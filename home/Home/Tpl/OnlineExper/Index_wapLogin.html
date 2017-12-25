@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;"/>
+        <meta name="format-detection"  content="telephone=no"/>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <title>翼码科技体验厅</title>
+        <link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/wap_tyt_201506.css?v=__VR__" />
+        <link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/wap_layer.css?v=__VR__" />
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_layer.js?v=__VR__"></script>
+    </head>
+
+    <body class="bgblue">
+        <div class="wrapper">
+            <div class="content">
+                <div class="login_title m4"></div>
+                <form name="" method="" action="">
+                    <div class="colgroup p4">
+                        <input type="text" name="phone" value="{$phone}" class="tym" <if condition='$phone neq ""'>style="display:none;"<else/>style="margin-bottom:10px;"</if> placeholder="请输入手机号码" />
+                        <input type="text" name="code" class="tym" placeholder="请输入体验码" />
+                        <input type="hidden" name="type" value="wap" />
+                    </div>
+                    <a href="javascript:void(0)" class="btn_one" id="varifyCode">确&nbsp;&nbsp;定</a>
+                </form>
+            </div>
+        </div>
+        <div class="cd-popup" role="alert">
+            <div class="cd-popup-container" id='error'>
+            </div>
+        </div>
+        <script type="text/javascript">
+            $(function() {
+                $("input").focus(function(){
+                    $("input").attr("placeholder", "");
+                });
+                
+                function getUrlParam(name) {
+                    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+                    var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+                    if (r != null) {
+                        return unescape(r[2]);
+                    } else {
+                        return null;
+                    } //返回参数值
+                }
+
+                $('#varifyCode').click(function(){
+                    var code = $('input[name=code]').val();
+                    var urlCode = getUrlParam('code');
+                    var phone = $('input[name=phone]').val();
+                    if(urlCode !== null){
+                        if(code != urlCode);
+                        code = urlCode;
+                    }
+                    var type = $('input[name=type]').val();
+                    $.post("{:U('OnlineExper/Index/checkCode')}",{'code':code,'type':type,'phone':phone},function(data){
+                        data = eval('(' + data +')');
+                        if(data['error'] == '0'){
+                            window.location.href = "{:U('Label/Store/index')}" + '&id=56097&saler_id=36';
+                        }else{
+                            $('.cd-popup').addClass('is-visible');
+                            var content = '<i id="cancer">X</i><dl><dt style="background:#ed3f41;">提示</dt><dd style="text-align:center;"><a href="javascript:void(0)" rel="mobile">' + data['msg'] + '</a></dd></dl>';
+                            $('#error').empty();
+                            $('#error').append(content);
+                            $('#cancer').on('click', function(event){
+                                var url = $('input[name=url]').val();
+                                if(url != '0' && typeof(url) != 'undefined'){
+                                    window.location.href = url;
+                                }
+                                $('.cd-popup').removeClass('is-visible');
+                            });
+                        }
+                    });
+                });
+                
+                function jump(){
+                    if('{$onlineExpUse}' == 'Y'){
+                        window.location.href = "{:U('Label/Store/index')}" + '&id=56097&saler_id=36';
+                    }
+                }
+                
+                jump();
+            })
+        </script>
+    </body>
+</html>

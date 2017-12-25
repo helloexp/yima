@@ -1,0 +1,359 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>{$goodsInfo['batch_name']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script>
+var _global_price = {
+		normalTotal:tonumber(<?php echo $totalAmount;?>),//商品总价
+		choosePaperHover:0,
+		shippingFee:tonumber({:$shipfee}) ? tonumber({:$shipfee}) : 0 ,//运费
+		totalAmount:tonumber({:$totalAmount}),//合计
+		ruleFeeLimit:tonumber({:$ruleFeeLimit}) ? tonumber({:$ruleFeeLimit}) : 0 ,//限制
+		allprice:false
+	};
+$(document).ready(function(e) {
+    var cityInfo = "{:$curAddress['province_code'].$curAddress['city_code'].$curAddress['town_code']}";
+    CityCode({
+            province:$("#province_code"),//省
+            city:$("#city_code"),//市
+            selected:cityInfo,//默认选中的省市区代号
+            url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+        });
+    $("#oadd").click(function(event) {
+            adressPop();
+    });
+    $(".orderAddress li").click(function() {
+        var _id = $(this).attr("data-id");
+        $(".orderAddress li").removeClass('hover');
+        $(".orderAddress li[data-id="+_id+"]").addClass('hover');
+        $("#receive_name").val($(this).attr("data-name"));
+        $("#receive_phone").val($(this).attr("data-tel"));
+        $("#receive_address").val($(this).attr("data-address"));
+        //省市区初始化
+        var province = $(this).attr("data-province");
+        var city = $(this).attr("data-city");
+        var town = $(this).attr("data-town");
+        var cityInfo = province + city + town;  
+        CityCode({
+            province:$("#province_code"),//省
+            city:$("#city_code"),//市
+            selected:cityInfo,//默认选中的省市区代号
+            url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+        });
+        adressPopclose();
+    });
+    orderForm();//结算
+    $("#cart_check").click(function(){
+        var deli = $('#delivery').val();
+        if(deli == 1) {
+            if ($("#receive_name").val() == "") {
+                alert("收货人姓名不能为空！");
+                return false;
+            }
+            if($("#province_code").val()==""){
+                    alert("请选择所在省市信息！");
+                    return false;
+            }
+            if($("#city_code").val()==""){
+                    alert("请选择所在城市！");
+                    return false;
+            }
+            if($("#town_code").val()==""){
+                    alert("请选择所在区信息！");
+                    return false;
+            }
+            if ($("#receive_address").val() == "") {
+                alert("配送地址不能为空！");
+                return false;
+            }
+        }
+        if ($("#receive_phone").val() == "") {
+            alert("收货人手机号码不能为空！");
+            return false;
+        }
+        if(!$("input[name='payment_type']:radio[checked]").val()){
+            alert("请选择支付方式！");
+            return false;
+        }
+        if($("input[name='payment_type']:radio[checked]").val() == '2'){
+            var order_amt = $("#orderVal").text();
+            if(parseFloat(order_amt) <= 1){
+                alert("订单金额小于等于1元，无法使用联动优势付款，请选择其他付款渠道");
+                return false;
+            }
+        }
+
+        setTimeout(function(){
+            $('#loadingBox').show();
+        },1);
+        $("#cartform").submit();
+
+    });
+
+
+
+    $(".btn-choosePaper").click(function(){
+        var html = '<div class="choosePaper">'+$("#choosePaper").html()+'</div>';
+        msgPop(html);
+    })
+    
+    $("body").on("click",".choosePaper .btn-ok",function(){
+        var id="";
+        $(".choosePaperready").text($(".choosePaper .choosePaperHover").attr("data-val"));
+        $(this).closest(".choosePaper").find(".choosePaperList li.hover").each(function(index, element) {
+            if(id!=""){
+                id+=",";
+            }
+            id=id+$(this).attr("data-id");
+        });
+        $("#bonus_use_id").val(id);
+        $(".choosePaperready").attr("data-id",id);
+        $("#choosePaperready").show();
+		_global_price.choosePaperHover = tonumber($(".choosePaper .choosePaperHover").attr("data-val"));
+		checkorderVal();
+        msgPopclose();
+    })
+    //运费规则读取
+    $('#city_code').change(function(){
+        var cityTmpCode = $("#province_code").val() + $(this).val();
+            var shippingFee = _global_price.shippingFee;
+            var totalFee = _global_price.totalAmount;
+            var feeLimit = _global_price.ruleFeeLimit;
+            var vid = {:$id};
+        if($(this).val()){
+            $.post("{:U('Label/ZqCut/getCityFee')}", {'city':cityTmpCode,'id':vid},function(resp){
+                if(2 != feeLimit){
+                    if(resp){
+                         var str = '<span>运费:</span><em>￥</em><b id="cityfee">' + resp + '</b>';
+                         $('.noFee').html(str);
+							 _global_price.shippingFee = resp
+							 checkorderVal();
+                    }
+                    if('0.00' == resp){
+                        $('.noFee').html('<b>免运费</b>');
+						 _global_price.shippingFee = 0
+						 checkorderVal();
+                    }
+                 }else{
+                    $('.noFee').html('<b>免运费</b>');
+					 _global_price.shippingFee = 0
+					 checkorderVal();
+                }         
+            }, 'json');
+        }    
+    })
+    //支付方式默认选中第一个
+    var pay_type = $("input[name='payment_type']:first");
+    if(pay_type.val() != '4'){
+    	pay_type.attr("checked","checked");
+    }
+    var allprice = $('#orderVal').text()*1;
+    //小于1元不能使用银联
+    if(allprice <= 1)
+        $('#noShowPay').hide();
+    else
+        $('#noShowPay').show();
+});
+function choosePaperli(t){
+    if(t.hasClass("hover")){
+        t.removeClass("hover");
+    }else{
+        t.addClass("hover");
+    }
+    $(".choosePaper .choosePaper-msg").hide();
+    var hasval=0;
+    var choval=0;
+	if($(".choosePaper .choosePaperNum").length>=1){
+		var maxval = tonumber($(".choosePaper .choosePaperNum").attr("data-val"));
+	}else{
+		var maxval = 100000;
+	}
+    t.closest(".choosePaperList").find("li.hover").each(function(index, element) {
+        var val = $(this).attr("data-val")*1;
+        hasval+=val;
+        choval+=val;
+    });
+    if(hasval>maxval){
+        $(".choosePaper .choosePaper-msg").show();
+        hasval = maxval;
+    }
+	$(".choosePaper .choosePaperHover").text(choval).attr("data-val",hasval);
+}
+function adressPop(msg){
+    $("#address").fadeIn(300);
+}
+function adressPopclose(){
+    $("#address").hide();
+}
+
+function checkorderVal(id){
+	var feeLimit = _global_price.ruleFeeLimit;
+	if(2 == feeLimit){
+		_global_price.shippingFee = 0;
+	}
+	var bonusTotal = _global_price.normalTotal - _global_price.choosePaperHover;
+	if(bonusTotal<0){
+		bonusTotal = 0;
+	}
+	_global_price.allprice = bonusTotal + _global_price.shippingFee;
+        //小于1元不能使用银联
+        if(_global_price.allprice <= 1)
+            $('#noShowPay').hide();
+        else
+            $('#noShowPay').show();
+	$(".choosePaperready").text(toformat(_global_price.choosePaperHover));
+	$("#cityfee").text(toformat(_global_price.shippingFee));
+	$("#orderVal").attr("data-val",_global_price.allprice).text(toformat(_global_price.allprice));
+}
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="fn">
+            <div class="back"><i></i></div>
+            <div class="trolley"></div>
+            <div class="title">结算</div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="mainCon fn">
+                <div class="orderForm " style="padding-bottom:20px;">
+                 <form name="cartform" id="cartform" action="{:U('Label/ZqCut/orderInfo')}" method="post">
+                 <input type="hidden" name="id" value="{$id}">
+                 <input type="hidden" name="delivery" id="delivery" value="{$delivery}">
+                 <input type="hidden" name="bonus_use_id" id="bonus_use_id" value="">
+                    <div class="orderFormMsg">
+                        <dl>
+                            <dt>收货人信息设置 
+                            <?php
+                            if($delivery == 1){
+                            ?>
+                            <a id="oadd" href="javascript:;" class="r">选择其他地址</a>
+                            <?php }?>
+                            </dt>
+                            <dd>
+                            <ul class="fn">
+                            <li><input type="text" name="receive_phone" id="receive_phone" placeholder="收货人手机号码" maxlength="11" value="<?php echo $curAddress['phone_no']?>"/></li>
+                            <?php
+                            if($delivery == 0){
+                            ?>
+                            <li>温馨提示：商品卡券短信会发送至您手机，可凭该短信在商家可验证门店提领商品。<br />如有商品需要商家寄送，请点击填写收货地址。</li>
+                            <?php }?>
+                            </ul>
+                            </dd>
+                        </dl>
+                        <?php
+                            if($delivery == 1){
+                        ?>
+                        <dl>
+                            <dd>
+                                <ul class="fn">
+                                    <li><input type="text" name="receive_name" id="receive_name" placeholder="收货人姓名" value="<?php echo $curAddress['user_name']?>"/></li>
+                                    <li ><select id='province_code' name='province_code' class="w3">
+                                            <option>省</option>
+                                        </select>
+                                        <select id='city_code' name='city_code' class="w3">
+                                            <option>市</option>
+                                        </select>
+                                        <select id='town_code' name="town_code" class="w3">
+                                            <option>区</option>
+                                        </select>
+                                        <div class="cl"></div>
+                                        <input type="text" name="receive_address" id="receive_address" placeholder="请输入详细地址" class="input-address" value="<?php echo $curAddress['address']?>"/></li>
+                                </ul>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>备注信息</dt>
+                            <dd>
+                                <ul class="fn">
+                                    <li><input type="text" name="memo" id="memo" placeholder="" value="" maxlength="100"></li>
+                                </ul>
+                            </dd>
+                        </dl>
+                        <?php
+                            }       
+                        ?>
+                        <dl>
+                            <dt>选择支付方式</dt>
+                            <dd>
+                                <ul class="fn">
+                                    <eq name="hasPayChannel" value="0">
+                                        <li><label>无有效支付方式</label></li>
+                                    <else />
+                                        <eq name="payChannelInfo.3" value="1"><li><label onclick="javascript:$('.bonus').show();$('#cart_check').text('马上支付');"><input type="radio"  name="payment_type" value="3" /><img src="__PUBLIC__/Label/Image/Shop/logo-wpay.png" class="paylogo" /></label></li></eq>
+                                        <eq name="payChannelInfo.2" value="1"><li id="noShowPay"><label onclick="javascript:$('.bonus').show();$('#cart_check').text('马上支付');"><input type="radio"  name="payment_type" value="2" /><img src="__PUBLIC__/Label/Image/Shop/logo-upay.png" class="paylogo" /></label></li></eq>
+                                        <eq name="payChannelInfo.1" value="1"><li><label onclick="javascript:$('.bonus').show();$('#cart_check').text('马上支付');"><input type="radio"  name="payment_type" value="1" /><img src="__PUBLIC__/Label/Image/Shop/logo-alipay.png" class="paylogo"/></label></li></eq>
+                                    </eq>
+                                    <if condition="($delivery eq 1) and ($goodsInfo['deli_pay_flag'] eq 1)">
+                                        <li><label onclick="javascript:$('.bonus').hide();$('#cart_check').text('马上下单');"><input type="radio"  name="payment_type" value="4" /><img src="__PUBLIC__/Label/Image/Shop/logo-logistics.png" class="paylogo" /></label></li>
+                                    </if>
+                                </ul>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>商品信息</dt>
+                            <dd>
+                                <ul class="orderPro">
+                                    <li class="fn"><p><span><b><?php echo $totalAmount;?></b></span><?php echo $goodsInfo['batch_name']?></p></li>
+                                </ul>
+                            </dd>
+                        </dl>
+                    </div>
+                     <?php 
+                        if($delivery == 1){
+                    ?>
+                     <div class="orderFormPrice noFee">                    
+                        <?php if($shipfee>0){?>
+                        <span>运费:</span><em>￥</em><b id="cityfee"><?php echo $shipfee; ?></b>
+                        <?php }else{?>
+                            <b>免运费</b>
+                        <?php
+                        }
+                        ?>
+                     </div>
+                     <?php
+                     }                   
+                     ?>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="proNav fn headerTrolley">
+        <p class="l">订单结算</p>
+        <p class="r allPrice">订单合计:<span id="orderVal" data-val="<?php echo $totalAmount;?>"><?php echo $totalAmount;?></span>元 
+        <eq name="hasPayChannel" value="1">         
+        <a href="javascript:void(0);" id="cart_check">马上支付</a>  
+        </eq>   
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+<div id="address" class="adressPop dn">
+    <div class="adressPopCon">
+        <a href="javascript:void(0)" class="close" onclick="adressPopclose()">+</a>
+        <ul class="orderAddress">
+            <volist name="selectddres" id="vo" empty="无其他地址信息">
+                <li <eq name="key" value="0">class="hover"</eq> data-id="{$vo['id']}" data-tel="{$vo['phone_no']}" data-name="{$vo['user_name']}" data-province="{$vo['province_code']}" data-city="{$vo['city_code']}" data-town="{$vo['town_code']}" data-address="{$vo['address']}"><p>手机号:{$vo['phone_no']}</p><p>姓名:{$vo['user_name']}</p><p>地址:{$vo['province']}{$vo['city']}{$vo['town']}{$vo['address']}</p></li>
+            </volist>
+        </ul>
+    </div>
+</body>
+</html>
+<eq name="show_menu" value="1">
+<script>
+var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Public/_hideWxMenu"/>
+</eq>

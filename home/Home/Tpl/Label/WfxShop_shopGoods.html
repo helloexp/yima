@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+        <meta content="telephone=no" name="format-detection" />
+        <meta content="email=no" name="format-detection" />
+        <meta name="apple-touch-fullscreen" content="NO">
+        <title>订货</title>
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_wfx.css?v=__VR__">
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.new.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+        <style>
+            .box{display:block;}
+        </style>
+    </head>
+    <body>
+        <div id="wrapper" style="background:#eee">
+            <div id="container">
+                <include file="Wfx:top"/>
+                <div id="main">
+                    <div class="bgGray bgbe5e5e5">
+                        <div class="txtTips">直接向店家订货，订货款由店家线下和您结算</div>
+                    </div>
+                    <div class="gapwhite"></div>
+                    <div class="bgGray">
+                        <div class="searchArea" style="height:40px;">
+                            <form name="search" action="{:U('Label/WfxShop/shopGoods')}" method="post" id='searchAction'>
+                                <div class="searchbox">
+                                    <i></i><input type="text" name="keywords" class="searchInput" placeholder="请输入你要订购的商品" value='{$searchWords}'/>
+                                    <a class="cancelbg dn" id="clearKeywords" href="javascript:void(0);"></a>
+                                </div>
+                                <div class="wfxSearchButton">
+                                    搜索
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="proList">
+                        <ul class="proscroll" id="moreGoods">
+                            <if condition="$goods neq '' ">
+                                <volist name='goods' id='item'>
+                                    <li class="goodsitem box" goodsUrl="{:U('Label/WfxShop/GoodsDetail', array('id'=>$item['m_id'], 'type'=>$item['batch_type']))}">
+                                        <div class="proImg">
+                                            <img src="{:get_upload_url($item['batch_img'])}" />
+                                        </div>
+                                        <div class="proContent">
+                                            <h2 class="protitle">
+                                                {$item.batch_short_name}
+                                            </h2>
+                                            <p class="proprice"><em>￥</em>{$item.batch_amt}</p>
+                                        </div>
+                                    </li>
+                                </volist>
+                            <else />
+                                <li class="nodata">
+                                    <i>啊偶，没有搜到您的商品。</i>
+                                </li>
+                            </if>
+                        </ul>
+                    </div>
+                    <nav id="page-nav">
+                        <a href="{$nextUrl}"></a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            function login_to(url) {
+                link_to(url);
+            }
+            $(function () {
+                $('#moreGoods').infinitescroll();
+
+                //搜索框聚焦
+                $(".searchInput").focus(function (e) {
+                    $(this).attr("placeholder", "");
+                    $(".cancelbg").removeClass("dn");
+                });
+
+                //清除搜索关键词
+                $("#clearKeywords").click(function (e) {
+                    $(".searchInput").val("");
+                });
+                
+                //搜索
+                $('.wfxSearchButton').click(function(){
+                    var seachWord = $('input[name=keywords]').val();
+                    if(seachWord != 'undefined' && seachWord != ''){
+                        $('#searchAction').submit();
+                    }
+                });
+                
+                $('body').on('click', '.box', function(){
+                    var url = $(this).attr('goodsUrl');
+                    window.location.href = url;
+                });
+            });
+        </script>
+    </body>
+</html>

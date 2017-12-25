@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title><?php if($node_id == '00017467'){echo '爱恋珠宝';}else{echo '翼码旺财';}?></title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,优惠劵" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<?php if($row['page_style'] == '1'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_a.css"/>
+<?php }elseif($row['page_style'] == '2'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_b.css"/>
+<?php }elseif($row['page_style'] == '3'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_c.css"/>
+<?php }else{?>
+<load href="__PUBLIC__/Label/Css/wap_main_d.css"/>
+<?php }?>
+<load href="__PUBLIC__/Label/Css/wap_News.css"/>
+<script>
+$(document).ready(function(e) {
+    //判断字符
+    $("hr:eq(0)").hide();
+    var fData=$(".top-title").text();
+    var intLength=0;
+    for (var i=0;i<fData.length;i++)
+    {
+        if ((fData.charCodeAt(i) < 0) || (fData.charCodeAt(i) > 255))
+            intLength=intLength+2
+        else
+            intLength=intLength+1    
+    }
+    if(intLength<=20){ 
+        $(".top-title").css("font-size","20px"); 
+    }else{ 
+        $(".top-title").css("font-size","18px"); 
+    }
+    //抽奖
+    var _is_sub = false;
+    $('#subcj').click(function(){
+         if(_is_sub)
+            return false;
+        _is_sub = true;
+       $.post(
+        "{:U('Label/Cj/submit')}",
+        $('#theform').serialize(),
+        function(data) {
+        	var _endCj = handelCjResult(data);
+            _endCj();
+            _is_sub = false;
+        },
+        'json'
+       ); 
+        
+    });
+});
+    
+
+</script>
+</head>
+<body>
+<include file="Public:file"/>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div class="mainTop">
+                <div class="top-img">
+                    <?php if($row['bg_style'] == '1'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sOne.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style'] == '2'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sTwo.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style']== '4'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sThree.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style']== '3'){?>
+                    <img src="__UPLOAD__/<?php echo $row['bg_pic']?>"  class="vip-img" />
+                     <?php }elseif($row['bg_style']== '5'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sFour.png"  class="vip-img" />
+                    <?php }?>
+                </div>
+            </div>
+            <div id="mainCon" class="mainCon fn <?php if($row['log_img']==''){?> noLogo <?php }?> <?php if($row['node_name']== ''){?> noTitle <?php }?> ">
+                <div class="top-title">{$row['node_name']}</div>
+                <div class="logo-bg">
+                    <?php
+                    if($row['log_img']!= ''){?>
+                    <div class="logo-con"><img src="__UPLOAD__/<?php echo $row['log_img']?>"  class="vip-img" /></div>
+                    <?php }?>
+                </div>
+                
+                <div class="multimedia">
+                    <?php if($row['music'] != ''){?>
+                    <audio src="__UPLOAD__/<?php echo $row['music']?>" autoplay="true" loop id="audio" style="display:none; width:0; height:0; overflow:hidden;"></audio>
+                    <div class="voice_button"><a href="javascript:void(0)" class="a-hide" onClick="audio()">音乐</a></div>
+                    <script>
+                        function audio(){
+                            var audio = document.getElementById('audio');
+                                if(audio.paused){
+                                    audio.play();
+                                    $(".voice_button").css("background","url(__PUBLIC__/Label/Image/voice_button.png)");
+                                    $(".voice_button").css("background-size","100%");
+                                }else{
+                                    audio.pause();
+                                    $(".voice_button").css("background","url(__PUBLIC__/Label/Image/stop_button.png)");
+                                    $(".voice_button").css("background-size","100%");
+                                }
+                            }
+                    </script>
+                    <?php }?>
+                    <?php if($row['video_url'] != ''){?>
+                    <div class="video_button"><a href="<?php echo $row['video_url']?>" class="a-hide" target="_blank">视频</a></div>
+                    <?php }?>
+                </div>
+                <div class="mainCon-contenter">
+                    <div class="mainCon-title"><?php echo $row['wap_title']?></div>
+                    <div class="mainCon-contenter-bg">
+                        <div class="moreContenter">
+                            <?php echo htmlspecialchars_decode($row['wap_info'])?>
+                        </div>
+                        <div class="content_button fn">
+                            <?php if( $row['is_cj'] == '1'){?>
+                            <input type="button"  value="<?php echo $cj_text==''?'点击抽奖':$cj_text;?>" class="input_button" onClick="popForm('popForm',0)"/>
+                            <?php  }?>
+                        </div>
+                    </div>
+                </div>
+                <eq name="showAwardList" value="block">
+				<div class="content_button fn" style="text-align: center;text-decoration: underline;display:{$showAwardList}">
+				<a href="{:U('DrawLottery/DrawLotteryCommon/awardList', array('id' => $id, 'wechat_card_js' => 1))}">中奖记录</a>
+				</div>
+				</eq>
+            </div>
+            <include file="Public:share"/>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+</div>
+<include file="Public:pop"/>
+</body>
+</html>

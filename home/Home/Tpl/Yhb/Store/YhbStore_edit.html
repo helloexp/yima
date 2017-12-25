@@ -1,0 +1,346 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-门店信息编辑</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+    
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=WRzAu3DNewWB4oeOELaczjsM"></script>
+
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script>
+//    var     _sel_street_info = "{:I('town_code')}",
+//            _sel_street_code = "{:I('street_code')}",
+//            _sel_village_code = "{:I('village_code')}";
+    var     _sel_street_info = "{$town_code}",
+            _sel_street_code = "{$street_code}",
+            _sel_village_code = "{$village_code}";
+$(function(){
+    $("#street_info").change(function(){
+        var town_code=$(this).val();
+        $.post("{:U('Yhb/YhbStore/street_info')}",{"town_code":town_code},function(data){
+            if(data.status =='0'){
+//                        alert(data.info);
+                $(".street_option").remove();
+                $(".village_option").remove();
+            }else{
+                $(".village_option").remove();
+                $("#street_code").find(".street_option").remove();
+                $(data.info).each(function(index,item){
+                    $("#street_code").append("<option class='street_option' value='"+item.street_code+"'>"+item.street+"</option>");
+                });
+                if(_sel_street_code){
+                    $("#street_code").val(_sel_street_code).trigger('change');
+                    _sel_street_code = '';
+                }
+            }
+        },'json');
+    });
+    $("#street_code").change(function(){
+        var street_code=$(this).val();
+        $.post("{:U('Yhb/YhbStore/village_info')}",{"street_code":street_code},function(data){
+            if(data.status =='0'){
+//                        alert(data.info);
+                $(".village_option").remove();
+            }else{
+                $("#village_code").find(".village_option").remove();
+                $(data.info).each(function(index,item){
+                    $("#village_code").append("<option class='village_option' value='"+item.village_code+"'>"+item.village+"</option>");
+                });
+                if(_sel_village_code){
+                    $("#village_code").val(_sel_village_code);
+                    _sel_village_code = '';
+                }
+            }
+        },'json');
+    });
+
+    if(_sel_street_info != ''){
+        $('#street_info').val(_sel_street_info).trigger('change');
+    }
+	//省市区初始化
+	CityCode({
+		province:$("#province_code"),//省
+		city:$("#city_code"),//市
+		town:$("#town_code"),//区
+		business:$("#business_code"),//商圈
+		selected:"{:$info['province_code'].$info['city_code'].$info['town_code'].$info['business_code']}",//默认选中的省市区代号
+		url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+	});
+    $("#smb").click(function(){
+        parent.location.href="index.php?g=Yhb&m=YhbStore&a=index";
+    });
+	 function subclick(){
+        if($("#storeFromEdit").validationEngine('validate')){
+            $("#storeFromEdit").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(3).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                           var win = art.dialog.open.origin;
+                           win.location.href = win.location.href;
+                      }else{
+                           dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                },
+                type:'post',
+                dataType:'json'
+            });
+            return false;
+        }
+  	}
+
+	$("#smbmit").click(subclick);
+})
+
+function result_(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				   //art.dialog.close();
+				}
+			})
+   }
+   
+function success(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				    art.dialog.close();
+				    parent.art.dialog.list['storeID'].close();
+					
+				}
+			})
+   }
+</script>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab" id="Wcanal-tabon">
+    <div class="steps">基本信息</div>
+    <div class="eTicket_form">
+        <form method="" action="{:U('Yhb/YhbStore/edit')}" id="storeFromEdit">
+		 <input type="hidden" name="id" value="{$Think.get.id}" />
+            <div id="Wform" class="Gform eTicket">
+                <input type="hidden" name="merchant_code" value="{$info['merchant_id']}" />
+                <ul>
+                    <li class="Gnmae">*&nbsp;门店简称：</li>
+                    <li class="Ginput"><input name="store_short_name" id="store_short_name" type="text" onkeyup="check_lenght(10,'name_text',this);" class="validate[required,maxSize[12]] textbox w380" value="{$info.store_short_name}"/>
+                    <p class="font-12-cc" style="font-size:12px;">最多12个字，会显示在核验终端验证卡券的打印小票中</p>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="fn">
+                        <ul style="float: left;">
+                            <li class="Gname">*&nbsp;门店所属区域：</li>
+                            <li class="Ginput">
+                                <select class=" validate[required] selectbox ml10 " name="province_code">
+                                    <option value="09">上海</option>
+                                </select>
+                            </li>
+                        </ul>
+                        <ul style="float: left;">
+                            <li class="Ginput" style="padding: 15px 0 0 10px;">
+                                <select class="validate[required] selectbox ml10" name="city_code">
+                                    <option value="021">上海市</option>
+                                </select>
+                            </li>
+                        </ul>
+                        <ul style="float: left;">
+                            <li class="Ginput area" style="padding: 15px 0 0 10px;">
+                                <select class="validate[required] selectbox ml10" style="width:101px;"name="town_code" id="street_info">
+                                    <option value="">选择区</option>
+                                    {:show_arr_opt($townCode_list,$info['town_code'])}
+                                </select>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="fn">
+                        <ul style="float: left;">
+                            <li class="Gname">&nbsp;门店所在商圈：</li>
+                            <li class="Ginput">
+                                <select class="validate[required] selectbox ml10"  style="width:100px" name="street_code"  id="street_code">
+                                    <option value="">选择</option>
+                                </select>
+                            </li>
+                        </ul>
+                        <ul style="float: left;">
+                            <li class="Gname" style="width: 100px;">&nbsp;门店所在小区</li>
+                            <li class="Ginput" style="padding: 12px 0 0 100px;">
+                                <select class="validate[required] selectbox ml10"  style="width:100px" name="village_code" id="village_code">
+                                    <option value="">选择</option>
+                                </select>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gnmae">*&nbsp;门店详细地址：</li>
+                    <li class="Ginput"><input name="address" id="address" type="text" onkeyup="check_lenght(50,'name_text',this);" class="validate[required,maxSize[50]] textbox w380" maxlength="50" value="{$info.address}"/>
+                    <p class="font-12-cc" style="font-size:12px;">指引消费者到店，如“昌平路653号”</p>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gnmae">*&nbsp;门店联系电话：</li>
+                    <li class="Ginput"><input name="store_phone" id="store_phone" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,minSize[11],maxSize[24]] textbox w380" value="{$info.store_phone}"/>
+                    <p class="font-12-cc" style="font-size:12px;">便于消费者联系门店咨询，如“021-51970599”</p>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gnmae">门店介绍：</li>
+                    <li class="Ginput"><textarea name="store_introduce" id="store_desc" onkeyup="check_lenght(500,'name_text',this);" class="validate[maxSize[500]] textbox w380" style="height: 120px;">{$info.store_introduce}</textarea>
+                        <!--<p class="font-12-cc" style="font-size:12px;">用于指引消费者到店,需填写门店详细地址，精确到门牌号，如“昌平路653号”</p>-->
+                    </li>
+                </ul>
+                <ul>
+                    <li class="global-input6-name Gnmae">*&nbsp;门店图片：</li>
+                    <li>
+                        <div id="logo-upload2" class="vm dib ml10 Ginput">
+                            <div class="rel l">
+                                <a href="javascript:void(0);" title="上传" class="btn_inner w60" onclick="log_add()">上传</a>
+                                <input type="text" value="" name="store_pic" id="goods_img"  style="width:1px;height: 1px;border-style:none" />
+                            </div>
+                        </div>
+                        <div class="cl"></div>
+                        <img id="img_logo_show" class="mt5 w80 Ginput" src="{:get_upload_url($info['store_pic'])}" style="margin-left: 10px;"/>
+                        <input type="hidden" name="previewimgis_logo" vale="0" />
+                    </li>
+                    <script>
+                        $(document).ready(function(e) {
+                            $("input[name='is_log_img']").change(function() {
+                                var t = $(this).val();
+                                showimg(t)
+                            })
+                            //初始化页面logo
+                            function startaction(){
+                                $('#img_logo_show').show();
+                                //previewuploadimg('{:get_upload_url($node_logo)}', "logo");
+                                //$('#goods_img').val('{$node_logo}');
+//                                $("#img_logo_show").hide();
+                                $('#reset_logo').val(1);
+                            }
+                            //调用初始化页面logo
+                            startaction();
+                        });
+                        function showimg(t) {
+                            if (t == 0) {
+                                $('#img_logo_show').hide('');
+                                $('#logo-upload2').hide();
+                                $(".Preview-mainCon").addClass("noLogo");
+                                var i = $("[name='node_name_radio']:checked").val();
+                                if (i == 0) {
+                                    $(".Preview-mainCon").addClass("noTitle");
+                                } else {
+                                    $(".Preview-mainCon").removeClass("noTitle");
+                                }
+                            } else {
+                                $('#logo-upload2').show();
+                                $(".Preview-mainCon").removeClass("noLogo");
+                                $(".Preview-mainCon").removeClass("noTitle");
+                                $('#img_logo_show').show();
+                                if ('{$node_logo}' != '' && $('input[name="previewimgis_logo"]').val() == 0) {
+                                    previewuploadimg('{:get_upload_url($node_logo)}', "logo");
+                                    $('#goods_img').val('{$node_logo}');
+                                    $('#reset_logo').val(1);
+                                }
+                            }
+                        }
+                        function log_add() {
+                            var opt = {
+                                obj: $("#img_resp_show"),
+                                height: 80,
+                                width: 80,
+                                cropPresets:false,
+                                callback: function(data) {
+//                                    console.log(data);
+                                    $('#img_logo_show').attr('src', data['src']);
+                                    $('#img_logo_show').show();
+                                    $('#goods_img').val(data['savename']);
+                                    $('#reset_logo').val(1);
+                                    $('input[name="previewimgis_logo"]').val(1);
+                                }
+                            };
+                            open_img_uploader(opt);
+                        }
+                        function openUploaderMeitu_log(url) {
+                            var win_width = 700;
+                            art.dialog.open(url, {
+                                lock: true,
+                                title: "上传LOGO图片",
+                                width: win_width,
+                                height: win_width / 1.6,
+                                id: 'art_upload'
+                            });
+                        }
+                    </script>
+                </ul>
+                <!--<ul>-->
+                    <!--<li class="Gnmae">&nbsp;门店所属商圈：</li>-->
+                    <!--<li class="Ginput">-->
+                        <!--<select id="business_code" class="selectbox" style="width:313px;" name="business_code">-->
+                            <!--<option value="">选择</option>-->
+                        <!--</select>-->
+                    <!--</li>-->
+                <!--</ul>-->
+                <div class="steps mt40">负责人信息</div>
+                <ul>
+                    <li class="Gnmae">*&nbsp;姓名：</li>
+                    <li class="Ginput"><input name="principal_name" id="principal_name" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[24]] textbox w380" value="{$info.principal_name}"/>
+                    </li>
+                </ul>
+                
+                <ul>
+                    <li class="Gnmae">*&nbsp;手机：</li>
+                    <li class="Ginput"><input name="principal_tel" id="principal_tel" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,minSize[11],maxSize[11]] textbox w380" value="{$info.principal_tel}"/>
+                    </li>
+                </ul>
+                
+                <ul>
+                    <li class="Gnmae">*&nbsp;邮箱：</li>
+                    <li class="Ginput"><input name="principal_email" id="principal_email" type="text" onkeyup="check_lenght(50,'name_text',this);" class="validate[required,minSize[4],maxSize[50]] textbox w380" value="{$info.principal_email}"/>
+                    <!--<p class="font-12-cc" style="font-size:12px;">用于接收EPOS电子核验终端的登录信息        <a href="{:U('Home/Help/helpArt',array('news_id'=>1304))}"  target="_blank">什么是EPOS?</a></p>-->
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gnmae"></li>
+                    <li class="Ginput mt5">
+                    <a href="javascript:void(0);" title="确认" id="smbmit" class="btn-all w110">确定</a>
+                    <a href="javascript:void(0);" title="取消" id="smb" class="btn-all-del w110 ml10">取消</a>
+                    </li>
+                </ul> 
+                </div>
+        </form>
+    </div>
+    </div>
+</div>
+</body>
+</html>

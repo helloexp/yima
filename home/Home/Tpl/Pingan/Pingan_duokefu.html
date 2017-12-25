@@ -1,0 +1,278 @@
+<php>
+//账号类型
+$account_type_arr = array(
+'1'=>'未认证订阅号',
+'2'=>'已认证订阅号',
+'3'=>'未认证服务号',
+'4'=>'已认证服务号'
+);
+</php>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wdkf.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<style type="text/css">
+.W-table td{ border-right:1px #FFF solid;}
+.W-table tr td:last-child{ border-right:solid 1px #e1e1e1;}
+.format{}
+.format ul li{float:left; line-height:24px; text-align:left; padding:5px 5px 0px 0px}
+.format ul li img{ width:50px; height:50px; /*padding:2px; border:1px #ebebeb solid;*/}
+.format ul li:first-child{ width:60px; padding-right:0; }
+.format ul li span{ display:block; color:#666666; position:relative}
+.format ul li span.gtitle{ margin-left:-3px;}
+.format ul li span a{ color:#666; text-decoration:none}
+.format ul li span a:hover{ color:#ed1c24; text-decoration:none}
+.format ul li span.grayfont{ color:#999999; font-size:14px; line-height:20px;}
+</style>
+<script>
+$(function(){
+	Gform();
+	//开关 开启表示从关闭状态到开始状态 关闭表示从开启状态转到关闭状态
+	$(".Uswitch").click(function(){
+		if($(this).attr("data-rel")=="0"){
+			$(this).find(".Uswitch-on").fadeIn(200);
+			$(this).attr("data-rel","1");
+			$("#flag").val('0');
+			$(this).find("i").animate({left:29},200,function(){
+			//此处提交数据的函数
+                $.post('{:U(Weixin/Weixin/duokefu)}', {'flag':'1'}, function(data){
+                });
+			});
+		}else{
+			$(this).find(".Uswitch-on").fadeOut(200);
+			$(this).attr("data-rel","0");
+			$("#flag").val('0');
+			$(this).find("i").animate({left:0},200,function(){
+			//此处提交数据的函数	
+				$.post('{:U(Weixin/Weixin/duokefu)}', {'flag':'0'}, function(data){
+                });
+			});
+		}
+	});
+
+});
+
+$(function(){		
+	$("#theform").submit(function(){
+		var actionUrl = $(this).attr("action");
+		var data = getFormData(this);
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.post(actionUrl,data,function(d){
+			alert(d.info);
+			if(d.status=='1'){
+				window.location.reload();
+			}
+			dialog.close();
+		},'json');
+		return false;
+	});
+
+	$("#btn-generate-token").click(function(){
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		var actionUrl = $(this).attr("data-url");
+		var data = getFormData("#theform");
+		if(!data.weixin_code){
+			alert("账号名不能为空");
+			return false;
+		}
+		$.post(actionUrl,data,function(d){
+			
+			if(d.status=='1'){
+				$("#token","#theform").val(d.info.token);
+				dialog.close();
+				return;
+			}
+			dialog.close();
+			alert(d.info);
+			
+		},'json');
+	});
+	
+
+	
+	//开启关闭按钮
+	
+
+	//判断初始
+	<eq name="_GET.setting" value="1">
+		$(".msg-user-opr").click();
+	</eq>
+	$(".msg-user-type").change();
+
+});
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu_pingan.html" topmenuid="gongzhonghao"/>
+    	<div id="container" >
+            <div id="main" class="rel">
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+                    <include file="LabelAdmin/Batch/WleftMenu_pingan" leftmenuid="dkf"/>
+                </div>
+                
+                <div class="subcon">
+                <div class="main-name fn">
+                    <h4>多客服<a class="btn-add first" href="javascript:void(0)" id="addKefu"><i></i>添加客服工号</a><a class="btn-down" href="javascript:void(0)" id="upsFromWx">从微信更新数据</a><a class="btn-down" href="{:U('Pingan/Pingan/duokefu_setLabel')}" id="setLabel">标签设置</a>
+                    <div class="Uswitch dib ml20" style="float:right" data-rel="{$flag['service_flag']}">
+                        <php>
+                            
+                            if(1 == $flag['service_flag']){
+                                echo '<div class="Uswitch-off"></div><div class="Uswitch-on"></div><i class="Uswitch-i-on"></i>';
+                            }else{
+                                echo '<div class="Uswitch-off"></div><div class="Uswitch-on" style="display:none"></div><i class="Uswitch-i-on" style="left:0px;"></i>';
+                            }
+                        </php>
+                        <input type="hidden" id="flag" name="flag" value="{$flag['service_flag']}">
+                    </div>
+                    </h4>
+                    
+                </div>
+                
+                <div class="mod-weixin-area">
+                	<table cellpadding="0" cellspacing="0" class="W-table">
+                        <tbody>
+                        <tr>
+                            <th width="300">客服</th> 
+                            <th>标签</th>
+                            <th width="150">操作</th>
+                        </tr>
+                        <tr>
+                            <td>
+                            	<div class="format">
+                                    <ul>
+                                        <li><img class="viewDetail img" src="http://test.wangcaio2o.com/Home/Upload/00004488/2016/02/24/56cd52dfe5e74.jpg" data-pin-nopin="true"></li>
+                                        <li>
+                                            <span class="viewDetail gtitle">高月</span>
+                                            <span class="tb mt10 grayfont">001@imageco.com.cn</span>
+                                        </li>
+                                    </ul>
+                        		</div>
+                            </td>
+                            <td>售后服务，业务线1</td>
+                            <td><a href="">修改</a>&nbsp;&nbsp;<a href="">删除</a></td>
+                        </tr>
+                        <tr>
+                            <td>
+                            	<div class="format">
+                                    <ul>
+                                        <li><img class="viewDetail img" src="http://test.wangcaio2o.com/Home/Upload/00004488/2016/02/24/56cd52dfe5e74.jpg" data-pin-nopin="true"></li>
+                                        <li>
+                                            <span class="viewDetail gtitle">高月</span>
+                                            <span class="tb mt10 grayfont">001@imageco.com.cn</span>
+                                        </li>
+                                    </ul>
+                        		</div>
+                            </td>
+                            <td>售后服务，业务线1</td>
+                            <td><a href="">修改</a>&nbsp;&nbsp;<a href="">删除</a></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <div class="nonedata"></div>
+                            </td>
+                        </tr> 
+                        </tbody>
+                    </table>
+                </div>
+                
+                
+                
+                </div>
+                
+                
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer_pingan.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/html" id="Kefu">
+<form id="theform" action="" method="post">
+<div class="Gform" style="margin-left:-100px">
+	<ul>
+    	<li class="Gname"><span>*</span>&nbsp;头像</li>
+        <li class="Ginput">
+			<div class="Gchoose Gview-img">
+			<input name="img_resp" id="img_resp" type="hidden" value="">
+			<a href="javascript:void(0)" class="Gbtn-pic" title="" data-gettitle="选择图片" alt=""><i></i></a>
+			</div>
+        </li>
+    </ul>
+    <ul>
+    	<li class="Gname">标签</li>
+        <li class="Ginput">
+        	<div class="switch auto hover">
+                <input type="checkbox" name="a[]" value="1" checked="">
+                <input type="checkbox" name="a[]" value="2">
+                <input type="checkbox" name="a[]" value="3">
+                <input type="checkbox" name="a[]" value="4" checked="">
+                <input type="checkbox" name="a[]" value="5">
+                <div class="newRadio">
+                    <span class="valfirst" data-val="1">A组</span>
+                    <span data-val="2">B组</span>
+                    <span data-val="3">C组</span>
+                    <span data-val="4">D组</span>
+                    <span class="vallast" data-val="5">E组</span>
+                </div>
+            </div>
+        </li>
+    </ul>
+    <ul>
+    	<li class="Gname">工号</li>
+        <li class="Ginput"><input type="text" class="input" placeholder="请输入登录帐号" id="txtEmployeeAccount" style="width:150px;" maxlength="10" />
+		<span class="maxTips forInput" style="left:368px;">@imagecosales</span>
+		<div class="cl"></div>
+        <p class="txtTips">工号不能重复，一旦输入，不能修改，有字母，数组组成。</p> 
+        </li>
+    </ul>
+    <ul>
+    	<li class="Gname">昵称</li>
+        <li class="Ginput"><input type="text" class="input" id="txtEmployeeNickName" maxlength="12" />
+        </li>
+    </ul>
+    <ul>
+    	<li class="Gname">密码</li>
+        <li class="Ginput"><input type="password" class="input" id="txtEmployeeNickName" maxlength="12" />
+        <p class="txtTips">请输入6～16位的密码</p> 
+        </li>
+    </ul>
+</div>
+</form>
+</script>
+<script type="text/javascript">
+$(function(){
+	$("#addKefu").click(function(e) {
+		var data={};
+        var addKefu = template('Kefu', data);
+		 art.dialog({
+            title: '添加客服',
+            content: addKefu,
+			okVal : "确认添加",
+            ok: function() {
+                
+            },
+            cancelVal: "取消",
+			cancel: true,
+            width: 500
+        });
+    });	
+})
+</script>
+

@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>修改分组</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Goods_ctrl.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<body>
+<div class="Gform" style="margin:0 auto">
+    <div class="GsearchInput">
+           <div class="GsearchChoose">
+		   </div>
+           <div class="input">
+                <i class="icon-searchOk erro" data-callback="addClassify"><a href="javascript:void(0)" class="a-hide">确定</a></i>
+                <input name="classify" id="classify" type="text" maxlength="24">
+                <div class="GsearchVal">
+                 <dl>
+                     <volist name="classify" id="vo" empty="$empty">
+                         <dd data-val="{$vo.id}" class="dn">{$vo.class_name}</dd>
+                      </volist>
+                </dl>
+                <div class="GsearchValFixed"></div>
+			  </div>
+           </div>
+     </div>
+	 <div class="DiabtnCon">
+		  <a class="Diabtn-all" id="subButton" href="javascript:void(0)">确定</a>
+	      <a class="Diabtn-all-del" id="cancleButton" href="javascript:void(0)">取消</a>
+	 </div>
+</div>
+<script type="text/javascript">
+  //分组定义数组使用
+function addClassify(t){
+    var g = t.closest(".GsearchInput"),
+        c = g.find(".GsearchChoose"),
+        i = g.find(".input input"),
+        v = i.val(),
+        erro = 1,
+        isrepeat = 1;
+    $(c).find("dd").each(function(){
+        if($(this).find("span").text()==v){
+            erro = 2;
+            return false;
+        }
+    })
+    g.find(".GsearchVal dd:not('.nosearchVal')").each(function(){
+        if($(this).text()==v){
+            isrepeat = $(this).attr("data-val");
+            return false;
+        }
+    })
+    if(erro!=2){
+        var valid = "";
+        if(typeof(isrepeat)=="string"){valid = isrepeat};
+        var html = "<dd><input type='hidden' name='cids[]' value='"+v+','+valid+"'><span>"+v+"</span><em class='closebtn'></em></dd>";
+        c.append(html);
+    }else{
+        Diaerror("已经存在该分组","","",false)
+    }
+    i.val("");
+}
+$(function(){
+   $("body").on("click",".GsearchInput .closebtn",function(e){
+        var g = $(this).closest(".GsearchChoose");
+        $(this).closest("dd").remove();
+    });
+
+   $("#subButton").click(function(){
+          var id_str=art.dialog.data('test');
+          var cvalue = [];
+          var cids=document.getElementsByName("cids[]");
+          for(var i=0;i<cids.length;i++){
+              if(cids[i].value!==''){
+				 cvalue.push(cids[i].value.split(",")[1]);//2016-06-29 商品管理优化：获得分类的id号
+              }
+           }
+          if(cvalue.length<1) {
+             art.dialog({title:false,content:"<div class='msg-all-error'>请勾选分组</div>",fixed:true,padding:0,time:2});
+             return false;
+          }else{
+			  Diasucceed("正在提交...");
+			  $.post('{:U('Ecshop/GoodsInfo/batchEdit')}',{ids:id_str,type:3,cids:cvalue},function(resp){
+				if(resp=='1'){
+						Diasucceed("分组修改成功...");
+						art.dialog.close();
+						var sx=art.dialog.open.origin;  
+						sx.location.reload();
+				}else{
+						Diasucceed("分组修改失败...");
+                }
+			 },'json');
+           }
+     })
+	 
+	 $("#cancleButton").click(function(){
+	      art.dialog.close();
+	  })
+	 
+	 
+})
+</script>
+</body>
+</html>

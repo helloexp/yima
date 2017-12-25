@@ -1,0 +1,211 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$bonusInfo.name}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop2.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+<script>
+$(document).ready(function(e) {
+	var loadImg = 0 ;
+	var imgNum = 4 ;
+	$(".loadimg").one('load', function() {
+			loadImg++;
+			if(loadImg==imgNum){
+				$("#loading").fadeOut();
+			}
+		}).each(function() {
+		if(this.complete) $(this).load();
+	});
+	
+	//获取cookie手机号
+	var cookname = "bonus_"+{$batch_id};
+	var bonus_phone = "";
+	var msgcookie = document.cookie.split("; ");
+	for(var i=0;i<msgcookie.length;i++){
+		var arr=msgcookie[i].split("=");
+		if(arr[0]==cookname){
+			bonus_phone = arr[1];
+		}
+	}
+	if(bonus_phone != "")
+		$('#phone').val(bonus_phone);
+
+});
+</script>
+</head>
+<body>
+<div id="loading">
+    <div class="spinner">
+    	<div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+    	<p>载入中</p>
+    </div>
+    <img src="__PUBLIC__/Label/Image/Shop/paper.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/Shop/paperbg.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/Shop/papercoin.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/tip-share.png" class="loadimg" />
+</div>
+<div id="shopPaper">
+    <div id="shopPaperCon">
+    	<div class="shopPaperHeader">
+        	<div class="shopPaperLogo">
+        		<empty name="bonusInfo.log_img">
+        			<img src="__PUBLIC__/Label/Image/icon-ok.png" >
+				<else />
+					<img src="{:get_upload_url($bonusInfo['log_img'])}" >
+				</empty>
+            </div>
+            <p>{$bonusInfo.node_name}</p>
+        </div>
+        <div class="shopPaper">
+        	<img src="__PUBLIC__/Label/Image/Shop/paper.png" class="paperBg">
+            <div class="paperLid">
+            	<p><span><img src="__PUBLIC__/Label/Image/icon-ok.png"></span></p>
+            </div>
+            <div class="paperForm">
+			<form id="theform" action="<?php echo U('Label/Bonus/addSubmit');?>" method="post" name="theform">
+			<input type="hidden" name="id" id="id" value="{$id}">
+			<input type="hidden" name="saler_id" id="saler_id" value="{$saler_id}">
+			<input type="hidden" name="bonus_id" id="bonus_id" value="{$bonusInfo.id}">
+			<input type="hidden" name="batch_id" id="batch_id" value="{$batch_id}">
+            	<ul>
+                    <li><input type="text" name="phone" id="phone" maxlength="11" placeholder="&nbsp;请输入手机号码" value=""></li>
+                    <li><input type="text" name="validatcode" id="validatcode" placeholder="&nbsp;请输验证码" class="half" ><img src="<?php echo U('Label/VerifyCode/index/')?>" class="sOne-cjpasscode-img" id="verifyImg"  onclick="updateCode()"></li>
+                    <li><a href="javascript:void(0)" class="btn-shopPaper" id="get_bonus">马上抢</a></li>
+			</form>
+                </ul>
+            </div>
+        </div>
+        <div class="shopPaperOther">
+        	<p><a href="javascript:void(0)" class="btn-shopPapershare">分享给好友</a></p>
+            	<h1>活动规则</h1>
+                <h2>总&nbsp;金&nbsp;额：<b>{$bonusInfo.bonus_amount}</b> 元<br />
+					总&nbsp;份&nbsp;数：<b>{$bonusInfo.bonus_num}</b> 份<br />
+					规则描述：{$bonusInfo.memo}</h2>
+				<h1>领取记录</h1>
+				<h2>
+				<volist name="bonusGetList" id="vo">
+					<p>{$vo.phone|mark_str=###,4,3} 领取了 <b>{$vo.amount}</b> 元</p>
+				</volist>
+				</h2>
+        </div>
+        <div class="shopPaperConbg"></div>
+    </div>
+</div>
+<div class="out-box dn">
+	<img class="img" src="__PUBLIC__/Label/Image/tip-share.png" alt="">
+    <div class="text"><p>分享给好友!</p></div>
+</div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+	//分享提示
+	$('body').on("click",".btn-shopPapershare",function(){
+		$(".out-box").show();
+	})
+	$(".out-box").click(function(){
+		$(this).hide();
+	});	
+
+
+	$("#get_bonus").click(function(){			
+		
+		//判断手机和验证码
+		if($("#phone").val()==""){
+			MsgPop({
+				title:"",
+				html:"<img src='__PUBLIC__/Label/Image/icon-erro.png' style='margin:0 auto; width:30px;height:auto'><br>请输入手机号码!",
+				fresh:false
+			});
+			return false;
+		}
+		if($("#validatcode").val()==""){
+			MsgPop({
+				title:"",
+				html:"<img src='__PUBLIC__/Label/Image/icon-erro.png' style='margin:0 auto; width:30px;height:auto'><br>请输入验证码!",
+				fresh:false
+			});
+			return false;
+		}		
+		
+		$.post(
+			"{:U('Label/Bonus/addSubmit')}",
+			$('#theform').serialize(),
+		function(data) {
+			if(data.status=='0'){
+				var titlestr="";
+				var fresh=false;
+				var showhtml="<img src='__PUBLIC__/Label/Image/Shop/icon-paper1.png' style='margin:0 auto; width:200px;height:auto'><br>"+data.info.msg;
+			}else{
+				var titlestr="";
+				var fresh=true;
+				var showhtml="<img src='__PUBLIC__/Label/Image/Shop/icon-paper1.png' style='margin:0 auto; width:200px;height:auto'><br>"+data.info.msg;
+				if(data.info.jump_url)
+					showhtml = showhtml + "<br /><a class='btn-all' href='"+data.info.jump_url+"'>"+data.info.button_name+"</a>";
+			}
+			MsgPop({
+				title:titlestr,
+				html:showhtml,
+				fresh:fresh
+			});
+          updateCode();
+		},
+		'json'
+	   ); 
+
+
+	});
+
+
+
+});
+//弹窗基础
+function closeMsgPop(obj){
+	$(".msgPop").remove();
+	if(obj === true){
+		location.href = location.href ;
+	}
+	
+}
+function MsgPop(msg){
+	
+
+	var shuaxin =false;
+	if(msg.isgourl){shuaxin = true;}
+	if(msg.fresh){shuaxin = true;}
+	if(!msg.icon){msg.icon=""}else{msg.icon="<i class='"+msg.icon+"'></i>"};
+	var html = ['<div class="msgPop bg">',
+					'<div class="msgBg">',
+						'<div class="msgTitle">'+msg.title+'<a href="javascript:void(0)" class="close-msgPop" onClick="closeMsgPop('+shuaxin+')"><i><span>+</span></i></a></div>',
+						'<div class="msgCon">'+msg.icon+msg.html+'</div>',
+					'</div>',
+				'</div>'].join('');
+	$("body").append(html)
+}
+</script>
+<script language="JavaScript">
+function updateCode(){ 
+      //重载验证码 
+      var obj = document.getElementById('verifyImg'); 
+      var captcha_img = obj.src; 
+      var i = captcha_img.indexOf('&t'); 
+      if(i != -1){ 
+          captcha_img = captcha_img.substr(0,i); 
+       } 
+      obj.src = captcha_img+"&t="+Math.random(); 
+      }
+</script>
+
+
+<script>
+var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Public/_shareWx"/>

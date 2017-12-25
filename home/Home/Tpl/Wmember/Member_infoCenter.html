@@ -1,0 +1,507 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>会员信息</title>
+<link href="__PUBLIC__/Css/easyui.css" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Whygl.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.easyui.min.js"></script>
+<style type="text/css">
+	.choose { padding:10px 0 10px 15px; font-size: 14px;}
+	.choose input[type="checkbox"] { margin-right: 10px; vertical-align: middle;}
+	.select{float: right; font-size: 14px;}
+	.select select{margin: 0 10px;}
+	
+	.SearchArea.extendMode { overflow: visible;}
+	.SearchAreaLeft label.active { margin-bottom: 0; padding: 5px 0;}
+	.combo.active { height: 26px; vertical-align: middle; padding: 0 6px;}
+	.combo.active .textbox-text,.combo.active .textbox-text:focus,.combo.active .textbox-text:hover { border: none; box-shadow: none;}
+	.combo.active .textbox-text { width: 74px; padding: 0;}
+	.combo.active .textbox-addon { padding-right: 0;}
+	.combo.active .combo-arrow { width: 28px; height: 26px; background: url(__PUBLIC__/Image/moreArrow.png) center center no-repeat; background-color: none;}
+	.mark-box { display: inline-block; vertical-align: middle;}
+	.mb1 {
+	    padding: 0 34px 0 10px;
+	    margin: 0 20px 0 0;
+	    height: 24px;
+	    line-height: 24px;
+	    text-align: center;
+	    font-size: 15px;
+	}
+	.mb1 { margin: 0 10px 10px 0; vertical-align: top; display: inline-block; float: none; height: 26px; line-height: 26px; border-width: 1px; color: #ed3f41;}
+	.mb1:hover { margin-right: 10px; display: inline-block; float: none; border-width: 1px;}
+	.mb1 i { width: 26px; height: 26px; color: #ed3f41; font-style: normal; display: block; position: absolute;right: 0;bottom: 0;}
+	.mb1:hover i { width: 26px; height: 26px; line-height: 26px; background: none; color: #ffffff; background-color: #ed3f41;}
+</style>
+<script>
+$(function(){
+	$(".more-filter").click(function(){
+		$(".SearchAreaLeft label").toggleClass("active");
+	});
+	
+    //添加标签弹窗
+	$(".js_orderconfirm").click(function(e) {
+        var m_id = $(this).attr("data-id");
+		art.dialog.open("{:U('addOneLabel')}&m_id="+m_id+"&ot_type="+1,{
+			id:"EnterpriseNo",
+			title:"添加标签",
+			width:"480px",
+			height:"240px"
+		});
+    });
+    
+    //导入数据弹窗
+	$(".btn-add").click(function(e) {
+		art.dialog.open("{:U('uploadMembers')}",{
+			id:"EnterpriseNo",
+			title:"导入数据",
+			width:"750px",
+			height:"350px"
+		});
+    });
+    
+    //导出数据弹窗
+	$(".btn-down").click(function(e) {
+		art.dialog.open("{:U('downloadMember')}",{
+			id:"EnterpriseNo",
+			title:"导出数据",
+			width:"750px",
+			height:"380px"
+		});
+    });
+    
+    //会员详情弹窗
+	$(".member-info a").click(function(e) {
+        var m_id = $(this).attr("data-id");
+		art.dialog.open("{:U('detail')}&m_id="+m_id,{
+			id:"EnterpriseNo",
+			title:"会员详情",
+			width:"800px",
+			height:"650px"
+		});
+    });
+})
+</script>
+
+<script>
+    function unselectall(){
+        if(document.myform.chkAll.checked){
+            document.myform.chkAll.checked = document.myform.chkAll.checked&0;
+        }
+    }
+    function CheckAll(form){
+        for (var i = 0; i < form.elements.length; i++){
+            var e = form.elements[i];
+            if (e.Name != 'chkAll' && e.disabled == false) {
+                e.checked = form.chkAll.checked;
+            }
+        }
+    }
+
+    function batchIncrease(type){
+        var value = [];
+        var c=document.getElementsByTagName("INPUT");
+        for(var i=0;i<c.length;i++){
+            if(c[i].type=="checkbox" && c[i].checked)
+            {
+                if(c[i].value !=''){
+                    value[value.length]=c[i].value;
+                }
+
+            }
+        }
+        if(value.length < 1) {
+            art.dialog({title:false,content:"<div class='msg-all-error'>请勾选会员</div>",fixed:true,padding:0,time:2});
+                return false;
+        }
+        var id_str = value.join(",");
+        if(type == 1) {
+            art.dialog.open("{:U('addOneLabel')}&m_id="+id_str+"&ot_type="+2,{
+                id:"EnterpriseNo",
+                title:"添加标签",
+                lock:true,
+                width:"480px",
+                height:"220px"
+            });
+        } else {
+            art.dialog.open("{:U('updateMemberCard')}&m_id="+id_str,{
+                id:"EnterpriseNo",
+                title:"更换会员卡",
+                lock:true,
+                width:"480px",
+                height:"250px"
+            });
+        }
+    }
+</script>
+
+</head>
+<body>
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+	<div class="container">
+       	<!--页面主体开始-->
+        <div class="" id="container">
+        	<div class="rel" id="main">
+            	<include file="Wmember/Member/leftMenu" leftmenuid="hyxx" />
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                    <h4>会员信息<a class="btn-add first" href="javascript:;"><i></i>导入数据</a><a class="btn-down" href="javascript:;"><i></i>导出数据</a></h4>
+                    </div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-list">
+                        	<div class="SearchArea fn">
+								<form action="{:U('infoCenter')}" method="POST" name="theform" id="theform">
+									<div class="SearchAreaLabel">基本<br>资料</div>
+			                        <div class="SearchAreaLeft">
+                                        <label>
+                                            <span>姓名</span><input name="member_name" type="text" class="textbox w90" value="{$member_name}" />
+                                        </label>
+                                        <label>
+                                            <span>手机号</span><input name="member_phone" type="text" class="textbox w90" value="{$member_phone}" />
+                                        </label>
+                                        <label>
+                                            <span>性别</span><select class="textbox w100" name="member_sex">
+                                                <option value="">全部</option>
+                                                {:show_arr_opt($sex_list, $member_sex)}
+                                            </select>
+                                        </label>
+                                        <label id="member_cards">
+                                            <span>会员卡</span>
+                                            <select class="textbox w100" name="member_cards">
+                                                <option value="">全部</option>
+                                                {:show_arr_opt($member_cgroup, $member_cards)}
+                                            </select>
+                                        </label>
+                                        <label id="nickname">
+                                            <span>微信昵称</span><input name="nickname" type="text" class="textbox w90" value="{$nickname}" />
+                                        </label>
+                                        <label>
+                                            <span>出生日期</span><input type="text" name="birthday_start" id="birthday_start" onclick="WdatePicker({dateFmt:'yyyyMMdd',maxDate:'#F{$dp.$D(\\'birthday_end\\')}'})" value="{$birthday_start}" />
+                                            -
+                                            <input type="text" name="birthday_end" id="birthday_end" onclick="WdatePicker({dateFmt:'yyyyMMdd',minDate:'#F{$dp.$D(\\'birthday_start\\')}'})" value="{$birthday_end}" />
+                                        </label>
+                                        <label>
+                                            <span>地区</span>
+                                            <select name="province" class="textbox w100" id="province">
+                                                <option value="">省</option>
+                                            </select>&nbsp;
+                                            <select name="city" class="textbox w100" id="city">
+                                                <option value="">市</option>
+                                            </select>&nbsp;
+                                            <select name="town" class="textbox w100" id="town">
+                                                <option value="">区</option>
+                                            </select>
+                                        </label>
+                                        <label>
+                                            <span>来源渠道</span><input name="channel_name" type="text" class="textbox w90" value="{$channel_name}" />
+                                        </label>
+                                        <if condition="$adb_flag eq 1">
+                                        <label>
+                                            <span>所属门店</span><input name="store_id" type="text" class="textbox w90" value="{$store_short_name}" />
+                                        </label>
+                                        </if>
+			                        </div>
+			                        
+			                        <div class="SearchAreaLabel">行为<br>数据</div>
+			                        <div class="SearchAreaLeft">
+                                        <label>
+                                            <span>活动参与次数</span>
+                                            <input name="join_cnt1" id="join_cnt1" type="text" class="textbox w90" value="{$join_cnt1}" />
+                                            -
+                                            <input name="join_cnt2" id="join_cnt2" type="text" class="textbox w90" value="{$join_cnt2}" />
+                                        </label>
+                                        <label>
+                                            <span>接收卡券数</span>
+                                            <input name="send_cnt1" id="send_cnt1" type="text" class="textbox w90" value="{$send_cnt1}" />
+                                            -
+                                            <input name="send_cnt2" id="send_cnt2" type="text" class="textbox w90" value="{$send_cnt2}" />
+                                        </label>
+                                        <label>
+                                            <span>到店核销数</span>
+                                            <input name="verify_cnt1" id="verify_cnt1" type="text" class="textbox w90" value="{$verify_cnt1}" />
+                                            -
+                                            <input name="verify_cnt2" id="verify_cnt2" type="text" class="textbox w90" value="{$verify_cnt2}" />
+                                        </label>
+                                        <label>
+                                            <span>线上购物次数</span>
+                                            <input name="shop_line1" id="shop_line1" type="text" class="textbox w90" value="{$shop_line1}" />
+                                            -
+                                            <input name="shop_line2" id="shop_line2" type="text" class="textbox w90" value="{$shop_line2}" />
+                                        </label>
+                                        <label>
+                                            <span>线下消费次数</span>
+                                            <input name="shop_down1" id="shop_down1" type="text" class="textbox w90" value="{$shop_down1}" style="width:70px;"/>
+                                            -
+                                            <input name="shop_down2" id="shop_down2" type="text" class="textbox w90" value="{$shop_down2}" style="width:70px;"/>
+                                        </label>
+			                        </div>
+
+                                    <div class="SearchAreaLabel">标签<br>信息</div>
+                                    <div class="SearchAreaLeft">
+                                        <label>
+                                            <span>标签</span>
+                                            <select class="easyui-combobox" id="state" style="width:100px;">
+                                                {:show_arr_opt($member_lgroup)}
+                                            </select>&nbsp;
+                                            <input class="searchBtn" id="add_mark" type="button" value="添加" style="position: inherit; right: 0; cursor: pointer; margin-right: 10px; vertical-align: middle;" />
+                                            <div class="mark-box fn" <php>if($arr){echo "style='display:block;'";}</php>>
+                                                <volist name="arr" id="vo1">
+                                                    <div class="mb1 fl" id="mb1">{$vo1}<i></i></div>
+                                                </volist>
+                                            </div>
+                                            <input type="hidden" id="bqValue" name="bqValue"  value="{$label_name}"/>
+                                        </label>
+                                    </div>
+			                        <div class="SearchAreaLabel">卡信<br>息</div>
+			                        <div class="SearchAreaLeft">
+                                        <!-- <label>
+                                            <span>会员卡号</span>
+                                            <input name="member_id" type="text" class="textbox w90" value="{$member_id}" style="width:70px;"/>
+                                        </label> -->
+                                        <label id="integral_point">
+                                            <span>剩余积分</span>
+                                            <input name="integral_point1" id="integral_point1" type="text" class="textbox w90" value="{$integral_point1}" />
+                                            -
+                                            <input name="integral_point2" id="integral_point2" type="text" class="textbox w90" value="{$integral_point2}" />
+                                        </label>
+			                        </div>
+			                        <div class="SearchAreaRight">
+			                            <a href="javascript:void(0);" id="sub_button" class="searchBtn">查找</a>
+			                            <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+			                        </div>
+								</form>
+							</div>
+                        	<div class="shopCon">
+                                <form name="myform" method="post" id="myform" action="" >
+	                            <table cellpadding="0" cellspacing="0" class="W-table">
+	                            <thead>
+	                            <tr class="th">
+	                            <th class="first"></th>
+	                            <th>手机号码</th>
+	                            <th>姓名</th>
+	                            <th>首次来源</th>
+	                            <th>活动参与次数</th>
+	                            <th>接收卡券数</th>
+	                            <th>到店核销数</th>
+	                            <th>登记日期</th>
+	                            <if condition="$adb_flag eq 1">
+	                            <th>所属门店</th>
+	                            </if>
+	                            <th class="last">操作</th>
+	                            </tr>
+	                            </thead>
+	                            <tbody>
+                                <volist name="memberData" id="vo">
+                                    <tr>
+                                        <td class="first"><input type="checkbox" name="name" onclick='unselectall()' value="{$vo.id}" /></td>
+                                        <td class="member-info"><a href="javascript:void(0);" data-id="{$vo.id}">{$vo.phone_no}</a></td>
+                                        <td>{$vo.name}</td>
+                                        <td><?php if($vo['channel_name']=='旺分销-群发消息') echo '旺分销消息'; else echo $vo['channel_name']; ?></td>
+                                        <td>{$vo['join_total']|default=0}</td>
+                                        <td>{$vo['send_total']|default=0}</td>
+                                        <td>{$vo['verify_total']|default=0}</td>
+                                        <td>{$vo['add_time']|preg_replace='/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])(.*)/','$1-$2-$3',###|}</td>
+                                        <if condition="$adb_flag eq 1">
+                                        <td>{$vo['store_short_name']}</td>
+                                        </if>
+                                        <td class="last"><a href="javascript:void(0);" data-id="{$vo.id}" class="js_orderconfirm">添加标签</a><if condition="$adb_flag eq 1 and $vo.openid neq ''">|<a href="javascript:void(0);" data-id="{$vo.openid}" class="remove">解绑门店</a></if></td>
+                                    </tr>
+                                </volist>
+	                            </tbody>
+	                            </table>
+	                            <div class="choose">
+	                            	<label><input type="checkbox" name="chkAll" id='chkAll' onclick='CheckAll(this.form)'value="" />全选</label>&nbsp;
+	                            	<a href="javascript:void(0);" onclick="batchIncrease(1)">批量添加标签</a>
+                                    &nbsp;
+                                    <a href="javascript:void(0);" onclick="batchIncrease(2)">批量更换会员卡</a>
+                                    <label class="select">
+                                    	每页显示<select id="select">
+                                        {:show_arr_opt($paging, $optNumber)}
+                                    	</select>条数据
+                                    </label>
+	                            </div>
+	                            <div class="page">{$page}</div>
+                                </form>
+	                        </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+</div>
+<div class="service"></div>
+</body>
+</html>
+<script>
+	$(document).ready(function(){
+	 $("#select").change(function(){
+	  var id = $(this).find("option:selected").val();//当前下拉选择的值
+
+         if(id == 10){
+             location.href = "{:U('Member/infoCenter',array('optNumber'=>10))}";
+             
+         }
+         if(id == 50){
+             location.href = "{:U('Member/infoCenter',array('optNumber'=>50))}";
+         }
+         if(id == 100){
+             location.href = "{:U('Member/infoCenter',array('optNumber'=>100))}";
+         }
+	 });
+	});
+</script>
+<script type="text/javascript">
+$(document).ready(function(e){
+    $("#sub_button").click(function(){
+        //剩余积分输入校验
+        if(inputFlag("integral_point", "剩余积分") == false) {
+            return false;
+        }
+        //活动参与次数输入校验
+        if(inputFlag("join_cnt", "活动参与次数") == false) {
+            return false;
+        }
+        //接收卡券数输入校验
+        if(inputFlag("send_cnt", "接收卡券数") == false) {
+            return false;
+        }
+        //到店核销数输入校验
+        if(inputFlag("verify_cnt", "到店核销数") == false) {
+            return false;
+        }
+        //线上购物次数输入校验
+        if(inputFlag("shop_line", "线上购物次数") == false) {
+            return false;
+        }
+        //线下购物次数输入校验
+        if(inputFlag("shop_down", "线下购物次数") == false) {
+            return false;
+        }
+
+        $("#theform").submit();
+    });
+
+    CityCode({
+        province:$("#province"),//省
+        city:$("#city"),//市
+        town:$("#town"),//区
+        selected:"{:$province.$city.$town}",
+        url:"{:U('LabelAdmin/AjaxCity/index')}"
+    });
+});
+
+function inputFlag(numId, msg)
+{
+    var num1 = $("#"+numId+"1").val();
+    var num2 = $("#"+numId+"2").val();
+
+    if(num1 != '' && num1 < 1) {
+        art.dialog({title:false,content:"<div class='msg-all-error'>请在"+msg+"第一个输入框输入大于0的数字</div>",fixed:true,padding:0,time:2});
+        return false;
+    }
+    if(num2 != '') {
+        if(num1 == '') {
+            if(num2 < 1) {
+                art.dialog({title:false,content:"<div class='msg-all-error'>请在"+msg+"第二个输入框中输入大于0的数字</div>",fixed:true,padding:0,time:2});
+                return false;
+            }
+        } else {
+            var num = num2 - num1;
+            if(num < 0) {
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+msg+"第二个参与必须大于第一个参数</div>",fixed:true,padding:0,time:2});
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+$(function(){
+    $(".combo").css("height","26px");
+    $(".combo-arrow").css("height","26px");
+	$(".textbox-text").css({"width":"74px","margin-right":"0"});
+    $(".combo").addClass("active");
+    $("#add_mark").click(function(){
+        var val = $(".textbox-text").val();
+        if(val == '') {
+            return false;
+        }
+        $.post(
+            "{:U('selLabelFlag')}",
+            {label_name: val},
+            function (data) {
+                if (data.status == '0') {
+                    art.dialog({title:false,content:"<div class='msg-all-error'>添加的标签不存在~~</div>",fixed:true,padding:0,time:2});
+                    return false;
+                }
+            },
+            'json'
+        );
+        var str = $("#bqValue").val();
+
+        if(str != '' && str.indexOf(val+",") > 0) {
+            art.dialog({title:false,content:"<div class='msg-all-error'>添加的标签已经添加，请添加其它标签~~</div>",fixed:true,padding:0,time:2});
+            return false;
+        }
+        var dom = '<div class="mb1 fl" id="mb1">' + val + '<i>x</i></div>';
+        $(".mark-box").css("display","block");
+        str += val+',';
+        $("#bqValue").val(str);
+        if(val==""){
+            $(".textbox-text").attr("value","");
+        }else{
+			$(this).after(dom);
+            $(".textbox-text").attr("value","");
+        };
+    });
+    $(document).on("click", "#mb1 i", function(){
+        var str = $("#bqValue").val();
+        var rmL = $(this).parent(".mb1").text();
+        $("#bqValue").val(str.replace(rmL+",", ""));
+        $(this).parent(".mb1").remove();
+    });
+    $(".remove").click(function(){
+    	var openid=$(this).attr("data-id");
+    	if(!confirm('是否解除门店绑定?')){
+    		return false;
+    	}
+    	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+    	$.ajax({
+    		url:"{:U('Wmember/Member/removeRelation')}",
+    		data:"openid="+openid,
+    		type:'post',
+            dataType:'json',
+    		success:function(data){
+    			if(data.status==1){
+    				dialog.time(2).content("<div>"+data.info+"</div>");
+                    window.location.reload();
+ 
+    			}else{
+    				dialog.time(2).content("<div>"+data.info+"</div>");
+    			}
+    		}
+    	})
+    })
+
+});
+</script>

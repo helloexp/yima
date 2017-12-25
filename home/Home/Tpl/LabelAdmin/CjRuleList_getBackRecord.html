@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券卡券发放记录</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivities.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__1"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<style>
+  .W-table td{color:#666;font-size:14px;border:solid 1px #e1e1e1} 
+  .W-table td.awards{color:#4e4e4e;} 
+  .fail_jl{color:#ed3f41;font-size:14px;line-height:26px;display:inline-block;height:26px;width:auto;}
+  .Diabtn-all,btn-all-del,.btn-all-del.Diabtnauto{margin:0px 7.5px}
+  .Wcanal-tab-list{min-height:200px}
+</style>
+<script type="text/javascript">
+$(function(){
+  $(".sendall").click(function(){
+	  $.ajax({
+	     beforeSend:function(){
+		     setTimeout('$(".sendall").html("发送中…")',500); 	
+		    setTimeout('$(".sendall").html("发送完成")',1500); 
+			setTimeout('$(".send_par").css("display","none")',2000);
+		  },
+	     url:"{:U('CjRuleList/resendPrize', array('batch_id' => $batch_id))}",
+		 type:"post",
+         dataType:"json",
+	  })
+   })
+})
+</script>
+<body>
+ <div class="Wcanal-tab inPop" id="Wcanal-tabon">
+	  <div class="Wcanal-tab-title fn" id="third-tab">
+		<p class=""><a href="{:U('CjRuleList/index', array('batch_id' => $batch_id))}">奖品总览</a></p>
+		<p class=""><a href="{:U('CjRuleList/getSendPrizeTrace', array('batch_id' => $batch_id))}">发放及使用情况</a></p>
+		<gt name="backCount" value="0">
+		<p class="Wcanal-tab-hover"><a href="{:U('CjRuleList/getBackRecord', array('batch_id' => $batch_id))}">回退记录</a></p>
+		</gt>
+		<gt name="failedCount" value="0">
+		<div class="r send_par" style="height:26px">
+		   <span class="fail_jl">{$failedCount}个卡券发送失败！</span><a class="btn-add sendall r" href="javascript:void(0)">全部重发</a>
+	    </div>
+	    </gt>
+	  </div>
+	  <div class="Wcanal-tab-list">
+	      <table cellpadding="0" cellspacing="0" class="W-table mt15">
+                <tbody>
+                   <tr class="th">
+                        <th>卡券名称</th>
+                        <th>回退数量</th>
+                        <th>回退时间</th>
+                        <th>操作员</th>
+                        <th>操作</th>
+                   </tr>
+                   <notempty name="list">
+                   <volist name="list" id="record">
+				   <tr>
+                        <td>{$record['batch_short_name']}</td>
+                        <td>{$record['change_num']}</td>
+                        <td>{:dateformat($record['add_time'])}</td>
+                        <td>{$record['true_name']}&nbsp;&nbsp;{$record['user_name']}</td>
+                        <td>
+                        <a target="_blank" href="{:U('WangcaiPc/NumGoods/storageTrace', array('goods_id' => $record['goods_id']))}">查看库存记录</a>
+                        </td>
+                   </tr>
+                   </volist>
+                   <else />
+                   <tr><td colspan="5"><div class="nonedata"></div></td></tr>
+                   </notempty>
+               </tbody>
+         </table>
+		<div class="page mini">
+               {$page}
+		</div>	 
+		 <div class="DiabtnCon">
+			 <a class="btn-all-del" href="javascript:art.dialog.close()">关闭</a>
+		 </div>
+	  </div>
+ </div>
+</body>
+
+</html>

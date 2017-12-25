@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msguser.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msgsend.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+
+
+
+function selectcallback(data){
+    var cnts = $('.tab_panel .tab_content');
+    $('.tab_text').removeClass('selected');
+    $('.tab_appmsg').addClass('selected');
+    $('#material_id').val(data);
+    $('#reply_type').val(2);
+    $.post('{:U('Home/WeixinResp/showMaterialById')}', {material_id:data}, function(data){
+        $(cnts[0]).hide();
+        $(cnts[1]).show().html('').append(data);
+    });
+}
+
+$(function(){
+    $(".frm_checkbox").live('change', function(){
+        $(this).closest(".frm_checkbox_label").toggleClass("selected");
+    });
+    $(".js_reply").live('click', function(){
+        $(this).closest("li").find(".quick_reply_box").show();
+    });
+
+
+    //选择图文回复-页面已有
+    $(".tab_appmsg").click(function(){
+        art.dialog.open('{:U('Home/WeixinResp/selectImgTxt', array('callback'=>'selectcallback'))}',{
+            lock: true,
+            background: '#000', // 背景色
+            opacity: 0.5,	// 透明度
+            title:"选择多图文信息",
+            width:740,
+            height: '80%'
+        });
+    });
+
+    //选择文字回复-页面已有
+    $('.tab_text').click(function(){
+        $(this).addClass('selected');
+        $('.tab_appmsg').removeClass('selected');
+        $('.tab_panel .tab_content:eq(0)').show();
+        $('.tab_panel .tab_content:eq(1)').hide();
+        $('#reply_type').val(0);
+    });
+
+    $("#theform").submit(function(){
+
+        if(!$("#theform").validationEngine('validate')){
+            return false;
+        }
+        var reply_type = $('#reply_type').val();
+        if(reply_type == '0'){
+            var cnt_obj = $('#reply_content');
+
+            //处理空格
+            cnt_obj.html($.trim(cnt_obj.html().replace(/&nbsp;/g, '')));
+            var reply_text = cnt_obj.html();
+            check_lenght(140,'js_editorTip',document.getElementById('reply_content'));
+
+            if(reply_text.length == 0){
+                alert('请输入回复内容！');
+                return false;
+            }
+            if(reply_text.length > 140){
+                alert('回复内容超长！');
+                return false;
+            }
+
+            $('#reply_text').val(reply_text);
+        }
+        else if(reply_type == '2'){
+            var material_id = $('#material_id').val();
+            if(material_id == ''){
+                alert('请选择图文内容！');
+                return false;
+            }
+        }
+        else{
+            alert('参数错误，请刷新页面重试！');
+            return false;
+        }
+
+        if(!confirm('是否确认发送！确认之后无法取消！'))
+            return false;
+
+        var dialog;
+        $("#theform").ajaxSubmit({
+            beforeSubmit:function(){
+                $('#js_submit').attr('disabled', true);
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+                $('#js_submit').attr('disabled', false);
+                if(data.status == '1'){
+                    dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                    setTimeout("art.dialog.close();",1000);
+                    location.href="{:U('Home/Weixin/batch_send_his')}";
+                    return false;
+                }else{
+                    dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+                },
+            dataType:'json'
+        });
+        return false;
+    });
+
+});
+</script>
+</head>
+<body>
+    <form action="{:U('Home/Weixin/batch_send')}" method="post" id="theform">
+    <input type="hidden" name="reply_type" id="reply_type" value="0">
+    <input type="hidden" name="reply_text" id="reply_text" value="">
+    <input type="hidden" name="material_id" id="material_id" value="">
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+    	<div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>&gt;</p>
+                            <p>微信助手</p>        
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+					<include file="LabelAdmin/Batch/leftMenu" leftmenuid="wxzs"/>
+                </div>
+
+                <div class="subcon">
+                
+                    <div class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover"><a href="#">群发消息</a></p>
+                            <p><a href="{:U('Home/Weixin/batch_send_his')}">已发送</a></p>
+                        </div>
+                        <div class="Wcanal-tab-list">
+                            <!--微信消息-->
+                            <div class="form-search mt10 fn">
+                                <p>群发对象:</p>
+                                <p class="ml5">
+                                    <select name="group_id" id="group_id" class="selectbox">
+                                        <option value="" class="">全部用户</option>
+                                        {:show_arr_opt($group_list)}
+                                    </select>
+                                </p>
+                                <p class="ml20">性别:</p>
+                                <p class="ml5">
+                                    <select name="sex" id="sex" class="selectbox">
+                                        <option value="">全部</option>
+                                        <option value="1" class="">男</option>
+                                        <option value="2" class="">女</option>
+                                    </select>
+                                </p>
+                                <!-- <p class="ml20">对:</p>
+                                <p class="ml5"><input name="start_score" id="start_score" type="text" value="" class="textbox w100 validate[custom[integer],min[0]]"></p>
+                                <p class="mlr5">到</p>
+                                <p><input name="end_score" id="end_score" type="text" value="" class="textbox w100 validate[custom[integer],min[0]]"></p>
+                                <p class="ml5">的活跃粉丝进行发送</p> -->
+                            </div>
+                            <div class="main_bd mt10">
+                                <div id="msgSender">
+                                    <div class="msg_sender" id="js_msgSender">
+                                        <div class="msg_tab">
+                                            <ul class="tab_navs">
+                                                <!-- <li class="tab_nav tab_text width5 selected" data-type="1" data-tab=".js_textArea">
+                                                    <a href="javascript:void(0);"><i class="icon_msg_sender"></i>文字</a>
+                                                </li> -->
+                                                <li class="tab_nav tab_appmsg width5 no_extra" data-type="10" data-tab=".js_appmsgArea">
+                                                    <a href="javascript:void(0);"><i class="icon_msg_sender"></i>选择图文消息</a>
+                                                </li>
+                                            </ul>
+                                            <div class="tab_panel">
+                                                <!--文字-->
+                                                <div class="tab_content"  style="display: none;">
+                                                    <div class="js_textArea inner no_extra">
+                                                        <div class="emotion_editor">
+                                                            <div class="edit_area js_editorArea" id="reply_content" contenteditable="true" style="overflow-y: auto; overflow-x: hidden;"  onkeyup="check_lenght(140,'js_editorTip',this);"></div>
+                                                            <div class="editor_toolbar">       
+                                                                <p class="editor_tip js_editorTip" id="js_editorTip">还可以输入<em>140</em>个字</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--图文-->
+                                                <div class="tab_content">
+                                                    <div class="msg-item-wrapper" style="margin:0 auto;" data-material-id="726">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tool_area">
+                                        <p class="mass_send_tips"><i>●</i>你本月还能群发 <em id="leftNum">{$mass_premonth - $sent_num}</em> 条消息</p>
+                                        <div class="warn_tips">微信公众平台严禁恶意营销以及诱导分享朋友圈，严禁发布违反法律法规及相关政策规定的信息。请留意您所发布的信息内容，一旦发现，我们将严厉打击和处理。</div>
+                                        <div class="tool_bar border">
+                                            <div id="verifycode"></div>
+                                            <php>if($mass_premonth - $sent_num > 0){</php>
+                                            <span class="btn btn_input btn_primary">
+                                                <button id="js_submit">群发</button>
+                                            </span>
+                                            <php>}else{</php>
+                                            本月不能再使用群发功能！
+                                            <php>}</php>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--微信消息-->
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+</form>
+    <div class="service"></div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券爱拍特供卡券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivities.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script src="__PUBLIC__/Js/check_form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+</head>
+<script type="text/javascript">
+$(function(){
+	$("#theform").submit(function(){
+		if( !check_form(this) )
+			return false;
+		var resp_log_img=$("#resp_log_img").val();
+		if(resp_log_img=='')
+		{
+			alert("请先上传图片!");
+			return false;
+		}
+	});
+});
+//文件上传
+function ajaxFileUpload(imgid,hiddenid,showid,url){
+var dialog = art.dialog({title:false,fixed: true,padding:0});
+$.ajaxFileUpload
+({
+	url:url,
+	secureuri:false,
+	fileElementId:imgid,
+	dataType: 'json',
+	data:{name:'logan', id:'id'},
+	success: function (data, status)
+	{
+		if(typeof(data.error) != 'undefined')
+		{
+			if(data.error != '')
+			{
+				dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+			}else{
+
+				var resp = data.msg;
+				if(resp != '0000'){
+					dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+					return false;
+				}else{
+					dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+				}
+				$('#'+hiddenid).val(data.imgurl);
+				$('#'+showid).attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+			}
+		}
+	},
+	error: function (data, status, e)
+	{
+		dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+	}
+})
+
+return false;
+}
+</script>
+<body class="bgfff">
+                <form action="{:U('WangcaiPc/AiPai/prize_add_back/?action=add&aipai=node')}" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+                <div class="fn">
+                    <div class="pop-up fn">
+                        <dd class="pop-img tc pt40"><img src="__PUBLIC__/Image/ok_img.png" width="46" height="46" class="mr30" style="vertical-align:middle;">
+						<if condition="($check_status eq '1')">
+						由于您企业认证被拒绝，请填写下列信息重新提交审核。
+						</if>
+						<if condition="($check_status eq '0')">
+						由于您是首次使用爱拍赢大奖业务，请填写下列信息以完成企业认证。
+						</if>
+						</dd>
+                        <dd class="pop-hint"></dd>
+                        
+                        <div class="fn" style="margin:0 auto; margin-left:50px; width:600px;">
+                            <div class="global-input5 fn pb30">
+                                <ul>
+                                    <li class="global-input5-name">*&nbsp;企业简称：</li>
+                                    <li class="global-input5-input"><input name="node_short_name" id="node_short_name" type="text" maxlength="20" jscheckrule="null=0;minlen=1;maxlen=50;" value="{$node_short_name}" jschecktitle="企业简称" class="textbox w300"/></li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input5-name">*&nbsp;营业执照扫描件：</li>
+                                    <li class="global-input5-input">
+                                       <input id="log_img_show" type="text"  class="textbox w160 l"/>
+                                        <div class="rel l">
+                                        <input type="file" name="log_img" id="log_img" style="left:-172px;width:240px" class="upload_file" onChange="$('#log_img_show').val($(this).val());return ajaxFileUpload('log_img','resp_log_img','logo_image','{:U('WangcaiPc/AiPai/business','node_type=1')}');"/>
+                                        <a href="javascript:;" title="上传" class="btn-all w40 ml5 h32">浏览</a>
+                                        </div>
+                            			<input type="hidden"  name="resp_log_img" id="resp_log_img" value="<?php echo $row['logo_img'];?>"/>
+                                   </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input5-name">企业热线电话：</li>
+                                    <li class="global-input5-input"><input name="node_service_hotline" id="node_service_hotline" maxlength="20" jscheckrule="maxlen=20;" value="{$node_service_hotline}" jschecktitle="企业热线电话" type="text"  class="textbox w300"/></li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input5-name">&nbsp;</li>
+                                    <li class="global-input5-input"><input type="submit" value="确认" class="btn-all w110"></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </form>
+</body>
+</html>

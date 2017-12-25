@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>图文编辑_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnewsadd.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker//WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+$(function(){
+    var ue = UE.getEditor('wap_info',{
+        imageUrl:"{:U('LabelAdmin/Upfile/editoImageSave')}",
+        imagePath:"__UPLOAD__",
+        catcherUrl:"{:U('LabelAdmin/Upfile/getRemoteImage')}",
+        catcherPath:"__UPLOAD__",
+    	initialFrameWidth:320,
+    	initialFrameHeight:280
+    });
+
+    ue.addListener("contentChange",function(){
+        $(".Preview-moreContenter").html(this.getContent());
+    });
+
+    $('#sub_button').click(function(){
+        if(!ue.getContent()){
+            $('#wap_tip').validationEngine('showPrompt', '不能为空','error','topRight',true);
+        }else{
+            $('#wap_tip').validationEngine('hide');
+        }
+        
+        //手动提交需要手动同步编辑器数据
+        ue.sync();
+        var batchId = {$row['id']};
+        //提交表单
+        if($("#theform").validationEngine('validate')){
+            $('#theform').ajaxSubmit({
+                beforeSubmit:function(){
+                    Dialoading("正在提交...");
+                },
+                success:function(data){
+                    if(data.status==1){
+                         Diasucceed("正在提交...");
+                         showcod(batchId);
+                    }else{
+                        Diaerror(data.info);
+                    }
+                },
+                dataType:'json'
+            });
+        }
+        //出二维码
+        function showcod(id){
+            var id = id;
+            var url2 = './index.php?g=LabelAdmin&m=CjSetShow&a=code&batch_id=' + id + '&batch_type=19';
+            $.get(url2,function(d){},'json');
+            art.dialog({
+                title: '扫码预览',
+                content: "<p style='text-align:center'><img src='"+url2+"' style='border:solid 1px #ddd; width:100px;height:100px;'></p><p style='font-size:14px;margin-top:8px;'>扫码预览图文编辑内容</p>",
+                cancelVal:'重新编辑',
+                cancel: true,
+                okVal:'返回列表',
+                ok: function () {
+                    window.location.href="{:U('MarketActive/Tool/pictext')}";
+                }
+            });
+        }
+    }) ;
+})
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="main-name fn"> 
+                    <h4>图文编辑</h4>
+                </div>
+                <div class="subAuto">
+                	<div class="subSide col1">
+                    	<div id="Gphone">
+                            <div class="Gphonetop"></div>
+                            <div id="iphonePreview-1" class="GphoneCon">
+                            	<div id="Preview-main">
+                                    <div class="Preview-mainTop">
+                                        <div class="Preview-top-img">
+                                            <img src="__PUBLIC__/Label/Image/topbg-sOne.png"  class="Preview-vip-img" />
+                                        </div>
+                                    </div>
+                                    <div id="Preview-mainCon" class="Preview-mainCon fn">
+                                        <div class="Preview-top-title Gshow-name"></div>
+                                        <div class="Preview-logo-bg">
+                                            <div class="Preview-logo-con"><img src="" class="Gshow-logo" /></div>
+                                        </div>
+                                        <div class="Preview-mainCon-contenter">
+                                            <div class="Preview-mainCon-title Gshow-title">{$row['wap_title']}</div>
+                                            <div class="Preview-mainCon-contenter-bg">
+                                                <div class="Preview-moreContenter">
+                                                    <p class="tc">此处会显示您所添加的活动页面内容</p>
+                                                    <br />
+                                                    <p class="tc" style=" color:#999;">
+                                                    您可以通过使用<br />极速模式/chrome/Firefox<br />查看实际效果
+                                                    </p>
+                                                    <br />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="Preview-share dn">
+                                            <ul class="Preview-share_list">
+                                                <li>分享到：</li>
+                                                <li class="dn"><a href="javascript:void(0)"><img src="__PUBLIC__/Label/Image/sinaweibo.png"/></a></li>
+                                                <li class="dn"><a href="javascript:void(0)"><img src="__PUBLIC__/Label/Image/tencentweibo.png"/></a></li>
+                                                <li class="dn"><a href="javascript:void(0)"><img src="__PUBLIC__/Label/Image/qzone.png"/></a></li>
+                                                <li class="dn"><a href="javascript:void(0)"><img src="__PUBLIC__/Label/Image/renren.png"/></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div id="Preview-footer">
+                                        <img src="__PUBLIC__/Label/Image/footer-logo.png" width="100%" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="subMain">
+                    	<div class="subAutoCon">
+                        	<form action="{:U('LabelAdmin/Med/editSubmit')}" method="post" name="theform" id="theform" enctype="multipart/form-data">
+                            <input type="hidden" name="is_reset" id="is_reset" value="0" />
+                            <input type="hidden" name="id" value="<?php echo $row['id']?>" />
+                        	<div class="Gform l">
+                                <ul class="h3">基础信息</ul>
+                                <include file="./Home/Tpl/LabelAdmin/Bg_editNew.html" />
+                                <include file="./Home/Tpl/LabelAdmin/Name_editNew.html" />
+                                <include file="./Home/Tpl/LabelAdmin/Logo_editNew.html" />
+                                <ul>
+                                    <li class="Gname"><span>*</span>页面标题</li>
+                                    <li class="Ginput">
+                                        <input type="text" maxlength="64" class="validate[required] Gview-title" name="wap_title" id="wap_title" value="<?php echo $row['wap_title'];?>"><span class="maxTips forInput" data-max="64">0/64</span>
+                                    </li>
+                                </ul>
+                            	<ul>
+                                    <li class="Gname"><span>*</span>页面内容</li>
+                                    <li class="Ginput" id="wap_tip">
+                                        <textarea name="wap_info" id="wap_info"><?php echo $row['wap_info'];?></textarea>
+                                    </li>
+                                </ul>
+                                <?php if($isOpenIntegral):?>
+                                <ul class="h3">赠送积分</ul>
+                                <ul>
+                                    <li class="Gname">赠送数量</li>
+                                    <li class="Ginput">
+                                        <input type="text" class="validate[custom[integer]]" value="{$serData['integral_num']}" name='integral'>
+                                        <span class="txtTips">消费者首次浏览此活动页面时，自动赠送指定数量积分。</span>
+                                    </li>
+                                </ul>
+                                <?php endif;?>
+                                <include file="./Home/Tpl/LabelAdmin/Share_editNew.html" />
+                            	<ul>
+                                    <li class="Gname">SNS分享</li>
+                                    <li class="Ginput">
+                                    	<div class="switch auto" data-callback="share">
+                                            <?php 
+                                            $sns_arr = C('SNS_ARR');
+                                            if(!empty($row['sns_type']))
+                                                $r_array = explode('-',$row['sns_type']);
+                                            foreach($sns_arr as $sns_k=>$sns_v){
+                                            if($sns_k>4) continue;
+                                            ?>
+                                            <input type="checkbox" name="sns_type[]" value="<?php echo $sns_k?>" <?php if(in_array($sns_k,$r_array)){?> checked="checked" <?php }?>>
+                                            <?php }?>
+                                            <div class="newRadio">
+                                            	<?php 
+                                                $sns_arr = C('SNS_ARR');
+                                                if(!empty($row['sns_type']))
+                                                    $r_array = explode('-',$row['sns_type']);
+                                                foreach($sns_arr as $sns_k=>$sns_v){
+                                                if($sns_k>4) continue;
+                                                ?>
+                                                <span data-val="<?php echo $sns_k?>"><?php echo $sns_v?></span>
+                                                <?php }?>
+                                            </div>
+                                        </div>
+                                        <span class="txtTips">选择后，允许消费者将您的营销活动分享给他的社交网络好友</span>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"></li>
+                                    <li class="Ginput">
+                                    <a href="javascript:void(0);" id="sub_button" class="btn-all">保存</a>
+                                    <a href="javascript:history.go(-1)" class="btn-all-del">取消</a></li>
+                                </ul>
+                            </div>
+                    	</form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+function share(t){
+	var v = t.attr("data-val");
+	$(".Preview-share").show();
+	$(".Preview-share li:eq("+v+")").toggle();
+}
+</script>

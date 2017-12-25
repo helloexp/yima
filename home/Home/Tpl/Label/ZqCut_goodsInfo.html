@@ -1,0 +1,306 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$goodsInfo['batch_name']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script>
+$(function(){
+    var bgnum = Math.floor(Math.random()*4);
+    $(".loginFormwap").addClass("bg"+bgnum);
+    
+    $(".out-box").click(function(){
+        $(this).hide();
+    })
+    
+    $("#buy").click(function(){
+    	//#15230-非标判断
+    	var no_buy = '{$noBuy}';
+    	if(no_buy == '1'){
+    		alert('还未砍到最低价，请继续努力');
+    		return false;
+    	}
+        //判断登录
+        var id={$id};
+        $.post("{:U('Label/ZqCut/checkPhoneLogin')}",{'id':id},function(data){
+            if(data.status==1){
+                //如果是登录
+                $("#nextbuy").attr("data-type",1);
+                $("#directbuy").addClass("open");
+            }else{
+                /*
+                setTimeout(function(){
+                    $('#loadingBox').show();
+                },1);
+                setTimeout(function(){$('#loadingBox').hide();},1000);
+                setTimeout(function(){$(".loginForm").show();$(".loginForm").animate({top:"0%"},500);},1000);
+                setTimeout(function(){$(".dn-bg").show();},1000);
+                $("#jump_url").val("<?php echo 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];?>");*/
+                var surl = "<?php echo urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);?>";
+                location.href = "{:U('O2OLogin/index')}"+"&id="+{$id}+"&backcall=click"+"&surl="+surl;
+            }
+        },'json');
+    });
+    
+    $("#nextbuy").click(function(){
+        if($(this).hasClass("erro")){return false;}
+        $(this).addClass("erro");
+        $(this).text("提交中...");
+        var deli = $("input[name='delivery']:radio[checked]").val();
+        if($(this).attr("data-type")==1){
+            location.href = '{:U('Label/ZqCut/orderInfo',array('id'=>$id))}'+'&delivery='+deli;
+        }
+    });
+});
+function login_to(url){
+    var id={$id};
+    $.post("{:U('Label/ZqCut/checkPhoneLogin')}",{'id':id},function(data){
+        if(data.status==1){
+            link_to(url);
+        }else{
+            /*setTimeout(function(){
+                $('#loadingBox').show();
+            },1);
+            setTimeout(function(){$('#loadingBox').hide();},1000);
+            setTimeout(function(){$(".loginForm").show();$(".loginForm").animate({top:"0%"},500);},1000);
+            setTimeout(function(){$(".dn-bg").show();},1000);
+            $("#jump_url").val(url);
+            */
+            //var surl = "<?php echo urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);?>";
+            var surl = urlencode(url);
+            location.href = "{:U('O2OLogin/index')}"+"&id="+{$id}+"&surl="+surl;
+        }
+    },'json');
+}
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div class="mainTop">
+                <div class="flash">
+                    <div class="flash-img">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide"><img src="__UPLOAD__/<?php echo $goodsInfo['goods_image']?>" /></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="mainCon" class="mainCon fn">
+                <div class="pro">
+                    <div class="proMsg">
+                        <h1>{$goodsInfo['batch_name']}</h1>
+                        <div class="fn tl">{$goodsInfo['memo']|nl2br}</div>
+                        <p class="l"><em>￥</em><b id="price">{$totalCutedPrice}</b><span><if condition="$goodsInfo['market_price'] neq 0">市场价￥{$goodsInfo['market_price']}元</if></span></p>    
+                    </div> 
+                </div>
+                <if condition="$due eq '0'">
+                    <div class="purchase-msg"><i class="icon-time"></i><p>距离截止时间仅剩<span>{$day}天{$hour}小时</span></p></div>
+                <elseif  condition="$due eq '2'"/>
+                    <div class="purchase-msg"><i class="icon-time"></i><span>该商品已过期</span></div>
+                <elseif  condition="$due eq '1'"/>
+                    <div class="purchase-msg"><i class="icon-time"></i><span>该商品尚未开始可购买</span></div>
+                </if>
+                <div class="purchase-msg"><i class="icon-number"></i><p>已售<span>{$totalSaleNum}份</span><if condition="$goodsInfo['storage_num'] neq -1"><span class="ml40">&nbsp;</span>仅剩<span>{$goodsInfo['remain_num']}份</span></if></p></div>
+                <div class="pro">
+                <div class="proInfo fn">
+                        <?php echo htmlspecialchars_decode($goodsInfo['wap_info']);?>
+                </div>
+                <if condition="$goodsInfo['defined_one_name'] neq '1'">
+                    <div class="searchShop fn">
+                            <a href="javascript:void(0)">查看可用门店</a>
+                    </div>
+                </if>     
+                </div>
+                <div class="detailNav mt10">
+                    <a href="javascript:void(0)" onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$goodsInfo['node_id'],'id'=>$id))}')"><i class="icon-navOeder"></i><span>订单中心</span></a>
+                </div>
+                <div class="purchase-footer">
+                </div>
+            </div>
+        </div>
+        
+        <div class="proNav fn">
+            <if condition="$due eq '2'">
+                <a href="javascript:void(0);" class="btn-erro l">已过期</a>
+            <elseif condition="$due eq '1'"/>
+                <a href="javascript:void(0);" class="btn-erro">尚未开始</a>
+            <elseif condition="($goodsInfo['remain_num'] elt 0) and ($goodsInfo['storage_num'] neq -1)" />
+                <a href="javascript:void(0);" class="btn-erro">已售完</a>
+            <elseif condition="$isHelpCut"/>
+                <a href="{:U('Label/ZqCut/index',array(id=>$id))}" class="btn-ok l">我也要砍树</a>
+            <elseif condition="!$isHelpCut and $orderStatus eq '2'"/>
+                <a href="javascript:void(0);" class="btn-erro">您已购买</a>
+            <else />
+                <a href="javascript:void(0);" class="btn-ok l" id="buy">马上购买</a>
+            </if>
+            <a href="{:U('Label/ZqCut/index',array(id=>$id,wxid=>$wxid))}" class="btn-ok r">返回首页</a>
+            <!--点击购买或送礼后的div-->
+            <div id="directbuy" class="proPop">
+                <div class="proPopbg"></div>
+                <div class="proPopCon">
+                    <a href="javascript:void(0)" class="close" onclick="adressPopclose()">+</a>
+                    <div class="proPopName">
+                        <img src="__UPLOAD__/{$goodsInfo['goods_image']}" />
+                        <h4>{$goodsInfo['batch_name']}</h4>
+                        <p><em>￥</em><b id="endprice">{$totalCutedPrice}</b></p>
+                    </div>
+                    <div class="proPopNum">
+                        <div class="title">配送方式:</div>
+                        <div class="text">
+                            <?php
+                                if($goodsInfo['defined_one_name']=='0'){
+                            ?>
+                                <label><input type="radio" name="delivery" checked="checked" value="0"><a href="javascript:void(0)">自提</a></label>
+                            <?php
+                                }elseif($goodsInfo['defined_one_name']=='1'){
+                            ?>
+                                <label><input type="radio" name="delivery" checked="checked" value="1"><a href="javascript:void(0)">物流</a></label>
+                            <?php
+                                }else{                          
+                            ?>
+                                <label><input type="radio" name="delivery" checked="checked" value="0"><a href="javascript:void(0)">自提</a></label>
+                                <label><input type="radio" name="delivery" value="1"><a href="javascript:void(0)">物流</a></label>
+                            <?php
+                                }
+                            ?>
+                        </div>
+                    </div>
+                    <div class="proPopBtn">
+                        <a href="javascript:void(0)" class="btn-ok" id="nextbuy" data-type="1">下一步</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="searchShopCon">
+    <div class="searchShopHeader fn">
+        <div class="close"><i></i></div>
+        <div class="headerorder" onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"></div>
+        <div class="title">{$goodsInfo.batch_name}</div>
+    </div>
+    <div class="searchShopConList">
+        <volist name="storeList" id="vo"  key="k">
+            <dl <eq name="key" value="0">class="hover"</eq> >
+                    <dt>{$vo.store_name}</dt>
+                <dd>门店地址：{$vo.address}<br>门店热线：<a href="tel:{$vo.store_phone}">{$vo.store_phone}</a></dd>
+            </dl>
+        </volist>
+    </div>
+    <div class="detailNav fn">
+        <a href="javascript:void(0)" onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"><i class="icon-navOeder"></i><span>个人中心</span></a>
+    </div>
+</div>
+<include file="Public:pop"/>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    var isSupportTouch = "ontouchend" in document ? true : false;
+    var cantouch = "click";
+    if(isSupportTouch){cantouch = "touchstart";}else{cantouch = "click";}
+    
+    $("body").on(cantouch,".numInput .minus",function(){
+        var gdc=$("#goodcount").val();
+        if(!isNaN(gdc)&&gdc>1){
+            $("#goodcount").val(gdc-1);
+            $("em.erro").removeClass("erro");
+        }else{
+            $("em.erro").removeClass("erro");
+            $(".numInput .minus").addClass("erro");
+        }
+    });
+    $("body").on(cantouch,".numInput .add",function(){
+        var gdc=$("#goodcount").val();
+        var maxnum=parseInt($("#goodcount").attr("data-max"));
+        if(!isNaN(gdc)&&gdc<maxnum){
+            $("#goodcount").val(++gdc);
+            $("em.erro").removeClass("erro");
+        }else{
+            $("em.erro").removeClass("erro");
+            $(".numInput .add").addClass("erro");
+        }
+    });
+        $(".searchShop").click(function(){
+        $(".searchShopCon").addClass("open");
+        $("body").css("overflow","hidden");
+    });
+    $(".searchShopHeader .close").click(function(){
+        $(".searchShopCon").removeClass("open");
+        $("body").css("overflow","auto");
+    });
+    $(".searchShopConList dl").click(function(){
+        $(".searchShopConList dl").removeClass("hover");
+        $(this).addClass("hover");
+    });
+    $("#goodcount").change(function(){
+        var gdc=$(this).val();
+        var maxnum=parseInt($("#goodcount").attr("data-max"));
+        if(isNaN(gdc)){
+            $(this).val(1);
+            $("em.erro").removeClass("erro");
+            $(".numInput .minus").addClass("erro");
+        }else if(gdc>=maxnum){
+            $(this).val(maxnum);
+            $("em.erro").removeClass("erro");
+            $(".numInput .add").addClass("erro");
+        }else if(gdc<maxnum){
+            $("em.erro").removeClass("erro");
+        }
+    });
+    //获取cookie
+    var cookname = "bcall";
+    var bcall = "";
+    var msgcookie = document.cookie.split("; ");
+    for(var i=0;i<msgcookie.length;i++){
+        var arr=msgcookie[i].split("=");
+        if(arr[0]==cookname){
+            bcall = arr[1];
+        }
+    }
+    document.cookie = "bcall=none";
+    if( bcall == 'click'){
+        $('#buy').click();
+    }else if( bcall == 'gclick'){
+        $("#giftform").submit();
+        //$("#gift").click();
+    }
+});
+function adressPopclose(){
+    $("#directbuy").addClass("close");
+    $("#nextbuy").text("下一步");
+    $("#nextbuy").removeClass("erro");
+    setTimeout(function(){
+        $("#directbuy").removeClass("close");
+        $("#directbuy").removeClass("open");
+    },500)
+}
+</script>
+<eq name="show_menu" value="1">
+<script>
+var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Public/_hideWxMenu"/>
+</eq>
+<script id="skuHtml" type="text/html">
+{{each namelist as v}}
+<div class="proPopSku">
+    <div class="title">{{v.name}}:</div>
+    <div class="text">
+        {{each v.list as value i}}
+            <label><input type="radio" name="sku{{v.id}}" {{if i ==0 }}checked="checked"{{/if}} value="{{value.id}}"><a href="javascript:void(0)">{{value.val}}</a></label>
+        {{/each}}
+    </div>
+</div>
+{{/each}}
+</script>

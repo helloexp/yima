@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>编辑列表_营销活动中心_翼码旺财</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/Wactlist.css?v=__VR__" />
+
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Common.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/Wactlist.js?v=__VR__"/>
+<script type="text/javascript">
+$(document).ready(function(e){
+	addactlist();
+}); 
+</script>
+
+
+<script>
+String.prototype.replaceAll = function(reallyDo, replaceWith, ignoreCase) {
+if (!RegExp.prototype.isPrototypeOf(reallyDo)) {
+	return this.replace(new RegExp(reallyDo, (ignoreCase ? "gi": "g")), replaceWith);
+} else {
+	return this.replace(reallyDo, replaceWith);
+}
+};
+
+function addactivity(){
+	var html=
+		['<form action="" method="POST" name="theform" id="theform" enctype="multipart/form-data">',
+		'<div class="global-input4 fn"><ul><li class="global-input4-name">列表名称：</li>',
+		'<li class="global-input4-input"><input name="name" id="name" value="<?php echo $row['name'];?>"  type="text"/></li></ul>',
+		'<ul><li class="global-input4-name">商户名称：</li>',
+		'<li class="global-input4-input"><input name="webtitle" id="webtitle" value="<?php echo $row['node_name'];?>"  type="text"/></li>',
+		'</ul></div>',
+		'</form>'].join('');
+        
+        
+	art.dialog({
+		title:'编辑列表名',
+        lock: true,
+		content: html,
+		ok: function () {
+            if($('#name').val() == ''){
+                art.dialog('列表名称不能为空！');
+	            return false;
+            }
+            if($('#name').val().length > 20 ){
+                art.dialog('列表名称长度不能超过20！');
+	            return false;
+            }
+   
+    		$.post("{:U('LabelAdmin/List/editSubmit')}",{"name":$('#name').val(),"id":$('#id').val(),"webtitle":$('#webtitle').val()},function(data){
+                if(data.status==1){
+                     window.location.href=window.location.href;
+                }else{
+                     art.dialog(data.info);
+                     //window.location.href="{:U('LabelAdmin/List/edit?id')}"+$('#id').val();
+                }
+            },"json");
+         
+    	   return false;
+		},
+		cancelVal: '关闭',
+		cancel: true,
+		width:"400px",
+		padding:"10px"
+	});
+};
+
+ 
+    //删除记录
+  function delone(id){
+    if(id == ''){
+        art.dialog('参数错误！');
+        return false;
+    }
+    art.dialog.confirm('你确定要删除这条记录吗？', 
+    function () {
+        $.post("{:U('LabelAdmin/List/del')}",{"id":id},function(data){
+                if(data.status==1){
+                     window.location.href=window.location.href;
+                }else{
+                     art.dialog(data.info);
+                     
+                }
+            },"json");
+    }, 
+    function () {
+    	
+            art.dialog.close();
+    });
+    
+  }
+</script>
+</head>
+<body>
+<input type="hidden" id="id" name="id" value="<?php echo $row['id'];?>" />
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+					<include file="Home/MarketActive/leftMenu" leftmenuid="listnew" />
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4 class="bd-b-565656">列表模板-编辑</h4>
+                    </div>
+                    <div class="z oh msg-edit">
+                        <div class="l msg-preview">
+                            <div class="msg-item-wrapper" id="appmsg">
+                                <div class="msg-item multi-msg">
+                                    <div class="appmsgItem">
+                                        <div class="cover">
+                                            <p class="default-tip i-title" id="show_name"><?php echo $row['name'];?></p>
+                                            <ul class="sub-msg-opr">
+                                                <li class="sub-msg-opr-item">
+                                                    <a href="javascript:;" class="icon18 iconEdit" id="iconEdit-title" onclick="addactivity()">编辑</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="sub-add">
+                                    <a href="javascript:void(0);" class="sub-add-btn open" data-url="{:U('LabelAdmin/List/select',array('id'=>$id))}"><span class="sub-add-icon"></span>增加一条</a>
+                                    </div>
+                                    <?php if($result){
+                                    foreach($result as $v){   
+                                    ?>
+                                    <div class="rel sub-msg-item appmsgItem firstAppmsgItem">
+                                        <span class="thumb">
+                                         <?php if(empty($v['pic'])){?>
+                                            <span class="default-tip">缩略图</span>
+                                         <?php }else{?>
+                                            <img class="i-img" src="<?php echo get_upload_url($v['pic']);?>">
+                                         <?php }?>
+                                        </span>
+                                        <h5 class="msg-t">
+                                            <span class="i-title"><?php echo $v['name'];?></span>
+                                        </h5>
+                                        <h5 class="msg-c">
+                                            <span class="i-con"><?php echo $v['short_note'];?></span>
+                                        </h5>
+                                        <ul class="abs tc sub-msg-opr">
+                                        <li class="b-dib sub-msg-opr-item">
+                                                <a href="?g=LabelAdmin&m=List&a=Top&id=<?=$v['id']?>&list_id=<?=$v['list_id']?>&model=event&type=combination&customer=staff" class="icon18 iconMtop" title="置顶">置顶</a>
+                                            </li>
+                                            <li class="b-dib sub-msg-opr-item">
+                                                <a href="?g=LabelAdmin&m=List&a=up&id=<?=$v['id']?>&list_id=<?=$v['list_id']?>&model=event&type=combination&customer=staff" class="icon18 iconTop" title="上移">上移</a>
+                                            </li>
+                                            <li class="b-dib sub-msg-opr-item">
+                                                <a href="javascript:void(0);" class="icon18 iconEdit iconEdit-list open" data-url="<?php echo U('LabelAdmin/List/select',array('list_id'=>$v['id'],'id'=>$id));?>" title="编辑">编辑</a>
+                                            </li>
+                                            <li class="b-dib sub-msg-opr-item">
+                                                <a href="javascript:void(0);" class="icon18 iconDel" onclick="delone('<?php echo $v['id'];?>')" title="删除">删除</a>
+                                            </li>
+                                           
+                                            <li class="b-dib sub-msg-opr-item">
+                                                <a href="?g=LabelAdmin&m=List&a=dw&id=<?=$v['id']?>&list_id=<?=$v['list_id']?>&model=event&type=combination&customer=staff" class="icon18 iconDw" title="下移"">下移</a>
+                                            </li>
+                                            
+                                            <li class="b-dib sub-msg-opr-item">
+                                                <a href="?g=LabelAdmin&m=List&a=bot&id=<?=$v['id']?>&list_id=<?=$v['list_id']?>&model=event&type=combination&customer=staff" class="icon18 iconMbottom" title="置底">置底</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                   <?php }}?>
+                                </div>
+                                <div class="fn page pr20"><?php echo $page;?></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fn tc"><a href="<?php echo U('LabelAdmin/List/index');?>" class="btn-all w90">完成</a> <a href="<?php echo U('LabelAdmin/BindChannel/index','batch_type=8&batch_id='.$row['id']);?>" class="btn-all w90 ml20">发布到渠道</a></div>
+                 </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+$(".open").click(function(){
+		var openUrl = $(this).attr("data-url") || 'about:blank';
+		art.dialog.open(openUrl,{
+			id:"addAppMsg",
+			lock: true,
+			fixed:true,
+			title:"设置",
+			width:600,
+			height: '500px'
+			});
+	});
+
+
+</script>

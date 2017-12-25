@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_卡券领取码_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<script type="text/javascript">
+$(function(){
+	$('#search-btn').click(function(){
+        $('#search-btn').attr('disabled', true);
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在查询...</div>",fixed: true,padding:0});
+        $('#theform').submit();
+        var data = {
+            
+        };
+        /*
+        $.post("", data, function(data){
+            if(data.status ==1){
+                dialog.time(2).close();
+            }else{
+                dialog.time(2).close();
+            }
+
+        },'json');
+        */
+	});
+})
+</script>
+</head>
+<body>
+	<div id="wrapper" >
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+        <div id="container" >
+            <div id="main" class="rel">
+              <div class="sidenav">
+					<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="cardGeneration"/>
+                </div>
+
+                <div class="subcon">
+                	<div class="main-name fn">
+                        <h4>卡券领取码<a href="{:U('Weixin/Weixin/cardGenerationEdit')}" class="btn-add ml10"><i></i>批量制码</a></h4>
+                    </div>
+                    <div class="tipNormal">
+                        <span>为配合线下发放微信卡券的场景，商家可以提前将微信卡券生成二维码，下载使用。下载的二维码，一般可用于卡券的店内投放、海报投放和传单投放。消费者扫码后即可领取。</span>
+                    </div>
+                    <form action="{:U('Weixin/Weixin/cardGeneration')}" method="POST" name="theform" id="theform" class="mt15">
+                        <div class="SearchArea fn">
+                            <div class="SearchAreaLeft" style="margin-bottom:0;">
+                            <label>
+                            <span>活动名称</span>
+                            <input type="text" name="hdname" />
+                            </label>
+                            <label>
+                            <span>卡券名称</span>
+                            <input type="text" name="cardname" />
+                            </label>
+                            <label>
+                            <span>备注</span>
+                            <input type="text" name="remarks" />
+                            </label>
+                            <label>
+                            <span>生成状态</span>
+                            <select name="generationStatus" id="generationStatus">
+                                <option value="">全部</option>
+                                <option value="3" class="">成功</option>
+                                <option value="2" class="">失败</option>
+                                <option value="1" class="">生成中</option>
+                                <option value="0" class="">未处理</option>
+                            </select>
+                            </label>
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="search-btn">查询</a>
+                            </div>
+                        </div>
+                    </form>
+                    <table cellpadding="0" cellspacing="0" class="W-table mt15">
+                        <tbody>
+                        <tr class="th">
+                        <th>批次名称</th>
+                        <th>卡券名称</th>
+                        <th>卡券有效期</th>
+                        <th>投放数（领取数）</th>
+                        <th>备注</th>
+                        <th>生成状态</th>
+                        <th>操作</th>
+                        </tr>
+                        <volist name="showData" id="vo">
+                            <tr class="title">
+                                <td>{$vo.batch_desc}</td>
+                                <td>{$vo.goods_name}</td>
+                                <td>{$vo.date_begin_timestamp} 到 {$vo.date_end_timestamp}</td>
+                                <td>{$vo.total_count} ( {$vo.get_stat_num} )</td>
+                                <td>{$vo.print_text}</td>
+                                <td>
+                                    <if condition="$vo['status'] eq 3"> <span  class="greenfont">成功 ( {$vo.percent} )</span>
+                                        <elseif condition="$vo['status'] eq 2"/> <span  class="redfont">失败 ( {$vo.percent} )</span>
+                                        <elseif condition="$vo['status'] eq 1" /> 生成中 ( {$vo.percent} )
+                                        <else /> 未处理 
+                                    </if>
+                                </td>
+                                <td>
+                                    <if condition="$vo['status'] eq 3">
+                                        <a href={$vo.file_name} class="js_download" data-id="{$val['id']}">下载二维码</a>
+                                    </if>
+                                    <a href="javascript:void(0)" class="js_viewDetail" data-id={$vo.batch_id}>详情</a>
+                                </td>
+                            </tr>
+                        </volist>
+
+<!--                        <tr class="title">
+                            <td>2.12摇奖活动</td>
+                            <td>10元代金券</td>
+                            <td>2016-01-12 到 2016-01-28</td>
+                            <td>200（100）</td>
+                            <td>1号门店</td>
+                            <td><span class="greenfont">成功（100%）</span></td>
+                            <td><a href="javascript:void(0)" class="js_download" data-id="{$val['id']}">下载二维码</a><a href="javascript:void(0)" class="js_viewDetail" data-id="{$val['id']}">详情</a></td>
+                        </tr>
+                        <tr class="title">
+                            <td>2.12摇奖活动</td>
+                            <td>10元代金券</td>
+                            <td>2016-01-12 到 2016-01-28</td>
+                            <td>200（0）</td>
+                            <td>1号门店</td>
+                            <td><span class="redfont">失败（50%）</span></td>
+                            <td><a href="javascript:void(0)" class="js_viewDetail" data-id="{$val['id']}">详情</a></td>
+                        </tr>
+                        <tr class="title">
+                            <td>2.12摇奖活动</td>
+                            <td>10元代金券</td>
+                            <td>2016-01-12 到 2016-01-28</td>
+                            <td>200（0）</td>
+                            <td>1号门店</td>
+                            <td>生成中（50%）</td>
+                            <td><a href="javascript:void(0)" class="js_viewDetail" data-id="{$val['id']}">详情</a></td>
+                        </tr>-->
+
+                        <empty name="showData">
+                            <tr>
+                                <td colspan="7">
+                                    <div class="nonedata"></div>
+                                </td>
+                            </tr>
+                        </empty>
+                        </tbody>
+                    </table>
+                    <div class="page">{$page}</div>
+                </div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	$(".js_viewDetail").click(function(e) {
+		var id = $(this).attr("data-id");
+		art.dialog.open("{:U('Weixin/Weixin/card_staticDetail')}&id="+id,{
+			title: "详情",
+			width:500,
+            ok:false,
+            okval:'下载粉丝数据'
+		})
+		
+    });
+	
+	$(".js_del").click(function(e) {
+        var id = $(this).attr('data-id')
+        $.post("{:U('hongbaoStaticDel')}",{id:id},function(data){
+            if (data.status == 1){
+                Diasucceed("删除成功！");
+                reload();
+            }else{
+                Diaerror("删除失败")
+            }
+        },'json')
+    });
+})
+</script>

@@ -1,0 +1,824 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>关键词自动回复_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<style type="text/css">
+.etList{ min-height: inherit; margin-top:15px;}
+.emotion_editor_wrp{ width: 440px; }
+.emotion_editor .edit_area{height: 80px;}
+.btnArea{ position:relative; width:auto; background:none;}
+.ivrSettingPage .detail .operator{ height:40px; line-height:40px; padding-bottom:0;}
+.tool_area {
+    padding: 10px 20px 10px 0; font-size:14px;
+}
+
+.overview_keywords_list li {
+    display: inline-block;
+    vertical-align: top;
+    line-height: 24px;
+    height: 24px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    background-color: #e5e7ec;
+    padding: 0 .5em;
+}
+.overview_keywords_list .keywords_name {
+    display: inline-block;
+    width: auto;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-wrap: normal;
+    max-width: 265px;
+    font-weight: 400;
+    font-style: normal;
+}
+.overview_keywords_list .btn_del {
+    margin-left: 5px;
+    margin-top: -0.2em;
+    line-height: 999px;
+    overflow: hidden;
+    background: url("__PUBLIC__/Image/weixin2/base_z21b651.png") 0 -6075px no-repeat;
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    display: inline-block;
+    vertical-align: 5px;
+}
+</style>
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script type="text/javascript">
+
+function selectActivityCallback(d){
+    //选择互动模块的回调
+
+    var currentForm = $(".addAppActivity").closest(".ruleItemEditing").find(".replyList");
+    var addbox = template('activityresp', d);
+    currentForm.find(".replyItems").append(addbox);
+	$(".actTitle").html(d.name);
+	$("#activityid").val(d.batch_id);
+
+}
+
+//选择卡券的回调
+function cardresp(d){
+    var addbox = template('cardresp', d);
+	var $this = $(".addAppCard");
+    var currentForm = $(".addAppCard").closest(".ruleItemEditing").find(".replyList");
+    currentForm.find(".replyItems").append(addbox);
+	$(".cardInfo").css("background",d.cardbg);
+	$(".cardInfo span").html(d.shopname);
+	$('.adShow_l img').attr("src",d.logo_url);
+	$('.cardtitle').html(d.goods_name);
+    if(d.date_type == 1){
+        var da = new Date(d.date_begin_timestamp*1000);
+        var year = da.getFullYear();
+        var month = da.getMonth()+1;
+        var date = da.getDate();
+        var da2 = new Date(d.date_end_timestamp*1000);
+        var year2 = da2.getFullYear();
+        var month2 = da2.getMonth()+1;
+        var date2 = da2.getDate();
+        var valDate = '有效期：'+[year,month,date].join('-')+'至'+[year2,month2,date2].join('-')
+    }else{
+        var valDate = '发送卡券后'+d.date_fixed_begin_timestamp+'天开始使用-发送卡券后'+d.date_fixed_timestamp+'天结束使用'
+    }
+	$('.AstaticDate').html(valDate);
+	$("#cardid").val(d.card_id);
+	$("#respid").val(d.id);
+	$(".totalNum").html(d.quantity);
+	$(".remainNum").html(d.quantity - d.card_get_num);
+	var card_num = parseInt(d.quantity - d.card_get_num);
+	var cid = d.id;
+
+}
+
+//选择回调函数
+var selectcallback = function(mid,mdata){
+	if(!mid) return false;
+	//计算图文数量
+	var countInfo = function(obj){
+		var txtNum = $(obj).find(".replyItems li.replyWords").length;
+		var imgNum = $(obj).find(".replyItems li.replyImages").length;
+		$(".wordsCnt",obj).text(txtNum);
+		$(".appMsgCnt",obj).text(imgNum);
+	}
+	var currentForm = art.dialog.data("currentForm");
+	var addid=$(currentForm).find(".replyItems li").length;  //写入 name=name+addid
+	if(addid<1){
+		var data = {
+			title:mdata.material_title,
+			img_url:mdata.img_url,
+			material_link:mdata.material_link,
+			material_id:mdata.id
+		};
+		var addbox = template('tpl_item', data);
+		$(currentForm).find(".replyItems").append(addbox);
+		countInfo(currentForm);
+	}else{
+		Diaerror("最多添加1条信息");
+	}
+}
+$(document).ready(function(e){
+	unfold();
+	pickup();
+	listItemNew();
+	matchMode();
+	Editor();
+	change();
+	editArea();
+
+    $("body").on("click",".addStorage",function(e) {
+        var card_num = $(".remainNum").html();
+        var remainNums =100000 - card_num;
+        var id= $("#respid").val();
+        art.dialog({
+            title: '补充库存',
+            content: "<div class='popupWin'><p class='DiaTitle'>请输入卡券增加的库存量（还能添加<em class='remainNums redfont'>"+remainNums+"</em>张）</p><input type='text' maxlength='6' name='Storage' id='addStorage' class='DiaInput'></div>",
+            id: 'art_addnum',
+            ok: function() {
+                var addNum = $('#addStorage').val();
+                var totalNum = parseInt($(".totalNum").html()) + parseInt($(".DiaInput").val());
+                var remainNum = parseInt($(".remainNum").html()) + parseInt($(".DiaInput").val());
+                if((addNum > remainNums) || (!/^[1-9]{1}[0-9]{0,5}$/.test(addNum))){
+                    Diaerror('数量格式错误！区间为1至'+remainNums);
+                    return false;
+                }
+                $.post("{:U('Weixin/WeixinCard/addStorageNum')}", {
+                    id: id,
+                    addNum: addNum
+                }, function(resp) {
+                    //库存添加成功
+                    if (resp.status == 1) {
+                       Diasucceed("库存变更成功！");
+                       $(".totalNum").html(totalNum);
+                       $(".remainNum").html(remainNum);
+                    }else{
+                        Diasucceed(resp.info);
+                    }
+                }, 'json');
+            },
+            cancel: true,
+            lock: true
+        });
+    });
+	$(".addWords").click(function(){
+		var currentForm = $(this).closest(".replyList");
+		var addid=currentForm.find(".replyItems li").length;
+		var currentClass = $("input[name='respClass[]']").val();
+		if(currentClass != 0 ){
+			if(addid>=1){Diaerror("最多添加1条信息");return false;}
+		}
+		
+		var uthis = $(this);
+		var toAppendObj = uthis.closest(".replyList").find(".replyItems").find(".replyWords").find(".wordContent");
+		var txtContent = toAppendObj.html();
+    	var data = {txtContent};
+		var keywordsContent = template("tpl_addwords", data);
+		art.dialog({
+			content:keywordsContent,
+			title:"添加文本",
+			width:800,
+			okVal:"确认",
+			ok:function(){
+				var txtContent = $(".js_editorTxt").val();
+				if(txtContent ==''){
+					Diaerror("请输入文本");
+					art_close();
+					$(".js_editorTxt").focus();
+					return false;
+				}
+				if(txtContent.length>300){
+					Diaerror("内容超出字数限制");
+					return false;
+				}
+				toAppendObj.html(txtContent);
+				$("textarea[name='wordContent[]']").val(txtContent);
+
+				var currentForm = uthis.closest(".replyList");
+				var data = {txtContent:txtContent};
+				var addbox = template('tpl_txt', data);
+				currentForm.find(".replyItems").append(addbox);
+
+			},
+			cancelVal:"取消",
+			cancel:true
+		})
+		$(".js_editorTxt").focus();
+	})
+
+	//编辑文本信息
+	$("body").on("click",".keywordEditor",function(){
+		var uthis = $(this);
+		var toAppendObj = uthis.closest(".replyBtn").prev(".contentWrap").find(".wordContent");
+		var txtContent = toAppendObj.html();
+		console.log(txtContent);
+		var data = {txtContent};
+		var keywordsContent = template("tpl_addwords", data);
+		art.dialog({
+			content:keywordsContent,
+			title:"添加文本",
+			width:800,
+			okVal:"确认",
+			ok:function(){
+				var inputContent = $(".js_editorTxt").val();
+				console.log(inputContent);
+				if(inputContent ==''){
+					Diaerror("请输入文本");
+					art_close();
+					$(".js_editorTxt").focus();
+					return false;
+				}
+				if(inputContent.length>300){
+					Diaerror("内容超出字数限制");
+					return false;
+				}
+				toAppendObj.html(inputContent);
+				$("textarea[name='wordContent[]']").val(inputContent);
+			},
+			cancelVal:"取消",
+			cancel:true
+		})
+		$(".js_editorTxt").focus();
+	})
+	
+	//选择图片
+	$(".addAppImg").click(function(){
+		var currentForm = $(this).closest(".replyList");
+		var addid=currentForm.find(".replyItems li").length;
+		if(addid>=1){Diaerror("最多添加1条信息");return false;}
+        var opt = {
+            cropPresets:'720x400',
+            callback:function(data){
+				var data = {src:data.src};
+				var addbox = template('tpl_img', data);
+				currentForm.find(".replyItems").append(addbox);
+            }
+        };
+        open_img_uploader(opt);
+    });
+	
+	//选择卡券
+	$(".addAppCard").click(function(){
+		var currentForm = $(this).closest(".replyList");
+		var addid=currentForm.find(".replyItems li").length;
+		if(addid>=1){Diaerror("最多添加1条信息");return false;}
+		art.dialog.open("{:U('Common/SelectJp/index')}&callback=cardresp&show_source=3&store_mode=2",{
+			title: '添加卡券',
+			width:800
+		});
+
+        
+    });
+	
+	//选择卡券
+	$(".addAppActivity").click(function(){
+		var currentForm = $(this).closest(".replyList");
+		var addid=currentForm.find(".replyItems li").length;
+		if(addid>=1){Diaerror("最多添加1条信息");return false;}
+		art.dialog.open("{:U('LabelAdmin/SelectBatches/index')}&callback=selectActivityCallback",{
+			title: '添加互动模块',
+			width:800
+		});
+        
+    });
+	
+	//启用停用自定义菜单
+$("#btn_warn_stop").click(function(){
+var dialog = art.dialog({
+    title: '温馨提示',
+    content: '<h4>操作确认</h4><p>关闭自动回复之后，将立即对所有用户生效。确认关闭？</p>',
+    width: '722px',
+    button: [{
+    	name: '确认',
+        callback:function (){},
+        focus: true
+    }]
+});
+
+dialog.button(
+    {
+        name: '取消',
+        callback: function () {},
+        disabled: true
+    }
+)
+});
+	//处理按钮事件
+	$(".saveRule").click(function(){
+		var currentForm = $(this).closest("form");
+		//表单内容校验
+		if(!check_form(currentForm)){
+			return false;
+		}
+		if($("input[name='keywordStr[]']",currentForm).length==0){
+			Diaerror("请添加至少一条关键词");
+			return false;
+		}
+		if($("input[name='respClass[]']",currentForm).length==0){
+			Diaerror("请添加一条回复内容");
+			return false;
+		}
+		var formData = getFormData(currentForm);
+		var dialog = art.dialog({title:false,lock:true});
+		var actionUrl = currentForm.attr("action");
+		$.post(actionUrl,formData,function(d){
+			dialog.close();
+			Diasucceed(d.info);
+			window.location.reload();
+		},'json');
+	});
+
+	//删除按钮
+	$(".delRule").click(function(){
+		var currentForm = $(this).closest("form");
+		var msgId = $("input[name='msgId']",currentForm).val();
+		if(!msgId){
+			//$(this).closest("#listItemNew").removeClass("ruleItemEditing");
+			window.location.reload();
+			return false;
+		}
+		if(!confirm("确定要删除吗？")){
+			return false;
+		}
+		var formData = {
+			actType:"delete",
+			msgId:msgId
+		};
+		var dialog = art.dialog({title:false,lock:true});
+		var actionUrl = currentForm.attr("action");
+		$.post(actionUrl,formData,function(d){
+			alert(d.info);
+			window.location.reload();
+		},'json');
+	});
+});
+</script>
+<!-- 以下是artTemplate模板变量 -->
+<!--文本-->
+<script id="tpl_txt" type="text/html">
+<li class="item float-p replyWords">
+    <div class="contentWrap l">
+        <input type="hidden" name="respClass[]" value="0">
+        <div class="wordContent">{{txtContent}}</div>
+        <div class="wordContent-input" style="display:none">
+        <textarea type="text" maxlength="300" name="wordContent[]" jscheckrule="null=0" jschecktitle="文字回复">{{txtContent}}</textarea></div>
+        
+    </div>
+    <div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><a href="javascript:;" class="keywordEditor" title="编辑">编辑</a><button class="delReply btnGreenS" title="删除">删除</button></div>
+</li>
+</script>
+
+<!-- 选择的图片信息 -->
+<script id="tpl_img" type="text/html">
+<li class="item float-p replyAppMsg">
+	<div class="contentWrap l">
+		<div class="l fileInfo">
+            <!--<input type="checkBox" name="replycheckbox" class="l replycheckbox"/>-->
+            <!-- <input type="hidden" name="respId[]" value=""/> -->
+			<input type="hidden" name="respClass[]" value="3">
+			<input type="hidden" name="wordContent[]" value="{{src}}">
+			<div class="appmsgImgArea">
+				<img src="{{src}}"/>
+			</div>
+			<div class="appmsgContentArea">
+				<a href="" target="_blank">[&nbsp;图片消息&nbsp;]</a>
+			</div>
+			<div class="cl"></div>
+		</div>
+	<div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><button class="delReply btnGreenS" title="删除">删除</button></div>
+	</div>
+</li>
+</script>
+<!-- 选择的图文信息 -->
+<script id="tpl_item" type="text/html">
+<li class="item float-p replyImages">
+	<!--<input type="checkBox" name="replycheckbox" class="l replycheckbox"/>-->
+	<!-- <input type="hidden" name="respId[]" value=""/> -->
+	<input type="hidden" name="wordContent[]" value="{{material_id}}"/>
+	<input type="hidden" name="respClass[]" value="1"/>
+	<div class="contentWrap l ">
+		<div class="l fileInfo">
+			<div class="appmsgImgArea">
+				<img src="{{img_url}}"/>
+			</div>
+			<div class="appmsgContentArea">
+				<a target="_blank" href="{{material_link}}">[&nbsp;图文消息&nbsp;]</a><br>
+				{{title}}
+			</div>
+			<div class="cl"></div>
+		</div>
+	<div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><button class="delReply btnGreenS" title="删除">删除</button></div>
+	</div>
+</li>
+</script>
+
+<!-- 选择的卡券信息 -->
+
+<script type="text/html" id="cardresp">
+<li class="item float-p replycard">
+	<!-- <input type="hidden" name="respId[]" value=""/> -->
+	<input type="hidden" name="wordContent[]" value="{{card_id}}"/>
+	<input type="hidden" name="respClass[]" value="4"/>
+	<div class="contentWrap l ">
+		<div class="l fileInfo">
+		<div class="award_list">
+		<dl>
+		<dd>
+			<p class="adward_title">
+				<strong class="cardtitle">{{goods_name}}</strong>
+				<span>
+				<a href="javascript:void(0)" class="addStorage">补充库存</a>
+				</span>
+			</p>
+			<div class="adShow">
+				<div class="adShow_l shinfo">
+					<img src="{{goods_image_url}}">
+				</div>
+				<div class="adShow_r">
+					<span class="Astatic">总投入数量<em class="totalNum">{{quantity}}</em></span>
+					<span class="Astatic">剩余数量<em class="remainNum">{{remain_num}}</em></span>
+				</div>
+				<div class="cl pt5"></div>
+				<p class="AstaticDate tip" style="text-align:left">有效期：{{$respText['time']}}</p>
+			</div>
+		</dd>
+		</dl>
+		</div>
+		</div>
+	<div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><button class="delReply btnGreenS" title="删除">删除</button></div>
+	</div>
+</li>
+</script>
+
+<script type="text/html" id="activityresp">
+<li class="item float-p replyactivity">
+	<!-- <input type="hidden" name="respId[]" value=""/> -->
+	<input type="hidden" name="wordContent[]" value="{{batch_id}}"/>
+	<input type="hidden" name="respClass[]" value="5"/>
+	<div class="contentWrap l ">
+		<div class="l fileInfo">
+			<div class="actAdded">
+				<div class="actTitle"></div>
+				<div class="actOpr"><a href="">点击参与</a></div>
+			</div>
+		</div>
+		<div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><button class="delReply btnGreenS" title="删除">删除</button></div>
+	</div>
+</li>
+</script>
+
+<!-- 添加关键词 -->
+<script id="tpl_addkeywords" type="text/html">
+<div class="emotion_editor_wrp" id="Js_textEditor">
+<div class="emotion_editor">
+    <textarea class="edit_area js_editorArea" id="js_editorArea" maxlength="30" style="outline:none; border:0; width:398px; overflow-y: auto; overflow-x: hidden;" onkeyup="check_lenght(30,'name_text',this);"></textarea>
+    <div class="editor_toolbar">      
+        <!--<p class="editor_tip opr_tips">按下Shift+Enter键换行</p>-->
+        <p class="editor_tip js_editorTip" id="name_text">还可以输入<em>30</em>字</p>
+    </div>
+</div>
+
+<div class="tool_area"><p class="tips">输入回车可添加多个关键字，每个关键字少于30个字符</p></div>
+<ul class="overview_keywords_list" id="Js_editorKeywordList"></ul>
+</div>
+</script>
+
+<!-- 添加文本 -->
+<script id="tpl_addwords" type="text/html">
+<div class="emotion_editor_wrp" style="width:auto" id="Js_textEditor">
+<div class="emotion_editor">
+    <textarea class="edit_area js_editorTxt" name="msgText" maxlength="300" style="outline:none; border:0; width:698px; height:300px; overflow-y: auto; overflow-x: hidden;" onkeyup="check_lenght(300,'name_text',this);">{{txtContent}}</textarea>
+    <div class="editor_toolbar">
+        <p class="editor_tip js_editorTip" id="name_text">还可以输入<em>300</em>字</p>
+    </div>
+</div>
+</div>
+</script>
+</head>
+
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+        <div id="container" >
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+					<php>
+					if($respType == '0'){
+						$leftmenuid = 'btjzdhh';
+					}
+					else{
+						$leftmenuid = 'xxzdhh';
+					}
+					</php>
+					<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="zdhf"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                    <h4><a href="http://www.wangcaio2o.com/index.php?m=Help&a=helpDetails&newsId=1256&classId=45" class="r" target="_blank"><span style="font-size:14px ;"><i class="allAsk mr5" style="margin-top:0;"></i>自动回复帮助说明</span></a>关键字自动回复<a href="javascript:;" class="btn-add first listItemNew"><i></i>添加规则</a></h4>
+                    </div>
+                    <div class=" icon_wrap icon_small border">
+                    
+                    <div class="msg-libs">
+                        <div class="content_wrap" id="div_replyContent" style="">        
+                            <div class="section_tab">                
+                            <ul class="tab_navs">                    
+                            <li class="tab_nav"><a href="{:U('Weixin/WeixinResp/index')}">关注自动回复</a></li>
+                            <li class="tab_nav"><a href="{:U('Weixin/WeixinResp/msg')}">消息自动回复</a></li>                   
+                            <li class="tab_nav selected"><a href="{:U('Weixin/WeixinResp/keywords')}">关键字自动回复</a></li>
+                            <li class="tab_nav no_extra "><a href="{:U('Weixin/WeixinLocation/index')}">微信智能导航</a></li>
+                            </ul>            
+                            </div>            
+                            
+                            <div class="ivrSettingPage">
+                                <div id="ivrSettingArea" class="settingArea">
+                                    <ul id="listContainer">
+                                    <?php if(!$msgListData[0]){?>
+                                     	<div class="nodata">
+                                            <img src="__PUBLIC__/Image/member/nodata.gif" style="border:0">
+                                            <div>空空如也，您可以<a href="javascript:void();" class="btnGrayS listItemNew txtKeywordsAdd">添加规则</a></div>
+                                            
+                                        </div>
+                                        <?php } ?>
+                                     <volist name="msgListData" id="msgInfo">
+                                        <li id="listItemNew" class="ruleItem <?php echo $key==='add'?'none ruleItemEditing':''?>">
+                                         <form action="{:U('Weixin/WeixinResp/keywordsSubmit')}" onsubmit="return false;">
+                                            <div class="title">
+                                                <div class="l">
+                                                    <h5 style="margin:0"><span>{$msgInfo['title']|default_nvl=新规则}</span>
+                                                    &nbsp;<span class="n headerRuleName" style=" vertical-align:middle">{$msgInfo['message_name']}</span>
+                                                    </h5>
+                                                </div>
+                                                <div class="r">
+                                                    <a class="unfold" href="javascript:;">编辑</a>
+                                                    <a class="pickup" href="javascript:;">收起</a>
+                                                </div>
+                                                <div class="cl"></div>
+                                            </div>
+                                            <nheq name="key" value="add">
+                                                <div class="settingPre">
+                                                    <div class="preBox">
+                                                        <label>关键词</label>
+                                                        <ul class="items keywordsPre">
+                                                         <volist name="msgInfo['msgKeywords']" id="voKey">
+                                                            <li class="item">{$voKey['key_words']}</li>
+                                                         </volist>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="preBox">
+                                                        <label>回复</label>
+                                                        <p class="items replyPre">
+                                                            <span class="replyCnt">{$msgInfo['replyCnt']}</span>条 （<span class="wordsCnt">{$msgInfo['wordsCnt']}</span>条文字，<span class="fileCnt">{$msgInfo['appMsgCnt']}</span>个图文，<span class="appMsgCnt">{$msgInfo['picCnt']}</span>条图片，<span class="appactCnt">{$msgInfo['activeCnt']}</span>条互动模块）
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </nheq>
+                                            <div class="detail">
+                                                <div class="cLine ruleNameWrap">
+                                                    <label>&bull; 规则名<input type="text" value="{$msgInfo['message_name']}" class="txtInput ruleName" name="ruleName" maxlength="60" jscheckrule="null=0" jschecktitle="规则名"/></label><span class="c-g9 pl10" style="font-size:12px">规则名最多60个字</span>
+                                                </div>
+                                                <div class="float-p">
+                                                    <div class="l keywordsList">
+                                                        <div class="cLine header">
+                                                            <span class="left">&bull; 关键字</span> <button class="addKeyword btnGrayS r js_addkeywords">添加关键字</button>
+                                                        </div>
+                                                        <ul class="keywordItems">
+                                                       <!-- <li class="item" style="text-align:center"><a href="javscript:void(0)" class="js_addkeywords">请添加关键词</a></li>-->
+                                                         <volist name="msgInfo['msgKeywords']" id="voKey">
+                                                            <li class="item float-p">
+                                                                <!--<input type="checkBox" class="l keywordcheckbox"/>-->
+                                                                <input type="hidden" name="kwdId[]" value="{$voKey['id']}"/>
+                                                                <div class="val l">{$voKey['key_words']}</div>
+                                                               
+                                                                <input type="text" name="keywordStr[]" class="val-input l" value="{$voKey['key_words']}" style="display:none;" maxlength="20" jscheckrule="null=0" jschecktitle="关键词">
+                                                                
+                                                                <button class="delKeyword btnGreenS r">删除</button>
+                                                                <a href="javascript:;" class="keywordEditor r">编辑</a>
+                                                                <label class="c-gA matchMode r">全匹配</label>
+                                                                <input type="hidden" name="matchMode[]" class="matchMode-input" value="{$voKey['match_type']|default_nvl='0'}">
+                                                            </li>
+                                                         </volist>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="replyList">
+                                                        <div class="cLine header">
+                                                            <p class="left">&bull; 回复</p>
+                                                            <label class="r"><!-- <input class="allReply" type="checkBox">发送全部回复--></label>
+                                                        </div>
+                                                        <div class="btnArea float-p">
+                                                            <a href="javascript:;"><button class="addWords btnAdd c-opr">文字</button></a>
+                                                            <a href="javascript:;"><button class="addAppMsg btnAdd c-opr" data-url="{:U('Weixin/WeixinResp/selectImgTxt',array('callback'=>'selectcallback'))}">图文</button></a>
+                                                            <a href="javascript:;"><button class="addAppImg btnAdd c-opr">图片</button></a>
+                                                            <a href="javascript:;"><button class="addAppActivity btnAdd c-opr">互动模块</button></a>
+                                                        </div>
+                                                        <ul class="replyItems showWords showFile showAppMsg">
+                                                          <volist name="msgInfo['msgResponse']" id="voRespContent">
+                                                          <input type="hidden" name="respId[]" value="{$voRespContent['id']}"/>
+                                                            <php>if(1 == $voRespContent['response_class']){</php>
+                                                            <!--图文信息-->
+                                                            <li class="item float-p replyAppMsg">
+                                                                <div class="contentWrap l">
+                                                                    <div class="l fileInfo">
+                                                                        
+                                                                        <input type="hidden" name="wordContent[]" value='{$voRespContent['response_info']}'/>
+                                                                        <input type="hidden" name="respClass[]" value="1">
+                                                                        <div class="appmsgImgArea">
+                                                                            <img src="{$voRespContent['material_img_url']}"/>
+                                                                        </div>
+                                                                        <div class="appmsgContentArea">
+                                                                            <a href="" target="_blank">[&nbsp;图文消息&nbsp;]</a><br />
+                                                                            {$voRespContent['material_title']}
+                                                                        </div>
+                                                                        <div class="cl"></div>
+                                                                    <div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><button class="delReply btnGreenS">删除</button></div>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                            </li>
+                                                            <php>}elseif(0 == $voRespContent['response_class']){</php>
+                                                            <!--文字-->
+                                                            <li class="item float-p replyWords">
+                                                                <div class="contentWrap l">
+                                                                    <!-- <input type="hidden" name="respId[]" value="{$voRespContent['id']}"/> -->
+                                                                    <input type="hidden" name="respClass[]" value="0">
+                                                                    <div class="wordContent">
+                                                                    {$voRespContent['response_info']}</div>
+                                                                    <div class="wordContent-input" style="display:none">
+                                                                    <textarea type="text" maxlength="300"  name="wordContent[]" jscheckrule="null=0" jschecktitle="文字回复">{$voRespContent['response_info']}</textarea></div>
+                                                                    
+                                                                </div>
+                                                                <div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><a href="javascript:;" class="keywordEditor" title="编辑">编辑</a><button class="delReply btnGreenS" title="删除">删除</button></div>
+                                                            </li>
+                                                            <php>}elseif(3 == $voRespContent['response_class']){</php>
+                                                            <!--图片-->
+                                                            <li class="item float-p replyAppMsg">
+                                                                <div class="contentWrap l">
+                                                                    <div class="l fileInfo">
+                                                                        <!-- <input type="hidden" name="respId[]" value="{$voRespContent['id']}"/> -->
+                                                                        <input type="hidden" name="wordContent[]" value='{$voRespContent['response_info']}'/>
+                                                                        <input type="hidden" name="respClass[]" value="1">
+                                                                        <div class="appmsgImgArea">
+                                                                            <img src="{$voRespContent['response_info']}"/>
+                                                                        </div>
+                                                                        <div class="appmsgContentArea">
+                                                                            <a href="" target="_blank">[&nbsp;图片消息&nbsp;]</a>
+                                                                        </div>
+                                                                <div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><button class="delReply btnGreenS" title="删除">删除</button></div>
+                                                                        <div class="cl"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                            <php>}elseif(4 == $voRespContent['response_class']){</php>
+                                                            <!--卡券-->
+                                                            <li class="item float-p replycard">
+                                                                <div class="contentWrap l">
+                                                                    <div class="l fileInfo">
+                                                                        <!-- <input type="hidden" name="respId[]" value="{$voRespContent['id']}"/> -->
+                                                                        <input type="hidden" name="wordContent[]" value="{$voRespContent['response_info']}"/>
+                                                                        <input type="hidden" name="respClass[]" value="4">
+                                                                        <div class="award_list">
+                                                                            <dl>
+                                                                            <dd>
+                                                                                <p class="adward_title">
+                                                                                    <strong class="cardtitle">{$voRespContent[0]['goods_name']}</strong>
+                                                                                    <span>
+                                                                                    <a href="javascript:void(0)" class="addStorage">补充库存</a>
+                                                                                    </span>
+                                                                                </p>
+                                                                                <div class="adShow">
+                                                                                    <div class="adShow_l shinfo">
+                                                                                        <img src="{$voRespContent[0]['logo_url']}">
+                                                                                    </div>
+                                                                                    <div class="adShow_r">
+                                                                                        <span class="Astatic">总投入数量 <em class="totalNum">{$voRespContent[0]['quantity']}</em></span>
+                                                                                        <span class="Astatic">剩余数量 <em class="remainNum">{$voRespContent[0]['quantity'] - $voRespContent[0]['card_get_num']}</em></span>
+                                                                                    </div>
+                                                                                    <div class="cl pt5"></div>
+                                                                                    <p class="AstaticDate tip" style="text-align:left">有效期：{$voRespContent[0]['time']}</p>
+                                                                                </div>
+                                                                                <input type="hidden" id="material_id_selected" value="card">
+                                                                                <input type="hidden" value="{$voRespContent[0]['card_id']}" name="cardid" id="cardid">
+                                                                                <input type="hidden" value="{$voRespContent[0]['id']}" name="respid" id="respid">
+                                                                            </dd>
+                                                                            </dl>
+                                                                        </div>
+                                                                        <div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><button class="delReply btnGreenS" title="删除">删除</button></div>
+                                                                        <div class="cl"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                            <php>}elseif(5 == $voRespContent['response_class']){</php>
+                                                            <!--互动模块-->
+                                                            <li class="item float-p replyactivity">
+                                                                <div class="contentWrap l">
+                                                                    <div class="l fileInfo">
+                                                                        <!-- <input type="hidden" name="respId[]" value="{$voRespContent['id']}"/> -->
+                                                                        <input type="hidden" name="wordContent[]" value="{$voRespContent['batch_id']}"/>
+                                                                        <input type="hidden" name="respClass[]" value="5">
+                                                                        <div class="actAdded">
+                                                                            <div class="actTitle">{$voRespContent['response_info'][0]}</div>
+                                                                            <div class="actOpr">{$voRespContent['response_info'][1]}</div>
+                                                                        </div>
+                                                                <div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><button class="delReply btnGreenS" title="删除">删除</button></div>
+                                                                        <div class="cl"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                            <php>}elseif(undefined == $voRespContent['response_class']){</php>
+                                                            <li class="item float-p replyWords">
+                                                                <div class="contentWrap l">
+                                                                    <!-- <input type="hidden" name="respId[]" value="{$voRespContent['id']}"/> -->
+                                                                    <input type="hidden" name="respClass[]" value="0">
+                                                                    <div class="wordContent">{$voRespContent['response_info']}</div>
+                                                                    <div class="wordContent-input" style="display:block">
+                                                                    <textarea type="text" maxlength="300" name="wordContent[]" jscheckrule="null=0" jschecktitle="文字回复">{$voRespContent['response_info']}</textarea></div>
+                                                                    
+                                                                </div>
+                                                                <div class="replyBtn" style="text-align:right; position:absolute; top:0; right:0;"><a href="javascript:;" class="keywordEditor" title="编辑">编辑</a><button class="delReply btnGreenS" title="删除">删除</button></div>
+                                                            </li>
+                                                            <php>}</php>
+                                                          </volist>
+                                                            <!--图片-->
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div class="btnArea operator DiabtnCon">
+                                                    <input type="hidden" name="actType" value="{$msgInfo['actType']}"/>
+                                                    <input type="hidden" name="msgId" value="{$msgInfo['message_id']}"/>
+                                                    <button class="delRule r btn-all-del" type="button">删除</button>
+                                                    <button class="saveRule r btn-all" type="button">保存</button>
+                                                </div>
+                                            </div>
+                                         </form>
+                                        </li>
+                                     </volist>
+                                    </ul>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                 </div>
+            	</div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>
+<script>
+    $(function(){
+        $("body").on("keydown",".js_editorArea",function(e) {  
+           var keywordContent = $(".js_editorArea").val();
+           var keywordItem = '<li data-content="'+ keywordContent +'"><em class="keywords_name" data-content="'+ keywordContent +'">'+ keywordContent +'</em><a href="javascript:;" class="btn_del Js_temp_item_close">X</a></li>';  
+            // 回车键事件 
+            if(e.keyCode==13) {
+                if(keywordContent==""){
+                    Diaerror("请输入关键字");
+					$(this).focus();
+                    return false;
+                }
+                else{
+                    $("#Js_editorKeywordList").append(keywordItem);
+                    setTimeout(function(){
+						$(".js_editorArea").val("");
+					},100);
+					$(this).focus();
+                }
+           }             
+       }); 
+        $("body").on("click",".Js_temp_item_close",function(){
+            $(this).closest("li").remove();
+        })
+    })
+</script>
+
+<script>
+    $(function(){
+        $("body").on("click",".txtKeywordsAdd",function(){
+            $(this).parents(".nodata").hide();
+        })
+    })
+</script>

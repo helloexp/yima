@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店分析_翼码旺财</title>
+<load href="__PUBLIC__/Css/main.css"/>
+<load href="__PUBLIC__/Css/layout.css"/>
+<load href="__PUBLIC__/Css/module.css"/>
+<load href="__PUBLIC__/Css/Wcanal.css"/>
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js"/>
+<js href="__PUBLIC__/Js/global.js"/>
+<load href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<load href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js"/>
+<js href="__PUBLIC__/Js/highcharts.js"/>
+<script type="text/javascript" src="http://widget.renren.com/js/rrshare.js"></script>
+<script src="http://qzonestyle.gtimg.cn/qzone/app/qzlike/qzopensl.js#jsdate=20111201" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+//数据源
+var charData = {:json_encode($query_list)};
+
+//计算销量饼图数据
+var charDataSend = [];
+//计算访问量柱状图 X 坐标名
+var charDataColumnName = [];
+
+//计算销量柱状图 X 坐标值
+var charDataSendColumnValue = [];
+
+for(var i in charData){
+  charDataColumnName.push(charData[i]['store_name']);
+    charDataSend.push([charData[i]['store_name'],charData[i]['order_num']*1]);
+    charDataSendColumnValue.push(charData[i]['order_num']*1);
+}
+var chart;
+$(document).ready(function() {
+   chart = new Highcharts.Chart({
+      chart: {
+         renderTo: 'chart_2'
+      },
+      title: {
+         text: '销量占比分析'
+      },
+      plotArea: {
+         shadow: null,
+         borderWidth: null,
+         backgroundColor: null
+      },
+      tooltip: {
+         formatter: function() {
+            return '<b>'+ this.point.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 1) +'% ('+
+                         Highcharts.numberFormat(this.y, 0, ',') +' 个)';
+         }
+      },
+      plotOptions: {
+         pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+               enabled: true,
+               formatter: function() {
+                  if (this.percentage > 4) return this.point.name;
+               },
+               color: '',
+               style: {
+                  font: '13px Trebuchet MS, Verdana, sans-serif'
+               }
+            }
+         }
+      },
+      legend: {
+         backgroundColor: '#FFFFFF',
+         x: 0,
+         y: -30
+      },
+      credits: {
+          enabled: false
+      },
+       series: [{
+         type: 'pie',
+         name: 'Browser share',
+         data: charDataSend
+        }]
+   });
+   
+   //柱状图
+   $('#chart_column').highcharts({
+       chart: {
+           type: 'column'
+       },
+       title: {
+           text: '销量占比分析'
+       },
+       subtitle: {
+           text: ''
+       },
+       xAxis: {
+         categories: charDataColumnName
+       },
+       yAxis: {
+           min: 0,
+           title: {
+               text: ''
+           }
+       },
+       tooltip: {
+           valueSuffix: ' 个'
+       },
+       plotOptions: {
+           column: {
+               pointPadding: 0.2,
+               borderWidth: 0
+           }
+       },
+       series: [ {
+           name: '销量',
+           data: charDataSendColumnValue
+
+       }]
+   });
+   $(".searchs").click(function(){
+    $(".searchForm").submit();
+  })
+   $(".searchTime").click(function(){
+    var begin_date=$("[name='begin_date']").val();
+    var end_date=$("[name='end_date']").val();
+    var batch_type=$("[name='batch_type']").val();
+    var order_store_id=$(this).attr("data-id");
+    var url="{:U('Ecshop/O2OHot/storeClickStat')}&begin_date="+begin_date+"&end_date="+end_date+"&order_store_id="+order_store_id+"&batch_type="+batch_type;
+    $(this).attr('href',url);
+   })
+});
+</script>
+
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <!--开始引入头部菜单-->                   
+            <include file="Shop/nav" navmenuid="Navshop"/>       
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <include file="Shop/menu" leftmenuid="mdfx"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>{$batch_name}-门店分析</h4>
+                    </div>
+                    <div id="Wcanal-tabon" class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover"><a href="javascript:void(0)">饼状图</a></p>
+                            <p><a href="javascript:void(0)">柱状图</a></p>
+                        </div>
+                        <div class="SearchArea fn">
+                          <form method="post" action="{:U('storeChart')}" class="searchForm">
+                              <input type="hidden" name="batch_type" value="{$batch_type}"/>
+                              <div class="SearchAreaLeft">
+                              <label>
+                              <span>日期</span>
+                              <input name="begin_date" value="{$_post['begin_date']}" type="text"  onClick="WdatePicker()" class="textbox w100"/>-<input name="end_date" type="text" value="{$_post['end_date']}" onClick="WdatePicker()" class="textbox w100"/></label>
+                             </div>
+                             <div class="SearchAreaRight">
+                              <a href="javascript:void(0);" class="searchBtn searchs">查询</a>
+                              </div>
+                          </form>
+                        </div>
+                        <div class="Wcanal-tab-list db fn">
+                            <div id="chart_2" style="height:350px; width: 400px; padding-top:10px;"><!-- 中奖饼图--></div>
+                        </div>
+                        <div class="Wcanal-tab-list dn fn">
+                            <div class="l" id="chart_column" style=" width:830px;"></div>
+                        </div>
+                    </div>
+                    <div class="cl"></div>
+                    <div class="fn-clear fn mt20">
+                        <table cellpadding="0" cellspacing="0" class="W-table">
+                            <tr>
+                                <th>所属门店</th>
+                                <th>销量</th>
+                            </tr>
+                            <php>
+                                $empty = '<td colspan="2">无数据</td>';
+                            </php>
+                            <volist name="query_list" id="v" empty="$empty">
+                            <tr>
+                                <td>{$v.store_name}</td>
+                                <td><a class="searchTime" data-id="{$v['order_store_id']}" href="javascript:void">{$v.order_num}</a></td>
+                            </tr>
+                           </volist>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

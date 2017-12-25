@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>我的微信卡券-卡券中心</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+$(document).ready(function(e) { 
+    $("#search").click(function(){
+        $("form").submit();
+    });
+});
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" /> 
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="wxkq"/>  
+        </div>
+
+        
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                    <include file="WangcaiPc/NumGoods/tabMenu" leftmenuid="WeixinCard"/>                  
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>使用中<a class="btn-add first" href="{:U('QQ/WeixinCard/add')}"><i></i>添加微信卡券</a><a class="btn-add" href="{:U('Weibo/WeiboCard/add')}"><i></i>添加微博卡券</a></h4>
+                    </div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-title fn">
+                        <p class="Wcanal-tab-hover"><a href="{:U('QQ/WeixinCard/index')}">微信卡券(<span class="redfont">{$count}</span>)</a></p>
+                        <p><a href="{:U('Weibo/WeiboCard/index')}">微博卡券(<span class="redfont">20</span>)</a></p>
+                        </div>
+                        <div class="Wcanal-tab-list" style=" display:block; float:none; width:100%; margin-top:15px;">
+                        <div class="SearchArea fn" style="margin-top:0">
+                    <form action="{:U('QQ/WeixinCard/index')}" method="post">
+                    <div class="SearchAreaLeft">
+                    <label>
+                    <span>卡券名称</span>
+                    <input type="text" name="card_name" value="{$Think.request.card_name}" />
+                    </label>
+                    
+                    <label>
+                    <span>卡券状态</span>
+                        <select name="auth_flag" id="auth_flag">
+                            <option value="">全部</option>
+                            {:show_arr_opt($authFlag, I('auth_flag'))}
+                        </select>
+                    </label>
+                    
+                    <label>
+                    <span>使用方式</span>
+                        <select name="store_mode" id="">
+                            <option value="">全部</option>
+                            {:show_arr_opt($storeMode, I('store_mode'))}
+                        </select>
+                    </label>
+                    </div>
+                    <div class="SearchAreaRight">
+                    <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                    </div>
+                    </form>
+                    
+                    </div>
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                    <tr class="th">
+                    <th>卡券类型</th>
+                    <th>卡券名称</th>
+                    <th>使用方式</th>
+                    <th>卡券有效期</th>
+                    <th>卡券状态</th>
+                    <th>剩余库存</th>
+                    <th>操作</th>
+                    </tr>
+                    <empty name="list" >
+                            <tr class="info">
+                                <td colspan="10" class="last">
+                                    <div class="nonedata"></div>
+                                </td>
+                            </tr>
+                    </empty>
+                    <volist name="list" id="vo">
+                    <tr>
+                        <td>{$cardType[$vo['card_type']]}</td>
+                        <td>{$vo['title']}</td>
+                        <td>{$storeMode[$vo['store_mode']]}</td>
+                        <td><?php if($vo['date_type']=='1'){echo date('Y-m-d',$vo['date_begin_timestamp']).'到'.date('Y-m-d',$vo['date_end_timestamp']);}else{echo '领取后'.$vo['date_fixed_begin_timestamp'].'天生效'.$vo['date_fixed_timestamp'].'天有效';}?></td>
+                        <td>{$authFlag[$vo['auth_flag']]}</td>
+                        <td><?php echo $vo['quantity'] - $vo['card_get_num']?></td>
+                        <td>
+                            <if condition="($vo.auth_flag eq $auth_valid) AND ($vo.store_mode eq 1)">
+                                <a href="{:U('QQ/WeixinCard/cardSendAdd',array('c_id'=>$vo['id']))}" class="ml10">通过微信助手投放</a>
+                            </if>
+                            <a href="javascript:void(0);" class="addStorage ml10" onclick="addStorageNum('{$vo.id}', this, '{$vo['quantity'] - $vo['card_get_num']}')">补充库存</a>
+                            <a href="{:U('QQ/WeixinCard/cardDetail',array('id'=>$vo['id']))}" class="ml10">详情</a>
+                        </td>
+                    </tr>
+                    </volist> 
+                    </table>
+                        </div>
+                        <div>{$page}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+function addStorageNum(id, obj, card_num) {
+    var remainNums =100000 - card_num;
+    art.dialog({
+        title: '补充库存',
+        content: "<div class='popupWin'><p class='DiaTitle'>请输入卡券增加的库存量（还能添加<em class='remainNums redfont'>"+remainNums+"</em>张）</p><input type='text' maxlength='6' name='Storage' id='addStorage' class='DiaInput'></div>",
+        id: 'art_addnum',
+        ok: function() {
+            var addNum = $('#addStorage').val();
+            if((addNum > remainNums) || (!/^[1-9]{1}[0-9]{0,5}$/.test(addNum))){
+                alert('数量格式错误！区间为1至'+remainNums);
+                return false;
+            }
+            $.post('/index.php?g=WangcaiPc&m=NumGoods&a=addStorageNum', {
+                id: id,
+                addNum: addNum,
+                addType:1
+            }, function(resp) {
+                alert(resp.info);
+                //库存添加成功
+                if (resp.status == 1) {
+                   $(obj).parent().prev().html(parseInt(card_num) + parseInt(addNum));
+                   $('.aui_close').click();
+                }
+            }, 'json');
+
+            return false;
+        },
+        cancel: true,
+        lock: true
+    });
+}
+
+</script>

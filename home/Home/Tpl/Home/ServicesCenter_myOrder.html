@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>我的订单_账户中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Wcanal.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<style>
+#Succeed {
+    width: 100%;
+    padding-left: 0;
+    box-sizing: border-box;
+    margin: 0;
+}
+#orderKeywords{
+	width:150px;
+}
+</style>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                 <div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <include file="Home/AccountCenter/menu" leftmenuid="myOrder"/>
+                </div>
+                <div class="subcon">
+                    <div class="main-name fn">
+                        <h4>我的订单</h4>
+                    </div>
+                    <div class="SearchArea fn">
+                        <form method="post" action="" id="theform">
+                            <div class="SearchAreaLeft">
+                              <label><span>关键词</span><input name="orderKeywords" id="orderKeywords" type="text" value="{$orderKeywords}" /></label>
+                              <label><span>支付时间</span>
+							  <input name="start_time_pay_order" id="start_time_pay_order" type="text" value="{$start_time_pay_order}" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time_pay_order\\')}'})"> - 
+							  <input name="end_time_pay_order" id="end_time_pay_order" type="text" value="{$end_time_pay_order}" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time_pay_order\\')}'})"></label>
+                              <label>
+                              <span>订单类型</span>
+                              <select name="order_type">
+                              	<option value="">全部</option>
+                                <option value="3" <if condition="$order_type eq '3'">selected="selected"</if> >申请终端</option>
+                                <option value="5" <if condition="$order_type eq '5'">selected="selected"</if> >在线签约</option>
+                                <option value="6" <if condition="$order_type eq '6'">selected="selected"</if> >多米收单</option>
+                              	<option value="1" <if condition="$order_type eq '1'">selected="selected"</if> >开通多乐互动</option>
+                              </select>
+                              </label>
+                              <label>
+                              <span>订单状态</span>
+                              <select name="pay_status">
+                              	<option value="">全部</option>
+                              	<option value="0" <if condition="$pay_status eq '0'">selected="selected"</if> >待支付</option>
+                                <option value="1" <if condition="$pay_status eq '1'">selected="selected"</if>>已支付</option>
+                                <option value="2" <if condition="$pay_status eq '2'">selected="selected"</if>>已取消</option>
+                              </select>
+                              </label>
+                              </div>
+                            <div class="SearchAreaRight">   
+								<input class="searchBtn" type="submit" value="查询"/>
+                            </div>
+                        </form>
+                    </div>
+                    <table cellpadding="0" cellspacing="0" class="W-table">
+                        <tbody>
+                        <tr class="th">
+                            <th>订单编号</th>
+                            <th>支付时间</th>
+                            <th>订单类型</th>
+                            <th>订单金额（元）</th>
+                            <th>订单状态</th>
+                            <th>操作</th>
+                        </tr>
+                        <volist name="orderList" id="order">
+                        <tr class="hover">
+                            <td>{$order['order_number']}</td>
+                            <td>{$order['pay_time']|default="-----"}</td>
+                            <td>{$order['order_type_name']}</td>
+                            <td>{$order['amount']}</td>
+                            <td>{$order['pay_status_name']}</td>
+                            <td>
+                                <a href="javascript:void(0);" class="js_view" data-orderid="{$order['id']}">详情</a>
+                            <if condition="$order['pay_status'] eq '0' or $order['pay_status'] eq '3'">
+                                <a href="javascript:void()" data-orderid="{$order['id']}" class="js_repayTip">付款</a><br/>
+                                <a href="javascript:void()" data-orderid="{$order['id']}" class="js_cancel_order">取消订单</a>
+                            </if>
+                            </td>
+                        </tr>
+						</volist>
+						<empty name="orderList">
+                        <tr>
+                            <td colspan="6">
+                                <div class="nonedata"></div>
+                            </td>
+                        </tr>
+                        </empty>
+                        </tbody>
+                    </table>
+                    <div class="page">{$page}</div>
+                </div>   
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+
+<div class="setting2 dn">
+	<div id="Succeed">
+        <div class="succeed_icon"><img src="__PUBLIC__/Image/start_icon.png"></div>
+        <div class="succeed_content">
+            <dl>
+                <dt>此订单您已付款成功！</dt>
+                <dd>您可继续为其他订单付款。</dd>
+            </dl>
+            <div><a href="" class="Diabtn-all">确定</a></div>
+        </div>
+        
+    </div>
+</div>
+</body>
+</html>
+<script>
+var detailDialog;
+$(document).ready(function(){
+	$('.js_view').click(function(){
+		var orderId = $(this).attr('data-orderid');
+		var data = {orderId:orderId};
+        window.location.href="{:U('Home/ServicesCenter/myOrderDetail')}"+"&orderId="+orderId;
+	});
+	
+	$(".js_repayTip").click(function(e) {
+		var orderId = $(this).attr('data-orderid');
+        $.ajax({
+            type:'POST',
+            data:{orderId:orderId},
+            url:"{:U('Home/ServicesCenter/checkOrderExpiry')}",
+            dataType:'json',
+            success:function(data){
+                if(data.status == '0')
+                {
+                    art.dialog.alert(data.info);
+                    return false;
+                }else{
+                    window.location.href=("{:U('Home/ServicesCenter/goCashier')}"+"&orderId="+orderId);
+                }
+            }
+        });
+        return false;
+    });
+    $(".js_cancel_order").click(function(){
+        var orderId = $(this).attr('data-orderid');
+        var dialog;
+        art.dialog.confirm('您确定取消该订单吗？',function(){
+            $.ajax({
+                type:'POST',
+                data:{orderId:orderId},
+                url:"{:U('Home/ServicesCenter/cancelOrder')}",
+                dataType:'json',
+                beforeSend:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1')
+                    {
+                        dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                        window.location.reload();
+                        return false;
+                    }else{
+                        dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                        return false;
+                    }
+                }
+            });
+        });
+        return false;
+    });
+})
+function closeDialog() {
+	detailDialog.close();
+}
+</script>

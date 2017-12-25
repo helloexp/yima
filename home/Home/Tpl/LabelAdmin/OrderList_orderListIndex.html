@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>创建新渠道_营销推广渠道_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css"/>
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css"/>
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<style type="text/css">
+  .filter_order{margin:0px 0px;padding:0px 10px;line-height:26px;height:26px;min-width:28px}
+  .download_bt,.upload_bt{text-align:center;width:600px;}
+  .post_type {font-size:12px;line-height:18px;padding-top:4px;color:#ed3f41;padding-left:155px;height:18px}
+   .btn-disable,.btn-disable:hover,.btn-all-del,.btn-all-del.Diabtnauto{margin:0 7.5px}
+   #upload_order:hover,#upload_order:focus{border:none}
+   .go_upload{position:fixed;right:55px;z-index:1000000;bottom:18px}
+</style>
+</head>
+<body>
+<div class="Wcanal-tab fn">
+    <div class="DiatipsCon" style="margin-bottom:0px">
+            <p>您可提前下载待配送订单列表，按照列表格式录入“物流公司”和“物流
+                单号”信息即可。物流公司名称必须匹配系统物流公司名称。如您需要查找物流公司名称，可下载<a href="{:U('OrderList/downLoad?fileType=expressCompanyList')}">《物流公司列表》</a>查询。</p>
+            <p>请上传 .CSV格式的文件，最大支持2M。</p>
+    </div>
+	<!-- 筛选订单 -->
+	<div class="Gform fn">
+      <form id="theform" class="filter_form">
+	     <div class="Gtitle" style="width:525px">筛选订单</div>
+        <ul>
+            <li class="Gname">商品货号</li>
+            <li class="Ginput"><input type="text" name="produce_code filter_input" id="produce_code" value="" placeholder="请输入您的商品货号！"></li>
+        </ul>
+		<ul>
+            <li class="Gname">运单状态	</li>
+            <li class="Ginput">
+			  <select name="order_status" id="order_status" class="order_status filter_input">
+					<option value="1">未配置</option>
+                    <option value="2">已配置</option>
+					<option value="3">全部</option>
+			  </select>
+			</li>
+        </ul>
+        <ul>
+            <li class="Gname">下单时间</li>
+            <li class="Ginput"> 
+                <input type="text" name="start_time" id="start_time" class="filter_input" onClick="WdatePicker({dateFmt:'yyyyMMdd',maxDate:'#F{$dp.$D(\\'end_time\\')}'})"  style="width:84px"> - <input type="text" name="end_time" id="end_time" class="filter_input"  onClick="WdatePicker({dateFmt:'yyyyMMdd',minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time|dateformat='Ymd'}" style="width:84px">
+			</li>
+        </ul>
+		<ul style="margin:0px 0px 15px 0px;">
+		  <li class="Ginput"><a href="javascript:void(0);" class="btn-add filter_order">筛选</a><span class="result red ml15"></span></li>
+		</ul>
+		<div class="download_bt DiabtnCon">
+		  <div class="rel" style="height:100%">
+			  <a id="download" class='btn-disable' href="javascript:void(0)">下载订单</a><span>111</span>
+			 
+		  </div>
+		</div>
+		 <a href="javascript:void(0)" class="go_upload">已经配置了运单信息马上上传！</a>
+     </form>
+    </div> 
+	<!-- 录入订单信息 -->
+	<div class="Gform fn dn upLoad_form">
+        <form action="{:U('OrderList/upLoad')}" method="POST" enctype="multipart/form-data" id="thef2">
+	     <div class="Gtitle" style="width:525px">录入运单信息 </div>
+        <ul>
+           <li class="Gname">上传文件</li>
+           <li class="Ginput">
+                <div class="Gchoose">
+                   <input type="text" name="staff" id="staff" value="">
+                   <a href="javascript:void(0)" class="txt"></a>
+                   <a href="javascript:void(0)" class="Gbtn-papers" title="录入运单信息">
+                   <i><input type="file" name="myFile" id="myFiles"></i></a>
+                </div>
+            </li>
+            <p class="post_type"><span></span></p>
+        </ul>
+		<div class="upload_bt DiabtnCon">
+			<input type="submit" class='Diabtn-all' id="upload_order"  value="上传">
+			<a href="javascript:void(0)" class="btn-all-del go_back">返回</a>
+		</div>
+       </form>
+    </div>
+	
+</div>
+<script type="text/javascript">
+  $(function(){
+     //筛选订单
+    $(".filter_order").click(function(){
+		var produce_code = $("#produce_code").val();
+		var order_status = $("#order_status").val();
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+        $.ajax({
+            type: "POST",
+            dataType:"json",
+            url: "{:U('OrderList/orderTime')}",
+            data:{"produce_code":produce_code,"order_status":order_status,"start_time":start_time,"end_time":end_time},
+            timeout:3000,
+            success:function(data){
+                var list_num="已筛选出"+data+"笔订单";
+                $(".result").html(list_num);
+                if(data > 0){
+                    $("#download").addClass("Diabtn-all");
+                    $("#download").removeClass("btn-disable");
+                }else{
+				    $("#download").addClass("btn-disable");
+                    $("#download").removeClass("Diabtn-all");
+				}
+            }
+        } )
+	 });
+	 //下载订单
+	 $("#download").on("click", function () {
+            if($(this).hasClass("btn-disable")){
+			   return false;
+			}
+            $.ajax({
+                type: "POST",
+                url:"{:U('OrderList/downLoadOrderList')}",
+                dataType: 'json',
+                success: function (result) {
+                if(result != ''){
+                    var finishedUrl = "{:U('OrderList/downLoad?fileType=pendingDispatchOrderList&fileStatus=')}"+result;
+                    location.href = finishedUrl;
+               }
+            }
+           });
+           return true;
+      });
+	  
+	  $(".go_upload").on("click",function(){
+	       $(".filter_form").hide();
+	       $(".upLoad_form").show();
+	  });
+	  
+	  $(".go_back").click(function(){
+		   $(".filter_form").show();
+	       $(".upLoad_form").hide();
+	  });
+	  
+	   function getCookie(name) {
+           var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+           if(arr=document.cookie.match(reg)){
+                return unescape(arr[2]);
+            }else{
+               return null;
+          }
+		}
+	   //上传文件
+       $("#upload_order").click(function () {
+		         var rew = getCookie("filesize");
+                 if($(this).hasClass("Diabtn-all-del")){
+                        return false;
+                  }else{
+                    var filepath = $(".Ginput .txt").text();
+                    var extStart = filepath.lastIndexOf(".");
+                    var ext = filepath.substring(extStart, filepath.length).toUpperCase();
+					if(filepath=="") {
+					   $(".post_type span").text("请添加您的上传文件！");
+					   return false;
+					}else if (ext.trim() != ".CSV"){
+                       $(".post_type span").text("请上传.csv格式的文件");
+                       return false;
+                    }
+                    var fileId = "myFiles";
+                        var dom = document.getElementById(fileId);
+                        var fileSize =  dom.files[0].size;
+                        if(fileSize == rew){
+                           $(".post_type span").text("请完成运单信息的录入再上传文件");
+                           return false;
+                   }
+				}
+         })
+
+  })
+</script>
+</body>
+</html>

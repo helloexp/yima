@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>已供货的采购需求_卡券_翼码旺财</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+function statusChange(id){
+    art.dialog.confirm("您确定删除该供货采购需求吗?",function(){
+        $.post("{:U('WangcaiPc/NumGoods/delSell')}",{"id":id},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+function showmsg(tel,email,name,mes){ 
+    var activaty =['<div class="global-input4 fn w1">', 
+    '<ul><li class="global-input4-name">&nbsp;联系电话：</li><li class="global-input4-input"><p>'+tel+'</p></li></ul>', 
+    '<ul><li class="global-input4-name">&nbsp;联系邮箱：</li><li class="global-input4-input"><p>'+email+'</p></li></ul>', 
+    '<ul><li class="global-input4-name">&nbsp;联系人：</li><li class="global-input4-input"><p>'+name+'</p></li></ul>', 
+    '<ul><li class="global-input4-name">&nbsp;留言：</li><li class="global-input4-input"><p>'+mes+'</p></li></ul>', 
+    '</div>'].join(''); 
+    art.dialog({ 
+        title:"预约内容", 
+        width:600,
+        content: activaty, 
+    }); 
+} 
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="index.php?g=WangcaiPc&m=NumGoods&a=numGoodsList">卡券</a></p>
+                            <p>></p>
+                            <p>已供货的采购需求</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="WangcaiPc/NumGoods/leftMenu" leftmenuid="ghcgxq"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">已供货的采购需求</h4>
+                    </div>
+                    <div class="purchaseList fn mt-10">
+                        <ul class="purchaseList-ul">
+                            <!--采购列表 10个-->
+                            <?php if(!empty($list)){
+                                    foreach($list as $k=>$val){
+
+                                    $now=date('Y-m-d');
+                                    $end_time=$val['end_time'];
+                                    $day=floor((strtotime($end_time)-strtotime($now))/86400);
+                                    if($day<0){
+                                        $day="已过期";
+                                    }else{
+                                        $day=$day."天";
+                                    }
+                            ?>
+                            <li>
+                                <h3 class="purchaseList-name"><p class="r"><?php echo $val['node_name'];?>&nbsp;<?php echo date('Y-m-d',strtotime($val['add_time']));?></p><a href="{:U('Hall/Index/demand_detail','demand_id='.$val['id'])}" target="_blank"><?php echo $val['demand_desc']?></a></h3>
+                                <div class="purchaseList-txt"><p class="purchaseList-endtime">金额:<span>￥<?php echo $val['amount'];?></span></p></div>
+                                    <div class="purchaseList-txt"><p class="purchaseList-endtime">距离截止时间还有:<span><?php echo $day;?></span></p></div>
+                                <div class="purchaseList-txt">
+                                    <div class="purchaseList-city">
+                                        要求卡券可兑换城市:
+                                        <?php
+                                                $map['demand_id'] = $val['id'];
+
+                                                if($val['limit_city_flag']!='1'){
+                                                
+                                                    $city_list=M()->table('tnode_demand_city A')->field('A.demand_id,A.city_code,B.city')->join('tcity_code B ON A.city_code=B.city_code and B.city_level="2"')->where($map)->select();
+                                                    $j=0;
+                                                    $count=count($city_list);
+                                                    if(!empty($city_list)){
+                                                        foreach($city_list as $ck=>$cal){                                                   
+                                                            if($ck<1){                                                  
+                                        ?>
+                                        <span><?php echo $cal['city']; ?></span>
+                                        <?php
+                                        }else{  
+                                            if($j==0){
+                                        ?>
+                                        <div class="purchaseList-morecity">
+                                            <p>更多</p>
+                                            <div class="cityList">
+                                        <?php                                                                           
+                                        }                                           
+                                        ?>
+                                        <span><?php echo $cal['city']; ?></span>
+                                        <?php if($ck==$count-1){?></div></div><?php }?>
+                                            <?php 
+                                                        $j++;   
+                                                            }
+
+                                                        }
+                                                    }
+                                                }
+                                            ?>
+                                    </div>
+                                </div>
+                                <div class="purchaseList-txt fn">
+                                    <div class="purchaseList-hot">热度:<span><?php echo $val['visit_num']?></span></div>
+                                    <div class="ml50 purchaseList-collect">供货商户:<span><?php echo $val['reply_num']?></span></div>
+                                </div>
+                                <div class="purchaseList-opr">
+                                    <a href="<?php echo U('Hall/Index/demand_detail',array('demand_id'=>$val['id']));?>" target="_blank">查看采购详情</a>
+                                    <a href="javascript:void(0)" onclick="showmsg('{$val[rtel]}','{$val[remail]}','{$val[rlinkman]}','{$val[rremark]}');" class="mt20">查看供货信息</a>
+                                    <a href="javascript:void(0)" onclick="statusChange('<?php echo $val['rid']?>')" class="ml30">删除</a>
+                                </div>
+                            </li>
+                            <!--采购列表end-->
+                            <?php
+                                    }
+                                }
+                            ?>
+                        </ul>
+                    </div>
+                    <!--分页-->                       
+                        <div class="pageBase-sm mt20">
+                            <ul class="pageul">{$page}</ul>
+                        </div>
+                    <!--分页end-->
+                </div>
+             </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

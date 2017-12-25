@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>挂机旺财</title>
+     <link rel="shortcut icon" href="__PUBLIC__/Image/Onhook/favicon.ico">
+	<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+	<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" /> 
+	<link href="__PUBLIC__/Css/Onhook.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/angularjs/angular.js?v=__VR__"></script>
+</head>
+<body>
+<include file="Fj114/Public/header"/> 
+
+<div class="container fn">
+
+        <include file="Fj114/Public/leftmenu" leftmenuid="fssz"/>  
+    
+	<div class="container-right">
+        <div class="main-name">
+            <h4 >发送设置<a href="javascript:void(0)" class="btn-add first newsend"><i></i>新增发送</a></h4>
+        </div>
+        <div class="tipNormal">
+            <p>设置卡券的下发时间，在指定时间段内该卡券自动跟随挂机短信下发</p>
+       </div>
+        <table class="W-table mt15">
+            <tr>
+                <th>时段设置</th>
+                <th>发送卡券</th>
+                <th>操作</th>
+            </tr>
+            <volist name='codeList' id='codeItem'>
+                <if condition="$codeItem['type'] eq '2'">
+                    <tr>
+                        <td>
+                            <span class="start">默认时段</span></td>
+                            <td>{$codeItem['goods_name']}</td>
+                            <td><a href="javascript:void(0)" class="modify" data-val="defaults" card="{$codeItem['id']}" goods="{$codeItem['g_id']}">修改设置</a>
+                        </td>
+                    </tr>
+                <else />
+                <tr>
+                    <td>
+                        <span class="start">{:dateformat($codeItem['start_time'], 'Y-m-d')}</span>至<span class="end">{:dateformat($codeItem['end_time'], 'Y-m-d')}</span></td>
+                        <td>{$codeItem['goods_name']}</td>
+                        <td><a href="javascript:void(0)" class="del" data-val="defaults" card="{$codeItem['id']}" goods="{$codeItem['g_id']}">删除</a>
+                    </td>
+                </tr>
+                </if>
+            </volist>
+        </table>
+    </div>
+</div>
+
+<div class="haobai-footer">
+  <include file="WangcaiPc/onHook/Footer"/>    
+</div> 
+</body>	
+</html>
+<script>
+$(function(){
+    //发送设置
+    function setSendCode(){
+        var startTime = $('input[name=startTime]').val();
+        var endTime = $('input[name=endTime]').val();
+        var goodNum = $('#cardCode').val();
+        $.post("{:U('Fj114/UserCode/codeSendSet')}",{'startTime':startTime, 'endTime':endTime, 'goodNum':goodNum},function(data){
+            data = eval("("+data+")");
+            if(data['resultCode'] == '0'){
+                location.reload();
+            }else{
+                art.dialog({
+                    content: data['resultTxt'],
+                    time: 3,
+                    height: '40px',
+                    close: function () {
+                    }
+                });
+            }
+        });
+    }
+    
+    $('.del').click(function(){
+        var listId = $(this).attr('card');
+        var goods = $(this).attr('goods');
+        art.dialog({
+        title:'删除发送设置',
+        content:'确认删除发送设置',
+        width:500,
+        padding:0,
+        ok:function(){
+            $.post("{:U('Fj114/UserCode/delSendList')}", {'listId':listId, 'goods':goods}, function(result){
+                if(result['error'] == '0'){
+                    window.location.reload();
+                }
+            },'json');
+        },
+        okVal:'确定'
+    });
+    });
+    
+  $('.modify').on('click',function(){
+    var defaults=$(this).attr('data-val');
+    var _this=$(this).closest('tr').find('td');
+    var startTime=_this.eq(0).find('span').eq(0).text();
+    var endTime=_this.eq(0).find('span').eq(1).text();
+    var names=_this.eq(1).text();
+    var card = $(this).attr('goods');
+    var data={'startTime':startTime,'endTime':endTime,'names':names,'defaults':defaults, 'card':card};
+    var html=template('modifySet',data);
+    var sendCardNum = $(this).attr('card');
+    
+    art.dialog({
+        title:'修改发送计划',
+        content:html,
+        width:500,
+        padding:0,
+        ok:function(){
+            var modifySet=$('.modifySet');
+            var stratInput=modifySet.find("input[name='startTime']").val();
+            var endInput=modifySet.find("input[name='endTime']").val();
+            var goodsId = $('#cardCode').val();
+            
+            $.post("{:U('Fj114/UserCode/codeSendSet')}", {'startTime':stratInput, 'endTime':endInput, 'goodNum':goodsId, 'card':sendCardNum}, function(data){
+                data = eval("("+data+")");
+                if(data['resultCode'] == '0'){
+                    var cardName=modifySet.find("select[name='cardName'] option:selected").text();
+                    //设置修改值
+                    _this.eq(0).find('span').eq(0).text(stratInput);
+                    _this.eq(0).find('span').eq(1).text(endInput);
+                    _this.eq(1).text(cardName);
+                    _this.eq(2).find('a').attr('goods', goodsId);
+                }else{
+                    art.dialog({
+                        content: data['resultTxt'],
+                        time: 3,
+                        height: '40px',
+                        close: function () {
+                        }
+                    });
+                }
+            });
+        },
+        okVal:'确定'
+    });
+    
+    $('#cardCode option').each(function(){
+        if($(this).val() == card){
+            $(this).attr('selected', true);
+        }
+    });
+    
+    if(startTime == '默认时段'){
+        var htmlStr = "<span>默认时段</span>";
+    }else{
+        var htmlStr = '<span>'+startTime+'</span>至<span>'+endTime+'</span>'
+    }
+    $('#sendDate').html(htmlStr);
+  });
+
+$('.newsend').on('click',function(){
+     var data={'startTime':'','endTime':'','names':'','defaults':'no-defaults'};
+    var html=template('modifySet',data);
+    art.dialog({
+        title:'新增发送计划',
+        content:html,
+        width:500,
+        padding:0,
+        ok:function(){
+            setSendCode();
+        },
+        okVal:'确定'
+    });
+  });
+});
+</script>
+
+<script id="modifySet" type="text/html">
+    <div class="Gform modifySet" style="margin-left:-30px;">
+        <ul>
+            <li class="Gname"><span>*&nbsp;</span>发送设置</li>
+            <li class="Ginput">
+                {{if defaults=='defaults'}}
+                    <div class="Gtime2 fn pt5">
+                        <span> {{startTime}}</span> 
+                        {{if startTime != '默认时段'}}至<span> {{endTime}}</span>{{/if}}
+                    </div>
+                {{else}}
+                     <div class="Gtime2 fn">
+                    <input type="text" name="startTime" onclick="WdatePicker({minDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd'})" value="{{startTime}}">
+                    <em>至</em>
+                    <input type="text" name="endTime" onclick="WdatePicker({minDate:'%y-%M-%d',dateFmt:'yyyy-MM-dd'})" value="{{endTime}}">
+                    </div>
+                    <span class="txtTips">卡券将在设置的时段内随挂机短信下发</span>  
+                {{/if}}
+            </li>
+        </ul>
+        <ul>
+            <li class="Gname"><span>*&nbsp;</span>选择卡券</li>
+            <li class="Ginput">
+                <select name="cardName" id='cardCode'>
+                    <option>请选择</option>
+                    <volist name='codeNameList' id='item'>
+                        <option value="{$item.id}">{$item.goods_name}</option>
+                    </volist>
+                </select>
+            </li>
+        </ul>
+    </div>
+</script>
+
+
+
+
+
+
+
+
+

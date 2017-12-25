@@ -1,0 +1,624 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>决战欧陆之巅_多乐互动_翼码旺财</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnewsadd.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wyxhd1.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivity2015.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script src="__PUBLIC__/Js/Wnewsadd.js?v=__VR__"></script>
+<script src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script src="__PUBLIC__/Js/jsScroll.js?v=__VR__"></script>
+<script src="__PUBLIC__/Js/jscolor/jscolor.js?v=__VR__"></script>
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" rel="stylesheet" type="text/css" />
+<script src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script src=" http://libs.baidu.com/json/json2/json2.js"></script>
+<style>
+	.award_list dl dd{height:auto;}
+</style>
+<script>
+function switchSq(wxAuthType) {
+	if (wxAuthType == '0') {
+    	$('p.ymsq').show();
+    	$('p.zysq').hide();
+    } else {
+    	$('p.zysq').show();
+    	$('p.ymsq').hide();
+    }
+}
+$(function(){
+    var joinMode = 1;
+    var wxAuthType = '{$wx_auth_type}';
+    var wx = false;
+    if(joinMode == '1'){
+        var content = wxAuthType == '0'?'上海翼码科技':'商户公众号';
+        wx = true;
+        $(".gzhtip").html(content);
+        $(".wxsq").show();
+        switchSq(wxAuthType);
+    }
+    $("#ymsq").click(function(){
+    	if (!$('#wx_auth_type').hasClass('disabled')) {
+    		$(".gzhtip").html('上海翼码科技');
+            $(".wxsq").show();
+            switchSq(0);
+    	}
+    });
+    $("#zysq").click(function(){
+    	if (!$('#wx_auth_type').hasClass('disabled')) {
+    		$(".gzhtip").html('(商户公众号)');
+            $(".wxsq").show();
+            switchSq(1);
+    	}
+    });
+    $("#jointype").click(function(){
+        if(!wx && $("input[name=wx_auth_type]").val() == '0'){
+            $(".gzhtip").html('上海翼码科技');
+            wx = true;
+            $(".wxsq").show();
+        }else if(!wx && $("input[name=wx_auth_type]").val() == '1'){
+            $(".gzhtip").html('商户公众号');
+            wx = true;
+            $(".wxsq").show();
+        }else{
+            wx = false;
+            //$(".wxsq").hide();
+        }
+    });
+    showOrHideWxzmhd();
+});
+
+
+function editPrize(cateId, b_id){
+	//有b_id参数表示编辑奖品，没有的是增加
+	art.dialog.open("{:U('Common/SelectJp/addToPrizeItem', array('m_id' => $m_id))}&prizeCateId=" + cateId + '&b_id=' + b_id,{
+		title: '编辑奖品',
+		width:800
+	});
+}
+//启用和停用奖品
+function setPrizeStatus(batch_id, cj_batch_id, status , remain_num) {
+	if (status == '2') {
+		var restQuantity = 0;
+		var data={"remain_num":remain_num};
+		var noremainTip = template("noremainTip",data);
+		if(restQuantity==0){
+			var data = {m_id:batch_id, cj_batch_id:cj_batch_id}
+			if(remain_num == 0){
+				art.dialog({
+					title: '提示',
+					width:"400px",
+					content: noremainTip,
+					ok:function(){
+						$.post('{:U('Common/SelectJp/canStart')}', data, function(resp){
+							if (resp.status != 1) {
+								var tips = art.dialog({width:"200px",title:"提示",lock:true,content:resp.info});
+							} else {
+								postPrizeStatus(batch_id, cj_batch_id, status);
+							}
+						}, 'json');
+					},
+					okVal:"我知道了"
+				})
+			}else{
+				$.post('{:U('Common/SelectJp/canStart')}', data, function(resp){
+					if (resp.status != 1) {
+						var tips = art.dialog({width:"200px",title:"提示",lock:true,content:resp.info});
+					} else {
+						postPrizeStatus(batch_id, cj_batch_id, status);
+					}
+				}, 'json');
+			}
+			
+		}
+	} else {
+		//停用限制
+		var isAllStop = true;
+		$('[name^="prizeStatus"]').each(function(){
+			var prizeId = $(this).attr('name');
+			var len = prizeId.length - 13;
+			prizeId = prizeId.substr(12, len);
+			if (cj_batch_id != prizeId) {
+				if ($(this).val() == 1) {
+					isAllStop = false;
+				}
+			}
+		});
+		if (isAllStop == true) {
+			var tips = art.dialog.msg({content:'至少有一个开启的奖品'});
+			return false;
+		}
+		postPrizeStatus(batch_id, cj_batch_id, status);
+	}
+}
+
+function postPrizeStatus(batch_id, cj_batch_id, status) {
+	var postUrl  = "{:U('Common/SelectJp/jpStop')}";
+	//2表示停用
+	if (status == '2') {
+		postUrl = "{:U('Common/SelectJp/jpStart')}";
+	}
+	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+	var data = {cj_batch_id : cj_batch_id,batch_id : batch_id}
+	$.post(postUrl, data, function(resp){
+		if (resp.status == '1') {
+			setTotalChance();
+		} else {
+			dialog.close();
+			dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+		}
+	}, 'json');
+}
+
+//删除奖项
+function delCate(cj_cate_id){
+	var batch_id = $('#m_id').val();
+	art.dialog({
+		title:"确认",
+		content:'您确定要删除该奖项吗？',
+		ok: function () {
+			var data = {
+				cj_cate_id : cj_cate_id,
+				batch_id : batch_id
+			}
+			$.post('{:U('Common/SelectJp/jpCateDel')}', data, function(resp){
+			var tips = art.dialog.msg({
+				content:resp.info,
+				ok: function () {
+					if(resp.status=='1'){
+						setTotalChance();
+					} else {
+						tips.close();
+						dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+					}
+				}
+			});
+			
+			}, 'json');
+		},
+		cancel: true
+	});
+}
+
+function initialSkip() {
+	if ($('#skip.hover') && $('#skip.hover').length > 0) {
+		$('#switch2').hide();
+	}
+}
+function ajaxPostWxAuthType() {
+	var data = {
+			m_id:$('#m_id').val(),
+			wx_auth_type:$('#wx_auth_type input[type=radio]').val()
+	};
+	var postUrl = '{:U('changeAuthType')}';
+	$.post(postUrl, data, function(resp){
+		if (!resp.status) {
+			art.dialog.msg({
+				content:resp.info,
+			});
+			var postData = this.data;
+			var arr = postData.split('&wx_auth_type=');
+			var r = arr[1];
+			$('#wx_auth_type .newRadio span').addClass('hover');
+			$('#wx_auth_type .newRadio span:eq('+r+')').removeClass('hover');
+			if (r == 1) {
+				r = 0;
+			} else {
+				r = 1;
+			}
+			$('#wx_auth_type input[type=radio]').val(r);
+			return false;
+		}
+		location.href = location.href;
+	}, 'json');
+}
+$(function(e){
+	$('#wx_auth_type .newRadio span').on('click',function(){
+		var t=$(this);
+		if(t.parents('#wx_auth_type').hasClass('disabled')){
+			return ;
+		}
+		if(!t.hasClass('hover')){
+			art.dialog({
+				title:'提示',
+				content:"切换授权方式，需要保存后才能修改其他配置项",
+				height:'20px;',
+				okVal:'保存',
+				ok:ajaxPostWxAuthType,
+				cancel:function(){
+					$('#wx_auth_type .newRadio span').addClass('hover');
+					t.removeClass('hover');
+					var v=$('#wx_auth_type .newRadio span').attr('data-val');
+					$('#wx_auth_type input[type=radio]').val(v);
+				},
+				cancelVal:"取消",
+				close:function(){
+					$('#wx_auth_type .newRadio span').addClass('hover');
+					t.removeClass('hover');
+					var v=$('#wx_auth_type .newRadio span').attr('data-val');
+					$('#wx_auth_type input[type=radio]').val(v);
+				}
+			});
+		}
+
+	});
+
+
+
+	Gform();
+	initialSkip();
+	$(".addAward_btn").click(function(e) {
+		var prizeCateId = $(this).next('[name="prizeCateId"]').val();
+        art.dialog.open("{:U('ZtWorldcup/MatchGuess/addAward', array('m_id' => $m_id))}&prizeCateId=" + prizeCateId,{
+			title: '添加奖品',
+			width:800
+		});
+    });
+	
+	$(".js_edit").click(function(e) {
+		var cj_cate_id = $(this).attr('data-cate');
+		var cate_name = '';
+		if (cj_cate_id) {
+			cate_name = $(this).parent().prev().html();
+		}
+        var dialog = art.dialog({
+			content: '<ul class="Gform"><form id="jx">'
+					+ '<li class="Gname">奖项名称</li>'
+					+ '<li class="Ginput"><input type="text" data-cate="'+cj_cate_id+'" value="'+cate_name+'" class="validate[required,maxSize[6]]" id="demo-labs-input" name="cj_cate_name"/></li>'
+					+ '</form></ul>',
+			width:500,
+			padding:0,
+			id: 'Fm7',
+			title:cj_cate_id ? "编辑奖项":"添加奖项",
+			ok: function(){
+				editJxSubmit(cj_cate_id);
+			},
+			cancel: true
+		});
+		$("#jx").submit(function(){
+			return false;
+		})
+    });
+	$('body').on('keydown','#demo-labs-input', function(e){
+		if(e.keyCode == 13){
+			var cate_id = $(this).attr('data-cate');
+			editJxSubmit(cate_id);
+		}
+	});
+})
+
+
+
+function editJxSubmit(cj_cate_id) {
+
+	
+	if (!$("#jx").validationEngine('validate')) {
+		return false;
+	}
+	var input = document.getElementById('demo-labs-input');
+	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+	var data = {
+			cj_cate_id : cj_cate_id,
+			cj_cate_name : $('[name="cj_cate_name"]').val(),
+			//member_id : member_id,
+			batch_id : $('#m_id').val()
+		}
+	$.post("{:U('Common/SelectJp/jpLevelSave')}", data, function(resp){
+		if (resp.status == '1') {
+			dialog.close();
+			setTotalChance();
+		} else {
+			dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+		}
+	}, 'json');
+}
+
+function getCjRespTextAndNoAwardNotice() {
+	var cj_resp_text = '';
+	$('[name^="cj_resp_text"]').each(function(){
+		cj_resp_text += $(this).val() + '|';
+	});
+	cj_resp_text = cj_resp_text.substr(0, (cj_resp_text.length - 1));
+	
+	var no_award_notice = '';
+	$('[name^="no_award_notice"]').each(function(){
+		no_award_notice += $(this).val() + '|';
+	});
+	no_award_notice = no_award_notice.substr(0, (no_award_notice.length - 1));
+	var result = {no_award_notice : no_award_notice, cj_resp_text : cj_resp_text};
+	return result;
+}
+
+function postPrize() {
+	var arr = [], is_limit = 0, member_batch_id = '', fans_collect_url = '';
+	//参与限制验证
+	if($("#form1").validationEngine('validate')){
+		arr = $('input[name="wx_member_group"]:checked').map(function(){return this.value}).get();
+	    is_limit = $("#wx_join_limit").find('[name="limit"]').val();
+	    //如果是微信，微信的招募活动选择是，并且没有被隐藏掉（当未选中“未分组”这个微信分组时，会隐藏）
+	    if ($('[name="wx_recruit"]').val() == 1 && $('#wx_zmhd').css('display') != 'none') {
+	    	fans_collect_url = $('[name="fans_collect_url"]').val();
+	    }
+	    var member_batch_id = arr.join();
+	    if (is_limit == 1 && member_batch_id == '') {
+	    	dialog = art.dialog({title:false,content:"<div class='msg-all-error'>请勾选参与限制的分组</div>",fixed: true,padding:0,lock:true,time:2});
+	    	return false;
+	    }
+	}
+	
+	
+	var result = getCjRespTextAndNoAwardNotice();
+	//提交保存数据
+	var readyData = {
+	        "m_id":$('#m_id').val(),
+	        "isReEdit":$('#isReEdit').val(),
+	        "total_chance" : $('[name="total_chance"]').val(),
+	        "cj_resp_text" : result.cj_resp_text,
+	        'no_award_notice' : result.no_award_notice,
+	        is_limit : is_limit,
+	        member_batch_id : member_batch_id,
+            fans_collect_url : fans_collect_url, 
+            play_mode : $('[name="play_mode"]').val()
+	    };
+	var sort = $('[name^=cj_cate_to_sort]').serialize();
+	
+	if($("#cj_rule").validationEngine('validate')){
+		$.post("{:U('ZtWorldcup/MatchGuess/setPrize')}&"+sort, readyData,
+			    function(data) {
+			        if (data.status) {
+			        	if ($('#isReEdit').val() == 1) {
+			        		window.location.href="{:U('MarketActive/Activity/MarketList')}";
+			        	} else {
+			        		window.location.href="{:U('LabelAdmin/BindChannel/checkSuccess', array('batch_type' => $batch_type, 'batch_id' => $m_id, 'isReEdit' => 0))}";
+			        	}
+			        } else {
+			            alert(data.info);
+			        }
+			    },
+			    "json");
+	}
+}
+
+function reEditSort(obj) {
+	var selectedDl = $(obj).parentsUntil('dl').parent().clone();
+	var selectedSort = $(obj).val();
+	//比自己小的插前面，比自己大的插后面
+	var originPosition = $(obj).attr('data-origin');
+	if (selectedSort > originPosition) {
+		//$('.sort_for:eq('+(selectedSort-1)+')').after(selectedDl);
+		$('.sort_for').each(function(){
+			var s = $(this).find('[name^=cj_cate_to_sort]');
+			var origin_data = $(s[0]).attr('data-origin');
+			if (origin_data == selectedSort) {
+				$(this).after(selectedDl);
+			}
+		});
+	} else {
+		//selectedDl.prependTo('.sort_for:eq('+(selectedSort-1)+')');
+		$('.sort_for').each(function(){
+			var s = $(this).find('[name^=cj_cate_to_sort]');
+			var origin_data = $(s[0]).attr('data-origin');
+			if (origin_data == selectedSort) {
+				$(this).before(selectedDl);
+			}
+		});
+	}
+	$(obj).parentsUntil('dl').parent().replaceWith('');
+	$('[name^=cj_cate_to_sort]').off('change', '', 'reEditSort');
+	var sort = 1;
+	$('[name^=cj_cate_to_sort]').each(function(){
+		$(this).val(sort);
+		$(this).attr('data-origin', sort);
+		sort++;
+	});
+	$('[name^=cj_cate_to_sort]').each(function(){
+		var temp = $(this).val();
+		//$(this).children().removeAttr('selected');
+		$(this).children().each(function(){
+			if ($(this).val() == temp) {
+				$(this).attr('selected', 'selected');
+			} else {
+				$(this).removeAttr('selected');
+			}
+		});
+	});
+	$('[name^=cj_cate_to_sort]').on('change', '', 'reEditSort');
+}
+
+function setTotalChance() {
+	window.location.reload();
+}
+//是否显示微信招募活动
+function showOrHideWxzmhd() {
+	var is_select_ungroup = false;
+	$('#ul_jointype_1_1 #wx_member').find('input[name="wx_member_group"]:checked').each(function(){
+		if ($(this).val() == 0) {
+			is_select_ungroup = true;
+		}
+	});
+	//如果选中了未分组这个组，就显示
+	if (is_select_ungroup == true) {
+		$('#wx_zmhd').show();//微信招募活动
+	} else {
+		$('#wx_zmhd').hide();
+	}
+}
+
+
+</script>
+
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            	<div class="bread">
+                    <div class="bread-con fn">
+                       <include file="./Home/Tpl/LabelAdmin/Path_index.html" batch_name="决战欧陆之巅"/>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="Gform prize l">
+				<ul class="newsadd-title">活动配置</ul>
+				<ul>
+	                <li class="Gnmae">&nbsp;活动形式：</li>
+	                <li class="Ginput">
+	                	<div id="play_mode"  class="switch <eq name="canSwitchPlayMode" value="2">disabled</eq>" >
+	                        <input type="radio" value="{$playMode}" checked="checked" name="play_mode">
+	                        <div class="newRadio">
+	                            <span class="valfirst" data-val="0" id="syjc">输赢竞猜</span>
+	                            <span class="vallast" data-val="1" id="bfyc">比分预测</span>
+	                        </div>
+	                    </div>
+	                </li>
+	            </ul>
+	            <ul>
+	                <li class="Gnmae">&nbsp;参与方式：</li>
+	                <li class="Ginput">
+	                	<div id="jointype"  class="switch" data-callback="jointype">
+	                        {:Gform_radio('join_mode',array('1'=>'微信号'),'1')}
+	                    </div>
+	                </li>
+	            </ul>
+	            <ul class="pb35">
+	           		<li class="Gnmae"  >&nbsp;微信授权：</li>
+	                <li class="Ginput">
+	                    <div id="wx_auth_type" class="switch <if condition="$isWxBd neq 1 or $isSelectCard eq 1">disabled</if>">
+	                        <input type="radio" value="{$wx_auth_type}" checked="checked" name="wx_auth_type">
+	                        <div class="newRadio">
+	                            <span class="valfirst" data-val="0" id="ymsq">翼码授权</span>
+	                            <span class="vallast" data-val="1" id="zysq">自有认证服务号授权</span>
+	                        </div>
+	                    </div>
+	                    <span class="txtTips" id="wxsq">
+	                        <p class="ymsq">由翼码提供代授权服务，获取用户的微信信息，如昵称、头像。</p>
+	                          <p class="zysq">绑定已认证微信服务号到旺财后，此设置才能生效。</p>
+	                       <a href="{$wxsqHelp}" target="_blank">什么是微信授权？</a>
+	                    </span>
+	                </li>
+	           	</ul>
+	           	<form name="form1" id="form1">
+	           	<ul>
+                    <li class="Gnmae">&nbsp;参与限制：</li>
+                    <li class="Ginput">
+                        <div id="wx_join_limit" class="switch <if condition="empty($wx_auth_type)">disabled</if>" data-show="ul_jointype_1_1">
+                            <input type="radio" value="{$member_batch_id_flag}" checked="checked" name="limit">
+                            <div class="newRadio">
+                                <span class="valfirst" data-val="0">不限</span>
+                                <span class="vallast" data-val="1">限制</span>
+                            </div>
+                        </div>
+                        <div class="txtTips">
+                        	"不限"表示所有人可参与；"限制"表示仅为微信粉丝参与。
+                        </div>
+                    </li>
+                </ul>
+                <div id="ul_jointype_1_1" class="dn">
+                <ul>
+                    <li class="Gnmae">&nbsp;</li>
+                    <li class="Ginput">
+                        <div id="wx_member" class="switch auto">
+                            {:Gform_checkbox('wx_member_group', $user_wx_group, $wx_selected)}
+                        </div>
+                        <div class="txtTips">
+                        	粉丝分组
+                        </div>
+                    </li>
+                </ul>
+             <ul id="wx_zmhd">
+                 <li class="Gnmae">&nbsp;是否关注：</li>
+                 <li class="Ginput">
+                 	<div class="switch">
+                         <input type="radio" name="wx_recruit" value="{$wx_recruit}" checked="checked">
+                         <div class="newRadio">
+                             <span class="valfirst" data-val="0">否</span>
+                             <span class="vallast" data-val="1">是</span>
+                         </div>
+                         <div class="newRadio-input">
+                             <input type="text" class="validate[required]" name="fans_collect_url" value="{$guidUrl}" remark="validate"  />
+                         </div>
+                     </div>
+                     <span class="txtTips">
+                     	选择“是”，并<a href="{:U('Weixin/Weixin/focus')}" target="_blank" title="设置微信引导关注页">设置微信引导关注页</a>，消费者关注您的公众号后才能参与活动。
+                     </span>
+                 </li>
+             </ul>
+             
+                </div>
+                </form>
+	           	<ul class="newsadd-title">活动奖项配置</ul>
+	           	<div class="Gform pt20" style="width:1100px;">
+                    <eq name="firstCreateTips" value="1">
+                        <div class="tipNormal">
+                            首次创建活动送50旺币作为奖品发码费，如因奖品数量设置过大导致旺币不足而无法发码，请自行充值！
+                        </div>
+                    </eq>
+                    <div id="switch2" class="without_award_setting">
+                    	<div class="shadow"></div>
+                        <form name="cj_rule" id="cj_rule" method="post">
+                        <input name="m_id" id="m_id" value="{$m_id}" type="hidden"/>
+                        <input type="hidden" id="isReEdit" value="{$isReEdit}" name="isReEdit"/>
+                        <ul class="dn" style="margin-left:-80px;">
+                            <li class="Gname"><span>*</span> 中奖概率</li>
+                            <li class="Ginput">
+                                <input type="text"  style="width:260px;" name="total_chance" value="{$cj_rule_arr['total_chance']}" class="validate[custom[integer],required,min[1],max[100],maxSize[3]]" maxlength="20" class="Gview-text"><span class="maxTips forInput" style="left:415px">%</span>
+                            </li>
+                        </ul>
+                        </form>
+                        <div class="award_list">
+                        	<include file="./Home/Tpl/LabelAdmin/Public_prize.html" />
+                            <div class="cl"></div>
+                            <eq name="canShowAddBtn" value="1">
+                            <a href="javascript:void(0)"  class="btn_add_list js_edit" data-cate=""><i>✚</i> 新增奖项</a>
+                            </eq>
+                        </div>
+                    </div>
+                    	<div class="fn tc">
+                            <a href="{:U('MarketActive/Activity/MarketList')}" class="btn-all-del ml10">取消</a>
+                            <eq name="isReEdit" value="0">
+                            <a href="{:U('ZtWorldcup/MatchGuess/edit', ['id' => $m_id, 'isReEdit' => '0'])}" class="btn-all ml10">上一步</a>
+                            <a href="javascript:postPrize()" class="btn-all ml10">下一步</a>
+                            <else />
+                            <a href="javascript:postPrize()" class="btn-all ml10">保存</a>
+                            </eq>
+						</div>
+                    </div>
+	        	</div>
+	        	<div class="wxsq">
+                    <div class="wxsqTitle">
+                        <p>微信授权示例图</p>
+                    </div>
+                    <div class="wxsqEnlargeImg"><img src="__PUBLIC__/Image/tjjp/hdpz.png" /></div>
+                    <div class="wxsqCon">
+                        <p>由<span class="gzhtip"></span>开发，向其提供以下</p>    
+                        <p>权限即可继续操作</p> 
+                    </div>
+                    <div class="wxsqEnlarge">
+                        <div class="wxsqEnlarge_p">
+                            <p>由<span class="gzhtip"></span>开发</p>    
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;权限即可继续</p> 
+                        </div>
+                        <div class="wxsqEnlarge_broder"></div>
+                        <div class="wxsqEnlarge_bg"></div>
+                    </div>
+                </div> 
+        	</div>
+    	</div>
+    	
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+<div class="service"></div>
+</body>
+</html>

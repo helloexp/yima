@@ -1,0 +1,551 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加本层机构</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/FbMeihui.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.css">
+<script>
+$(function(){
+    $("#upload_pic_btn").click(function(){
+        var opt = {
+            obj:$("#img_resp_show"),
+            height:160,
+            width:160,
+            Gform:false,
+            callback:function(data){
+                $('#logo_pic').val(data['savename']);
+                $('#logo_pic_show').attr('src',data['src']);
+            }
+        };
+        open_img_uploader(opt);
+    });
+    var availableTags = "{$agencyList}".split(" ");
+    var availableTagsEx = "{$salerList}".split(" ");
+    var mHEx = "{$mhList}".split(" ");
+    var mHAll = "{$mhListAll}".split(" ");
+    $("#agency").autocomplete({
+        source: availableTags
+    });
+    $("#saler").autocomplete({
+        source: availableTagsEx
+    });
+    $("#mHsaler").autocomplete({
+        source: mHEx
+    });
+    $("#mHAll").autocomplete({
+        source: mHAll
+    });
+    $("#mHAll").click(function(){
+        $('#errorTipMhAll').html("");
+    });
+    $("#mHsaler").click(function(){
+        $('#errorTipMh').html("");
+    });
+    $("#agency").click(function(){
+        $('#errorTip').html("");
+    });
+    $("#saler").click(function(){
+        $('#errorTipEx').html("");
+    });
+    $("#sub_button").click(function(){
+        var agencySelect = $("#agency").val();
+        if($.inArray(agencySelect,availableTags)== '-1'){
+            $('#errorTip').html("错误：请重新选择门店！");
+            return false;
+        }else{
+            succSubmit();
+        }
+    });
+    $("#sub_button1").click(function(){
+        var agencySelect = $("#agency").val();
+        if($.inArray(agencySelect,availableTags)== '-1'){
+            $('#errorTip').html("错误：请重新选择门店！");
+            return false;
+        }else{
+            succSubmit1();
+        }
+    });
+    $("#sub_button2").click(function(){
+        var agencySelect = $("#agency").val();
+        if($.inArray(agencySelect,availableTags)== '-1'){
+            $('#errorTip').html("错误：请重新选择门店！");
+            return false;
+        }else{
+            succSubmit2();
+        }
+    });
+    $("#sub_button3").click(function(){
+        var agencySelect = $("#agency").val();
+        if($.inArray(agencySelect,availableTags)== '-1'){
+            $('#errorTip').html("错误：请重新选择门店！");
+            return false;
+        }else{
+            succSubmit3();
+        }
+    });
+    $("#sub_buttonex").click(function(){
+        var agencySelect = $("#saler").val();
+        if($.inArray(agencySelect,availableTagsEx)== '-1'){
+            $('#errorTipEx').html("错误：请重新选择门店！");
+            return false;
+        }else{
+            succSubmitEx();
+        }
+    });
+})
+</script>
+<script type="text/javascript">
+    function succSubmit(){
+        var dialog;
+        var parentWin = art.dialog.opener;
+        var agencyName = $("#agencyName").val();
+        if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        art.dialog({
+                            title:"提示(5秒后自动关闭)",
+                            width:350,
+                            height:100,
+                            content:'<span style="font-weight:bold;">门店<blue style="color:#3D86BA;">&nbsp;'+agencyName+'&nbsp;</blue>添加成功，请及时审核！</span><br />通过审核后，<blue style="color:#3D86BA;">&nbsp;'+agencyName+'&nbsp;</blue>可以登录旺财小店，管理下级会员。<br />门店详情中可以下载分销入口二维码。',
+                            icon: "succeed",
+                            lock:true,
+                            close:function(){
+//                                art.dialog.close();
+//                                art.dialog.opener.reload();
+                                setTimeout(function(){
+                                    window.parent.window.clickRefresh(1);
+                                    art.dialog.close();
+                                }, 1000);
+                            }
+                        }).time(5);
+                        return false;
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json'
+            });
+            
+            return false;
+        }
+        return false;
+    }
+    function succSubmit1(){
+        var dialog;
+        var parentWin = art.dialog.opener;
+        var agencyName = $("#agencyName").val();
+        if($("#theform1").validationEngine('validate')){
+            $("#theform1").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        art.dialog({
+                            title:"提示(5秒后自动关闭)",
+                            width:350,
+                            height:100,
+                            content:'<span style="font-weight:bold;">钻石会员<blue style="color:#3D86BA;">&nbsp;'+agencyName+'&nbsp;</blue>添加成功，请及时审核！</span><br />通过审核后，<blue style="color:#3D86BA;">&nbsp;'+agencyName+'&nbsp;</blue>可以登录旺财小店，管理下级会员。<br />会员详情中可以下载分销入口二维码。',
+                            icon: "succeed",
+                            lock:true,
+                            close:function(){
+//                                art.dialog.close();
+//                               art.dialog.opener.reload();
+                                setTimeout(function(){
+                                    window.parent.window.clickRefresh(2);
+                                    art.dialog.close();
+                                }, 1000);
+                            }
+                        }).time(5);
+                        return false;
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json'
+            });
+
+            return false;
+        }
+        return false;
+    }
+    function succSubmit2(){
+        var dialog;
+        var parentWin = art.dialog.opener;
+        var agencyName = $("#agencyName").val();
+        if($("#theform2").validationEngine('validate')){
+            $("#theform2").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        art.dialog({
+                            title:"提示(5秒后自动关闭)",
+                            width:350,
+                            height:100,
+                            content:'<span style="font-weight:bold;">金牌会员<blue style="color:#3D86BA;">&nbsp;'+agencyName+'&nbsp;</blue>添加成功，请及时审核！</span><br />通过审核后，<blue style="color:#3D86BA;">&nbsp;'+agencyName+'&nbsp;</blue>可以登录旺财小店，管理下级会员。<br />会员详情中可以下载分销入口二维码。',
+                            icon: "succeed",
+                            lock:true,
+                            close:function(){
+//                                art.dialog.close();
+//                                art.dialog.opener.reload();
+                                setTimeout(function(){
+                                    window.parent.window.clickRefresh(3);
+                                    art.dialog.close();
+                                }, 1000);
+                            }
+                        }).time(5);
+                        return false;
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json'
+            });
+
+            return false;
+        }
+        return false;
+    }
+    function succSubmit3(){
+        var dialog;
+        var parentWin = art.dialog.opener;
+        var agencyName = $("#agencyName").val();
+        if($("#theform3").validationEngine('validate')){
+            $("#theform3").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        art.dialog({
+                            title:"提示(5秒后自动关闭)",
+                            width:350,
+                            height:100,
+                            content:'<span style="font-weight:bold;">银牌会员<blue style="color:#3D86BA;">&nbsp;'+agencyName+'&nbsp;</blue>添加成功，请及时审核！</span><br />通过审核后，<blue style="color:#3D86BA;">&nbsp;'+agencyName+'&nbsp;</blue>可以登录旺财小店。<br />会员详情中可以下载分销入口二维码。',
+                            icon: "succeed",
+                            lock:true,
+                            close:function(){
+//                                art.dialog.close();
+//                                art.dialog.opener.reload();
+                                setTimeout(function(){
+                                    window.parent.window.clickRefresh(4);
+                                    art.dialog.close();
+                                }, 1000);
+                            }
+                        }).time(5);
+                        return false;
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json'
+            });
+
+            return false;
+        }
+        return false;
+    }
+    function succSubmitEx(){
+        var dialog;
+        var parentWin = art.dialog.opener;
+        var salerName = $("#salerName").val();
+        if($("#theformex").validationEngine('validate')){
+            $("#theformex").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        art.dialog({
+                            title:"提示(5秒后自动关闭)",
+                            width:350,
+                            height:100,
+                            content:'<span style="font-weight:bold;">销售员<blue style="color:#3D86BA;">&nbsp;'+salerName+'&nbsp;</blue>添加成功，请及时审核！</span><br />通过审核后，<blue style="color:#3D86BA;">&nbsp;'+salerName+'&nbsp;</blue>可以登录旺财小店，查看分销业绩。<br />销售员详情中可以下载分销入口二维码。',
+                            icon: "succeed",
+                            lock:true,
+                            close:function(){
+                                art.dialog.close();
+                                art.dialog.opener.reload();
+                            }
+                        }).time(5);                
+                        return false;
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json'
+            });
+            
+            return false;
+        }
+        return false;
+    }
+</script>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab inPop" id="Wcanal-tabon">
+<div class="Wcanal-tab-title fn" id="third-tab">
+    <p class="Wcanal-tab-hover"><a href="javascript:void(0);">门店</a></p>
+    <p class=""><a href="javascript:void(0);">钻石会员</a></p>
+    <p class=""><a href="javascript:void(0);">金牌会员</a></p>
+    <p class=""><a href="javascript:void(0);">银牌会员</a></p>
+</div>
+<div class="Wcanal-tab-list">
+    <div class="Gform fn"  style="width:100%;">
+    <form id="theform" action="{:U('Wfx/Fxgl/fbAddMember',array('type'=>1))}" method="post" enctype="multipart/form-data">
+        <ul class="first">
+            <li class="Gname"><span>*</span>门店名称</li>
+            <li class="Ginput"><input type="text" name="name" id="agencyName" class="validate[required]" value="" placeholder="必填"></li>
+        </ul>
+        <ul>
+            <li class="Gname"><span>*</span>负责人姓名</li>
+            <li class="Ginput"><input type="text" name="contact_name" id="contact_name" class="validate[required]" value="" placeholder="必填"></li>
+        </ul>
+        <ul>
+            <li class="Gname"><span>*</span>手机号码</li>
+            <li class="Ginput"><input type="text" name="phone_no" id="phone_no" class="validate[required,custom[phone]]" value="" placeholder="必填"></li>
+        </ul>
+        <div class="tc"><a href="javascript:void(0)" class="btn-all btn_primary mt30 mb30" id="sub_button">确认</a></div>
+    </form>
+    </div>
+</div>
+<div class="Wcanal-tab-list" style="display:none">
+    <div class="Gform fn"  style="width:100%;">
+    <form id="theform1" action="{:U('Wfx/Fxgl/fbAddMember',array('type'=>2))}" method="post" enctype="multipart/form-data">
+        <div class="Gtitle">基本信息</div>
+        <ul class="first">
+            <li class="Gname"><span>*</span>会员名称</li>
+            <li class="Ginput"><input type="text" name="name" id="agencyName" class="validate[required]" value="" placeholder="必填"></li>
+        </ul>
+        <ul>
+            <li class="Gname"><span>*</span>负责人姓名</li>
+            <li class="Ginput"><input type="text" name="contact_name" id="contact_name" class="validate[required]" value="" placeholder="必填"></li>
+        </ul>
+        <ul>
+            <li class="Gname"><span>*</span>手机号码</li>
+            <li class="Ginput"><input type="text" name="phone_no" id="phone_no" class="validate[required,custom[phone]]" value="" placeholder="必填"></li>
+        </ul>
+        <eq name="accountType" value="1">
+            <ul class="last">
+                <li class="Gname">支付宝账号</li>
+                <li class="Ginput"><input type="text" name="alipay_account" id="alipay_account" value="" placeholder="选填"><span class="txtTips">负责人接收到通知短信后也可自行绑定账号</span></li>
+            </ul>
+            <else/>
+            <ul>
+                <li class="Gname">银行名称</li>
+                <li class="Ginput">
+                    <select name="bank_name" id="bank_name">
+                        <option value="">请选择银行</option>
+                        <volist name="defaultBankName" id="vd">
+                            <option value="{$vd}">{$vd}</option>
+                        </volist>
+                    </select>
+                    <p class="Gtext" style="font-size: 13px;color: #aaa;"></p>
+                </li>
+            </ul>
+            <ul class="last">
+                <li class="Gname">银行账号</li>
+                <li class="Ginput"><input type="text" name="bank_account" id="bank_account" value="" placeholder="选填，银行名称与账户必须同时存在"><span class="txtTips">负责人接收到通知短信后也可自行绑定账号</span></li>
+            </ul>
+        </eq>
+        <!--<div class="Gtitle">提成默认设置<span style="margin-left:20px;font-weight: normal;">(具体以商品配置时的数值为准)</span></div>-->
+        <!--<ul class="first">-->
+            <!--<li class="Gname"><span>*</span>销售提成比</li>-->
+            <!--<li class="Ginput"><input type="text" name="default_sale_percent" id="default_sale_percent" value="" class="validate[required]" placeholder="该经销商直接销售产品时获得的提成">%<span class="txtTips"></span></li>-->
+        <!--</ul>-->
+        <!--<ul class="last">-->
+            <!--<li class="Gname"><span>*</span>管理提成比</li>-->
+            <!--<li class="Ginput"><input type="text" name="default_manage_percent" id="default_manage_percent" class="validate[required]" value="" placeholder="该经销商下的销售员产生业绩时所得提成">%<span class="txtTips"></span></li>-->
+        <!--</ul>-->
+        <div class="Gtitle">所属会员</div>
+        <ul class="first last">
+            <li class="Gname">选择门店</li>
+            <li class="Ginput">
+                <input type="text" name="level_info" id="agency" value="{$selectAgencyName}" placeholder="关键字，如：会员-16835359696-翼码">
+                <span class="txtTips">钻石会员只能所属于门店</span>
+                <p id="errorTip" style="color:red;font-size:12px;"></p>
+            </li>
+        </ul>
+        <div class="Gtitle">其他信息<span style="margin-left:20px;font-weight: normal;">(选填)</span></div>
+        <ul class="first last">
+            <li class="Gname">上传营业执照</li>
+            <li class="Ginput">
+                <div class="Gchoose Gview-img">
+                    <input type="text" value="" name="business_licence"  id="logo_pic"/>
+                    <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:641,height:321}"><i></i></a>
+                </div>
+            </li>
+        </ul>
+        <div class="tc"><a href="javascript:void(0)" class="btn-all btn_primary mt30 mb30" id="sub_button1">确认</a></div>
+    </form>
+    </div>
+</div>
+    <div class="Wcanal-tab-list" style="display:none">
+        <div class="Gform fn"  style="width:100%;">
+            <form id="theform2" action="{:U('Wfx/Fxgl/fbAddMember',array('type'=>3))}" method="post" enctype="multipart/form-data">
+                <div class="Gtitle">基本信息</div>
+                <ul class="first">
+                    <li class="Gname"><span>*</span>会员名称</li>
+                    <li class="Ginput"><input type="text" name="name" id="agencyName" class="validate[required]" value="" placeholder="必填"></li>
+                </ul>
+                <ul>
+                    <li class="Gname"><span>*</span>负责人姓名</li>
+                    <li class="Ginput"><input type="text" name="contact_name" id="contact_name" class="validate[required]" value="" placeholder="必填"></li>
+                </ul>
+                <ul>
+                    <li class="Gname"><span>*</span>手机号码</li>
+                    <li class="Ginput"><input type="text" name="phone_no" id="phone_no" class="validate[required,custom[phone]]" value="" placeholder="必填"></li>
+                </ul>
+                <eq name="accountType" value="1">
+                    <ul class="last">
+                        <li class="Gname">支付宝账号</li>
+                        <li class="Ginput"><input type="text" name="alipay_account" id="alipay_account" value="" placeholder="选填"><span class="txtTips">负责人接收到通知短信后也可自行绑定账号</span></li>
+                    </ul>
+                    <else/>
+                    <ul>
+                        <li class="Gname">银行名称</li>
+                        <li class="Ginput">
+                            <select name="bank_name" id="bank_name">
+                                <option value="">请选择银行</option>
+                                <volist name="defaultBankName" id="vd">
+                                    <option value="{$vd}">{$vd}</option>
+                                </volist>
+                            </select>
+                            <p class="Gtext" style="font-size: 13px;color: #aaa;"></p>
+                        </li>
+                    </ul>
+                    <ul class="last">
+                        <li class="Gname">银行账号</li>
+                        <li class="Ginput"><input type="text" name="bank_account" id="bank_account" value="" placeholder="选填，银行名称与账户必须同时存在"><span class="txtTips">负责人接收到通知短信后也可自行绑定账号</span></li>
+                    </ul>
+                </eq>
+                <!--<div class="Gtitle">提成默认设置<span style="margin-left:20px;font-weight: normal;">(具体以商品配置时的数值为准)</span></div>-->
+                <!--<ul class="first">-->
+                    <!--<li class="Gname"><span>*</span>销售提成比</li>-->
+                    <!--<li class="Ginput"><input type="text" name="default_sale_percent" id="default_sale_percent" class="validate[required]" value="" placeholder="该经销商直接销售产品时获得的提成">%<span class="txtTips"></span></li>-->
+                <!--</ul>-->
+                <!--<ul class="last">-->
+                    <!--<li class="Gname"><span>*</span>管理提成比</li>-->
+                    <!--<li class="Ginput"><input type="text" name="default_manage_percent" id="default_manage_percent" class="validate[required]" value="" placeholder="该经销商下的销售员产生业绩时所得提成">%<span class="txtTips"></span></li>-->
+                <!--</ul>-->
+                <div class="Gtitle">所属会员</div>
+                <ul class="first last">
+                    <li class="Gname">选择会员</li>
+                    <li class="Ginput">
+                        <input type="text" name="level_info" id="mHsaler" value="{$selectAgencyName}" placeholder="关键字，如门店-16835359696-翼码" />
+                        <span class="txtTips">金牌会员只能所属于门店或钻石会员</span>
+                        <p id="errorTipMh" style="color:red;font-size:12px;"></p>
+                    </li>
+                </ul>
+                <div class="Gtitle">其他信息<span style="margin-left:20px;font-weight: normal;">(选填)</span></div>
+                <ul class="first last">
+                    <li class="Gname">上传营业执照</li>
+                    <li class="Ginput">
+                        <div class="Gchoose Gview-img">
+                            <input type="text" name="business_licence" value="">
+                            <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:641,height:321}"><i></i></a>
+                        </div>
+                    </li>
+                </ul>
+                <div class="tc"><a href="javascript:void(0)" class="btn-all btn_primary mt30 mb30" id="sub_button2">确认</a></div>
+            </form>
+        </div>
+    </div>
+    <div class="Wcanal-tab-list" style="display:none">
+        <div class="Gform fn"  style="width:100%;">
+            <form id="theform3" action="{:U('Wfx/Fxgl/fbAddMember',array('type'=>4))}" method="post" enctype="multipart/form-data">
+                <div class="Gtitle">基本信息</div>
+                <ul class="first">
+                    <li class="Gname"><span>*</span>会员名称</li>
+                    <li class="Ginput"><input type="text" name="name" id="agencyName" class="validate[required]" value="" placeholder="必填"></li>
+                </ul>
+                <ul>
+                    <li class="Gname"><span>*</span>负责人姓名</li>
+                    <li class="Ginput"><input type="text" name="contact_name" id="contact_name" class="validate[required]" value="" placeholder="必填"></li>
+                </ul>
+                <ul>
+                    <li class="Gname"><span>*</span>手机号码</li>
+                    <li class="Ginput"><input type="text" name="phone_no" id="phone_no" class="validate[required,custom[phone]]" value="" placeholder="必填"></li>
+                </ul>
+                <eq name="accountType" value="1">
+                    <ul class="last">
+                        <li class="Gname">支付宝账号</li>
+                        <li class="Ginput"><input type="text" name="alipay_account" id="alipay_account" value="" placeholder="选填"><span class="txtTips">负责人接收到通知短信后也可自行绑定账号</span></li>
+                    </ul>
+                    <else/>
+                    <ul>
+                        <li class="Gname">银行名称</li>
+                        <li class="Ginput">
+                            <select name="bank_name" id="bank_name">
+                                <option value="">请选择银行</option>
+                                <volist name="defaultBankName" id="vd">
+                                    <option value="{$vd}">{$vd}</option>
+                                </volist>
+                            </select>
+                            <p class="Gtext" style="font-size: 13px;color: #aaa;"></p>
+                        </li>
+                    </ul>
+                    <ul class="last">
+                        <li class="Gname">银行账号</li>
+                        <li class="Ginput"><input type="text" name="bank_account" id="bank_account" value="" placeholder="选填，银行名称与账户必须同时存在"><span class="txtTips">负责人接收到通知短信后也可自行绑定账号</span></li>
+                    </ul>
+                </eq>
+                <!--<div class="Gtitle">提成默认设置<span style="margin-left:20px;font-weight: normal;">(具体以商品配置时的数值为准)</span></div>-->
+                <!--<ul class="first">-->
+                    <!--<li class="Gname"><span>*</span>销售提成比</li>-->
+                    <!--<li class="Ginput"><input type="text" name="default_sale_percent" id="default_sale_percent" class="validate[required]" value="" placeholder="该经销商直接销售产品时获得的提成">%<span class="txtTips"></span></li>-->
+                <!--</ul>-->
+                <!--<ul class="last">-->
+                    <!--<li class="Gname"><span>*</span>管理提成比</li>-->
+                    <!--<li class="Ginput"><input type="text" name="default_manage_percent" id="default_manage_percent" class="validate[required]" value="" placeholder="该经销商下的销售员产生业绩时所得提成">%<span class="txtTips"></span></li>-->
+                <!--</ul>-->
+                <div class="Gtitle">所属会员</div>
+                <ul class="first last">
+                    <li class="Gname">选择会员</li>
+                    <li class="Ginput">
+                        <input type="text" name="level_info" id="mHAll" value="{$selectAgencyName}" placeholder="关键字，如：会员-16835359696-翼码">
+                        <span class="txtTips">银牌会员可以所属于门店，钻石会员或金牌会员</span>
+                        <p id="errorTipMhAll" style="color:red;font-size:12px;"></p>
+                    </li>
+                </ul>
+                <div class="Gtitle">其他信息<span style="margin-left:20px;font-weight: normal;">(选填)</span></div>
+                <ul class="first last">
+                    <li class="Gname">上传营业执照</li>
+                    <li class="Ginput">
+                        <div class="Gchoose Gview-img">
+                            <input type="text" name="business_licence"  value="">
+                            <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:641,height:321}"><i></i></a>
+                        </div>
+                    </li>
+                </ul>
+                <div class="tc"><a href="javascript:void(0)" class="btn-all btn_primary mt30 mb30" id="sub_button3">确认</a></div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>

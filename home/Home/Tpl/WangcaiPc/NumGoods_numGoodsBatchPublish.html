@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券中心-发布卡券</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<script>
+//选择卡券的回调
+var cardresp = function(d){
+	var d_id=d.id;
+    if(d.timeType ==1){
+        var html = '发送卡券后'+d.dataAmountStart+'天开始使用-发送卡券后'+d.dataAmountEnd+'天结束使用'
+    }else{
+        var verify_begin_date = d.verify_begin_date.substr(0,4)+'-'+d.verify_begin_date.substr(4,2)+'-'+d.verify_begin_date.substr(6,2);
+        var verify_end_date = d.verify_end_date.substr(0,4)+'-'+d.verify_end_date.substr(4,2)+'-'+d.verify_end_date.substr(6,2);
+        var html = '有效期：'+verify_begin_date+'至'+verify_end_date;
+    }
+    d.dtd = html;
+    var html2 = template('cardresp',d);
+    $('#isAddCard').addClass('dn');
+    $('#isTip').addClass('dn');
+    $(".award_list").html(html2);
+}
+$(document).ready(function(e){
+    //编辑卡券弹窗里的信息
+    $("body").on("click","#editCard",function() {
+        var editUrl = "{:U('WangcaiPc/NumGoods/editCardConfig')}"+'&prizeId='+$('#goods_id').val();
+        art.dialog.open(editUrl,{title: '编辑卡券',width:800});
+    })
+
+    //删除卡券
+    $("body").on("click","#isDel",function() {
+        $('#isAddCard').removeClass('dn');
+        $('#isTip').removeClass('dn');
+        $('#isCard .wxCard').remove();
+    })
+
+	$(".addPrise").click(function(e) {
+            var isopen = 1; //0：未开通微信卡包业务，1：已开通微信卡包业务
+			if(isopen == 0)
+			{
+				art.dialog.msg({
+					content:"您的微信公众号未开通微信卡包业务",
+					ok:function(){
+						window.open("https://mp.weixin.qq.com");
+					},
+					okVal:"去开通",
+					width:400
+				})
+			}
+			else
+			{
+			art.dialog.open("{:U('WangcaiPc/NumGoods/choiceCard')}&callback=cardresp&show_source=3&store_mode=2",{
+				title: '添加卡券',
+				width:800
+			});
+			}
+        });
+    $("#smb").click(function(){
+        var uploadType = $('#uploadType').val();
+        //var dialog=art.dialog({title:false,lock:true});
+        if($("#theForm").validationEngine('validate')){
+            $("#theForm").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    dialog.close();
+                     if(data.status == '1'){
+                        window.location.href="{:U('WangcaiPc/NumGoods/sendCardResultCore')}"+'&uploadType='+uploadType;
+                        return false;
+                     }else if(data.status == '0'){
+                        art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0}).time(5);
+                     }else{
+                        data.title = '您上传的文件有点小问题';
+						var errorTips = template('errTips',data);
+						$(".errorMsg").html(data.info);
+                        art.dialog({
+							id:"resultTips",
+                            title: '提示',
+                            content:errorTips,
+                            okVal:"继续发送",
+							width:500,
+                            ok:function(){
+                                if(data.status == '2'){
+                                    $('#goRepeatPhone').val(1);
+                                }
+                                if(data.status == '3'){
+                                    $('#goRepeatFile').val(1);
+                                }
+                                        $("#theForm").ajaxSubmit({
+                                        beforeSubmit:function(){
+                                            dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                                        },
+                                        success:function(data){
+                                            // dialog.close();
+                                             if(data.status == '1'){
+                                                window.location.href="{:U('WangcaiPc/NumGoods/sendCardResultCore')}"+'&uploadType='+uploadType;
+                                                return false;
+                                             }else if(data.status == '0'){
+                                                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0}).time(5);
+                                             }else{
+                                                data.title = '手机号有重复，是否继续发送？';
+                                                errorTips = template('errTips',data);
+                                                $(".errorMsg").html(data.info);
+                                                art.dialog({
+                                                    title: '提示',
+													width:500,
+                                                    content:errorTips,
+                                                    okVal:"继续发送",
+                                                    ok:function(){
+                                                        if(data.status == '2'){
+                                                            $('#goRepeatPhone').val(1);
+                                                        }
+                                                        if(data.status == '3'){
+                                                            $('#goRepeatFile').val(1);
+                                                        }
+                                                         $("#theForm").ajaxSubmit({
+                                                            beforeSubmit:function(){
+                                                                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                                                            },
+                                                            success:function(data){
+                                                                // dialog.close();
+                                                                 if(data.status == '1'){
+                                                                    window.location.href="{:U('WangcaiPc/NumGoods/sendCardResultCore')}"+'&uploadType='+uploadType;
+                                                                    return false;
+                                                                 }else{
+                                                                    art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0}).time(4);
+                                                                }
+                                                            },dataType:'json'
+                                                        });
+                                                    },
+                                                    cancel: function(){
+													 	dialog.close();
+													},
+													cancelVal: "取消"
+                                                });
+                                             }
+                                        },
+                                        dataType:'json'
+                                    });
+                            },
+                            cancel: function(){
+								dialog.close();
+                            },
+							cancelVal: "取消"
+                        });
+                     }
+                },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+
+
+});
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <!--开始引入顶部菜单-->
+            <include file="./Home/Tpl/Alipay/Alipay_public_header.html" topmenuid="alipay"/>
+        </div>
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                    <ul class="shop-Menu">
+                        <include file="./Home/Tpl/Alipay/Index_left_menuNew.html" leftmenuid="yimakaquan"/>
+                    </ul>              
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>批量发送卡券</h4>
+                    </div>                    
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-list">
+                        <form id='theForm' method="post" action="{:U('WangcaiPc/NumGoods/performSendCard')}">
+                            <input type="hidden" name="goRepeatPhone" id="goRepeatPhone" value="0" />
+                            <input type="hidden" name="goRepeatFile" id="goRepeatFile" value="0" />
+                            <div class="showsaloonForm2">
+                                <div class="Gform l">
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;卡券名称</li>
+                                        <li class="Ginput">
+                                        <div class="addPrise mr10" id="isAddCard"><a href="javascript:void(0);" class="addPriseBtn"><i></i>添加卡券</a></div>
+                                        <span class="txtTips" id='isTip'>最多添加一个</span>
+                                            <div class="showPrise">
+                                                <div class="award_list" id="isCard"></div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;发给</li>
+                                        <li class="Ginput">
+                                            <div class="switch">
+                                                <input type="radio" value="0" name="uploadType" id="uploadType">
+                                                <div class="newRadio">
+                                                    <span class="valfirst hover" data-val="0" data-checkbefor="">10个以内手机号</span>
+                                                    <span class="vallast" data-val="1">多于10个手机号</span>
+                                                </div>
+                                                <div class="cl  mt10"></div>
+                                                <div class="newRadio-default">
+                                                    <textarea name="phone_no" placeholder="请填写要发送的手机号。多个手机号请用逗号隔开，最多可填写10个手机号"></textarea>
+                                                </div>
+                                                <div class="newRadio-input">
+                                                    <div class="Gchoose">
+                                                        <input type="text" value="" name="Telsfile">
+                                                        <a href="javascript:void(0)"></a>
+                                                        <a href="javascript:void(0)" class="Gbtn-papers" title="选择材料"><i><input type="file" name="phone_no_path"></i></a>
+                                                    </div>
+                                                    <span class="txtTips"><a href="{:U('WangcaiPc/NumGoods/loadModel')}">【批量发送模板】</a> 每次最多导入1000条手机号</span>
+                                                </div>
+                                            </div>
+                                            <p class="txtTips">注：请确保您的账户余额或旺币余额充足，以免造成发送失败</p>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname">备注</li>
+                                        <li class="Ginput">
+                                        	<textarea name="batch_desc"></textarea>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                    	<li class="Gname"></li>
+                                        <li class="Ginput">
+                                        	<a href="javascript:void(0)" id="smb" class="btn-all btn-updata">确定</a>
+                                    		<a href="javascript:history.go(-1);" class="btn-all-del">取消</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </form>
+                        </div>
+                    </div>
+                    
+                
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+
+<!-- 选择的卡券信息 -->
+<script type="text/html" id="cardresp">
+
+    <dl class="wxCard">
+		<dd style="margin-top:15px;">
+    	<p class="adward_title">
+            <strong class="cardtitle">{{goodName}}</strong>
+            <span style="float:none">
+            <a href="javascript:void(0)" id="editCard">编辑</a>
+            <a href="javascript:void(0)" class="ml10" id="isDel">删除</a>
+            </span>
+        </p>
+        <div class="adShow">
+			<div class="adShow_l shinfo">
+				<img src="{{goodImg}}">
+			</div>
+			<div class="adShow_r">
+				<span class="Astatic">剩余数量&nbsp;<em class="totalNum">{{goodsNum}}</em></span>
+				<span class="Astatic">发放方式&nbsp;<em class="remainNum">短信</em></span>
+			</div>
+            
+		</div>
+		<p class="AstaticDate tip" style="margin-left:10px; margin-top:10px;">{{dtd}}</p>
+        <input type="hidden" value="{{goodsNum}}" name="goodsNum" id="goodsNum">
+        <input type="hidden" value="{{goodName}}" name="goodName" id="goodName">
+        <input type="hidden" value="{{goodImg}}" name="goodImg" id="goodImg">
+		<input type="hidden" value="{{prizeId}}" name="goods_id" id="goods_id">
+        <input type="hidden" value="{{goodsType}}" name="goods_type" id="goods_type">
+        <input type="hidden" value="{{useExplain}}" name="caixin_content" id="caixin_content">
+        
+        <input type="hidden" value="{{timeType}}" name="time_type" id="time_type">
+        <input type="hidden" value="{{verify_begin_date}}" name="use_start_time" id="use_start_time">
+        <input type="hidden" value="{{verify_end_date}}" name="use_end_time" id="use_end_time">
+        <input type="hidden" value="{{dataAmountStart}}" name="later_start_time" id="later_start_time">
+        <input type="hidden" value="{{dataAmountEnd}}" name="later_end_time" id="later_end_time">
+        <input type="hidden" value="{{smsContent}}" name="smsContent" id="smsContent">
+        <input type="hidden" value="{{cusMsg}}" name="cusMsg" id="cusMsg">
+    </dd>
+	</dl>
+
+</script>
+
+<script type="text/html" id="errTips">
+<div class='loadTip dn'>
+    <div class='loadStatus tip'>
+    <dl>
+    <dt>{{title}}</dt>
+    <dd><p><span class="errorMsg"  style="word-wrap:break-word; word-break:break-all">{{info}}</span></p></dd>
+    </dl>
+    </div>
+</div>
+</script>

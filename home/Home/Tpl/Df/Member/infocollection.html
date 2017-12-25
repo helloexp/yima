@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>会员信息采集</title>
+        <meta name="Keywords" content="{:C('SITE_KEYWORDS')}"/>
+        <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <link href="__PUBLIC__/Css/Wactivities.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wdf_cj.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/json2.js?v=__VR__"></script>
+
+        <script type="text/javaScript">
+            $(function () {
+            $(".addToggle1").click(function () {
+            $(".addForm").toggle();
+            windowheight();
+            });
+            // $(".addForm").show();
+
+            });
+            
+            function statusChange(batch_id,status){
+	if(status==1){
+		var title="您确认启用该活动？";
+	}else{
+		var title="您确认停止该活动？";
+	}
+    art.dialog.confirm(title,function(){
+        $.post("{:U('Df/Bm/editStatus')}",{"batch_id":batch_id,"status":status},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>更新成功</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+            
+        </script>
+    </head>
+
+    <body>
+        <div id="wrapper">
+            <include file="./Home/Tpl/Public/Public_header.html"/>
+            <div id="container">
+                <div id="main" class="rel">
+                    <div class="sidenav">
+                        <include file="Member/menu" leftmenuid="hyxxcj"/>
+                    </div>
+                    <div class="subcon fn">
+                        <div class="df-collection">
+                            <div class="addForm">
+                                <div class="collectionBox fn">
+                                    <div id="name_item"></div>
+                                    <div class="btn-submit l"><input type="submit" id="item_save" value="保存" class="submit"/><input
+                                            type="reset" name="" value="取消" class="reset"/></div>
+                                </div>
+                            </div>
+                            <div class="activity">
+                                <h3>采集信息活动<a href="{:U('Df/Bm/add')}" class="btn-add"><i></i>&nbsp;发布会员信息采集活动</a>
+                                <a href="javascript:;" class="btn-add addToggle1" id="">配置采集信息</a>
+                                </h3>
+                                <volist name="query_list" id="v" >
+                                <div class="list">
+                                    <div class="title fn">
+                                        <div class="l"><?php echo $v['status'] == '1'?'<i class="icon-on"></i>':'<i class="icon-off"></i>';?><span><?php echo $v['name'];?> </span></div>
+                                        <div class="r">
+                                            <a href="<?php echo U('LabelAdmin/CjSet/index','batch_id='.$v['id']);?>" class="btn blue">设置抽奖</a>
+                                            <a href="<?php echo U('LabelAdmin/BindChannel/index','batch_type=1004&batch_id='.$v['id']);?>" class="btn blue">发布活动</a>
+                                        </div>
+                                    </div>
+                                    <ul>
+                                        <li>所属商户：<span><?php echo D('node')->getNodeName($v['node_id']);?></span></li>
+                                        <li>活动时间：<span><?php echo date('Y-m-d',strtotime($v['start_time']));?>&nbsp;&nbsp;-&nbsp;&nbsp;<?php echo date('Y-m-d',strtotime($v['end_time']));?></span></li>
+                                        <li>访问量：<span class="blue"><a href="{:U('LabelAdmin/Chart/clickChart',array('batch_id'=>$v['id'],'batch_type'=>1004))}">{$v['click_count']}</a></span>中奖数：<span class="blue"><a href="{:U('LabelAdmin/Chart/clickChart',array('batch_id'=>$v['id'],'batch_type'=>1004))}">{$v['send_count']}</a></span><a
+                                                href="javascript:;" class="btn blue"><a href="javascript:;" onclick="javascript:art.dialog.open('{:U('LabelAdmin/CjRuleList/index',array('batch_id'=>$v['id'],'batch_type'=>1004))} ',{width: 700, height: 400 ,title:'卡券发放记录'})  ">卡券发放记录</a></a></li>
+                                    </ul>
+                                    <div class="menu fn">
+                                        <a href="<?php echo U('Df/Bm/edit/',array('id'=>$v['id']));?>" class="btn btn1"><i></i>编辑活动</a>
+                                        <li class="opr-item">
+                                    <?php if($v['status'] == '1'){?>
+                                    <a href="javascript:void(0);" onclick="statusChange('<?php echo $v['id']?>','2')" class="btn btn2"><i class="icon-stop"></i><span>停止活动</span></a>
+                                    <?php }else{?>
+                                    <a href="javascript:void(0);" onclick="statusChange('<?php echo $v['id']?>','1')" class="btn btn6"><i class="icon-begin"></i><span>启用活动</span></a>
+                                    <?php }?>
+                                </li>
+                                        <a href="<?php echo U('LabelAdmin/Chart/channelChart',array('batch_type'=>1004,'batch_id'=>$v['id']));?>" class="btn btn3"><i></i>渠道分析</a>
+                                        <a href="<?php echo U('LabelAdmin/DownCj/winningExport',array('batch_id'=>$v['id'],'batch_type'=>1004));?>" class="btn btn4"><i></i>下载中奖名单</a>
+                                        <a href="<?php echo U('LabelAdmin/Bm/info',array('batch_id'=>$v['id'],'batch_type'=>1004));?>" class="btn btn5"><i></i>查看调研结果</a>
+                                    </div>
+                                </div>
+                                    </volist>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html"/>
+        </div>
+        <div class="service"></div>
+
+    </body>
+    <script id="tpl_name_item" type="text/html">
+        <div class="l name">
+            <h4 class="title"><span>采集信息名称</span></h4>
+            <ul class="list">
+                <%for(d in list){
+                var disabled = +d !== index ? 'disabled="disabled"' : '';
+                %>
+                <li class='fn' v-repeat="list">
+                    <input type='text' class="data-name" value='<%=list[d].name%>' placeholder='输入采集名称' maxlength='12' <%=disabled%> />
+                           <label>
+                            <a href='javascript:;' class="edit_name">编辑</a>&nbsp;|&nbsp;
+                            <a href='javascript:;' class='del_name'>删除</a>
+                        </label>
+                </li>
+                <%}%>
+            </ul>
+            <div class="btn"><a href="javascript:;" class="btn-add" id="addName"><i></i>&nbsp;新增</a></div>
+        </div>
+        <div class="r content">
+            <h4 class="title"><span>采集信息内容</span></h4>
+            <ul class="list fn">
+                <%if(list[index] != undefined){%>
+                <%for(d in list[index]['item']){%>
+                <li class='fn'>
+                    <input type='text' class="data-item_name" value='<%=list[index]['item'][d]%>' placeholder='输入采集内容'
+                           maxlength='12'/>
+                           <label>
+                            <!-- <a href='javascript:;' class='edit_item'>编辑</a>&nbsp;|&nbsp; -->
+                            <a href="javascript:;" class='del_item'>删除</a>
+                        </label>
+                </li>
+                <%}}%>
+                <li class="add fn"><a href="javascript:;" id="addItem" class="add-btn addContent" ><i></i></a></li>
+                <ul>
+                    </div>
+                    </script>
+                    <script>
+window._g = window.g || {};
+_g.url_collecting_item = "{:U('Df/Member/infocollection_save')}";
+(function () {
+    var _data = {
+        list: <?php echo $row['param_value'];?>,
+        index: null,
+    };
+
+    function flush_tpl() {
+        $('#name_item').html(template('tpl_name_item', _data));
+    }
+
+    $(document).on('click', '#addName', function () {
+        _data.list.push({
+            name: "",
+            item: []
+        })
+        _data.index = _data.list.length - 1;
+        console.log(_data);
+        flush_tpl();
+        $('.data-name:eq(' + _data.index + ')').focus();
+    })
+            .on('click', '#addItem', function () {
+                if (_data.index === null)
+                    return;
+                _data.list[_data.index]['item'].push('');
+                flush_tpl();
+                $('.data-item_name:eq(' + (_data.list[_data.index]['item'].length - 1) + ')').focus();
+            })
+            .on('click', '.edit_name', function () {
+                _data.index = $(this).parent().parent().index();
+                flush_tpl();
+            })
+            .on('click', '.del_name', function () {
+                index = $(this).parent().parent().index();
+                _data.list.splice(index, 1);
+                flush_tpl();
+            })
+            .on('click', '.edit_item', function () {
+                // index = $(this).parent().parent().index();
+                // _data.list.splice(index, 1);
+                // flush_tpl();
+            })
+            .on('click', '.del_item', function () {
+                index = $(this).parent().parent().index();
+                _data.list[_data.index]['item'].splice(index, 1);
+            })
+            .on('change', 'input[type="text"]', function () {
+                _data.list[_data.index]['name'] = $('.data-name:eq(' + _data.index + ')').val();
+                _data.list[_data.index]['item'] = $('.data-item_name').map(function () {
+                    return this.value
+                }).get();
+            })
+            .on('click', '#item_save', function () {
+                $.post(_g.url_collecting_item, {data: JSON.stringify(_data.list)}, function (data) {
+                    
+                    if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>操作成功</div>",fixed: true,padding:0,time:2});
+                 _data.index = null;
+                 flush_tpl();
+                
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+                    
+                    //			_data.list = resp;
+                    //			flush_tpl();
+                }, 'json');
+                //console.log(JSON.stringify(_data.list));
+            });
+    $.get(_g.url_collecting_item, function (resp) {
+        // _data.list = resp;
+
+    }, 'json');
+    flush_tpl();
+})();
+                    </script>
+                    </html>

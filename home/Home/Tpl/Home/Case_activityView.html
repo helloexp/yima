@@ -1,0 +1,670 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{$batchData['name']}_O2O案例__{:C('SITE_TITLE')}</title>
+<meta name="Keywords" content="零售O2O,服装O2O,餐饮O2O,金融O2O,家居O2O,旅游O2O" />
+<meta name="description" content="汇集国内各行业O2O实战案例，覆盖零售O2O，服装O2O，餐饮O2O，金融O2O，家居O2O，旅游O2O等各大行业。" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wonlineactivity.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script src="__PUBLIC__/Js/jquery-ui-1.8.custom.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/Wonlineactivity.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/jquery.easing.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/masonry/jquery.mousewheel.min.js?v=__VR__"/>
+<script language="javascript">
+$(document).ready(function(e){
+    defaultsolide("activityList",5);
+	//判断浏览器
+	try {
+		var urlhash = window.location.hash;
+		if (!urlhash.match("fromapp")){
+			if ((navigator.userAgent.match(/(iPhone|iPod|Android|ios)/i))){
+				window.location="index.php?&g=Label&m=Label&a=index&id={$label_id}";
+			}
+		}
+	}
+	catch(err)
+	{
+	}
+	//判断浏览器
+	var ua = navigator.userAgent;
+	ua = ua.toLowerCase();
+	var match = /(webkit)[ \/]([\w.]+)/.exec(ua) ||
+	/(opera)(?:.*version)?[ \/]([\w.]+)/.exec(ua) ||
+	/(msie) ([\w.]+)/.exec(ua) ||
+	!/compatible/.test(ua) && /(mozilla)(?:.*? rv:([\w.]+))?/.exec(ua) ||
+	[];
+    switch(match[1]){
+		case "msie":      //ie
+			$(".activityView-Preview").append("<div style='width:335px; height:40px; position:absolute; top:75px; left:30px; background:#333; color:#fff; line-height:40px;'>您的浏览器无法完美支持预览,您可以扫描左侧二维码参与活动</div>");
+		break;
+	}
+
+	//提交一级留言
+	$("#submsg").click(function(){		
+       
+		var dialog;
+        if($("form").validationEngine('validate')){
+			$("form").ajaxSubmit({
+				beforeSubmit:function(){
+					dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+				},
+				success:function(data){
+					 if(data.status == '1'){
+                         var info = data.info;
+                         var task_info = '';
+                         if(typeof(data.info) == 'object'){
+                             info = data.info.info;
+                             task_info = data.info.task_info;
+                         }
+                         //如果有任务信息
+                         if(task_info){
+                             dialog.close = function(){
+                                 this.hide();
+                                 msgmoneym(task_info,1);
+                             };
+                         }
+                         else{
+                             dialog.close = function(){
+                                 setTimeout(function(){
+                                     window.location.reload();
+                                 },1000);
+                                 return false;
+                                 //window.location.href="index.php?m=Case&a=activityView&show_id={$label_id}&p=1#comment";
+                             };
+                         }
+                       dialog.time(2).content("<div class='msg-all-succeed'>"+info+"</div>");
+					  }else if(data.status == '2'){
+						 //如果是没有登录直接弹出登陆框
+						 dialog.close();
+						 $(".loginBg.login2").fadeIn();
+					  }else{
+
+						   //改版登录提交地址
+						   //$("#loginform").attr("action","index.phpssoAjaxlogin");
+	
+
+						   dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+						   
+					  }
+				},
+				dataType:'json'
+			});
+		};
+    });
+	//提交一级留言
+
+
+	//提交子级留言
+	$(".subreply,.ptsub").live("click",function(){
+		var _this=$(this)
+		var thisform=$(this).parent("form");
+		var dialog;
+		//var thisform=$(this).find("form[name=replyform]");
+		//alert(thisform);
+        //if($("#".thisform).validationEngine('validate')){			
+			$(thisform).ajaxSubmit({
+				beforeSubmit:function(){
+					dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+				},
+				success:function(data){
+					 if(data.status == '1'){
+
+                         //如果有任务信息
+                         var task_info = data.task_info || '';
+                         if(task_info){
+                             dialog.close = function(){
+                                 this.hide();
+                                 msgmoneym(task_info,0);
+                             };
+                         }
+						   dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+
+						   if(!data.head_photo){
+								var head_photo_str='<img class="in-head" src="__PUBLIC__/Image/portrait.gif" alt="" />';
+						   }else{
+								var head_photo_str='<img class="in-head" src="'+data.head_photo+'" alt="" />';
+						   }						   
+
+						 var html=[
+						  		'<dl>',
+									head_photo_str,
+									'<div class="in-message">',
+										'<dt>'+data.node_name+'：</dt>',
+										'<dd><p>'+data.content+'</p></dd>',
+										'<dd class="in-toolbar">',
+											'<span class="in-time">'+data.add_time+'</span>',
+											' <a class="in-reply" href="javascript:void(0)">回复</a>',                          
+										'</dd>',
+                                         '<dd class="in-form">',
+											'<form name=replyform id="replyform" action="{:U('Home/Case/replychild')}" method="post">',
+											'<input type="hidden" name="show_id" id="show_id" value="'+data.label_id+'">',
+											'<input type="hidden" name="pid" id="pid" value="'+data.pid+'">',
+                                             '<input class="in-re" type="text" name="childcontent"  id="childcontent" value=""/>',
+                                             '<input class="in-btn subreply" type="button"  value="提交" />',
+											 '</form>',
+                                        '</dd>',
+									'</div>',
+								'</dl>'].join('');
+								_this.closest(".re-menu").find(".repost").after(html);
+
+								//_this.unbind("click");
+
+					  }else{
+						   dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+						 
+					  }
+				},
+				dataType:'json'
+			});
+		//};
+    });
+	//提交子级留言
+
+
+
+	$(".pageul a").each(function(){
+			$(this).attr("href",$(this).attr("href")+"#comment");
+	});
+
+
+	//联系商家
+	$(".contact_node").click(function(){
+         var contact_node=$(this).attr("data-rel");
+		 
+		 art.dialog.open("index.php?g=Home&m=Case&a=contact_node&contact_node="+contact_node+"&id="+<?php echo $label_id; ?>,{
+			lock: true,
+			title:"联系商家",
+			width:620,
+			height:390
+		});  
+     });
+
+
+	//点赞
+	$(".support").click(function(){
+		var id=parseInt($(this).attr("data-id"));
+		var num=parseInt($(this).attr("data-rel"))+1;
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		var _this=$(this);
+		$.post("{:U('Home/Case/support')}",{'id':id},function(data){
+				if(data.status==1){
+					//dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+					dialog.close();
+					_this.text("赞（"+num+"）");
+					_this.removeClass("support").css("color","#999");
+					_this.unbind("click")
+					return false;
+				}else{
+					dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+				}
+			},'json');
+	});
+
+	//活动点赞
+	$("#batch_love").click(function(){		
+		var id=parseInt($(this).attr("data-id"));
+		var num=parseInt($(this).attr("data-rel"))+1;
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		var _this=$(this);
+		$.post("{:U('Home/Case/batch_support')}",{'id':id},function(data){
+				if(data.status==1){
+					//dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+					dialog.close();
+					_this.text("赞("+num+")");
+					_this.removeClass("support").css("color","#999");
+					_this.unbind("click")
+					return false;
+				}else{
+					dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+				}
+			},'json');
+	});
+
+});
+
+
+
+
+
+
+
+function cancelCollect(label_id){
+	var dialog = art.dialog({title:false,fixed: true,padding:0});
+	$.post("{:U('Home/Case/cancelCollect')}",{'label_id':label_id},function(data){
+            if(data.status==1){
+            	dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+				window.location.reload();
+                return false;
+            }else{
+                dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+            }
+        },'json');
+	
+}
+
+
+function setCollect(label_id){
+	var dialog = art.dialog({title:false,fixed: true,padding:0});
+	$.post("{:U('Home/Case/setCollect')}",{'label_id':label_id},function(data){
+            if(data.status==1){
+            	dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>"); 
+				window.location.reload();
+                return false;
+            }else{
+                dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+            }
+        },'json');
+	
+}
+
+function support(id){
+	var dialog = art.dialog({title:false,fixed: true,padding:0});
+	$.post("{:U('Home/Case/support')}",{'id':id},function(data){
+            if(data.status==1){
+            	dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>"); 
+				$(this).text("")
+                return false;
+            }else{
+                dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+            }
+        },'json');
+}
+
+function batch_support(id){
+	var dialog = art.dialog({title:false,fixed: true,padding:0});
+	$.post("{:U('Home/Case/batch_support')}",{'id':id},function(data){
+            if(data.status==1){
+            	dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>"); 
+				$(this).text("")
+                return false;
+            }else{
+                dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+            }
+        },'json');
+}
+
+function SetWinHeight(obj){
+    var win=obj;
+    if (document.getElementById){
+        if (win && !window.opera){
+            if (win.contentDocument && win.contentDocument.getElementById("wrapper").offsetHeight){
+				if(win.height>=win.contentDocument.getElementById("wrapper").offsetHeight){
+					return false;
+				}
+                win.height = win.contentDocument.getElementById("wrapper").offsetHeight; 
+            }else if(win.Document && win.Document.getElementById("wrapper").scrollHeight){
+				if(win.height>=win.contentDocument.getElementById("wrapper").offsetHeight){
+					return false;
+				}
+                win.height = win.Document.getElementById("wrapper").scrollHeight;
+            }
+        }
+    }
+}
+</script>  
+</head>
+
+<body>
+    <div id="wrapper" class="bgf3f3f3">
+    <include file="Public:loginHeader"/>
+        <!--内容-->
+        <div id="main">
+            <div class="all_contect">
+                <!--预览内容-->
+                <div class="activityView fn">
+                    <div class="activityView-Preview">
+                        <div class="PreviewCon">
+                            <div id="mcs_container" class="mcs_container">
+                                <div class="customScrollBox">
+                                    <div class="container">
+                                        <div class="content">
+                                            <iframe src="<?php echo U('Label/Label/index','id='.$batchData['id']);?>" id="PreviewUrl" name="PreviewUrl" frameborder="0" allowtransparency="true" scrolling="no" style="width:100%;" height="586" onload="Javascript:SetWinHeight(this)"></iframe>
+                                        </div>
+                                    </div>
+                                    <div class="dragger_container">
+                                        <div class="dragger"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activityView-title"><span class="font-606060">{$batchData['name']}</span></div>
+                    <div class="activityView-con">                       
+						<img src="{$batchData['log_img']}" alt="" />						
+
+                        <p>时间：{$batchData.start_time|dateformat=###,'Y年m月d日'}—{$batchData.end_time|dateformat=###,'Y年m月d日'}</p>
+                        <p>商户：{$batchData['node_short_name']}</p>   
+                          <p>活动类型：{$batchtypename}</p>
+                        <p>状态：<span class="imp"><?php $currdate=date('Ymd').'235959';if($batchData['status']==1&&$batchData['end_time']>=$currdate){echo '进行中';}else{echo '已结束';}?></span></p>
+                        <p>奖品：<?php if($batchData['is_cj']==1){echo '有';}else{echo '没有';}?></p>                                   
+                        <p><span class="font-e51010">{$batchData['click_count']}人看过&nbsp;&nbsp;|&nbsp;&nbsp;<a href="#comment">{$guestCount}人已评论</a></span></p>  
+                        <a class="btn bg-red" href=" <?php $url=C('BATCH_CREATE_URL'); echo $url[$batchData['batch_type']] ?>">创建该活动</a>
+						<div class="l fn">
+                        <?php
+						if($batchData['my_count']>0){
+						?>
+						
+						<a class="btn bg-gray1 mt10" href="javascript:void(0)" onclick="cancelCollect('<?php echo $label_id;?>')">取消收藏</a> 
+						
+						<?php
+						}else{
+						?>
+						  <a class="btn bg-gray1 mt10" href="javascript:void(0)" onclick="setCollect('<?php echo $label_id;?>')">收藏(<?php echo $batchData['collect_count']?>)</a> 
+						<?php
+						}						
+						?>
+						 <a class="btn bg-gray2 mt10" href="javascript:void(0);" id="batch_love" data-id="<?php echo $batchData['id'];?>" data-rel="<?php echo $batchData['love_count'];?>">赞(<?php echo $batchData['love_count']?>)</a>
+						 </div>
+                         <div class="contact">
+                            <i class="qq"></i><a class="contact_node" href="javascript:void(0)" data-rel="<?php echo $batchData['node_id']?>">联系商家</a>
+                            <i class="pm"></i><a href="http://wpa.qq.com/msgrd?v=3&amp;uin=2105236636&amp;site=qq&amp;menu=yes">咨询客服</a>
+								<div class="dn">
+                                    <a href="javascript:void(0)" onclick="managercard()"><span class="useropr-important">我的客户经理</span></a>
+                                    <div id="managercardName" class="dn"><?php if(!empty($_SESSION['card_name'])){?><?php echo $_SESSION['card_name'];?><?php }else{?>客服热线<?php }?></div>
+                                    <div id="managercardPosition" class="dn"></div>
+                                    <div id="managercardCompany" class="dn">上海新大陆翼码信息科技股份有限公司</div>
+                                    <div id="managercardQQ" class="dn"></div>
+                                    <div id="managercardWeibo" class="dn"></div>
+                                    <div id="managercardWeixin" class="dn"></div>
+                                    <div id="managercardMphone" class="dn"><?php if(!empty($_SESSION['card_phone'])){?><?php echo $_SESSION['card_phone'];?><?php }else{?>4008827770<?php }?></div>
+                                    <div id="managercardTphone" class="dn"></div>
+                                    <div id="managercardMail" class="dn"><?php if(!empty($_SESSION['card_email'])){?><?php echo $_SESSION['card_email'];?><?php }?></div>
+                                    <div id="managercardImg" class="dn">__PUBLIC__/Image/cardqr.png</div>
+                                    <div id="onlinecontant" class="dn">{$messageSum}</div>
+                                </div>
+                        </div>
+						 <div class="conv-bor">
+                            <i class="close-conv"></i>
+                            <p>赶紧私信我吧！或许我们可以来一场异业联盟，或许我们可以在这里发现合作机会，或许你只是想和我随便聊聊。都可以私信我哦！</p>
+                        </div>
+                    </div>
+                    <div class="activityView-share">
+                        <div class="activityView-qr"><p><span><img src="<?php echo U('LabelAdmin/ShowCode/index','id='.$batchData['id']);?>" /></span></p></div>
+                        <div class="activityView-p">扫一扫参与活动</div>
+                        <div class="fn tc">
+                            <div class="bdsharebuttonbox tc"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a><a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"2","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+                        </div>
+                    </div>
+                    <div class="cl"></div>
+                    <div class="activityView-text">
+                        <div class="activityView-text-title"></div>
+                        <div class="fn mt20">
+                            <p>{$batchData['wap_info']|htmlspecialchars_decode}</p>
+                        </div>
+                    </div>
+                    <div class="activityView-comt">
+                        <div class="title"></div>
+                        <div class="comment" id="comment">
+                             <form action="{:U('Home/Case/submit_guestbook')}" method="post">
+                                <input type="hidden" name="label_id" id="label_id" value="{$label_id}">
+                                <div class="q-re fn">
+                                    <a href="javascript:;" class="q-bg1">页面信息量丰富</a>
+                                    <a href="javascript:;" class="q-bg2">页面很酷炫</a>
+                                    <a href="javascript:;" class="q-bg3">很有创意</a>
+                                    <a href="javascript:;" class="q-bg4">页面较空洞</a>
+                                    <a href="javascript:;" class="q-bg5">主题设计很新颖</a>
+                                    <a href="javascript:;" class="q-bg6">富文本很强大</a>
+                                </div>
+                                <textarea name="content" id="content" class="validate[required,maxSize[400]] area" placeholder="亲，为了营造良好的沟通气氛，留言内容请尽可能的丰富一点，可在这里发表对活动的建议、探讨新的使用场景"></textarea>
+                                 <input type="button" id="submsg" class="btn " type="button" value="提交留言"  />
+                                 <div style="float:right;margin-top:30px; margin-right:20px;">
+                                     <label><input type="checkbox" class="vm j_check_shouzhe" checked disabled/>同意遵守</label>&nbsp;<a href="javascript:void(0);" class="font-fe j_open_shouzhe" data-href="{:U('o2oshouzhe')}">旺财平台用户留言守则</a>
+                                 </div>
+                            </form>
+                                <ul class="cl">
+                                    <h3>共{$guestCount}条评论</h3>
+                                    <?php
+                                        if(!empty($queryList)){
+                                            foreach($queryList as $gk=>$gal){
+                                    ?>
+                                    <li>
+                                        <i class="head">
+                                        <?php 
+                                        if($gal['head_photo']!="")
+                                        {
+                                        ?>
+                                        <img class="head" src="<?php echo get_upload_url($gal['head_photo'])?>" alt="" />
+                                        <?php
+                                        }else{
+                                        ?>
+                                          <img src="__PUBLIC__/Image/portrait.gif" id="head_photo_src"/>
+                                        <?php
+                                        }
+                                        ?>
+                                        </i>
+
+                                        <div class="rit">
+                                            <h2 class="tit"><?php echo $gal['node_name']?></h2>
+                                            <p class="cont"><?php echo $gal['content']?></p>
+                                            <div class="tool">                                          
+                                                <p class="click"><a href="javascript:void(0)" class="support" data-id="<?php echo $gal['id'];?>" data-rel="<?php echo $gal['support'];?>">赞（<?php echo $gal['support'];?>）</a>　|　<a  name="{$gal[id]}" data-id='{$gal[id]}' class="reply" href="javascript:void(0)">回复（<?php echo $gal['count'];?>）</a></p>
+                                                <p class="time"><?php echo dateformat($gal['add_time']);?></p>
+                                            </div>
+                                        </div>
+                                        <div class="cl"></div>
+                                        <div class="re-menu">
+                                            <dl class="repost">
+                                                <form data-id="{$gal['id']}"  name=ptform id="ptform" action="{:U('Home/Case/replychild')}" method="post">
+                                                <input type="hidden" name="show_id" id="show_id" value="<?php echo $label_id;?>">
+                                                <input type="hidden" name="pid" id="pid" value="<?php echo $gal['id'];?>">
+                                                <input placeholder="请输入回复内容..." name="childcontent" id="childcontent" class="f-reply" type="text" />
+                                                <input class="in-btn ptsub" type="button" value="提交" />
+                                                </form>
+                                            </dl>
+                                            <?php                                           
+                                            if(!empty($gal['child'])){
+
+                                                //print_r($gal['child'][0]);
+                                                foreach($gal['child'][0] as $k=>$kal){
+                                            ?>
+                                            <dl>
+                                                <?php
+                                                if($kal['head_photo']!=""){
+                                                ?>
+                                                <img class="head" src="<?php echo get_upload_url($kal['head_photo'])?>" style="width:30px;height:30px;"/>
+                                                <?php
+                                                }else{                                              
+                                                ?>
+                                                <img class="in-head" src="__PUBLIC__/Image/new_pic/in-head.png" alt="" />
+                                                <?php
+                                                }
+                                                ?>
+                                                
+                                                <div class="in-message">
+                                                    <dt><?php echo $kal['node_name']?>：</dt>
+                                                    <dd><p><?php echo $kal['content']?></p></dd>
+                                                    <dd class="in-toolbar">
+                                                        <span class="in-time"><?php echo dateformat($kal['add_time']);?></span>
+                                                       <a class="in-reply"   name="{$kal[id]}" data-id='{$kal[id]}' href="javascript:void(0)" id="replyone" data-label="<?php echo $label_id;?>" data-path="<?php echo $kal['path'];?>" data-pid="<?php echo $kal['id'];?>">回复</a>                            
+                                                    </dd>
+                                                    <dd class="in-form">
+                                                        <form  data-id="{$kal['id']}" name=replyform id="replyform" action="{:U('Home/Case/replychild')}" method="post">
+                                                        <input type="hidden" name="show_id" id="show_id" value="<?php echo $label_id;?>">                                   
+                                                        <input type="hidden" name="pid" id="pid" value="<?php echo $kal['id'];?>">
+                                                        <input class="in-re" type="text" name="childcontent"  id="childcontent" value=""/>
+                                                        <input class="in-btn subreply" type="button"  value="提交" />
+                                                        </form>
+                                                    </dd>
+                                                </div>
+                                            </dl>
+                                            <?php
+                                                }
+                                            }
+                                            ?>
+                                            
+                                        </div>       
+                                    </li>
+                                    <?php
+                                        }
+                                    }
+                                    ?>
+                                     
+                                </ul>
+
+                            </form>
+                        </div>
+                         <!--分页-->
+                        <div class="pageBase-sm mt20">
+                            <ul class="pageul">{$page}</ul>
+                        </div>
+                        <!--分页end-->
+                    </div>
+                    <div class="activityView-scene">
+                        <div class="title"></div>
+                        <p>线下渠道</p>
+                        <img src="__PUBLIC__/Image/new_pic/offline.png" alt="" />
+                        <p>线上渠道</p>
+                        <img src="__PUBLIC__/Image/new_pic/online.png" alt="" />
+                    </div>
+                    
+                </div>
+                <h1 class="act-tit">{$batchtypename}也可以这么玩</h1>
+                <div class="activityList-bg">
+                    <div class="activityList">
+                        <ul class="activityList-con">
+                            <volist name="batchList" id="vo">
+                            <li>
+                                <a target="_blank" href="{:U('Home/Case/activityView',array('show_id'=>$vo['id']))}">
+                                <div class="activityList-img"><img src="{$vo['img']|get_upload_url}" /></div>
+                                <div class="activityList-title">{$vo['name']}</div>
+                                <div class="box_contect_btns">
+                                    <span class="icon4 mr10">{$vo['collect_count']}</span>
+                                    <span class="icon5">{$vo['guestCount']}</span>
+                                </div>
+                                </a>
+                            </li>
+                            </volist>
+                        </ul>
+                        <!-- <div class="oper">
+                            <i>●</i><i>●</i>
+                        </div> -->
+                    </div>
+                </div>
+                <!--预览内容-->
+            </div>
+        </div>
+        <!--内容-->
+    <include file="./Home/Tpl/Public/Public_Indexfooter.html" />               
+    <include file="Public:Ajax_login"/>
+	<include file="Public:login"/>
+    </div>
+</body>
+<script>
+$(document).ready(function(){
+	$(".reply").toggle(function(){
+        var c =$(this).parents('li').find('.re-menu')
+        c.show();
+        oprchange("activityList",5);/*此行用于最下方箭头定位,下同*/
+    },function(){
+         var c =$(this).parents('li').find('.re-menu')
+         c.hide();
+        oprchange("activityList",5);
+    })
+    
+    $(".in-reply").live("click",function(){
+        var c=$(this).parents('dl').find('.in-form');
+        var name=$(this).parents('dl').find('dt').text();
+        c.find('.in-re').val('回复'+name); 
+        c.toggle();
+        oprchange("activityList",5);
+	  });
+	   <if  condition="!empty($hid)">
+	   var hid={$hid};
+	   <else/> var hid="";
+	   </if>
+	   if(hid!=''){
+	 			$('a[data-id='+hid+']').click();
+				 $('a[data-id='+hid+']').parents('li').find('.re-menu').show()
+				location.hash=hid;
+				setTimeout(function(){$('form[data-id='+hid+']').find('input[name=childcontent]').focus()},2000);
+	 	 	}
+
+
+	
+})
+
+
+    //快捷回复
+    $(".activityView-comt .q-re a").on('click', function(event) {
+        event.preventDefault();
+        var text = $(this).text();
+        var t_before = $(this).parents(".comment").find("textarea").val();
+        if(t_before!=""){
+            $(this).parents(".comment").find("textarea").val(t_before+'　'+text);
+        }else{
+            $(this).parents(".comment").find("textarea").val(text);
+        }
+    });
+
+     // 外回复
+      
+      //内回复
+
+	  //关闭提示框
+      $(".close-conv").on('click',function(event) {
+          event.preventDefault();
+          $(".conv-bor").hide();
+      });
+	  
+      
+
+     $(".j_open_shouzhe").click(function(){
+         art.dialog.open($(this).attr('data-href'),{
+             width:'80%',
+             height:'90%',
+             title:'旺财平台用户留言守则',
+             lock:true
+         });
+     });
+
+</script>
+<script>
+$(window).load(function() {
+    mCustomScrollbars();
+});
+
+function mCustomScrollbars(){
+    /* 
+    malihu custom scrollbar function parameters: 
+    1) scroll type (values: "vertical" or "horizontal")
+    2) scroll easing amount (0 for no easing) 
+    3) scroll easing type 
+    4) extra bottom scrolling space for vertical scroll type only (minimum value: 1)
+    5) scrollbar height/width adjustment (values: "auto" or "fixed")
+    6) mouse-wheel support (values: "yes" or "no")
+    7) scrolling via buttons support (values: "yes" or "no")
+    8) buttons scrolling speed (values: 1-20, 1 being the slowest)
+    */
+    $("#mcs_container").mCustomScrollbar("vertical",1000,"easeOutCirc",1.05,"auto","yes","yes",15); 
+}
+
+/* function to fix the -10000 pixel limit of jquery.animate */
+$.fx.prototype.cur = function(){
+    if ( this.elem[this.prop] != null && (!this.elem.style || this.elem.style[this.prop] == null) ) {
+      return this.elem[ this.prop ];
+    }
+    var r = parseFloat( jQuery.css( this.elem, this.prop ) );
+    return typeof r == 'undefined' ? 0 : r;
+}
+
+/* function to load new content dynamically */
+function LoadNewContent(id,file){
+    $("#"+id+" .customScrollBox .content").load(file,function(){
+        mCustomScrollbars();
+    });
+}
+</script>
+<js href="__PUBLIC__/Js/masonry/jquery.mCustomScrollbar.js?v=__VR__"/>
+</html>

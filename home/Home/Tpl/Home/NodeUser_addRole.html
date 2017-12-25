@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>业务服务-角色添加</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+    $("#smb").click(function(){
+        var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                    var check_box = $("[name='power_id[]']:checked");
+                    if(check_box.length==0){
+                        dialog.time(3).content("<div class='msg-all-error'>请选择要禁用的角色权限</div>");
+                        return false;
+                    }
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                    	 dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                         setTimeout("var win = art.dialog.open.origin;win.location.reload();",500);
+                         return false;
+
+                      }else{
+                         dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                },
+                dataType:'json'
+            });
+            return false;
+        }
+        
+    });
+    
+    $(".group_title").click(function(){
+    	if(this.checked){
+    		$(this).closest(".fn").find("input[name='power_id[]']").attr('checked',true);
+    	}else{
+            $(this).closest(".fn").find("input[name='power_id[]']").attr('checked',false);
+    	}
+    });
+})
+</script>
+</head>
+<body class="bgfff">
+<div class="fn">
+    <div class="global-input6 fn pt30">
+        <form method="post" action="{:U('Home/NodeUser/addRole')}">
+            <ul>
+                <li class="global-input6-name">*&nbsp;角色名称：</li>
+                <li class="global-input6-input"><input name="name" type="text"  class="validate[required,maxSize[32]] textbox w240"/></li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;禁用的权限：</li>
+                <li class="global-input6-input" style="line-height:30px;">
+                    <volist name="roleList" id="vo">
+                    <div class="fn <if condition="$i gt 1">pt10</if>">
+                        <input type="checkbox" class="group_title" />
+                        <p class="ml5"><b>{$vo[0]['powergroup_name']}</b></p>
+                        <div class="fn">
+                            <volist name="vo" id="v">
+                            <dd class="ml20 l"><input type="checkbox" name="power_id[]" value="{$v['power_id']}"/><p class="ml5">{$v['power_name']}</p></dd>
+                            </volist>
+                        </div>
+                    </div>
+                    </volist>
+                </li>
+            </ul>
+            <ul>
+                <li class="global-input6-name"></li>
+                <li class="global-input6-input">
+                <a href="javascript:;" id="smb" title="确认" class="btn-all w110">确认</a>
+                <a href="javascript:art.dialog.close();" title="取消" class="btn-all-del w110 ml10">取消</a></li>
+            </ul>
+        </form>
+    </div>
+</div>
+</body>
+</html>

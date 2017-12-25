@@ -1,0 +1,351 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券分销助手-我要发货</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js?v=__VR__"></script>
+
+<script>
+$(document).ready(function(e){
+	$("#re_node_id").blur(function(){
+		var re_node_id=$(this).val();
+		$.getJSON("{:U('Hall/Mypartner/ck_saleList')}",{rela_node_id:re_node_id},function(data){
+			if(data.status==1){
+				var control_flag=data.data.control_flag;
+				var control_type=data.data.control_type;
+				var bail=data.data.bail;
+				var warning_amt=data.data.warning_amt;
+				if(control_flag==1){
+					control_type==1?$("#control_type").html("按采购方使用量"):$("#control_type").html("按供货方验证量");
+					$("#bail").html(bail);
+					$("#warning_amt").html(warning_amt);
+				}else{
+					$("#control_type").html("--");
+					$("#bail").html("--");
+					$("#warning_amt").html("--");
+				}
+			}else{
+				art.dialog.time(5).content("<div class='msg-all-error'>"+data.info+"<div>");
+			}
+		});
+	});
+	$("#smb").click(function(){
+        var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                    	   dialog.close();
+                           $(".showsaloonChoose").hide();
+                           $(".showsaloonForm1").hide();
+                           $(".showsaloonForm2").hide();
+                           $(".showsaloonmsg").show();
+                           return false;
+                      }else{
+                           dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+	
+	
+	// 分销
+	$("#voucherSmb").click(function(){
+        var dialog;
+        if($("#voucherform").validationEngine('validate')){
+            $("#voucherform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status==1){
+                    	  /* dialog.close(); */
+                    	  dialog.time(3).content("<div class='msg-all-succeed'>已成功发布到你的分销客户！</div>");
+                    	  window.location.href="{:U('Distri/index')}";
+                         /*$(".showsaloonChoose").hide();
+                           $(".showsaloonForm1").hide();
+                           $(".showsaloonForm2").hide();
+                           $(".showsaloonmsg p").text("已成功发布到你的分销客户！");
+                           $(".showsaloonmsg").show(); */
+                           return false;
+                      }else{
+                           dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      } 
+                },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+	
+    $(".choosetext1").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").hide();
+    });
+    $(".choosetext2").click(function(){
+    	var counts = $(this).closest("li").find(".choosetext").val();
+    	if(counts!=null&&counts!=-1){
+    		$(this).closest("li").find(".choosetext").val(counts);
+    	}else{
+            $(this).closest("li").find(".choosetext").val("");
+    	}
+        $(this).closest("li").find(".choosetext").show();
+    });
+    $("#choose-mode a").click(function(event) {
+        var index = $(this).index();
+        //console.log(index);
+        $(this).css({"background":"#ed1c24","color":"#fff"});
+        $(this).siblings().css({"background":"#fff","color":"#ed1c24"});
+        $("form").fadeOut(200);
+        $("form").eq(index).fadeIn(200);
+    });
+    // 选择卡券
+    $('#bind_cj').click(function(){
+        art.dialog.open("{:U('Hall/Mypartner/chooseVou',array('type'=>1,'call_back'=>'call_back'))}",{
+            width: 800,
+            height: 500,
+            title:'选择卡券',
+            lock: true
+        })
+    }); 
+    $("#aprice").blur(function(){
+		  var aprice1=$("#market_price").html();
+		  var apruce2=$("#aprice").val();
+		  if(apruce2!=''){
+			  if(apruce2<0 && aprice1<0){
+				  /* var res=apruce2/aprice1;
+				  $("#theone p").text('*折扣率：'+res.toFixed(2)).css('color','#999').show(); */
+				  /* }else{ */
+					  $("#theone p").text('卡券市场价和结算价格必须大于或等于0').css('color','red').show();
+				   } 
+		  }else{
+			  $("#theone p").text('结算价格不能为空').css('color','red').show();
+		  }
+	  });	
+})
+
+/* function goodsCheck(){
+    if($("#goods_id").val() == ''){
+        return "请选择卡券";
+    }
+}  */
+
+function showImgCheck(){
+    if($("#show_resp_img").val() == '')
+        {
+            return "请上传卡券图片";
+        }
+}
+function aiImgCheck(){
+    if($("#ai_img_resp").val() == ''){
+        return "请上传卡券图片";
+    }
+}
+
+/*获取图片路径中的图片名*/
+function base_name(url){
+    var urlList = url.split('/'); 
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*    2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+
+function uploadImg(url) {
+var win_width = 500;
+art.dialog.open(url, {
+    lock: true,
+    title: "上传图片",
+    width: win_width,
+    height: win_width / 1.6,
+    id: 'art_upload'
+});
+}
+
+
+function call_back(datas){
+	$("#show_name").val(datas.goods_name);
+	$("#goods_id").val(datas.goods_id);
+	/* $("#app1").val(datas.market_price); */
+	if(datas.remain_num>0){
+		$("#goods_num").val(datas.remain_num);
+	}
+	$("#ai_img_resp_show").attr('src',datas.goods_image);
+   
+    $("#market_price").html(datas.market_price);
+    var goods_type=datas.goods_type;
+    if(goods_type==1){
+    	$("#goods_type").html("代金券");
+    }
+    if(goods_type==2){
+    	$("#goods_type").html("提领券");
+    }
+    
+    
+    if(datas.storage_num != '-1'){
+    	$("#num_type2").attr("checked","checked");
+    	$("#goods_num").show();
+    	$("#num_type1").hide();
+    	$("#hideer").hide();
+    }else{
+    	$("#num_type1").show();
+    	$("#hideer").show();
+    }
+    $("#mms_title").val(datas.mms_title);
+    $("#using_rules").val(datas.mms_text);
+}
+
+//背景图片回调函数
+function aiCallback(d) {
+//填充缩略图
+$('#ai_img_resp_show').attr('src', d.absolutepath);
+//上传用
+$('#ai_img_resp').val(base_name(d.absolutepath));
+}
+
+//背景图片回调函数
+function showCallback(d) {
+//填充缩略图
+$('#show_img_resp_show').attr('src', d.absolutepath);
+//上传用
+$('#show_img_resp').val(base_name(d.absolutepath));
+}
+
+
+</script>
+</head>
+<body>
+	<div id="wrapper">
+		<include file="./Home/Tpl/Public/Public_header.html" />
+<div class="shopNav">
+<include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="fxzs"/>
+</div>
+	<div id="container">
+			<div id="main" class="rel">
+				<div class="sidenav"> 
+					 <include file="Hall/Mypartner/leftMenu" leftmenuid="wdfxs"/>
+				</div>
+				<div class="subcon pt80 fn">
+					<div class="eticket-d-sales">
+						<p class="d-sales-tit icon-send-pro">我要发货</p>
+						<div class="eTicket_form">
+							<div class="showsaloonForm2">
+                        <div class="global-input4 fn w1">
+                        <form method="post" action="{:U('Hall/Voucher/distribution')}" id="voucherform">
+                           <ul>
+                                <li class="global-input4-name">*&nbsp;采购方名称：</li>
+                                <li class="global-input4-input saloon-channel">
+                                	<select name="re_node_id" id="re_node_id" class="validate[required] textbox ml10">
+                                		<option value="">--请选择采购方--</option>
+                                		<volist name="saleList" id="vo">
+                                		<option value="{$key}" <?php if($key==$voucher_node_id) echo 'selected="selected"';?>>{$vo}</option>
+                                		</volist>
+                                	</select>
+                                </li>
+                                <input type="hidden" name="voucher_node_id" value="{$voucher_node_id}" />
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;卡券名称：</li>
+                                <li class="global-input4-input saloon-channel">
+                                <input type="hidden" name="goods_id" id="goods_id" value=""/>
+                                <input id="show_name" type="text"  class="validate[required] textbox w140 ml10" value="" readonly="readonly"/>
+                            	<a href="javascript:void(0)" class="btn-add ml10" id="bind_cj">选择卡券</a></li>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">&nbsp;卡券类型：</li>
+                                <li class="global-input4-input saloon-channel ml10" id="goods_type">--</li>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;卡券图片：</li>
+                                <li class="global-input4-input">
+                                    <div class="rel l">
+                                        <input type="hidden" value="<?php echo basename($goodsData['goods_image'])?>" name="ai_img_resp" id="ai_img_resp"/>
+                                        <a href="javascript:;" title="上传" onclick="return uploadImg('{:U('ImgResize/Resize/index',array('ratioX'=>230,ratioY=>190,'suggestX'=>230,'suggestY'=>190,'bathName'=>'这是您的卡券图片','callback'=>'aiCallback'))}')" class="btn-add ml10">上传</a>
+                                    </div>
+                                    <div class="cl"></div>
+                                    <img src="" id="ai_img_resp_show" width="150" class="mt10 ml10"/>
+                                    <div class="cl"></div>
+                                    <p class="font-12-cc ml10">建议尺寸230px*190px，请上传1M以内的jpg,jpeg,png图片</p>
+                                    <div class="cl"></div>
+                                </li>
+                            </ul>
+                            
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;结算价格：</li>
+                                <li class="global-input4-input" id="theone">
+                                    <input type="text" class="validate[required] textbox w140 ml10 textbox" style="width:208px;" name="settle_price" id="aprice" />　元<p class="dn ml10" style='color:#999;'></p>
+                                </li>
+                            </ul> 
+                            <p style="padding:0 120px;color:#999; margin-left:10px;">系统将根据您填写的结算价格计算应结算金额，请确认该结算价格无误！</p>
+                            <ul id="staxian">
+                            <li class="global-input4-name">*&nbsp;发货数量：</li>
+                               <li class="global-input4-input ml20">
+                                    <input name="num_type" id="num_type1" value="1" checked="checked" type="radio" class="choosetext1"/><p class="ml5 choosetext1" id="hideer">不限</p>
+                                    <input name="num_type" id="num_type2" value="2" type="radio" class="ml20 choosetext2"/><p class="ml5 choosetext2">限制</p>
+                                    <input name="goods_num" id="goods_num" type="text" class="validate[min[1],condRequired[num_type2],custom[integer]] textbox dn w50 ml5 choosetext" value="" onkeyup="this.value=this.value.replace(/[^\d]/g,'')"/>&nbsp;
+                              </li>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;使用期限：</li>
+                                <li class="global-input4-input ml10">
+                                     <input type="text" name="start_time" id="start_time" class="validate[required] textbox w80" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}',minDate:'{$goodsData.begin_time|dateformat=###,'Y-m-d'}'})" value="{$goodsData.begin_time|dateformat=###,'Ymd'}" />-<input type="text" name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}',maxDate:'{$goodsData.end_time|dateformat=###,'Y-m-d'}'})" value="{$goodsData.end_time|dateformat=###,'Ymd'}" class="validate[required] textbox w80" />
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">&nbsp;交易结算方式：</li>
+                                <li class="global-input4-input saloon-channel ml10" id="control_type"><?php if($relaList){echo $relaList['control_type']==1?"按采购方使用量":"按供货方验证量";}else{echo "--";}?></li>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">&nbsp;预付费金额：</li>
+                                <li class="global-input4-input saloon-channel ml10" id="bail">{$relaList['bail']}</li>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">&nbsp;预警金额：</li>
+                                <li class="global-input4-input saloon-channel ml10" id="warning_amt">{$relaList['warning_amt']}</li>
+                            </ul>
+                            </form>
+                        </div>
+                        <div class="fn pb20" style="margin-left:70px;">
+                            <a href="javascript:void(0)" id="voucherSmb" class="btn-all btn-updata ml50">确定</a>
+                        </div>
+                    </div> 
+						</div>
+					</div>
+				</div>
+			</div>
+	</div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+	</div>
+	<div class="service"></div>
+</body>
+</html>

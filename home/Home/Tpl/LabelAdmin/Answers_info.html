@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>有奖答题_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivities.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <include file="./Home/Tpl/LabelAdmin/Path_index.html" />
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="cl"></div>
+                <div class="dataBm">
+                	<div class="dataBm-title">
+                    	<p>活动名称：<span>{$info.name}</span></p>
+                        <p>活动时间：<span><php>echo dateformat($info['start_time'], 'Y.m.d') .'-'.dateformat($info['end_time'], 'Y.m.d');</php></span></p>
+                        <p>
+                        	访问量：<span class="mr30"><a href="{:U('LabelAdmin/Chart/clickChart',array('batch_id'=>$_GET['batch_id'],'batch_type'=>3))}">{$info.click_count}</a></span>
+                            参与数：<span>{$list[0].count|default=0}</span>
+                            <a href="<?php echo U('LabelAdmin/Bm/BmCountExport/',array('batch_id'=>$_GET['batch_id']));?>" class="btn-dataBm">下载调研结果</a>
+                        </p>
+                    </div>
+                    <div>
+                        <div id="refresh"><a href="javascript:void(0)" onclick="refreshData()" class="btn-dataBm">刷新数据</a></div>
+                        <div id="dataBmContent">{$content}</div>
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html" />
+        </div>
+        <div class="service"></div>
+        <script type="text/javascript">
+            var key = '{$key1}';
+            var batch_id = '{$batch_id}';
+            var tryTimes = 0;
+            var getResult = '{$getResult}';
+            var startTime = 0;
+            var waitingTimeHandler = null;
+            var waitingTimeObj = $('#waitingTime');
+            var dataProcessing = false;
+
+            function startWaitingTimeCountdown(initTime) {
+                if (initTime) {
+                    startTime = 0;
+                }
+                if (waitingTimeHandler) {
+                    clearInterval(waitingTimeHandler);
+                }
+
+                waitingTimeHandler = setInterval(function(){
+                    startTime++;
+                    $('#waitingTime').show().html("&nbsp;&nbsp;&nbsp;刷新数据，当前等待时间为:<span style='color:red;'>" + startTime +"</span>秒");
+                },1000);
+            }
+
+            function stopWaitingTimeCountdown() {
+                if (waitingTimeHandler) {
+                    clearInterval(waitingTimeHandler);
+                    waitingTimeObj.hide();
+                }
+            }
+
+            function refreshData() {
+                if (!dataProcessing) {
+                    var url = "{:U('LabelAdmin/Answers/refreshDataForce/',array('batch_id'=>$batch_id))}";
+                    $.get(url, {
+                        "batch_id": batch_id
+                    }, function (data) {
+                        if (typeof data.retCode != 'undefined') {
+                            if (data.retCode == '0000') {
+                                if (typeof data.key != 'undefined') {
+                                    key = data.key;
+                                    setTimeout(function(){ getInfoResult(true);}, 3000);
+                                    startWaitingTimeCountdown(1);
+                                    alert('请求成功，请耐心等待 ^_^ .');
+                                }
+                            } else if (data.retCode == '1001') {
+                                dataProcessing = true;
+                                setTimeout(function(){ dataProcessing = false;}, 30000);
+                                alert('请不要重复请求 (┬＿┬) .');
+                            }else { //请求参数错误
+                                alert('请求失败，请稍候再试 (┬＿┬).');
+                            }
+                        }
+                    }, 'JSON');
+                } else {
+                    alert('请不要重复请求 (┬＿┬) .');
+                }
+            }
+
+
+            function getInfoResult(showTips) {
+                $.get("{:U('LabelAdmin/Answers/getInfoResult')}", {
+                    "key": key,
+                    "batch_id": batch_id
+                }, function (data) {
+                    if (typeof data.retCode != 'undefined') {
+                        var retCode = data.retCode;
+                        if (retCode == '0000') {
+                            $('#dataBmContent').html(data.data.content);
+                            stopWaitingTimeCountdown();
+                            if (showTips) {
+                                alert("数据更新成功，请查阅 ^_^ ");
+                            }
+                        } else if(retCode == 1002){ //请求参数错误
+                            $('#dataBmContent').html(data.retTxt);
+                        } else {
+                            startWaitingTimeCountdown();
+                            if (typeof data.data.key != 'undefined') {
+                                key = data.data.key;
+                            }
+                            setTimeout(getInfoResult, 6000);
+                        }
+                    }
+                }, 'JSON');
+            }
+            $(document).ready(function(){
+                if (getResult) {
+                    getInfoResult(false);
+                }
+            });
+        </script>
+</body>
+</html>

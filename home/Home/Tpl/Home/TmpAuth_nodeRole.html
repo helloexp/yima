@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>已开通服务查询_账户中心_翼码旺财</title>
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog/jquery.artDialog.js?skin=default"/>
+<style>
+    h1,h2{
+        font-size:12px;
+    }
+    .noParent{
+        background-color: #fff2d8;
+    }
+    .selected_0{
+        color: #9b9b9b;
+        text-decoration: line-through;
+    }
+</style>
+    <script>
+
+        function showForm(obj){
+            var p = $(obj).closest('ul');
+            var $form = $('.js-power-form',p);
+            art.dialog({
+                'title':'修改角色'+$(obj).attr('title'),
+                'content':$form.get(0)
+            });
+        }
+
+        $(function(){
+            $(".group_title").click(function(){
+                var p = $(this).closest('.js-group-parent');
+                $(':checkbox',p).attr('checked',this.checked);
+            });
+
+        });
+    </script>
+</head>
+<body>
+<a href="{:U('index')}">权限管理</a>
+<h1 style="font-size:20px">机构类型角色</h1>
+
+    <volist name="roleList" id="vo">
+        <ul>
+        <php>
+            $subPowerIds = array_valtokey($vo['sub_power'],'id','id');
+        </php>
+    <li>
+        <h1><b>{$vo.id}</b>.{$vo.title} ({$vo.alias}) - <a href="javascript:void(0);" onclick="showForm(this)" title="{$vo.title}">修改</a></h1>
+        <span style="color:#cccccc">{$vo.memo}</span>
+        <if condition="false">
+        <ul style="display:none">
+            <volist name="vo.sub_power" id="vo2">
+            <li>[{$vo2.id}]{$vo2.title}</li>
+            </volist>
+        </ul>
+        </if>
+
+    </li>
+        <div style="display:none" class="js-power-form">
+            <form action="" method="post">
+                <input type="hidden" name="role_id" value="{$vo.id}"/>
+            <ul>
+                <li class="global-input6-name">*&nbsp;可用权限：</li>
+                <li class="global-input6-input" style="line-height:30px;">
+                    <volist name="powerList" id="vo">
+                        <div class="fn <if condition='$i gt 1'>pt10</if> js-group-parent">
+                            <label><input type="checkbox" class="group_title" />
+                                <span class="ml5"><b>{$vo[0]['grouppath']|default='默认组'}</b></span>
+                            </label>
+                            <div class="fn">
+                                <volist name="vo" id="vv">
+                                    <php>
+
+                                        if(in_array($vv['id'],$subPowerIds)){
+                                        $vv['selected'] = 1;
+                                        }
+                                        else{
+                                        $vv['selected'] = 0;
+                                        }
+
+                                    </php>
+                                    <dd class="ml20 l">
+                                        <label class="selected_{$vv['selected']}"><input type="checkbox" name="power_id[]" value="{$vv['id']}" {:$vv['selected']?'checked':''}/>[{$vv['id']}]{$vv['title']}</label></dd>
+                                </volist>
+                            </div>
+                        </div>
+                    </volist>
+                </li>
+            </ul>
+             <div>
+                 <input type="submit" value="确定修改" name="sub"/>
+             </div>
+            </form>
+        </div>
+        </ul>
+    </volist>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

@@ -1,0 +1,293 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title><?php echo session('title')?></title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script>
+var skudata;
+$(document).ready(function(e) {
+	trolleyList();//购物车
+
+	$(".delivery").click(function(){	
+		shiptype=$(this).attr("data-rel");
+		gid=$(this).attr("data-id");
+                sku_id = $(this).attr("data-sku-id");
+		$.ajax({
+                        url: 'index.php?g=Label&m=Store&a=addGoodsShip&id=<?php echo session("id");?>&gid='+gid+'&skuInfo='+sku_id+'&type='+shiptype,
+                        success: function( data ) {
+                             
+                        }
+
+                });
+		
+	});
+$('.goback').click(function(){
+       history.go(-1);
+   });
+});
+//购物车
+function trolleyList(){
+	$(".trolleyItem-del").click(function(){
+		if(!confirm("您确定要删除么？"))
+			return false;
+		var goods_id=$(this).attr("data-id");
+                var sku_id = $(this).attr("data-sku-id");
+		$.ajax({url: 'index.php?g=Label&m=Store&a=deleteCart&id=<?php echo session("id");?>&goods_id='+goods_id + '&sku_id='+ sku_id,success: function( data ) {					
+                if(data.status==1){
+                    $(this).closest(".trolleyItem").remove();
+                    window.location.reload();
+                }else{
+                	alert("删除失败")
+                }
+        },dataType:"json"});
+	})
+	$(".trolleyNum-type a").click(function(){
+		$(this).closest(".trolleyNum-type").find("a").removeClass("checked");
+		$(this).addClass("checked");
+		$(this).closest(".trolleyNum").find(".input-type").val($(this).attr("data-rel"));
+	});
+	$(".trolleyNum-num i").click(function(){
+		var _this = $(this).closest(".trolleyNum"),
+			_thisnum = _this.find(".trolleyNum-num span")
+			_thisprice = _this.find(".trolleyNum-price span"),
+			_thisoneprice = _this.find(".trolleyNum-oneprice"),
+			
+			nownum = Number(_this.find(".input-num").val()),
+			maxnum = _this.find(".input-maxnum").val() ? Number(_this.find(".input-maxnum").val()) : 10000,
+			minnum = Number(_this.find(".input-minnum").val()),
+			oneprice = tonumber(_this.find(".input-oneprice").val());
+			if($(this).hasClass("icon-minus")){
+				if(nownum>minnum){
+					nownum=nownum-1;
+				}else{
+					return false;
+				}
+			}else if($(this).hasClass("icon-add")){
+				if(nownum<maxnum){
+					nownum=nownum+1;
+				}else{
+					return false;
+				}
+			};
+			if(nownum==0){return false;};
+			
+			_thisnum.text(nownum);
+			_thisprice.text(toformat(nownum*oneprice));
+			_this.find(".input-num").val(nownum);
+			_this.find(".input-price").val(nownum*oneprice);
+			changeprice();
+
+			/*更新购物车数量*/
+			var goods_id=_this.find("#goods_id").val();
+
+			$.ajax({
+				url: 'index.php?g=Label&m=Store&a=update_cart&id=<?php echo session("id");?>&goods_id='+goods_id+'&count='+nownum,
+				success: function( data ) {
+					data = eval('(' + data + ')');
+                                        if('0' == data.status){
+                                            alert(data.info);
+                                            window.location.reload();
+                                        }
+					//window.location.reload();  //更改2015/06/25
+					/*if(data.status=='1'){
+						alert("xxxxxxxxxxxxx");
+						//var datas=data.split('|');
+						//$('#p_buy #all_price').html('￥'+datas[1]);
+						//$('#total_count').html(datas[0]);
+						//$('#total_price').html('￥'+datas[1]);
+						window.location.reload();
+					}*/
+				}
+
+			});
+			
+	});
+}
+function login_to(url){
+    var id="<?php echo session('id');?>";
+    $.post("{:U('Label/Store/checkPhoneLogin')}",{'id':id},function(data){
+        if(data.status==1){
+            link_to(url);
+        }else{
+            //var surl = "<?php echo urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);?>";
+			var surl = urlencode(url);
+            location.href = "{:U('O2OLogin/index')}"+"&id="+id+"&surl="+surl;
+        }
+    },'json');
+}
+//去支付
+function go_to_pay(){
+    //传值到支付页面  ["goods"]=> array(1) { [0]=> string(5) "12205" }
+    var get_info = {'goods':[]};
+    $("[name='b_id']:checked").each(function(){
+    	get_info.goods.push({bId:$(this).val(),skuId:$(this).attr("data-sku-id")});
+    });
+    $("[name='goods']").val(JSON.stringify(get_info));
+    $("#theform").submit();
+    /*
+    //提交信息
+    $.post("{:U('Label/Store/cart_check')}", get_info,function(){
+        return false;
+        location.href = "{:U('Label/Store/cart_check')}";
+    });
+*/
+}
+function changeprice(){
+	var allprice = 0;
+	$(".trolleyItem").each(function(){
+		if($(this).find("[name='b_id']").attr("checked")){
+			allprice = FloatAdd(tonumber($(this).find(".trolleyNum-price span").text()),tonumber(allprice));
+		}
+	})
+	$(".allPrice span").text(toformat(allprice));
+}
+</script>
+</head>
+<body>
+<div id="wrapper" class="bgf5f5f5">
+    <div id="container">
+        <div id="header" class="fn">
+            <div class="goback"><i></i></div>
+            <div class="headerorder" onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"></div>
+            <div class="title">购物车</div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="mainCon fn m0">
+                <div class="trolleyList">
+                	<!--循环-->
+                        <?php
+                                if(!empty($products)){							
+                                        foreach($products as $ck=>$cal){
+                                        $newKey = $ck;
+                                        //查询商品库存
+                                        if(isset($cal['skuId'])){
+                                            $goodsInfo =  M('tecshop_goods_ex e ')->field("e.delivery_flag,s.storage_num,s.remain_num,b.batch_img,g.goods_image")
+                                                                        ->join("tbatch_info b ON b.id=e.b_id")	
+                                                                        ->join("tgoods_info g ON g.goods_id=b.goods_id")
+                                                                        ->join("tecshop_goods_sku s ON s.b_id=e.b_id")
+                                                                        ->join("tgoods_sku_info tt ON tt.id=s.skuinfo_id")
+                                                                        ->where("e.b_id='".$cal['b_id']."' and tt.sku_detail_id = '".$cal['skuId']."'")->find();
+                                        }else{
+                                            $goodsInfo =  M('tecshop_goods_ex e ')->field("e.delivery_flag,b.storage_num,b.remain_num,b.batch_img,g.goods_image")
+                                                                        ->join("tbatch_info b ON b.id=e.b_id")	
+                                                                        ->join("tgoods_info g ON g.goods_id=b.goods_id")
+                                                                        ->where("e.b_id='".$cal['b_id']."'")->find();
+                                        }
+                                        //处理skuId
+                                        if(strstr($ck, '#'))
+                                            $ck = str_replace('#', ',', $ck);
+                                         //sku库存
+                                         if(isset($goodsInfo['sku_remain'])){
+                                            $goodsInfo['storage_num'] = $goodsInfo['sku_remain'];
+                                        }    
+                        ?>
+                	
+					<div class="trolleyItem">
+                    	<h1>
+                    		<label onclick="changeprice()"><input type="checkbox" name="b_id" value="<?php echo $cal['b_id']?>" data-sku-id="<?php echo str_replace('#', ',', $cal['skuId']);?>" checked></label>
+                    		<a href="javascript:void(0)" class="trolleyItem-del" data-sku-id ="<?php echo str_replace('#', ',', $cal['skuId']);?>" data-id="<?php echo $cal['b_id']?>">删除</a>
+                    		<p>
+                    		<?php echo $cal['batch_name'];?><?php if($cal['sku_name'] !=  ''){ echo "<em>[" . $cal['sku_name'] . "]</em>";}?>
+                    		</p>
+                    		<!--a href="javascript:void(0)" class="trolleyItem-edit" data-sku-id ="<?php echo str_replace('#', ',', $cal['skuId']);?>" data-id="<?php echo $cal['b_id']?>" data-data="
+                    			{
+                    			goods_image:'__UPLOAD__/{$goodsInfo['goods_image']}',
+                    			id:{$cal['b_id']},
+                    			batch_name:'{$cal['batch_name']}',
+                    			price:'{$cal['price']}',
+                    			totalPrice:'<?php echo number_format($cal['totalPrice'],2)?>',
+                    			total:'{$cal['total']}',
+                    			b_id:'{$shipdata[$cal['b_id']]}',
+                    			remain_num:'{$goodsInfo['remain_num']}',
+                    			storage_num:'{$goodsInfo['storage_num']}'
+                    			}
+                    			">编辑</a-->
+                    	</h1>
+                        <div class="trolleyItem-con fn">
+                        	<div class="img" style="background-image:url(__UPLOAD__/{$goodsInfo['goods_image']})"></div>
+                        	<!--div class="text">
+                                <div class="textInfo">
+                                    <p><?php echo $cal['batch_name'];?></p>
+                                    <p><em>123</em></p>
+                                    <?php if($gal['sku_name'] !=  ''){ ?><p><em><?php echo "[" . $kgal['sku_name'] . "]";?></em></p><?php } ?>
+                                    <p><span class="price">￥<?php echo number_format($cal['totalPrice'],2)?></span><span class="num">X<?php echo $cal['total']?></span></p>
+                                </div>
+                            </div>
+                            <div class="textOther"><p>配送方式：自提（购买后发送至个人中心-我的卡券）</p></div-->
+                            <div class="trolleyNum">
+                            	<div class="trolleyNum-num fn"><i class="icon-minus">-</i><i class="icon-add">+</i><span><?php echo $cal['total']?></span></div>
+                            	<!--
+                            	<?php if($goodsInfo['storage_num']!=-1){?><div class="trolleyNum-tip fn"><span class="tip">您最多可以购买<?php echo isset($goodsInfo['sku_remain']) ? $goodsInfo['sku_remain'] : $goodsInfo['remain_num'];?>份该商品</span></div><?php }?>
+                            	-->
+                                <div class="trolleyNum-type fn">
+								<?php
+								if($goodsInfo['delivery_flag']=='0'){
+								?>
+								<a href="javascript:void(0)" class="delivery checked" data-rel="0" data-id="<?php echo $ck;?>" data-sku-id ="<?php echo str_replace('#', ',', $cal['skuId']);?>">自提</a>
+								<?php
+								}elseif($goodsInfo['delivery_flag']=='1'){
+								?>
+								<a href="javascript:void(0)" class="delivery checked" data-rel="1" data-id="<?php echo $ck;?>" data-sku-id ="<?php echo str_replace('#', ',', $cal['skuId']);?>">配送</a>
+								<?php
+								}else{
+								?>
+								<a href="javascript:void(0)" class="delivery btn-type1 <?php if(empty($shipdata[$newKey])||$shipdata[$newKey]=='0'){ ?>checked<?php }?>" data-rel="0" data-sku-id ="<?php echo str_replace('#', ',', $cal['skuId']);?>" data-id="<?php echo $cal['b_id']?>">自提</a>
+								<a href="javascript:void(0)" class="delivery btn-type2 <?php
+								if($shipdata[$newKey]=='1'){?>checked<?php }?>" data-rel="1" data-id="<?php echo $cal['b_id']?>" data-sku-id ="<?php echo str_replace('#', ',', $cal['skuId']);?>">配送</a>
+								<?php
+								}
+								?>
+								</div>
+                                <div class="trolleyNum-price fn"><em>￥</em><span><?php echo number_format($cal['totalPrice'],2)?></span></div>                                
+                                <div class="dn">
+                                	<input type="text" name="goods_id" id="goods_id" value="<?php echo $ck;?>">
+									<input type="text" value="<?php echo $cal['price']?>" class="input-oneprice" data-rel="单价" />
+                                	<?php   
+									if($goodsInfo['storage_num']!=-1){
+									?>
+									<input type="text" value="<?php echo $goodsInfo['remain_num'];?>" class="input-maxnum"  data-rel="购买上限"/>
+									<?php
+									}
+									?>
+                                	<input type="text" value="1" class="input-minnum" data-rel="购买下限"/>
+                                	<input type="text" value="<?php echo $cal['total'] ?>" class="input-num" data-rel="数量"/>
+                                	<input type="text" value="1" class="input-type" data-rel="发送方式"/>                                	
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--循环-->
+					<?php
+						}
+					}else{
+					?>
+					<div class="nodata">
+                    	<img src="__PUBLIC__/Label/Image/Shop/icon-nodata2.png">
+                        <h3>购物车快饿瘪了T.T</h3><h4>主人快给我挑点宝贝吧</h4>
+                        <a href="javascript:void(0)" onClick="link_to('<?php echo U('Label/Store/index','id='.session('id'));?>')"><i class="icon-navHome"></i><span>去逛逛</span></a>
+                    </div>
+					<?php
+					}    //循环
+					?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="proNav fn headerTrolley">
+        <p class="l">购物车</p>
+        <p class="r allPrice">合计:<span><?php echo number_format($totalFee,2);?></span><input name="a" id="a" type="hidden" value="<?php echo $totalFee;?>" >元				
+        <a onClick="go_to_pay()">去结算</a>		
+    </div>
+    <form id="theform" action="{:U('Label/Store/cart_check')}" method="post"><input value="" type="hidden" name="goods"></form>
+</div>
+</body>
+</html>

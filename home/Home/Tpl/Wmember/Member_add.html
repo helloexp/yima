@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>粉丝筐添加粉丝</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/member.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/member.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+	$("#submit").click(function(){
+        var dialog;
+        if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                           //刷新来源框架，刷新当前框架用window.location.reload();
+                           //var win = art.dialog.open.origin;
+                           //win.location.reload();
+                           //500毫秒关闭窗口
+                           setTimeout("var win = art.dialog.open.origin;win.location.href = win.location.href;",500);
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                              }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+	});
+	
+});
+</script>
+</head>
+<body class="no">
+<form action="{:U('Member/Member/insert')}" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+    <div class="global-input5 pt20 pl40">
+        <ul>
+            <li class="global-input5-name">粉丝姓名：</li>
+            <li class="global-input5-input"><input type="text" name="name" class="textbox w120" value=""/></li>
+        </ul>
+        <div class="clear"></div>
+        <ul>
+            <li class="global-input5-name">手机号码：</li>
+            <li class="global-input5-input"><input type="text" name="phone_no" class="validate[required,minSize[11],custom[onlyNumberSp]] textbox w120" maxlength ="11" value=""/></li>
+        </ul>
+        <div class="clear"></div>
+        <ul>
+            <li class="global-input5-name">粉丝权益：</li>
+            <li class="global-input5-input">
+                <select name="batch_no" id="batch_no" class="selectbox" >
+                    <option value="" >请选择类别</option>
+                    <volist name='batch_list' id='list'>
+                        <option value="{$list.batch_no}" >{$list.level_name}</option>
+                    </volist>
+                </select>
+                
+            </li>
+        </ul>
+        <div class="clear"></div>
+        <ul>
+            <li class="global-input5-name">粉丝分组：</li>
+            <li class="global-input5-input">
+                <select name="group_id" id="group_id" class="selectbox" >
+                    <option value="" >请选择类别</option>
+                    <volist name='groupList' id='list'>
+                        <option value="{$list.id}" >{$list.name}</option>
+                    </volist>
+                </select>
+                
+            </li>
+        </ul>
+        <div class="clear"></div>
+        <ul>
+            <li class="global-input5-name">性别：</li>
+            <li class="global-input5-input"><input type="radio" class="mr5" name="sex" checked="checked" value="1"/>男<input class="validate[required,minCheckbox[1]] mr5 ml20" type="radio" name="sex" value="2"/>女</li>
+        </ul>
+        <div class="clear"></div>
+        <ul>
+            <li class="global-input5-name">生日：</li>
+            <li class="global-input5-input"><input type="text" name="birthday" class="textbox w120" value="" onclick="WdatePicker();"/></li>
+        </ul>
+        <div class="clear"></div>
+        <ul>
+            <li class="global-input5-name">地域：</li>
+            <li class="global-input5-input"><input type="text" name="address" class="textbox w120" value="" /></li>
+        </ul>
+        <div class="clear"></div>
+        <neq name="is_12580" value="1">
+        <ul>
+            <li class="global-input5-name">&nbsp;</li>
+            <li class="global-input5-input"><input type="checkbox" name="is_send_code" value="1" class="mr5" />同时发送电子权益</li>
+        </ul>
+        <div class="clear"></div>
+        </neq>
+        <ul>
+            <li class="global-input5-name">&nbsp;</li>
+            <input type="hidden" value='1' name="ajax" />
+            <li class="global-input5-input">
+                <a href="javascript:void(0)" id="submit"  class="btn-all w90">确定</a>
+                <a href="javascript:void(0)" onclick="art.dialog.close()"  class="btn-all-del w90 ml10">取消</a>
+            </li>
+            
+        </ul>
+        <div class="clear"></div>
+    </div>
+     </form>
+</body>
+</html>

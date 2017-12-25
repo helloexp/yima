@@ -1,0 +1,345 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta property="qc:admins" content="1542570064671673117276375" />
+<title>留言板详情__{:C('SITE_TITLE')}</title>
+<meta name="keywords" content="{:C('SITE_KEYWORDS')}" />
+<meta name="description" content="{:C('SITE_DESCRIPTION')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wdefault.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wdefault.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<script type="text/javascript">
+ 	$(document).ready(function(){
+		// 第一层回复按钮
+		$('.out-rep').toggle(function(){
+			$(this).parents('li').find('.re-menu').show();
+		},function(){
+			$(this).parents('li').find('.re-menu').hide();
+		});
+		// 第二层回复按钮
+		$('.in-rep').toggle(function(){
+			var tit = $(this).parents('.in-message').find('dt').text();
+			$(this).parents('.in-message').find('.in-form').show();
+			$(this).parents('.in-message').find('.in-re').val('回复'+tit);
+		},function(){
+			$('.in-form').hide();
+		});
+		 <if  condition="!empty($seqid)">
+			var nodeid={$seqid};
+		   <else/> 	var nodeid="";
+		 </if>
+ 	 	if(nodeid!=''){
+				 $('a[data-id='+nodeid+']').click();
+				 $('a[data-id='+nodeid+']').parents('li').find('.re-menu').show()
+				 location.hash=nodeid;
+				 setTimeout(function(){$('form[data-id='+nodeid+']').find('input[name=contents]').focus()},2000);
+ 	 	 	}
+		$("#aabbccdd").click(function(){
+         art.dialog.open("{:U('Home/Case/o2oshouzhe')}",{
+             width:'80%',
+             height:'90%',
+             title:'旺财平台用户留言守则',
+             lock:true
+			 })
+         });
+		
+	 $(".btn-a").click(function(){
+         var contact_node=$(this).attr("data-rel");
+		 art.dialog.open("{:U('Home/Board/win')}&id="+contact_node,{
+			lock: true,
+			title:"联系商家",
+			width:620,
+			height:390
+		});  
+     });
+	
+})
+ 	
+</script>
+<body>
+	<div id="wrapper">
+		<include file="Public:loginHeader"/>
+		<div class="bbs-container">
+			<div class="b-banner">
+				<img src="__PUBLIC__/Image/banner/b-banner.jpg" alt="O2O留言板" />
+			</div>
+			<div class="bbs-main fn">
+				<div class="bbs-l">
+					<div class="title">
+						<h1 class="bbs-shop-rec"><a class="btn-mes" href="javascript:;">+我要留言</a>留言板</h1>
+					</div>
+					<div class="bbs-detail">
+						<h1 class="tit">{$row['liuyan_title']}</h1>
+						<p class="mes-info">留言人：<span>{$row['node_name']}</span>时间：<span><?php echo date('Y-m-d H:i:s',strtotime($row['add_time'])); ?></span>点击：<span>{$row['lookup']}</span>回复：<span>{$row['reply']}</span></p>
+						<div class="text-info">
+							<pre>{$row['liuyan_content']}</pre>
+							<?php if($row['liuyan_img'] != ''){ ?>
+							<img src="<?php echo $board_img_url.$row['liuyan_img']; ?>" />
+							<?php } ?>
+						</div>
+						<div class="contact-info l">
+							<p class="lxfs">联系方式<i class="lxfs-arrow"></i><i class="lxfs-arrow1"></i></p>
+							<p class="lxfs-info"><?php if(empty($userInfo)){echo "登录后可查看联系方式"; }else{ echo $row['lianxifangshi']; } ?></p>
+						</div>
+						<div class="bbs-comment">
+							<div class="comment">
+								<form action="" method="post" id="oneAddForm">
+								<input type="hidden" name="boardId" value="{$Think.get.Boardid}" id="boardId" />
+									<div class="q-re fn">
+										
+									</div>
+									<textarea class="area texttextarea" placeholder="请输入回复内容 " name="Bcontent" id="Bcontent"></textarea>
+									<input type="button" class="btn" value="回复" id="oneAddSubmit"/>
+									<div class="r mt30 mr20">
+										<label>
+											<input type="checkbox" class="vm" checked disabled/>同意遵守
+										</label>
+										<a href="javascript:void(0);" id="aabbccdd">旺财平台用户留言守则</a>
+									</div>
+								</form>
+								<ul class="cl">
+									<h3>共{$row['reply']}条评论</h3>
+									<?php if($list){ foreach($list as $k=>$v){ ?>
+									<li>
+										<i class="head">
+										    <?php if($v['head_photo'] == ''){ ?>
+											<img class="head" src="__PUBLIC__/Image/new_pic/wc-dog.png" alt="" />
+											<?php }else{ ?>
+											<img class="head" src="<?php echo get_upload_url($v['head_photo'])?>" alt="" />
+											<?php } ?>
+										</i>
+										<div class="rit">
+											<b>{$v['node_name']}:</b>
+											<p class="cont"><?php echo $v['contents']; ?></p>
+											<div class="tool">
+												<p class="click">
+													<a href="javascript:void(0);" class="support" onclick="Praise(<?php echo $v['id']; ?>)">赞（<?php echo $v['help']; ?>）</a>　|　
+													<a href="javascript:;" name="{$v['id']}"  data-id={$v['id']} class="reply out-rep">回复（<?php echo $v['reply']; ?>）</a>												</p>
+												<p class="time"><?php echo date('Y-m-d H:i:s',strtotime($v['add_time'])); ?></p>
+											</div>
+										</div>
+										<div class="cl"></div>
+										<div class="re-menu">
+											<dl class="repost">
+												<form action="" data-id={$v['id']}  id="twoAddForm<?php echo $k; ?>">
+												    <input type="hidden" name="boardId" value="{$Think.get.Boardid}" id="boardId" />
+													<input type="hidden" name="fromID" value="<?php echo $v['id']; ?>" id="boardId" />
+													<input type="hidden" value="{$v['node_id']}" name="node_id"/>
+													<input type="text" class="f-reply" placeholder="请输入回复内容..." name="contents"/>
+													<input type="button" class="in-btn" value="提交" onclick="twoAddSubmit('<?php echo $k;?>')"/>
+												</form>
+											</dl>
+											<?php if($v['huifu']){ 	foreach($v['huifu'] as $ka=>$va){ ?>
+											<dl>
+											    <?php if($va['head_photo'] == ''){ ?>
+												<img src="__PUBLIC__/Image/new_pic/wc-dog.png" alt="" class="head" style="width:30px;height:30px;" />                                              <?php }else{ ?>
+												<img src="<?php echo get_upload_url($va['head_photo'])?>" alt="" class="head" style="width:30px;height:30px;" />       <?php } ?>
+												<div class="in-message">
+													<dt><?php echo $va['node_name']; ?>：</dt>
+													<dd><p><?php echo $va['contents']; ?></p></dd>
+													<dd class="in-toolbar">
+														<span class="in-time"><?php echo date('Y-m-d H:i:s',strtotime($va['add_time'])); ?></span>
+														<a name="{$va['id']}"  data-id={$va['id']} class="in-reply in-rep">回复</a>
+													</dd>
+													<dd class="in-form">
+														<form action=""  data-id={$va['id']} id="minAddForm<?php echo $va['id']; ?>">
+														    <input type="hidden" name="boardId" value="{$Think.get.Boardid}" id="boardId" />
+												        	<input type="hidden" name="fromID" value="<?php echo $v['id']; ?>" id="" />
+															<input type="hidden" name="node_id" value="<?php echo $va['node_id']; ?>" id="" />
+															<input type="text" class="in-re" name="contents"/>
+															<input type="button" class="in-btn" value="提交" onclick="minAddSubmit('<?php echo $va['id'];?>')"/>
+														</form>
+													</dd>
+												</div>
+											</dl>
+										 <?php }} ?>
+										</div>
+									</li>
+									<?php }} ?>
+								</ul>
+								 <div class="page">{:$show}</div>
+							</div>
+						</div> 
+					</div>
+				</div>
+				<div class="bbs-r">
+					<h1 class="bbs-shop-rec">明星商户推荐</h1>
+					<div class="bbs-right-con">
+						<div class="tabs fn">
+							<div class="tab bre5 hover"><p>通信</p><p>互联网</p></div>
+							<div class="tab bre5"><p>餐饮</p><p>旅游</p></div>
+							<div class="tab"><p>石油化工</p><p>其他</p></div>
+						</div>
+						<ul class="tab-list">
+						    <?php $i0=0; if($star['0']){ foreach($star['0'] as $v0){
+							      $i0++;
+								  if($i0>10) break;
+							 ?>
+							 <div class="rel star-com">
+							<li><?php echo $v0['node_name']; ?></li>
+							<div class="com-info">
+									<div class="info-box">
+										<p id="momomomop"><?php echo $v0['node_name']; ?></p>
+										<p class="bbm"></p>
+										<p>所在地：<?php echo $v0['node_city']; ?></p>
+										<p>行业：通信互联网</p>
+									    <p class="bbm"></p>
+										<a href="javascript:void(0);" class="btn-a" data-rel="<?php echo $v0['node_id']; ?>">联系负责人</a>
+									</div>
+								</div>
+							</div>
+							<?php }} ?>
+						</ul>
+						<ul class="tab-list dn">
+						  <?php $i1=0; if($star['1']){ foreach($star['1'] as $v1){ 
+							       $i1++;
+								   if($i1>10) break;
+							?>
+							<div class="rel star-com">
+							<li><?php echo $v1['node_name']; ?></li>
+							<div class="com-info">
+									<div class="info-box">
+										<p id="momomomop"><?php echo $v1['node_name']; ?></p>
+										<p class="bbm"></p>
+										<p>所在地：<?php echo $v1['node_city']; ?></p>
+										<p>行业：通信互联网</p>
+									    <p class="bbm"></p>
+										<a href="javascript:void(0);" class="btn-a" data-rel="<?php echo $v1['node_id']; ?>">联系负责人</a>
+									</div>
+								</div>
+							</div>
+							<?php }} ?>
+						</ul>
+						<ul class="tab-list dn">
+						    <?php $i2=0; if($star['2']){ foreach($star['2'] as $v2){
+							      $i2++;
+								  if($i2>10) break;
+						    ?>
+							<div class="rel star-com">
+							<li><?php echo $v2['node_name']; ?></li>
+							<div class="com-info">
+									<div class="info-box">
+										<p id="momomomop"><?php echo $v2['node_name']; ?></p>
+										<p class="bbm"></p>
+										<p>所在地：<?php echo $v2['node_city']; ?></p>
+										<p>行业：通信互联网</p>
+									    <p class="bbm"></p>
+										<a href="javascript:void(0);" class="btn-a" data-rel="<?php echo $v2['node_id']; ?>">联系负责人</a>
+									</div>
+								</div>
+							</div>
+							<?php }} ?>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<include file="./Home/Tpl/Public/Public_Indexfooter.html" />
+		<include file="Public:login"/>
+	</div>
+</body>
+</html>
+<script>
+	$(document).ready(function(){
+	    $("#oneAddSubmit").click(function(){
+		      if($("#boardId").val() == ''){
+			      result_('参数错误！！！');
+				  return false;
+			  }
+			  
+			  if($("#Bcontent").val() == '' ){
+			      result_('内容不能为空！！！');
+				  return false;
+			  }
+			  
+			  if($("#Bcontent").val().length > '1000'){
+			      result_('字数不能超过1000！！！');
+				  return false;
+			  }
+			  
+			  $.post("{:U('Home/Board/oneAddSubmit')}",$("#oneAddForm").serialize(),function(d){
+			       result_(d.codeText);
+			  },'json');
+		});
+	    
+		$(".q-re a").on('click', function(event) {
+        	event.preventDefault();
+        	var text = $(this).text();
+        	var t_before = $(this).parents(".comment").find("textarea").val();
+        	if(t_before!=""){
+        	    $(this).parents(".comment").find("textarea").val(t_before+'　'+text);
+        	}else{
+        	    $(this).parents(".comment").find("textarea").val(text);
+        	}
+    	});
+		
+
+		$('.tabs').on('hover','.tab',function(){
+			$('.tab').removeClass('hover');
+			$('.tab-list').hide();
+			$(this).addClass('hover');
+			$('.tab-list').eq($(this).index()).show();
+		});
+		$('.btn-mes').on('click',function(){
+		    <?php if(empty($userInfo)){ ?>
+			        result_('请登陆后，再试试！！！'); 
+			<?php }else{ ?>
+			art.dialog.open('{:U("Home/Board/wicket")}',{id:'wicket',title:'我要留言',width:640,height:530,lock:true,close:function(){
+			   location.reload();
+			}});
+			<?php } ?>
+		})
+	});
+	
+	function result_(contents){
+	  var bid={$Think.get.Boardid};
+	  var url="{:U('Home/Board/detail')}";
+	  var url=url+'&fid=1&Boardid='+bid;
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				   art.dialog.close();
+				   window.location.href=url; 
+				}
+			})
+   }
+   
+   function Praise(id){
+      $.get('{:U("Home/Board/praise")}&resID='+id,'',function(d){
+	      result_(d.codeText);  
+	  },'json');
+   }
+   
+   function twoAddSubmit(k){
+       if(k == ''){
+	        result_('参数错误！！！');
+		    return false;
+	   }
+	    $.post("{:U('Home/Board/twoAddSubmit')}",$("#twoAddForm"+k).serialize(),function(d){
+			       result_(d.codeText);
+			  },'json');   
+   }
+   
+   function minAddSubmit(key){
+       if(key == ''){
+	        result_('参数错误！！！');
+		    return false;
+	   }
+	   
+	    $.post("{:U('Home/Board/minAddSubmit')}",$("#minAddForm"+key).serialize(),function(d){
+			       result_(d.codeText);
+			  },'json');   
+   }
+</script>

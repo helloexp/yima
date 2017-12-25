@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加奖品</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+	var isUsed = parseInt("{$useIng}"); //奖品是否已经参加活动 1 已参加 0 未参加
+	if(isUsed == 1){
+		$(".js_useTips").removeClass("dn");
+	}
+    //编辑的时候
+    var isEdit = "{$isEdit}";
+    var batchId = "{$batchId}";
+    var goodsId = "{$cardData['goods_id']}";
+    var sourceType = "{$cardData['source']}";         //6是红包
+    var index = "{$index}";                           //奖品的下标
+    if(isEdit == '1'){
+        var win = art.dialog.open.origin;
+        $.each(win.$('.award_list dd'),function(key,value){
+            if(batchId == '2'){
+                    if(index == key){
+                // if($(value).attr('class').split(' ')[0] == goodsId){
+                    $('#cardCount').val($(this).find("#cardCount").val());
+                    var sendType = $(this).find("#sendType").val();
+                    if(sendType == 1){
+                         $("#cli").click();
+                        // $("input[name='sendType']").eq(1).attr('checked','checked');
+                        $("#dayLimit").val($(this).find("#dayLimit").val());
+                    }else{
+                        // $("input[name='sendType']").eq(0).attr('checked','checked');
+                    }
+                    $('#respContent').val($(this).find("#respContent").val());
+                    $('#cardCount').val($(this).find("#cardCount").val());
+                    $('#batchId').val(batchId);
+                    $('#cardKey').val(key);
+                    if($(this).find("#source").val()==6){
+                        $(".prizeDateLimit").hide();
+                    }
+                    return;
+                } 
+            }else{
+                //已生效的卡券
+                if($(value).attr('data-id') == batchId){
+                    $('#cardCount').val($(this).find("#cardCount").val());
+                    var sendType = $(this).find("#sendType").val();
+                    if(sendType == 1){
+                        $("#cli").click();
+                        // $("input[name='sendType']").eq(1).attr('checked','checked');
+                        $("#dayLimit").val($(this).find("#dayLimit").val());
+                    }else{
+
+                        // $("input[name='sendType']").eq(0).attr('checked','checked');
+                    }
+                    $('#respContent').val($(this).find("#respContent").val());
+                    $('#cardCount').val($(this).find("#cardCount").val());
+                    $('#batchId').val(batchId);
+                    $('#cardKey').val(key);
+                    if($(this).find("#source").val()==6){
+                        $(".prizeDateLimit").hide();
+                    }
+                    return;
+                }
+            }
+        });
+        $('#cardCount').attr("disabled","disabled");
+        $('#dayLimit').attr("disabled","disabled");
+        $(".Gform .Ginput .setLimit").addClass("disabled");
+        if(sourceType==6){
+            $(".prizeDateLimit").hide();
+        }
+    }
+	$('#smb').click(function(){
+		if($("#prizeSetForm").validationEngine('validate')){
+            if($("#cardCount").val() == ''){
+                alert('请输入卡券投放数量');
+                return false;
+            }
+			if(parseInt($("#cardCount").val()) > parseInt($(".restNum").html()) && $('#batchId').val() == 1){
+                Diaerror('当前活动奖品投放量不能大于剩余库存');
+				$("#cardCount").focus();
+                return false;
+            }
+			var win = art.dialog.opener;
+            var data = <?php echo json_encode($cardData);?>;  
+            data.cardCount = $("#cardCount").val();           //卡券投入的数量
+            if($("#respContent").val() != ''){
+                data.respContent = $("#respContent").val();       //发送的文字
+            }
+            // if(data.source != 6){          //卡券
+                data.sendType = $("input[name='sendType']:checked").val();         //卡券发放类型
+                if(data.sendType == 1){    //限制
+                    if($("#dayLimit").val() == ''){
+                        alert('请输入日上限数量');
+                        return false;
+                    }
+                    data.dayLimit = $("#dayLimit").val();     //日上限
+                }else{
+                    $("#dayLimit").val('');
+                    data.dayLimit = 0;
+                }
+            // }
+            if($('#cardKey').val() != ''){
+                data.cardKey = $('#cardKey').val();
+            }else{
+                data.cardKey = -1;
+            }
+            data.batchId = $('#batchId').val();
+			win['cardresp'].call(this, data);
+	        art.dialog.close();
+	        return ; 
+		}
+	});
+})
+Date.prototype.Format = function(fmt)   
+{  
+  var o = {   
+    "M+" : this.getMonth()+1,                 
+    "d+" : this.getDate(),                    
+    "h+" : this.getHours(),                   
+    "m+" : this.getMinutes(),                
+    "s+" : this.getSeconds(),                 
+    "q+" : Math.floor((this.getMonth()+3)/3), 
+    "S"  : this.getMilliseconds()             
+  };   
+  if(/(y+)/.test(fmt))   
+    fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));   
+  for(var k in o)   
+    if(new RegExp("("+ k +")").test(fmt))   
+  fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));   
+  return fmt;   
+}
+
+function createDatePickerWithLimit() {
+	var	min_date = '%y-%M-%d';
+	var obj = new Object();
+	obj.minDate = min_date;
+	WdatePicker(obj);
+}
+function createDatePickerWithLimitEnd() {
+	var verifyBeginDate = $('#verify_begin_date').val();
+	var min_date = $('#activity_end_time').val();
+	min_date = min_date.substr(0, 8);
+	if (verifyBeginDate > min_date) {
+		min_date = verifyBeginDate;
+	}
+	var year = min_date.substr(0, 4);
+	var month = min_date.substr(4, 2);
+	var day = min_date.substr(6, 2);
+	min_date = year + '-' + month + '-' + day;
+	var obj = new Object();
+	obj.minDate = min_date;
+	WdatePicker(obj);
+}
+function checkSendDay(field, rules, i, options) {
+	var beginTime = parseInt($('.Gtime1 [name="verify_begin_days"]').val());
+	var endTime = parseInt($('.Gtime1 [name="verify_end_days"]').val());
+	if (beginTime > endTime) {
+		return "使用开始时间不能大于使用结束时间";
+	}
+}
+
+</script>
+</head>
+<body>
+<div class="DiatipsCon js_useTips dn" style="width:101%">
+	卡券已经在其他活动中使用，坚持添加可能导致您的用户因为重复领取而无法领到奖品。建议创建一张新的卡券或者使用其他卡券代替。
+</div>
+<div class="Gform">
+	<form name="prizeSetForm" id="prizeSetForm" action="" method="post">
+    <input type="hidden" value="1" name="batchId" id='batchId'/>
+    <input type="hidden" value="0" name="cardKey" id='cardKey'/>
+    <ul>
+    	<li class="Gname"><span>*</span>奖品投放数量</li>
+        <li class="Ginput"><input type="text" name="cardCount" class="validate[required,custom[integer]]" id="cardCount" value='' />
+        <?php if($isEdit == 0):?>
+        	<p class="txtTips">当前库存<span style="color:#ed3f41" class="restNum">
+            <?php if($cardData['source'] == 6):?>
+                {$cardData['remain_num']}
+            <?php else:?>
+                {$cardData['quantity']-$cardData['card_get_num']}
+            <?php endif;?>
+            </span></p>
+        <?php endif;?>
+        </li>
+    </ul>
+    
+    <ul>
+    	<li class="Gname"><span>*</span>每日奖品限量</li>
+        <li class="Ginput">
+            <div class="switch setLimit">
+                <input name="sendType" id="sendType" type="radio" value="0" checked="checked">
+                <div class="newRadio l">
+                    <span class="valfirst hover" data-val="0" data-checkbefor="">不限</span>
+                    <span class="vallast" data-val="1" data-checkbefor="" id="cli">限制</span>
+                </div>
+                <div class="newRadio-input l">
+                    <input type="text" name="dayLimit" id="dayLimit" value="" style="width:133px;"><span class="maxTips forInput">张</span>
+                </div>
+            </div>
+        </li>
+    </ul>
+    <?php if($cardData['source'] != 6):?>
+    <ul class="prizeDateLimit">
+    	<li class="Gname"><span>*</span>奖品有效期</li>
+        <li class="Ginput">
+                    <?php if($cardData['date_type'] == 1):?>
+                    <div class="Gtime2 fn">
+                        <input type="text" name="begin_time" id="act_time_from" value="{$cardData['strTime']}" disabled="disabled">
+                <em>至</em>
+                <input type="text" name="end_time" id="act_time_to" value="{$cardData['endTime']}" disabled="disabled">
+                </div>
+                    <?php else:?>
+                        <div class="Gtime1 fn special">
+                            <em class="em1">领取后</em>
+                            <input type="text" value="{$cardData['date_fixed_begin_timestamp']}">
+                            <em class="em2">天开始使用</em>
+                        </div>
+                        <div class="Gtime1 fn special mt10">
+                            <em class="em1">领取后</em>
+                            <input type="text" value="{$cardData['date_fixed_timestamp']}">
+                            <em class="em2">天结束使用</em>
+                        </div>
+                    <?php endif;?>
+            <span class="txtTips">微信卡券等第三方券种一旦生成，奖品有效期不能更改。</span>
+        </li>
+    </ul>
+    <?php endif;?>
+    
+    <ul>
+    	<li class="Gname"><span>*</span>回复内容</li>
+        <li class="Ginput">
+            <textarea maxlength="60" placeholder="如：恭喜你中奖了！" name='respContent' id='respContent'></textarea><span class="maxTips forArea" data-max="60">0/60</span>
+        </li>
+    </ul>
+    <div class="DiabtnCon">
+    <!--
+        <empty name="b_id"><a href="{:U('Weixin/Weixin/addAward')}" title="返回" class="Diabtn-all-del js_back">上一步</a></empty>
+    -->
+        <a href="javascript:void(0);" title="确认" id="smb" class="Diabtn-all">确定</a>
+    </div>
+    </form>
+</div>
+</body>
+</html>

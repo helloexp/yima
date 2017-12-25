@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>供货方信息查询_代金券分销助手_翼码旺财</title>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/main.css"/>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/layout.css"/>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/module.css"/>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/Wcanal.css"/>
+<script src="__PUBLIC__/Js/jquery-1.7.1.min.js"></script>
+<js href="__PUBLIC__/Js/global.js"/>
+<js href="__PUBLIC__/Js/Wcanal.js"/>
+<script src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js"></script>
+<load href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"/>
+<script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js?v=__VR__"></script>
+<script type="text/javaScript">
+$(function(){
+    $("#submit_select").click(function(){
+        $("#seleform").submit();
+    });
+})
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+<div class="shopNav">
+<include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="fxzs"/>
+</div>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">  
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="{:U('Hall/Mypartner/index')}">代金券分销助手</a></p>
+                            <p>></p>
+                            <p>供货方信息查询</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>          
+                <div class="sidenav">
+                    <!--引入左边栏-->
+                    <include file="Hall/Mypartner/left" leftmenuid="gysxxcx"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn"> 
+                           <p><a href="{:U('Hall/Mypartner/supplierList')}">已确认</a></p>
+                           <p class="Wcanal-tab-hover"><a href="{:U('Hall/Mypartner/supplierList'),array('tab'=>'no_check')}">未确认</a></p>
+                        </div>
+                        <div class="Wcanal-tab-list">
+                            <form action="{:U('Mypartner/supplierList')}" method="post" id="seleform">
+                                <div class="form-search fn">
+                                    <input type="hidden" name="tab" value="no_check" />
+                                    <p>供货方名称</p>
+                                    <p><input type="text" name="node_name" value="{$post.node_name}" class="textbox w200" id="node_name"/></p>
+                                    <p class="ml20">合作期限</p><p><input name="start_time" type="text" value="{$post.start_time}"  onClick="WdatePicker()" class="textbox w100"/></p><p>-</p><p><input name="end_time" type="text"  onClick="WdatePicker()" value="{$post.end_time}" class="textbox w100"/></p>
+                                    <a href="javascript:;" class="btn-all w120 ml20" id="submit_select">查询</a>
+                                    <div class="cl mb5"></div>
+                                    <p class="ml40">状态</p>
+                                    <p>
+                                        <select name="check_status" class="selectbox w100">
+                                            <option value="">全部</option>
+                                            <option value="0" <if condition="strval(0) eq $post['check_status']">selected="selected"</if>>未失效</option>
+                                            <option value="2" <if condition="2 eq $post['check_status']">selected="selected"</if>>已拒绝</option>
+                                            <option value="3" <if condition="3 eq $post['check_status']">selected="selected"</if>>已失效</option>
+                                        </select>
+                                    </p>
+                                    <p class="ml20">添加日期</p><p><input name="sadd_time" type="text" value="{$post.sadd_time}"  onClick="WdatePicker()" class="textbox w100"/></p><p>-</p><p><input name="eadd_time" type="text"  onClick="WdatePicker()" value="{$post.eadd_time}" class="textbox w100"/></p>
+                                </div>
+                            </form>
+                            <table class="W-table mt25" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th>供货方名称</th><th>合作期限</th><th>状态</th><th>是否管控</th><th>预付费</th><th>清算方式</th><th>最大额度</th><th>添加日期</th><th>操作</th>
+                                </tr>
+                               <volist name="list" id="vo">
+                                <tr>
+                                    <td>{$vo.node_name}</td>
+                                    <td><?php echo date("Y-m-d",strtotime($vo['begin_time'])); ?><br/><?php echo date("Y-m-d",strtotime($vo['end_time'])); ?></td>
+                                    <td><?php echo $checkStatusType[$vo['check_status']] ?></td>
+                                    <td><?php if($vo['control_flag']=='0'){echo '否';}else{echo '是';}?></td>
+                                    <td>{$vo.bail}</td>
+                                    <td><?php if($vo['control_type']==1){ echo '发码';}elseif($vo['control_type']==2){echo '验码';}else{echo '其他';}?></td>
+                                    <td>{$vo.max_amt}</td>
+                                    <td><?php echo date("Y-m-d",strtotime($vo['add_time'])); ?></td>
+                                    <td>
+                                    <?php if($vo['check_status']=='0'){ ?>
+                                    <a href="{:U('Mypartner/supplierDetail',array('id'=>$vo['id']))}">确认</a>&nbsp;&nbsp;
+                                    <?php }else{ ?>
+                                    --
+                                    <?php }?>
+                                    </td>
+                                </tr>
+                                </volist>
+                            </table>
+                            <div class="page">{$page}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

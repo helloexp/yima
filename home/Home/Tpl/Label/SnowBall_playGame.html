@@ -1,0 +1,361 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$row['wap_title']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20141224.css">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+<script>
+
+$(document).ready(function(e) {
+	var loadImg = 0 ;
+	var imgNum = 11 ;
+	$(".loadimg").one('load', function() {
+			loadImg++;
+			if(loadImg==imgNum){
+				$("#loading").fadeOut();
+			}
+		}).each(function() {
+		if(this.complete) $(this).load();
+	});
+	
+	
+        			
+});
+</script>
+</head>
+<body>
+<div id="loading">
+    <div class="spinner">
+    	<div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+    	<p>载入中</p>
+    </div>
+    <img src="__PUBLIC__/Label/Image/20141224/gamebg.jpg" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20141224/gamebg2.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20141224/gamebg3.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20141224/headerbg4.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20141224/snowman1.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20141224/snowman-miss-l.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20141224/snowman-miss-r.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20141224/snowman-success-l.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20141224/snowman-success-r.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20141224/hand.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20141224/snowball.png" class="loadimg" />
+</div>
+<div id="gamewrapper" ontouchstart="autoaudio()">
+    <div class="music on" onClick="audio()"><span></span><i></i><em></em></div>
+    <audio src="__PUBLIC__/Label/Image/20141224/music.mp3" autoplay="true" loop id="audio" style="display:none; width:0; height:0; overflow:hidden;"></audio>
+    <div id="gamecontainer">
+    	<img src="__PUBLIC__/Label/Image/20141224/gamebg2.png" class="gamebg1 animation" />
+        <img src="__PUBLIC__/Label/Image/20141224/gamebg3.png" class="gamebg2 animation" />
+        <img src="__PUBLIC__/Label/Image/20141224/headerbg4.png" class="gamebg3 animation" />
+        <img src="__PUBLIC__/Label/Image/20141224/headerbg4.png" class="gamebg4 animation" />
+        <img src="__PUBLIC__/Label/Image/20141224/headerbg4.png" class="gamebg5 animation" />
+        <div class="gameCon">
+        	<div class="snowballNum l"><i class="icon-snowball"></i><span></span></div>
+        	<div class="snowballNum r"><i class="icon-coin"></i><span></span></div>
+            <div class="snowMan">
+            	<div class="snowManCon">
+                	<div class="icon-help"></div>
+                	<div class="code"></div>
+                </div>
+            </div>
+            <div class="hand">
+            	<img src="__PUBLIC__/Label/Image/20141224/hand.png" class="lefthand handmove" >
+            	<img src="__PUBLIC__/Label/Image/20141224/hand.png" class="righthand handmove" >
+            	<img src="__PUBLIC__/Label/Image/20141224/snowball.png" class="snowball" >
+            </div>
+            <div class="beginCon"><p class="tc"><a href="<?php echo U('Label/SnowBall/index',array('id'=>$id));?>" class="btn-gohome">返回首页</a></p></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+var windowwidth=$("#gamewrapper").width();
+var windowheight=$("#gamewrapper").height();
+var speed = 0;//速度指针
+var speedArrey = ["","speed3","speed2","speed1","speed1","speed1"];//速度样式
+var setI = "";//计时器
+var clear = false;//判断是否正在初始化
+var code = [0,55,88,99];//积分数组
+var codeerro = false ;
+var thiscode = 0;
+var nowcode = parseInt(<?php echo $info['score'];?>);
+var nowball = parseInt(<?php echo $info['ball_count'];?>);
+var rankcount = parseInt(<?php echo $info['ranking_count'];?>);
+if(rankcount>600000){
+	codeerro = true;
+}
+var issubmit = true;
+	$.post("{:U('Label/SnowBall/getInfo')}",
+					{"id":"<?php echo $id;?>"},
+					function(data){
+						if(data.status == '1'){
+							var nowcode1 =parseInt(data.info.score); 
+							var nowball1 =parseInt(data.info.ball_count); 
+							if(nowball != nowball1 || nowball1!=nowball ){
+								location.href = location.href;
+							}
+						}
+        			},"json");
+$(document).ready(function(e) {
+    init();
+	begin(6000);
+	nowclode(nowball,nowcode,0);
+	var scale=windowwidth/640;
+	$("#gamewrapper").on("touchmove",function(){
+		event.preventDefault();
+	});
+	
+	$(".btn-gohome").on("touchstart",function(){
+			event.stopPropagation();
+	});
+	
+	$(".snowManCon").on("touchstart",function(){
+		$(".icon-help").hide();
+		if(codeerro){
+			if(Math.floor(Math.random()*10)>=3){
+				$(".gameCon").touchstart();
+				return false;
+			}
+		}
+		if(!erro()){return false;};
+		if(clear){
+			issubmit =true;
+			if($(".gamemsg").length==0){
+				$("body").append("<div class='gamemsg'><p>雪人正在修复~请稍后</p></div>");
+			}else{
+				$(".gamemsg").addClass("erro");
+				setTimeout(function(){
+					$(".gamemsg").removeClass("erro");
+				},400);
+			}
+			event.stopPropagation();
+			return false;
+		}
+	    nowball -= 1;
+		$(".gamemsg").remove();
+		clear = true;
+		snowball();
+		var _this = $(".snowManCon");
+		_this.addClass("paused");
+		setTimeout(function(){
+			var codeRandom = Math.floor(Math.random()*5);
+			if(codeRandom>3||codeRandom==0){codeRandom=1;};
+			nowcode += code[codeRandom];
+			thiscode += code[codeRandom];
+			nowclode(nowball,nowcode,code[codeRandom],1);
+			$(".code").addClass("code"+codeRandom);
+			_this.addClass("success");
+			setTimeout(function(){
+				_this.addClass("success");
+			},144);
+			speed++;
+			if(speed==6){speed=0;}
+			setTimeout(function(){
+				_this.removeClass("paused");
+				if(speed==0){
+					var time = 5000;
+				}else if(speed==1){
+					var time = 3000;
+				}else if(speed==2){
+					var time = 2000;
+				}else{
+					var time = 1000;
+				}
+				begin(time);
+			},1000);
+			setTimeout(function(){
+				$(".code").attr("class","code");
+			},1300);
+		},700);
+		event.stopPropagation();
+	});
+	
+	$(".gameCon").on("touchstart",function(){
+		if(!erro()){return false;};
+		if(clear){
+			issubmit =true;
+			if($(".gamemsg").length==0){
+				$("body").append("<div class='gamemsg'><p>雪人正在修复~请稍后</p></div>");
+			}else{
+				$(".gamemsg").addClass("erro");
+				setTimeout(function(){
+					$(".gamemsg").removeClass("erro");
+				},400);
+			}
+			event.stopPropagation();
+			return false;
+		}		
+	    nowball -= 1;
+		$(".gamemsg").remove();
+		snowball();
+		setTimeout(function(){
+			$(".code").addClass("code0");
+			nowclode(nowball,nowcode,0,1);
+			var _this = $(".snowManCon");
+			setTimeout(function(){
+				_this.css("background-position","-"+scale*300+"px 0px");
+			},144);
+			setTimeout(function(){
+				_this.css("background-position","0px 0px");
+				_this.removeClass("paused");
+			},1000);
+			setTimeout(function(){
+				$(".code").attr("class","code");
+			},1300);
+		},500);
+	});
+});
+
+function nowclode (nowball,nowcode,score,type){
+
+	if(type == 1){
+		$.post("{:U('Label/SnowBall/game')}",
+					{"id":"<?php echo $id;?>","score":score},
+					function(data){
+						//alert(data.info);
+						if(data.status == '1'){
+							issubmit = true;
+							clear = false;
+							$(".gamemsg").remove();
+						}else{
+							clear = false;
+							$(".gamemsg").remove();
+							issubmit = true;
+						}
+        			},"json");
+		
+	}
+	
+        			
+	$(".snowballNum.l span").text("X"+nowball);
+	$(".snowballNum.r span").text(nowcode);
+}
+
+function erro(){
+	if(nowball<=0){
+		end();
+		return false;
+	}else{
+		return true;
+	}
+}
+
+function end(){
+	$.post("{:U('Label/SnowBall/playRate')}",
+					{"id":"<?php echo $id;?>","ranking":"<?php echo $info['score'];?>"},
+					function(data){
+						if(data.status == '1'){
+		var html = ['<p class="msg-p">您的雪球已用完，马上去兑换奖品吧<span></p>',
+				'<a href="<?php echo U('Label/SnowBall/getPrize',array('id'=>$id));?>" class="btn-all w120">兑换奖品</a>'].join('');
+	MsgPop({
+		title:"&nbsp;",
+		html:html,
+		close:false
+	});
+							
+				}
+        			},"json");
+	
+}
+
+
+
+function snowball(){
+	$(".snowball").removeClass("move");
+	$(".righthand").removeClass("handthrow").removeClass("handmove");
+	$(".snowball").css({
+		bottom:"30px",
+		right:0,
+		width:"26%"
+	});
+	var bodywidth = $("body").width();
+	if(event.targetTouches){
+		var x = windowwidth - event.targetTouches[0].clientX;
+		var y = windowheight - event.targetTouches[0].clientY;		
+	}else{
+		var x = (bodywidth+windowwidth)/2 - event.screenX - 30;
+		var y = windowheight - event.screenY + 30 ;
+	}
+	setTimeout(function(){
+		$(".snowball").addClass("move");
+		$(".snowball").animate({
+			bottom:y,
+			right:x,
+			width:"14%"
+		},200);
+	},350);
+	$(".righthand").addClass("handthrow");
+}
+
+function init(){
+	var windowwidth=$("#gamewrapper").width();
+	var scale=windowwidth/640;
+	$(".lefthand,.righthand").css({
+		width:177*scale
+	});
+	$(".snowManCon").css({
+		width:250*scale,
+		height:243*scale,
+		marginLeft:-125*scale
+	});
+}
+
+function begin(time){
+	var _this = $(".snowManCon");
+	_this.attr("class","snowManCon "+speedArrey[speed]+" moveBegin ");
+	var move = function(){
+			if($(".snowManCon").hasClass("paused")){return false;}
+			var judge = [$(".snowManCon").hasClass("moveBegin"),$(".snowManCon").hasClass("moveLeft"),$(".snowManCon").hasClass("moveRiht")];
+			if(!judge[0]){
+				_this.addClass("moveBegin");
+			}else{
+				if(!judge[1]){
+					_this.removeClass("moveRight");
+					_this.addClass("moveLeft");
+				}else{
+					_this.removeClass("moveLeft");
+					_this.addClass("moveRight");
+				}
+			}
+		}
+	if(setI!=""){
+		clearInterval(setI);
+	}
+	setI = setInterval(move,time);
+}
+
+function audio(){
+	var audio = document.getElementById('audio');
+	if(audio.paused){
+		audio.play();
+		$(".music").addClass("on");
+	}else{
+		audio.pause();
+		$(".music").removeClass("on");
+	}
+}
+var m = true;
+function autoaudio(){
+	if(m){
+		var audio = document.getElementById('audio');
+		if(audio){
+			if(audio.paused){
+				audio.play();
+				$(".music").addClass("on");
+			}
+		}
+		m = false;
+	}
+}
+</script>
+<include file="Label/SnowBall/share"/>

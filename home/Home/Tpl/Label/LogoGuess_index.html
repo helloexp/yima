@@ -1,0 +1,364 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>真假大冒险</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,真假大冒险" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<load href="__PUBLIC__/Label/Css/activity/wap_20140315.css"/>
+<script>
+function qrcode(){
+	var url=window.location.href;
+	var u = navigator.userAgent,app = navigator.appVersion;
+	var reg=/[&\|\\\*^%$#@\-();,/]/g;
+		u = u.replace(reg," ");
+	var uu=u.split(" ");
+	var qrcode={running:false};
+	for(var ii=0;ii<=uu.length;ii++){
+		if(uu[ii]=="windows"){
+			for(var i=0;i<=uu.length;i++){
+				if(uu[i]=="Chrome"){
+					qrcode.running=false;
+					break;
+				}else{
+					qrcode.running=true;
+				}
+			}
+		}else if(uu[ii]=="Windows"){
+			for(var i=0;i<=uu.length;i++){
+				if(uu[i]=="Chrome"){
+					qrcode.running=false;
+					break;
+				}else{
+					qrcode.running=true;
+				}
+			}
+		}
+	}
+	if (qrcode.running){
+	   var src_url = '<?php echo U('LabelAdmin/ShowCode/index','id='.$id);?>' ;
+		$('.mainCon-dinstruction').html('<div id="qrcode"><img src="'+src_url+'"><p style="font-size:18px; margin-top:10px;">扫描二维码，参与活动</p></div>');
+		$('.mainCon-law-text>span').text("扫描二维码后，请在10秒之内，找出正确的商家Logo，成功闯关者可以参与抽奖哦！");
+		$('.go-input-button').hide();
+	}
+}
+$(document).ready(function(e) {	
+	qrcode();
+    //抽奖
+    var _is_sub = false;
+    $('#subcj').click(function(){
+         if(_is_sub)
+            return false;
+        _is_sub = true;
+       $.post(
+        "{:U('Label/Cj/submit')}",
+		$('#theform').serialize(),
+		function(data) {
+		  popForm('popMsg',data.info,data.status);
+          _is_sub = false;
+          fleshVerify();
+
+		},
+		'json'
+	   ); 
+    })
+	
+	//页面大小
+	initialise();
+	//参与活动
+	$(".go-input-button").click(function(){
+		$("#wrapperLoad").css("left",$("#wrapper").width())
+		$("#wrapperLoad").height($("#mainCon").height());
+		$(".canvasbox").height($("#wrapperLoad").height()-155);
+		$("#mainCon").addClass("mainCon-move");
+		$('body').animate({scrollTop:$(".time").offset().top-10},500,function(){
+			$("#wrapperLoad").animate({left:0},1000,function(){
+				$("#mainCon").css("visibility","hidden");
+				goimg();
+				time();
+			});
+		});
+		
+    })
+});
+    
+$(window).resize(function(e) {
+	initialise();
+});
+
+function initialise(){
+	var windowwidth=$("#wrapper").width();
+	if(windowwidth>640){windowwidth=640;}
+	var windowheight=$(window).height()-42;
+	var scale=windowwidth/320;
+	$("#header").width(scale*320);
+	$("#header").height(scale*136);
+	$("#header-bg").width(scale*320);
+	$("#header-bg").height(scale*136);
+	$(".logoimg").width(scale*75);
+	$(".logoimg").height(scale*75);
+	$(".canvasbox").height(windowheight-50);
+	if($(".mainCon").height()>=windowheight){ 
+		$(".mainCon").height("auto"); 
+	}else{ 
+		$(".mainCon").height(windowheight); 
+	}
+}
+function time(){
+	var g={running:false};
+	var time = 10;
+	var _width=$(".time p").width();
+	var	_Cwidth=_width/10;
+	$(".time p").animate({width:0},10000);
+	var checkTime = function(){
+			time--;
+			$('.time-con span').text(time);
+			if(time==0){
+				$('.time-con span').text(time);
+				if(g.running)return false;
+				g.running=true;
+				$(".logoimg").removeClass("imgMove1").removeClass("imgMove2").removeClass("imgMove3").removeClass("imgMove4").removeClass("imgMove5").removeClass("imgMove6").removeClass("imgMove7").removeClass("imgMove8").removeClass("imgMove9").removeClass("imgMove10").css("opacity","1");
+				$(".truelogo").addClass("truelogoMove");
+				var popFormx = function (){
+					$("#nocj_resp_id").show();
+					$("#cj_resp_id").hide();
+					popForm('popMsg',"闯关失败，日常生活中有一些不法分子利用山寨LOGO提供虚假伪劣产品及服务，作为消费者一定要炼就火眼金睛，谨防受骗！",2)
+				}
+				setTimeout(popFormx,1500)
+				clearInterval(Int);
+			};
+		}
+
+
+	var Int=setInterval(checkTime,1000);
+	$(".truelogo").click(function(){
+		clearInterval(Int);
+		$('.time-con span').text(10);
+		$(".time p").stop();
+		if(g.running)return false;
+		g.running=true;
+		popForm('popForm',0);
+    })
+
+	$(".fakelogo").click(function(){ 
+		clearInterval(Int);
+		$('.time-con span').text(10);
+		$(".time p").stop();
+		if(g.running)return false;
+		g.running=true;
+			popForm('popMsg',"闯关失败，日常生活中有一些不法分子利用山寨LOGO提供虚假伪劣产品及服务，作为消费者一定要炼就火眼金睛，谨防受骗！",2); 
+		});
+}
+function goimg(){
+	var MathX=$(".canvasbox").width()-$(".logoimg").width()-40;
+	var MathY=$(".canvasbox").height()-$(".logoimg").height()-40;
+	var $src=["logo1.png","logo2.png","logo3.png","logo4.png","logo5.png","logo6.png","logo7.png","logo8.png","logo9.png","logo10.png","logo11.png","logo12.png","logo13.png","logo14.png","logo15.png","logo16.png","logo17.png","logo18.png","logo19.png","logo20.png"];
+	$(".fakelogo").each(function(){
+		var $s=Math.floor(Math.random()*11);
+		if($(this).attr("src")==""){
+			$(this).attr("src","__PUBLIC__/Label/Image/20140315/"+$src[$s]);
+		}else{
+			return false;	
+		}
+		$src.splice([$s],1);
+		$(this).css("left",MathX*Math.random());
+		$(this).css("top",MathY*Math.random());
+  	});
+	$(".truelogo").each(function(){
+		if($(this).css("left")=="-75px"){
+			$(this).css("left",(MathX-40)*Math.random());
+			$(this).css("top",(MathY-40)*Math.random());
+		}else{
+			return false;	
+		}
+  	});
+	$(".logoimg").addClass("logoimg-animation");
+	var imgClass=function(){
+		var imgMove=1;
+		$(".logoimg").each(function(){
+			$(this).removeClass("logoimg-animation").addClass("imgMove"+imgMove);
+			imgMove++;
+		});
+	}
+	setTimeout(imgClass,1000);
+}
+</script>
+
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div id="mainCon" class="mainCon">
+            	<div id="header-bg">
+                	<img src="__PUBLIC__/Label/Image/20140315/stone1.png" class="stone stone1">
+                    <img src="__PUBLIC__/Label/Image/20140315/stone2.png" class="stone stone2">
+                    <img src="__PUBLIC__/Label/Image/20140315/stone3.png" class="stone stone3">
+                    <img src="__PUBLIC__/Label/Image/20140315/stone3.png" class="stone stone4">
+                    <img src="__PUBLIC__/Label/Image/20140315/stone3.png" class="stone stone5">
+                </div>
+            	<div id="header"></div>
+                <div class="mainCon-contenter">
+                	<div class="mainCon-contenter-bg">
+                        <div class="mainCon-law">
+                            <p class="b">游戏规则：</p>
+                            <div class="mainCon-law-text fn">
+                            <?php
+                            if($row['log_img']!= ''){?>
+                            <p class="logo-con"><img src="__UPLOAD__/<?php echo $row['log_img']?>"/><span>正确logo</span></p>
+                            <?php }?>
+                            <span>请在10秒之内，找出正确的商家Logo，成功闯关者可以参与抽奖哦！</span>
+                            </div>
+                        </div>
+                        <div class="mainCon-dinstruction">
+                            <p class="b">活动说明：</p>
+                            <p><?php echo $row['wap_info'];?></p>
+                        </div>
+                        <div class="pt20">
+                            <a href="javascript:void(0)" class="go-input-button" />开始冒险</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="popularize-msg">
+                    开展更多活动，请关注“<span>翼码旺财</span>”微信公众账号
+                </div>
+            </div>
+            <div id="wrapperLoad">
+                <div class="time"><p></p></div>
+                <div class="time-con">倒计时:<span>10</span>秒</div>
+                <div class="canvasbox">
+                    <img src="" class="logoimg fakelogo">
+                    <img src="" class="logoimg fakelogo">
+                    <img src="" class="logoimg fakelogo">
+                    <img src="" class="logoimg fakelogo">
+                    <img src="" class="logoimg fakelogo">
+                    <img src="" class="logoimg fakelogo">
+                    <img src="" class="logoimg fakelogo">
+                    <img src="" class="logoimg fakelogo">
+                    <img src="" class="logoimg fakelogo">
+                    <?php
+                    if($row['log_img']!= ''){?>
+                    <img src="__UPLOAD__/<?php echo $row['log_img']?>" class="logoimg truelogo"/>
+                    <?php }?>
+                    <div class="dn">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo1.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo2.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo3.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo4.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo5.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo6.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo7.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo8.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo9.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo10.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo11.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo12.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo13.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo14.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo15.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo16.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo17.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo18.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo19.png">
+                        <img src="__PUBLIC__/Label/Image/20140315/logo20.png">
+                    </div>
+                </div>
+                <div class="popularize-msg">
+                    开展更多活动，请关注“<span>翼码旺财</span>”微信公众账号
+                </div>
+            </div>
+      		<include file="Public:share"/>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function(e) {
+	$(".close-AjaxWrapper").click(function(){
+		$("#AjaxWrapper").fadeOut(300);
+		$("#wrapperLoad").css("left",$("#wrapper").width());
+		$(".mainCon-move").removeClass("mainCon-move");
+		$("#mainCon").css("visibility","visible");
+		$(".time p").stop().width("101%");
+		$(".fakelogo").attr("src","").removeClass("imgMove1").removeClass("imgMove2").removeClass("imgMove3").removeClass("imgMove4")
+		.removeClass("imgMove5").removeClass("imgMove6").removeClass("imgMove7").removeClass("imgMove8").removeClass("imgMove9").removeClass("imgMove10")
+	});
+});
+function popForm(type,msg,isTrue) {
+    $("#AjaxWrapper").fadeIn(300);
+    if(type=="popForm"){
+        $("#popMsg").hide();
+        $("#popForm").show();
+        $("#popForm .cjText-text").html(msg);
+        $("#nocj_resp_id").hide();
+        $("#cj_resp_id").show();
+        fleshVerify();
+    }else if(type == 'popMsg'){
+        $("#popForm").hide();
+        $("#popMsg").show();
+        $("#popMsg .cjText-text").html(msg);
+        if(isTrue == '1'){
+            $('#showPic').attr('src','__PUBLIC__/Label/Image/icon-ok.png');
+            $("#cj_resp_id").hide();
+            $("#nocj_resp_id").show();
+        }else{
+            $('#showPic').attr('src','__PUBLIC__/Label/Image/icon-error.png');
+        }
+    }
+}
+</script>
+<div id="AjaxWrapper" class="dn">
+	<div class="cjWrapper">
+    	<div class="cjWrapper-close"><a href="javascript:void(0)" class="close-AjaxWrapper">+</a></div>
+    	<div class="cjCon pb10 dn" id="popMsg">
+            <div class="cjText">
+            	<div class="cjText-con">
+                    <div class="cjText-img"><img id="showPic" src="__PUBLIC__/Label/Image/icon-error.png"></div>
+                    <div class="cjText-text">您填写的信息有误，<br />请重新输入！</div>
+                </div>
+            </div>
+            <div class="cjBtn">
+                <a href="javascript:void(0)" class="cjBtn-back close-AjaxWrapper" id="nocj_resp_id">再来一次</a>
+                <a href="javascript:void(0)" class="cjBtn-back" style="display: none;" id="cj_resp_id" onclick="popForm('popForm')">返回</a>
+            </div>
+        </div>
+        
+    	<div class="cjCon dn" id="popForm">
+            <div class="cjText">太棒了，顺利闯关，<br>请输入您的手机号参与抽奖吧！</div>
+            <form id="theform" action="<?php echo U('Label/Cj/Submit');?>" method="post" name="theform">
+            <input type="hidden" id="id" name="id" value="<?php echo $id;?>" />
+            <div class="cjForm">
+                <ul class="sOne-cjForm">
+                	
+                    <li><p>手机号:</p><input type="text" name="mobile" id="mobile" class="sOne-cjInput" placeholder="请输入手机号" maxlength="11" /></li>
+                    <li>
+                        <p>验证码:</p>
+                        <input type="text" class="sOne-cjInput-half" name="verify" id="verify" maxlength="4" placeholder="验证码" >
+                        <a href="javascript:void(0);"><img src="<?php echo U('Label/VerifyCode/index/')?>" class="sOne-cjpasscode-img" id="verifyImg"  onclick="fleshVerify()"></a>
+                    </li>
+                    <li class="pt20"><input type="button" id="subcj" value="提交" class="cj-input-button" /></li>
+                </ul>
+            </div>
+            </form>
+			<script language="JavaScript">
+            function fleshVerify(){ 
+                //重载验证码 
+                var obj = document.getElementById('verifyImg'); 
+                var captcha_img = obj.src; 
+                var i = captcha_img.indexOf('#'); 
+                if(i != -1){ 
+                captcha_img = captcha_img.substr(0,i); 
+                } 
+                obj.src = captcha_img+"#"+Math.random(); 
+            }
+            </script>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

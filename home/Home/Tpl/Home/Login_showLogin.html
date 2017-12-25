@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>登录_{:C('SITE_TITLE')}</title>
+<meta name="keywords" content="{:C('SITE_KEYWORDS')}" />
+<meta name="description" content="{:C('SITE_DESCRIPTION')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wdefault.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<body>
+<div id="wrapper" class="login-bg">
+	<include file="Public:loginHeader"/>
+	<div id="container">
+		<div id="main">
+			<div class="login-wrap">
+				<table cellpadding="0" cellspacing="0" summary="登录表单"><tbody>
+					<tr>
+						<td class="login-logo rel"><img src="__PUBLIC__/Image/login-logo.png" />
+						</td>
+						<td class="login-form">
+							<div style="color:red" id="error_msg"></div>
+							<div class="login-box ">
+								<form method="post" id="loginform" name="loginform">
+								<input type="hidden" name="landname" value="{$landname}" />
+								<input type="hidden" name="param1" value="{:I('param1')}" />
+								<input type="hidden" name="isHelp" value="{:I('isHelp')}" />
+								<div class="input-box">
+										<i class="login-icon"></i>
+									<input type="text" class="u-name validate[required]" name="email" id="email" placeholder="用户名" value="<?php if(!empty($_COOKIE['emailCookie'])){?><?php echo $_COOKIE['emailCookie']; ?><?php }?>"/>
+								</div>
+									<div class="input-box">
+										<i class="pwd-icon"></i>
+										<input type="password" name="password" id="password" class="pwd mt10 validate[required]" placeholder="密码"/>
+									</div>
+									<div id="verify_div">
+									</div>
+									<p class="mt15 fn"><label class="l"><input type="checkbox" class="vm mr5" name="rememberMe" id="rememberMe" value="1" checked/><span class="vm">记住用户名</span></label><a class="r" href="{:U('Home/ForgetPwd/index')}" style="color:#999;">忘记密码？</a></p>
+									<input type="button" class="btn-sub mt15" id="loginsub" value="登录" />
+									<p class="mt15">还没账号？<a href="{:U('Home/Reg/index',array('landname'=>$landname,'param1'=>I('param1')))}">立即注册</a> <a href="{:C('EPOS_LOGIN_URL')}" class="r">登录Epos系统</a></p>
+								</form>
+							</div>
+						</td>
+					</tr>
+				</tbody></table>
+			</div>
+		</div>
+	</div>
+<script type="text/javascript">
+	$(".gologin").click(function(){
+		$("#verifyImg").attr('src',"{:U('Home/Verifycode/verify',array('_t'=>time()))}");
+	});
+
+/* 	$("#loginform").submit(function(){
+		var email=$("#email").val();		
+		var password=$("#password").val();
+		var verify=$("#verify").val();
+		if(email=="")
+		{	alert("登录名不能为空！");
+			return false;		
+		}
+		if(password=="")
+		{
+			alert("登录密码不能为空！");
+			return false;	
+		}
+		if($("#verify") && verify=="")
+		{
+			alert("验证码不能为空！");
+			return false;	
+		}
+		if($("#loginsub").hasClass("erro")){
+			return false;
+		}else{
+			$("#loginsub").addClass("erro");
+			setTimeout(function(){
+				$("#loginsub").removeClass("erro");
+			},2000);
+		}
+		
+	}); */
+
+</script>
+<script language="JavaScript">
+var requestLoginError = function() {
+	$.ajax({
+		   type: "POST",
+		   url: "{:U('Home/Login/ajaxLoginError')}",
+		   success: callbackLoginError,
+		   dataType:"json"
+	});
+}
+var callbackLoginError = function(data) {
+	if (data['loginError'] != -1) {
+		var verifyImgSrc = "{:U('Home/Verifycode/verify',array('_t'=>time()))}";
+		$('#verify_div').html('<input type="text" class="verify mt10 validate[required]" placeholder="验证码" name="verify" id="verify" value="" maxlength="4" /><img id="verifyImg" src="'+verifyImgSrc+'" onclick="fleshVerify()" class="ml10" style="vertical-align:middle; height:32px;cursor:pointer;" />');
+	}
+}
+ function fleshVerify(){ 
+    //重载验证码
+    var time = new Date().getTime();
+        document.getElementById('verifyImg').src= '{:U("Home/Verifycode/verify")}&time='+time;
+ }
+var callbackLogin = function(data) {
+	if (data['success'] == 0) {
+		$('#error_msg').html(data['error_msg']);
+		var verifyImgSrc = "{:U('Home/Verifycode/verify',array('_t'=>time()))}";
+		$('#verify_div').html('<input type="text" class="verify mt10 validate[required]" placeholder="验证码" name="verify" id="verify" value="" maxlength="4" /><img id="verifyImg" src="'+verifyImgSrc+'" onclick="fleshVerify()" class="ml10" style="vertical-align:middle; height:32px;cursor:pointer;" />');
+		$('#verifyImg').click();
+	} else {
+		var h=window.location.href;
+		var i=h.indexOf('newRedirectUrl=');
+		var s=h.substr(i+15,h.length);
+		if( i !=-1){
+			window.location.href =s
+		}else{
+			window.location.href = data['redirectUrl'];
+		}
+
+	}
+}
+$(function(){
+	$.validationEngineLanguage.allRules['email'] = {
+			"regex": /^([a-zA-Z0-9]+[_|\_|\-|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\-|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/,
+            "alertText": "邮件地址无效"
+	};
+	$("#loginsub").click(function(){
+		var t = $("#loginform").validationEngine("validate");
+        if(!t) return false;
+        $.ajax({
+ 		   type: "POST",
+ 		   data:$('#loginform').serialize(),
+ 		   url: "{:U('Home/Login/ssologin')}",
+ 		   success: callbackLogin,
+ 		   error:function(XMLHttpRequest, textStatus, errorThrown){
+ 			   		alert('通信错误，请重新登录');
+ 			   		//window.location.href=window.location.href;
+ 			   	},
+ 		   dataType:"json"
+ 		});
+	});
+	requestLoginError();
+	$('#email,#password').keydown(function(event){
+		if(event.keyCode == 13){ //绑定回车
+			$("#loginsub").click();
+		}
+	});
+	$('#verify_div input').live('keydown', function(event){
+		if(event.keyCode == 13){ //绑定回车
+			$("#loginsub").click();
+		}
+	});
+});
+</script>
+	<include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+</body>
+</html>

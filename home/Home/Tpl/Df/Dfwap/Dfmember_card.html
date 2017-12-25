@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>会员卡</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_df.css?v=__VR__">
+    <link href="__PUBLIC__/Js/artDialog6/ui-dialog.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Image/df/Item/wap_df.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js"></script>
+<script src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<style>
+    .Gform .Nav li{ border-top: 1px solid #DDD;}
+    .Gform .Nav li:first-child{ border-top: 0px solid #DDD;}
+</style>
+    <script>
+	$(function(){
+	    $("#get").click(function(){
+			var data = {
+				name : "名字",
+				phone : "15921217744"
+			};
+			var html = template("dataLogin", data);
+			MsgPop({
+				title:"修改手机号",
+				content : '<div class="Gform register"><form id="form" action="" method="post" name="form"><ul><li class="name">手机号码&nbsp;&nbsp;|</li><li class="input"><input name="phone" id="phone" type="tel" class="textbox validate[required,minSize[11]]" maxlength="11" placeholder="&nbsp;请填写手机号码" data-rel=""></li></ul><ul><li class="name">验&nbsp;&nbsp;证&nbsp;码&nbsp;&nbsp;|</li><li class="input"><input name="verify" type="text" id="verify" maxlength="4" class="textbox half validate[required]" placeholder="&nbsp;验证码" data-rel=""><input type="button" name="getpasscode" id="getpasscode" class="btn-input half" value="获取验证码" data-in_ajax="0"></li></ul><ul class="btn-ul"><li class="btn-li"><input type="button" value="确定修改" class="btn-up" id="df_submit"/></li><li class="btn-li"><a href="javascript:void(0)" class="btn-cancel">取消</a></li></ul></form></div>'
+			});
+            $(".btn-cancel").click(function(){
+                $(this).closest(".msgPop").remove();
+            });
+            $("#df_submit").click(function(){
+                if($("#form").validationEngine('validate')) {
+                    $("#form").ajaxSubmit({
+                        success: function (data) {
+                            if (data.status == 1) {
+                                art.dialog.alert(data.info);
+                                $(".Gform").closest(".msgPop").remove();
+                                window.location.reload();
+                                return false;
+                            } else {
+                                art.dialog.alert(data.info);
+                            }
+                        },
+                        url: "{:U('Df/DfWap/change_phone')}",
+                        dataType: 'json'
+                    });
+                }
+            });
+			$('#form').validationEngine({
+				'allrules': {
+					"carname":{
+						"alertText":"请输入有效的信息"
+					}
+				}
+			});
+            var Int;
+            $("#getpasscode").click(function(){
+                var phone = $("#phone").val();
+                if(phone.length!=11)
+                {
+                    art.dialog.alert("手机号码不正确！");
+                    return false;
+                }
+                var self = $(this);
+                if(self.data('in_ajax') != 0) return ;
+                self.data('in_ajax', 1);
+                self.val("正在发送......");
+                $.get("{:U('Df/DfWap/sendCheckCode')}"+'&phone='+phone,function(data){
+
+                    self.data('in_ajax', 0);
+                    if (data.status == 1) {
+                        self.data('in_ajax', 2);
+                        self.val("90秒");
+                        var sed = 90, Int;
+                        function aha(){
+                            sed = sed - 1;
+                            if( sed == 0){
+                                self.data('in_ajax', 0);
+                                self.val('获取验证码');
+                                clearInterval(Int);
+                                return;
+                            }else{
+                                self.val(sed+'秒');
+                            }
+                        }
+                        Int = setInterval(aha, 1000);
+                    } else {
+                        art.dialog.alert(data.info);
+                        $("#getpasscode").val("获取验证码");
+                    }
+                },"json");
+            });
+	});
+});
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+        	<div class="goback"><i></i></div>
+            <div class="logo"><span>会员卡</span></div>
+        </div>
+        <div id="main">
+        	<div class="mainTop bgf2f2f2">
+                <div class="cardDf">
+                	<img src="__PUBLIC__/Label/Image/df/Item/df-card1.png" width="100%" height="auto" />
+                	<div class="cardInfo">
+                		<p class="point">会员积分<span>{$list['point']}</span></p>
+                		<p class="num">NO.<span>{$list['id']}</span></p>
+                	</div>
+                </div>
+                <div class="shadow"></div>
+            </div>
+            <div id="mainCon" class="Gform">
+                <div class="Nav">
+                    <ul class="fn">
+                        <li><label>姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：</label><span>{$list['name']}</span></li>
+                        <li><a href="javascript:;" id="get"><label>手机号码：</label><span>{$list['mobile']}</span><i class="icon-2"></i></a></li>
+                        <li><label>生&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;日：</label><span>{$list['birthday']}</span></li>
+                        <php>
+                            if($list['sex']===-1){
+                               $sex="未知";
+                            }elseif($list['sex']==0){
+                               $sex="男";
+                            }elseif($list['sex']==1){
+                               $sex="女";
+                            }else{
+                               $sex="未知";
+                            }
+                        </php>
+                        <li><label>性&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;别：</label><span>{$sex}</span></li>
+                    </ul>
+                </div>
+                <ul class="btn-ul">
+                    <li class="btn-li"><a href="index.php?g=Label&m=Label&a=index&id={$id}" class="btn-up">去兑换商品</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+    $(".goback").click(function(){
+        WeixinJSBridge.call('closeWindow');
+    });
+</script>

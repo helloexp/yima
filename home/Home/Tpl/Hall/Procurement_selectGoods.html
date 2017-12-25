@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>采购需求-供货-选择电子券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wselect_et.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+var _json_data = <?php echo json_encode(array_valtokey($list, 'card_id'));?>;
+var _callback = "{:I('callback')}";
+var next_step = "{$next_step}";
+$(function(){
+    if($(".DiatipsCon").height()==0){$(".DiatipsCon").hide();}
+    $(".etList ul li").click(function(e) {
+        var is_exit = $(this).find(".date").find("mark").text();
+        var is_selected=$(this).hasClass("selected")
+        if(is_exit!="无库存"){
+            if(is_selected == true)
+            {
+                $(this).removeClass("selected");
+            }
+            else
+            {
+                $(".etList ul li").removeClass("selected");
+                $(this).addClass("selected");
+            }
+        
+        }
+        else{
+            art.dialog({title:false,content:"<div class='msg-all-error'>该电子券已无库存</div>",fixed: true,padding:0,time:1});
+            $(this).removeClass("selected");
+        }
+    });
+    
+    $(".etList ul li").mouseover(function(e) {
+        $(this).children("div.details").show();
+    });
+    
+    $(".etList ul li").mouseout(function(e) {
+        $(this).children("div.details").hide();
+    });
+    
+    $(".btn-next,#pos_store_back,#store_back").click(function(){
+        var store_num = '{$stroeNum}';
+        var pos_store_num = '{$posStoreNum}';
+        var len = $(".selected").length;
+        var show_type = '{$show_type}';
+        if(len==0){
+            if(show_type == '12')
+                art.dialog({title:false,content:"<div class='msg-all-error'>请选择定额红包</div>",fixed: true,padding:0,time:1});
+            else
+                art.dialog({title:false,content:"<div class='msg-all-error'>请选择电子券</div>",fixed: true,padding:0,time:1});
+            return false;
+        }
+        if(store_num == '0' && show_type != '12'){
+            $(".SelectGoods").hide();
+            $(".no_store").show();
+            return false;
+        }
+        if(pos_store_num == '0' && show_type != '12'){
+            $(".SelectGoods").hide();
+            $(".no_pos_store").show();
+            return false;
+        }
+        //如果有下一步按钮的，接上奖品Id传过去（招募会员活动用到）
+        if ($(this).attr('id') == 'next_step') {
+            var card_id = $(".selected").attr('data-id');
+            location.href = next_step + "&prizeId=" + card_id;
+            return false;
+        }
+        $.submit_goods();
+    });
+    
+    $("#pos_store_back,#store_back").click(function(){
+        if (next_step != '') {
+            location.href = location.href;
+        } else {
+            $.submit_goods();
+        }
+    });
+    
+    $.submit_goods = function(){
+        var card_id = $(".selected").attr('data-id');
+        var datas = _json_data[card_id];
+        var win = art.dialog.opener;
+        if(_callback && win[_callback] && typeof(win[_callback]) == 'function' )
+            win[_callback].call(this, datas);
+        art.dialog.close();
+        return ; 
+    }
+    
+    $("#source,#goods_type").change(function(){
+        $("#theform").submit();
+    });
+    $("#sub_button").click(function(){
+        $("form").submit();
+    });
+    //无数据页面
+    var list_status = <?php if(empty($_POST) && empty($list)){echo '0';}else{echo '1';}?>;
+    var goodsTypes = '{$goodsType}';
+    if(list_status){
+            $(".SelectGoods").show();
+            $(".no_goods").hide();
+            $(".no_bonus").hide();   
+    }else{
+        $(".SelectGoods").hide();
+        if('6' == goodsTypes){
+            $(".no_goodsInfo").show();
+        }else{
+        var show_type = '{$show_type}';
+        if(show_type == '12')
+            $(".no_bonus").show();
+        else
+            $(".no_goods").show();
+       }            
+    }
+    //跳转提示
+    $("#go_goods,#go_hall").click(function(){
+        $(".no_goods").hide();
+        $(".location_tip").show();
+    });
+    //跳转提示
+    $("#go_bonus").click(function(){
+        $(".no_bonus").hide();
+        $(".location_tip2").show();
+    });
+    $("#show_go_tip").click(function(){
+        $(".SelectGoods").hide();
+        $(".no_goods").show();
+    });
+    
+    <eq name="showSetElec" value="1">
+    $("#show_go_tip").click();
+    </eq>
+    
+    $(".getMore").click(function(){
+        var url = $(this).attr("data-href");
+            art.dialog.open(url, {
+                title: '查看详情',
+                width:800,
+                height:650
+            });
+        return false;
+    })
+    if($(".etList li").length==0){
+        var html = '<div class="iframeCon"><div class="Dianodate"><img src="__PUBLIC__/Image/member/nodata.gif" /><p>空空如也，尝试下下其他类型的吧~~</p></div></div>'
+        $(".etList").html(html);
+    }
+})
+</script>
+</head>
+
+<body>
+    <div class="iframeCon SelectGoods">
+        <div class="DiatipsCon">
+            <if condition="$_REQUEST['goods_type'] neq '6'">
+                <eq name="show_type" value="12">
+                    <a href="{:U('Ecshop/ElectronicCommerce/index')}" target="_blank" class="r">如何使用定额红包？</a>
+                <else/>
+                    <a href="{$goodsHelp}" target="_blank" class="r">如何使用电子券？</a>
+                </eq>
+            </if>
+            <if condition="($_REQUEST['goods_type'] neq '6') and ($show_type neq '12')">
+                <i class="icon-Diamsg"></i>
+                <p>如电子券需要在线下领取或核销，请确保该电子券信息中包含已安装了核验终端的门店。</p>
+            <else/>
+            <p class="top_tips"></p>
+            </if>
+        </div>
+        <div class="SearchArea fn">
+            <form id="theform" action="{:U('Common/SelectJp/index')}" method="post">
+                <div class="SearchAreaLeft">
+                <input type="hidden" name="callback" value="{$_REQUEST['callback']}"/>
+                <input type="hidden" name="show_source" value="{$_REQUEST['show_source']}"/>
+                <input type="hidden" name="show_type" value="{$_REQUEST['show_type']}"/>
+                <input type="hidden" name="next_step" value="{$next_step}" />
+                <if condition="$_REQUEST['goods_type'] eq '6'">
+                <input type="hidden" name="goods_type" value="6"/>
+                </if>
+                
+                <eq name="goodsTypeSelectStatus" value='1'>
+                <label>
+                <select name="goods_type" id="goods_type">
+                    <option value="">电子券类型</option>
+                    <volist name="selectType" id="vo">
+                        <option value="{$key}" <if condition="strval($key) heq $_REQUEST['goods_type']">selected="selected"</if>>{$vo}</option>
+                    </volist>
+                </select>
+                </label>
+                </eq>
+                <label><span>关键字</span><input type="text" name="goods_name" value="{$_POST['goods_name']}"/></label>
+            </div>
+            <div class="SearchAreaRight">
+            <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+            </div>
+            </form>
+        </div>
+        <div class="etList">
+            <ul>
+            <volist name="list" id="vo">
+                <li data-id="{$vo['card_id']}">
+                    <div class="img"><img src="__UPLOAD__/{$vo['goods_image']}" /></div>
+                    <div class="text">
+                        <h3><span>{$vo['goods_name']}</span><i class="type{$vo['goods_type']}">{$selectType[$vo['goods_type']]}</i></h3>
+                        <p>剩余：<if condition="$vo['storage_type'] eq '1'">{$vo['remain_num']}<else/>不限</if></p>
+                        <p><a href="javascript:void(0)" data-href="<switch name="vo.source">
+                                    <case value="0">{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$vo['goods_id']))}</case>
+                                    <case value="1">{:U('WangcaiPc/NumGoods/purchaseDetail',array('goods_id'=>$vo['goods_id']))}</case>
+                                    <case value="3">{:U('Weixin/WeixinCard/cardDetail',array('id'=>$vo['id']))}</case>
+                                    <case value="4">{:U('WangcaiPc/NumGoods/purchaseDetail',array('goods_id'=>$vo['goods_id']))}</case>
+                                 </switch>" class="getMore">查看详情</a></p>
+                    </div>
+                </li>
+                </volist>
+            </ul>
+            <div class="page mini">{$page}</div>
+        </div>
+        <div class="DiabtnCon">
+            <a class="Diabtn-all btn-next">确定</a>
+            <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+        </div>
+    </div>
+    <!-- 无电子券 -->
+    <div class="iframeCon no_goods dn">
+        <div class="DiatipsCon">
+            <a href="{$goodsHelp}" target="_blank" class="r">如何使用电子券？</a>
+        </div>
+        <div class="Dianodate">
+            <img src="__PUBLIC__/Image/member/nodata.gif" />
+            <p>空空如也，您还没有电子券~~</p>
+            <p>您可以<a href="{:U('WangcaiPc/NumGoods/addNumGoods')}" id="go_goods" target="_blank">创建电子券</a>或<a href="{:U('Hall/Index/build')}" target="_blank" id="go_hall">快速采购电子券</a></p>
+        </div>
+        <div class="additional dn">
+            <dl>
+                <dt>关于电子券</dt>
+                <dd><em>电子券</em>是商家的商品、服务或权益的电子化信息，是消费者获得对应商品、服务或权益的凭证。</dd>
+                <dd>在旺财平台您可以通过以下两种方式<em>获取电子券：</em></dd>  
+                <dd><em>自建电子券：</em>即自行创建的电子券，可以在您自己的门店终端上核验。点击“创建电子券”，填写对应信息，即可快速创建。</dd>
+                <dd><em>采购电子券：</em>即向其他企业购买的电子券，可以用作营销活动奖品，不能直接售卖。您可以到电子券交易大厅，挑选并采购第三方电子券。</dd>
+            </dl>
+        </div>
+    </div>
+</body>

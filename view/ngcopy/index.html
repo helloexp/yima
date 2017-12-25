@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="js/angular.min.js"></script>
+<script type="text/javascript" src="js/ZeroClipboard.js"></script>
+</head>
+<body ng-app="app" ng-controller="appcopy">
+    <div ui-copy="{{ha}}" ui-copyback="callback()">点我复制链接{{ha}}</div>
+    <br>
+    <br>
+    <div ui-copy="{{haa}}" ui-copyback="callback()">点我复制指定div内容，比如{{haa}}</div>
+
+    <div id="main">
+    	<p style="color:red;font-size:20px;">我是被复制的html</p>
+    </div>
+	<p contenteditable style="border:solid 1px #333;height:80px; background:#f4f4f4"></p>
+</body>
+</html>
+<script type="text/javascript">
+var app = angular.module('app', ["ui.copy"]);
+app.controller('appcopy',['$scope', function($scope) {
+	$scope.ha = "http://www.baidu.com";
+	$scope.haa = "#main";
+	$scope.callback = function(){
+		alert("复制成功")
+	}
+}]);
+
+angular.module('ui.copy',[]).directive('uiCopy',[function(){
+	return{
+		scope:{
+			uiCopy:"@",
+			uiCopyback:"&"
+		},
+		link: function(scope, element) {
+    		ZeroClipboard.config({swfPath:'js/ZeroClipboard.swf',forceHandCursor:true});
+			var newclip = new ZeroClipboard(element);
+			newclip.on("copy", function(e){
+				if(scope.uiCopy.indexOf("#")==0||scope.uiCopy.indexOf(".")==0){
+					newclip.setHtml($(scope.uiCopy).html());
+				}else{
+					newclip.setText(scope.uiCopy);
+				};
+				scope.uiCopyback();
+			});
+		}
+	};
+}])
+</script>

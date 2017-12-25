@@ -1,0 +1,271 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>签到有礼</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,签到有礼" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link href="__PUBLIC__/Label/Css/activity/wap_worldcup_sign.css" rel="stylesheet" type="text/css" />
+<style>
+.loadingBox{position:fixed;z-index:1000;top:50%;left:50%;width:180px;height:100px; overflow:hidden;margin:-60px auto auto -120px;padding:30px 30px;border: 1px solid #2A2A2A;color:#fff;text-align:center;border-radius:10px;background:rgba(0,0,0,.66);}
+.loadingBox p{}
+.loadingBox span { font-size:16px;}
+.loadingBox i{position:absolute;z-index:999;top:60%;left:50%;margin:-16px 0 0 -16px;display:inline-block;width:20px;height:20px;border:4px dotted #000;border-color:rgba(255,255,255,.1) rgba(255,255,255,.2) rgba(255,255,255,.4) rgba(255,255,255,.5);border-radius:300px;-webkit-animation:loadforever 20s infinite linear;} 
+@-webkit-keyframes loadforever{0%{ -webkit-transform:rotate(0deg); }100%{ -webkit-transform:rotate(5000deg); }}
+</style>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script>
+function fleshVerify(){ 
+    //重载验证码 
+    var obj = document.getElementById('verifyImg'); 
+    var captcha_img = obj.src; 
+    var i = captcha_img.indexOf('#'); 
+    if(i != -1){ 
+    captcha_img = captcha_img.substr(0,i); 
+    } 
+    obj.src = captcha_img+"#"+Math.random(); 
+}
+//从表单中获取 Input元素形成 json报文
+function get_form_data(f){
+	var $form = $(f);
+	var o = {};
+	var a = $("input,textarea,select",$form).serializeArray();
+	$.each(a, function() {
+	   if (o[this.name]) {
+		   if (!o[this.name].push) {
+			   o[this.name] = [o[this.name]];
+		   }
+		   o[this.name].push(this.value || '');
+	   } else {
+		   o[this.name] = this.value || '';
+	   }
+	});
+	return o;
+}
+$(document).ready(function(e) {
+     //抽奖
+    var _is_sub = false;
+    $('#subcj').click(function(){
+         if(_is_sub)
+            return false;
+
+		var data = get_form_data($('#theform'));
+		if(!data.mobile){
+			popForm('popMsg','请输入手机号');
+			return;
+		}
+		if(!data.verify_code){
+			popForm('popMsg','请输入验证码');
+			return;
+		}
+		if(!confirm("确定要提交吗？")) return false;
+	   $(".loadingBox").show();
+	   _is_sub = true;
+       $.post($("#theform").attr("data-action"),
+		data,
+		function(data) {
+		fleshVerify();
+		$(".loadingBox").hide();
+		  if(typeof(data.info) == 'string'){
+			data.info = {msg:data.info,other:null}; 
+		  }
+		  popForm('popMsg',data.info.msg,data.status,data.info.other);
+          _is_sub = false;
+		},
+		'json'
+	   ); 
+    });
+	
+	//页面大小
+	initialise();
+
+    var prizeNum=$(".sign-prize li").length;
+    if(prizeNum<=3){
+        $(".sign-prize li").css("width",100/$(".sign-prize li").length+"%");
+        $(".sign-prize li img").css("width",30*$(".sign-prize li").length+"%");
+    }else{
+        $(".sign-prizeopr").fadeIn();
+        $(".signPrize").css({"margin":"0 20px"});
+        $(".sign-prize li").css("width",100/3+"%");
+        $(".sign-prize li img").css("width","90%");
+        var prizeWidth=	$(".sign-prize li").width();
+        $(".sign-prize li").css("width",prizeWidth);
+        $(".signPrize h1").show();
+        $(".sign-prize").width(prizeWidth*prizeNum);
+    }
+});
+    
+$(window).resize(function(e) {
+	initialise();
+});
+
+function initialise(){
+	var windowwidth = $(window).width();
+    if (windowwidth > 640) {
+        windowwidth = 640;
+    }
+    var scale = windowwidth / 320;
+    $(".logo-bg").css({
+        "width": scale * 320,
+        "height": scale * 91
+    });
+    $(".logo-con").css({
+        "width": scale * 53,
+        "height": scale * 53,
+        //"top": scale * 20,
+		//"left": scale * 20
+        "top": scale * 100,
+		"left": scale * 132,
+		"z-index": 300
+    });
+    $("#mainCon .mainCon-contenter").css("padding-top", scale * 130);
+}
+</script>
+<style>
+.cj-input-button { width:90%;height:38px;color:#fff; font-size:18px; cursor:pointer; border-radius:8px;-webkit-border-radius:8px;-moz-border-radius:8px;-webkit-appearance:none; background:#ff5454; box-shadow:0 3px 0 #e52626;-webkit-box-shadow:0 3px 0 #e52626;-moz-box-shadow:0 3px 0 #e52626; line-height:38px;}
+.mainCon-sign-calendar .calendarTable th { text-align:center; background:#ff5454; color:#fff; padding:2px 5px; height:30px;}
+.cjBtn { margin:0 auto; width:170px;height:35px; line-height:35px; -webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;background-color: #ff5454; font-size:18px;color:#fff;}
+.mainCon-sign-calendar .calendarTable td.openhover { background:#ff5454; color:#FFF; position:relative;}
+</style>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div id="mainCon" class="mainCon fn" style="background:#ff5454;">
+            	<div class="logo-bg">
+                	<img src="__PUBLIC__/Label/Image/Item/sign-top2.jpg" id="bg-img"/>
+                    <div class="logo-con">
+					<notempty name="row['log_img']">
+					<img src="__UPLOAD__/{$row['log_img']}"/>
+					<else/>
+                    <!-- 
+                    <img src="__PUBLIC__/Label/Image/defaultlogo-sTwo.png"/>
+                     -->
+                    </notempty>
+					</div>
+                </div>
+                <div class="mainCon-contenter">
+                	<div class="mainCon-contenter-bg" style="padding-top:20px;background:#fff">
+                        <div class="mainCon-sign-title">活动介绍：</div>
+                        <div class="mainCon-sign-text">{$row.wap_info|nl2br}</div>
+                        <div class="mainCon-sign-phone">
+						  <li class="pt20">
+							<div class="mainCon-sign-calendar">
+								<table cellpadding="0" cellspacing="0" class="calendarTable">
+									<tr><th colspan="5">可签到日期</th></tr>
+									<tr>
+									<volist name="dayList" id="vo" mod="5">
+									<if condition="($mod eq 0) and ($i neq 1)"></tr><tr></if>
+										<td data-val="{$vo}" {:$vo==date('Ymd')?'class="openhover"':''}>{$vo|dateformat='m.d'}
+										</td>
+									</volist>
+									</tr>
+								</table>
+							</div>
+                          </li>
+						<empty name="errmsg">
+                    	<form id="theform" data-action="{:U('submit')}" method="post" name="theform">
+						 <input type="hidden" name="id" value="{$_GET['id']}">
+                            <li class="pt20"><input  type="tel" id="mobile" name="mobile" class="sOne-cjInput girlphone" maxlength="11"  placeholder="请输入您的手机号码"/></li>
+							<li class="pt20 " id="verify_li">
+                                <input type="tel" class="sOne-cjInput-half" name="verify_code" id="verify" maxlength="4" placeholder="验证码" >
+                                <a href="javascript:void(0);"><img src="<?php echo U('Label/VerifyCode/index/')?>" class="sOne-cjpasscode-img" id="verifyImg"  onclick="fleshVerify()"></a></li>
+                            <li class="pt20"><a href="javascript:void(0)" class="dib cj-input-button go-input-button" id="subcj" /><i></i>我要签到</a></li>
+                        </form>
+						<else/>
+						<div style="padding:30px;text-align:center"><span id="J_errmsg">{$errmsg}</span></div>
+						<script>
+						$(function(){
+							popForm('popMsg',$("#J_errmsg").html());
+						});
+						</script>
+						</empty>
+                        </div>
+
+                        <div class="fn rel pt20">
+                        	<div class="signPrize">
+                                <ul class="sign-prize">
+                                    <php>$count = sizeof($prizeData);</php>
+                                    <volist name="prizeData" id="vo">
+                                        <li class="l">
+                                            <h1>
+                                                <php>if($count > 1){</php>签到{$vo.total_chance}天<php>}</php><span></span></h1>
+                                            <img src="__UPLOAD__/<?php echo $vo['batch_img']?>" /><p>{$vo['batch_name']}</p>
+                                        </li>
+                                    </volist>
+                                </ul>
+                            </div>
+                            <div class="sign-prizeopr dn"><a class="pre">&lt;</a><a class="next">&gt;</a></div>
+                        </div>
+                       
+                    </div>
+                </div>
+                <include file="./Home/Tpl/Label/Public_share.html"/>
+            </div>
+
+            <include file="./Home/Tpl/Label/Public_footer.html"/>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function(e) {
+	$(".close-AjaxWrapper").click(function(){
+		$("#AjaxWrapper").fadeOut(300);
+	});
+});
+function popForm(type,msg,isTrue,other) {
+    $("#AjaxWrapper").fadeIn(300);
+    if(type=="popForm"){
+        $("#popMsg").hide();
+        $("#popForm").show();
+        $("#popForm .cjText-text").html(msg);
+        $("#nocj_resp_id").hide();
+        $("#cj_resp_id").show();
+        fleshVerify();
+    }else if(type == 'popMsg'){
+        $("#popForm").hide();
+        $("#popMsg").show();
+        $("#popMsg .cjText-text").html(msg);
+		other = other||'';
+		$("#popMsg .cjText-other").html(other);
+		
+        if(isTrue == '1'){
+            $('#showPic').attr('src','__PUBLIC__/Label/Image/icon-ok.png');
+            $("#cj_resp_id").hide();
+            $("#nocj_resp_id").show();
+        }else{
+            $('#showPic').attr('src','__PUBLIC__/Label/Image/icon-error.png');
+        }
+    }
+}
+</script>
+<div id="AjaxWrapper" class="dn">
+	<div class="cjWrapper">
+    	<div class="cjWrapper-close"><a href="javascript:void(0)" class="close-AjaxWrapper">+</a></div>
+    	<div class="cjCon pb10 dn" id="popMsg">
+            <div class="cjText">
+            	<div class="cjText-con">
+                    <div class="cjText-img"><img id="showPic" src="__PUBLIC__/Label/Image/icon-error.png"></div>
+                    <div class="cjText-text">您填写的信息有误，<br />请重新输入！</div>
+                </div>
+				<div class="cjText-other"><!----></div>
+            </div>
+            <div class="cjBtn">
+                <a href="javascript:void(0)" class="cjBtn-back close-AjaxWrapper" id="nocj_resp_id">返回</a>
+                <a href="javascript:void(0)" class="cjBtn-back" style="display: none;" id="cj_resp_id" onclick="popForm('popForm')">返回</a>
+            </div>
+        </div>
+        
+    	<div class="cjCon dn" id="popForm">
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+
+</body>
+</html>

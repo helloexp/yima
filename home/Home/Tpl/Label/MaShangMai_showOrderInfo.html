@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>我的订单</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<load href="__PUBLIC__/Label/Css/wap_Purchase.css"/>
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<script>
+$(function(){
+	$("#load_more").live("click",function(){
+		var p = $(this).data('p');
+		var id = '{$id}';
+		setTimeout(function(){
+	        $('#loadingBox').show();
+	    },1);
+		$.get("{:U('Label/GoodsSale/showOrderInfo')}",{"id":id,"p":p,"ajax":1},function(data){
+			if(data == ''){
+				$("#load_more").html('无更多订单');
+			}else{
+				$("#lode_content").append(data);
+	            $("#load_more").data('p',p+1);
+			}
+			$('#loadingBox').hide();
+		},'html');
+		
+	});
+});
+function link_to(url,fun){
+    setTimeout(function(){
+        $('#loadingBox').show();
+    },1);
+    setTimeout(function(){
+    if(typeof url == 'string'){
+    location.href=url;
+    }
+    if(typeof url == 'function'){
+    url();
+    }
+    },500);
+    setTimeout(function(){$('#loadingBox').hide();},6000);
+    if(typeof fun == 'string'){
+    var jscode = new Function('return function(){'+fun+'}')();
+        jscode();
+    }else if(typeof fun == 'function'){
+        fun();
+    }
+}
+</script>
+</head>
+<body>
+<div id="wrapper" class="bgf3f3f3">
+    <div id="container">
+        <div id="main">
+            <div class="headerTitle">我的历史订单</div>
+            <div class="orderList" id="lode_content">
+            <volist name="orderList" id="vo" empty="您还没有购买过我们的商品">
+                <li>
+                    <div class="orderList-title">
+                        {$vo['group_goods_name']}<?php if($vo['order_status']=='1') echo "(已取消)"?>
+                        <?php if($vo['pay_status']==1 && $vo['order_status']==0){?>
+                        <a href="javascript:void(0);" onClick="javascript:link_to('<?php echo U('Label/PayMent/OrderPay',array('order_id'=>$vo['order_id']));?>');return false;">支付</a>
+                        <?php }?>
+                    </div>
+                    <div class="orderList-con">
+                        <p><span>下单时间:{$vo['add_time']|dateformat=###,'Y-m-d H:i:s'}</span><span class="ml20">收货手机号码:{$vo['receiver_phone']}</span></p>
+                        <p><span>支付状态:{$status[$vo['pay_status']]}</span></p>
+                        <p><span>购买数量:{$vo['buy_num']}</span><span class="ml20">商品单价:{$vo['group_price']}元</span><span class="ml20">共支付:{$vo['order_amt']}元</span></p>
+                    </div>
+                </li>
+            </volist>    
+            </div>
+            <div class="readMore"><a href="javascript:void(0);" id="load_more" data-p='2'>查看更多</a></div>
+        </div>
+    </div>
+</div>
+<div class="dn-bg dn"></div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox" ><i></i><span>加载中...</span></section>
+</body>
+</html>
+<eq name="show_menu" value="1">
+<script>
+var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Public/_hideWxMenu"/>
+</eq>

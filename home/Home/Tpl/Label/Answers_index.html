@@ -1,0 +1,360 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title><?php if($node_id == '00017467'){echo '爱恋珠宝';}else{echo $row['wap_title'];}?></title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,有奖答题" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/countdown.js?v=__VR__"/>
+<?php if($row['page_style'] == '1'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_a.css"/>
+<?php }elseif($row['page_style'] == '2'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_b.css"/>
+<?php }elseif($row['page_style'] == '3'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_c.css"/>
+<?php }else{?>
+<load href="__PUBLIC__/Label/Css/wap_main_d.css"/>
+<?php }?>
+<load href="__PUBLIC__/Label/Css/wap_Bm.css"/>
+<script>
+$(document).ready(function(e) {
+    //判断字符
+    $("hr:eq(0)").hide();
+    var fData=$(".top-title").text();
+    var intLength=0;
+    for (var i=0;i<fData.length;i++)
+    {
+        if ((fData.charCodeAt(i) < 0) || (fData.charCodeAt(i) > 255))
+            intLength=intLength+2
+        else
+            intLength=intLength+1    
+    }
+    if(intLength<=20){ 
+        $(".top-title").css("font-size","20px"); 
+    }else{ 
+        $(".top-title").css("font-size","18px"); 
+    }
+    
+	var specialCj = "{$row['cj_phone_type']}";
+	if(specialCj=="1"){
+		//普通抽奖,特殊抽奖在单独页面中
+		var _is_sub = false;
+		$('#subcj').click(function(){
+			 if(_is_sub)
+				return false;
+			_is_sub = true;
+		   $.post(
+			"{:U('Label/Cj/submit')}",
+			$('#theform').serialize(),
+			function(data) {
+              var _endCj = handelCjResult(data);
+              _endCj();
+			  _is_sub = false;
+	
+			},
+			'json'
+		   ); 
+		});
+	}
+    
+    //调研
+    var _one_sub = false;
+    $('#bm_sub_id').click(function(){
+		var checkanswers=true;
+		$(".bmForm-list").each(function(i) {
+			var _success_val=$(this).children("li").children("p").text().replace(/[^0-9]/ig,"");
+			var _success_input=$(this).children("li").children("p").text().split("-");
+			var _choose_val="";
+			$(this).children("li").children("input:checked").each(function(i){
+				_choose_val=_choose_val+this.value;
+			});
+			if(_choose_val!=_success_val){
+				checkanswers=false;
+				$(this).addClass("erro");
+				for(var ii=0;ii<=4;ii++){
+					$(this).children("li:eq("+_success_input[ii]+")").css("background","#fff2f2");
+				}
+				$(this).children("li").children("h3").css("color","#bf0600");
+				$('body,html').animate({scrollTop:$(".erro").eq(0).offset().top},500);
+                console.log($(this).children("h3").html() + "sss");
+			}else{
+                console.log($(this).children("h3").html() + "error");
+				$(this).removeClass("erro");
+				$(this).children("li").children("h3").css("color","#333");
+				$(this).children("li").css("background","#fff");
+			}
+        });
+        checkanswers = true;
+		if(checkanswers){
+			if(_one_sub)
+            return false;
+			_one_sub = true;
+			$.post(
+				"{:U('Label/Answers/submit')}",
+				$('#bmform').serialize(),
+				function(data) {
+					_one_sub = false;
+					var cj_type = "{$row['cj_phone_type']}";
+					if(data.data == 'success_cj'){
+						if(cj_type == "1"){
+							popForm('popForm',data.info,data.status);
+	                        $('#bm_sub_id').attr('disabled',true);
+	                        $('#bm_sub_id').css('background','#dddddd');
+						}else{
+							$('#subcj').off();
+							$(".specialCj").fadeIn().load("{:U('Label/Cj/cjindex',array('id'=>$id))}");
+							//window.location.href = "{:U('Label/Cj/cjindex',array('id'=>$id))}";
+						}
+					}else if(data.data == 'success'){
+                        //唐山平安非标中奖处理
+                        if(typeof(data.info.tangshan_url) === "string"){
+                            tangshan_pingan(data.info.tangshan_url,1);
+                            return false;
+                        }
+                        popForm('popMsg',data.info,data.status);
+						$('#bm_sub_id').attr('disabled',true);
+						$('#bm_sub_id').css('background','#dddddd');
+					}else{
+                            //翼蕙宝微信会员注册
+                            <notempty name="is_yhb">
+                                var _popOther = function(html){
+                                    $("#AjaxWrapper").fadeIn(300);
+                                    $("#popForm").hide();
+                                    $("#js-popForm-other").show().html(html);
+                                }
+                                if(data.status == 5){
+                                    var html = $(template("js-register-phoneform",{msg:data.info}));
+                                    $("#js-register",html).click(function(){
+                                        var _that = $(this);
+                                        var _form = $('form',html),
+                                          url = _form.data('action'),
+                                          data = _form.serialize();
+                                        var phone = $('input[name=phone]',_form).val();
+                                        if(!phone){
+                                            dialogShowMsg('手机号不能为空');
+                                            return;
+                                        }
+                                        _that.val("正在注册...");
+                                        $.post(url,data,function(res){
+                                            if(res.status == 1){
+                                              popForm('popMsg',res.info,res.status);
+                                            }else{
+                                                dialogShowMsg(res.info);
+                                            }
+                                        },'json').fail(function(){
+                                            dialogShowMsg('系统正忙...');
+                                        }).always(function(){
+                                            //还原
+                                            _that.val(_that.data('value'));
+                                        });
+                                    });
+                                 $('#getpasscode',html).click(function(){
+                                        $(this).val("正在发送..");
+                                        var phone = $("#phone").val();
+                                        var id = $("input[name='id']").val();
+                                        if(!phone){
+                                             dialogShowMsg('手机号不能为空');
+                                             $(this).val("获取验证码");
+                                             return false;
+                                        }
+                                        var Int;
+                                        var time = 90;
+                                        var checkTime = function(){
+                                            $("input[name='getpasscode']").val("已发送,"+time+"秒");
+                                            if(time==0){
+                                                $("input[name='getpasscode']").val("获取验证码");
+                                                $("input[name='getpasscode']").attr("id","getpasscode");
+                                                time = 90;
+                                                clearInterval(Int);
+                                                return false;
+                                            }
+                                            time--;
+                                        }
+                                        $.post("index.php?g=Label&m=ShareBatch&a=sendCheckCode",{"id":id,"phone":phone},function(data){
+                                             if(data.status=='1'){
+                                                $("#getpasscode").attr("id","noSend");
+                                                Int = setInterval(checkTime,1000);
+                                            }else{
+                                                 dialogShowMsg(data.info);
+                                                $("#getpasscode").val("获取验证码");
+                                            }
+                                        },"json");
+                                });
+                                _popOther(html);
+                                 return false;
+                                }
+                            </notempty>
+							popForm('popMsg',data.info,data.status,"",1);
+						}
+					},
+				'json'
+			);
+		}
+    });	
+});  
+</script>
+</head>
+<body>
+<include file="Public:file"/>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div class="mainTop">
+                <div class="top-img">
+                    <?php if($row['bg_style'] == '1'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sOne.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style'] == '2'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sTwo.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style']== '4'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sThree.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style']== '3'){?>
+                    <img src="<?php echo C('UPLOAD').$row['bg_pic']?>"  class="vip-img" />
+                     <?php }elseif($row['bg_style']== '5'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sFour.png"  class="vip-img" />
+                    <?php }?>
+                </div>
+            </div>
+            <div id="mainCon" class="mainCon fn <?php if($row['log_img']==''){?> noLogo <?php }?> <?php if($row['node_name']== ''){?> noTitle <?php }?> ">
+                <div class="top-title">{$row['node_name']}</div>
+                <div class="logo-bg">
+                    <?php
+                    if($row['log_img']!= ''){?>
+                    <div class="logo-con"><img src="<?php echo C('UPLOAD').$row['log_img']?>"  class="vip-img" /></div>
+                    <?php }?>
+                </div>
+                <div class="multimedia">
+                    <?php if($row['music'] != ''){?>
+                    <audio src="<?php echo C('UPLOAD').$row['music']?>" autoplay="true" loop id="audio" style="display:none;"></audio>
+                    <div class="voice_button"><a href="javascript:void(0)" class="a-hide" onClick="audio()">音乐</a></div>
+                    <script>
+                        function audio(){
+                            var audio = document.getElementById('audio');
+                                if(audio.paused){
+                                    audio.play();
+                                    $(".voice_button").css("background","__PUBLIC__/Label/Image/voice_button.png");
+                                }else{
+                                    audio.pause();
+                                    $(".voice_button").css("background","__PUBLIC__/Label/Image/stop_button.png");
+                                }
+                            }
+                    </script>
+                    <?php }?>
+                    <?php if($row['video_url'] != ''){?>
+                    <div class="video_button"><a href="<?php echo $row['video_url']?>" class="a-hide" target="_blank">视频</a></div>
+                    <?php }?>
+                </div>
+                <div class="mainCon-contenter">
+                    <div class="mainCon-title"><?php echo $row['wap_title']?></div>
+                    <div class="mainCon-text"><?php echo $row['wap_info'];?></div>
+                    <div class="mainCon-contenter-bg">
+                        <div class="mainForm">
+                            <form name="bmform" id="bmform" action="<?php echo U('Label/Answers/Submit')?>" method="post">
+                                <input type="hidden" value="<?php echo $_GET['id']?>" name="id" id="id" />
+                                <input type="hidden" value="<?php echo $row['select_type']?>" name="select_type" />
+                                <input type="hidden"  name="pay_token" value="{$pay_token}" />
+                                <div class="baseForm">
+                                     <?php 
+                                     $bm_arr=C('BM_TYPE_ARR');
+                                       $get_bm_arr = array(
+                                        '1'=>'true_name',
+                                        '2'=>'mobile',
+                                        '3'=>'sex',
+                                        '4'=>'age',
+                                        '5'=>'edu',
+                                        '6'=>'address',
+                                        '7'=>'email',
+                                        '8'=>'company',
+                                        '9'=>'position',
+                                        '10'=>'defined_one',
+                                        '11'=>'defined_two',
+                                        '12'=>'defined_three',
+                                        );
+                                     foreach($query_arr as $v){ ?>
+                                     <li>
+                                        <p>
+                                            <?php
+                                            if($v == '10')echo $row['defined_one_name'];
+                                            elseif($v == '11')echo $row['defined_two_name'];
+                                            elseif($v == '12')echo $row['defined_three_name'];
+                                            else echo $bm_arr[$v];
+                                            ?>：
+                                        </p>
+                                        <?php if($get_bm_arr[$v]=='sex'){?>
+                                        <input type="radio" name="<?php echo $get_bm_arr[$v]?>" value='男' checked="checked" class="sOne-Radio" id="sex-boy"><label for="sex-boy">&nbsp;男</label>
+                                        <input type="radio" name="<?php echo $get_bm_arr[$v]?>" value="女"  class="sOne-Radio" id="sex-girl"/><label for="sex-girl">&nbsp;女</label>
+                                        <?php }elseif($get_bm_arr[$v]=='edu'){ ?>
+                                        <select name="edu" class="sOne-select">
+                                            <option value="">请选择</option>
+                                            <option value='小学'>小学</option>
+                                            <option value='初中'>初中</option>
+                                            <option value='高中'>高中</option>
+                                            <option value='专科'>专科</option>
+                                            <option value='本科'>本科</option>
+                                            <option value='硕士'>硕士</option>
+                                            <option value='博士'>博士</option>
+                                            <option value='其他'>其他</option>
+                                        </select>
+                                        <?php }else{?>
+                                        <input name="<?php echo $get_bm_arr[$v]?>" type="text" class="sOne-Input"/>
+                                        <?php } ?>
+                                    </li>
+                                    <?php }?>
+                                </div>
+                                <div class="bmForm">
+                                    <?php
+                                    $q_type= array('1'=>'单选题','2'=>'多选题','3'=>'问答题');
+                                    $add_count = 0;
+                                     foreach($resp_arr as $k=>$v){
+                                        $add_count++;
+                                    ?>
+                                    <ul class="bmForm-list">
+                                    <li>
+                                        <hr/>
+                                        <h3><b><?php echo $add_count;?>.</b><?php echo $v['info']['questions']?></h3>
+                                        <p class="bmFormanswer" style="display:none;"><?php echo $v['info']['correct_answer']?></p>
+                                    </li>
+                                    <?php if($v['info']['type'] == '3'){?>
+                                    <li>
+                                        <textarea name="textarea-<?php echo $v['info']['id']?>" class="sOne-Textarea"></textarea>
+                                    </li>
+                                    <?php }else{?>
+                                    <?php
+                                    foreach($v['list'] as $kk=>$vv){ ?>
+                                    <li>
+                                        <?php if($v['info']['type'] == '1'){?>
+                                        <input type="radio" name="radio-<?php echo $v['info']['id']?>" value="<?php echo $vv['value']?>" class="sOne-Radio" id="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><label for="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><?php echo $vv['answers'];?></label>
+                                        <?php }elseif($v['info']['type'] == '2'){?>
+                                        <input type="checkbox" name="checkbox-<?php echo $v['info']['id']?>[]" value="<?php echo $vv['value']?>" class="sOne-Checkbox" id="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><label for="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><?php echo $vv['answers'];?></label>
+                                        <?php }?>
+                                    </li>
+                                    <?php }?>
+                                    </ul>
+                                    <?php }}?>
+                                </div>
+                                <div class="content_button">
+                                    <input type="button"  value="<?php if($row['is_cj'] == '1'){ if($node_id==C('tangshan.node_id') && !empty($tangshan_arr['sub_name'])){ echo $tangshan_arr['sub_name'];}else{echo $cj_text!='' ? $cj_text :'点击提交并抽奖'; }}else{if($node_id==C('tangshan.node_id') && !empty($tangshan_arr['sub_name'])){echo $tangshan_arr['sub_name'];}else{echo '点击提交';}}   ?>" class="input_button" id="bm_sub_id"  />
+                                </div>
+                                <eq name="showAwardList" value="block">
+								<div class="content_button fn" style="text-align: center;text-decoration: underline;display:{$showAwardList}">
+								<a href="{:U('DrawLottery/DrawLotteryCommon/awardList', array('id' => $id, 'wechat_card_js' => 1))}">中奖记录</a>
+								</div>
+								</eq>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <include file="Public:share"/>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+</div>
+<include file="Public:pop"/>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><span></span></section>
+<div class="specialCj"></div>
+</body>
+</html>

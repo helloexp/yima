@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>商品管理</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e){
+	$("#sub_button").click(function(){
+        $("#theform").submit();
+    });
+});
+</script>
+</head>
+
+<body class="bgfff">
+<div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="new_sidenav">
+                    <include file="./Home/Tpl/Integral/Integral/Store_sidenav.html" leftmenuid="mdqd"/>
+                </div>
+                <div id="div_content" class="subcon fn">
+				<div class="shopCon">
+                	<div class="main-name fn">
+                        <h4>商品管理<a href="javascript:void(0);" class="btn-add first" gourl="{:U('Integral/GoodsInfo/add')}" onclick="createGoods()"><i></i>新建商品</a></h4>
+                    </div>
+				<div class="SearchArea fn">
+					 <form action="?" method="get" name="theform" id="theform">
+						<input type="hidden" name="g" value="Integral">
+						<input type="hidden" name="m" value="GoodsInfo">
+						<input type="hidden" name="a" value="index">
+                        <div class="SearchAreaLeft">
+                            <label>
+                                <span>商品名称</span>
+                                <input name="goods_name" type="text" class="textbox w90" value="{$goods_name}">
+                            </label>
+                            <label><span>状态</span>
+                            <select class="textbox w100" name="pos_count_status">
+                            <option value="">全部</option>
+                            <?php foreach($pos_status as $k=>$v){ ?>
+                            <option value="<?php echo $k; ?>" <?php if($_GET['pos_count_status'] == $k){?> selected="selected"<?php } ?>><?php echo $v; ?></option>
+                            <?php } ?>
+                            </select>
+                            </label>
+                        </div>
+                        <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" id="sub_button" class="searchBtn">查找</a>
+                        </div>
+					</form>
+				</div>
+                <div class="fn">
+                    <table cellpadding="0" cellspacing="0" class="W-table" style="width:100%;border-collapse:collapse; border:1px solid #e3e2e2;">
+                        <tr>
+                            <th>商品名</th>
+                            <th>所属分类</th>
+                            <th>兑换分值</th>
+                            <th>商品总数</th>
+                            <th>库存</th>
+                            <th>兑换量</th>
+                            <th>商品状态</th>
+                            <th>操作</th>
+                        </tr>
+                        <volist name="list" id="vo" empty="$empty">
+                        <tr>
+                            <td>{$vo['goods_name']}</td>
+                            <td>{$classify_arr[$vo['ecshop_classify']]}</td>
+                            <td><php>echo str_replace('.00', '', $vo['market_price']);</php></td>
+                            <td><if condition="$vo['storage_type'] eq 0">不限<else />{$vo['storage_num']}</if></td>
+                            <td><if condition="$vo['storage_type'] eq 0">不限<elseif condition="$vo['remain_num'] eq null"/>0<else />{$vo['remain_num']}</if></td>
+                            <td>{$vo['exchange_num']}</td>
+                            <php>if($vo['storage_type']=='1' && $vo['remain_num']<1){</php>
+                                <td>已兑完</td>
+                            <php>}elseif($vo['status']=='2'){</php>
+                                <td>未上架</td>
+                            <php>}else{</php>
+                                 <td>可兑换</td>
+                            <php>}</php>
+                            <td>
+                                <php>if($vo['status']=='2'){</php>
+                                     <a href="javascript:void(0);" onclick="integralChange('{$vo.m_id}')">&nbsp;上架</a>
+                                     <a href="{:U('Integral/GoodsInfo/edit',array('id'=>$vo['id']))}">&nbsp;编辑</a>
+                                <php>}else{</php>
+                                     <a href="javascript:void(0);"  onclick="integralChangeDown('{$vo.m_id}')" style="margin-right: 45px;">&nbsp;下架</a>
+                                <php>}</php>
+                            </td>
+                        </tr>
+                        </volist>
+                        <empty name="list" >
+                            <tr class="info">
+                                <td colspan="8" class="last">
+                                    <div class="nonedata"></div>
+                                </td>
+                            </tr>
+                        </empty>
+                    </table>
+                    <div class="page"><?php echo $page;?>&nbsp;&nbsp;</div>
+                </div>
+			</div>
+                </div>
+		</div>
+	</div>
+</div>
+<div class="integralService"></div>
+</body>
+<script type="text/javascript">
+function createGoods(){
+    var goUrl = $(".btn-add").attr("gourl");
+    window.location.href=goUrl;
+    // art.dialog({
+    //             title:"创建提醒",
+    //             content:'【提示】：由于商品创建关系到部分不可逆的文件和功能（如合同），故创建后商品名称"不可删除"和"修改"。请问是否创建？',
+    //             fixed: true,
+    //             width:400,
+    //             lock:true,
+    //             okVal: '确认',
+    //             ok: function () {
+    //                 window.location.href=goUrl;
+    //             },
+    //             cancel:function () {
+    //                 this.close();
+    //             }
+    //         });
+}
+function integralChange(id){
+    var title="您确认上架该商品？";
+    art.dialog.confirm(title,function(){
+        $.post("{:U('Integral/GoodsInfo/putLine')}",{"id":id},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>上架成功</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+function integralChangeDown(id){
+    var title="您确认下架该商品？";
+    art.dialog.confirm(title,function(){
+        $.post("{:U('Integral/GoodsInfo/offLine')}",{"id":id},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>下架成功</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+function integralDel(id){
+    var title="您确认要删除该商品？";
+    art.dialog.confirm(title,function(){
+        $.post("{:U('Integral/GoodsInfo/delLine')}",{"id":id},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>删除成功</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+</script>

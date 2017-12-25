@@ -1,0 +1,317 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>小店订单_旺财小店_多宝电商</title>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/main.css?v=__VR__">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/layout.css?v=__VR__">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/module.css?v=__VR__">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/Wshop.css?v=__VR__">
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) {
+	var searcht = false;
+	$(".Gsearch input").each(function(index, element) {
+		if($(this).val()!=""){searcht = true;}
+	});
+	if(searcht){$(".btn-more").click();}
+	$(".icon-edit").live("click", function () {
+                var openUrl = $(this).attr("data-url") || 'about:blank';
+				//openUrl += '&tpl_id='+$('#tpl_id').val();
+                var dialogHeight;
+                art.dialog.open(openUrl, {
+                    id: "editstatus",
+                    lock: true,
+                    fixed: true,
+                    title: "修改状态",
+                    width: "30%",
+                    height: "40%"
+                });
+            });
+	$(".icon-print").live("click", function () {
+                var openUrl = $(this).attr("data-url") || 'about:blank';
+				//openUrl += '&tpl_id='+$('#tpl_id').val();
+                var dialogHeight;
+                art.dialog.open(openUrl, {
+                    id: "editstatus",
+                    lock: true,
+                    fixed: true,
+                    title: "打印订单",
+                    width: "60%",
+                    height: "90%"
+                });
+            });
+	$(".icon-qr").live("click",function(){
+		//location.href="{:U('Ecshop/OrderList/exportOne',array('order_id'=>'1408079364670133'))}";
+		var openUrl = $(this).attr("data-url") || 'about:blank';
+                var dialogHeight;
+                art.dialog.open(openUrl, {
+                    id: "orderoption",
+                    lock: true,
+                    fixed: true,
+                    title: "凭证操作",
+                    width: "80%",
+                    height: "90%"
+                });
+
+	});
+	$(".UpdateDelivery").live("click", function () {
+		var orderId = $(this).attr("data-o");
+		var dst = $(this).attr("data-d");
+		var dsd = $(this).attr("data-dd");
+		var dsn = $(this).attr("data-n");
+		var dsc = $(this).attr("data-c");
+		//var optionv = '{:show_arr_opt($deliveryStatus,'+dst+')}';
+		var optionv = '';
+		var udata = {"status":$(this).attr("data-d"),"optionv":optionv,"dst":dst,"dsd":dsd,"dsn":dsn,"dsc":dsc};
+		var uhtml = template("inputDeliveryInfo",udata);
+                art.dialog({
+					title: '更新物流信息',
+					width:'520px',
+					content:uhtml,
+					lock:true,
+					height:'200px',
+					okVal:"提交",
+					ok:function(){
+						var delivery_date = $('#delivery_date').val();
+						var delivery_status = $('#d_status').val();
+						var delivery_company = $('#delivery_company').val();
+						var delivery_number = $('#delivery_number').val();
+						if(delivery_status == ''){
+							alert('请选择配送状态');
+							return false;
+						}
+						if(delivery_date == ''){
+							alert('请选择物流发出时间');
+							return false;
+						}
+						if(delivery_company == ''){
+							alert('请选择物流公司');
+							return false;
+						}
+						if(delivery_number == ''){
+							alert('请选择物流单号');
+							return false;
+						}
+						var dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+						$.post("{:U('LabelAdmin/OrderList/updateDelivery')}",
+								{"delivery_status":delivery_status,"delivery_date":delivery_date,"delivery_company":delivery_company,
+								"delivery_number":delivery_number,"order_id":orderId},
+								function(cdata){
+									var c_status= cdata.status;
+									if(c_status == 1){
+										dialog.time(3).content("<div class='msg-all-error'>"+cdata.info+"</div>");
+										top.location.reload();
+									}else{
+										dialog.time(3).content("<div class='msg-all-error'>"+cdata.info+"</div>");
+									}
+								},'JSON');
+					},
+					cancelVal:'关闭',
+					cancel: true
+				});
+            });
+	$("#down").click(function(){
+        $("#theform").attr("action","{:U('Ecshop/OrderList/export')}").submit();
+    });
+	$("#sub_button").click(function(){
+        $("#theform").attr("action","{:U('Ecshop/OrderList/index')}").submit();
+    });
+	//单选
+	$(".onecheck").click(function(){
+		var _thisckeck = $(this).find("input:checked").length;
+		if(_thisckeck==0){
+			$(this).addClass("checked");
+			$(this).find("input").attr("checked",true);
+		}else{
+			$(this).removeClass("checked");
+			$(this).find("input").attr("checked",false);
+		}
+	})
+	
+	//全选
+	$(".allcheck").click(function(){
+		var _thisckeck = $(this).find("input:checked").length;
+		if(_thisckeck==0){
+			$(".shopTable").find(".onecheck input").attr("checked",true);
+			$(".shopTable").find(".onecheck").addClass("checked");
+			$(this).addClass("checked");
+			$(this).find("input").attr("checked",true);
+		}else{
+			$(".shopTable").find(".onecheck input").attr("checked",false);
+			$(".shopTable").find(".onecheck").removeClass("checked");
+			$(this).removeClass("checked");
+			$(this).find("input").attr("checked",false);
+		}
+	})
+});
+</script>
+
+</head>
+<body>
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+	<!--开始载入头部菜单--> 
+        <include file="Shop/nav" navmenuid="Navshop"/>
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+			<div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <include file="Shop/menu" leftmenuid="xddd"/>
+             </div>
+            <div class="subcon pt0">
+                <div class="main-name fn">
+                    <h4>订单列表<a href="javascript:void(0);" class="btn-down first" id="down"><i></i>下载订单列表</a></h4>
+                </div>
+                <!--查询-->
+                <div class="Gsearch fn mb20">
+                    <form action="" method="POST" name="theform" id="theform">
+                        <p>订&nbsp;&nbsp;单&nbsp;&nbsp;号</p>
+                        <p><input type="text" name="order_id" class="textbox w180" value="{$post.order_id}" /></p>
+                        <p class="ml20">
+                            <select class="selectbox w100" name="pay_status" id="pay_status">
+                            <option value="">支付状态</option>
+                            {:show_arr_opt($payStatus,$post['pay_status'])}
+                            </select>
+                        </p>
+                        <p class="ml20">
+                            <select class="selectbox w100" name="delivery_status" id="delivery_status">
+                            <option value="">配送状态</option>
+                            {:show_arr_opt($deliveryStatus,$post['delivery_status'])}
+                            </select>
+                        </p>
+                        <p class="ml20">
+                            <select class="selectbox w100" name="order_status" id="order_status">
+                            <option value="">订单状态</option>
+                            {:show_arr_opt($orderStatus,$post['order_status'])}
+                            </select>
+                        </p>
+                        <p class="ml20">
+                        <select name="receiver_type" class="selectbox">
+                        <option value="" >订单类型</option>
+                        {:show_arr_opt($receiverType,$post['receiver_type'])}
+                        </select>
+                        </p>
+                        <a href="javascript:void(0);" class="btn-more r" onclick="javascript:$('.Gsearch-more').toggle();$(this).text()=='更多筛选'?$(this).text('收起筛选'):$(this).text('更多筛选');">更多筛选</a>
+                        <a href="javascript:void(0);" class="btn-all w80 r" id="sub_button">查询</a>
+                        <div class="Gsearch-more dn">
+                            <div class="cl pt10"></div>
+                            <p>下单时间</p>
+                            <p><input type="text" name="start_time" id="start_time" onClick="WdatePicker({dateFmt:'yyyyMMddHHmm',maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$Think.request.start_time|dateformat='YmdHi'}" class="textbox w80" />
+                            -
+                            <input type="text" name="end_time" id="end_time" onClick="WdatePicker({dateFmt:'yyyyMMddHHmm',minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time|dateformat='YmdHi'}" class="textbox w80" /></p>
+                            <p class="ml10"><select name="is_gift" class="selectbox">
+                            <option value="" >用途</option>
+                            {:show_arr_opt($gift_arr,$post['is_gift'])}
+                            </select>
+                            </p>
+                            <p class="ml10">收货人手机</p>
+                            <p><input name="rece_phone" type="text" class="textbox w100" value="{$post['rece_phone']}"></p>
+                            <p class="ml10">订单来源</p>
+                            <p><input name="channel_name" type="text" class="textbox w180" value="{$post['channel_name']}"></p>
+                            <div class="cl pt10"></div>
+                            <p>购买人手机</p>
+                            <p><input name="order_phone" type="text" class="textbox w100" value="{$post['order_phone']}"></p>
+                        </div>
+                    </form>
+                </div>
+                <!--查询-->
+                <!--列表-->
+                <div class="shopCon">
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                        <tr>
+                            <th class="first">下单时间</th>
+                            <th>商品数量</th>
+                            <th>收货人手机号</th>
+                            <th>应付金额</th>
+                            <th>订单来源</th>
+                            <th>支付状态</th>
+                            <th>配送状态</th>
+                            <th>订单状态</th>
+                            <th class="last">操作</th>
+                        </tr>
+                        <volist name="orderList" id="vo">
+                        <tr class="title <if condition="$vo['pay_status'] eq 2">hover</if>">
+                            <td class="title" colspan="9"><i class="icon-checkbox onecheck"><input type="checkbox" /></i>订单号:{$vo.order_id} 
+                            <span class="ml20">购买人手机:{$vo['order_phone']}</span>
+                            <span class="ml20">收货人手机:{$vo['receiver_phone']}</span>
+                            <span class="ml20"><if condition="$vo['receiver_type'] eq 0">凭证自提订单<else />物流订单</if></span>
+                            <span class="ml20"><eq name="vo.is_gift" value="1">送礼<else />自消费</eq></span>
+							<span class="ml20"><eq name="vo.pay_channel" value="4">货到付款</eq></span>
+                            </td>
+                        </tr>
+                        <tr class="info <if condition="$vo['pay_status'] eq 2">hover</if>">
+                            <td class="first">{$vo['add_time']|dateformat=###,'Y-m-d'}<br />{$vo['add_time']|dateformat=###,'H:i:s'}</td>
+                            <td>{$vo['buy_num']}</td>
+                            <td>{$vo['receiver_phone']}</td>
+                            <td>{$vo['order_amt']}<br/>（含运费：{$vo['freight']|default_nvl='0.00'}）</td>
+                            <td>{$vo['channel_name']}</td>
+                            <td>{$payStatus[$vo['pay_status']]}</td>
+                            <td>{$deliveryStatus[$vo['delivery_status']]}</td>
+                            <td>{$orderStatus[$vo['order_status']]}</td>
+                            <td class="last">
+                                <if condition="$vo['code_show'] neq 0">
+                                    <a href="javascript:void(0)" title="凭证操作" class="icon-qr" data-url="{:U('LabelAdmin/OrderList/orderOption',array('order_id'=>$vo['order_id']))}">凭证操作</a>
+                                    <br>
+                                </if>
+                                <if condition="($vo['pay_status'] eq 2) and ($vo['receiver_type'] eq 1)">
+                                <a class="UpdateDelivery" href="javascript:void(0)" data-o="{$vo['order_id']}" data-d="{$vo.delivery_status}" data-c="{$vo.delivery_company}" data-n="{$vo.delivery_number}" data-dd="{$vo.delivery_date}">更新物流</a>
+                                <br />
+                                </if>
+                                <a href="javascript:void(0)" title="打印" class="icon-print" data-url="{:U('Ecshop/OrderList/orderPrint',array('order_id'=>$vo['order_id']))}">打印</a>
+                            </td>
+                        </tr>
+                        </volist>
+                        <empty name="orderList">
+                            <tr><td colspan="9" class="last"><div class="nonedata"></div></td></tr>
+                        </empty>
+                    </table>
+                </div>
+                <div class="shopPage fn">
+                    <span class="l"><i class="icon-checkbox allcheck"><input type="checkbox" /></i>全选</span>
+                    <?php echo $page;?>
+                </div>
+                <!--列表-->                        
+            </div>
+            </div>
+        </div>
+    </div>
+	<include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+<div class="service"></div>
+</body>
+</html>
+<script id="inputDeliveryInfo" type="text/html">
+<div class="Gform fn">
+	<ul>
+		<li class="Gname">*物流公司：</li>
+		<li class="Ginput"><input type="text" class="validate[required]" maxlength="50" name="delivery_company" id="delivery_company"  value="{{dsc}}"></li>
+	</ul>
+	<ul>
+		<li class="Gname">*物流单号：</li>
+		<li class="Ginput"><input type="text" class="validate[required]" maxlength="50" name="delivery_number" id="delivery_number"  value="{{dsn}}"></li>
+	</ul>
+	<ul>
+		<li class="Gname">*发出时间：</li>
+		<li class="Ginput"><input type="text" class="validate[required] textbox" onClick="WdatePicker({dateFmt:'yyyyMMddHHmmss'})" name="delivery_date" id="delivery_date" value="{{dsd}}"></li>
+	</ul>
+	<ul>
+		<li class="Gname">*配送状态：</li>
+		<li class="Ginput">
+			<select name="d_status" class="selectbox" id="d_status">
+				<option value="" >配送状态</option>
+				<option value="1" {{ if dst==1}}selected{{/if}} >待配送</option>
+				<option value="2" {{ if dst==2}}selected{{/if}} >配送中</option>
+				<option value="3" {{ if dst==3}}selected{{/if}} >已配送</option>
+				//{{#optionv}}
+			</select>
+		</li>
+	</ul>
+</div>
+</script>

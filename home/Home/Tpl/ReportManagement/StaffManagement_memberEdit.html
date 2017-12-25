@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>修改员工信息</title>
+	<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/Wprize.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+	<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+	<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+	<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+</head>
+<body>
+<div class="fn" id="one_div">
+	<div class="cl"></div>
+	<div id="form1" class="fn">
+		<form method="post" id="theform" method="post" name="form">
+			<div class="Gform fn">
+				<ul>
+					<li class="Gnmae"><i>*</i>所属分公司：</li>
+					<li class="Ginput">
+						<select class="validate[required] textbox w100" name="company_id">
+						<option value="">请选择</option>
+						{:show_arr_opt($companyList,$getOneMember['company_id'])}
+						</select>
+					</li>
+				</ul>
+				<ul>
+					<li class="Gnmae"><i>*</i>员工姓名：</li>
+					<li class="Ginput">
+						<input type="text" value="{$getOneMember['name']}"  name="name" class="validate[required]" maxlength="16"/>
+					</li>
+				</ul>
+				<ul>
+					<li class="Gnmae"><i>*</i>手机号：</li>
+					<li class="Ginput">
+						<input type="text" value="{$getOneMember['mobile']}" name="mobile" class="validate[required],min[11],custom[integer]" maxlength="11"/>
+					</li>
+				</ul>
+				<ul>
+					<li class="Gnmae">自定义编号：</li>
+					<li class="Ginput">
+						<input type="text" value="{$getOneMember['custom_number']}"  name="custom_number" class="custom[integer]" />
+					</li>
+				</ul>
+			</div>
+			<input type="hidden" name="id" value="{$getOneMember['id']}"/>
+			<div class="DiabtnCon">
+			   <a href="javascript:void(0);" title="确认" id="btn" class="Diabtn-all">确定</a>
+			   <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+			</div>
+		</form>
+    </div>
+</div>
+</body>
+</html>
+<script>
+	$("#btn").click(function(){
+		var dialog;
+		if($("form").validationEngine('validate')){
+			var data=$("#theform").serialize();
+			$.ajax({
+						type: "POST",
+						url: "{:U('ReportManagement/StaffManagement/memberEditSave')}",
+						data: data,
+					    dataType: 'json',
+						success: function(msg){
+							if(msg.status==0){
+								art.dialog({title:false,content:"<div class='msg-all-error'>"+msg.info+"</div>",fixed: true,padding:0,time:1});
+							}else{
+								art.dialog({title:false,content:"<div class='msg-all-succeed'>"+msg.info+"</div>",fixed: true,padding:0,time:1});
+								setTimeout(function(){
+									top.location.reload();
+									art.dialog.close();
+								},2000);
+							}
+						}
+		          });
+			return false;
+		}
+	});
+</script>

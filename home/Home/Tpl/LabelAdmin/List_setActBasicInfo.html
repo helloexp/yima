@@ -1,0 +1,1019 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>编辑列表_营销活动中心_翼码旺财</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivity2015.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/json2.js?v=__VR__"></script>
+<script>
+var jsonStr = '{$listData}';
+var dataList = $.parseJSON(jsonStr);
+$(function(){
+	$("input[name='banner_pic']").val(dataList.banner);
+	beginList(dataList);
+	beginListForm(dataList);
+	$("body").on("click",".ActList .ActListopr .opr-edit",function(){
+		var thisActList = $(this).closest(".ActList");
+		var tempId = thisActList.attr('data-tempId');
+		var listId = thisActList.attr('data-listId');
+		var index = thisActList.index();
+		var nowdata = dataList.list.list[index];
+		var data = {
+				tempId:tempId,
+				listId:listId,
+				title:nowdata.title,
+				text:nowdata.text,
+				src:nowdata.src,
+				srctype:nowdata.srctype,
+				url:nowdata.url,
+				urltype:nowdata.urltype,
+				urltitle:nowdata.urltitle,
+				bgcolor:nowdata.bgcolor,
+				bgcolortype:nowdata.bgcolortype,
+				dateSideNav:nowdata.dateSideNav,
+				TabNav:nowdata.TabNav,
+				alldateSideNav:dataList.dateSideNav,
+				allTabNav:dataList.TabNav,
+				alltype:dataList.list.type
+			}
+		var html = template("listTemp",data);
+		art.dialog({
+			title: '修改列表内容',
+			width: '800px',
+			content: html,
+			ok: function () {
+				addList(listId, tempId, 2);//编辑
+			},
+			cancel:true
+		});
+		if(dataList.list.type==1){
+			$("."+data.bgcolor).click();
+			if(data.src.indexOf("iconVal-")>=0){
+				var num = data.src.split("iconVal/");
+					num = num[1].split(".png");
+				$("."+num[0]).click();
+			}else{
+				$(".iconVal-1").click();
+			}
+		}
+		Gformbegin();
+	});
+	//删除
+	$("body").on("click",".ActList .ActListopr .opr-del",function(){
+		var thisActList = $(this).closest(".ActList");
+		var tempId = thisActList.attr('data-tempId');
+		var listId = thisActList.attr('data-listId');
+		var index = thisActList.index();
+		var nowdata = dataList.list.list[index];
+		var m_id = $('[name="m_id"]').val();
+		delListDraft(m_id, tempId, listId,index);
+	});
+	
+	$("body").on("click",".choose-color-val",function(){
+		$(".choose-color-val").removeClass("color-hover");
+		$(this).addClass("color-hover");
+		$(".choose-icon-val").css("background-color",$(this).css("background-color"));
+		var color = $(this).attr('data-val');
+		$('.ListForm-bgcolor').val(color);
+	});
+	$("body").on("click",".choose-icon-val",function(){
+		$(".choose-icon-val").removeClass("icon-hover");
+		$(this).addClass("icon-hover");
+		var src = $(this).find('img').attr('src');
+		$('.ListForm-src').val(src);
+	});
+	$("body").on("click",".addAct",function(){
+		var data = {
+				alldateSideNav:dataList.dateSideNav,
+				allTabNav:dataList.TabNav,
+				alltype:dataList.list.type,
+				urltype:-1,
+				urltitle:"",
+				url:"http://",
+				rel_m_id:"",
+				rel_batch_type:"",
+			}
+		var html = template("listTemp",data);
+		var width = dataList.list.type =="0" ? 500:800;
+		art.dialog({
+			title: '添加列表内容',
+			width: width,
+			padding:"15px 0 30px 0",
+			content: html,
+			ok: function () {
+				if(!$("#listTemp-form").validationEngine("validate")){
+					return false;
+				}else{
+					var temp_id = get_temp_id();
+					addList('', temp_id);
+				}
+			},
+			cancel:true
+		});
+		$(".colorVal-1").click();
+		if(dataList.list.type==1){
+			$(".iconVal-1").click();
+		}
+		Gformbegin();
+		$("#listTemp-form").validationEngine({scroll:false});
+	});
+	$("body").on("keyup","#GaddNav input",function(){
+		var index = $(this).index();
+		var val = $(this).val();
+		if(index>=2){index=1;}
+		dataList.dateSideNav[index].title = val;
+		beginList(dataList);
+	});
+	$("body").on("click","#GaddTab input",function(){
+		var _this = $(this);
+		var index = $(this).closest(".Gadd").index();
+		var _list = $(this).closest(".Gadd").find(".list");
+		var html = template("TabForm",dataList.TabNav[index]);
+		art.dialog({
+			title: '检索栏',
+			width: '520px',
+			content: html,
+			ok: function () {
+				var validResult = $(".TabFormList").validationEngine('validate');
+				if(validResult){
+					return false;
+				}
+				var title = $(".TabFormTitle").val().replace(/\s/g,'');
+				var list = $(".TabFormList").val().replace(new RegExp(',+',"gm"),',').replace(new RegExp('，+',"gm"),',').replace(/\s/g,',').replace(/\n/g,',').replace(new RegExp(',+',"gm"),',').replace(/,$/,"");
+				_this.val(title);
+				_list.html(list);
+				dataList.TabNav[index].title = _this.val();
+				dataList.TabNav[index].list = [];
+				var list = list.split(",");
+				dataList.TabNav[index].list = list;
+				beginList(dataList);
+			},
+			cancel:true
+		});
+		Gformbegin();
+	});
+	$("body").on("click","#cancel",function(){
+		location.href="{:U('delDraft', array('m_id' => $m_id))}";
+	})
+	$("body").on("click","#save",function(){
+		var validResult = $("#theform").validationEngine('validate');
+		if (validResult) {
+			var listSort = [];
+			$('.ActList').each(function(index){
+				var sort = {tempid:$(this).attr('data-tempid'),listid:$(this).attr('data-listid'),title:$(this).find("h3").text()}
+				listSort.push(sort);
+			});
+			var data = {
+					m_id:$('[name="m_id"]').val(),
+					page_name:$('[name="page_name"]').val(),
+					list_name:$('[name="list_name"]').val(),
+					banner_pic:$('[name="banner_pic"]').val(),
+					nav_1:$('[name="nav_1"]').val(),
+					nav_2:$('[name="nav_2"]').val(),
+					TabNav:dataList.TabNav,
+					list_type:$('[name="list_type"]').val(),
+					list_sort:listSort,
+					introduce:$('[name="introduce"]').val(),
+					share_pic:$('[name="share_pic"]').val()
+			}
+			var checktype = function(){
+								var checktype = 0;
+								for(var i=0;i<dataList.list.list.length;i++){
+									var arr = dataList.list.list[i];
+									if(arr.src.indexOf("imgerro.png")>=0){
+										checktype = 1;
+									}else if(arr.src.indexOf("iconerro.png")>=0){
+										checktype = 1;
+									}
+									console.log(checktype)
+								}
+								return checktype;
+							}
+			if(checktype()==1){
+				art.dialog({
+					title: '提示',
+					content:'<div class="fn"><img src="__PUBLIC__/Image/sips_ans.png" class="vm"><span class="vm ml20" style="font-size:14px;">保存失败，您还有图片未传</span></div>',
+					width:400,
+					height:100,
+					cancel:true
+				});
+				return false;
+			}
+			var dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+			$.ajax({
+				   type: "POST",
+				   url: "{:U('LabelAdmin/List/setActBasicInfo', array('m_id' => $m_id))}",
+				   data:data,
+				   success: function(re){
+					   if (re.status) {
+						   window.location.href="{:U('LabelAdmin/List/publish')}&m_id=" + re.info.m_id;
+					   } else {
+						   dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+re.info+"</div>",fixed: true,padding:0,lock:true,time:2});
+					   }
+				   },
+				   dataType: "json"
+			});
+		}
+	});
+	$(".ActListForm").sortable({
+		items: ".ActList",
+		distance: 10,
+		opacity: 0.7,
+		axis:"y",
+		start:function(event, ui){
+			ui.item.startindex = ui.item.index();
+		},
+		deactivate: function(event, ui) {
+			var newlist = dataList.list.list[ui.item.startindex];
+			dataList.list.list.splice(ui.item.startindex,1);
+			dataList.list.list.splice(ui.item.index(),0,newlist);
+			beginList(dataList);
+		} 
+	});
+	$(".help-wx").click(function(){
+		art.dialog({
+			title: '微信分享设置',
+			width: 500,
+			content: "<img src='__PUBLIC__/Image/introduce/help-wxshare.png'>",
+			ok:true
+		});
+	});
+})
+function check(t){
+	var that = t;
+	var val = t.attr("data-val");
+	if(t.hasClass("hover")){
+		return false;	
+	}else{
+		art.dialog({
+			title: '提示',
+			content:'<div class="fn"><img src="__PUBLIC__/Image/sips_ans.png" class="vm"><span class="vm ml20" style="font-size:14px;">切换风格会重置图片及背景色，是否继续？</span></div>',
+			width:400,
+			height:100,
+			ok: function () {
+				that.attr("data-checkbefor","true")
+				that.click();
+				dataList.list.type=val;
+				if(val==0){
+					for(var i=0;i<dataList.list.list.length;i++){
+						var arr = dataList.list.list[i];
+						arr.src = "__PUBLIC__/Label/Image/activitylist/imgerro.png";
+						arr.bgcolor = "";
+					}
+				}else{
+					for(var i=0;i<dataList.list.list.length;i++){
+						var arr = dataList.list.list[i];
+						arr.src = "__PUBLIC__/Label/Image/activitylist/iconerro.png";
+						arr.bgcolor = "colorVal-1";
+					}
+				}
+				beginList(dataList);
+			},
+			cancel:true
+		});
+	};
+}
+function GaddNav(t){
+	dataList.dateSideNav = [{
+			id:1,
+			title:""
+		},{
+			id:2,
+			title:""
+		}]
+	$("#GaddNav").find(".Gadd").each(function(index, element) {
+		var val = $(this).find("input").val();
+		dataList.dateSideNav[index].title = val;
+	});
+	beginList(dataList);
+}
+function GaddTab(t){
+	dataList.TabNav = [{
+			id:1,
+			title:"",
+			list:[]
+		},{
+			id:2,
+			title:"",
+			list:[]
+		}];
+	if($("#GaddTab").find(".Gadd").length==0){
+		dataList.TabNav = [{
+			id:1,
+			title:"",
+			list:[]
+		},{
+			id:2,
+			title:"",
+			list:[]
+		}];
+	}else{
+		$("#GaddTab").find(".Gadd").each(function(index, element) {
+			var val = $(this).find("input:eq(0)").val();
+			var list = $(this).find(".list").html().split(",");
+			for(var i=0;i<list.length;i++){
+				dataList.TabNav[index].list.push(list[i]);
+			}
+			dataList.TabNav[index].title = val;
+		});
+	};
+	beginList(dataList);
+	beginListForm(dataList);
+}
+//选择模块 参照LabelAdmin/Poster_add.html
+function select_activity(obj) {
+	var _this = $(obj);
+    var url = "{:U('LabelAdmin/SelectBatches/index',array('filterType'=>'dzhb'))}";
+    var title = '选择互动模块';
+    art.dialog.data('_this', _this);
+    art.dialog.open(url, {
+        width: 800,
+        title: title,
+        id: 'selectjp'
+    });
+}
+function selectActivityCallback(d) {
+    $('[name="urlTitle"]').val(d.info);
+    $('#urlTitle').html(d.info);
+    $('#batch_type').val(d.batch_type);
+    $('#batch_id').val(d.batch_id);
+	var batchId = d.batch_id;
+	var batchType = d.batch_type;
+	$.ajax({
+	   type: "GET",
+	   url: "{:U('LabelAdmin/List/ajaxGetLabelId')}&batchId="+batchId+"&batchType="+batchType,
+	   success: function(da){
+		   if (da.status) {
+			   var url2 = "{:U('Label/Label/index', '', true, false, true)}&id="+ da.info;
+			   $('[name="url2"]').val(url2);
+			   $('#urlTitle').attr('href', url2);
+			   $('#rel_m_id').val(batchId);
+			   $('#rel_batch_type').val(batchType);
+		   } else {
+			   alert(da.info);
+		   }
+	   },
+	   dataType: "json"
+	});
+}
+//选择模块 参照LabelAdmin/Poster_add.html
+function beginList(dataList){
+	var html =  template("PhonemainTemp",dataList);
+	var html2 =  template("ActListTemp",dataList);
+	$("#Phonemain").html(html);
+	$(".ActListForm").html(html2);
+	$("#phoneCon").height("auto");
+	if($("#phoneCon").height()<480){
+		$("#phoneCon").height(480);
+	};
+	if(dataList.list.type==1){
+		$(".ActList img").each(function(index, element) {
+			if($(this).attr("src").indexOf("iconerro.png")<0){
+				$(this).css({width:50,height:50,marginLeft:12,marginTop:7});
+			}
+        });
+	};
+	Gformbegin();
+}
+function beginListForm(dataList){
+	var html3 =  template("GaddNavTemp",dataList);
+	var html4 =  template("GaddTabTemp",dataList);
+	$("#GaddNav").html(html3);
+	$("#GaddTab").html(html4);
+	$("#phoneCon").height("auto");
+	Gformbegin();
+}
+function addList() {
+	var list_id = arguments[0] ? arguments[0] : '';
+	var temp_id = arguments[1] ? arguments[1] : '';
+	var is_add = arguments[2] ? arguments[2] : 1;
+	var title = $(".ListForm-Title").val();
+	var text = $(".ListForm-Text").val();
+	var src = $(".ListForm-src").val();
+	var bgcolor = $('.ListForm-bgcolor').val();
+	var urltype = $(".ListForm-urltype").val();
+	var rel_m_id = 0;
+	var rel_batch_type = 0;
+	if(urltype=="-1"){
+		var url = $(".ListForm-url1").val();
+		urlTitle = '';
+	}else{
+		var url = $(".ListForm-url2").val();
+		rel_m_id = $('#rel_m_id').val();
+		rel_batch_type = $('#rel_batch_type').val();
+	};
+	var dateSideNav = $(".ListForm-dateSideNav").val();
+	var TabNav = [[],[]];
+    $(".tabnav").each(function(index, element){
+    	TabNav[index] = [];
+    	$(this).find('.ListForm-TabNavList:checked').each(function(){
+    		TabNav[index].push($(this).val());
+    	});
+    })
+    var m_id = $('[name="m_id"]').val();
+    //把链接的rel_m_id, rel_batch_type弄出来todo
+	var data = {
+			id:list_id,
+			temp_id:temp_id,
+			m_id:m_id,
+			title:title,
+			text:text,
+			src:src,
+			url:url,
+			urltype:urltype,
+			rel_m_id:rel_m_id,
+			rel_batch_type:rel_batch_type,
+			dateSideNav:dateSideNav,
+			TabNav:TabNav,
+			bgcolor:bgcolor,
+	};
+	$.ajax({
+		   type: "POST",
+		   url: "{:U('LabelAdmin/List/addListNew')}",
+		   data:data,
+		   success: function(dat){
+			   var readyListData = {
+						id:list_id,
+						temp_id:temp_id,
+						rel_m_id:rel_m_id,
+						rel_batch_type:rel_batch_type,
+						title:title,
+						text:text,
+						src:src,
+						urltype:urltype,
+						urltitle:title,
+						url:url,
+						dateSideNav:dateSideNav,
+						TabNav:TabNav,
+						bgcolor:bgcolor,
+				};
+			   if (dat.status == 1) {
+				   	if (is_add == 1) {
+				   		dataList.list.list.splice(0,0,readyListData);
+				   	} else {
+				   		$.each(dataList.list.list, function(k, v){
+				   			if ((list_id && v.id == list_id) || (temp_id && v.temp_id == temp_id)) {
+				   				dataList.list.list[k] = readyListData;
+				   			}
+				   		})
+				   	}
+					beginList(dataList);
+					beginListForm(dataList);
+					console.log(dataList);
+			   } else {
+				   var dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+dat.info+"</div>",fixed: true,padding:0,lock:true,time:2});
+			   }
+		   },
+		   dataType: "json"
+	});
+}
+function get_temp_id() {
+	var temp_id = 0;
+	$('.ActList').each(function(){
+		var data_tempid = $(this).attr('data-tempid');
+		if (data_tempid) {
+			data_tempid = parseInt(data_tempid);
+			if (data_tempid > temp_id) {
+				temp_id = data_tempid;
+			}
+		}
+	});
+	temp_id = temp_id + 1;
+	return temp_id;
+}
+function changecolor(val){
+	switch(val){
+		case "colorVal-1":
+		  return "#f2b216" ;
+		case "colorVal-2":
+		  return "#592257" ;
+		case "colorVal-3":
+		  return "#545456" ;
+		case "colorVal-4":
+		  return "#52c7e8" ;
+		case "colorVal-5":
+		  return "#66ab26" ;
+		case "colorVal-6":
+		  return "#e44b58" ;
+		case "colorVal-7":
+		  return "#a05000" ;
+		case "colorVal-8":
+		  return "#1875d4" ;
+		case "colorVal-9":
+		  return "#fc5366" ;
+		case "colorVal-10":
+		  return "#ff8a4a" ;
+		case "colorVal-11":
+		  return "#ebb70c" ;
+		case "colorVal-12":
+		  return "#01cad4" ;
+		case "colorVal-13":
+		  return "#1bc266" ;
+		case "colorVal-14":
+		  return "#5dade2" ;
+		case "colorVal-15":
+		  return "#c0db36" ;
+		case "colorVal-16":
+		  return "#faca38" ;
+		case "colorVal-17":
+		  return "#ee72b1" ;
+		case "colorVal-18":
+		  return "#ffba31" ;
+		case "colorVal-19":
+		  return "#88c8ff" ;
+		case "colorVal-20":
+		  return "#87dad2" ;
+		case "colorVal-21":
+		  return "#ffa9b2" ;
+		case "colorVal-22":
+		  return "#f5976c" ;
+		case "colorVal-23":
+		  return "#c3de67" ;
+		case "colorVal-24":
+		  return "#62e2ff" ;
+		case "colorVal-25":
+		  return "#dac4ae" ;
+		case "colorVal-26":
+		  return "#cea0d7" ;
+	}
+}
+template.helper('changecolor', changecolor);
+function delListDraft(m_id, temp_id, list_id,index) {
+		var data = {
+				m_id:m_id,
+				temp_id:temp_id,
+				list_id:list_id
+		};
+		dialog = art.dialog({title:false,content:"<div class='msg-all-error'>删除中...</div>",fixed: true,padding:0,lock:true,time:2});
+		$.ajax({
+			   type: "POST",
+			   url: "{:U('LabelAdmin/List/delListDraft')}",
+			   data:data,
+			   success: function(re){
+				   if (re.status) {
+						dataList.list.list.splice(index,1);
+						beginList(dataList);
+						dialog.close();
+				   } else {
+					   dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+re.info+"</div>",fixed: true,padding:0,lock:true,time:2});
+				   }
+			   },
+			   dataType: "json"
+		});
+}
+function checkTabFormList(field, rules, i, options){
+	var list = $(".TabFormList").val().replace(/\s/g,',').replace(/\n/g,',').replace(new RegExp(',+',"gm"),',').replace(new RegExp('，+',"gm"),',');
+	var list = list.split(",");
+	if(list.length>12){
+		for(var i=0;i<list.length;i++){
+			if(list[i].length>6){
+				return "检索关键字最多12个，且最长6字"
+			}
+		}
+		return "检索关键字最多12个"
+	}else{
+		for(var i=0;i<list.length;i++){
+			if(list[i].length>6){
+				return "检索关键字最长6字"
+			}
+		}
+	}
+}
+</script>
+<script>
+    var _global_url_upload = '__URL_UPLOAD__';
+    var _global_url_public = '__PUBLIC__';
+    /*获取图片路径*/
+    function get_upload_url(img){
+   		var img_path = _global_url_upload;
+        if(!img) return img;
+        if(img.indexOf('http://') != -1) return img;
+        if(img.indexOf('./Home/Public') != -1){
+            return img.replace('./Home/Public',_global_url_public);
+        }
+        return img_path+'/'+img;
+    }
+    template.helper('get_upload_url', get_upload_url);
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+            	<div class="member_con">
+                	<!--[if IE]><div class="IEmsgerro">您的浏览器无法使用该模块功能,请使用<span>Chrome谷歌浏览器</span>或切换至<span>极速模式</span>/<span>高速模式</span>进行操作</div><![endif]-->
+                	{$stepBar}
+                	<div class="member_l">
+                    	<div id="phone">
+                            <div class="phonetop"></div>
+                            <div id="phoneCon" class="selected rel" style="padding-top:0; min-height:480px; background:none; overflow:hidden;">
+                                <div id="Phoneheader" style="width:320px;">
+                                    <i class="icon-back l"><a href="javascript:;" class="a-hide goNav"></a></i>
+                                    <h1 class="Gshow-name"></h1>
+                                </div>
+                                <div id="Phonewrapper" style="background:#f6f6f6; width:320px;">
+                                    <div id="Phonemain"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="member_r">
+                    	<form action="" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+                    	<input name="m_id" value="{$m_id}" type="hidden">
+                    	<h3>页面功能设置</h3>
+                        <div class="Gform l">
+                            <ul>
+                                <li class="Gname"><span>*</span>页面名称</li>
+                                <li class="Ginput">
+                                    <input type="text" maxlength="20" class="validate[required,maxSize[20]]" name="page_name" value="{$data['page_name']}"><span class="maxTips forInput" data-max="20">0/20</span>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gname"><span>*</span>列表名称</li>
+                                <li class="Ginput">
+                                    <input type="text" maxlength="20" class="Gview-name validate[required,maxSize[20]]" name="list_name" value="{$data['list_name']}"><span class="maxTips forInput" data-max="20">0/20</span>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gname">banner图</li>
+                                <li class="Ginput">
+                                    <div class="Gchoose banner Gview-banner">
+		                                <input type="text" value="" name="banner_pic">
+		                                <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:640,height:320}"><i></i></a>
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gname">导航栏</li>
+                                <li class="Ginput" id="GaddNav">
+                                    <p>&nbsp;</p>
+                                </li>
+                            </ul>
+                            <ul class="last">
+                                <li class="Gname">检索栏</li>
+                                <li class="Ginput" id="GaddTab">
+                                	<p>&nbsp;</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="cl"></div>
+                        <h3>页面内容编辑</h3>
+                        <div class="Gform l">
+                            <ul>
+                                <li class="Gname">检索栏</li>
+                                <li class="Ginput">
+                                    <div class="switch" data-before="check">
+                                        <input type="radio" value="{$data['list_type']}" checked="checked" name="list_type">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0">图文列表</span>
+                                            <span class="vallast" data-val="1">多彩列表</span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul class="last">
+                                <li class="Gname">列表内容</li>
+                                <li class="Ginput">
+                                    <div class="ActListForm">
+                                        
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="cl"></div>
+                        <h3>微信分享设置<a href="javascript:void(0)" class="ml10 help-wx">查看示例</a></h3>
+                        <div class="Gform l">
+                        	<ul>
+                                <li class="Gname">站点简介</li>
+                                <li class="Ginput">
+                                    <textarea maxlength="140" name="introduce">{$data['introduce']}</textarea><span class="maxTips forArea" data-max="140">0/140</span>
+                                </li>
+                            </ul>
+                            <ul>
+		                        <li class="Gname">分享图标</li>
+		                        <li class="Ginput">
+		                            <div class="Gchoose">
+		                                <input type="text" value="{$data['share_pic']}" name="share_pic">
+		                                <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:160,height:160}"><i></i></a>
+                                    </div>
+		                        </li>
+		                    </ul>
+                            <ul class="pt20">
+                                <li class="Ginput">
+                                    <a href="javascript:void(0)" class="btn-all" id="save">完成</a>
+                                    <a href="javascript:void(0)" class="btn-all-del" id="cancel">取消</a>
+                                </li>
+                            </ul>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<!--预览内容-->
+<script id="PhonemainTemp" type="text/html">
+{{if banner!=""}}
+<div class="bannerImg"><img src="{{banner | get_upload_url}}" class="Gshow-banner"></div>
+{{/if}}
+{{if dateSideNav[0].title!="" || dateSideNav[1].title!=""}}
+<div class="dateSideNav">
+<ul>
+	{{each dateSideNav as value i}}
+	{{if value.title!=""}}
+	<li {{if i==0}}class="hover"{{/if}}><a href="javascript:void(0);">{{value.title}}</a></li>
+	{{/if}}
+	{{/each}}
+</ul>
+{{/if}}
+</div>
+{{if TabNav[0].title!="" || TabNav[1].title!=""}}
+<div class="TabNav">
+	<ul>
+	{{each TabNav as value i}}
+		{{if value.title!=""}}
+		<li {{if i==0}}class="hover"{{/if}}>
+			<a href="javascript:void(0);">{{value.title}}<i></i></a>
+			<div class="TabNavList">
+				<dl>
+					{{each value.list as value i}}
+					<dd><a href="javascript:void(0)">{{value.title}}</a></dd>
+					{{/each}}
+				</dl>
+			</div>
+		</li>
+		{{/if}}
+	{{/each}}
+	</ul>
+</div>
+{{/if}}
+{{if list.list!=""}}
+	{{if list.list[0].title!=""}}
+	<div {{if list.type==1}}class="colorList"{{else}}class="normalList"{{/if}}>
+		<dl id="masonry">
+			{{each list.list as value i}}
+			<dd class="box" {{if list.type==1}}style="background-color:{{value.bgcolor | changecolor}};"{{/if}}>
+				<a href="{{value.url}}" target="_blank">
+					<div class="img"><img src="{{value.src | get_upload_url}}"></div>
+					<div class="text">
+						<h3>{{value.title}}</h3>
+						<p>{{value.text}}</p>
+					</div>
+				</a>
+			</dd>
+			{{/each}}
+		</dl>
+	</div>
+	{{/if}}
+{{/if}}
+</script>
+
+<!--添加列表-->
+<script id="ActListTemp" type="text/html">
+{{each list.list as value i}}
+<div class="ActList" data-listId="{{value.id}}" data-tempId="{{value.temp_id}}">
+    <div class="img" {{if list.type==1}}style="background-color:{{value.bgcolor | changecolor}};"{{/if}}><img src="{{value.src | get_upload_url}}"></div>
+    <div class="text">
+        <h3>{{value.title}}</h3>
+        <p>{{value.text}}</p>
+    </div>
+    <div class="ActListopr"><i class="opr-edit"></i><i class="opr-del"></i></div>
+</div>
+{{/each}}
+<div class="addAct">
+    <i></i>
+    <span>增加一条</span>
+</div>
+</script>
+<!--检索项表单-->
+<script id="TabForm" type="text/html">
+<div class="Gform fn">
+<ul>
+<li class="Gname"><span>*</span>检索项</li>
+<li class="Ginput"><input type="text" maxlength="6" class="TabFormTitle validate[required]" value="{{title}}" maxlength="8"><span class="maxTips forInput" data-max="8">0/8</span></li>
+</ul>
+<ul>
+<li class="Gname"><span>*</span>检索关键字</li>
+<li class="Ginput">
+	<textarea class="TabFormList validate[required,validate[funcCall[checkTabFormList]]]">{{each list as value i}}{{if i==0}}{{value}}{{else}},{{value}}{{/if}}{{/each}}</textarea>
+	<span class="txtTips">注:多个搜索关键字用英文","隔开</span>
+</li>
+</ul>
+</div>
+</script>
+
+<!--导航栏-->
+<script id="GaddNavTemp" type="text/html">
+{{if dateSideNav[0].title!=""}}
+	<input type="text" maxlength="8" class="mb10" name="nav_1" value="{{dateSideNav[0].title}}"><span class="maxTips forInput" data-max="8">0/8</span>
+{{else}}
+	<input type="text" maxlength="8" class="mb10" name="nav_1" ><span class="maxTips forInput" data-max="8">0/8</span>
+{{/if}}
+
+{{if dateSideNav[1].title!=""}}
+	<input type="text" maxlength="8" name="nav_2" value="{{dateSideNav[1].title}}"><span class="maxTips forInput" data-max="8" style="top:55px;">0/8</span>
+{{else}}
+	<input type="text" maxlength="8" name="nav_2" ><span class="maxTips forInput" data-max="8" style="top:55px;">0/8</span>
+{{/if}}
+</script>
+
+<!--检索栏-->
+<script id="GaddTabTemp" type="text/html">
+{{if TabNav[0].title!="" || TabNav[1].title!=""}}
+{{each TabNav as value i}}
+	{{if value.title!=""}}
+	<div class="Gadd" data-min="0" data-max="2" data-callback="GaddTab">
+		<input type="text" maxlength="8" readonly="readonly" value="{{value.title}}"><span class="maxTips forInput" data-max="8">0/8</span>
+		<a href="javascript:void(0)" class="Gbtn-add"><i></i></a>
+		<a href="javascript:void(0)" class="Gbtn-del"><i></i></a>
+		<div class="list dn">{{each value.list as listvalue ii}}{{if ii==0}}{{listvalue}}{{else}},{{listvalue}}{{/if}}{{/each}}</div>
+	</div>
+	{{else}}
+		{{if i==0}}
+		<div class="Gadd" data-min="0" data-max="2" data-callback="GaddTab">
+			<input type="text" maxlength="8" readonly="readonly"><span class="maxTips forInput" data-max="8">0/8</span>
+			<a href="javascript:void(0)" class="Gbtn-add"><i></i></a>
+			<a href="javascript:void(0)" class="Gbtn-del"><i></i></a>
+			<div class="list dn">{{each value.list as listvalue ii}}{{if ii==0}}{{listvalue}}{{else}},{{listvalue}}{{/if}}{{/each}}</div>
+		</div>
+		{{/if}}
+	{{/if}}
+{{/each}}
+{{else}}
+<div class="Gadd" data-min="0" data-max="2" data-callback="GaddTab">
+	<input type="text" maxlength="8" readonly="readonly"><span class="maxTips forInput" data-max="8">0/8</span>
+	<a href="javascript:void(0)" class="Gbtn-add"><i></i></a>
+	<a href="javascript:void(0)" class="Gbtn-del"><i></i></a>
+	<div class="list dn"></div>
+</div>
+{{/if}}
+</script>
+
+<!--添加列表表单-->
+<script id="listTemp" type="text/html">
+<form id="listTemp-form">
+<input name="list_id" value="{{listId}}" type="hidden">
+<input name="temp_id" value="{{tempId}}" type="hidden">
+<div class="Gform fn l" style="width:{{if alltype==1}}800px{{/if}};">
+<ul>
+<li class="Gname"><span>*</span>标题</li>
+<li class="Ginput"><input type="text" maxlength="20" class="ListForm-Title validate[required]" name="title" value="{{title}}"><span class="maxTips forInput" data-max="20">0/20</span></li>
+</ul>
+<ul>
+<li class="Gname"><span>*</span>摘要</li>
+<li class="Ginput"><textarea maxlength="120" class="ListForm-Text name="description" validate[required]">{{text}}</textarea><span class="maxTips forArea" data-max="120">0/120</span></li>
+</ul>
+{{if alldateSideNav[0].title!="" || alldateSideNav[1].title!=""}}
+<ul>
+<li class="Gname"><span>*</span>所属导航栏</li>
+<li class="Ginput">
+<select class="ListForm-dateSideNav" name="nav_id">
+	{{each alldateSideNav as value i}}
+	<option value="{{value.id}}" {{if dateSideNav==value.id}}selected{{/if}}>{{value.title}}</option>
+	{{/each}}
+</select>
+</li>
+</ul>
+{{/if}}
+{{if allTabNav[0].title!="" || allTabNav[1].title!=""}}
+<ul>
+<li class="Gname"><span>*</span>检索关键词</li>
+<li class="Ginput">
+	{{each allTabNav as value i}}
+	<p style="padding-left:0">{{value.title}}</p>
+	<div class="fn tabnav" data-tabnav="{{value.id}}">
+		{{each value.list as v i}}
+		{{if v!=""}}
+		<label><input type="checkbox" class="vm ListForm-TabNav ListForm-TabNavList" value="{{v}}" {{if TabNav}}{{each TabNav[0] as newList n }}{{if newList==v}}checked{{/if}}{{/each}}  {{each TabNav[1] as newList n }}{{if newList==v}}checked{{/if}}{{/each}}{{/if}}/><span class="vm">{{v}}</span></label>
+		{{/if}}
+		{{/each}}
+	</div>
+	{{/each}}
+</li>
+</ul>
+{{/if}}
+{{if alltype==1}}
+<ul>
+<li class="Gname"><span>*</span>背景色</li>
+<li class="Ginput">
+	<input type="hidden" class="ListForm-bgcolor">
+	<div class="choose-color fn">
+		<dd><div class="choose-color-val colorVal-1" title="富贵黄" data-val="colorVal-1"></div></dd>
+		<dd><div class="choose-color-val colorVal-2" title="神秘紫" data-val="colorVal-2"></div></dd>
+		<dd><div class="choose-color-val colorVal-3" title="水晶黑" data-val="colorVal-3"></div></dd>
+		<dd><div class="choose-color-val colorVal-4" title="天空蓝" data-val="colorVal-4"></div></dd>
+		<dd><div class="choose-color-val colorVal-5" title="青草绿" data-val="colorVal-5"></div></dd>
+		<dd><div class="choose-color-val colorVal-6" title="蜜桃粉" data-val="colorVal-6"></div></dd>
+		<dd><div class="choose-color-val colorVal-7" title="摩卡黑" data-val="colorVal-7"></div></dd>
+		<dd><div class="choose-color-val colorVal-8" title="宝石蓝" data-val="colorVal-8"></div></dd>
+		<dd><div class="choose-color-val colorVal-9" title="" data-val="colorVal-9"></div></dd>
+		<dd><div class="choose-color-val colorVal-10" title="" data-val="colorVal-10"></div></dd>
+		<dd><div class="choose-color-val colorVal-11" title="" data-val="colorVal-11"></div></dd>
+		<dd><div class="choose-color-val colorVal-12" title="" data-val="colorVal-12"></div></dd>
+		<dd><div class="choose-color-val colorVal-13" title="" data-val="colorVal-13"></div></dd>
+		<dd><div class="choose-color-val colorVal-14" title="" data-val="colorVal-14"></div></dd>
+		<dd><div class="choose-color-val colorVal-15" title="" data-val="colorVal-15"></div></dd>
+		<dd><div class="choose-color-val colorVal-16" title="" data-val="colorVal-16"></div></dd>
+		<dd><div class="choose-color-val colorVal-17" title="" data-val="colorVal-17"></div></dd>
+	</div>
+	<p>夏日小清新主题颜色</p>
+	<div class="choose-color fn">
+		<dd><div class="choose-color-val colorVal-18" title="夏日小清新" data-val="colorVal-18"></div></dd>
+		<dd><div class="choose-color-val colorVal-19" title="夏日小清新" data-val="colorVal-19"></div></dd>
+		<dd><div class="choose-color-val colorVal-20" title="夏日小清新" data-val="colorVal-20"></div></dd>
+		<dd><div class="choose-color-val colorVal-21" title="夏日小清新" data-val="colorVal-21"></div></dd>
+		<dd><div class="choose-color-val colorVal-22" title="夏日小清新" data-val="colorVal-22"></div></dd>
+		<dd><div class="choose-color-val colorVal-23" title="夏日小清新" data-val="colorVal-23"></div></dd>
+		<dd><div class="choose-color-val colorVal-24" title="夏日小清新" data-val="colorVal-24"></div></dd>
+		<dd><div class="choose-color-val colorVal-25" title="夏日小清新" data-val="colorVal-25"></div></dd>
+		<dd><div class="choose-color-val colorVal-26" title="夏日小清新" data-val="colorVal-26"></div></dd>
+	</div>
+</li>
+</ul>
+
+<ul>
+<li class="Gname"><span>*</span>选择图标</li>
+<li class="Ginput">
+	<input type="hidden" class="ListForm-src">
+	<div class="choose-icon fn">
+		<dd><div class="choose-icon-val iconVal-1" data-val="iconVal-1.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-1.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-2" data-val="iconVal-2.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-2.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-3" data-val="iconVal-3.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-3.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-4" data-val="iconVal-4.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-4.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-5" data-val="iconVal-5.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-5.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-6" data-val="iconVal-6.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-6.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-7" data-val="iconVal-7.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-7.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-8" data-val="iconVal-8.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-8.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-9" data-val="iconVal-9.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-9.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-10" data-val="iconVal-10.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-10.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-11" data-val="iconVal-11.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-11.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-12" data-val="iconVal-12.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-12.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-13" data-val="iconVal-13.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-13.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-14" data-val="iconVal-14.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-14.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-15" data-val="iconVal-15.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-15.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-16" data-val="iconVal-16.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-16.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-17" data-val="iconVal-17.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-17.png"></div></dd>
+		<dd><div class="choose-icon-val iconVal-18" data-val="iconVal-18.png" style="background-color: rgb(242, 178, 22);"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-18.png"></div></dd>
+	</div>
+</li>
+</ul>
+{{else}}
+<ul>
+<li class="Gname"><span>*</span>图片</li>
+<li class="Ginput">
+	<div class="Gchoose">
+		<input type="text" value="{{src}}" name="" class="ListForm-src validate[required]" >
+		<a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:150,height:130}"><i></i></a>
+	</div>
+</li>
+</ul>
+{{/if}}
+<ul>
+<li class="Gname"><span>*</span>跳转链接</li>
+<li class="Ginput">
+	<div class="switch">
+		<input name="urlType" type="radio" value="{{if urltype!=''}}{{urltype}}{{else}}-1{{/if}}" checked="checked" class="ListForm-urltype">
+		<div class="newRadio">
+			<span class="valfirst" data-val="-1">其他</span>
+			<span class="vallast" data-val="4">模块</span>
+		</div>
+		<div class="newRadio-default">
+		   <input name="url1" type="text" class="ListForm-url1 validate[required]" value="{{if urltype==-1}}{{url}}{{else}}http://{{/if}}" style="width:150px;">
+		</div>
+		<div class="newRadio-input">
+			<div class="Gchoose" style="width:170px;">
+				<input name="url2" type="text" value="{{if urltype==4}}{{url}}{{/if}}" class="ListForm-url2 validate[required]" >
+				<input name="urlTitle" type="hidden" value="{{urltitle}}">
+				<input name="rel_m_id" type="hidden" value="{{rel_m_id}}" id="rel_m_id" >
+				<input name="rel_batch_type" type="hidden" value="{{rel_batch_type}}" id="rel_batch_type" >
+				<a href="javascript:void(0)" id="urlTitle">{{url}}</a>
+				<a href="javascript:void(0)" class="Gbtn-url" title="选择地址" onclick="select_activity(this)"><i></i></a>
+			</div>
+		</div>
+	</div>
+</li>
+</ul>
+</div>
+</form>
+</script>

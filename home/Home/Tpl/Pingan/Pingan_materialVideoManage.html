@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>素材管理_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+
+<script type="text/javascript">
+$(document).ready(function(e){
+	fileNameEditing();    //编辑框
+
+	//设置编辑框表单提交事件为AJAX
+	$(".formFileNameSave").submit(function(){
+		if(!check_form(this)){
+			return false;
+		}
+		var actionUrl = $(this).attr("action");
+		var data = getFormData(this);
+		var dialog = art.dialog({title:false,lock:true});
+		$.post(actionUrl,data,function(d){
+			alert(d.info);
+			window.location.reload();
+		},'json');
+		return false;
+	});
+	$(".iconDel").click(function(){
+		if(!confirm("确定要删除吗，删除之后无法恢复")) return false;
+		var actionUrl = "{:U('Pingan/materialImgDeleteSubmit')}";
+		var data = {"input_i-material_id":$(this).attr("data-id")};
+		var dialog = art.dialog({title:false,lock:true});
+		$.post(actionUrl,data,function(d){
+			alert(d.info);
+			window.location.reload();
+		},'json');
+		return false;
+	});
+
+}); 
+</script>
+</head>
+<body>
+    <div id="wrapper" >
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu_pingan.html" topmenuid="gongzhonghao"/>
+        <div id="container" >
+            <div id="main" class="rel">
+            	<!--<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>&gt;</p>
+                            <p>微信助手</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+					<include file="LabelAdmin/Batch/WleftMenu_pingan" leftmenuid="wxzs"/>
+                </div>
+                <div class="subcon">
+                <div class="main-name fn">
+                <h4 class="bd-b-565656 msg-title noborder">素材管理</h4>
+                </div>
+                	<div class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn">
+                            <p><a href="{:U('Pingan/materialImgTxtManage')}">图文信息</a></p>
+                            <p><a href="{:U('Pingan/materialImgManage')}">图片管理</a></p>
+                            <p><a href="{:U('Pingan/materialAudioManage')}">语音</a></p>
+                            <p class="Wcanal-tab-hover"><a href="{:U('Pingan/materialVideoManage')}">视频</a></p>
+                        </div>
+                        <div class="Wcanal-tab-list">
+                            <div class="msg_page">&nbsp;{$pageShow}</div>
+                            <div class="listTitle mt20">
+                                <div class="l title msg">文件</div>
+                                <div class="r title opt">操作</div>
+                                <div class="r title opt">大小</div>
+                            </div>
+                            <ul id="listContainer">
+                            <!--循环 li-->
+                            <volist name='materialArr' id='vo'>
+                                <li class="listItem fn">
+                                    <div class="l file">
+                                        <div class="fileNameArea">
+                                            <span class="fileName">{$vo.material_title}</span>
+                                            <span class="fileNameEdit">
+                                                <form class="formFileNameSave" method="post" action="{:U('Pingan/materialImgEditSubmit')}">
+                                                    <input class="fileNameInput" name="input_i-material_title" value="{$vo.material_title}" type="text" maxlength="20" jscheckrule="null=0" jschecktitle="素材标题"/>(20字内)
+                                                    <input name="input_i-material_id" value="{$vo.id}" type="hidden"/>
+                                                    <input type="submit" value="保存"  class="fileNameInputupdate"/>
+                                                </form>
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <div id="msgItemBox10000029" class="wxMsgImg">
+                                                <img src="{$vo.img_url}" title="点击放大/缩小" class="wxmImg" style="width:200px;">
+                                            </div>
+                                            <div class="clear"></div>
+                                        </div>
+                                    </div>
+                                    <div class="r opt oper">
+                                        <a href="{$vo.img_url}" class="icon18 iconDownload" target="_blank" title="下载"></a>
+                                        <a href="javascript:void(0);" class="icon18 iconEdit" title="重命名"></a>
+                                        <a href="javascript:void(0);" class="icon18 iconDel"  title="删除" data-id="{$vo.id}"></a>
+                                    </div>
+                                    <div class="r size">{$vo.material_size}K</div>
+                                    <div class="clear"></div>
+                                </li>
+                            </volist>
+                            <!--循环结束-->
+                            </ul>
+                            <div class="page">
+                                &nbsp;{$pageShow}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer_pingan.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

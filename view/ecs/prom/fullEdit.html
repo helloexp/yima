@@ -1,0 +1,123 @@
+<div class="main-name fn">
+    <h4 ng-show="edit==0">满送/减</h4>
+    <h4 ng-show="edit==1"><a href="javascript:history.go(-1);" class="back"><i></i>满送/减</a>/ 编辑</h4>
+</div>
+<div class="steps">活动规则设置</div>
+<div class="Gform l newFull">
+    <ul>
+        <li class="Gname"><span>*</span>活动名称设置</li>
+        <li class="Ginput">
+            <input type="text" maxlength="20" name="activename" ng-model="activename" value="" class="validate[required,maxSize[20]]">
+            <span class="maxTips forInput" data-max="20">0/20</span>
+        </li>
+    </ul>
+    <ul>
+       <li class="Gname"><span>*</span>活动时间</li>
+        <li class="Ginput">
+            <div class="Gtime2 fn">
+                <input type="text" class="validate[required]"  name="start_time" ng-model="start_time" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})">
+                <em>至</em>
+                <input type="text" class="validate[required]" name="end_time" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" ng-model="end_time">
+            </div>
+            
+        </li>
+    </ul>
+    <ul>
+       <li class="Gname"><span>*</span>规则设置</li>
+        <li class="Ginput">
+            <div class="AddRule">
+                <div class="addPrise mr10" ng-click="addRule($event.target)"><a  href="javascript:void(0);" class="addPriseBtn"><i></i>添加规则</a></div>
+                <div class="l w1 pt15 mb15">
+                    <span class="red">同时添加多个规则时，不累积叠加，最多设置5条规则</span>
+                </div>
+            </div>
+            <table class="W-table RulList">
+                <thead>
+                    <tr>
+                        <th>编号</th>
+                        <th>返现条件</th>
+                        <th>返现规则（可多选）</th>
+                        <th style="width:102px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="value in rules">
+                        <td>{{ $index+1 }}</td>
+                        <td><div class="rel">满 <input name="money" maxlength="5" type="text" ng-model="value.price" /><span class="abs"> 元</span></div></td>
+                        <td  style="text-align:left;width:360px;">
+                            <div>
+                                <dl>
+                                    <dd>
+                                        <input type="checkbox" ng-model="value.reduceCash.checked" name="condition"/>
+                                        <span class="before" ng-if="!value.reduceCash.checked"> 减现金</span><span class="after rel" ng-if="value.reduceCash.checked">减 <input type="text" maxlength="5" name="money" ng-model="value.reduceCash.reduce" /> <span class="abs" style="right:10px;">元</span></span></dd>
+                                    <dd><input type="checkbox" ng-model="value.freeShipping.checked" name="condition"/> 包邮</dd>
+                                    <dd><input type="checkbox" ng-model="value.giftsCard.checked" name="condition"/> 返电商优惠券
+                                        <div class="backCashCard" ng-if="value.giftsCard.checked">
+                                            <table class="W-table shoplist mb15" ng-if="value.giftsCard.name">
+                                                <tr>
+                                                    <td class="left">{{value.giftsCard.name}}</td><input type="hidden" vlaue="{{ value.giftsCard.id }}">
+                                                    <td class="right"><a href="javascript:void(0)" ng-click="deleteShop(value.giftsCard,'giftsCard')">删除</a></td>
+                                                </tr>
+                                            </table>
+                                             <div class="addPrise  addcard" style="float:none" ng-click="addcard(value.giftsCard,'giftsCard')" ng-if="!value.giftsCard.name"><a  href="javascript:void(0);" class="addPriseBtn" ><i></i>添加优惠券</a></div>
+                                        </div>
+                                    </dd>
+                                    <dd><input type="checkbox" ng-model="value.giftsGoods.checked"  name="condition"/> 送赠品
+                                        <div class="backCashCard" ng-if="value.giftsGoods.checked">
+                                            <table class="W-table shoplist mb15" ng-if="value.giftsGoods.name">
+                                              <tbody>
+                                                  <tr>
+                                                    <td class="left">{{ value.giftsGoods.name }}</td><input type="hidden" value="value.giftsGoods.id">
+                                                    <td class="right"><a href="javascript:void(0)" ng-click="deleteShop(value.giftsGoods,'giftsGoods')" >删除</a></td>
+                                                </tr>
+                                              </tbody>
+                                            </table>
+                                             <div class="addPrise addShop" ng-if="!value.giftsGoods.name" style="float:none" ng-click="addShop(value.giftsGoods,'giftsGoods')"><a  href="javascript:void(0);" class="addPriseBtn" ><i></i>添加商品</a></div>
+                                        </div>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </td>
+                        <td ><a href="javascript:void(0)" ng-if="rules.length>1" ng-click="deleteRule(value)">删除</a>&nbsp;</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+        </li>
+    </ul>
+    <ul>
+        <li class="Gname"><span>*</span>活动商品设置</li>
+        <li class="Ginput">
+            <div class="switch" >
+                <input type="radio" value="{{ available || 0 }}" name="available" >
+                <div class="newRadio" style="float:none">
+                    <span ng-class="{'hover':available==0 || !available}" class="valfirst" ng-click="available='0'">所有商品参与</span>
+                    <span ng-class="{'hover':available==1}" class="vallast partShop" ng-click="available='1'">部分商品参与</span>
+                </div>
+                <div class="newRadio-input mt15" ng-show="available==1" >
+                    <table class="W-table shoplist mb15" ng-show="list.length>0" >
+                        <thead>
+                           <tr>
+                                <th class="left">商品名称</th>
+                                <th class="right">操作</th>
+                            </tr> 
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="key in list"><input type="hidden" name="{{ key.id }}" value='{{key.goods_name}}' />
+                                <td class="left" ng-bind="key.goods_name"> </td>
+                                <td class="right"><a href="javascript:void(0)"  ng-click="deleteShop($event.target)">删除</a></td>
+                            </tr>
+                        </tbody>   
+                        </table>
+                        <div class="addPrise mr10" ng-click="addCommodity()"><a  href="javascript:void(0);" class="addPriseBtn"><i></i>添加商品</a></div>
+                </div>
+            </div>
+        </li>
+    </ul>
+    <ul>
+        <li class="Ginput">
+            <a href="javascript:void(0);" class="btn-all" ng-click="submit()">确定</a><a href="javascript:history.back();" class="btn-all-del" ng-click="cancel()">取消</a>
+        </li>
+        
+    </ul>    
+</div>

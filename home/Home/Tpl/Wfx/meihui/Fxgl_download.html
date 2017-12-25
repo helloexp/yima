@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>批量导入</title>
+    <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wfx.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.css">
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+    <script>
+        $(function(){
+            Gform();
+            $(".shoplist li").click(function() {
+                if($(this).hasClass("selected")) {
+                    $(this).removeClass("selected");
+                }else
+                {
+                    $(this).addClass("selected");
+                }
+            });
+        })
+        //提交下载excel表单
+        function downexcel(){
+            if($("#settle_type").val() == 1){
+                var selected =$('#choose1 > .selected');
+            }
+            var temp='';
+            selected.each(function() {
+                var $this = $(this);
+                temp = temp+$this.attr("id")+',';
+            });
+            $("#data").val(temp);
+            if($("#data").val() !=""){
+                $("#data_form").submit();
+                $("#export").text("");
+            }else{
+                $("#export").text("您未选择字段");
+            }
+        }
+        $(function(){
+            $(".vallast").click(function(){
+                $("#export").text("");
+            });
+        })
+    </script>
+    <style>
+        .errorTip {margin-left: 155px; text-align: left; color: red; }
+    </style>
+</head>
+<body>
+<div class="popupWin">
+    <div class="Wcanal-tab inPop" id="Wcanal-tabon">
+        <div class="Wcanal-tab-title fn">
+            <p class="Wcanal-tab-hover first"><a href="javascript:void(0);">下载列表数据</a></p>
+        </div>
+        <div class="Wcanal-tab-list">
+            <form action="{:U('Wfx/Fxgl/mhExportData')}" method="POST" enctype="multipart/form-data" id="data_form">
+                <div class="Gform fn w1" style="margin-left:-30px;">
+                    <ul>
+                        <li class="Ginput">
+                            <div class="switch hover">
+                                <input type="radio" id="settle_type" name="settle_type" value="1" checked="checked">
+                                <div class="cl"></div>
+                                <div class="newRadio-input">
+                                    <ul id="pulish_tip" style="margin-left:-155px;">
+                                        <li class="Gname">选择数据字段</li>
+                                        <li class="Ginput">
+                                            <ul class="shoplist firstlay" id="choose1" style="overflow:visible;">
+                                                <li id="name" class="selected">会员名称</li>
+                                                <li id="parent_id" class="selected">上级会员</li>
+                                                <li id="status" class="selected">审核状态</li>
+                                                <li id="contact_name" class="selected">负责人姓名</li>
+                                                <li id="phone_no" class="selected">负责人手机号码</li>
+                                                <li id="alipay_account" class="selected">支付宝账号</li>
+                                                <li id="bank_name" class="selected">银行名称</li>
+                                                <li id="bank_account" class="selected">银行账号</li>
+                                                <li id="parent_path" class="selected">下级会员</li>
+                                                <li id="add_time" class="selected">创建时间</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <input id="data" name="data" type="hidden"/>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <p id = "export"class="errorTip"></p>
+                <div class="tc"><a class="Diabtn-all" href="javascript:downexcel();" id="submit_type3">下载</a></div>
+            </form>
+        </div>
+    </div>
+    <form id="qr" name="qr" action="{:U('Wfx/Fxgl/loadIcon')}" method="POST">
+        <input id="agency_selected" name ="agency_selected" type="hidden" value=""/>
+        <input id="types" name ="types" type="hidden"value=""/>
+    </form>
+
+</div>
+</body>
+<script>
+    $(document).ready(function(){
+        $("#submit_type2").click(function() {
+            if($("#mudle").html() == '')
+            {
+                $(".errorTip").html("请先上传文件！");
+                return false;
+            }
+            var dialog;
+            $("#thef2").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        dialog.time(2).content("<div class='msg-all-succeed'>提交成功</div>");
+                        art.dialog.opener.reload();
+                        return false;
+                    }else{
+                        dialog.close();
+                        $(".errorTip").html(data.info);
+                    }
+                },
+                dataType:'json',
+            });
+        });
+
+        $("#staff").parent().click(function(){
+            $(".errorTip").html("");
+        });
+    })
+
+    function result(contents){
+        art.dialog({
+            title:"提示",
+            height:100,
+            content:contents,
+            icon: 'succeed',
+            lock:true,
+            ok:function(){
+                art.dialog.close();
+            }
+        })
+    }
+</script>
+</html>                                                                                                                                                                                                                                                                                                          

@@ -1,0 +1,422 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>商户列表</title>
+    <meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+    <meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+    <meta content="telephone=no" name="format-detection" />
+    <meta content="email=no" name="format-detection" />
+    <meta name="apple-touch-fullscreen" content="NO">
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_gxsy.css">
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+    <style type="text/css">
+    #mainCon .item:first-child {
+        border-top: 0;
+    }
+    
+    #mainCon {
+        background: #ffffff;
+    }
+    
+    .choose ul li.fn {
+        border-right: 0;
+    }
+    
+    .choose ul li .county a.all {
+        width: auto;
+        color: #333333;
+        position: relative;
+        border-bottom: 1px #e5e5e5 solid;
+    }
+    
+    .choose ul li .county a.all.active {
+        color: #ed3f41;
+        font-weight: bold;
+    }
+    
+    .choose ul li .county .all.active i {
+        border-width: 2px 0 0 2px;
+        margin-bottom: -8px;
+    }
+    
+    .choose ul li .county .third {
+        margin-left: 10px;
+    }
+    
+    .choose ul li .county .third a {
+        /* width: 50%;*/
+        text-indent: 15px;
+        float: left;
+        margin-left: 0;
+    }
+    
+    .choose ul li .all i {
+        right: 15px;
+    }
+    
+    .choose ul li#sequence {
+        border-right: 0;
+    }
+    
+    .choose ul li.sequence .item {
+        display: block;
+    }
+    
+    .choose ul li.sequence {
+        background: none;
+    }
+    
+    .choose ul li.sequence .county {
+        background: #ffffff;
+        margin-left: 0;
+        width: 100%;
+        box-shadow: -1px 0 1px rgba(0, 0, 0, 0.1);
+        right: -1px;
+        top: 0px;
+    }
+    
+    .choose ul li.sequence .item a {
+        margin: 0;
+        text-align: left;
+        text-indent: 20px;
+    }
+    
+    .choose ul li.sequence:before {
+        display: none;
+    }
+    
+    .box .proItem-msg {
+        position: relative;
+    }
+    
+    .box .proItem-msg .phone {
+        display: inline-block;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        z-index: 100;
+        margin-top: -25px;
+        width: 25px;
+        height: 25px;
+        background: url(__PUBLIC__/Label/Image/gxsy/gxsy-icon1.png) no-repeat;
+        background-size: 100%;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="container">
+            <div id="header" class="userCenter fn">
+                <div class="goback"><i></i></div>
+                <div class="logo">
+                    <!--<i>惠</i>--><span>商户列表</span></div>
+            </div>
+            <div id="main">
+                <div class="mainTop">
+                    <div class="search">
+                        <div class="searchForm">
+                            <!--<div class="searchTitle">搜索</div>-->
+                            <form action="{:U('CnpcGX/WapStore/index')}" name="searchform" id="searchform" method="get" onsubmit="search1();">
+                                <input type="hidden" name="g" value="CnpcGX">
+                                <input type="hidden" name="m" value="WapStore">
+                                <input type="hidden" name="a" value="index">
+                                <input type="hidden" name="id" value="{:I('id')}">
+                                <input type="hidden" name="city_code" id="city_code" value="{:I('city_code')}">
+                                <input type="hidden" name="town_code" id="town_code" value="{:I('town_code')}">
+                                <input type="hidden" name="parent_id" id="parent_id" value="{:I('parent_id')}">
+                                <input type="hidden" name="catalog_id" id="catalog_id" value="{:I('catalog_id')}">
+
+                                <a href="javascript:void(0)" class="btn-search" onclick="search1()"><i></i></a>
+                                <input type="search" name="keyword" id="keyword" class="search-input" placeholder="输入的商户名、地址" value="{$keyword}" />
+                            </form>
+                        </div>
+                    </div>
+                    <div class="choose">
+                        <ul>
+                            <li id="city">
+                                <p>{$selCity}</p><i></i>
+                            </li>
+                            <li class="fn">
+                                <ul class="city_box">
+                                    <li onclick="setCity('');">全部城市</li>
+                                    <volist name="city" id="vo">
+                                        <li>{$vo['city']}</li>
+                                    </volist>
+                                </ul>
+                                <ul class="county">
+                                    <li class="item">
+                                        <!-- <a href="javascript:;" class="only" onclick="setCity()">全部城市</a> -->
+                                    </li>
+                                    <php>foreach($town as $key=>$vo){</php>
+                                    <li class="item">
+                                        <a href="javascript:;" class="only" onclick="setCity('{$key},')">全部</a>
+                                        <php>foreach($vo as $v){</php>
+                                        <a href="javascript:;" onclick="setCity('{$key},{$v['town_code']}')">{$v['town']}</a>
+                                        <php>}</php>
+                                    </li>
+                                    <php>}</php>
+                                </ul>
+                            </li>
+                            <li id="classify">
+                                <p>{$selCata}</p><i></i></li>
+                            <li class="fn">
+                                <ul class="city_box">
+                                    <li onclick="setCate('')">全部分类</li>
+                                    <volist name="parentInfo" id="vo">
+                                        <li>{$vo['catalog_name']}</li>
+                                    </volist>
+                                </ul>
+                                <ul class="county">
+                                    <li class="item">
+                                        <!-- <a href="javascript:;" class="all">全部分类</a> -->
+                                    </li>
+                                    <php>foreach($catalogInfo as $parent_id=>$vo){</php>
+                                        <li class="item">
+                                            <a href="javascript:;" onclick="setCate('{$parent_id},');" class="all">全部</a>
+                                            <volist name="vo" id="v">
+                                                <a href="javascript:;" onclick="setCate('{$parent_id},{$v['id']}')">{$v['catalog_name']}</a>
+                                            </volist>
+                                        </li>
+                                    <php>}</php>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="mainCon">
+                    <div id="masonry">
+                        <!--循环-->
+                        <volist name="list" id="vo" empty="$empty">
+                            <div class="box">
+                                <a href="{:U('CnpcGX/WapStore/goodslist',array('id'=>$id,'merchant_id'=>$vo['id']))}">
+                                    <img src="{:C('UPLOAD').$vo['image_link']}" />
+                                    <div class="proItem-msg">
+                                        <h1>{$vo['merchant_name']}</h1>
+                                        <h2>&nbsp;</h2>
+                                        <h3><p class="l">{$vo['address']}</p></h3>
+                                        <a href="tel:{$vo['hot_line_tel']}" class="phone"></a>
+                                    </div>
+                                </a>
+                            </div>
+                        </volist>
+                        <!--循环-->
+                    </div>
+                </div>
+                <div class="get-more" data-url="{$nextUrl}"><i></i><a href="javascript:;">往上拉查看更多</a></div>
+            </div>
+        </div>
+    </div>
+    <section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+<script type="text/javascript">
+_in_ajax = false;
+$(document).ready(function() {
+    var loadhtml = '<div id="infscr-loading" style="text-align: center; display:none;"><img src="__PUBLIC__/Label/Image/Item/loading.gif"><div><em>加载中...</em></div></div>';
+    $("#masonry").append(loadhtml);
+    $("body").append("<div id='masonry2' style='display:none;'></div>");
+    $(window).scroll(function() {
+        setTimeout(function() {
+            if ($(document).scrollTop() + $(window).height() >= $(document).height()) {
+                if (_in_ajax) return ;
+                if ($("masonry2").hasClass("erro")) {
+                    return false;
+                }
+                _in_ajax = true;
+                $("masonry2").addClass("erro");
+                var url = $('.get-more').attr("data-url");
+                $("#infscr-loading").show();
+                $('#masonry2').load(url + ' ' + ".box", null, function(data, status) {
+                    var l = $("#masonry2 .box").length;
+                    if (l == 0) {
+                        $("#infscr-loading em").text("没有更多数据了");
+                        $("#infscr-loading img").hide();
+                        setTimeout(function() {
+                            $("#infscr-loading").hide();
+                        }, 2000);
+                        $('.get-more').hide();
+                    } else {
+                        $('#masonry').append($('#masonry2').html());
+                        $("#infscr-loading").fadeOut(500);
+                    }
+                    var newpath = newPath(url);
+                    $(".get-more").attr("data-url", newpath);
+                    $("masonry2").removeClass("erro");
+                    _in_ajax = false;
+                });
+            };
+        }, 500);
+    });
+
+    //城市选择tab切换
+    var wrapperWdith = $("#wrapper").width();
+    $(".third").hide();
+    $("#city").on("click", function() {
+        $("#city").next("li.fn").width(wrapperWdith);
+        $("#city").next("li.fn").toggle();
+        $("#classify,#sequence").next("li.fn").hide();
+        $(this).find("p").toggleClass("active");
+        $(this).find("i").toggleClass("active");
+        $("#classify,#sequence").find("i").removeClass("active");
+        $("#classify,#sequence").find("p").removeClass("active");
+        $("body").css("position", "fixed");
+    });
+    $("#city").next("li.fn").find(".city_box li").on("click", function() {
+        $("#city").next("li.fn").find(".city_box li").removeClass('active');
+        $(this).addClass("active");
+        $("#city").next("li.fn").find(".county .item").hide();
+        var index = $(this).index();
+        $("#city").next("li.fn").find(".county .item").eq(index).show();
+    });
+    $("#city").next("li.fn").find(".county .all").on("click", function() {
+        $(this).next(".third").toggle();
+        $(this).toggleClass("active");
+    });
+    $("#city").next("li.fn").find(".county a").click(function() {
+        var text = $(this).text();
+        $("#city p").text(text);
+        $("li.fn").hide();
+        $("#city").next("li.fn").find(".county a").removeClass("active");
+        $(this).addClass("active");
+        $("#city").find("i").removeClass("active");
+        $("#city").find("p").removeClass("active");
+        $("body").css("position", "relative");
+    });
+
+
+    //分类选择tab切换
+    var wrapperWdith = $("#wrapper").width();
+    $("#classify").on("click", function() {
+        $("#classify").next("li.fn").width(wrapperWdith);
+        $("#classify").next("li.fn").toggle();
+        $("#city,#sequence").next("li.fn").hide();
+        $(this).find("p").toggleClass("active");
+        $(this).find("i").toggleClass("active");
+        $("#city,#sequence").find("i").removeClass("active");
+        $("#city,#sequence").find("p").removeClass("active");
+        $("body").css("position", "fixed");
+    });
+    $("#classify").next("li.fn").find(".city_box li").on("click", function() {
+        $("#classify").next("li.fn").find(".city_box li").removeClass('active');
+        $(this).addClass("active");
+        $("#classify").next("li.fn").find(".county .item").hide();
+        var index = $(this).index();
+        $("#classify").next("li.fn").find(".county .item").eq(index).show();
+    });
+    $("#classify").next("li.fn").find(".county a").click(function() {
+        var text = $(this).text();
+        $("#classify p").text(text);
+        $("li.fn").hide();
+        $(this).find("i").removeClass("active");
+        $("#classify").find("i").removeClass("active");
+        $("#classify").find("p").removeClass("active");
+        $("body").css("position", "relative");
+    });
+
+    //排序选择tab切换
+    var wrapperWdith = $("#wrapper").width();
+    $("#sequence").on("click", function() {
+        $("#sequence").next("li.fn").width(wrapperWdith);
+        $("#sequence").next("li.fn").toggle();
+        $("#city,#classify").next("li.fn").hide();
+        $(this).find("p").toggleClass("active");
+        $(this).find("i").addClass("active");
+        $("#city,#classify").find("i").removeClass("active");
+        $("#city,#classify").find("p").removeClass("active");
+        $("body").css("position", "fixed");
+    });
+    $("#sequence").next("li.fn").find(".county a").click(function() {
+        var text = $(this).text();
+        var dataVal = $(this).attr("data-value");
+        $(".sequence").find("select").val(dataVal);
+        $("#sequence p").text(text);
+        $("li.fn").hide();
+        $(this).find("i").removeClass("active");
+        $("#sequence").find("i").removeClass("active");
+        $("#sequence").find("p").removeClass("active");
+        $("body").css("position", "relative");
+    });
+});
+
+function newPath(path) {
+    path = path.split("p=");
+    var p = path[1] * 1 + 1;
+    newpath = path[0] + "p=" + p;
+    return newpath;
+};
+function setCity(code){
+    if(code == ''){
+        $('#city_code,#town_code').val('');
+    }
+    else{
+        code = code.split(',');
+        $('#city_code').val(code[0]);
+        $('#town_code').val(code[1]);
+    }
+    $('#searchform').submit();
+}
+function setCate(code){
+    if(code == ''){
+        $('#parent_id,#catalog_id').val('');
+    }
+    else{
+        code = code.split(',');
+        $('#parent_id').val(code[0]);
+        $('#catalog_id').val(code[1]);
+    }
+    $('#searchform').submit();
+}
+function updata(city_code, town_code, parent_id, catalog_id) {
+    //  var select_city=$(".select_city").val();
+    var city_town = $("#city").attr("data-town");
+    var select_city = $("#city").attr("data-city");
+
+    $.get("{:U('CnpcGX/WapStore/index')}", {
+        "city_code": city_code,
+        "town_code": town_code,
+        "parent_id": parent_id,
+        "catalog_id": catalog_id,
+        "ajax": 1
+    }, function(data) {
+        var nUrl = data['nextUrl'];
+        var hdata = data['str'];
+        $('.get-more').show().attr("data-url", nUrl);
+        $("#masonry").empty();
+        if (hdata == '') {
+            $('.get-more').hide();
+            $("#masonry").html('未查询到数据');
+        } else {
+            $('.get-more').show();
+            $("#masonry").append(hdata);
+        }
+    }, 'JSON');
+    return false;
+
+}
+
+function search1() {
+    return true;
+    var key = $('#keyword').val();
+    $.get("{:U('CnpcGX/WapStore/index')}", {
+        "keyword": key,
+        "ajax": 1
+    }, function(data) {
+        var nUrl = data['nextUrl'];
+        var hdata = data['str'];
+        $('.get-more').show().attr("data-url", nUrl);
+        $("#masonry").empty();
+        if (hdata == '') {
+            $('.get-more').hide();
+            $("#masonry").html('未查询到数据');
+        } else {
+            $('.get-more').show();
+            $("#masonry").append(hdata);
+        }
+    }, 'JSON');
+    return false;
+}
+</script>
+
+</html>

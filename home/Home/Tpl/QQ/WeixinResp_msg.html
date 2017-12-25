@@ -1,0 +1,440 @@
+<?php 
+//本模板同时被 respType=0 以及 respType=1 以及respType=2 使用，所以，根据不同的respClass进行文字替换
+if($respType == '0'){
+	$title = "被添加自动回复";
+}
+elseif($respType == '1'){
+	$title = "消息自动回复";
+}
+elseif($respType == '2'){
+	$title = "关键词自动回复";
+}
+else{
+	$title = "自动回复";
+}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信被添加自动回复</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/datetimepicker.min.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wqq.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script src="__PUBLIC__/Js/weixin2/jq-emotion.js" type="text/javascript"></script>
+<script src="__PUBLIC__/Js/weixin2/datetimepicker.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+    var html = $("#reply_content_0").html();
+        html = html.replace(/\n/g,"<br>");
+    $("#reply_content_0").html(html);
+    check_lenght_weixin(600,"js_editorTip0","#reply_content_0");
+	$("#message_face").jqfaceedit("reply_content_0");
+}); 
+</script>
+
+<script type="text/javascript">
+//选择后的回调函数
+var selectcallback = function(mid){
+	if(mid=="") {$(".tab_text").addClass("selected");return false};
+	if(mid=="img"){
+		$(".tab_img").addClass("selected");
+        $("#reply_content_0").hide();
+        $("#reply_content_1").hide();
+        $("#reply_content_2").show();
+		return false;
+	};
+    var dialog = art.dialog({title:false,lock:true});
+    var data = {material_id:mid};
+    $("#material_id_selected").val(mid);
+    $.post("{:U('QQ/WeixinResp/showMaterialById')}",data,function(d){
+        dialog.close();
+        $("#reply_content_0").hide();
+        $("#reply_content_1").show();
+        $("#reply_content_0").html("");
+		$("#reply_content_1").html(d);
+        $("#reply_content_2").hide();
+        windowheight();
+    });
+}
+
+
+$(document).ready(function(e){
+
+	editArea();
+	var week ="<?php  echo $setting['week'] ?>";
+	var weekArr = new Array();
+	weekArr = week.split(",");
+	for (i=0;i<weekArr.length-1 ;i++ ){
+		$("input[name=week]").each(function(){
+			if($(this).val() == weekArr[i]){
+				$(this).attr("checked", "false");
+			}
+		})
+	}
+    var msgId = $("#material_id_selected").val();
+
+    if(msgId==""){
+		$("#reply_content_0").show();
+		$("#reply_content_1").hide();
+		$("#reply_content_2").hide();
+    }else if(msgId=="img"){
+		$("#reply_content_0").hide();
+		$("#reply_content_1").hide();
+		$("#reply_content_2").show();
+    }else{
+		$("#reply_content_0").hide();
+		$("#reply_content_1").show();
+		$("#reply_content_2").hide();
+    }
+	
+    $(".tab_text").click(function(){
+        $(".content_wrap .tab_nav").removeClass("selected");
+        $(".tab_text").addClass("selected");
+        $("#reply_content_0").show();
+        $("#reply_content_2").hide();
+        $("#reply_content_1").hide();
+        $("#material_id_selected").val("");
+        $("#reply_content_0").focus();
+    });
+    
+    $(".tab_appmsg").click(function(){
+        $(".content_wrap .tab_nav").removeClass("selected");
+        $(".tab_appmsg").addClass("selected");
+    });
+	//确定按钮事件
+	$("#btn_submit").click(function(){
+        var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+        if($("#material_id_selected").val()!="" && $("#material_id_selected").val()!="img"){
+			var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+			var startTime = $('[name="startTime"]').val();
+			var lastTime = $('[name="lastTime"]').val();
+			var week = '';
+			$("input[name=week]").each(function() {
+				if ($(this).attr("checked")) {  
+					week += $(this).val()+","; 
+				}
+			});  
+			var minute = $('[name="minute"]').val();
+	
+				var data = {
+				response_info:$("#material_id_selected").val(),
+				respType:1,
+				respClass:1,
+				startTime:startTime,
+				lastTime:lastTime,
+				week:week,
+				minute:minute,
+			};
+				$.post("{:U('QQ/WeixinResp/followSubmit')}",data,function(d){
+					dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+					location.reload();   
+				},'json');
+        }else if($("#material_id_selected").val()==""){
+			var mid = $("#material_id_selected").val();
+			var reply_text = $("#reply_content_0").html();
+			if(reply_text.length == 0){
+				alert('请输入回复内容！');
+				return ;
+			}
+			reply_text=reply_text.replace(/\n/g, "\n");
+			reply_text=reply_text.replace(/<br\/?[^>]*>/g, "\n");
+			reply_text=reply_text.replace(/\&nbsp\;/g, ' ');
+            reply_text=reply_text.replace(/\&lt;/g, '<'); 
+            reply_text=reply_text.replace(/\&gt;/g, '>');
+
+	
+			var text = $("#reply_content_0").text();
+
+			var imglength = $("#reply_content_0").find("img");
+			if(imglength.length*3+text.length > 600){
+				alert('字数超过600个啦，请修改！');
+				return ;
+			}
+			var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+			var startTime = $('[name="startTime"]').val();
+			var lastTime = $('[name="lastTime"]').val();
+			var week = '';
+			$("input[name=week]").each(function() {
+				if ($(this).attr("checked")) {  
+					week += $(this).val()+","; 
+				}
+			});  
+			var minute = $('[name="minute"]').val();
+			var data = {
+				response_info:reply_text,
+				respType:1,
+				respClass:0,
+				startTime:startTime,
+				lastTime:lastTime,
+				week:week,
+				minute:minute,
+			};
+			$.post("{:U('QQ/WeixinResp/followSubmit')}",data,function(d){
+				dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+				location.reload();
+			},'json');
+		}else if($("#material_id_selected").val()=="img"){
+            var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+            var startTime = $('[name="startTime"]').val();
+            var lastTime = $('[name="lastTime"]').val();
+            var week = '';
+            $("input[name=week]").each(function() {
+                if ($(this).attr("checked")) {
+                    week += $(this).val()+",";
+                }
+            });
+            var minute = $('[name="minute"]').val();
+
+            var data = {
+                response_info:$("#material_src").val(),
+                respType:1,
+                respClass:3,
+                startTime:startTime,
+                lastTime:lastTime,
+                week:week,
+                minute:minute,
+            };
+
+            $.post("{:U('QQ/WeixinResp/followSubmit')}",data,function(d){
+                dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                //alert('提交成功');
+                location.reload();
+            },'json');
+        }
+	});
+
+	//初始化被选中的素材
+
+	selectcallback($("#material_id_selected").val());
+});
+$(function(){
+    $("#uploadMeitu").click(function(){
+        $(".content_wrap .tab_nav").removeClass("selected");
+        $(".tab_img").addClass("selected");
+        var opt = {
+            cropPresets:'720x400',
+            callback:function(data){
+				$("#reply_content_0").hide();
+				$("#reply_content_1").hide();
+				$("#reply_content_2").show().find("img").show().attr("src",data.src);
+				$("#reply_content_0").html("");
+				$("#reply_content_1").html("");
+				$("#material_id_selected").val("img")
+				$("#material_src").val(data.src);
+				$("#reply_content_2 a").show();
+            }
+        };
+        open_img_uploader(opt);
+    });
+	$("#reply_content_2 a").click(function(){
+		$(this).hide();
+		$("#reply_content_2").find("img").hide().attr("src","");
+		$("#material_src").val("");
+	})
+});
+</script>
+</head>
+<body>
+	<div id="wrapper" >
+		<include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="qqgzh"/>
+		<div id="container" >
+			<div id="main" class="rel">
+				<div class="sidenav">
+					<!--开始载入左菜单-->
+					<php> if($respType == '0'){ $leftmenuid = 'btjzdhh'; } else{
+					$leftmenuid = 'xxzdhh'; } </php>
+					<include file="Batch/WleftMenu" leftmenuid="zdhf" />
+				</div>
+				<div class="subcon fn">
+					<div class="main-name fn">
+						<h4>{$title}</h4>
+					</div>
+					<div class="msg-libs">
+                    <div class="content_wrap global_mod">
+                    <div class="section_tab">
+                        <ul class="tab_navs">
+                            <li class="tab_nav"><a href="{:U('QQ/WeixinResp/index')}">被添加自动回复</a></li>
+                            <li class="tab_nav  selected"><a href="{:U('QQ/WeixinResp/msg')}">消息自动回复</a></li>
+                            <li class="tab_nav no_extra"><a href="{:U('QQ/WeixinResp/keywords')}">关键词自动回复</a></li>
+                            
+                        </ul>
+                    </div>
+                    <style type="text/css">
+                    .form-horizontal .control-group {
+					margin-bottom: 10px;
+					}
+					.form-horizontal .control-label {
+					float: left;
+					width: 160px;
+					padding-top: 5px;
+					text-align: right;
+					}
+					.form-horizontal .controls {
+					margin-left: 180px;
+					}
+					.controls > .radio, .controls > .checkbox {
+					display: inline-block;
+					padding: 0 !important;
+					margin: 0 !important;
+					margin-top: 8px !important;
+					margin-right: 15px !important;
+					vertical-align:middle;
+					}
+					.radio, .checkbox {
+					min-height: 16px;
+					padding-left: 16px;
+					}
+					.form-horizontal input{
+					color: #333333;
+					outline: 0;
+					font-size: 14px;
+					font-weight: normal;
+					border: 1px solid #e5e5e5;
+						}
+					fieldset {
+					border: 1px solid #e5e5e5;
+					margin:10px 0px 10px 0px;
+					padding:30px 0;
+						}
+					fieldset legend { margin-left:30px; font-size:16px}
+					.msg_sender{ margin:0 10px;}
+					.tab_navs{ margin-left:0; padding-left:0}
+					.msg_sender .tab_nav{ line-height:38px;}
+					.shopNav ul{ margin:0}
+                    </style>
+                    <div class="msg-libs">
+                    <form action="#" class="form-horizontal">
+                    <fieldset>
+                    <legend>设置开启条件</legend>
+                        <div class="control-group">
+                        <label class="control-label">分时段开启</label>
+                        <div class="controls">
+                              <div id="datetimepicker3" class="input-append">
+                                <input data-format="hh:mm:ss" name="startTime" type="text" readonly="" value="{$setting['startTime']}"></input>
+                                <span class="add-on">
+                                  <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+                                  </i>
+                                </span>
+                              </div>
+                              -
+                              <div id="datetimepicker4" class="input-append">
+                                <input data-format="hh:mm:ss" name="lastTime" type="text" readonly="" value="{$setting['lastTime']}"></input>
+                                <span class="add-on">
+                                  <i data-time-icon="icon-time" data-date-icon="icon-calendar">
+                                  </i>
+                                </span>
+                              </div>
+                            <script type="text/javascript">
+                              $(function() {
+                                $('#datetimepicker3').datetimepicker({
+                                  pickDate: false
+                                });
+								
+								$('#datetimepicker4').datetimepicker({
+                                  pickDate: false
+                                });
+                              });
+                            </script>
+                        </div>
+                        </div>
+                        <div class="control-group">
+                        <label class="control-label">周几开启</label>
+                        <div class="controls">
+                            <label class="checkbox">
+                            <input type="checkbox" name="week" value="1" /> 一
+                            </label>
+                            <label class="checkbox">
+                            <input type="checkbox" name="week" value="2" /> 二
+                            </label>
+                            <label class="checkbox">
+                            <input type="checkbox" name="week" value="3" /> 三
+                            </label>
+                            <label class="checkbox">
+                            <input type="checkbox" name="week" value="4" /> 四
+                            </label>
+                            <label class="checkbox">
+                            <input type="checkbox" name="week" value="5" /> 五
+                            </label>
+                            <label class="checkbox">
+                            <input type="checkbox" name="week" value="6" /> 六
+                            </label>
+                            <label class="checkbox">
+                            <input type="checkbox" name="week" value="7" /> 日
+                            </label>
+                        </div>
+                        </div>
+                        <div class="control-group">
+                        <label class="control-label">触发条件</label>
+                        <div class="controls">
+                            <input type="text" name="minute" class="m-wrap large" value="{$setting['minute']}"/> 分钟内无回复才触发
+                        </div>
+                        </div>
+                    </fieldset>
+                    </form>
+                    </div>
+                </div>
+                <div class="content_wrap" id="div_replyContent" style="">
+                <div class="msg_sender" id="js_msgSender" style="margin:0;">
+                <div class="msg_tab">
+                        <ul class="tab_navs" style="margin-bottom:0">
+                                <li class="tab_nav tab_text" data-type="1" data-tab=".js_textArea" data-tooltip="文字">
+                                <a href="javascript:void(0);">&nbsp;<i class="icon_msg_sender"></i>文字</a>
+                                </li>
+                                <li class="tab_nav tab_appmsg" data-type="10" data-tab=".js_appmsgArea" data-tooltip="图文消息"><a href="javascript:void(0);" class="libraryArea-add" data-url="index.php?g=Weixin&m=WeixinResp&a=selectImgTxt&callback=selectcallback">&nbsp;<i class="icon_msg_sender" ></i>图文</a></li>
+                                <li class="tab_nav tab_img" data-type="10" data-tab=".js_appmsgArea" data-tooltip="图片消息"><a href="javascript:void(0);">&nbsp;<i id="uploadMeitu" class="icon_msg_sender" ></i>图片</a></li>
+                        </ul>
+                    <div class="tab_panel">
+                        <div class="tab_content">
+                            <div class="js_textArea inner no_extra">
+                                <div class="emotion_editor">
+
+                                    <php>if(3 != $response_class){</php>
+                                    <div class="edit_area js_editorArea editArea" id="reply_content_0"  contenteditable="true" style="overflow-y: auto; overflow-x: hidden; border:0px;" onkeydown="check_lenght_onkeydown(this)" onkeyup="check_lenght_weixin(600,'js_editorTip0',this);"><?=$respText?></div>
+                                    <div class="edit_area js_editorArea editArea dn" id="reply_content_1" style="overflow-y: auto; overflow-x: hidden; border:0px;"></div>
+                                    <input type="hidden" id="material_id_selected" value="{$imgId}">
+                                    <php>}else{</php>
+                                    <div class="edit_area js_editorArea editArea" id="reply_content_0"  contenteditable="true" style="overflow-y: auto; overflow-x: hidden; border:0px;" onkeydown="check_lenght_onkeydown(this)" onkeyup="check_lenght_weixin(600,'js_editorTip0',this);"></div>
+                                    <div class="edit_area js_editorArea editArea dn" id="reply_content_1" style="overflow-y: auto; overflow-x: hidden; border:0px;"></div>
+                                    <input type="hidden" id="material_id_selected" value="img">
+                                    <php>}</php>
+
+                                    <div class="edit_area js_editorArea editArea dn" id="reply_content_2" style="overflow-y: auto; min-height:188px; height:auto; overflow-x: hidden; border:0px; text-align:center;"><img src="{$respText}" /><br /><br /><a href="javascript:void(0)">删除</a><input type="hidden" id="material_src" value="" /></div>
+                                    <div class="editor_toolbar">
+                                        <a href="javascript:void(0);" class="icon_emotion emotion_switch js_switch" id="message_face"><i></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                </div>
+                    <div class="tool_bar">
+                        <span class="btn btn_primary btn_input"><a href="javascript:void(0);" class="w110" title="确认" id="btn_submit">保存</a></span>
+                   </div>
+            </div>
+                    				
+                   </div>
+                   </div>
+                   </div>
+			</div>
+		</div>
+		<include file="./Home/Tpl/Public/Public_footer.html" />
+	</div>
+	<div class="service"></div>
+</body>
+</html>

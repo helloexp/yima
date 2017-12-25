@@ -1,0 +1,235 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>会员信息</title>
+<link href="__PUBLIC__/Css/easyui.css" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Whygl.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.easyui.min.js"></script>
+<script>
+$(function(){
+    //添加标签弹窗
+	$(".js_orderconfirm").click(function(e) {
+        var m_id = $(this).attr("data-id");
+		art.dialog.open("{:U('addOneLabel')}&m_id="+m_id+"&ot_type="+1,{
+			id:"EnterpriseNo",
+			title:"添加标签",
+			width:"480px",
+			height:"240px"
+		});
+    });
+    //会员详情弹窗
+	$(".member-info a").click(function(e) {
+        var m_id = $(this).attr("data-id");
+		art.dialog.open("{:U('detail')}&m_id="+m_id,{
+			id:"EnterpriseNo",
+			title:"会员详情",
+			width:"800px",
+			height:"650px"
+		});
+    });
+})
+</script>
+
+<script>
+    function unselectall(){
+        if(document.myform.chkAll.checked){
+            document.myform.chkAll.checked = document.myform.chkAll.checked&0;
+        }
+    }
+    function CheckAll(form){
+        for (var i = 0; i < form.elements.length; i++){
+            var e = form.elements[i];
+            if (e.Name != 'chkAll' && e.disabled == false) {
+                e.checked = form.chkAll.checked;
+            }
+        }
+    }
+
+    function batchIncrease(type){
+        var value = [];
+        var c=document.getElementsByTagName("INPUT");
+        for(var i=0;i<c.length;i++){
+            if(c[i].type=="checkbox" && c[i].checked)
+            {
+                if(c[i].value !=''){
+                    value[value.length]=c[i].value;
+                }
+
+            }
+        }
+        if(value.length < 1) {
+            art.dialog({title:false,content:"<div class='msg-all-error'>请勾选会员</div>",fixed:true,padding:0,time:2});
+                return false;
+        }
+        var id_str = value.join(",");
+        if(type == 1) {
+            art.dialog.open("{:U('addOneLabel')}&m_id="+id_str+"&ot_type="+2,{
+                id:"EnterpriseNo",
+                title:"添加标签",
+                lock:true,
+                width:"480px",
+                height:"220px"
+            });
+        } else {
+            art.dialog.open("{:U('updateMemberCard')}&m_id="+id_str,{
+                id:"EnterpriseNo",
+                title:"更换会员卡",
+                lock:true,
+                width:"480px",
+                height:"250px"
+            });
+        }
+    }
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+	<div class="container">
+       	<!--页面主体开始-->
+        <div class="" id="container">
+        	<div class="rel" id="main">
+            	<include file="Wmember/Member/leftMenu" leftmenuid="xxcjx"/>
+                <div class="subcon fn">
+                	<div class="main-name fn"><h4>会员信息</h4></div>
+					<div class="tipNormal part mb15"><p>在 <span class="cj_item red">{$text}</span> 中选择 <span class="set_item red">{$opt}</span> 的会员</p></div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-list">
+                        	<div class="shopCon">
+                                <form name="myform" method="post" id="myform" action="" >
+	                            <table cellpadding="0" cellspacing="0" class="W-table">
+	                            <thead>
+	                            <tr class="th">
+	                            <th class="first"></th>
+	                            <th>手机号码</th>
+	                            <th>姓名</th>
+	                            <th>首次来源</th>
+	                            <th>活动参与次数</th>
+	                            <th>接收卡券数</th>
+	                            <th>到店核销数</th>
+	                            <th>登记日期</th>
+	                            <if condition="$adb_flag eq 1">
+	                            <th>所属门店</th>
+	                            </if>
+	                            <th class="last">操作</th>
+	                            </tr>
+	                            </thead>
+	                            <tbody>
+
+                                <volist name="msginfo" id="vo">
+                                   <tr>
+                                        <td class="first"><input type="checkbox" name="name" onclick='unselectall()' value="10162" /></td>
+                                       <td class="member-info"><a href="javascript:void(0);" data-id="{$vo.id}">{$vo.phone_no}</a></td>
+                                        <td>{$vo.name}</td>
+                                        <td><?php if($vo['channel_name']=='旺分销-群发消息') echo '旺分销消息'; else echo $vo['channel_name']; ?></td>
+                                       <td>{$vo['join_total']|default=0}</td>
+                                       <td>{$vo['send_total']|default=0}</td>
+                                       <td>{$vo['verify_total']|default=0}</td>
+                                       <td>{$vo['add_time']|preg_replace='/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])(.*)/','$1-$2-$3',###|}</td>
+                                       <td class="last"><a href="javascript:void(0);" data-id="{$vo.id}" class="js_orderconfirm">添加标签</a><if condition="$adb_flag eq 1 and $vo.openid neq ''">|<a href="javascript:void(0);" data-id="{$vo.openid}" class="remove">解绑门店</a></if></td>
+                                    </tr>
+                                </volist>
+
+	                            </tbody>
+	                            </table>
+	                            <div class="choose pt10 pb10 pl15 pr15">
+	                            	<input type="checkbox" name="chkAll" id='chkAll' onclick='CheckAll(this.form)'value=""/>
+	                            	<a href="javascript:void(0);"onclick="batchIncrease(1)" style="font-size:14px">批量添加标签</a>
+	                            </div>
+	                            <div class="page">{$page}</div>
+                                </form>
+	                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+</div>
+<div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+    $(".combo").css("height","26px");
+    $(".combo-arrow").css("height","26px");
+	$(".textbox-text").css({"width":"74px","margin-right":"0"});
+    $(".combo").addClass("active");
+    $("#add_mark").click(function(){
+        var val = $(".textbox-text").val();
+        if(val == '') {
+            return false;
+        }
+        $.post(
+            "{:U('selLabelFlag')}",
+            {label_name: val},
+            function (data) {
+                if (data.status == '0') {
+                    art.dialog({title:false,content:"<div class='msg-all-error'>添加的标签不存在~~</div>",fixed:true,padding:0,time:2});
+                    return false;
+                }
+            },
+            'json'
+        );
+        var str = $("#bqValue").val();
+        if(str != '' && str.indexOf(val+",") > 0) {
+            art.dialog({title:false,content:"<div class='msg-all-error'>添加的标签已经添加，请添加其它标签~~</div>",fixed:true,padding:0,time:2});
+            return false;
+        }
+        var dom = '<div class="mb1 fl" id="mb1">' + val + '<i>x</i></div>';
+        $(".mark-box").css("display","block");
+        str += val+',';
+        $("#bqValue").val(str);
+        if(val==""){
+            $(".textbox-text").attr("value","");
+        }else{
+			$(this).after(dom);
+            $(".textbox-text").attr("value","");
+        };
+    });
+    $(document).on("click", "#mb1 i", function(){
+        var str = $("#bqValue").val();
+        var rmL = $(this).parent(".mb1").text();
+        $("#bqValue").val(str.replace(rmL+",", ""));
+        $(this).parent(".mb1").remove();
+    });
+    $(".remove").click(function(){
+    	var openid=$(this).attr("data-id");
+    	if(!confirm('是否解除门店绑定?')){
+    		return false;
+    	}
+    	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+    	$.ajax({
+    		url:"{:U('Wmember/Member/removeRelation')}",
+    		data:"openid="+openid,
+    		type:'post',
+            dataType:'json',
+    		success:function(data){
+    			if(data.status==1){
+    				dialog.time(2).content("<div>"+data.info+"</div>");
+                    window.location.reload();
+ 
+    			}else{
+    				dialog.time(2).content("<div>"+data.info+"</div>");
+    			}
+    		}
+    	})
+    })
+});
+</script>

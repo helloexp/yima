@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>代金券-编辑</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js?v=__VR__"></script>
+
+<script>
+$(function(){
+    $("#smb").click(function(){
+        var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                           setTimeout("var win = art.dialog.open.origin;win.location.reload();",500);
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                              }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+    
+    $(".icon-del").click(function(){
+        $(this).closest(".numgoodsList-item").detach();
+    });
+    $(".message-show").click(function(){
+        var message=$("#mms_text").val();
+        var html=
+        ['<div class="aipai-iphone">',
+          '<div class="aipai-iphone-text">',
+              message,
+          '</div>',
+          '</div>'].join('');
+          art.dialog({
+            padding: 20,
+            title: '短信预览',
+            content: html,
+            lock: true
+        });
+    });
+    $("#verify_begin_date").click(function(){
+        $("input[name='verify_begin_type'][value='0']").attr("checked",true);
+    });
+    $("#verify_begin_days").click(function(){
+        $("input[name='verify_begin_type'][value='1']").attr("checked",true);
+    });
+    $("#verify_end_date").click(function(){
+        $("input[name='verify_end_type'][value='0']").attr("checked",true);
+    });
+    $("#verify_end_days").click(function(){
+        $("input[name='verify_end_type'][value='1']").attr("checked",true);
+    });
+})
+</script>
+</head>
+<body class="bgfff">
+<div style="width:800px; padding-left:30px;">
+                      
+    <div class="global-input6 fn pt30">
+        <form method="post" action="<?php echo U('Voucher/voucherEdit');?>">
+            <ul>
+                <li class="global-input6-name">&nbsp;代金券名称：</li>
+                <li class="global-input6-input"><p>{$goodsData['goods_name']}</p></li>
+            </ul>
+            <ul class="numgoods-form-title">代金券基本内容</ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;有效期：</li>
+                <li class="global-input6-input"><input name="goods_begin_date" id="goods_begin_date" value="{$goodsData['begin_time']|dateformat=###,'Ymd'}" type="text" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'goods_end_date\\')}'})" disabled="disabled" class="validate[required] textbox w172"/>
+                                                <span class="mlr5">至</span>
+                                                <input name="goods_end_date" id="goods_end_date" value="{$goodsData['end_time']|dateformat=###,'Ymd'}" type="text" onClick="WdatePicker({minDate:'<?php echo dateformat($goodsData['end_time'],'Y-m-d')?>'})" class="validate[required] textbox w172"/>
+                                                <br />
+                                                <p class="font-12-cc">只能延长有效期结束时间</p>
+                </li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;打印小票内容：</li>
+                <li class="global-input6-input"><textarea name="print_text" id="print_text" class="validate[maxSize[100],required] texttextarea w380">{$goodsData['print_text']}</textarea><br />
+                <p class="font-12-cc">小票内容将显示在验证后的打印小票上，运营员根据打印小票内容提供服务</p>
+                </li>
+            </ul>
+            <ul class="numgoods-form-title">代金券发验时间设置</ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;使用代金券时间：</li>
+                <li class="global-input6-input">
+                    <div class="judgeDiv">
+                        <label class="ml5" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();">
+                        <input type="radio" <?php if($goodsData['verify_begin_type']=='0'){echo 'checked="checked"';}?> name="verify_time_type" value="0" id="verify_begin_type1"/><span class="ml5">按日期设置</span></label>
+                        <label class="ml10" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();">
+                        <input type="radio" <?php if($goodsData['verify_begin_type']=='1'){echo 'checked="checked"';}?> name="verify_time_type" value="1" id="verify_begin_type2"/><span class="ml5">按天数设置</span></label>
+                    </div>
+                    <div class="judgeCon-time judgeCon1 <?php if($goodsData['verify_begin_type']=='1'){echo 'dn';}?>">
+                        <p class="ml5">使用开始时间</p>
+                        <input name="verify_begin_date" id="verify_begin_date" type="text" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" value="<?php echo dateformat($goodsData['verify_begin_date'],'Ymd');?>"/>
+                        <p class="ml20">使用结束时间</p>
+                        <input name="verify_end_date" id="verify_end_date" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')||\\'%y-%M-%d\\'}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="<?php echo dateformat($goodsData['verify_end_date'],'Ymd');?>" />
+                        <div class="cl"></div>
+                        <p class="font-12-cc">商户可以自定义验码开始的日期如："4月1号,6月1号";</p>
+                    </div>
+                    <div class="judgeCon-time judgeCon2 <?php if($goodsData['verify_begin_type']=='0'){echo 'dn';}?>">
+                        <p class="ml5">发送代金券后</p>
+                        <input name="verify_begin_days" id="verify_begin_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$goodsData['verify_begin_date']}" />&nbsp;天开始使用
+                        <p class="ml20">发送代金券后</p>
+                        <input name="verify_end_days" id="verify_end_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$goodsData['verify_end_date']}" />&nbsp;天结束使用
+                        <div class="cl"></div>
+                        <p class="font-12-cc">商户可以自定义验码时间，如：“发送代金券后3天开始使用-发送代金券后5天结束使用”</p>
+                    </div>
+                </li>
+            </ul>
+            
+            <ul class="numgoods-form-title">代金券发送到用户手机短彩信设置<a href="javascript:void(0)" class="message-show ml180"><i class="icon-message"></i><span>点击预览</span></a></ul>
+            <ul>
+                <li class="global-input6-name">&nbsp;彩信标题：</li>
+                <li class="global-input6-input"><input id="mms_title" name="mms_title" type="text" value="{$goodsData['mms_title']}" onkeyup="check_lenght(10,'title_text',this);"  class="validate[maxSize[10]] textbox w380"/>
+                <br />
+                <p class="font-12-cc" id="title_text">还可以输入10个字</p>
+                </li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">&nbsp;彩信内容：</li>
+                <li class="global-input6-input"><textarea name="mms_text" id="mms_text" onkeyup="check_lenght(100,'text',this);" class="validate[maxSize[100]] texttextarea w380 h50">{$goodsData['mms_text']}</textarea>
+                <br />
+                <span class="font-12-cc" id="text">还可以输入100个字</span><p class="font-12-cc">,请短彩信内容按照以下格式：xxx时间到xxxx地点享受xxxx服务</p>
+                </li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">&nbsp;<input type="hidden" name="goods_id" value="{$goodsData['goods_id']}" /> </li>
+                <li class="global-input6-input"><a href="javascript:void(0);" title="确认" id="smb" class="btn-all w110">提交</a><a href="javascript:art.dialog.close();" title="取消" id="" class="btn-all-del ml10 w110">取消</a></li>
+            </ul>
+            </form>
+     </div>
+</div>
+                   
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

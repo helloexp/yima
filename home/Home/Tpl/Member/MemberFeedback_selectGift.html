@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>粉丝回馈_粉丝筐_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<link href="__PUBLIC__/Css/member.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/member.js?v=__VR__"></script>
+<script type="text/javascript">
+$(document).ready(function(e){
+    /*
+    $("a[name='select_gift']").click(function(){
+        art.dialog.open("{:U('MemberFeedback/giftList')}",{
+            lock: true,
+            background: '#000', // 背景色
+            opacity: 0.5,   // 透明度
+            title:"选择礼品",
+            width:720,
+            height:'80%'
+        });
+    });
+    */
+    $("a[name='select_gift']").click(function(){
+        // var  name = '&memberFeed=1';
+        art.dialog({id:'configBatch'}).close(); 
+        art.dialog.open("{:U('Common/SelectJp/index',array('callback'=>'call_back','show_source'=>'0,1,4'))}",{
+        // art.dialog.open("{:U('LabelAdmin/SelectJp/index')}"+name,{
+            id: 'closeJp',
+            width: 800,
+            height: 600,
+            title:'选择卡券',
+            lock: true,
+            background:'#000',
+            opacity: 0.5
+        })
+    });
+    $("#next").click(function(){
+    	var batch_no = $("#batch_id").val();
+    	if(!batch_no){
+    		art.dialog("请选择礼品");
+    		return false;
+    	}
+        $("#confirmGift").submit();
+    });
+    $('.btn-pre').click(function(){
+        $("a[name='select_gift']").trigger('click');
+    });
+
+    $('.btn-save-batch').click(function(){
+        var dialog;
+        $("#batch_form").ajaxSubmit({
+            beforeSubmit:function(){
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+                if(data.status == '1'){
+                   var datas = data.info;
+                   dialog.time(2).content("<div class='msg-all-succeed'>添加成功</div>");
+
+                   $("#gift_name").html("卡券为："+datas.goods_name);
+                   $("#batch_id").val(datas.batch_id);
+                   $("#gift_div").show();
+                   $("#set_gift").hide();
+
+                   setTimeout(function(){
+                    art.dialog({id:'configBatch'}).close(); 
+                    },1000);
+                   return false;
+                }else{
+                   dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },
+            dataType:'json'
+        });
+        return false;
+    });
+}); 
+function call_back(datas){
+    $("#show_name").html(datas.goods_name);
+    
+
+    $('#sms_text').html(datas.sms_text);
+    $("#mms_title").val(datas.mms_title);
+    $("#using_rules").val(datas.mms_text);
+    $('#goods_id').val(datas.goods_id);
+
+    if(datas.goods_type != '9'){
+        
+        $('.sms_info').hide();
+        $('.mms_info').show();
+    }
+    else{
+        $('.sms_info').show();
+        $('.mms_info').hide();
+    }
+
+    art.dialog({id:'closeJp'}).close(); 
+    art.dialog({
+        title: '设置卡券',
+        width:800,
+        heifht:500,
+        content: document.getElementById('showsaloonForm2'),
+        id: 'configBatch'
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            	<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="javascript:void(0)">粉丝筐</a></p>
+							<p>></p>
+                            <p><a href="javascript:void(0)">粉丝回馈</a></p>
+                            
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="LabelAdmin/Batch/leftMenu" leftmenuid="fshk"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4 class="bd-b-565656">粉丝回馈</h4>
+                    </div>
+                                    <div class="mem-repay-procedure fn">
+                                        <li><span>1</span><a href="javascript:void(0);">筛选粉丝</a></li>
+                                        <li class="hover"><span>2</span><a href="javascript:void(0);">选择卡券</a></li>
+                                        <li><span>3</span><a href="javascript:void(0);">确认发送</a></li>
+                                    </div>
+                                    <div class="mem-repay-prize fn mt20 bgf3f3f3 p20 tc" id="set_gift">
+                                        <span>您目前已选择{$countNum}个粉丝</span><a href="javascript:void(0)" name="select_gift" class="btn-all w110 ml20">选择卡券</a>
+                                    </div>
+                                    <div class="mem-repay-prize fn mt20 bgf3f3f3 p20 dn tc" id="gift_div">
+                                        <span>您目前已选择{$countNum}个粉丝</span><span class="ml20" id="gift_name"></span><a href="javascript:void(0)" name="select_gift" class="btn-all w110 ml20">重新选择</a>
+                                        <form id="confirmGift" method='post' action="{:U('MemberFeedback/confirmGift')}">
+                                            <input type="hidden" value="" name="batch_id" id="batch_id" />
+                                            <input type="hidden" value="{$countNum}" name="member_num" id="gift_id" />
+                                        </form>
+                                    </div>
+                                    <div class="fn tc mt20">
+                                        <a href="javascript:history.go(-1)" class="btn-all-del w110">上一步</a>
+                                        <a href="javascript:void(0)" id="next" class="btn-all w110 ml20">下一步</a>
+                                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+
+
+    <div id="showsaloonForm2" class="showsaloonForm2 dn pb20">
+        <form id="batch_form" action="{:U('addBatch')}" method="post">
+        <input type="hidden" name="goods_id" id="goods_id" value="">
+        <div class="global-input6 fn">
+            <ul>
+                <li class="global-input6-name">*&nbsp;您选择的卡券：</li>
+                <li class="global-input5-input"><p id="show_name"></p></li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;卡券有效期：</li>
+                <li class="global-input5-input"><p id="show_date"></p></li>
+            </ul>
+            <ul class="mms_info">
+                <li class="global-input6-name">*&nbsp;使用卡券时间：</li>
+                <li class="global-input5-input">
+                    <div class="judgeDiv">
+                        <label class="ml5" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();">
+                        <input type="radio"  name="verify_time_type" value="0" id="verify_begin_type1"/><span class="ml5">按日期设置</span></label>
+                        <label class="ml10" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();">
+                        <input type="radio"  name="verify_time_type" value="1" id="verify_begin_type2"/><span class="ml5">按天数设置</span></label>
+                    </div>
+                    <div class="judgeCon-time judgeCon1 ">
+                        <p class="ml5">使用开始时间</p>
+                        <input name="verify_begin_date" id="verify_begin_date" type="text" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" value=""/>
+                        <p class="ml20">使用结束时间</p>
+                        <input name="verify_end_date" id="verify_end_date" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')||\\'%y-%M-%d\\'}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="" />
+                        <div class="cl"></div>
+                        <p class="font-12-cc">商户可以自定义验码开始的日期如："4月1号,6月1号";</p>
+                    </div>
+                    <div class="judgeCon-time judgeCon2 ">
+                        <p class="ml5">发送卡券后</p>
+                        <input name="verify_begin_days" id="verify_begin_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="" />&nbsp;天开始使用
+                        <p class="ml20">发送卡券后</p>
+                        <input name="verify_end_days" id="verify_end_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="" />&nbsp;天结束使用
+                        <div class="cl"></div>
+                        <p class="font-12-cc">商户可以自定义验码时间，如：“发送卡券后3天开始使用-发送卡券后5天结束使用”</p>
+                    </div>
+                </li>
+                </ul>
+            <ul class="mms_info">
+                <li class="global-input6-name">*&nbsp;彩信标题：</li>
+                <li class="global-input5-input"><input id="mms_title" name="mms_title" type="text" onkeyup="check_lenght(10,'title_text',this);"  class="validate[required,maxSize[10]] textbox w380"/>
+                <br />
+                <p class="font-12-cc" id="title_text">还可以输入10个字</p>
+                </li>
+            </ul>
+            <ul class="mms_info">
+                <li class="global-input6-name">*&nbsp;彩信内容：</li>
+                <li class="global-input5-input"><textarea name="using_rules" id="using_rules" onkeyup="check_lenght(100,'text',this);" class="validate[required,maxSize[100]] texttextarea w380 h50"></textarea>
+                <br />
+                <span class="font-12-cc" id="text">还可以输入100个字</span><p class="font-12-cc">,请短彩信内容按照以下格式：xxx时间到xxxx地点享受xxxx服务</p>
+                </li>
+            </ul>
+            <ul class="source sms_info">
+                <li class="global-input6-name">*&nbsp;短信内容：</li>
+                <li class="global-input5-input">
+                    <div id="sms_text" class="mt5"></div>
+                </li>
+            </ul>
+            <ul>
+                <li class="global-input6-name"></li>
+                <li class="global-input5-input">
+                    <a href="javascript:void(0)" class="btn-all w120 btn-pre">上一步</a>
+                    <a href="javascript:void(0)" id="smb" class="btn-all w120 btn-save-batch ml20">确定</a>
+                </li>
+            </ul>
+        </div>
+        </form>
+    </div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

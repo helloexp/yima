@@ -1,0 +1,290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券分销助手-我的采购方</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script src="__PUBLIC__/Js/jquery-1.7.1.min.js"></script>
+<js href="__PUBLIC__/Js/global.js"/>
+<js href="__PUBLIC__/Js/Wcanal.js"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js"></script>
+<script src="__PUBLIC__/Js/Mypartner.js"></script>
+<load href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"/>
+<style>
+	.global-input1 .global-input1-name{width:150px;}
+	.global-input1-input span{color:#999;}
+</style>
+</head>
+<script>
+$(function(){
+	if($('.r-check').attr('value')==0){
+		$('#gk').hide();
+	}
+$("#subform").click(function(){
+	var dialog;
+	var gkbz=$("input[name='gkbz']:checked").val();
+	var gkfs=$("input[name='gkfs']:checked").val();
+	$("#gkbz").val(gkbz);
+	$("#gkfs").val(gkfs);
+	 if(gkbz==1){
+		var bail=$("#bail").val();
+		var warning=$("#warning_amt").val();
+		if(bail=='' || warning==''){
+			art.dialog({
+				icon:'error',
+				title:'提示',
+				content:'带*号为必填项！',
+				width:'200',
+				time:3,
+			});
+		}else{
+			$('#editform').submit();
+		}
+		}else{
+			$('#editform').submit();
+		} 
+});
+
+//峰值
+/* $('#maxamt').blur(function(){
+	 var valmax=$(this).val();
+	 if(valmax < 500){
+	$("#tipsname").css("color","#ed1c24");
+	 }else{	 
+	$("#tipsname").css("color","#999");
+	 }
+}); */
+
+//  保证金
+$('#bail').blur(function(){
+	 var valmax=$(this).val();
+	 if(valmax < 500){
+	$("#tipsname").css("color","#ed1c24");
+	 }else{	 
+	$("#tipsname").css("color","#999");
+	 }
+});
+
+$("#myphone").blur(function(){
+	 var phoneVal=$("#myphone").val();
+	 if(phoneVal==''){
+		 $("#phone_null").css("color","red").html("&nbsp;&nbsp;&nbsp;&nbsp;管控时，您的预警手机号必填！");
+	 }else{
+		 $("#phone_null").css("color","#999").html("&nbsp;&nbsp;&nbsp;&nbsp;暂不支持多个号码填写");
+	 } 
+});
+$("#partphone").blur(function(){
+	 var custVal=$("#partphone").val();
+	 if(custVal==''){
+		 $("#cust_null").css("color","red").html("&nbsp;&nbsp;&nbsp;&nbsp;管控时，采购方预警手机号必填！");
+	 }else{
+		 $("#cust_null").css("color","#999").html("&nbsp;&nbsp;&nbsp;&nbsp;暂不支持多个号码填写");
+	 } 
+});
+
+$("#warning_amt").blur(function(){
+	 var valmoney=$(this).val();
+	 //var valmax=$("#maxamt").val();  // 峰值
+	 var valmax=$("#bail").val();  // 预付费
+	 if(parseInt(valmoney) > parseInt(valmax)){
+		 $("#tipsmoney").show();
+		 $("#hoverMsg").hide();
+	 }else{
+		 $("#tipsmoney").hide();
+		 $("#hoverMsg").show();
+	 }
+});
+})
+function sorn(index){
+    switch (index){
+        case 1:$("#gk").hide(); 
+            break;
+        default:$("#gk").show();
+    }
+}
+</script>
+<body>
+	<div id="wrapper">
+		<include file="./Home/Tpl/Public/Public_header.html" />
+        <div class="shopNav">
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="fxzs"/>
+        </div>
+		<div id="container">
+			<div id="main" class="rel">
+				<div class="sidenav"> 
+					<include file="Hall/Mypartner/leftMenu" leftmenuid="wdfxs"/>
+				</div>
+				<div class="subcon fn">
+					<div class="eticket-d-sales">
+						<p class="d-sales-tit icon-my-purchase">我的采购方>编辑</p>
+						<div class="eTicket_form">
+							<form action="{:U('Mypartner/saveUpda')}" method="post" id="editform">
+                                <div class="global-input1 pt20 fn">
+                                    <ul class="d-sales-label">基础信息设置</ul>
+                                    <ul>
+                                        <li class="global-input1-name">*&nbsp;采购方：</li>
+                                        <li class="global-input1-input">
+                                            <p><?php echo $list['node_name'] ?></p>
+                                            <input type="hidden" name="relaid" value="{$list['relation_node_id']}" />
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="global-input1-name">*&nbsp;合作期限：</li>
+                                        <li class="global-input1-input">
+                                          <!-- <p><?php echo date("Y-m-d",strtotime($list['begin_time']))."—".date("Y-m-d",strtotime($list['end_time']))?></p> -->  
+                                        <input <?php if($list['begin_time']<=date('YmdHis',time())){ ?>onfocus=this.onblur() readonly="true" <?php } ?> id="begin_time" name="begin_time" type="text" onfocus="WdatePicker()" value="<?php echo date('Ymd',strtotime($list['begin_time']));?>" class="textbox w100" />-<input <?php if($list['begin_time']<=date('YmdHis',time())){ ?> onclick="WdatePicker({minDate:'<?php echo date("Y-m-d",strtotime($list['end_time'])); ?>'})" <?php }else{?> onclick="WdatePicker({minDate:'<?php echo date("Y-m-d",strtotime($list['begin_time'])); ?>'})" <?php }?> name="end_time" type="text" value="<?php echo date('Ymd',strtotime($list['end_time'])); ?>" class="textbox w100" />
+                                        <span>&nbsp;&nbsp;&nbsp;&nbsp;若合作时间已经开始,则只能延长合作期限</span>
+                                        </li>
+                                    </ul>
+                                     <ul>
+                                        <li class="global-input1-name">&nbsp;采购方联系人：</li>
+                                        <li class="global-input1-input">
+                                            <p>
+                                                <input type="text" name="b_contact_name" id="b_contact_name" value="{$list['party_b_linkman']}" class="textbox w220" /> 
+                                           <span></span>
+                                            </p>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="global-input1-name">&nbsp;联系人手机：</li>
+                                        <li class="global-input1-input">
+                                            <p>
+                                                <input type="text" name="b_contact_phone" id="b_contact_phone" class="textbox w220" value="{$list['party_b_linkman_phone']}" /> <span class="tipsd red" style="display:none"></span>
+                                           <span></span>
+                                            </p>
+                                        </li>
+                                    </ul>
+                                     <ul>
+                                        <li class="global-input1-name">&nbsp;供货方联系人：</li>
+                                        <li class="global-input1-input">
+                                            <p>
+                                                <input type="text" name="a_contact_name" id="a_contact_name" class="textbox w220" value="{$list['party_a_linkman']}"/> <span class="tipsd red" style="display:none"></span>
+                                           <span></span>
+                                            </p>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="global-input1-name">&nbsp;联系人手机：</li>
+                                        <li class="global-input1-input">
+                                            <p>
+                                                <input type="text" name="a_contact_phone" id="a_contact_phone" class="textbox w220" value="{$list['party_a_linkman_phone']}"/> <span class="tipsd red" style="display:none"></span>
+                                            <span></span>
+                                            </p>
+                                        </li>
+                                    </ul>
+                                    <ul class="d-sales-label">预付费管控设置</ul>
+                                     <ul>
+                                        <li class="global-input1-name">*&nbsp;协议清算方式：</li>
+                                        <li class="global-input1-input">
+                                        <?php if($list['begin_time']<=date('YmdHis',time())){ ?>
+                                            <p>
+                                            <?php if($list['control_type']==1){ ?>
+                                                <input name="qsfs" type="radio" checked="checked"  value="1"/><span>按采购方使用量&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                            <?php }else{ ?>
+                                                <input name="qsfs" type="radio" checked="checked" value="2"/><span>按供货方验证量&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                           <?php } ?>
+                                           <span class="font-12-cc">(合作已生效，该项禁止编辑)</span>
+                                            </p>
+                                            <?php }else{ ?>
+                                             <p>
+                                                <input name="qsfs" type="radio" checked="checked"  value="1"/><lable>按采购方使用量&nbsp;&nbsp;&nbsp;&nbsp;</lable>
+                                                <input name="qsfs" type="radio" value="2"/><lable>按供货方验证量&nbsp;&nbsp;&nbsp;&nbsp;</lable>
+                                            </p>
+                                            <?php } ?>
+                                        </li>
+                                    </ul>
+                                     <ul>
+                                        <li class="global-input1-name">*&nbsp;是否有预付费管控：</li>
+                                        <li class="global-input1-input">
+                                        <?php if($list['begin_time']<=date('YmdHis',time())){ ?>
+                                            <p>
+                                            <?php if($list['control_flag']==1){ ?>
+                                                <input class="r-check" name="gkbz" type="radio" onclick="sorn(-1)" checked="checked" value="1"/><span>是&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                            <?php }else{ ?> 
+                                                <input class="r-check" name="gkbz" type="radio" onclick="sorn(1)" checked="checked" value="0"/><span>否&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                            <?php } ?>
+                                             <span class="font-12-cc">(合作已生效，该项禁止编辑)</span>
+                                            </p>
+                                            <?php }else{ ?>
+                                            <p>
+                                                <input class="r-check" name="gkbz" type="radio" onclick="sorn(-1)" checked="checked" value="1"/><lable>是&nbsp;&nbsp;&nbsp;&nbsp;</lable>
+                                                <input class="r-check" name="gkbz" type="radio" onclick="sorn(1)" value="0"/><lable>否&nbsp;&nbsp;&nbsp;&nbsp;</lable>
+                                            </p>
+                                            <?php } ?>
+                                        </li>
+                                    </ul>
+                                     <div id="gk">
+                                     <ul>
+                                        <li class="global-input1-name">*&nbsp;预付费金额：</li>
+                                        <li class="global-input1-input">
+                                            <p>
+                                                <input type="text" class="textbox w220" name="bail" id="bail" value="<?php echo $list['bail'];?>" onkeyup="this.value=this.value.replace(/[^\d]/g,'')"/>&nbsp;元 
+                                           <span id="tipsname">填写金额不得低于500元</span>
+                                            </p>
+                                        </li>
+                                    </ul>
+                                  <!--    <ul>
+                                        <li class="global-input1-name">最大可采购额度：</li>
+                                        <li class="global-input1-input">
+                                            <p>
+                                                <input type="text" class="textbox w220" name="maxamt" id="maxamt" value="<?php echo $list['max_amt']?>" onkeyup="this.value=this.value.replace(/[^\d]/g,'')"/>&nbsp;元  <span class="tips red" style="display:none">*峰值不能低于500元</span>
+                                           <span id="tipsname">填写金额不得低于500元</span>
+                                            </p>
+                                        </li>
+                                    </ul>  -->
+                                    <ul>
+                                        <li class="global-input1-name">*&nbsp;设置预警金额：</li>
+                                        <li class="global-input1-input">
+                                            <p>
+                                                <input type="text" class="textbox w220" name="warning_amt" id="warning_amt" value="<?php echo $list['warning_amt']?>" onkeyup="this.value=this.value.replace(/[^\d]/g,'')"/>&nbsp;元 <span class="tips red" id="tipsmoney" style="display:none;color:#ed1c24;">*预警金额不能大于预付费金额</span>
+                                          <span id="hoverMsg">当已使用额度达到预警金额时，将触发短信预警</span>
+                                            </p>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="global-input1-name">*&nbsp;供货方预警号码：</li>
+                                        <li class="global-input1-input">
+                                            <p>
+                                                <input type="text" class="textbox w220" name="myphone" id="myphone" value="<?php echo $list['party_a_phone']?>"/>
+                                                <span id="phone_null" class="font-12-cc">&nbsp;&nbsp;&nbsp;&nbsp;暂不支持多个号码填写</span>
+                                            </p>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="global-input1-name">*&nbsp;采购方预警号码：</li>
+                                        <li class="global-input1-input">
+                                            <p>
+                                                <input type="text" class="textbox w220" name="partphone" id="partphone" value="<?php echo $list['party_b_phone']?>"/>
+                                                <span id="cust_null" class="font-12-cc">&nbsp;&nbsp;&nbsp;&nbsp;暂不支持多个号码填写</span>
+                                            </p>
+                                        </li>
+                                    </ul>
+                                    </div>
+                                    <ul class="mb40">
+                                        <li class="global-input1-name"></li>
+                                        <li class="global-input1-input mt40">
+                                        <input type="hidden" name="check_status" value="{$list['check_status']}" />
+                                           <a href="javascript:void(0)" title="确认" class="btn-all w110" id="subform">确认</a>
+                                           <a href="javascript:history.go(-1);" title="取消" class="btn-all-del w110 ml20">取消</a>
+                                    </li>
+                                </ul>
+                                </div>
+                            </form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+	</div>
+	<div class="service"></div>
+</body>
+</html>

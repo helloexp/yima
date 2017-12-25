@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>可用门店</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_pa.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_pa.js?v=__VR__"></script>
+ <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=WRzAu3DNewWB4oeOELaczjsM"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?type=quick&ak=WRzAu3DNewWB4oeOELaczjsM&v=1.0"></script>
+
+<style type="text/css">
+	.search { position: relative; top: 0; border-bottom-color: #cfcfcf;}
+	.box { margin-left: 15px; padding-right: 15px;}
+	.box img { margin-left: 0;}
+	.box .proItem-msg { margin-right: 0; margin-left: 92px;}
+	.box .proItem-msg h1 p.l { width: 70%;}
+	.box .proItem-msg h1 p.r,.box .proItem-msg h3,.box .proItem-msg h2 a.l { font-size: 13px; color: #999999;}
+	.box .proItem-msg h3 { width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+	.box .proItem-msg.proItem-msg2 h2 { margin-top: 5px; height: auto;}
+	.box .proItem-msg h2 a.l i { display: inline-block; width: 16px; height: 18px; margin-right: 5px; vertical-align: middle; background: url(__PUBLIC__/Label/Image/pingan4th/pa-icon1.png) no-repeat; background-size: 100%;}
+	.box .proItem-msg h2 a.r i { display: inline-block; width: 16px; height: 15px; margin-right: 5px; vertical-align: middle; background: url(__PUBLIC__/Label/Image/pingan4th/pa-icon2.png) no-repeat; background-size: 100%;}
+	.box .proItem-msg h2 a.r { font-size: 12px; color: #999999;}
+
+    #masonry .box img { display: none;}
+    #masonry .box .proItem-msg { margin-left: 0;}
+    #masonry .box .proItem-msg h1 p.l { width: 80%;}
+    #masonry .box .proItem-msg.proItem-msg2 h1 { height: auto;}
+    #masonry .box .proItem-msg.proItem-msg2 h3 { width: 100%; overflow: inherit; text-overflow: inherit; white-space: normal;}
+
+    .choose ul li { width:49%;}
+    .choose ul li select { font-size: 15px;}
+</style>
+</head>
+<body>
+<input type="hidden" id="group_id" value="{$group_id}" />
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="fn">
+            <div class="goback"><i></i></div>
+            <div class="logo"><span>可用门店</span></div>
+        </div>
+        <div id="main">
+            <div class="mainTop">
+                <div class="search show">
+                	<div class="searchForm">
+                    	<div class="searchTitle">搜索</div>
+                        <form action="" name="searchform" method="post">
+						<a href="javascript:void(0);" class="btn-search" onclick="updata()"><i></i></a>
+						<input type="search" name="keyword"  id="keyword" class="search-input" onkeypress="if(event.keyCode==13){ return false;}" value="" placeholder="搜索可用门店" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="mainCon">
+                <div id="masonry"></div>
+                <div id="add_more"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+function updata(){
+    var group_id = $('#group_id').val();
+
+    var key = $('#keyword').val();
+    
+    $.get("{:U('Label/AvailableStore/availableStoreArr')}",{"group_id":group_id,"keyword":key},function(data){
+            if(data['status'] == 0) {
+                $("#masonry").html(data['msg']);
+            }
+            var nUrl = data['nextUrl'];
+            var hdata = data['str'];
+            var town_str = data['town_str'];
+
+            if(nUrl != '') {
+                $("#add_more").html(nUrl).show();
+            } else {
+                $("#add_more").hide();
+            }
+            $('.select_town').empty();
+            $('.select_town').append(town_str);
+            $("#masonry").empty();
+            if(hdata == ''){
+                $('.get-more').hide();
+                $("#masonry").html('未查询到符合门店');
+            }else{
+                $('.get-more').show();
+                $("#masonry").append(hdata);
+            }
+        },'JSON');
+    return false;
+
+}
+
+$(document).ready(function(e) {
+	var loadhtml = '<div id="infscr-loading" style="text-align: center; display:none;"><img src="__PUBLIC__/Label/Image/Item/loading.gif"><div><em>加载中...</em></div></div>';
+	$("body").append(loadhtml);
+	$("body").append("<div id='masonry2' style='display:none;'></div>");
+    $(document).on("click", '.get-more', function(){
+		if($("#masonry2").hasClass("erro")){return false;}
+		$("#masonry2").addClass("erro");
+		var url = $(this).attr("data-url");
+		$("#infscr-loading").show();
+		$("#infscr-loading em").text("加载中...");
+		$("#infscr-loading img").show();
+
+        $.get(
+            url,
+            function(data){
+                $("#masonry2").removeClass("erro");
+
+                var nUrl = data['nextUrl'];
+                var hdata = data['str'];
+                if(nUrl == '') {
+                    $("#add_more").hide();
+                }else{
+                    $("#add_more").html(nUrl).show();
+                }
+                
+                if(hdata == ''){
+                    $("#infscr-loading em").text("没有更多数据了");
+                    $("#infscr-loading img").hide();
+                    setTimeout(function(){
+                        $("#infscr-loading").hide();
+                    },2000);
+                }else{
+                    $("#masonry2").append(hdata);
+                    $('#masonry').append($('#masonry2').html());
+                    $("#infscr-loading").fadeOut(500);
+                    $('#masonry2').html("");
+                }
+            },
+            'JSON'
+        );
+	});
+});
+
+</script>
+<script>
+$(document).ready(function(e) {
+    bmapGetLbs();
+
+    $(document).on('click', ".gps_url", function(){
+        endLng = $(this).attr('lng');
+        endLat = $(this).attr('lat');
+        address = $(this).attr("data-addr");
+        address = encodeURIComponent(address);
+        des_city = $(this).children('.des_city').val();
+        bmapGetLbs(function(){
+            location.href = "{:U('Fb/PinganWap/drivingRoute')}"+'&start='+$.cookie('lon')+','+$.cookie("lat")+'&end='+endLng+','+endLat;
+        });
+    });
+});
+
+function storeGetJson()
+{
+    var group_id = $('#group_id').val();
+
+    $.get(
+        "{:U('Label/AvailableStore/availableStoreArr')}",
+        {"group_id":group_id},
+        function(data){
+            if(data['status'] == 0) {
+                $("#masonry").html(data['msg']);
+            }
+            var nUrl = data['nextUrl'];
+            var hdata = data['str'];
+            if(nUrl != '') {
+                $("#add_more").append(nUrl);
+            }
+            if(hdata == ''){
+                $("#masonry").html('未查询到更多门店');
+            }else{
+                $("#masonry").append(hdata);
+            }
+        },
+        'JSON'
+    );
+}
+
+//获取当前lbs信息
+function bmapGetLbs()
+{
+    var callback = arguments.length > 0 ? arguments[0] : null;
+
+    if (navigator.geolocation)
+    {
+        Util_tools.ui.loading('正在获取当前位置...');
+        navigator.geolocation.getCurrentPosition(function(r){
+            $.ajax({
+                url: "{:U('geoconv')}",
+                data: {x: r.coords.latitude, y: r.coords.longitude},
+                async: false,
+                dataType: 'json',
+                success: function(resp){
+                    Util_tools.ui.loading(false);
+                    if(resp.status == 0){
+                        Util_tools.ui.loading(resp.info);
+                        setTimeout(function(){
+                            Util_tools.ui.loading(false);
+                        }, 3000);
+                    }
+                    else{
+                        var a = new Date();
+                        a.setTime(a.getTime() + (60 * 60 * 1000));
+                        $.cookie("lon", resp.y, {expires: a});
+                        $.cookie("lat", resp.x, {expires: a});
+                        Util_tools.ui.loading(false);
+                        if(callback && typeof callback == 'function'){
+                            callback();
+                        }
+
+                        storeGetJson();
+                    }
+                }
+            });
+        }, function(error){
+            if(error.code == error.POSITION_UNAVAILABLE){
+                Util_tools.ui.loading('您的浏览器暂时无法为您所在的位置服务');
+                setTimeout(function(){
+                    storeGetJson();
+                    Util_tools.ui.loading(false);
+                }, 3000);
+            }
+        });
+    } else {
+        alert('该浏览器不支持获取当前位置信息');
+    }
+    return ;
+}
+</script>

@@ -1,0 +1,382 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>翼码旺财添加已创建活动</title>
+<css href="__PUBLIC__/Css/main.css?v=__VR__"/>
+<css href="__PUBLIC__/Css/layout.css?v=__VR__" />
+<css href="__PUBLIC__/Css/module.css?v=__VR__" />
+<css href="__PUBLIC__/Css/Wcanal.css?v=__VR__" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+
+
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+
+<script>
+$(function(){
+
+	var _this=art.dialog.data('_this');
+	var vtype="{$type}";
+	if(vtype=='fms'){
+		 $(".sidenav").hide();
+	}
+	$("#save").click(function(){
+		// 如果是 付满送
+		var vtype=$("#fmstype").val();
+		if(vtype=='fms'){
+			dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+			var check_obj=$("input[name='ckid']:checked");
+			var b_id=check_obj.val();
+			var call_back = "{$_REQUEST['call_back']}";
+			if(!check_obj.length){
+				dialog.time(2).content("<div class='msg-all-error'</div>"+请选择互动模块+"</div>");
+				return false;
+			}else{
+				$.post("{:U('Alipay/Paysend/getBatchList')}",{"id":b_id},function(data){
+					if(data.status=='1'){
+						dialog.close();
+	                    var win = art.dialog.open.origin;   //获取弹窗的父类窗口
+	                    var datas = data.data;
+	                    if(call_back && win[call_back] && typeof(win[call_back])=='function'){ 
+	                        try{ 
+	                            win[call_back].call(this, datas); 
+	                            art.dialog.close();
+	                        }catch(e){
+	                            alert('选择异常');          
+	                        }; 
+	                    }
+					}else{
+						dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+					}
+				},"json");
+			}
+		}else{
+	    if($('#id').val() != ''){
+           var data = getFormData($('#theform'));
+        	var url = $('#theform').attr('action');
+        	var loading = art.dialog({title:false,lock:true});
+        	$.post(url,data,function(d){
+        	   if(d.status==1){
+        	      loading.time(2).content(d.info);  
+                 setTimeout("window.parent.location.reload()",2000);
+                  
+        	   }else{
+        	      loading.time(2).content(d.info);  
+               }
+        		            
+        	},'json');
+        	return false;
+	   }else{
+		var ckdata = $("input[name='ckid']:checked").closest(".ckid_data_area").find("#ckid_data").html();
+		if(ckdata == 'on' || ckdata == ''){
+			ckdata = { };
+		}
+		else{
+			try{
+				ckdata = eval('('+ckdata+')');
+				ckdata.batch_type = '{$batch_type}';
+				ckdata.rid = '{$rid}';
+			}catch(e){
+				alert('请选择互动模块');
+			}
+		}
+		var win = art.dialog.opener;
+		win['selectActivityCallback'].call(null,ckdata,_this);
+		art.dialog.close();
+        }
+		}
+	});
+})
+</script>
+</head>
+<body class="bgfff" style="overflow:;">
+<form action="{:U('LabelAdmin/SelectBatch/Submit')}" method="post" name="theform" id="theform">
+<input type="hidden" id="id" name="id" value="{$id}" />
+<input type="hidden" id="batchType" name="batchType" value="{$batch_type}" />
+<input type="hidden" id="fmstype" name="fmstype" value="{$type}" />
+<div class="sidenav">
+<ul class="left-Menu fn">
+    <li id="menu_id-cjyx" data-rel="0"><i class="icon-masternav" data-gid="0"></i><a href="javascript:void(0)" class="menu_1">常见营销</a></li>
+    <div class="cl"></div>
+    <ul class="sidenav-div">
+	  
+        <li id="menu_id-cj" class="ml16 <?php if($batch_type=='2'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>2,'id'=>$id,'rid'=>$rid));?>">抽奖</a></li>  
+      
+        <li id="menu_id-scdy" class="ml16 <?php if($batch_type =='3'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>3,'id'=>$id,'rid'=>$rid));?>">市场调研</a></li>   
+	  
+        <li id="menu_id-yjdt" class="ml16 <?php if($batch_type =='10'){echo 'hover'; }?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>10,'id'=>$id,'rid'=>$rid));?>">有奖答题</a></li> 
+
+		<li id="menu_id-wtp" class="ml16 <?php if($batch_type =='20'){echo 'hover'; }?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>20,'id'=>$id,'rid'=>$rid));?>">投票</a></li> 
+	  
+        <li id="menu_id-yhjff" class="ml16  <?php if($batch_type =='9'){echo 'hover';}?>"><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>9,'id'=>$id,'rid'=>$rid));?>">优惠券</a></li>  
+	
+        <li id="menu_id-fszm" class="ml16 <?php if($batch_type =='4'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>4,'id'=>$id,'rid'=>$rid));?>">粉丝招募</a></li>  
+		<li id="menu_id-spelling" class="ml16 <?php if($batch_type =='36'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>36,'id'=>$id,'rid'=>$rid));?>">爱拼才会赢</a></li>  
+		<li id="menu_id-ddd" class="ml16 <?php if($batch_type =='37'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>37,'id'=>$id,'rid'=>$rid));?>">电子海报</a></li>  
+	
+        <li id="menu_id-lbhd" class="ml16 <?php if($batch_type =='8'){echo 'hover';}?>"><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>8,'id'=>$id,'rid'=>$rid));?>">列表模板</a></li> 
+        <?php if(R('LabelAdmin/Registration/checkRegNode')){ ?>
+        <li id="menu_id-lbhd" class="ml16 <?php if($batch_type =='32'){echo 'hover';}?>"><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>32,'id'=>$id,'rid'=>$rid));?>">注册有礼</a></li> 
+        <?php }?>
+    </ul>
+   <li id="menu_id-jryx" data-rel="1"><i class="icon-masternav" data-gid="1"></i><a href="#">节日营销</a></li>
+    <div class="cl"></div>
+    <ul class="sidenav-div">
+        <li id="menu_id-zongzi" class="ml16 <?php if($batch_type =='50'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>50,'id'=>$id,'rid'=>$rid));?>">粽礼寻Ta</a></li>
+
+		<li id="menu_id-dapao" class="ml16 <?php if($batch_type =='46'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>46,'id'=>$id,'rid'=>$rid));?>">妈妈我爱你</a></li>
+        
+		<li id="menu_id-dapao" class="ml16 <?php if($batch_type =='45'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>45,'id'=>$id,'rid'=>$rid));?>">劳动最光荣</a></li>
+
+        <li id="menu_id-dapao" class="ml16 <?php if($batch_type =='42'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>42,'id'=>$id,'rid'=>$rid));?>">打炮总动员</a></li>
+
+        <li id="menu_id-snowball" class="ml16 <?php if($batch_type =='35'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>35,'id'=>$id,'rid'=>$rid));?>">圣诞节</a></li>
+    
+	 	<li id="menu_id-zhongqiu" class="ml16 <?php if($batch_type =='30'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>30,'id'=>$id,'rid'=>$rid));?>">中秋节</a></li> 
+	 	
+	 	<li id="menu_id-qixi" class="ml16 <?php if($batch_type =='28'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>28,'id'=>$id,'rid'=>$rid));?>">七夕节</a></li> 
+	 	
+        <li id="menu_id-dmx" class="ml16 <?php if($batch_type =='16'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>16,'id'=>$id,'rid'=>$rid));?>">真假大冒险</a></li> 
+	  
+        <li id="menu_id-nvren" class="ml16 <?php if($batch_type =='15'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>15,'id'=>$id,'rid'=>$rid));?>">女人我最大</a></li>
+
+       
+        <li id="menu_id-tsyd" class="ml16  <?php if($batch_type =='12'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>12,'id'=>$id,'rid'=>$rid));?>">天生一对</a></li>
+
+       
+        <li id="menu_id-tshd" class="ml16 <?php if($batch_type =='11'){echo 'hover';}?>"><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>11,'id'=>$id,'rid'=>$rid));?>">码上有红包</a></li>   
+
+        <li id="menu_id-tshd" class="ml16 <?php if($batch_type =='18'){echo 'hover';}?>"><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>18,'id'=>$id,'rid'=>$rid));?>">母亲节</a></li>   
+    </ul>
+	<li id="menu_id-wgw" data-rel="3" class="<?php if($batch_type=='13'){echo 'hover';}?>"><i class="icon-masternav"></i>
+   		<a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>13,'id'=>$id,'rid'=>$rid));?>">微官网</a>
+   		</li>
+	<li id="menu_id-wgw" data-rel="4" class="<?php if($batch_type=='19'){echo 'hover';}?>"><i class="icon-masternav"></i>
+   		<a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>19,'id'=>$id,'rid'=>$rid));?>">图文编辑</a>
+   		</li>
+    <li id="menu_id-wxkq" data-rel="5" class="<?php if($batch_type=='40'){echo 'hover';}?>"><i class="icon-masternav"></i>
+        <a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>'40','id'=>$id,'rid'=>$rid));?>">微信卡券</a>
+    </li>
+
+    <!-- 商品销售 -->
+    <li id="menu_id-spxs" data-rel="2"><i class="icon-masternav" data-gid="2"></i><a href="#">多宝电商</a></li>
+    <div class="cl"></div>
+    <ul class="sidenav-div">
+        <li id="menu_id-spgl" class="ml16 <?php if($batch_type =='26'){echo 'hover';}?>"><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>26,'id'=>$id,'rid'=>$rid));?>">闪购</a></li>
+        <li id="menu_id-msm" class="ml16 <?php if($batch_type =='27'){echo 'hover';}?>"><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>27,'id'=>$id,'rid'=>$rid));?>">码上买</a></li>
+		<li id="menu_id-store" class="ml16 <?php if($batch_type =='29'){echo 'hover';}?>"><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>29,'id'=>$id,'rid'=>$rid));?>">旺财小店</a></li>
+		<li id="menu_id-bonus" class="ml16 <?php if($batch_type =='41'){echo 'hover';}?>"><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>41,'id'=>$id,'rid'=>$rid));?>">随机红包</a></li>
+    </ul>
+
+    <!-- 世界杯 -->
+    <li id="menu_id-jryx" data-rel="3"><i class="icon-masternav" data-gid="3"></i><a href="#">世界杯</a></li>
+    <div class="cl"></div>
+    <ul class="sidenav-div">
+        <li id="menu_id-tshd" class="ml16 <?php if($batch_type =='25'){echo 'hover';}?>"><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>25,'id'=>$id));?>">冠军竞猜</a></li>
+
+        <li id="menu_id-dmx" class="ml16 <?php if($batch_type =='22'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>22,'id'=>$id));?>">赛事竞猜</a></li>
+
+        <li id="menu_id-nvren" class="ml16 <?php if($batch_type =='23'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>23,'id'=>$id));?>">签到有礼</a></li>
+
+
+        <li id="menu_id-tsyd" class="ml16  <?php if($batch_type =='24'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>24,'id'=>$id));?>">进球有礼</a></li>
+    </ul>
+
+	<?php if($userInfo['node_id']== '00000370' || $userInfo['node_id']== '00014968'){?>
+    <li id="menu_id-vip" data-rel="4" class="<?php if($batch_type=='21'){echo 'hover';}?>"><i class="icon-masternav"></i>
+        <a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>21,'id'=>$id,'rid'=>$rid));?>">VIP活动</a>
+        </li>
+		<?php }?>
+
+ </ul>
+</div>
+    <div class="subcon fn">
+    	<div class="main-name fn">
+            <h4><?php echo $batch_name;?></h4>
+        </div>
+        <div class="fn">
+        <?php 
+        	//判断是否有权限
+        	if($batch_type == '2'){
+        		if((checkUserRights($userInfo['node_id'], C('NEW_CHARGE_ID')) ||checkUserRights($userInfo['node_id'],C("BASIC_CHARGE_ID"))) ){
+        			$node_power = true;
+        		}
+        	}elseif($batch_type == '3'){
+        		if((checkUserRights($userInfo['node_id'], C('BM_CHARGE_ID')) ||checkUserRights($userInfo['node_id'],C("BASIC_CHARGE_ID"))) ){
+        			$node_power = true;
+        		}
+        	}else{
+        		if($userInfo['node_type'] == '2'){
+	        		$node_power_array = array(
+	        			'2'=>'抽奖发布',
+                        '3'=>'市场调研发布',
+                        '4'=>'粉丝招募发布',
+                        '8'=>'列表模板发布',
+                        '9'=>'优惠券发布',
+                        '10'=>'有奖答题发布',
+                        '11'=>'码上有红包发布',
+                        '12'=>'天生一对发布',
+                        '13'=>'微官网发布',
+                        '15'=>'女人我最大发布',
+                        '16'=>'真假大冒险发布',
+                        '18'=>'母亲节发布',
+                        '19'=>'图文编辑发布',
+                        '20'=>'投票发布',
+                        '22'=>'赛事竞猜发布',
+                        '23'=>'签到有礼发布',
+                        '24'=>'进球有礼发布',
+                        '25'=>'冠军竞猜发布',
+                        '26'=>'商品管理',
+                        '27'=>'码上买',
+                        '28'=>'七夕节发布',
+                        '30'=>'中秋节发布',
+						'32'=>'注册有礼',
+						'36'=>'爱拼才会赢',
+						'37'=>'电子海报',
+                        '40'=>'微信卡券',
+						'46'=>'妈妈我爱你',
+						'50'=>'粽礼寻Ta',
+                     );
+	        		if(!getNodeTypePower($userInfo['node_type'], $node_power_array[$batch_type])){
+	        			$node_power = true;
+	        		}
+	        	}else{
+	        		$node_power = true;
+	        	}
+        	}
+        	
+        	
+        	if(!$node_power ){
+        ?>
+        <div class="nonedata mt20 bgf4f4f4"><p>很遗憾未开通服务！</p></div>
+        <?php
+	         }else{
+	        if($queryList){
+        ?>
+        	<table class="Msg-table" cellpadding="0" cellspacing="0">
+                <tr>
+                   <th style="width:48px">选择</th><th style="width:200px">活动名称</th><th style="width:320px">有效期</th>
+                </tr>
+				<volist name="queryList" id="v">
+                <tr>
+                    <td>
+					<div class="ckid_data_area">
+					<input type="radio" name="ckid" value="{$v.batch_id}" />
+					<script id="ckid_data" type="text/json">{:json_encode($v)}</script>
+					</div>
+					</td>
+                    <td>{$v.name}</td>
+                    <td><if condition="$batch_type eq 29">- - -<else />
+					{$v.start_time|dateformat='Y-m-d H:i:s'} - 
+					{$v.end_time|dateformat='Y-m-d H:i:s'}
+					</if>
+					</td>
+                </tr>
+				</volist>
+                
+            </table>
+            <div class="page"><?php echo $page ;?></div>
+        </div>
+        
+        <div class="fn tc mt10">
+        	<a href="javascript:;" id="save" class="btn-all w110">确定</a>
+        </div>
+        <?php }else{
+            if($batch_type == '2'){
+            ?>
+            <div class="nonedata mt20 bgf4f4f4"><p>你还未创建抽奖营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/News/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '3'){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建市场调研营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/Bm/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '4'){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建粉丝招募营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/MemberRegistration/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '9'){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建优惠券营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/Coupon/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '10'){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建有奖答题营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/Answers/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '8'){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建列表模板营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/List/index');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '11' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建码上有红包营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/Special/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '12' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建天生一对营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/Valentine/add');?>">马上去创建</a>吧！</p></div>
+		<?php }elseif($batch_type == '15' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建女人我最大营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/Women/add');?>">马上去创建</a>吧！</p></div>
+		<?php }elseif($batch_type == '16' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建真假大冒险营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/LogoGuess/add');?>">马上去创建</a>吧！</p></div>
+		<?php }elseif($batch_type == '18' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建母亲节营销活动，<a target="_parent" href="<?php echo U('LabelAdmin/Mama/add');?>">马上去创建</a>吧！</p></div>
+		<?php } elseif($batch_type == '13' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建微官网，<a target="_parent" href="<?php echo U('MicroWeb/Index/add');?>">马上去创建</a>吧！</p></div>
+		<?php } elseif($batch_type == '19' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建图文编辑，<a target="_parent" href="<?php echo U('LabelAdmin/Med/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '22' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建赛事竞猜，<a target="_parent" href="<?php echo U('ZtWorldcup/MatchGuess/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '23' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建签到有礼，<a target="_parent" href="<?php echo U('ZtWorldcup/DakaHasGift/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '24' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建进球有礼，<a target="_parent" href="<?php echo U('ZtWorldcup/GoalHasGift/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '25' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建冠军竞猜，<a target="_parent" href="<?php echo U('ZtWorldcup/ChampionGuess/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '26' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建商品，<a target="_parent" href="<?php echo U('Home/Index/marketingShow5');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '27' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建码上买，<a target="_parent" href="<?php echo U('Home/Index/marketingShow5');?>">马上去创建</a>吧！</p></div>
+		 <?php }elseif($batch_type == '31' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建旺财小店商品，<a target="_parent" href="<?php echo U('Home/Index/marketingShow5');?>">马上去创建</a>吧！</p></div>
+		 <?php }elseif($batch_type == '20' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建投票，<a target="_parent" href="<?php echo U('LabelAdmin/Vote/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '28' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建七夕节，<a target="_parent" href="<?php echo U('LabelAdmin/Qixi/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '30' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建中秋节，<a target="_parent" href="<?php echo U('LabelAdmin/ZhongQiu/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '32' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建注册有礼，<a target="_parent" href="<?php echo U('LabelAdmin/Registration/add');?>">马上去创建</a>吧！</p></div>
+        <?php }elseif($batch_type == '40' ){?>
+        <div class="nonedata mt20 bgf4f4f4"><p>你还未创建微信投放活动，<a target="_parent" href="<?php echo U('Weixin/WeixinCard/cardSendAdd');?>">马上去创建</a>吧！</p></div>
+        
+        <?php }}}?>
+
+    </div>
+    </form>
+   
+</body>
+</html>
+
+<script>
+//设置当前菜单
+
+
+$(function(){
+		$(".hover").closest(".sidenav-div").height("auto");
+		$(".hover").closest(".sidenav-div").prev("div").prev("li").find("i").removeClass("icon-masternav").addClass("icon-masternavclose");
+	windowheight();
+    /*以后如果要高亮父菜单时用，现在不用
+    var parent_id = _currentMenu.attr('data-parent');
+    if(parent_id){
+        $("#"+parent_id,".left-Menu").addClass('hover');
+    }
+    */
+	//菜单收缩
+	$(".icon-masternav").live("click",function(){
+		$(this).removeClass("icon-masternav").addClass("icon-masternavclose");
+		var index=$(this).attr("data-gid");
+		var $this=$(".sidenav-div:eq("+index+")")
+		$this.height("auto");
+		var heightval=$this.height();
+		$this.height("0");
+		$this.animate({height:heightval},200,function(){windowheight();});
+	});
+	$(".icon-masternavclose").live("click",function(){
+		$(this).removeClass("icon-masternavclose").addClass("icon-masternav");
+		var index=$(this).attr("data-gid");
+		var $this=$(".sidenav-div:eq("+index+")")
+		$this.animate({height:0},200,function(){windowheight();});
+	});
+});
+
+</script>

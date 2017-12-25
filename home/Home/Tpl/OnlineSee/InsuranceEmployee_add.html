@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加员工</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/member.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/member.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script>
+$(function(){
+	$("#submit").click(function(){
+        var dialog;
+        if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                           //刷新来源框架，刷新当前框架用window.location.reload();
+                           //var win = art.dialog.open.origin;
+                           //win.location.reload();
+                           //500毫秒关闭窗口
+                           setTimeout("var win = art.dialog.open.origin;win.location.href = win.location.href;",500);
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                              }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+	});
+});
+</script>
+</head>
+<body class="bgfff">
+<form action="{:U('OnlineSee/InsuranceEmployee/insert')}" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+    <input type="hidden" name="addType" value="{$type}" />
+    <input type="hidden" name="mid" value="{$mid}" />
+    <div class="global-input5 pt20 pl40">
+        <ul>
+            <li class="global-input5-name">照片信息：</li>
+            <li>
+                <div id="logo-upload2" class="vm dib ml10 Ginput">
+                    <div class="rel l">
+                        <a href="javascript:void(0);" title="上传" class="btn-all w60 " onclick="log_add()">上传</a>
+                        <input type="text" value="" name="store_pic" id="goods_img" class="" style="width:1px;height: 1px;border-style:none" />
+                    </div>
+                </div>
+                <div class="cl"></div>
+                <img id="img_logo_show" class="mt5 w80 dn Ginput" src="{:get_upload_url($info['image_link'])}" style="margin-left: 10px;"/>
+                <input type="hidden" name="previewimgis_logo" vale="0" />
+            </li>
+            <script>
+                $(document).ready(function(e) {
+                    $("input[name='is_log_img']").change(function() {
+                        var t = $(this).val();
+                        showimg(t)
+                    })
+
+                    //初始化页面logo
+                    function startaction(){
+                        $('#img_logo_show').show();
+                        $('#goods_img').val("{$info['image_link']}");
+                        $('#reset_logo').val(1);
+                    }
+                    //调用初始化页面logo
+                    startaction();
+                });
+                function showimg(t) {
+                    if (t == 0) {
+                        $('#img_logo_show').hide('');
+                        $('#logo-upload2').hide();
+                        $(".Preview-mainCon").addClass("noLogo");
+                        var i = $("[name='node_name_radio']:checked").val();
+                        if (i == 0) {
+                            $(".Preview-mainCon").addClass("noTitle");
+                        } else {
+                            $(".Preview-mainCon").removeClass("noTitle");
+                        }
+                    } else {
+                        $('#logo-upload2').show();
+                        $(".Preview-mainCon").removeClass("noLogo");
+                        $(".Preview-mainCon").removeClass("noTitle");
+                        $('#img_logo_show').show();
+                        if ("{$info['image_link']}" != '' && $('input[name="previewimgis_logo"]').val() == 0) {
+                            previewuploadimg("{:get_upload_url($info['image_link'])}", "logo");
+                            $('#goods_img').val("{$info['image_link']}");
+                            $('#reset_logo').val(1);
+                        }
+                    }
+                }
+                function log_add() {
+                    var opt = {
+                        obj: $("#img_resp_show"),
+                        height: 160,
+                        width: 160,
+                        cropPresets:false,
+                        callback: function(data) {
+                            $('#img_logo_show').attr('src', data['src']);
+                            $('#img_logo_show').show();
+                            $('#goods_img').val(data['savename']);
+                            $('#reset_logo').val(1);
+                            $('input[name="previewimgis_logo"]').val(1);
+                        }
+                    };
+                    open_img_uploader(opt);
+                }
+                function openUploaderMeitu_log(url) {
+                    var win_width = 700;
+                    art.dialog.open(url, {
+                        lock: true,
+                        title: "上传LOGO图片",
+                        width: win_width,
+                        height: win_width / 1.6,
+                        id: 'art_upload'
+                    });
+                }
+            </script>
+        </ul>
+        <div class="clear"></div>
+        <ul>
+            <li class="global-input5-name">员工编号：</li>
+            <li class="global-input5-input">
+                <?php
+                if($type == 2) {
+                    echo $info['staff_number'];
+                } else {
+                ?>
+                <input type="text" name="staff_number" class="textbox w120" value="{$info['staff_number']}"/>
+                <?php } ?>
+            </li>
+        </ul>
+        <div class="clear"></div>
+        <ul>
+            <li class="global-input5-name">姓名：</li>
+            <li class="global-input5-input"><input type="text" name="name" class="textbox w120" value="{$info['name']}"/></li>
+        </ul>
+        <div class="clear"></div>
+        <?php if($type != 2) { ?>
+        <ul>
+            <li class="global-input5-name">员工分组：</li>
+            <li class="global-input5-input">
+                <select name="group_id" id="group_id" class="selectbox" >
+                    <option value="" >请选择类别</option>
+                    <volist name='groupList' id='list'>
+                        <option value="{$list.id}" <?php if($info["group_id"]==$list['id']) {echo "selected='selected'";} ?>>{$list.group_name}</option>
+                    </volist>
+                </select>
+                
+            </li>
+        </ul>
+        <div class="clear"></div>
+        <?php } ?>
+        <ul>
+            <li class="global-input5-name">服务宣言：</li>
+            <li class="global-input5-input"><textarea rows="2" name="server_dec">{$info["staff_service_dec"]}</textarea></li>
+        </ul>
+        <div class="clear"></div>
+        </neq>
+        <ul>
+            <li class="global-input5-name">&nbsp;</li>
+            <input type="hidden" value='1' name="ajax" />
+            <li class="global-input5-input">
+                <a href="javascript:void(0)" id="submit"  class="btn-all w90">确定</a>
+                <a href="javascript:void(0)" onclick="art.dialog.close()"  class="btn-all-del w90 ml10">取消</a>
+            </li>
+            
+        </ul>
+        <div class="clear"></div>
+    </div>
+     </form>
+</body>
+</html>

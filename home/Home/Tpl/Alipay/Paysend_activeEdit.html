@@ -1,0 +1,590 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>付满送_条码支付_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Walipay.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=20150304"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=20150304"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) { 
+    $("#selectShop").click(function(e){
+        art.dialog.open("{:U('Home/Store/storePopup')}",{
+          title: '选择门店',
+          width:'800px'
+        });
+      });
+      
+      $("#editStore").click(function(){
+        art.dialog.open("{:U('Home/Store/storePopup')}",{
+          title: '选择门店',
+          width:'800px'
+        });
+      });
+    Gform();
+});
+</script>
+<script>
+$(function(){
+$("#subform").click(function(){
+	if($("#thisoneform").validationEngine('validate')){
+	   //$("form").submit();
+		 $("#thisoneform").ajaxSubmit({
+			beforeSubmit:function(){
+				Dialoading("正在提交...");
+			},
+			success:function(data){
+				Dialoading();
+				if(data.status==1){
+					Diasucceed(data.info)
+					window.location.href="{:U('Alipay/Paysend/moreActive')}";
+					return false;
+				}else{
+					Diaerror(data.info)
+				}
+			},
+			dataType:'json'
+		}); 
+		return false;
+	}
+})
+
+$("#choose_batch").click(function(e) {
+    var url = "{:U('LabelAdmin/SelectBatch/index',array('type'=>'fms','call_back'=>'call_back'))}";
+    var _this = $(this);
+    art.dialog.data('_this', _this);
+    art.dialog.open(url, {
+        width: 800,
+        title: '选择互动模块',
+        id: 'selectsp'
+    }); 
+});
+})
+//回调，填充
+function call_back(data){
+	$("#b_id").val(data.id);
+	$("#show_name").val(data.name);
+	$("#code_img").val(data.code_img);
+}
+</script>
+<style type="text/css">
+.aui_content{ display:block}
+</style>
+</head>
+<body>
+<div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html"/>
+        
+        <div id="container">
+            <div id="main"> 
+               <assign name="part" value="2" />
+               <include file="./Home/Tpl/Alipay/Index_left_menu.html" leftmenuid="all" />
+                <div class="subcon fn">
+                     <div class="main-name fn">
+                       <h4>编辑活动</h4>
+                    </div>
+                    <div class="alipay fn">
+                        <form action="" method="post" id="thisoneform">
+                            <input type='hidden' name='deletebatch'/>
+                            <div class="Gform w1">
+                                <ul class="Gtitle first">活动基本信息</ul>
+                                <ul class="fn">
+                                    <li class="Gname"><span>*</span>活动名称</li>
+                                    <li class="Ginput"><input type="text" class="validate[required,maxSize[20]] text" name="channel_name" value="{$chanList['name']}" maxlength="18"/></li>
+                                </ul>
+                                <ul class="fn">
+                                    <li class="Gname"><span>*</span>活动时间</li>
+                                    <li class="Ginput">
+                                        <div class="Gtime1 fn l">
+                                        <input name="begin_time" id="begin_time" type="text" style="width:94px" onclick="WdatePicker()" class="validate[required]" value="{$chanList['begin_time']|dateformat=###,'Ymd'}"/>
+                                        <em></em>
+                                        </div>
+                                        <div class="Gtime2 noIcon">
+                                            <em style="border-left:0">至</em>
+                                        </div>
+                                        <div class="Gtime1 fn l">
+                                        <input name="end_time" id="end_time" type="text" style="width:94px" onclick="WdatePicker()" class="validate[required]" value="{$chanList['end_time']|dateformat=###,'Ymd'}"/>
+                                        <em></em>
+                                        </div>
+                                    </li>
+                                </ul> 
+
+                                <ul class="fn">
+                                                  <li class="Gname"><span>*</span>参与门店</li>
+                                                  <li class="Ginput">
+                                                              <div class="switch">
+                                                                <input type="radio" <if condition="!empty($chanList['id']) && $chanList.store_join_flag eq 2">value="1"<else/>value="0"</if>  name='storelimit' checked="checked" id="checktype">
+                                                                <div class="newRadio">
+                                                                    <span  <if condition="!empty($chanList['id']) && $chanList.store_join_flag eq 2">class="valfirst"<else/>class="valfirst hover"</if>    data-val="0" id="getAllStores">所有门店</span>
+                                                                    <span <if condition="!empty($chanList['id']) && $chanList.store_join_flag eq 2">class="vallast hover"<else/>class="vallast"</if> data-val="1" id="selectShop">指定门店</span>
+                                                                </div>
+                                                                <div class="cl fn"></div>
+                                                                <div class="newRadio-input" 
+                                                   <if condition="!empty($chanList['id']) && $chanList.store_join_flag eq 2"> style="display:block"</if>>
+                                                                    <div class="sweet_tips2" id="htmlss">您总共选择了<span id="number">{$chanList.store_num}</span>家门店&nbsp;&nbsp;<a href="javascript:void()" id="editStore"  name="choose_shop">点击查看</a></div>
+                                                                </div>
+                                                            </div>
+                                                            <input type="hidden" id="openStores" name="openStores" value="{$chanList.ids}"/>
+                                                            <input type="hidden" id="notice" name="notice" value=""/>
+                                                            </li>
+                                                </ul>    
+                               <div class="Gtitle">优惠信息</div>
+                                <ul class="fn">
+                                <li class="Gname"><span>*</span>&nbsp;优惠活动</li>
+                                       <li class="Ginput">
+                                        <table class="W-table config-Table" id="configRule">
+                                            <thead>
+                                            <tr>
+                                                <th width="30" class="first">层级</th>
+                                                <th width="120">优惠门槛</th>
+                                                <th width="120">优惠方式</th>
+                                                <th>优惠内容</th>
+                                                <th width="40">操作</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                                 <php>
+                                                global $channelList ;
+                                                foreach($channelList as $k=> $v){
+                                                </php>
+                                                <tr class="disabled">
+                                                <td class="first nIndex"><span class="NO"><php>echo ($k+1);</php></span></td>
+                                                <td>满&nbsp;&nbsp;<input type="text" class="" disabled="disabled" value="<php>echo $v['tlimat'];</php>" style="width:60px; padding:0">&nbsp;&nbsp;元</td>
+                                                <td>
+                                                    <div class="Rulecontent">
+                                                    <div>
+                                                    <input class="rule1" type="checkbox"   value="0"
+                                                     disabled="disabled" 
+                                                     <php>echo  ($v["flag"]=='0'? "checked='checked'":"") ;</php>  >
+                                                    <label for="rule1">送卡券</label>
+                                                    </div>
+                                                    <div>
+                                                    <input class="rule2" type="checkbox"   <php>echo  ($v["flag"]==1? "checked='checked'":"") ;</php>  value="1"  disabled="disabled">
+                                                    <label for="rule2">参加抽奖</label>
+                                                    </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="Rulecontent">
+                                                     <p class="callbackTitle"><php>if($v['flag']=='0') echo $v['batch_short_name'];
+
+                                                        else echo $v['markName'];</php></p>
+                                                    
+                                                        <php>
+                                                      if($v['flag']=='0' && $v['card_class']!=2 ) {
+                                                        </php>
+                                                        <p class="callbackLimit">设置&nbsp;&nbsp;<input type="text"  value="<php>
+                                                             echo $v['defined_two_name']? $v['defined_two_name'] :'0';
+                                                            </php>"
+
+                                                        style="width:60px;" disabled="disabled">&nbsp;&nbsp;份分享</p>
+                                                        <p>
+                                                            <a href="http://www.wangcaio2o.com/index.php?g=Home&m=Help&a=helpDetails&newsId=1537&classId=49"  target='_blank'>什么是卡券分享？</a>
+                                                        </p>
+                                                        <php>}else if($v['flag']=='0' && $v['tpaygift']==1  && $v['card_class']==2){</php>
+
+                                                                
+                                                                <div>
+                                                                    <input class='rule2 giftcheckbox' disabled="disabled" checked type='checkbox' style='opacity:1; margin-top:5px;'/>
+                                                                    &nbsp;微信支付时，订单页面推送卡券
+                                                                </div>
+                                                                <p><a href="javascript:void();" class="showModel">查看示例</a></p>
+                                                              
+                                                        <php>
+                                                            }
+                                                        </php>
+                                                    </div>
+                                                </td>
+                                                <td><a href="javascript:void(0);" tbatch_channel="<php>echo $v['tbatchchannel_id']</php>" class="delBtn">删除</a></td>
+                                            </tr>
+                                            <php>
+                                                }
+                                             </php>
+                                            
+                                              <tr>
+                                                <td colspan="5" class="tl"><a href="javascript:void(0);" id="addRules">+ 新增多级优惠</a></td>
+                                              </tr>
+                                          </tbody>
+                                    </table>
+                                 </li>
+
+                                            
+                                </ul>
+                                <ul class="fn">
+                                    <li class="Gname">参与机会</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                        <input type="radio" name="join_limit" value="{$chanList['join_limit']}" checked="checked"/>
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="1">仅可参加一次</span>
+                                            <span class="vallast" data-val="0">可以重复参加</span>
+                                        </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="fn">
+                                    <li class="Gname">备注</li>
+                                    <li class="Ginput">
+                                        <textarea maxlength="50" name="meme_m" id="memo" class="validate[maxSize[100]] texttextarea w400" placeholder="输入活动备注说明">{$chanList['memo']}</textarea>
+                                        <p class="font-12-cc" style="font-size:12px;">注：活动备注说明，将打印在活动二维码的下方</p>
+                                    </li>
+                               </ul>
+                                <ul class="fn mt20">
+                                    <li class="Gname">&nbsp;</li>
+                                    <li class="Ginput">
+                                        <input type="hidden" name="chan_id" value="{$chanList['id']}"/>
+                                        <input type="button" id="subform" class="Diabtn-all" value="提交"/>
+                                        <input type="button" value="返回" class="Diabtn-all-del" id="retHistory"/>  
+                                    </li>
+                                </ul>
+                            </div>
+                        </form>
+                    </div>
+                </div> 
+</div>
+</div>
+</div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>
+
+<script>
+	$(document).ready(function(){
+	   CityCode({
+		province:$("#province"),//省
+		city:$("#city"),//市
+		town:$("#town"),//区
+		selected:"{$node_info['node_citycode']}",//默认选中的省市区代号
+		url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+	   });
+	
+		var win =["<div class='window'>",
+                	"<h1 class='title'>支付宝条码支付申请确认</h1>",
+                	"<div class='text'>",
+                		"<p>您提交的支付宝收款账号为：</p>",
+                		"<p class='tc mt25 mb15' id='zfb'></p>",
+                		"<p style='line-height: 1.5;'>旺小二将尽快审核您提交的信息，并提交至支付宝；相关进度可在<a href='javascript:;'>消息中心</a>查看。</p>",
+                	"</div>",
+                	"<div class='btns'>",
+                		"<button class='Diabtn-all-del mr20' onclick=\"javascript:art.dialog.list['comfid'].close();\">取消</button>",
+                		"<button class='Diabtn-all' onclick='a()'>确认</button>",
+                	"</div>",
+                "</div>"].join(' ');
+        $('#').click(function(event){
+		       var account=$("#account").val();
+			   if(account == ''){
+			    alert('支付宝帐号不能为空！！！');
+				return false;
+			   }
+			   var img1 = $('#resp_img1').val();
+			   if(img1 == ''){
+					alert('必须上传门店图片1');
+					return false;
+			   }
+			   var img2 = $('#resp_img2').val();
+			   if(img2 == ''){
+					alert('必须上传门店图片2');
+					return false;
+			   }
+			   var img3 = $('#resp_img3').val();
+			   if(img3 == ''){
+					alert('必须上传门店图片3');
+					return false;
+			   }
+        		event.preventDefault();
+        		art.dialog({
+        			title:'消息',
+        			content:win,
+        			lock:true,
+					id:'comfid'
+        		})
+				$('#zfb').text(account);
+        })
+		
+	 $("#retHistory").click(function(){ 
+		   window.history.back();
+	 });
+	})
+	function a(){
+	  	//var content=$('form').serialize();
+	   //alert(content);
+	  $("#thisoneform").submit();
+	}
+	function cb_img_1(data){cb_img(1, data); }
+	function cb_img_2(data){cb_img(2, data); }
+	function cb_img_3(data){cb_img(3, data); }
+
+	function cb_img(n, data){
+		//填充缩略图
+		$('#show'+n).attr('src', data.absolutepath).show();
+		//上传用
+		$('#resp_img'+n).val(base_name(data.absolutepath));
+	}
+	function uploadImg(url) {
+		var win_width = 700;
+		//console.log(url);
+		art.dialog.open(url+"&uploadUrl={:urlencode(U('ImgResize/Resize/uploadFile','','','',true))}&menuType=1", {
+			lock: true,
+			title: "上传图片",
+			width: win_width,
+			height: win_width / 1.6,
+			id: 'art_upload'
+		});
+	}
+	/*获取图片路径中的图片名*/
+	function base_name(url){
+		var urlList = url.split('/'); 
+		var a = urlList[urlList.length-1];
+		return a;
+	}
+</script>
+
+
+<script type="text/javascript">
+
+$(function(){
+    $("body").on("click","#addRules",function(){
+        var data = {};
+        var html = template('addRule', data);
+        var show_count = 20;   //要显示的条数
+        var length= $(".config-Table tbody tr").size();
+        if (length < show_count)    //点击时候，如果当前的数字小于递增结束的条件
+        {
+            $(this).closest("tr").before(html);
+            changeIndex();//更新行号
+        }
+        
+    })
+    
+    $("body").on("click",".delBtn",function(){
+        var _t = $(this);
+        var isDisabled = _t.hasClass("disabled");
+        if(!isDisabled){
+            deltr(_t);
+        }
+    })
+    
+	$("body").on("click",".showModel",function(){
+		var data = {};
+        var modelContent = template('showModel', data);
+        art.dialog({
+			content: modelContent,
+			title: '查看微信推送示例',
+			width:600,
+			ok:function(){},
+			okVal:"确定"
+		});
+    })
+    
+    $("body").on("click","input[name^='rule1']",function(){
+        art.dialog.data('curentr',$(this).parent().parent().parent().parent().find('.NO').html());
+        $(this).parent().parent().find("input[name^='rule1']").attr('checked',false);
+        $(this).attr('checked',true);
+        var inputValue = $(this).parent().parent().find("input[name^='rule1']:checked").val();
+        if(inputValue==0) selectCallback1()
+        if(inputValue==1) selectCallback2();
+        
+    })
+})
+
+var selectCallback1 = function(){
+    art.dialog.open("{:U('Alipay/Paysend/addAward', array('callback'=>'setcard'))}" ,{
+        title: '添加奖品',
+        width:800
+    });
+}
+
+var selectCallback2 = function(){
+    art.dialog.open("{:U('LabelAdmin/SelectBatches/index')}&call_back=selectActivityCallback&filterType=fms",{
+        title: '添加互动模块',
+        id:'paysend',
+        width:800
+    });
+}
+function changepaygift (_this){
+          var curentrnum= art.dialog.data('curentr');
+          var thisobj=  $('#configRule').find('.NO:contains('+curentrnum+')').closest('tr');
+           if($(_this).attr('checked')){
+                 thisobj.find('input[name^=paygift]').val(1); 
+             }
+}
+var selectActivityCallback = function(d){
+    var curentrnum= art.dialog.data('curentr');
+    var thisobj=  $('#configRule').find('.NO:contains('+curentrnum+')').closest('tr');
+    //clear
+    thisobj.find('input[name^=goods_id]').val(''); 
+    thisobj.find('input[name^=wx_card_id]').val('');
+    thisobj.find('input[name^=jp_type]').val(''); 
+    thisobj.find('input[name^=friend_tiack]').val(''); 
+    thisobj.find('input[name^=priseitem]').val(''); 
+    thisobj.find('input[name^=sharednum]').val(''); 
+    thisobj.find('input[name^=paygift]').val(''); 
+    thisobj.find('.friendgift').hide();   
+
+    thisobj.find(".callbackTitle").html(d.name);
+    thisobj.find("input[name^=mid]").val(d.batch_id);
+     thisobj.find(".type1").hide();
+    thisobj.find(".type2").hide();
+     thisobj.find(".type3").show();
+    
+}
+
+function setcard(d){
+    var curentrnum= art.dialog.data('curentr');
+    var thisobj=  $('#configRule').find('.NO:contains('+curentrnum+')').closest('tr');
+    //清空操作
+    thisobj.find("input[name^=mid]").val('');
+    thisobj.find('input[name^=goods_id]').val(''); 
+    thisobj.find('input[name^=wx_card_id]').val('');
+    thisobj.find('input[name^=jp_type]').val(''); 
+    thisobj.find('input[name^=friend_tiack]').val(''); 
+    thisobj.find('input[name^=priseitem]').val(''); 
+    thisobj.find('input[name^=paygift]').val('');
+    thisobj.find('.friendgift').hide(); 
+
+    var goods_id=d.goods_id;
+    thisobj.find(".callbackTitle").html(d.goodsname);
+    thisobj.find('input[name^=goods_id]').val(goods_id); 
+    thisobj.find('input[name^=wx_card_id]').val(d.card_id);
+    var type=1; 
+    if(d.selectTabValue==5){
+             type = 2;//1代表普通卡券 2代表朋友的券
+    }
+    if(type == 1){
+        thisobj.find(".type1").show();
+        thisobj.find(".type2").hide();
+        thisobj.find(".type3").hide();  
+    }else if(type == 2){
+         thisobj.find(".type1").hide();
+         thisobj.find(".type2").show();
+         thisobj.find(".type3").hide();
+    }  
+    if(d.selectTabValue==5){
+          thisobj.find('input[name^=sharednum]').val(''); 
+          thisobj.find('input[name^=jp_type]').val('1'); 
+          thisobj.find('input[name^=friend_tiack]').val('1'); 
+          thisobj.find('.friendgift').show();
+      }else {
+            var _url="{:U('Common/SelectJp/addToPrizeItem')}";
+            art.dialog.open(_url+'&prizeId='+goods_id + '&card_id=' + d.card_id + '&callback=priseitem' + '&availableSendType=' + d.availableSendType,{title:'奖品基本信息设置',width:800});
+      }
+}
+
+//设置奖品详情函数
+function priseitem(data){
+    var curentrnum= art.dialog.data('curentr');
+    var thisobj=  $('#configRule').find('.NO:contains('+curentrnum+')').closest('tr');
+    thisobj.find('input[name^=priseitem]').val(data);  
+}
+</script>
+<script type="html/text" id="showModel">
+	<style>
+	.aui_state_focus .aui_content{ display:block}
+	</style>
+	<div class="showPush">
+    	<div class="DiatipsCon">
+        	<p>消费者使用微信支付时，默认使用如下方式推送卡券；</p>
+            <p>使用其他支付方式，消费者需按原有方式（通过打印小票扫码）领取卡券。</p>
+        </div>
+        <img src="__PUBLIC__/Image/showwxPush.png"  style="margin:0 auto; display:block; text-align:center"/>
+    </div>
+</script>
+
+<script type="html/text" id="addRule">
+<tr>
+    <td class="first nIndex"><span class="NO">1</span></td>
+    <td>满&nbsp;&nbsp;<input type="text" class="" name='limit_amt[]' style="width:60px; padding:0">&nbsp;&nbsp;元
+    </td>
+    <td>
+        <div class="Rulecontent">
+        <div>
+        <input class="rule1" type="checkbox" name="rule1[]" value="0">
+        <label for="rule1">送卡券</label>
+        </div>
+        <div>
+        <input class="rule2" type="checkbox" name="rule1[]" value="1">
+        <label for="rule2">参加抽奖</label>
+        </div>
+        </div>
+    </td>
+    <td>
+        <div class="Rulecontent">
+        <!--表单数据-->
+        <input type="hidden"  value="" name="friend_tiack[]"/>
+        <input type="hidden" name="goods_id[]" value="">
+        <input type="hidden" name="priseitem[]"/> 
+        <input type="hidden" name="mid[]" value="" />
+        <input type="hidden" name="wx_card_id[]"/>
+        <input type="hidden" name="jp_type[]"  value='0' > 
+          <input type='hidden' value='0' name='paygift[]'/> 
+
+        <div class="type1 dn">
+        <p class="callbackTitle"></p>
+        <p class="callbackLimit">设置&nbsp;&nbsp;<input type="text" name="sharednum[]" style="width:60px;">&nbsp;&nbsp;份分享</p>
+        <p><a  target='_blank' href="http://www.wangcaio2o.com/index.php?g=Home&m=Help&a=helpDetails&newsId=1537&classId=49">什么是卡券分享？</a></p>
+        </div>
+
+        <div class="type2 dn">
+        <p class="callbackTitle"></p>
+        <div class='dn friendgift'>
+            <input class='rule2 giftcheckbox' type='checkbox' style='opacity:1; margin-top:5px'  onclick='changepaygift(this)' />
+            &nbsp;微信支付时，订单页面推送卡券
+        </div>
+		<p><a href="javascript:void();" class="showModel">查看示例</a></p>
+        </div>
+
+        <div class="type3 dn">
+            <p class="callbackTitle"></p>
+        </div>
+
+
+        </div>
+    </td>
+    <td><a href="javascript:void(0);" class="delBtn">删除</a></td>
+</tr>
+</script>
+
+<script type="text/javascript">
+function changeIndex() {
+    var i = 1;
+    $(".config-Table tbody tr").each(function () { //循环tab tbody下的tr
+        $(this).find(".NO").html(i++);//更新行号
+    });
+}
+
+function deltr(opp) {
+    var length = $(".config-Table tbody tr").length;
+    $(opp).closest("tr").remove();//移除当前行
+    if($(opp).attr('tbatch_channel')!=''){
+          var _str=$('input[name=deletebatch]').val();
+          _str=_str+','+$(opp).attr('tbatch_channel');
+          $('input[name=deletebatch]').val(_str); 
+    }
+    changeIndex();
+}
+
+</script>
+
+
+
+
+
+
+
+

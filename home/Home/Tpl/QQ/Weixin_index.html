@@ -1,0 +1,193 @@
+<php>
+//账号类型
+$account_type_arr = array(
+'1'=>'未认证订阅号',
+'2'=>'已认证订阅号',
+'3'=>'未认证服务号',
+'4'=>'已认证服务号'
+);
+</php>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wqq.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script type="text/javascript">
+$(function(){
+$(".js_test").click(function(e) {
+    var testHtml="<div class='setting'>" +
+				 "<div id='Succeed'>" +
+				 "<div class='succeed_icon'><img src='__PUBLIC__/Image/sips_ans.png'></div>" +
+				 "<div class='succeed_content'>" +
+				 "<dl>" +
+				 "<dt>请在公众号对话框发送 '绑定测试'</dt>" +
+				 "<dd>如系统回复“绑定成功”则说明已完成绑定；</dd>" +
+				 "<dd>如“无回复”，说明未绑定成功</dd>" +
+				 "</dl>" +
+				 "</div>" +
+				 "</div>" +
+            "</div>";
+	art.dialog({
+		title:"测试绑定状态",
+		content:testHtml,
+		id:"bindTest",
+		width:"400px",
+		okVal:"重新绑定",
+		ok:function(){
+            window.location.href="{$wxConfigUrl|default='#'}";
+        },
+        cancel:true,
+		cancelVal:"绑定成功"
+	});
+});
+
+
+var auth_flag="{$info['auth_flag']}";
+var status = "{$info['status']}";
+if(auth_flag != '1' && status == '0')
+{
+    var rebindTip="<div class='setting'>"+$(".setting").html()+"</div>";
+    art.dialog({
+        content:rebindTip,
+        id:"rebind",
+        width:"400px",
+        okVal:"重新绑定",
+        ok:function(){
+            window.location.href="{$wxConfigUrl|default='#'}";
+        },
+        cancel:true,
+        cancelVal:"取消"
+    });
+}
+
+
+})
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="qqgzh"/>
+    	<div id="container" >
+            <div id="main" class="rel">
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+                    <include file="Batch/WleftMenu" leftmenuid="zhgk"/>
+                </div>
+                
+                <div class="subcon">
+                	<div class="main-name fn">
+                        <h4>账户概况</h4>
+                    </div>
+                    <notempty name="info.weixin_code">
+                    <div class="msg-user fn">
+                        <div class="avatar"><img src="<empty name='info.head_img'>__PUBLIC__/Image/portrait.gif</empty>{$info['head_img']}"></div>
+                        <ul class="msg-user-info">
+                            <li>
+                                <eq name="info.account_type" value="1"><span class="accountType type1">订阅号</span><span class="accountType status2 ml10">未认证</span></eq>
+                                <eq name="info.account_type" value="2"><span class="accountType type1">订阅号</span><span class="accountType status1 ml10">已认证</span></eq>
+                                <eq name="info.account_type" value="3"><span class="accountType type2">服务号</span><span class="accountType status2 ml10">未认证</span></eq>
+                                <eq name="info.account_type" value="4"><span class="accountType type2">服务号</span><span class="accountType status1 ml10">已认证</span></eq>
+                            </li>
+                            <li>{$info['weixin_code']}</li>
+                        </ul>
+                        <ul class="msg-user-info bindAccount">
+                            <li><a href="{$wxConfigUrl|default='#'}" class="btn_inner r">重新绑定</a></li>
+                        </ul>
+                    </div>
+                    <else />
+                    <div class="msg-user fn">
+                        <div class="avatar"><img src="__PUBLIC__/Image/portrait.gif"></div>
+                        <ul class="msg-user-info">
+                            <li>您当前未绑定公众号。</li>
+                            <li>请您绑定微信公众号获取更多信息。</li>
+                        </ul>
+                        <ul class="msg-user-info bindAccount">
+                            <li><a href="{$wxConfigUrl|default='#'}" class="btn_inner r">账户绑定</a></li>
+                        </ul>
+                    </div>
+                    </notempty>
+                    <div class="index_show_area">
+                        <div class="index_tap added">
+                            <ul class="inner">
+                                <li class="index_tap_item added_message">
+                                <a href="{:U('QQ/Weixin/user_msgmng')}">
+                                    <i class="icon_index_tap"></i>
+                                    <em class="number">{$msgcount}</em>
+                                    <strong class="title">新消息</strong>
+                                </a>
+                                </li>
+                                <li class="index_tap_item added_fans">
+                                <a href="{:U('QQ/Weixin/fansmng')}">
+                                    <i class="icon_index_tap"></i>
+                                    <em class="number">{$countinc}</em>
+                                    <strong class="title">新增粉丝</strong>
+                                    </span>
+                                </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="index_tap total">
+                            <ul class="inner">
+                            <li class="index_tap_item total_fans extra">
+                                <a href="{:U('QQ/Weixin/fansmng')}">
+                                    <span class="tap_inner">
+                                    <i class="icon_index_tap"></i>
+                                    <em class="number">{$count}<i class="marks"><neq name="countinc" value='0'>&nbsp;&nbsp;&uarr;{$inc}</neq></i></em>
+                                    <strong class="title">总粉丝数</strong>
+                                    </span>
+                                </a>
+                            </li>
+                            </ul>
+                        </div>
+                    </div>
+                  <div class="mp_news_area notices_box">
+                    <div class="title_bar"><h3>帮助文档</h3></div>
+                    <ul class="mp_news_list">
+                    <foreach name="newsList" item="vo">
+                    	<li class="mp_news_item">
+                        <a  target="_black" href="{:U('Home/Help/helpArt')}&news_id={$vo.news_id}&leftId=gzhzs&class_name=微信公众号&type=5">
+                        <strong>{$vo.news_name}<i class="icon_common new"></i></strong>
+                        <span class="read_more"><php>echo dateformat($vo['add_time'], 'Y-m-d');</php></span>
+                        </a>
+                        </li>
+                    </foreach>
+                    </ul>
+                    </div>
+                    <div class="pagination_wrp pageNavigator">
+                    <div class="pagination" id="wxPagebar_1414484031122">
+                        {$page}
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+    
+<div class="setting dn">
+	<div id="Succeed">
+        <div class="succeed_icon"><img src="__PUBLIC__/Image/sips_ans.png"></div>
+        <div class="succeed_content">
+            <dl>
+                <dd>为了能更完整地同步您的数据，建议您重新绑定账号。</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+</body>
+</html>

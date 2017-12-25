@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>订单确认-卡券在线交易</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/eTrade.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WonlineSales.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Windex.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script src="__PUBLIC__/Js/global.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script>
+    $(function(){
+    	Gform();
+        $.fn.Spinner = function (opts) {
+            var defaults = {value:1, min:1, len:6, max:999999}
+            var options = $.extend(defaults, opts)
+            var keyCodes = {up:38, down:40}
+            return this.each(function() {
+            
+                var a = $('<a></a>'); f(a,0,"Decrease","-");    //减
+                var c = $('<a></a>'); f(c,0,"Increase","+");    //加
+                var b = $('<input/>');f(b,1,"Amount");cv(0);    //值
+                
+                $(this).append(a).append(b).append(c);
+                a.click(function(){cv(-1)});
+                b.keyup(function(){cv(0)});
+                c.click(function(){cv(+1)});
+                b.bind('keyup paste change',function(e){
+                    e.keyCode==keyCodes.up&&cv(+1);
+                    e.keyCode==keyCodes.down&&cv(-1);
+                });
+                function cv(n){
+                    b.val(b.val().replace(/[^\d]/g,''));
+                    bv=parseInt(b.val()||options.min)+n;
+                    bv>=options.min&&bv<=options.max&&b.val(bv);
+                    if(bv<=options.min){b.val(options.min);f(a,2,"DisDe","Decrease");}else{f(a,2,"Decrease","DisDe");}
+                    if(bv>=options.max){b.val(options.max);f(c,2,"DisIn","Increase");}else{f(c,2,"Increase","DisIn");}
+                    var price = "{$goodsInfo['batch_amt']}";
+                    var num = b.val();
+                    var totalPrice = price*num;
+                    $("#subtotal,#alltotal").html(totalPrice.toFixed(2));
+                }
+                
+            });
+            function f(o,t,c,s){
+                t==0&&o.addClass(c).attr("href","javascript:void(0)").append("<i></i>").find("i").append(s);
+                t==1&&o.addClass(c).attr({"value":options.value,"autocomplete":"off","maxlength":options.len});
+                t==2&&o.addClass(c).removeClass(s);
+            }
+        }
+        $("#d").Spinner();
+        $(".txt_link").mouseover(function(e) {
+            $(".xz_tip").fadeIn();
+        });
+        
+        $(".txt_link").mouseout(function(e) {
+            $(".xz_tip").fadeOut();
+        });
+        
+        $(".js_click_extend").toggle(function(e) {
+            $(".process_hide").hide(300);
+            $(".process_show").show(300);
+            $(".open_extend").text("展开");           
+        },function(e) {
+            $(".process_hide").show(300);
+            $(".process_show").hide(300);
+            $(".open_extend").text("收起");           
+        });
+        
+        $("#smb").click(function(){
+            
+            if($("form").validationEngine('validate')){
+            	var price = "{$goodsInfo['batch_amt']}";
+                var num = $(".Amount").val();
+            	if($("#num_city").val()=='2'){
+                    var city_str = $("#num_city_name").val();
+                    var city_arr_1 = city_str.split("，");
+                    var city_arr_2 = city_str.split(",");
+                    if(city_arr_1.length > 5 || city_arr_2.length > 5){
+                        art.dialog({title:false,content:"<div class='msg-all-error'>最多可填写5个城市</div>",fixed: true,padding:0,time:2});
+                        return false;
+                    }
+                }else if($("#num_city").val()=='1'){
+                    if(price*num < 10000000){
+                        art.dialog({title:false,content:"<div class='msg-all-error'>总金额不得低于1000万元</div>",fixed: true,padding:0,time:2});
+                        return false;
+                    }
+                }
+            	var $is_checked = $("#aggreement").attr("checked");
+                if (!$is_checked){
+                    $(".help-tip p").show();
+                    setTimeout(function () {
+                        $(".help-tip p").fadeOut();
+                    }, 1000);
+                    return false;
+                }
+                $("#bookNum").val(num);
+            	var dialog;
+            	$("form").ajaxSubmit({
+                    beforeSubmit:function(){
+                        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                        $("#smb").hide();
+                    },
+                    success:function(data){
+                        if(data.status == '1'){
+                        	if(data.url){
+                        		window.location.href=data.url;
+                        	}else{
+                        		dialog.close();
+                                $("#main").hide();
+                                $('#Succeed,.Entrance').show();                     
+                                return false;
+                        	}
+                        }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                            $("#smb").show();
+                        }
+                    },
+                    dataType:'json'
+                });
+            }
+        });
+        
+    });
+</script>
+<style>
+#Succeed{ width:75%;}
+
+.Entrance{font-size:14px; color:#666666; line-height:34px; border-top:1px #efefef solid; background:#f8f8f8; padding:30px; width:1100px; margin:0 auto; margin-bottom:50px; box-sizing:border-box;}
+.Entrance .EntranceList{ width:78%; margin:0 auto}
+.Entrance .EntranceList dl{}
+.Entrance .EntranceList dl dt{}
+.Entrance .EntranceList dl dt a{ float:right; color:#ec3e3e; font-size:14px; padding-right:40px;}
+.Entrance .EntranceList dl dd:after{clear:both; display:block; content:""}
+.Entrance .EntranceList dl dd .list-wrapper{ display:inline-block; box-sizing:border-box; width:20%; float:left}
+.Entrance .EntranceList dl dd .list-wrapper li {  width: 80px;  height: 145px;  padding-top: 30px;  margin-left: 0px; text-align: center;}
+
+.top1{ background:#f7f7f7; padding:35px; float:left; display:inline-block; margin-right:20px;}
+.top1 img{ width:250px; height:182px; border:1px #ebebeb solid; padding:4px; background:#FFF;}
+</style>
+</head>
+<body>
+    <div id="wrapper">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/Hall/Index_hallHeader.html" topmenuid="sydzj"/>  
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="order_process">
+                    <a href="javascript:void(0);" class="open_extend js_click_extend">收起</a>
+                    <div class="process_show">
+                        <a href="javascript:void(0)" class="js_click_extend firstExtend">采购须知</a>
+                    </div>
+                    <div class="process_hide">
+                    <dl class="xuzhi">
+                        <dt>采购须知</dt>
+                        <dd>采购卡券费用不支持旺币抵扣</dd>
+                        <dd>采购成功的卡券不支持退货</dd>
+                        <dd>如果您希望在营销活动、多宝电商等业务中使用采购的卡券，请先与翼码科技签订《旺财业务服务合同》，并支付旺财平台服务年费等相关费用</dd>
+                        <dd>翼码科技向采购方提供等额的正式机打普通/增值税发票</dd>
+                    </dl>
+                    
+                    <dl class="liucheng">
+                        <dt>采购流程</dt>
+                        <dd><img src="__PUBLIC__/Image/eTrade/tradeProcess.png" /></dd>
+                    </dl>
+                    </div>
+                    
+                </div>
+                <form action="{:U('Hall/Index/book_submit_batch')}" method="post" >
+                <input type="hidden" name="batch_id" id="batch_id" value="<?php echo $id;?>" />
+                <input type="hidden" name="bookNum" id="bookNum" value="" />
+                <div class="order_details noborder">
+                    <h2>确认采购方信息</h2>
+                    <div class="qpView">
+                    <dl class="contactInfo">
+                        <dd><p class="add_message"><label>联系人：</label><input type="text" name="linkman" id="linkman" class="validate[required,maxSize[32]]" value="{$userInfo.contact_name}" /></p></dd>
+                        <dd><p class="add_message"><label>联系电话：</label><input type="text" name="tel" id="tel" class="validate[required,maxSize[32]]" value="{$userInfo.contact_phone}" /></p></dd>
+                        <dd><p class="add_message"><label>联系邮箱：</label><input type="text" name="email" id="email" class="validate[required,custom[email],maxSize[32]]" value="{$email}" /></p></dd>
+                    </dl>
+                    <dl class="contactMessage">
+                    <dd><p class="add_message"><label>在线留言：</label><textarea name="remark" id="remark" class="validate[maxSize[250]]" placeholder="请填写您的需求，如发票抬头、寄送地址等"></textarea></p></dd>
+                    </dl>
+                    </div>
+                    <div class="cl"></div>
+                    
+                    <style>
+					.qpView{}
+					.qpView:after{ clear:both; display:block; content:""; height:0}
+					.qpView .contactInfo{ width:50%; float:left}
+					.qpView .contactInfo dd{ display:block; float:none; width:100%;}
+					.qpView .contactInfo dd p{ padding:10px 0 0 0;}
+					.qpView .contactInfo dd p label{ width:120px; float:left; text-align:right; display:inline-block; margin-right:5px; line-height:24px;}
+					.qpView .contactInfo dd p input{ float:left; width:320px;}
+					.qpView .contactMessage{width:50%; float:right; border-top:0;}
+					.qpView .contactMessage dd p{padding: 10px 0 0 0;}
+					.qpView .contactMessage dd p label{ width:120px; float:left; text-align:right; display:inline-block; margin-right:5px; line-height:24px;}
+					.qpView .contactMessage dd p textarea{ float:left; width:395px; height:95px; margin-left:5px; padding:5px 10px;}
+					
+                    .radio{ display:none}
+                    .Gform .Ginput label{ display:none}
+                    </style>
+                    <if condition="$goodsInfo['belongs_note'] eq '1'">
+                    <h2 style="margin-top:20px;">确认卡券可用城市</h2>
+                    <div class="Gform" style="margin:0">
+                    <ul>
+                        <li class="Ginput" style="padding-left:0; padding-top:0; padding-bottom:12px;">
+                            <div class="switch">
+                                <input type="radio" name="num_city" id="num_city" value="1" checked="checked" />
+                                <div class="newRadio">
+                                    <span class="valfirst hover" data-val="1">全国</span>
+                                    <span class="vallast" data-val="2">可用城市</span>
+                                </div>
+                                <div class="cl"></div>
+                                <div class="newRadio-default db">
+                                    <p class="font-12-cc" style="line-height:26px;">采购全国可用的卡券，总金额不得低于1000万元</p>
+                                </div>
+                                <div class="newRadio-input" style="float:left;">
+                                    <input type="text" name="num_city_name" id="num_city_name" style="width:80%;" class="validate[required] mt10  textbox" value="" placeholder="请填写城市名称，以“，”隔开" />
+                                    <p class="font-12-cc" style="line-height:26px; float:left; width:100%">最多可填写5个城市</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    </div>
+                    </if>
+                    <h2>确认订单信息 <div class="help_anchor" style="right:0; top:-10px;"><img src="__PUBLIC__/Image/fast_help_icon.png"><span>对订单有疑问？<a class="" href="http://wpa.b.qq.com/cgi/wpa.php?ln=1&key=XzkzODA2Njc3MF8zNzA4NjdfNDAwODgwNzAwNV8yXw" target="_blank">联系店小二</a></span></div></h2>
+                    <div class="tables" style="padding-bottom:0; border:0;">
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                    <tbody>
+                    <tr class="th">
+                    <th>卡券信息</th>
+                    <th>单价（元）</th>
+                    <th>数量</th>
+                    <th>小计（元）</th>
+                    </tr>
+                    <tr>
+                    <td>
+                    
+                    <div class="format">
+                        <ul>
+                            <li><img src="{:get_upload_url(json_decode($goodsInfo['batch_img'])[0])==NULL?get_upload_url($goodsInfo['batch_img']):get_upload_url(json_decode($goodsInfo['batch_img'])[0])}" class="img" /></li>
+                            <li>
+                                <span>{$goodsInfo['batch_name']}</span>
+                                <span></span>
+                                <span class="grayfont">供货方：{$goodsInfo['node_name']}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    </td>
+                    <td>{$goodsInfo['batch_amt']}</td>
+                    <td align="center"><div id="d" class="count Spinner" style="width:160px; box-sizing:border-box;"></div></td>
+                    <td><em id="subtotal">{$goodsInfo['batch_amt']}</em></td>
+                    </tr>
+                    
+                    <tr class="all">
+                        <td colspan="4">
+                            <!--<p class="add_message">给供货方留言 <input type="text" name="message" /><em>0/20</em></p>-->
+                            <p class="hj">应付金额：￥<strong id="alltotal">{$goodsInfo['batch_amt']}</strong></p>
+                        </td>
+                    </tr>
+                    </tbody>
+                    </table>
+                    
+                    </div>
+                    
+                   <div class="pay_opr fr" style="position:relative">
+                   <div class="help-tip"><p>提交订单之前请同意卡券采购须知</p></div>
+                   <p class="tr mt10 mb10"><input type="checkbox" checked="checked" name="agreement" id="aggreement"/> 我已知晓<a href="{:U('Hall/Index/hallHelpView',array('news_id'=>1353,'leftId'=>gz,'type'=>3))}" target="_blank">《卡券采购规则》</a></p>
+                   <p class="tr"><a href="javascript:void(0);" class="btn-submit" id="smb" style="float:right"><?php if(in_array($goodsInfo['goods_type'],array(7,8))){echo '付款';}else{echo '订购';}?></a></p>
+                   </div>
+                </div>
+                </form>
+             </div>
+             <div id="Succeed" class="dn">
+                <div class="succeed_icon"><img src="__PUBLIC__/Image/start_icon.png"></div>
+                <div class="succeed_content">
+                    <dl>
+                        <if condition="$goodsInfo['belongs_note'] eq '1'">
+                            <dt>您已成功提交采购申请！我们会及时与您联系，确认采购事宜。</dt>
+                            <dd>您可以<a href="{:U('Hall/Index/build')}" >继续采购</a>或<a href="{:U('WangcaiPc/NumGoods/purchaseList','',true,false,true)}" >查看已采购卡券</a></dd>
+                            <else/>
+                            <dt>您已成功提交采购申请！请耐心等待翼码确认。</dt>
+                            <dd>您可以<a href="{:U('Hall/Index/build')}">继续采购</a>或<a href="{:U('WangcaiPc/OnlineTrading/purchaserOrderList','',true,false,true)}">查看已采购卡券</a></dd>
+                        </if>
+                    </dl>
+                </div>
+            </div>
+            <notempty name="otherList">
+            <div class="Entrance dn">
+                <div class="EntranceList">
+                <dl>
+                    <dt>采购过该卡券的用户还采购了这些，您也去看看吧？</dt>
+                    <dd>
+                        <ul class="saloonList-ul">
+                        <volist name="otherList" id="vo">
+                            <li>
+                                <div class="salItem-img">
+                                    <a href="{:U('Hall/Index/goods','goods_id='.$vo['id'])}">
+                                    <img src="{:get_upload_url(json_decode($vo['batch_img'])[0])==NULL?get_upload_url($vo['batch_img']):get_upload_url(json_decode($vo['batch_img'])[0])}">
+                                    </a>
+                                </div>
+                                <div class="salItem-msg">
+                                    <h3>{$vo['batch_name']}</h3><h5><?php echo $vo['batch_amt'] == '0' ? '免费' : '<i>￥</i>'.$vo['batch_amt'];?></h5>
+                                    <div class="fn">
+                                        <div class="salItem-hot">热度:
+                                        <span>
+                                        <?php 
+                                            if($vo['visit_num'] < 50) {
+                                        echo("<em class='rang3'></em>");
+                                    } else if($vo['visit_num'] <= 100 && $vo['visit_num'] >= 50) {
+                                        echo("<em class='rang2'></em>");
+                                    } else if($vo['visit_num'] > 100) {
+                                        echo("<em class='rang1'></em>");
+                                    }
+                                    ?>
+                                        </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </volist>
+                    </ul>
+                </dd>
+            </dl>
+            </div>
+        </div>
+        </notempty>
+        </div>
+        <include file="./Home/Tpl/Public/Public_Indexfooter.html" />  
+    </div>
+</body>
+</html>

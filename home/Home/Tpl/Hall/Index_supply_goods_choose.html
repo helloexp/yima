@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>选择卡券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+var _callback = '{:I('callback')}';
+var _alldata = {:json_encode(array_valtokey($queryList, 'id'))};
+$(function(){
+
+    $('#ok').click(function(){
+        var val = $(':radio[checked]').val();
+
+        if(val == ''){
+            alert('请选择卡券！');
+            return false;
+        }
+
+        var win = art.dialog.opener;
+
+        if(_callback && win[_callback] && typeof(win[_callback])=='function'){
+            try{
+                win[_callback].call(this,_alldata[val]);
+            }catch(e){};
+        }    
+    });
+    
+});
+</script>
+</head>
+
+<body class="bgfff">
+    <form method="post" action="<?php echo U('LabelAdmin/SelectJp/addBatch');?>">
+    <div class="showsaloonForm1">
+        <table cellpadding="0" cellspacing="0" class="W-table">
+            <tr>
+                <th width="120">选择</th>
+                <th><eq name="type" value="0">优惠券名称<else/>卡券名称</eq></th>
+                <th>库存</th>
+                <th>有效期</th>
+            </tr>
+            <?php
+            if(!empty($queryList)){
+            foreach($queryList as $v){
+                $flag = $v['storage_type'] == '1' && $v['remain_num'] < $demandInfo['num'];
+            ?>
+            <tr>
+                <td>
+                <?php if($v['storage_type'] == '1' && $v['remain_num'] < $demandInfo['num']){ echo '库存不足'; }else{?>
+                    <input type="radio"  value="<?php echo $v['id']?>" name="goods_id"/>
+                <?php } ?>
+                </td>
+                <td><?php echo $v['goods_name'];?></td>
+                <td>
+                    <?php echo $v['storage_type'] == '0' ? '不限' : $v['remain_num']?>
+                </td>
+                <td><?php echo dateformat($v['begin_time'],'Y-m-d').'到'.dateformat($v['end_time'],'Y-m-d')?></td>
+            </tr>
+            <?php }}else{?>
+            <td colspan="3">无数据</td>
+            <?php }?>
+        </table>
+        <div class="tr pt5 pb5"><?php echo $page;?>&nbsp;&nbsp;</div>
+        <div class="fn tc pt20 pb20"><a href="javascript:;" id="ok" class="btn-all w120 btn-next">确定</a></div>
+    </div>
+
+    </form>
+</body>

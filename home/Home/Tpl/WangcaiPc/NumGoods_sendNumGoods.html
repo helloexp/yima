@@ -1,0 +1,460 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<script type="text/javascript">
+//选择卡券的回调
+var cardresp = function(d){
+    var d_id=d.id;
+    $("."+d_id).remove();
+    var html2 = template('cardresp',d);
+    $(".award_list").append(html2);
+    $("."+d_id).find(".cardInfo").css("background",d.cardbg);
+    $("."+d_id).find(".cardInfo span").html(d.shopname);
+    $("."+d_id).find('.adShow_l img').attr("src",d.logo_url);
+    $("."+d_id).find('.cardtitle').html(d.goods_name);
+    if(d.date_type ==1){
+        var da = new Date(d.date_begin_timestamp*1000);
+        var year = da.getFullYear();
+        var month = da.getMonth()+1;
+        var date = da.getDate();
+        var da2 = new Date(d.date_end_timestamp*1000);
+        var year2 = da2.getFullYear();
+        var month2 = da2.getMonth()+1;
+        var date2 = da2.getDate();
+        var html = '有效期：'+[year,month,date].join('-')+'至'+[year2,month2,date2].join('-')
+    }else{
+        var html = '发送卡券后'+d.date_fixed_begin_timestamp+'天开始使用-发送卡券后'+d.date_fixed_timestamp+'天结束使用'
+    }
+    $("."+d_id).find('.AstaticDate').html(html);
+    $("."+d_id).find("#cardid").val(d.card_id);
+    $("."+d_id).find("#respid").val(d.id);
+    $("."+d_id).find(".totalNum").html(d.quantity);
+    $("."+d_id).find(".remainNum").html(d.quantity - d.card_get_num);
+    var card_num = parseInt(d.quantity - d.card_get_num);
+    $(".delWard").click(function(e) {
+        $(this).closest("dl").remove();
+    });
+}
+$(function(){
+    $(".delWard").click(function(e) {
+        $(this).closest("dl").remove();
+    });
+})
+function editCard(cateId, b_id){
+    //有b_id参数表示编辑奖品，没有的是增加
+    art.dialog.open("{:U('Common/SelectJp/editCard', array('m_id' => $m_id))}&prizeCateId=" + cateId + '&b_id=' + b_id,{
+        title: '编辑奖品',
+        width:500
+    });
+};
+ 
+
+</script>
+<style type="text/css">
+    .subcon .key_areas .btn_area span{    padding-left: 70px;}
+    a.btn-up{  display: inline-block;  padding: 4px 15px;  border: solid 1px #ffd0d3;  background: #fff2f3; border-radius:2px;  color: #f15755; text-decoration:none cursor:pointer}
+a.btn-up:hover { background:#ffd0d3; text-decoration:none}
+</style>
+
+</head>
+<body id="hdyls_cont">
+<form action="#" method="post" id="theform">
+<div id="wrapper" >
+<!--开始引入头部-->
+<include file="./Home/Tpl/Public/Public_header.html" />
+ <div class="shopNav">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="wddzq"/>  
+        </div>
+<div id="container" >
+    <div id="main" class="rel">
+      <div class="sidenav">
+        <!--开始引入左菜单-->
+          <include file="WangcaiPc/NumGoods/tabMenu" leftmenuid="lxck"/>
+      </div>
+      <div class="subcon">
+         <div class="main-name fn">
+            <h4>多卡券发送</h4>
+         </div>
+        
+            <div class="Wcanal-tab"> 
+        
+            <div class="main_bd">
+                    <div class="Gform fn l" style="width:auto">
+                      
+                     
+                        
+                       
+                     
+                        <ul>
+                        <li class="Gname"><span>*</span>卡券</li>
+                            <li class="Ginput">
+                                <p class="key_areas" style="padding:0px">
+                                <a class="btn_area addAward_btn" href="javascript:void(0)" ><span>+</span>添加</a>
+                                <span class="ms">（最多添加5张）</span></p>
+                            </li>
+                            <li class="award_list fn">
+                                <volist name="info['card_info']" id="card">
+                                    <dl style="padding-left:155px"  class="{$card['id']}">
+                                        <dd style="margin-top:15px">
+                                            <p class="adward_title">
+                                                <strong class="cardtitle">{$card['goods_name']}</strong>
+                                                <span>
+                                                    <a href="javascript:void(0)" class="delWard">删除</a>
+                                                </span>
+                                                <span style="margin-right:10px">
+                                                    <a href="javascript:void(0)" class="addStorage">编辑</a>
+                                                </span>
+                                            </p>
+                                            <div class="adShow">
+                                                <div class="adShow_l shinfo">
+                                                    <img src="{$card['logo_url']}">
+                                                </div>
+                                                <div class="adShow_r">
+                                                    <span class="Astatic">卡券类型<em class="totalNum">{$card['quantity']}</em></span>
+                                                    <span class="Astatic">剩余库存<em class="remainNum">{$card['quantity'] - $card['card_get_num']}</em></span>
+                                                </div>
+                                                <div class="cl pt5"></div>
+                                                <p class="AstaticDate tip" style="text-align:left">使用时间：{$card['time']}</p>
+                                            </div>
+                                            <input type="hidden" value="{$card['card_id']}" name="cardid[]" id="cardid">
+                                            <input type="hidden" value="{$card['id']}" name="respid" id="respid">
+                                            <input type="hidden" name="respClass[]" value="6"/>
+                                            <input type="hidden" name="respId[]" value=""/>
+                                        </dd>
+                                     
+                                    </dl>
+                                 </volist>
+                            </li>
+                        </ul>
+                          <ul>
+                                            <li class="Gname"><span>*</span>&nbsp;发给</li>
+                                            <li class="Ginput">
+                                                <input type="text" id="staff" name="phone_no" value="" placeholder="请填写希望发给的手机号" style="width:200px; padding-right:5px">
+                                                <a href="javascript:void(0)" class="btn-up fl">批量导入</a>
+                                                <input style="display:none;" type="file" name="phone_no_path" onchange="document.getElementById('staff').value=this.value;document.getElementById('staff').disabled=true;" />
+                                                <p class="font-12-cc" style=" font-size:12px; line-height:26px;"><a href="{:U('WangcaiPc/NumGoods/loadModel')}">【批量赠送模板下载】</a>每次最多导入1000条手机号</p>
+                                            </li>
+                                        </ul>
+
+                        <ul class="sayfx_cont">
+                            <li class="Gname">备注</li>
+                            <li class="Ginput">
+                                <textarea maxlength="600" placeholder="如：您已领过奖品，邀请更多好友一起参加吧！" name="explain_info">{$info['response_info'][0]['explain_info']}</textarea><span class="maxTips forArea" data-max="600">0/600</span>
+                            </li>
+                        </ul>
+                       
+                       
+                  </div>
+
+             </div>
+         </div>
+     </div>
+    </div>
+</div>
+<!--开始引入底部-->
+<include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+</form>
+<div class="service"></div>
+<script type="text/javascript">
+  $(function(){
+    matchMode();
+    Editor();
+    change();
+   
+    
+  
+    //选择卡券
+        $(".addAward_btn").click(function() {
+            var dlLength =$(".award_list dl").length;
+            if (dlLength<=5) {
+                 art.dialog.open("{:U('Common/SelectJp/indexNew')}&callback=cardresp&show_source=3&store_mode=2",{
+                    title: '添加卡券',
+                     width:800,
+                     });
+            }
+            else{
+                art.dialog({
+                        title:'提醒',
+                        time:2,
+                        content:"最多添加5张卡券",
+                });
+
+            }
+        
+       
+        
+    });
+    //补充库存
+   
+    //添加关键词键盘事件
+     $("body").on("keydown",".js_editorArea",function(e) {
+           var keywordContent = $(".js_editorArea").text();
+           var keywordItem = '<li data-content="'+ keywordContent +'"><em class="keywords_name" data-content="'+ keywordContent +'">'+ keywordContent +'</em><a href="javascript:;" class="btn_del Js_temp_item_close">X</a></li>';  
+            // 回车键事件 
+            if(e.keyCode==13) {
+                if(keywordContent==""){
+                    Diasucceed("请输入关键字");
+                    return false;
+                }
+                else{
+                    $("#Js_editorKeywordList").append(keywordItem);
+                    $(".js_editorArea").empty();
+                }
+           }
+             
+       }); 
+       $("body").on("click",".Js_temp_item_close",function(){
+            $(this).closest("li").remove();
+       });
+       
+       $('#search-btn').click(function(){
+        $('#search-btn').attr('disabled', true);
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在查询...</div>",fixed: true,padding:0});
+        var group_id = $('[name="group_id"]').val();
+        var sex = $('[name="sex"]').val();
+        var province = $('[name="province"]').val();
+        var city = $('[name="city"]').val();
+        var keywords = $('[name="keywords"]').val();
+        var scene = $('[name="scene"]').val();
+
+        var data = {
+            group_id : group_id,
+            sex :sex,
+            province : province,
+            city : city,
+            keywords : keywords,
+            scene : scene
+        };
+
+        $.post("{:U('Weixin/Weixin/batch_send_count')}", data, function(data){
+            if(data.status ==1){
+                $('#count').html(data.info +'您已准备向 ' + data.data.countTotal + ' 位粉丝发送消息');
+                dialog.time(2).close();
+            }else{
+                $('#count').html(data.info);
+                dialog.time(2).close();
+            }
+
+        },'json');
+        
+    });
+    
+    $("#theform").submit(function(){
+        if($("input[name='ruleName']").val()==''){
+            Diaerror("请填写活动名称");
+            return false;
+        }
+        if($("input[name='keywordStr[]']").length==0){
+            Diaerror("请添加关键词");
+            return false;
+        }
+        if($("input[name='cardid[]']").length==0){
+            Diaerror("请添加奖品");
+            return false;
+        }
+        var dialog;
+        $("#theform").ajaxSubmit({
+            beforeSubmit:function(){
+                $('#js_submit').attr('disabled', true);
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+                $('#js_submit').attr('disabled', false);
+                if(data.status == '1'){
+                    dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                    setTimeout("art.dialog.close();",1000);
+                    location.href="{:U('Weixin/Weixin/interact_created')}";
+                    return false;
+                }else{
+                    dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },
+            dataType:'json'
+        });
+        return false;
+    });
+  })
+ //点击添加关键词
+ function change(){ 
+           //计算图文数量
+        var countInfo = function(obj){
+            var txtNum = $(obj).find(".replyItems li.replyWords").length;
+            var imgNum = $(obj).find(".replyItems li.replyImages").length;
+            $(".wordsCnt",obj).text(txtNum);
+            $(".appMsgCnt",obj).text(imgNum);
+        }
+
+        $(".delKeyword").live("click",function(){
+            var delbox=$(this).closest(".keywordsList").find(".keywordItems").find("li")
+                delsize=delbox.length;
+            for(i=0;i<delsize;i++){
+                if(delbox.eq(i).find(".keywordcheckbox").attr("checked")=="checked"){
+                    delbox.eq(i).detach();
+                }
+            }
+        });
+        $(".delReply").live("click",function(){
+            var delbox=$(this).closest(".replyList").find(".replyItems").find("li");
+            delbox.detach();
+            countInfo($(this).closest('form'));
+        });
+        $("body").on("click",".keywordEditor",function(){
+        $(this).closest("li").find(".val").css("display","none");
+        $(this).closest("li").find(".wordContent").css("display","none");
+        $(this).closest("li").find(".val-input").css("display","block");
+        $(this).closest("li").find(".wordContent-input").css("display","block");
+       })
+
+       $("body").on("click",".delKeyword",function(){
+           $(this).closest("li").remove();
+        })
+       $(".js_addkeywords").click(function(){
+        var data = {};
+        var keywordsContent = template("tpl_addkeywords", data);
+        art.dialog({
+            content:keywordsContent,
+            title:"添加关键词",
+            width:500,
+            okVal:"确认",
+            ok:function(){
+                var inputContent = $(".js_editorArea").html();
+                console.log(inputContent);
+                var ulContent= $("#Js_editorKeywordList").html();
+                if(ulContent !='' || inputContent!=''){
+                    var toappentinputContent = '<li class="item float-p"><input type="hidden" name="kwdId[]" value=><div class="val l">'+ inputContent +'</div><input type="text" name="keywordStr[]" class="val-input l" value="'+ inputContent +'" style="display:none;" maxlength="20" jscheckrule="null=0" jschecktitle="关键词"><button class="delKeyword btnGreenS" title="删除">删除</button><a href="javascript:;" class="keywordEditor" title="编辑">编辑</a><label class="c-gA matchMode r">模糊匹配</label><input type="hidden" name="matchMode[]" class="matchMode-input" value="0"></li>';
+                    if(inputContent!=""){
+                        $("#Js_editorKeywordList li").each(function(){
+                          var appendContent = $(this).find(".keywords_name").attr("data-content");
+                          var toappentContent = '<li class="item float-p"><input type="hidden" name="kwdId[]" value=><div class="val l">'+ appendContent +'</div><input type="text" name="keywordStr[]" class="val-input l" value="'+ appendContent +'" style="display:none;" maxlength="20" jscheckrule="null=0" jschecktitle="关键词"><button class="delKeyword" title="删除">删除</button><a href="javascript:;" class="keywordEditor" title="编辑">编辑</a><label class="c-gA matchMode r">模糊匹配</label><input type="hidden" name="matchMode[]" class="matchMode-input" value="0"></li>';
+                          $("#listItemNew .keywordItems").append(toappentContent);
+                        });
+                        $("#listItemNew .keywordItems").append(toappentinputContent);
+                    }else{
+                        $("#Js_editorKeywordList li").each(function(){
+                          var appendContent = $(this).find(".keywords_name").attr("data-content");
+                          var toappentContent = '<li class="item float-p"><input type="hidden" name="kwdId[]" value=><div class="val l">'+ appendContent +'</div><input type="text" name="keywordStr[]" class="val-input l" value="'+ appendContent +'" style="display:none;" maxlength="20" jscheckrule="null=0" jschecktitle="关键词"><button class="delKeyword" title="删除">删除</button><a href="javascript:;" class="keywordEditor" title="编辑">编辑</a><label class="c-gA matchMode r">模糊匹配</label><input type="hidden" name="matchMode[]" class="matchMode-input" value="0"></li>';
+                          $("#listItemNew .keywordItems").append(toappentContent);
+                        });
+                    }
+                }else{
+                    Diaerror("请输入关键词");
+                    return false;
+                }
+            },
+            cancelVal:"取消",
+            cancel:true
+        })
+    });
+  }
+  
+  function matchMode(){
+    $(".matchMode").live("click",function(){
+        var matchInput = $(this).closest("li").find(".matchMode-input");
+        var matchModelVal = matchInput.val() || '0';
+        if(matchModelVal == '0'){
+            $(this).addClass("matchMode1");
+            $(this).text("精确匹配");
+            matchInput.val("1");
+        }else{
+            $(this).removeClass("matchMode1");
+            $(this).text("模糊匹配");
+            matchInput.val("0");
+        }
+    }).each(function(){
+        var matchInput = $(this).closest("li").find(".matchMode-input");
+        var matchModelVal = matchInput.val() || '0';
+        if(matchModelVal == '1'){
+            $(this).addClass("matchMode1");
+            $(this).text("精确匹配");
+        }else{
+            $(this).removeClass("matchMode1");
+            $(this).text("模糊匹配");
+        }
+    });
+}
+function Editor(){
+    $(".keywordEditor").click(function(){
+        $(this).closest("li").find(".val").css("display","none");
+        $(this).closest("li").find(".val-input").css("display","block");
+    });
+    $(".replyEditor").click(function(){
+        $(this).closest("li").find(".wordContent").css("display","none");
+        $(this).closest("li").find(".wordContent-input").css("display","block");
+    });
+}
+</script>
+<!-- 添加关键词 -->
+<script id="tpl_addkeywords" type="text/html">
+    <div class="emotion_editor_wrp" id="Js_textEditor">
+        <div class="emotion_editor">
+            <div class="edit_area js_editorArea" contenteditable="true" style="overflow-y: auto; overflow-x: hidden;"></div>
+            <div class="editor_toolbar">      
+                <!--<p class="editor_tip opr_tips">按下Shift+Enter键换行</p>-->
+                <p class="editor_tip js_editorTip">还可以输入<em>30</em>字</p>
+            </div>
+        </div>
+        <div class="tool_area"><p class="tips">输入回车可添加多个关键字，每个关键字少于30个字符</p></div>
+        <ul class="overview_keywords_list" id="Js_editorKeywordList"></ul>
+    </div>
+</script>
+<!-- 选择的卡券信息 -->
+<script type="text/html" id="cardresp">
+    <dl style="padding-left:155px;"  class="{{id}} fn">
+        <dd style="margin-top:15px">
+            <p class="adward_title">
+                <strong class="cardtitle">{{goods_name}}</strong>
+                <span>
+                    <a href="javascript:void(0)" class="delWard">删除</a>
+                </span>
+                <span style="margin-right:10px">
+                    <a href="javascript:void(0)" onclick="editCard(7435, 11111)">编辑</a>
+                </span>
+            </p>
+            <div class="adShow">
+                <div class="adShow_l shinfo">
+                    <img src="{{goods_image_url}}">
+                </div>
+                <div class="adShow_r">
+                    <span class="Astatic">卡券类型<em class="totalNum">{{quantity}}</em></span>
+                    <span class="Astatic">剩余库存<em class="remainNum">{{remain_num}}</em></span>
+                </div>
+                <div class="cl pt5"></div>
+                <p class="AstaticDate tip" style="text-align:left">使用时间：{{$respText['time']}}</p>
+            </div>
+            <input type="hidden" value="{{card_id}}" name="cardid[]" id="cardid">
+            <input type="hidden" value="{{id}}" name="respid" id="respid">
+            <input type="hidden" name="respClass[]" value="6"/>
+            <input type="hidden" name="respId[]" value="0"/>
+        </dd>
+       
+    </dl>
+</script>
+</body>
+<script type="text/javascript">
+    
+     $(".btn-up").click(function(){
+        $(this).next().click();
+    });
+</script>
+</html>

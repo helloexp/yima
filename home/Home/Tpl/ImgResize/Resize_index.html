@@ -1,0 +1,343 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>图片上传</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <css href="__PUBLIC__/Css/Wactlist.css?v=__VR__" />
+
+    <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+    <js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/Common.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+
+    <js href="__PUBLIC__/Js/Wactlist.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"/>
+
+    <load href="__PUBLIC__/Js/imgareaselect/css/imgareaselect-animated.css" />
+    <js href="__PUBLIC__/Js/imgareaselect/scripts/jquery.imgareaselect.pack.js?v=__VR__"/>
+
+
+  
+    <script type="text/javascript">
+        var kIsSubmiting = false;
+        function sumitingStart(){
+            kIsSubmiting = true;
+        }
+        function submitComplete(){
+            kIsSubmiting = false;
+        }
+        function isSubmiting(){
+            return kIsSubmiting;
+        }
+
+        function isBlank(str) {
+            return (!str || /^\s*$/.test(str));
+        }
+    </script>
+    <style>
+    	#uploadImg { width:100%; height:100%;}
+		#uploadImg .uploadImg { padding:10px;}
+		#uploadImg .uploadImg h1 { font-size:14px; color:#000;}
+		#uploadImg .uploadImg p.tips { font-size:12px; color:#666; padding:0 0 8px 0;}
+		#uploadImg .uploadImg p.tips span { color:#ed1c24;}
+		#uploadImg .uploadImg .uploadFile { display:block; width:100px; height:25px; overflow:hidden; text-align:center; line-height:25px; color:#ed1c24; background:#fff3f3; border:solid 1px #ffa8ab; position:relative;}
+		#uploadImg .uploadImg .uploadFile:hover { background:#d20a0a;border:solid 1px #d20a0a; color:#fff;}
+		#uploadImg .uploadImg .uploadFile input[type=file] { position:absolute; top:0; left:0; width:100px; height:25px; opacity:0;filter:alpha(opacity=0); cursor:pointer;}
+		#uploadImg .uploadImgCon { width:100%; height:282px; overflow:hidden; padding:10px 0 20px 0;}
+		#uploadImg .uploadImgCon .left { width:280px; height:280px; border:solid 1px #cccccc; background:#f9f9f9; float:left;}
+		#uploadImg .uploadImgCon .left img { margin:0 auto;}
+		#uploadImg .uploadImgCon .right { width:180px; height:300px; overflow:hidden; float:right; position:relative;}
+		#uploadImg .uploadImgCon .right p { font-size:12px; color:#bbb; padding:0 0 8px 0;}
+		#uploadImg .uploadImgCon .right .tips-erro { position:absolute; bottom:0; left:0; width:152px; border-top:solid 1px #ddd; text-align:center; background:#fff; z-index:2; padding:0;}
+		#preview { width:150px; height:150px; overflow:hidden; border:solid 1px #ddd;}
+    </style>
+</head>
+<form  method="post" id="theform">
+
+
+    <body class="bgfff">
+    	<div id="uploadImg">
+        	<div class="uploadImg">
+            	<h1>从电脑里选择您喜欢的图片</h1>
+                <p class="tips">建议图片尺寸:<span>{$targetWidth}*{$targetHeight}</span>px,格式为jpg,gif,png,jpeg,大小不超过1M</p>
+                <a href="javascript:void(0)" class="uploadFile">选择文件<input type="file" class="upload-file" id="code_img" name="code_img" value="{$list['image_name']}" onChange="return ajaxFileUpload('code_img','msg-input-imgfile','image_name','{:U('ImgResize/Resize/upload_file','type=img')}');" /></a>
+                <div class="fn uploadImgCon dn">
+                	<div class="left">
+                	<img src="" alt="toResizeImage" id="photo" style="display: none;" />
+                    </div>
+                    <div class="right">
+                		<p>{$bathName}</p>
+                        <div id="preview">
+                        	<img src="" style=" display:none;" />
+                        </div>
+                        <p class="tips-erro" style=" display:none;">预览超出范围<br />但不影响您实际使用</p>
+                    </div>
+                </div>
+                <div class="fn dn tc btn-uploadImg">
+                	<a href="javascript:void(0)" class="btn-all w90 mr20" onclick="return cropPhoto('{:U('ImgResize/Resize/resizeImg')}')">确定</a>
+                	<a href="javascript:void(0)" class="btn-all-del w90" onclick="javascript:art.dialog.close();">取消</a>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="targetHeight" value="{$targetHeight}"/>
+        <input type="hidden" id="targetWidth" value="{$targetWidth}"/>
+        <input type="hidden" id="resize" value="{$resizeflag}"/>
+        <input type="hidden" id="callback"  value="{$callback|default='imageInfoCallback'}">
+        <input type="hidden" id="suggestWidth" value="{$suggestX}"/>
+        <input type="hidden" id="suggestHeight"  value="{$suggestY}">
+    </body>
+</form>
+</html>
+<script>
+
+    var kTargetHeight = $("#targetHeight").val() || 0;
+    var kTargetWidth = $("#targetWidth").val() || 0;
+    var kResizeflag = $("#resize").val();
+	var kCallBack = $("#callback").val();
+
+    var suggestWidth = $("#suggestWidth").val() || 0;
+    var suggestHeight = $("#suggestHeight").val() || 0;
+
+    var kX1=0;
+    var kX2=0;
+    var kY1=0;
+    var kY2=0;
+    var kCropWidth =0;
+    var kCropHeight = 0;
+    var kPhotoName = null;
+	
+	var previewWidth=150;
+	if(!parseInt(kTargetHeight)==0){
+		previewWidth = 150*kTargetHeight/kTargetWidth;
+	}
+	$(document).ready(function(e) {
+		var previewWidth=150;
+		if(!parseInt(kTargetHeight)==0){
+			previewWidth = 150*kTargetHeight/kTargetWidth;
+        	$("#preview").height(previewWidth);
+		}
+    });
+    //文件上传
+    function ajaxFileUpload(imgid,hiddenid,showid,url){
+        var dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在上传图片...</div>",fixed:true,padding:0});
+        $.ajaxFileUpload
+        ({
+            url:url,
+            secureuri:false,
+            fileElementId:imgid,
+            dataType: 'json',
+            data:{name:'image_name', id:'id'},
+            success: function (data, status)
+            {
+
+                if(typeof(data.error) != 'undefined')
+                {
+                    if(data.error != '')
+                    {
+                        dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+                    }else{
+
+                        var resp = data.msg;
+                        if(resp != '0000'){
+                            dialog.time(2).content("<div class='msg-all-error'>上传失败！</div>");
+                            return false;
+                        }else{
+                            dialog.time(1).content("<div class='msg-all-succeed'>上传成功！</div>");
+							var api = art.dialog.open.api;
+								if (!api) return;
+								api.size(500,450);
+								api.position("50%", "40%");
+							
+							$(".btn-uploadImg,.uploadImgCon").show();
+							$('#preview img').show();
+							$('#preview img').attr("src",data.absolutepath);
+                            /**
+                             * 计算图片比例，以便在css中缩小
+                             * 比例保持一致
+                             * @type {number}
+                             */
+                            var scale = data.width / data.height;
+							if(scale>=1){
+								var w = 280; //图片宽度
+								var h = Math.ceil(w/scale);  //计算长度
+							}else{
+								var h = 280; //图片宽度
+								var w = Math.ceil(h*scale);  //计算长度
+							}
+
+
+                            /*
+                            计算虚拟框的宽高
+                            x2 使用图片的真实宽度
+                            y2 由计算得出
+                            与img的css样式**不同**，
+                            虚拟框使用的是图片真实的宽高
+                             */
+							if(kTargetWidth==0||suggestHeight==0){
+								var previewScale = 0;
+							}else{
+								var previewScale = kTargetWidth/kTargetHeight;
+							}
+                            var previewW = data.width;
+                            var previewH =Math.ceil(previewW/previewScale);
+
+							if(previewScale){
+								if(previewH>data.height){
+									previewH = data.height;
+									previewW =Math.ceil( previewScale * previewH);
+									//TODO previewW>width???
+								}
+							}else{
+								previewH = data.height;
+								previewW = data.width;
+							}
+                            kCropHeight = previewH;
+                            kCropWidth = previewW;
+
+                            kPhotoName = data.imgurl;
+
+
+                            $('#photo').css('display','block');
+                            $('#photo').css('width',w+"px");
+                            $('#photo').css('height',h+"px");
+							
+							var suggestMinWidth=0;
+							var suggestMinHeight=0;
+							if(suggestWidth!=0){
+								if(suggestWidth>=data.width){
+									suggestMinWidth=data.width;
+								}else{
+									suggestMinWidth=suggestWidth;
+								}
+							}
+							if(suggestHeight!=0){
+								if(suggestHeight>=data.height){
+									suggestMinHeight=data.height;
+								}else{
+									suggestMinHeight=suggestHeight;
+								}
+							}
+
+                            $('#photo').attr("src",data.absolutepath);
+                            $('#photo').imgAreaSelect({
+                                x1:0,
+                                y1:0,
+                                x2:previewW,
+                                y2:previewH,
+								handles:true,
+                                aspectRatio: previewScale ? kTargetWidth+":"+kTargetHeight:false,
+								minWidth:suggestMinWidth,
+								minHeight:suggestMinHeight,								
+                                imageHeight:data.height,
+                                imageWidth:data.width,
+								onInit:preview ,
+								onSelectChange:preview ,
+                                onSelectEnd: function (img, selection) {
+                                    // x1,y1,x2,y2,width,height
+                                    kX1=selection.x1;
+                                    kX2=selection.x2;
+                                    kY1 = selection.y1;
+                                    kY2 = selection.y2;
+                                    kCropHeight = selection.height;
+                                    kCropWidth = selection.width;
+                                   // console.log('width: ' + selection.width+  '; height: ' + selection.height +" x1:"+selection.x1+ " y1:"+selection.y1+ " x2:"+selection.x2+ " y2:"+selection.y2);
+                                }
+                            });
+                        }
+                        $('#'+hiddenid).val(data.imgurl);
+						
+						function preview(img, selection) {
+							if (!selection.width || !selection.height)
+								return;
+							var scaleX = 150 / selection.width;
+							var scaleY = previewWidth / selection.height;
+							if(suggestHeight==0){
+								var newpreviewheight = $(".imgareaselect-selection").height()*150/$(".imgareaselect-selection").width();
+								var newcaleY = newpreviewheight / selection.height;
+								if(newpreviewheight>=280){
+									$(".tips-erro").show();
+								}else{
+									$(".tips-erro").hide();
+								}
+								$('#preview').css({
+									height: Math.round(newpreviewheight)
+								});
+								$('#preview img').css({
+									width: Math.round(scaleX * data.width),
+									marginLeft: -Math.round(scaleX * selection.x1),
+									marginTop: -Math.round(newcaleY * selection.y1)
+								});
+								return false;
+							}
+							$(".tips-erro").hide();
+							$('#preview img').css({
+								width: Math.round(scaleX * data.width),
+								height: Math.round(scaleY * data.height),
+								marginLeft: -Math.round(scaleX * selection.x1),
+								marginTop: -Math.round(scaleY * selection.y1)
+							});  
+						}
+
+                    }
+                }
+            },
+            error: function (data, status, e)
+            {
+
+                dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+            }
+        })
+
+        return false;
+    }
+
+    /*
+    提交裁剪请求
+    */
+    function cropPhoto(url){
+       // console.log("--->"+url);
+        var dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed:true,padding:0});
+        if(kCropWidth==0||kCropHeight==0){
+           // console.log("width:"+kCropWidth +"   height:"+kCropHeight);
+            dialog.time(1).content("<div class='msg-all-error'>必须选择裁剪区域</div>");
+            return;
+        }
+        if(kResizeflag==undefined || kResizeflag == null){
+            kResizeflag = true;
+        }
+        $.get( url,
+                {
+                // thumb_image_name: "thumb_image_name", /**/
+				image: kPhotoName,   /*编辑图片名称*/
+				width:kCropWidth,            /*原图片裁剪宽度*/
+				height:kCropHeight,           /*原图片裁剪高度*/
+				start_width:kX1,           /*原图片裁剪开始X*/
+				start_height:kY1,           /*原图片裁剪开始Y*/
+				scale:1,            /*缩放比例,不要改变！*/
+				targetHeight:kTargetHeight, /*需求高度*/
+				targetWidth:kTargetWidth,   /*需求宽度*/
+				resizeflag:kResizeflag+"" /*是否重新裁剪到targetHeight、targetWidth 默认true，如果是false 那么长宽位 width height */
+        } )
+                .done(function( data ) {
+                   // console.log(data);
+                    var d = JSON.parse(data);
+                    //console.log (d.msg);
+                    if(d['msg']=='0000'){
+                        //成功
+						art.dialog.opener.eval(kCallBack)(d);
+                        art.dialog.close();
+                    }else{
+                        //失败
+                        dialog.time(1).content("<div class='msg-all-error'>裁剪失败!</div>");
+                    }
+                    //console.log(data);
+                });
+    }
+</script>

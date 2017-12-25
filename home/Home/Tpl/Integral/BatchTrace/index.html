@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>自提管理</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+$(function(){
+	$("#search").click(function(){
+		$("form").submit();
+	});
+})
+function revocation(id){
+	art.dialog.confirm("确认撤销?",function(){
+		Dialoading("正在提交...");
+		$.post("{:U('BatchTrace/revocationCode')}",{"id":id},function(data){
+			Dialoading();
+			if(data.status==1){
+				Diasucceed(data.info,function(){
+					window.location.reload();
+				});
+			}else{
+				Diaerro(data.info);
+			}
+		},"json");
+	});
+}
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+		<!--开始载入头部菜单--> 
+	 <include file="Shop/nav" navmenuid="Navqr"/>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="new_sidenav">
+                    <include file="./Home/Tpl/Integral/Integral/Store_sidenav.html" leftmenuid="pzls"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                		<h4>自提管理</h4>
+                        <div class="Wcanal-tab mb15" id="Wcanal-tabon">
+                            <div class="Wcanal-tab-title fn">
+                                <p class="Wcanal-tab-hover"><a href="{:U('Integral/BatchTrace/index')}">发码明细</a></p>
+                                <p class=""><a href="{:U('Integral/BatchTrace/posTrace')}">验证明细</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="SearchArea fn">
+                        <form method="post" action="{:U('Integral/BatchTrace/index')}">
+                            <div class="SearchAreaLeft">
+                            <label><span>手机号</span>
+                            <input name="mobile" type="text" value="{$Think.request.mobile}"  maxlength="11" class="textbox w100"/>
+                            </label>
+                            <label>
+                            <span>所属商户</span>
+                            <select name="node_id" id="select" class="selectbox" >
+                                <option value="" class="">全部</option>
+                                
+                                <volist name="nodeList" id="vo">
+                                <option value="{$vo['node_id']}" <if condition="$vo['node_id'] eq $_REQUEST['node_id']">selected="selected"</if>>{$vo['node_name']}</option>
+                                </volist>
+                                
+                            </select>
+                            </label>
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                            </div>
+                        </form>
+                    </div>
+                    <table cellpadding="0" cellspacing="0" class="W-table">
+                        <tr>
+                            <th>编号</th>
+                            <th>所属商户</th>
+                            <th>名称</th>
+                            <th>手机号</th>
+                            <th>发码时间</th>
+                            <th>交易类型</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                        
+                        <if condition="$list"> 
+                        <volist name="list" id="vo">
+                        <tr>
+                            <td>{$vo.order_id}</td>
+                            <td>{$vo.node_name}</td>
+                            <td>{$vo.goods_name}</td>
+                            <td>{$vo.phone_no}</td>
+                            <td>{$vo.trans_time|dateformat=###,'Y-m-d H:i:s'}</td>
+                            <td>{$transType[$vo['trans_type']]}</td>
+                            <td>{$status[$vo['status']]}</td>
+                            <td>
+                            <if condition="($vo['trans_type'] eq 0001) AND ($vo['status'] eq 0) and ($vo['data_from'] neq '9') and ($userInfo['node_id'] eq $vo['node_id']) and ($vo['use_status'] neq 2)">
+                                <a onclick="reSend('{$vo['id']}','{$vo['phone_no']}')">重发</a>
+                                <!--<a onclick="return confirm('确认重发:{$vo[phone_no]}吗?')" href="{:U('BatchTrace/reSend?id='.$vo[id])}">重发</a>-->
+                            <br />
+                            <else />
+                            --
+                            </if>
+                            </td>
+                        </tr>
+                        </volist>
+                        <else/>
+                            <tr>
+                                <td colspan="8">
+                                    <div class="nonedata"></div>
+                                </td>
+                            </tr> 
+                       </if>
+                        
+                    </table>
+                    <div class="page">{$page}</div>
+                </div>
+             </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="integralService"></div>
+</body>
+</html>
+<script>
+    function reSend(id,phone_no){
+        var title="确认重发:"+phone_no+"吗?";
+        art.dialog.confirm(title,function(){
+            $.post("{:U('Integral/BatchTrace/reSend')}",{"id":id},function(data){
+                if(data.status==1){
+                    art.dialog({title:false,content:"<div class='msg-all-succeed'>重发成功</div>",fixed: true,padding:0,time:2});
+                    window.location.reload();
+                }else{
+                    art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+                }
+            },"json");
+        });
+    }
+</script>

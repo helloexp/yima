@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>翼码旺财多宝电商</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e){
+	$("#StatusChange").live("click", function () {
+                var openUrl = $(this).attr("data-url") || 'about:blank';
+				//openUrl += '&tpl_id='+$('#tpl_id').val();
+                var dialogHeight;
+                art.dialog.open(openUrl, {
+                    id: "editstatus",
+                    lock: true,
+                    fixed: true,
+                    title: "修改状态",
+                    width: "30%",
+                    height: "40%"
+                });
+            });
+	$("#OrderPrint").live("click", function () {
+                var openUrl = $(this).attr("data-url") || 'about:blank';
+                var dialogHeight;
+                art.dialog.open(openUrl, {
+                    id: "orderprint",
+                    lock: true,
+                    fixed: true,
+                    title: "打印订单",
+                    width: "60%",
+                    height: "90%"
+                });
+            });
+});
+
+function codeOperate(order_id,type){
+	var dialog; 
+	var url;
+	switch(type){
+		case 1:
+			url = "{:U('Ecshop/GoodsSale/sendCode')}";
+			break;
+		case 2:
+			url = "{:U('Ecshop/GoodsSale/cancelCode')}";
+			break;
+		case 3:
+			url = "{:U('Ecshop/GoodsSale/resendCode')}";
+	}
+	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+    $.post(url,{"order_id":order_id},function(data){
+        if(data.status==1){
+            dialog.time(1).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+            setTimeout("window.location.reload();",500);
+            return false;
+        }else{
+            dialog.time(1).content("<div class='msg-all-error'>"+data.info+"</div>");
+        }
+    },"json");
+}
+</script>
+</head>
+
+<body style=" padding:30px;">
+<div class="SearchArea fn">
+     <form action="{:U('Ecshop/GoodsSale/orderList/')}" method="post" name="theform" id="theform">
+        <div class="SearchAreaLeft">
+        <label>
+        <span>订单号</span>
+        <input name="order_id" type="text" value="{$post.order_id}">
+        </label>
+        
+        
+        <label>
+        <span>商品名称</span>
+        <input name="goods_name" type="text" class="textbox w90" value="{$post.goods_name}">
+        </label>
+        
+        <label>
+        <span>订单状态</span>
+        <select name="order_status" class="selectbox">
+            <option value="" >订单状态</option>
+			{:show_arr_opt($orderStatus,$post['order_status'])}
+        </select>
+        </label>
+        
+        
+        <label>
+        <select name="pay_status" class="selectbox">
+            <option value="" >支付状态</option>
+			{:show_arr_opt($payStatus,$post['pay_status'])}
+        </select>
+        </label>
+        
+		<label>
+		<select name="delivery_status" class="selectbox">
+			<option value="" >配送状态</option>
+			{:show_arr_opt($deliveryStatus,$post['delivery_status'])}
+		</select>
+        </label>
+		<label>
+		<select name="receiver_type" class="selectbox">
+			<option value="" >订单类型</option>
+			{:show_arr_opt($receiverType,$post['receiver_type'])}
+		</select>
+		</label>
+        </div>
+		<div class="SearchAreaRight">
+        <input type="hidden" name="batch_no" value="{$batchNo}" />
+            <a href="javascript:void(0);" onclick="return $('#theform').submit();" id="sub_button" class="searchBtn">查找</a>
+        </div>
+    </form>
+</div>
+<div class="fn">
+    <table cellpadding="0" cellspacing="0" class="W-table" style="width:100%;border-collapse:collapse;font: normal 14px/2em tahoma,arial,\5b8b\4f53;border:1px solid #e3e2e2;">
+        <tr>
+            <th>下单时间</th>
+            <th>订单号</th>
+			<th>商品名</th>
+            <th>收货人手机号</th>
+            <th>购买数量</th>
+            <th>总计</th>
+            <th>支付状态</th>
+			<th>配送状态</th>
+			<th>订单状态</th>
+            <th class="last">操作</th>
+        </tr>
+        <volist name="orderList" id="vo" empty="$empty">
+        <tr>
+            <td>{$vo['add_time']|dateformat=###,'Y-m-d H:i:s'}</td>
+            <td>{$vo['order_id']}</td>
+			<td>{$vo['group_goods_name']}</td>
+            <td>{$vo['receiver_phone']}</td>
+            <td>{$vo['buy_num']}</td>
+            <td>{$vo['order_amt']}</td>
+            <td>{$payStatus[$vo['pay_status']]}</td>
+			<td>{$deliveryStatus[$vo['delivery_status']]}</td>
+			<td><if condition="$vo['order_status'] eq 0 ">正常<else />取消</if></td>
+            <td>
+			<!---
+            <?php 
+                if($vo['pay_status']==2){
+                    if(empty($vo['send_seq'])){
+            ?>
+                <a href="javascript:codeOperate('<?php echo $vo['order_id']?>',1);">发码</a>
+            <?php
+                    }else{
+            ?> 
+                <a href="javascript:codeOperate('<?php echo $vo['order_id']?>',2);">撤消</a>
+                <a href="javascript:codeOperate('<?php echo $vo['order_id']?>',3);">重发</a>
+            <?php           
+            }}else{ 
+            ?>
+            --
+            <?php } ?>
+			--->
+			<if condition="$vo['pay_status'] eq 2 ">
+				<a id="StatusChange" href="javascript:void(0)" data-url="{:U('Ecshop/GoodsSale/editStatus',array('order_id'=>$vo['order_id']))}">修改状态</a>
+			</if>
+			<a id="OrderPrint" href="javascript:void(0)" data-url="{:U('LabelAdmin/OrderPrint/index',array('order_id'=>$vo['order_id']))}">打印订单</a>
+            </td>
+        </tr>
+        </volist>
+    </table>
+    <div style="float:right;"><?php echo $page;?>&nbsp;&nbsp;</div>
+</div>
+</body>

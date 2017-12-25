@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加员工</title>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/member.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+    $("#save2").click(function(){
+        var dialog;
+        if($("#thefrom").validationEngine('validate')){
+            $("#thefrom").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                    if($("#log_img").val()==''){
+                        dialog.time(1).content("<div class='msg-all-error'>请选择上传文件!</div>");
+                        return false;
+                    }
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           var datas = data.data;
+                           $("#tip_info").html(data.info);
+                           if(datas.is_send_code == 1 && datas.succNum != 0){
+                               var url = $("#batch_url").attr("href")+"&batch_id="+datas.batch_id;
+                               $("#batch_url").attr("href","javascript:var win = art.dialog.open.origin;win.location.href='"+url+"';art.dialog.close();").parent().show();
+                           }
+                           if(datas.fail_num > 0){
+                               $("#error_file").attr("href","__UPLOAD__/downTemp/"+datas.error_name).parent().show();
+                           }
+                           art.dialog({
+                                title:"消息",
+                                id:"succ_msg",
+                                content:document.getElementById("succ_msg"),
+                                width:600,
+                                lock:true
+                           });
+                           dialog.close();
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                              }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+});
+
+</script>
+</head>
+<body class="no">
+    <form action="{:U('OnlineSee/InsuranceEmployee/importInsert')}" method="post" id="thefrom" name='thefrom' enctype="multipart/form-data" >
+    <div class="num-con fn-clear fn pt40">
+        <div class="global-input4">
+            <ul>
+                <li class="global-input4-name">选择文件：</li>
+                <li class="global-input4-input rel">
+                    <input name="file_show" type="text" id="file_show" class="textbox w100" value="">
+                        <input type="file" id="log_img" name="log_img" class="upload_file" onchange="document.getElementById('file_show').value=this.value">
+                    <input type="button" value="浏览" value="1" title="上传" class="btn-all w70 ml10" />
+                    <br>
+                     <input type="hidden" value="" name="resp_log_img" id="resp_log_img">
+                    <span>请下载模板，按模板格式录入员工信息<a href="__PUBLIC__/tmpDownload/employee.csv">【模板下载】</a></span>
+                </li>
+                
+            </ul>
+            <ul>
+                <li class="global-input4-name">&nbsp;</li>
+                <li class="global-input4-input">
+                     <input type="hidden" value='1' name="ajax" />
+                     <a href="javascript:;"  id="save2" class="btn-all w110 ">添加</a>
+                     <a href="javascript:art.dialog.close();" class="btn-all-del w110 ml10">取消</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</form>
+
+  <div id="succ_msg" class="mem-form dn">
+    <div class="mem-rights-form">
+        <ul>
+            <li id="tip_info"></li>
+        </ul>
+        <ul>
+            <li class="mt20">
+                <a href="javascript:void(0)" onclick="var win = art.dialog.open.origin;win.location.reload();" id="submit"  class="btn-all w90">确认</a>
+                <span class="dn"><a href="javascript:void(0)" id="error_file"  class="btn-all w90 dn">下载错误名单</a></span>
+                <span class="dn"><a href="{:U('Member/Member/membeSendBatch')}" id="batch_url"  class="btn-all w90 dn">查看发卡结果</a></span>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

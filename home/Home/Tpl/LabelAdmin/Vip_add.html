@@ -1,0 +1,727 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>VIP活动_营销活动_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnewsadd.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Wnewsadd.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jsScroll.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jscolor/jscolor.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e){
+	PreviewnewsAdd();
+});
+var _chooseflag = 1;// 1  发文抽奖 2  点赞是否允许抽奖
+$(function(){
+/*	    var ue = UE.getEditor('wap_info',{
+	    	imageUrl:"{:U('LabelAdmin/Upfile/editoImageSave')}",
+	    	imagePath:"__UPLOAD__",
+	    	catcherUrl:"{:U('LabelAdmin/Upfile/getRemoteImage')}",
+	    	catcherPath:"__UPLOAD__",
+	    	initialFrameWidth:340,
+	    	initialFrameHeight:280
+	    });
+	    ue.addListener("contentChange",function(){
+	    	$(".Preview-moreContenter").html(this.getContent());
+			jsScroll(document.getElementById('iphonePreview'),11, 27, 'divSrollBar');
+	    });*/
+        $('#sub_button').click(function(){
+         if($("input[name='is_cj1']:checked").val() == '1'){
+              
+                if(parseInt($('#day_goods_count1').val()) > parseInt($('#goods_count1').val()) ){
+                    alert('每日奖品限量不能大于总奖品数！');
+                    $('#goods_count1').focus();
+                    return false;
+                }       
+        }
+		 if($("input[name='is_cj2']:checked").val() == '1'){
+              
+                if(parseInt($('#day_goods_count2').val()) > parseInt($('#goods_count2').val()) ){
+                    alert('每日奖品限量不能大于总奖品数！');
+                    $('#goods_count2').focus();
+                    return false;
+                }       
+        }
+         
+        // $("#theform").validationEngine().submit();
+        var dialog;
+        if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           var datas = data.data;
+                           dialog.close();
+                           $(".text_form").hide();
+                           $(".tip_msg").show();
+                           $("#jump_url").attr("href",datas.url);
+                           $(window).scrollTop(0);
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    }) ;
+	 $("input[name=is_cj1]").change(function(){
+            if($(this).val() == '2'){
+              $('#jp_fw').show('slow');
+              $('#cj_fw').show();
+            }else{
+              $('#jp_fw').hide('slow');
+              $('#cj_fw').hide();
+            }
+        });
+		
+		
+	 $("input[name=is_cj2]").change(function(){
+            if($(this).val() == '2'){
+              $('#jp_dz').show();
+              $('#cj_dz').show();
+            }else{
+              $('#jp_dz').hide();
+              $('#cj_dz').hide();
+            }
+        });
+       
+    $('#bind_cj_fw,#bind_cj_dz').click(function(){
+    	_chooseflag = this.id == 'bind_cj_fw' ? 1 : 2;
+    	art.dialog.open("{:U('LabelAdmin/SelectJp/index',array('call_back'=>'setInfo', 'type'=>1))}",{
+            width: 800,
+            height: 500,
+            title:'选择卡券',
+            lock: true
+        });
+    });
+})
+
+function setInfo(datas){
+	$("#goods_name"+_chooseflag).val(datas.goods_name);
+	$("#goods_id"+_chooseflag).val(datas.goods_id);
+    $("#show_date"+_chooseflag).html(datas.begin_time+'&nbsp;到&nbsp;'+datas.end_time);
+
+    if(datas.verify_begin_type == '1'){
+        $(_chooseflag == 1 ? "#verify_begin_type2" : '#verify_begin_type4').attr("checked","checked");
+        $("#verify_end_days"+_chooseflag).val(datas.verify_end_date);
+        $("#verify_begin_days"+_chooseflag).val(datas.verify_begin_date);
+        $(_chooseflag == 1 ? ".judgeCon2": '.judgeCon4').show();
+        $(_chooseflag == 1 ? ".judgeCon1" : '.judgeCon3').hide();
+    }else{
+        $(_chooseflag == 1 ? "#verify_begin_type1" : '#verify_begin_type3').attr("checked","checked");
+        $("#verify_begin_date"+_chooseflag).val(datas.verify_begin_date.substr(0,8));
+        $("#verify_end_date"+_chooseflag).val(datas.verify_end_date.substr(0,8));
+        $(_chooseflag == 1 ? ".judgeCon1" : '.judgeCon3').show();
+        $(_chooseflag == 1 ? ".judgeCon2" : '.judgeCon4').hide();
+    }
+    $("#mms_title"+_chooseflag).val(datas.mms_title);
+    $("#using_rules"+_chooseflag).val(datas.mms_text);
+}
+
+function checkActLogo(){
+    if($("#resp_log_img").val() == '')
+        {
+            return "请上传wap页面Logo";
+        }
+}
+function checkActContect(){
+	img = $("#resp_wap_page_img_one").val();
+    if (img == '') {
+        return "请上传图片";
+    }
+}
+
+
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel text_form">
+            	<div class="bread">
+                    <div class="bread-con fn">
+                       <include file="./Home/Tpl/LabelAdmin/Path_index.html" />
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <form action="{:U('LabelAdmin/Vip/addSubmit')}" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+						<div class="global-input2 fn w2 pb30">
+	                    	<ul class="newsadd-title">活动基础信息</ul>
+	                      <ul>
+	                          <li class="global-input2-name">*&nbsp;活动名称：</li>
+	                          <li class="global-input2-input"><input name="name" id="name"  type="text"  class="validate[required,optional,maxSize[20]] textbox w300" value=""/></li>
+	                      </ul>
+	                      <ul>
+	                          <li class="global-input2-name">*&nbsp;活动时间：</li>
+	                          <li class="global-input2-input"><input name="start_time" id="start_time" type="text"  class="validate[required] textbox w130" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" /><span class="mlr10">-</span><input name="end_time" id="end_time" type="text"  class="validate[required] textbox w130"  onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" /></li>
+	                      </ul>
+	                    <ul class="newsadd-title">活动界面设计</ul>
+						<ul>
+							<li class="global-input2-name">活动广告位上传：</li>
+							<li class="global-input2-input">
+								<div id="logo-upload2">
+									<div class="rel l">
+
+										<a href="javascript:void(0);" title="上传" class="btn_inner w60 " onclick="log_add()">上传</a>	
+										<input type="text" value="" name="resp_log_img" id="resp_log_img" class="validate[required,condRequired[logo-false],funcCall[checkActLogo]]]" style="width:1px;height: 1px;border-style:none" />
+										<p class="cl font-12-cc ml5">图片格式为jpg,gif,png,jpeg，小于等于1M</p>
+										<br />
+										<img id="img_logo_show" class="mt5 w80 dn"  />
+									</div>
+								
+								</div>
+								
+							</li>
+						</ul>
+						 <ul class="newsadd-title">活动规则配置</ul>
+						   <ul>
+	                          <li class="global-input2-name">*&nbsp;允许发文次数：</li>
+	                          <li class="global-input2-input"><input name="fwnt" id="fwnt"  type="text"  class=" textbox w120" value="0"/><p class="cl font-12-cc ml5">每位用户允许发文次数，0为不限</p></li>
+	                      </ul>
+						   <ul>
+	                          <li class="global-input2-name">*&nbsp;发文字数限制：</li>
+	                          <li class="global-input2-input"><input name="fwznt" id="fwznt"  type="text"  class=" textbox w120" value="0"/><p class="cl font-12-cc ml5">用户发文每次字数限制</p></li>
+	                      </ul>
+						  <ul style="display:none;">
+							  <li class="global-input2-name">&nbsp;发文是否允许抽奖：</li>
+							  <li class="global-input2-input">
+							  	  <input name="is_cj1" id="is_cj_fw1"  type="radio" value="1" checked="checked" />
+								  <label for="is_cj_fw1" class="ml5">否</label>
+								  <input name="is_cj1" id="is_cj_fw2"  type="radio"  value="2"  />
+								  <label for="is_cj_fw2" class="ml5">是</label>
+							  </li>
+						  </ul>
+
+						  <div id="jp_fw" style="display:none; height:auto; border:1px dooted #ccc">
+						  <ul>
+							  <li class="global-input2-name">&nbsp;发文抽奖机会设置：</li>
+							  <li class="global-input2-input">
+								  <input name="jp_set_type1" id="jp_set_type_fw1"  type="radio"  value="2"  class="validate[condRequired[is_cj_t]]" checked="checked" />
+								  <label for="jp_set_type_fw1" class="ml5">每发一文都可获取一次抽奖机会</label>
+								  <div class="cl"></div>
+								  <input name="jp_set_type1" id="jp_set_type_fw2"   type="radio"  value="1"  />
+								  <label for="jp_set_type_fw2" class="ml5">一个用户仅能获取一份抽奖机会</label>
+							  </li>
+						  </ul>
+						  
+						  <ul>
+	                            <li class="global-input2-name">&nbsp;卡券：</li>
+	                            <li class="global-input2-input">
+	                            	<input type="hidden" name="goods_id1" id="goods_id1" value=""/>
+									<input name="goods_name1" id="goods_name1" type="text"  
+									class="validate[condRequired[is_cj_fw2]] textbox w120 ml10" value="" readonly="readonly"/>
+	                            	<a href="javascript:void(0)" class="btn-all w80 ml10" id="bind_cj_fw">选择卡券</a>
+	                            </li>
+	                      </ul>
+	                      <ul>
+	                            <li class="global-input2-name">&nbsp;卡券有效期：</li>
+	                            <li class="global-input2-input"><p id="show_date1"></p></li>
+	                      </ul>
+
+	                      <ul>
+	                         <li class="global-input2-name">*&nbsp;使用卡券时间：</li>
+	                         <li class="global-input2-input">
+	                            <div class="judgeDiv">
+	                                <label class="ml5" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();">
+	                                <input type="radio" name="verify_time_type1" value="0" id="verify_begin_type1"/><span class="ml5">按日期设置</span></label>
+	                                <label class="ml10" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();">
+	                                <input type="radio" name="verify_time_type1" value="1" id="verify_begin_type2"/><span class="ml5">按天数设置</span></label>
+	                            </div>
+	                            <div class="judgeCon-time judgeCon1 dn">
+	                                <p class="ml5">使用开始时间</p>
+	                                <input name="verify_begin_date1" id="verify_begin_date1" type="text" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date1\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" value=""/>
+	                                <div class="cl pt5"></div>
+	                                <p class="ml5">使用结束时间</p>
+	                                <input name="verify_end_date1" id="verify_end_date1" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date1\\')||\\'%y-%M-%d\\'}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="" />
+	                                <div class="cl"></div>
+	                                <p class="font-12-cc">商户可以自定义验码开始的日期如："4月1号,6月1号";</p>
+	                            </div>
+	                            <div class="judgeCon-time judgeCon2 dn">
+	                                <p class="ml5">发送卡券后</p>
+	                                <input name="verify_begin_days1" id="verify_begin_days1" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="" />&nbsp;天开始使用
+	                                <div class="cl pt5"></div>
+	                                <p class="ml5">发送卡券后</p>
+	                                <input name="verify_end_days1" id="verify_end_days1" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="" />&nbsp;天结束使用
+	                                <div class="cl"></div>
+	                                <p class="font-12-cc">商户可以自定义验码时间，如：“发送卡券后3天开始使用-发送卡券后5天结束使用”</p>
+	                            </div>
+	                          </li>
+	                        </ul>
+
+
+	                      <ul>
+	                            <li class="global-input2-name">*&nbsp;每日奖品限量：</li>
+	                            <li class="global-input2-input">
+	                            	<input id="day_goods_count1" name="day_goods_count1" type="text"  
+	                            	class="validate[condRequired[is_cj_fw2],custom[integer]] textbox w50"/>
+	                            	<span>&nbsp;份/每天</span>
+	                            </li>
+	                      </ul>
+	                      <ul>
+	                            <li class="global-input2-name">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：</li>
+	                            <li class="global-input2-input">
+	                            	<input id="goods_count1" name="goods_count1" type="text" 
+	                            	class="validate[condRequired[is_cj_fw2],custom[integer]] textbox w50" value=""/>
+	                            	<span>&nbsp;份</span>
+	                            </li>
+	                      </ul>
+	                      <ul>
+	                            <li class="global-input2-name">*&nbsp;中&nbsp;&nbsp;奖&nbsp;&nbsp;概&nbsp;&nbsp;&nbsp;率：</li>
+	                            <li class="global-input2-input">
+	                            	<input name="chance1" type="text"  
+	                            	class="validate[custom[integer],min[0],max[100],condRequired[is_cj_fw2]] textbox w50" 
+	                            	value="" onblur="javascript:if($(this).val()>100 ){alert('不能超过100');}" />
+	                            	<span>&nbsp;%</span>
+	                            </li>
+	                      </ul>
+
+	                      <ul>
+                            <li class="global-input2-name">*&nbsp;彩信标题：</li>
+                            <li class="global-input2-input"><input id="mms_title1" name="mms_title1" type="text" onkeyup="check_lenght(10,'title_text',this);"  class="validate[required,condRequired[is_cj_fw2],maxSize[10]] textbox w380"/>
+                            <br />
+                            <span class="font-12-cc" id="title_text">还可以输入10个字</span>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="global-input2-name">*&nbsp;彩信内容：</li>
+                            <li class="global-input2-input"><textarea name="using_rules1" id="using_rules1" onkeyup="check_lenght(100,'text',this);" class="validate[required,maxSize[100],condRequired[is_cj_fw2]] texttextarea w380 h50"></textarea>
+                            <br />
+                            <span class="font-12-cc" id="text">还可以输入100个字</span><p class="font-12-cc">,请短彩信内容按照以下格式：xxx时间到xxxx地点享受xxxx服务</p>
+                            </li>
+                        </ul>
+
+                        <hr>
+	                      </div>
+
+	                      <!-- <hr> -->
+
+	                      <ul>
+	                          <li class="global-input2-name">*&nbsp;允许点赞次数：</li>
+	                          <li class="global-input2-input"><input name="dznt" id="dznt"  type="text"  class=" textbox w120" value="0"/><p class="cl font-12-cc ml5">每位用户允许点赞次数，0为不限</p></li>
+	                      </ul>
+						  
+						  <ul style="display:none;">
+							  <li class="global-input2-name">&nbsp;点赞是否允许抽奖：</li>
+							  <li class="global-input2-input">
+							  	  <input name="is_cj2" id="is_cj_dz1"  type="radio" value="1" checked="checked" />
+								  <label for="is_cj_dz1" class="ml5">否</label>
+								  <input name="is_cj2" id="is_cj_dz2"  type="radio"  value="2"  />
+								  <label for="is_cj_dz2" class="ml5">是</label>
+							  </li>
+						  </ul>
+
+						<!-- 点赞抽奖奖品设置 -->
+							<div id="jp_dz" style="display:none; border:1px dooted #ccc">
+						  <ul>
+							  <li class="global-input2-name">&nbsp;点赞抽奖奖品设置：</li>
+							  <li class="global-input2-input">
+								  <input name="jp_set_type2" id="jp_set_type_dz1"  type="radio"  value="2"  class="validate[condRequired[is_cj_t]]" checked="checked" />
+								  <label for="jp_set_type_dz1" class="ml5">每点一次赞都可获取一次抽奖机会</label>
+								  <div class="cl"></div>
+								  <input name="jp_set_type2" id="jp_set_type_dz2"   type="radio"  value="1"  />
+								  <label for="jp_set_type_dz2" class="ml5">一个用户仅能获取一份抽奖机会</label>
+							  </li>
+						  </ul>
+						  
+						  <ul>
+	                            <li class="global-input2-name">&nbsp;卡券：</li>
+	                            <li class="global-input2-input">
+	                            	<input type="hidden" name="goods_id2" id="goods_id2" value=""/>
+									<input name="goods_name2" id="goods_name2" type="text"  class="validate[condRequired[is_cj_dz2]] textbox w120 ml10" value="" readonly="readonly"/>
+									<a href="javascript:void(0)" class="btn-all w80 ml10" id="bind_cj_dz">选择卡券</a>
+	                            </li>
+	                      </ul>
+	                      <ul>
+	                            <li class="global-input2-name">&nbsp;卡券有效期：</li>
+	                            <li class="global-input2-input"><p id="show_date2"></p></li>
+	                      </ul>
+
+	                      <ul>
+	                         <li class="global-input2-name">*&nbsp;使用卡券时间：</li>
+	                         <li class="global-input2-input">
+	                            <div class="judgeDiv">
+	                                <label class="ml5" onclick="javascript:$('.judgeCon3').show();$('.judgeCon4').hide();">
+	                                <input type="radio" name="verify_time_type2" value="0" id="verify_begin_type3"/><span class="ml5">按日期设置</span></label>
+	                                <label class="ml10" onclick="javascript:$('.judgeCon4').show();$('.judgeCon3').hide();">
+	                                <input type="radio" name="verify_time_type2" value="1" id="verify_begin_type4"/><span class="ml5">按天数设置</span></label>
+	                            </div>
+	                            <div class="judgeCon-time judgeCon3 dn">
+	                                <p class="ml5">使用开始时间</p>
+	                                <input name="verify_begin_date2" id="verify_begin_date2" type="text" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date2\\')}'})" class="validate[condRequired[verify_begin_type3]] textbox w90 ml5" value=""/>
+	                                <div class="cl pt5"></div>
+	                                <p class="ml5">使用结束时间</p>
+	                                <input name="verify_end_date2" id="verify_end_date2" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date2\\')||\\'%y-%M-%d\\'}'})" class="validate[condRequired[verify_begin_type3]] textbox w90 ml5" maxlength="8" value="" />
+	                                <div class="cl"></div>
+	                                <p class="font-12-cc">商户可以自定义验码开始的日期如："4月1号,6月1号";</p>
+	                            </div>
+	                            <div class="judgeCon-time judgeCon4 dn">
+	                                <p class="ml5">发送卡券后</p>
+	                                <input name="verify_begin_days2" id="verify_begin_days2" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type4]] textbox w50 ml5" value="" />&nbsp;天开始使用
+	                                <div class="cl pt5"></div>
+	                                <p class="ml5">发送卡券后</p>
+	                                <input name="verify_end_days2" id="verify_end_days2" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type4]] textbox w50 ml5" value="" />&nbsp;天结束使用
+	                                <div class="cl"></div>
+	                                <p class="font-12-cc">商户可以自定义验码时间，如：“发送卡券后3天开始使用-发送卡券后5天结束使用”</p>
+	                            </div>
+	                          </li>
+	                        </ul>
+
+
+	                      <ul>
+	                            <li class="global-input2-name">*&nbsp;每日奖品限量：</li>
+	                            <li class="global-input2-input">
+	                            	<input id="day_goods_count2" name="day_goods_count2" type="text"  
+	                            	class="validate[condRequired[is_cj_dz2],custom[integer]] textbox w50"/>
+	                            	<span>&nbsp;份/每天</span>
+	                            </li>
+	                      </ul>
+	                      <ul>
+	                            <li class="global-input2-name">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：</li>
+	                            <li class="global-input2-input">
+	                            	<input id="goods_count2" name="goods_count2" type="text" 
+	                            	class="validate[condRequired[is_cj_dz2],custom[integer]] textbox w50" value=""/>
+	                            	<span>&nbsp;份</span>
+	                            </li>
+	                      </ul>
+	                      <ul>
+	                            <li class="global-input2-name">*&nbsp;中&nbsp;&nbsp;奖&nbsp;&nbsp;概&nbsp;&nbsp;&nbsp;率：</li>
+	                            <li class="global-input2-input">
+	                            	<input name="chance2" type="text"  
+	                            	class="validate[custom[integer],min[0],max[100],condRequired[is_cj_dz2]] textbox w50" 
+	                            	value="" onblur="javascript:if($(this).val()>100 ){alert('不能超过100');}" />
+	                            	<span>&nbsp;%</span>
+	                            </li>
+	                      </ul>
+
+
+	                      	                      <ul>
+                            <li class="global-input2-name">*&nbsp;彩信标题：</li>
+                            <li class="global-input2-input"><input id="mms_title2" name="mms_title2" type="text" onkeyup="check_lenght(10,'title_text',this);"  class="validate[required,maxSize[10],condRequired[is_cj_dz2]] textbox w380"/>
+                            <br />
+                            <span class="font-12-cc" id="title_text">还可以输入10个字</span>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="global-input2-name">*&nbsp;彩信内容：</li>
+                            <li class="global-input2-input"><textarea name="using_rules2" id="using_rules2" onkeyup="check_lenght(100,'text',this);" class="validate[required,maxSize[100],condRequired[is_cj_dz2]] texttextarea w380 h50"></textarea>
+                            <br />
+                            <span class="font-12-cc" id="text">还可以输入100个字</span><p class="font-12-cc">,请短彩信内容按照以下格式：xxx时间到xxxx地点享受xxxx服务</p>
+                            </li>
+                        </ul>
+	                      </div>
+						 
+	                      <ul>
+	                          <li class="global-input2-name"></li>
+	                          <li class="global-input2-input">
+	                          <a href="javascript:;" id="sub_button" title="确认" class="btn-all w110">确认</a>
+	                          <a href="javascript:history.go(-1)" title="取消" class="btn-all-del w110 ml10">取消</a></li>
+	                      </ul>
+	                  </div>
+	                  <div class="activityread_iphone tc mt70">
+	                      <div class="activityread_iphone_con">
+	                          <div id="iphonePreview">
+	                     
+						<img src="__PUBLIC__/Image/ap-iphone-Csyd.png"/>
+	                          
+	                      </div>
+	                  </div>
+                    </div>
+                          
+                </form>
+            </div>
+
+
+            <!-- 添加成功 begin-->
+            <div id="main" class="rel tip_msg dn">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="/index.php?g=Home&amp;m=Index&amp;a=index">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="javascript:void(0)">操作成功！</a></p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:window.location.reload()" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="fn">
+                    <div class="pop-up fn mt40">
+                            <dd class="pop-img tc pt40"><img src="__PUBLIC__/Image/ok_img.png" width="46" height="46" class="mr30" style="vertical-align:middle;">添加成功！</dd>
+                            <dd class="pop-hint"></dd>
+                            <dd class="pop-btn tc mt40">
+                                <a href="{:U('LabelAdmin/Vip/index')}" class="btn-all w110 mr10">Vip列表</a>
+                                <a class="btn-all w110 mr10" id="jump_url">发布渠道</a>                           
+                            </dd>
+                    </div>
+               </div>
+            </div>
+            <!-- 添加成功 end-->
+        </div>
+    </div>
+    </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>
+<script>
+/*$('#bind_cj_dz').click(function(){
+	        var  name = '&name=goods_name&batch_no=wc_batch_no';
+    	    art.dialog.open("{:U('LabelAdmin/SelectJp/index')}"+name,{
+    	    	width: 800,
+    	    	height: 500,
+    	    	title:'选择卡券',
+    	    	lock: true
+    	    })
+        });
+$('#bind_cj_fw').click(function(){
+	        var  name = '&name=fw_goods_name&batch_no=fw_wc_batch_no';
+    	    art.dialog.open("{:U('LabelAdmin/SelectJp/index')}"+name,{
+    	    	width: 800,
+    	    	height: 500,
+    	    	title:'选择卡券',
+    	    	lock: true
+    	    })
+        });*/
+
+
+    $("input[name=is_music]").change(function(){
+		if($(this).val() == '1'){
+			$('#logo-upload3').show();
+		}else{
+			$('#resp_music').val('');
+			$('#logo-upload3').hide();
+		}
+	});
+    
+   
+
+
+    
+  //隐藏页面
+function hide_page(id){
+	if(id=='page_3'){
+		$('#close_id_2').show();
+	}
+	$('#'+id).hide();
+}
+//添加页面
+function add_page(){
+	if($("#page_1").is(":hidden")){
+		$('#page_1').show();
+		return ;
+	}
+	if($("#page_2").is(":hidden")){
+		$('#close_id_1').hide();
+		$('#page_2').show();
+		return ;
+	}
+	if($("#page_3").is(":hidden")){
+		$('#close_id_1').hide();
+		$('#close_id_2').hide();
+		$('#page_3').show();
+		return ;
+	}else{
+		alert('只能新增3个');
+		return;
+	}
+
+}
+ 
+
+function log_add() {
+    var opt = {
+        obj: $("#img_resp_show"),
+        height: 160,
+        width: 160,
+        callback: function(data) {
+            $('#img_logo_show').attr('src', data['src']);
+            $('#img_logo_show').show();
+            $('#resp_log_img').val(data['savename']);
+        }
+    };
+    open_img_uploader(opt);
+}
+
+//文件上传
+function ajaxFileUpload(imgid,hiddenid,showid,url){
+var dialog = art.dialog({title:false,fixed: true,padding:0});
+$.ajaxFileUpload
+({
+	url:url,
+	secureuri:false,
+	fileElementId:imgid,
+	dataType: 'json',
+	data:{name:'logan', id:'id'},
+	success: function (data, status)
+	{
+		if(typeof(data.error) != 'undefined')
+		{
+			if(data.error != '')
+			{
+				dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+			}else{
+
+				var resp = data.msg;
+				if(resp != '0000'){
+					dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+					return false;
+				}else{
+					dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+				}
+				$('#'+hiddenid).val(data.imgurl);
+                previewuploadimg('<?php echo APP_PATH.'Upload/';?>'+data.imgurl,"logo");
+			}
+		}
+	},
+	error: function (data, status, e)
+	{
+		dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+	}
+})
+
+return false;
+}
+/*
+function get_scrolltop(){
+	var ns = (navigator.appName.indexOf("Netscape") != -1);
+	var diffY;
+	if (document.documentElement && document.documentElement.scrollTop)
+	{diffY = document.documentElement.scrollTop;}
+	else if (document.body){diffY = document.body.scrollTop;}
+	var Scrolltop = ns ? pageYOffset : diffY;			
+	if( Scrolltop > 260){
+		document.getElementById('new_content_fixright').className='new_content_fixright';
+	}
+	else if( Scrolltop < 260 ){
+		document.getElementById('new_content_fixright').className='';	
+	}
+	setTimeout("get_scrolltop()",30);
+}
+get_scrolltop();
+*/
+
+//文件上传带预览
+	function ajaxFileUploadview(imgid,hiddenid,showid,url){
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.ajaxFileUpload
+		({
+			url:url,
+			secureuri:false,
+			fileElementId:imgid,
+			dataType: 'json',
+			data:{name:'logan', id:'id'},
+			success: function (data, status)
+			{
+				if(typeof(data.error) != 'undefined')
+				{
+					if(data.error != '')
+					{
+						dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+					}else{
+
+						var resp = data.msg;
+						if(resp != '0000'){
+							dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+							return false;
+						}else{
+							dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+						}
+						$('#'+hiddenid).val(data.imgurl);
+                        $("#bg_style").val(3);
+						previewuploadimg('<?php echo APP_PATH.'Upload/wapBg/';?>'+data.imgurl,"background");
+						
+					}
+				}
+			},
+			error: function (data, status, e)
+			{
+
+				dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+			}
+		})
+
+		return false;
+	}
+
+
+
+
+ /*获取图片路径中的图片名*/
+		function base_name_logo(url){
+			var urlList = url.split('/'); 
+			var a = urlList[urlList.length-1];
+			return a;
+		}
+    
+    	 /**
+     * 打开图片上传地址
+     * 格式如下：
+     * {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+     * rationX 图片宽度
+     * rationY 图片长度
+     * 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+     *     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+     * */
+
+    function uploadImg_logo(url) {
+        var win_width = 500;
+        art.dialog.open(url, {
+            lock: true,
+            title: "上传图片",
+            width: win_width,
+            height: win_width / 1.6,
+            id: 'art_upload'
+        });
+    }
+
+	 /**
+     * 图片上传后回调
+     * 参数：json
+     * d.msg  0000 代表成功
+     * d.error true / false
+     * d.image_name  裁剪后图片名称
+     * d.origin   裁剪*前*图片完整路径
+     * d.absolutepath 裁剪*后*图片完整路径
+     * d.width  图片宽度
+     * d.height 图片高度
+     */
+    function imageInfoCallback(d) {
+        //填充缩略图
+        $('#img_logo_show').attr('src', d.absolutepath);
+        //上传用
+        $('#resp_log_img').val(base_name_logo(d.absolutepath));
+        //显示预览
+		$('#img_logo_show').show();
+        previewuploadimg('<?php echo APP_PATH.$tmp_path;?>'+$('#resp_log_img').val(),"logo");
+    }
+    
+</script>

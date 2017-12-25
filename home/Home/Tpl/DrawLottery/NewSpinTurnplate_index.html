@@ -1,0 +1,1176 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>幸运大转盘</title>
+    <meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+    <meta content="telephone=no" name="format-detection"/>
+    <meta content="email=no" name="format-detection"/>
+    <meta name="apple-touch-fullscreen" content="NO">
+    {$cacheControl}
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_newLottery.css">
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js"></script>
+    <js href="__PUBLIC__/Js/countdown.js?v=__VR__"/>
+</head>
+<body>
+<div class="specialCj-con">
+    <div class="logo fn">
+        <div class="box"><img src="{$row.log_img}" width="55"/></div>
+        <h2>{$node_name}</h2>
+    </div>
+    <div class="title">
+        <img src="__PUBLIC__/Label/Image/lottery/element_16.png" class="element_16 img">
+        <img src="__PUBLIC__/Label/Image/lottery/element_9.png" class="element_9 img">
+        <a href="javascript:void(0);" class="btn-rule">活动规则</a>
+    </div>
+    <div class="element">
+        <div class="star1"></div>
+        <div class="star2"></div>
+        <div class="star3"></div>
+        <div class="star4"></div>
+        <div class="star5"></div>
+    </div>
+    <notempty name="total_part">
+        <div class="remaining">剩余抽奖次数：<span id="remaining_num">{$leftChances}</span>次</div>
+    </notempty>
+    <div class="record"><a href="{:U('DrawLottery/DrawLotteryCommon/awardList', array('id' => $id))}" >查看中奖记录</a>
+    </div>
+</div>
+<include file="./Home/Tpl/Label/Public_footer.html"/>
+</body>
+
+<script type="text/javascript">
+    var member_reg_label_id = '{$member_reg_label_id}';
+    var needIgnoreFlag = '{$needIgnoreFlag}';
+    var _global = {
+        isgocj: true,
+        zp_type: "2",//抽奖形式:1==普通，2==大转盘，3==老虎机，4==砸金蛋，5==摇一摇
+        member_registration: "{:U('Label/MemberRecruit/index',array('id'=>$member_reg_label_id, 'wechat_card_js'=>1, 'a' => 'index'))}",//招募会员链接
+        return_commission_flag: "{$return_commission_flag}",//"{$return_commission_flag}",//全民营销:0==普通，1==全民营销,3==微信登录
+        islogin: "{$islogin}",//是否登录,0==未登录,1==已登录   如果没有登录就需要输入手机号
+        cookie:{
+            mobile:"{$mobile}",
+            cid:"{$id}",
+            readymobile:"{$mobile}"
+        },
+        join_mode: "{$join_mode}",//是否微信参加,0==否,1==是
+        isVcard: "{$vcard}",//二维码名片,vcard==二维码名片活动
+        cjText: "感谢参与！请输入您的信息",
+        id: "{$id}",//当前标签id
+        cj_check_flag: "{$cj_check_flag}",//是否需要有参与码
+        full_id: "{$full_id}",//
+        pay_token: "{$pay_token}",
+        phone: "{$phone}",
+        specialCj: "{$row['cj_phone_type']}",//手机页面抽奖类型:1-普通抽奖 2-大转盘 3-老虎机 4-砸蛋 5-摇一摇
+        from_user_id: "{$from_user_id}",
+        from_type: "{$from_type}",
+        url: {
+            cjSubmit: "{:U('DrawLottery/NewSpinTurnplate/drawLottery')}"
+        },
+        onsub: false,
+        time: '{$leftChances}', //新增字段:抽奖次数
+        ishongbao: false, //新增字段:是否红包
+        shopurl: "www.baidu.com", //新增字段:小店地址
+        cjprize: {
+            arry: [{$cjInfo.cj_cate_id}],
+    arryname: [{$cjInfo.cj_cate_name}],
+    probability: "{$cjInfo.total_chance}"
+    },
+    cj_total_part:'{$total_part}'
+    };
+    template.helper('_global', _global);
+    
+    var dataForRule = {
+    		wapInfo:"{$row.wap_info|nl2br}", 
+    		prize:{:json_encode($cjInfo['prizeList'])},
+    		cjCateList:{:json_encode($cjInfo['cjCateList'])}
+    };
+    
+    window['getWxCard'] = function () {
+        alert('您点得太快了，请多点几次');
+    };
+    document.addEventListener('WeixinJSBridgeReady', function () {
+        window['getWxCard'] = function (data) {
+            if (typeof(WeixinJSBridge) == 'undefined') {
+                alert('wait...');
+                return;
+            }
+            WeixinJSBridge.invoke('batchAddCard', {
+                "card_list": [{
+                    "card_id": data.card_id,
+                    "card_ext": data.card_ext
+                }]
+            }, function (res) {
+                //alert("res:" + JSON.stringify(res) + " -- data:" + JSON.stringify(data));
+            });
+        }
+    }, false);
+
+    $(document).ready(function (e) {
+        //活动规则
+        $(".btn-rule").click(function(){
+			var html = template("js-tmpl-rule", dataForRule);
+            cj.content({
+                msg:html,
+                btn: [{
+                    text: "返回"
+                }]
+            });
+        });
+        $("#remaining_num").text(_global.time);
+        var game = template("js-tmpl-cjtype" + _global.zp_type, _global.cjprize);
+        $(".specialCj-con .element").after(game);
+        //已登录
+        var _thisBody = $('body');
+        _thisBody.on("click", ".lotCenter", function () { //我要抽奖
+            if (_global.time > 0) {
+                if (_global.onsub)return false;
+                if (needIgnoreFlag == '1') { //不允许再抽奖
+                    alert("抱歉，最近您已经参与过该抽奖，暂时不能再次参与(┬＿┬).");
+                    return false;
+                }
+                if(CountDowner.isCountdowning()) {//正在倒计时 不可以再次提交
+                    alert("您好，短时间内不可以重复抽奖哟亲 - _ - .");
+                    return false;
+                }
+                CountDowner.notCountdowningAndInitAndStart();//开始倒计时
+                _global.onsub = true;
+                cj.login({
+                    updateurl: _global.url.cjSubmit,
+                    updatedata: {
+                        "id": _global.id,
+                        "from_user_id": _global.from_user_id,
+                        "from_type": _global.from_type,
+                        "pay_token": _global.pay_token
+                    }
+                });
+            } else { //已经没有抽奖次数 弹窗提示
+                cj.content({
+                    html: "<p><img src='__PUBLIC__/Label/Image/lottery/element_28.png' width='100%' /></p><p><img src='__PUBLIC__/Label/Image/lottery/element_29.png' width='100%' /></p>",
+                    icon: true,
+                    btn: false
+                });
+                $(".msgPop").addClass("active");
+            }
+        });
+
+        _thisBody.on("click", "#subcj", function () {
+            var regex = /^([\+][0-9]{1,3}[ \.\-])?([\(]{1}[0-9]{2,6}[\)])?([0-9 \.\-\/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$/;
+            var phone = $('#mobile').val();
+            var verify = $('#verify').val();
+            if(_global.cookie.mobile != phone){ //修改了手机号
+                if (!verify) {
+                    $("#verify").addClass("erro");
+                    cj.show();
+                    _global.onsub = false;
+                    return false;
+                }
+            }
+            if (!regex.test(phone)) { //手机号验证失败
+                $("#mobile").addClass("erro");
+                cj.show();
+                _global.onsub = false;
+                return false;
+            }
+            if (_global.onsub)return false;
+            _global.onsub = true;
+            _global.cookie.readymobile = phone;
+            update({
+                url: _global.url.cjSubmit,
+                data: $('#theform').serialize()
+            });
+        });
+
+        _thisBody.on("keyup", "#mobile", function () { //修改手机号 显示验证码
+            if($(this).val()!=_global.cookie.mobile){
+                $(this).closest("li").next("li").show();
+            }else{
+                $(this).closest("li").next("li").hide();
+            }
+        });
+
+    });
+    /**
+     * 提交抽奖
+     * */
+    function update(data) {
+        cj.tip();
+        cjajax({
+            url: data.url,
+            data: data.data
+        });
+    }
+    //转换响应值，比如，把 默认的{status:0,info:[]}转成 {code:0,msg:'',data:{}}
+    function convertRes(res) {
+        if (typeof(res.status) != 'undefined') {
+            res = {
+                code: res.status,
+                msg: typeof(res.info) == 'string' ? res.info : '',
+                data: res.data
+            };
+        } else if (typeof(res.resp_id) != 'undefined') {
+            res = {
+                code: res.resp_id,
+                msg: typeof(res.resp_desc) == 'string' ? res.resp_desc : '',
+                data: typeof(res.resp_data) != 'undefined' ? res.resp_data : ''
+            };
+        }
+        return res;
+    }
+
+
+    var query_url;
+    var i = 1;
+    /**
+     * 抽奖
+     * */
+    function cjajax(postdata, repost) {
+        var url = postdata.url;
+        var data = postdata.data;
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: data,
+            timeout: 10000,
+            dataType: "json",
+            success: function (data) {
+                console.log(data)
+                data = convertRes(data);
+                data.code = +data.code;
+
+                cj.tip(1);
+                if (data.code >= 0 || data.code == -1060 || data.code == 1012){cj.close();}
+                if ((data.code == -1060 ||data.code == 1012)&& member_reg_label_id > 0) { //(该抽奖活动只有会员才可以参与 且设置了会员招募引导页)不是会员 引导至会员招募页面
+                    cj.content({
+                        msg: "该抽奖活动只有会员才可以参与",
+                        btn: [{
+                            text: "前去注册",
+                            url:_global.member_registration
+                        }]
+                    });
+                } else if (data.code == -1048) { //预览渠道不能抽奖
+                    cj.content({
+                        msg: "此页面仅供预览！",
+                        btn: [{
+                            text: "返回",
+                            callback: function () {
+                                cj.close();
+                            }
+                        }]
+                    });
+                } else if (data.code == -1035 || data.code == 9904) { //手机号验证错误
+                    cj.close();
+                    $("#mobile").addClass("erro");
+                    _global.onsub = false;
+
+                    cj.content({
+                        msg: data.msg,
+                        btn: [{
+                            text: "继续抽奖",
+                            callback: function () {
+                                cj.close();
+                            }
+                        },{
+                            text: "返回",
+                            callback: function () {
+                                cj.login();
+                            }
+                        }]
+                    });
+
+                    return false;
+                } else if (data.code == -1040) { //没有抽奖次数
+                    cj.close();
+                    $("#mobile").addClass("erro");
+                    _global.onsub = false;
+
+                    cj.content({
+                        html: "<p><img src='__PUBLIC__/Label/Image/lottery/element_28.png' width='100%' /></p><p><img src='__PUBLIC__/Label/Image/lottery/element_29.png' width='100%' /></p>",
+                        icon: true,
+                        btn: false
+                    });
+                    $(".msgPop").addClass("active");
+
+                    return false;
+                } else if (data.code == -1007 || data.code == -1009 || data.code == -1010) { //手机验证码错误,-1007验证码错,-1009验证码错，-1010验证码过期
+                    $("#verify").addClass("erro");
+                    _global.onsub = false;
+                    return false;
+                } else if (data.code == 0) { //抽奖成功 展示奖品信息
+                    _global.cookie.mobile = _global.cookie.readymobile;
+                    handleCjResult(data);
+                } else if (data.code == -1001) { //继续查询
+                    query_url = (data.data && data.data.url) || query_url;
+                    i++;
+                    console.log('第' + i + '次查询');
+                    cj.tip("开始抽奖...");
+                    setTimeout(function () {
+                        cjajax({
+                            url: query_url
+                        }, true)
+                    }, 2000);
+                } else { //没有中奖
+                    //获得抽奖次数
+                    zpAction(0);
+                    setTimeout(function () {
+                        cj.content({
+                            msg: data.msg,
+                            btn: [{
+                                text: "继续抽奖",
+                                callback: function () {
+                                    cj.close();
+                                }
+                            }]
+                        });
+                    },6000);
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) { //请求出错
+                if (textStatus == "timeout") {
+                    cj.tip("链接超时,请查看您的网络连接");
+                } else {
+                    cj.tip("请求失败,请刷新页面重试");
+                }
+                _global.onsub = false;
+                setTimeout(function () {
+                    cj.tip(1);
+                }, 8000);
+            }
+        });
+    }
+
+    /**
+     * 处理中奖结果
+     **/
+    function handleCjResult(data) {
+        cj.tip(1);
+        cj.close();
+        var leftChances = typeof data.data.leftChances != 'undefined' ? data.data.leftChances : -1;
+        if (leftChances != -1) {
+            _global.time = leftChances;
+        }
+
+        var showResult = function () {
+            _global.onsub = false;
+            var btnMsg = [];
+            var msg = '';
+            var htmlContent = "";
+
+            var goods_info;
+            if (typeof data.data.goods_info != 'undefined') {
+                goods_info = data.data.goods_info;
+            } else {
+                goods_info = {"goods_name": '', "link_url": '', "bonus_id": 0, "goods_id": "", "goods_type": ""};
+            }
+
+            if (data.data && data.data.card_id) { //奖品为微信卡券
+                htmlContent = "<p><img src='__PUBLIC__/Label/Image/lottery/element_36.png' width='100%' /></p><p><img src='__PUBLIC__/Label/Image/lottery/element_17.png' width='100%' /></p><p class='text'>您获得了" + goods_info.goods_name + "</p>";
+                btnMsg = [{
+                    text: "继续抽奖",
+                    url: "javascript:void(0)",
+                    callback: function () {
+                        cj.close();
+                    }
+                }, {
+                    text: "去领取",
+                    url: "javascript:void(0)",
+                    callback: function () {
+                        getWxCard({
+                            card_id: data.data.card_id,
+                            card_ext: data.data.card_ext
+                        });
+                    }
+                }];
+                msg = data.msg;
+            } else { //普通奖品
+                if (_global.join_mode == "1") { //微信登录 (需要手机号)
+                    loginWithWechatGetPhoneNum(data, goods_info);
+                    return;
+                }
+                htmlContent = '';
+                if (data.data.cate_id != "") {
+                    if (goods_info.bonus_id > 0) { //定额红包
+                        htmlContent = "<p><img src='__PUBLIC__/Label/Image/lottery/element_36.png' width='100%' /></p><p><img src='__PUBLIC__/Label/Image/lottery/element_17.png' width='100%' /></p><p class='text'>您获得了" + goods_info.goods_name + "，请到" + goods_info.node_name + "使用。</p>";
+                        _global.ishongbao = true;
+                        btnMsg = [{
+                            text: "继续抽奖",
+                            url: "javascript:void(0)",
+                            callback: function () {
+                                cj.close();
+                            }
+                        }, {
+                            text: "去使用",
+                            url: goods_info.link_url,
+                            callback: function () {
+                                cj.close();
+                            }
+                        }];
+                    } else if (typeof data.data.integral_get_id != 'undefined' && data.data.integral_get_id > 0){ //积分
+                        htmlContent = "<p><img src='__PUBLIC__/Label/Image/lottery/element_36.png' width='100%' /></p><p><img src='__PUBLIC__/Label/Image/lottery/element_17.png' width='100%' /></p><p class='text'>您获得了" + goods_info.goods_name + "X" + goods_info.num+ "，请到个人中心查看。</p>";
+                        btnMsg = [{
+                            text: "继续抽奖",
+                            url: "javascript:void(0)",
+                            callback: function () {
+                                cj.close();
+                            }
+                        }, {
+                            text: "去查看",
+                            url: '{$memberCenterUrl}',
+                            callback: function () {
+                                cj.close();
+                            }
+                        }];
+                    } 
+                  //流量包
+                    else if (typeof data.data.batch_class != 'undefined' && data.data.batch_class == '15') {
+                    	htmlContent = "<p><img src='__PUBLIC__/Label/Image/lottery/element_36.png' width='100%' /></p><p><img src='__PUBLIC__/Label/Image/lottery/element_17.png' width='100%' /></p><p class='text'>您获得了" + goods_info.goods_name + "，流量将在3日内充值到账，请注意查收。</p>";
+                        btnMsg = [{
+                            text: "继续抽奖",
+                            url: "javascript:void(0)",
+                            callback: function () {
+                                cj.close();
+                            }
+                        }];
+                    } else { //卡券
+                        htmlContent = "<p><img src='__PUBLIC__/Label/Image/lottery/element_36.png' width='100%' /></p><p><img src='__PUBLIC__/Label/Image/lottery/element_17.png' width='100%' /></p><p class='text'>您获得了" + data.msg + "</p>";
+                        btnMsg = [{
+                            text: "继续抽奖",
+                            url: "javascript:void(0)",
+                            callback: function () {
+                                cj.close();
+                            }
+                        }];
+                    }
+                } else {
+                    btnMsg = false;
+                }
+                msg = data.msg;
+            }
+
+            cj.content({
+                html: htmlContent,
+                msg: msg,
+                btn: btnMsg
+            });
+            $(".msgPop").addClass("active");
+
+            return false;
+        };
+        zpAction(data.data.cate_id, showResult);
+    }
+
+    //验证码
+    function fleshVerify() {
+        $('#verifyImg').src = "{:U('Label/VerifyCode/index/')}" + "&_t=" + Math.random();
+    }
+
+    //特殊抽奖动画
+    function zpAction(id, callback) {
+        _global.onsub = true;
+        $("#remaining_num").text(_global.time);
+        $(".lotCenter").attr("class", "lotCenter lotCenter-market");
+        var Pnum = $(".prize").length;
+        var classid;
+        var noprize=[];
+        var noprizei = 0;
+        $(".lotCon .prize").each(function(index, element) {
+            if($(this).attr("data-id")=="noprize"){
+                var i = index+1;
+                noprize[noprizei] = i;
+                noprizei++;
+            }
+        });
+        $("[data-id='" + id + "']").length==0 ? classid = noprize[Math.floor((Math.random()*noprize.length))] : classid = $("[data-id='" + id + "']").index() + 1;
+        if (classid == -1) {
+            cj.tip("转盘出错了,刷新后重试");
+            setTimeout(function () {
+                cj.tip(1)
+            }, 4000);
+            return false;
+        }
+        setTimeout(function(){
+            $(".lotCenter").addClass("lotCenter-animation" + Pnum + "-" + classid);
+            $(".lotLight").removeClass("lotLight-animation2").addClass("lotLight-animation1");
+        },30);
+        setTimeout(function () {
+            _global.onsub = false;
+            $(".lotLight").removeClass("lotLight-animation1").addClass("lotLight-animation2");
+        }, 6000);
+        setTimeout(callback, 6500);
+    }
+
+    //抽奖基础
+    var cj = {
+        basic: function (msg) {
+            cj.close();
+            if (!msg.title) {
+                var notitle = "notitle";
+                msg.title = "";
+            }
+            var closehtml;
+            if (msg.isclose) {
+                closehtml = '<a href="javascript:void(0)" class="close-msgPop"><i><span>+</span></i></a>'
+            } else {
+                closehtml = "";
+            }
+            var html = ['<div class="msgPop bg" id="' + msg.id + '">',
+                '<div class="msgBg">',
+                '<div class="msgTitle border"></div>',
+                '<div class="msgTitle ' + notitle + '">' + msg.title + closehtml + '</div>',
+                '<div class="msgCon">' + msg.html + '</div>',
+                '</div>',
+                '</div>'].join('');
+            $("body").append(html);
+            if (typeof(msg.start) == 'string') {
+                window[msg.start].call(this, $(this));
+            } else if (typeof(msg.start) == 'function') {
+                msg.start.call(this, $(this));
+            }
+            $("body").find(".msgBg", html).on("click", ".cjBtn-back", function () {
+                var index = $(this).index();
+                if (typeof(msg.btn[index].callback) == 'string') {
+                    window[msg.btn[index].callback].call(this, $(this));
+                } else if (typeof(msg.btn[index].callback) == 'function') {
+                    msg.btn[index].callback.call(this, $(this));
+                } else {
+                    msg.repeat ? (cj.close(), cj.login({repeat: msg.repeat})) : cj.close();
+                    if ($(this).attr("href") != "javascript:void(0)") {
+                        window.location.href = $(this).attr("href");
+                    }
+                }
+            });
+            $("body").find(".msgBg", html).on("click", ".close-msgPop", function () {
+                if (typeof(msg.after) == 'string') {
+                    window[msg.after].call(this, $(this));
+                } else if (typeof(msg.after) == 'function') {
+                    msg.after.call(this, $(this));
+                }
+                msg.repeat ? (cj.remove(), cj.login({repeat: msg.repeat})) : cj.remove();
+            });
+            $("body").on("click", "input", msg.html, function () {
+                $(this).removeClass("erro");
+            });
+        },
+        tip: function (msg) {
+            $(".cjTip").remove();
+            if (!msg) {
+                msg = "正在请求抽奖数据...";
+            }
+
+            if (msg == 1) {
+                return false;
+            }
+            var html = '<div class="cjTip"><div class="cjTipTxt"><i></i><p>' + msg + '</p></div><div class="cjTipbg"></div></div>';
+            $("body").append(html);
+        },
+        login: function (msg) {
+            $(".msgPop").not("[id!='']").remove();
+            //如果是手机号参与，弹出登录按钮
+            if (_global.join_mode == "0" || _global.islogin == "0") {
+                var arr,reg=new RegExp("(^| )DLALCM_"+_global.cookie.cid+"=([^;]*)(;|$)");
+                if(arr=document.cookie.match(reg)){
+                    _global.cookie.mobile = unescape(arr[2]);
+                }else{
+                    _global.cookie.mobile = "";
+                }
+                var html;
+                html = template("js-tmpl-popForm", _global);
+                msg = $.extend(true, {}, cj.msg, msg);
+                msg.html = html;
+                cj.basic(msg);
+            } else {
+                update({
+                    url: msg.updateurl,
+                    data: msg.updatedata
+                });
+            }
+        },
+        content: function (msg) {
+            msg = $.extend(true, {}, cj.msg, msg);
+            if(!msg.html){
+                msg.html = template("js-tmpl-msg", msg);
+            }else{
+                if(msg.html.indexOf("js-tmpl")>=0){
+                    msg.html = template(msg.html, msg);
+                }else{
+                    msg.html = template("js-tmpl-msg", msg);
+                }
+            }
+            cj.basic(msg);
+        },
+        hide: function (msg) {
+            $(".msgPop").hide();
+        },
+        show: function (msg) {
+            $(".msgPop").show();
+        },
+
+        close: function (msg) {
+            _global.onsub = false;
+            var _MsgPopglobal = {
+                refurbish: false,
+                repeat: true
+            };
+            msg = $.extend(true, {}, _MsgPopglobal, msg);
+            $(".msgPop").not("[id!='']").remove();
+            if (msg.refurbish) {
+                location.href = location.href;
+            }
+            if (_global.isVcard == 'vcard') {
+                window.location.href = 'index.php?g=Wap&m=Vcard&a=viewUser';
+            }
+        },
+        remove: function (msg) {
+            _global.onsub = false;
+            var _MsgPopglobal = {
+                refurbish: false,
+                repeat: true
+            };
+            msg = $.extend(true, {}, _MsgPopglobal, msg);
+            $(".msgPop").remove();
+            if (_global.isVcard == 'vcard') {
+                window.location.href = 'index.php?g=Wap&m=Vcard&a=viewUser&mobile=' + _global.phone;
+            }
+        },
+        msg: {
+            id: "",
+            title: false,//标题
+            html: false,//内容
+            refurbish: false,//是否刷新
+            msg: "未知错误",//内容
+            icon: false,//小狗，1==笑，2==哭
+            repeat: false,//重新填出登陆框
+            btn: [{
+                text: "返回",//按钮文字
+                url: "javascript:void(0)",//按钮链接
+                callback: false
+            }
+            ],
+            isclose: true,
+            start: false,//弹出之后callback
+            after: false//关闭之后callback
+        }
+    }
+</script>
+
+<!-- 卡券-->
+<script type="text/html" id="js-tmpl-phoneForm">
+    <div class="cjCon" id="popForm">
+        <div class="cjText">
+            <p>{{msg}}</p>
+            <form id="js-phoneform" data-action="{{real_post_url}}" method="post">
+                <input type="hidden" name="id" value="{{id}}"/>
+                <input type="hidden" name="from_user_id" value="{{from_user_id}}"/>
+                <input type="hidden" name="from_type" value="{{from_type}}"/>
+                <input type="hidden" name="full_id" value="{{full_id}}"/>
+                <input type="hidden" name="cj_code" value="{{cj_code}}"/>
+                <input type="hidden" name="bonus_use_detail_id" value="{{bonus_use_detail_id}}" />
+                <ul>
+                    <li><input type="tel" name="phone" id="phone" placeholder="请输入手机号" maxlength="11" />
+                        <div class="formError">手机号错误</div>
+                    </li>
+                    <li class="dn"></li>
+                </ul>
+            </form>
+        </div>
+        <div class="cjBtn">
+            {{each btn as value i}}
+            <a href="{{value.url}}" class="cjBtn-back {{if btn.length>1}}{{if i==0}}first sm{{/if}}{{/if}}">{{value.text}}</a>
+            {{/each}}
+        </div>
+    </div>
+</script>
+
+<!--普通抽奖-->
+<script type="text/html" id="js-tmpl-popForm">
+    <div class="cjCon" id="popForm">
+        <div class="cjText">
+            <p>{{cjText}}</p>
+
+            <form id="theform" action="{{_global.url.cjSubmit}}" method="post" name="theform">
+                <input type="hidden" id="id" name="id" value="{{id}}"/>
+                <input type="hidden" id="cj_check_flag" name="cj_check_flag" value="{{cj_check_flag}}"/>
+                <input type="hidden" id="full_id" name="full_id" value="{{full_id}}"/>
+                <input type="hidden" id="pay_token" name="pay_token" value="{{pay_token}}"/>
+
+                <ul>
+                    <li><input type="tel" name="mobile" id="mobile" placeholder="请输入手机号" maxlength="11"
+                               value="{{cookie.mobile}}"/>
+
+                        <div class="formError">手机号错误</div>
+                    </li>
+                    <li class="{{if cookie.mobile!=""}}dn{{/if}}">
+                    <input type="tel" id="verify" name="verify" placeholder="输入验证码"
+                           class="textbox half validate[required]">
+
+                    <div class="formError">验证码错误</div>
+                    <input type="button" value="获取验证码" class="sOne-cjpasscode-btn" id="cjpasscode-btn"
+                           onclick="sendCkeckCode();" style="width: 100px;">
+                    </li>
+                    <li><a href="javascript:void(0);" id="subcj">提交</a></li>
+                </ul>
+            </form>
+        </div>
+        <div class="cjBtn">
+
+        </div>
+    </div>
+</script>
+<script>
+    function verifyPhoneno() {
+        var regex = /^([\+][0-9]{1,3}[ \.\-])?([\(]{1}[0-9]{2,6}[\)])?([0-9 \.\-\/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$/;
+        var phone = $('#mobile').val();
+        return regex.test(phone);
+    }
+
+    function sendCkeckCode() {
+        $('#cjpasscode-btn').attr('disabled', true);
+        var phone_no = $("#mobile").val();
+        var id = $("#id").val();
+        phone_no = phone_no.trim();
+        if (verifyPhoneno()) {
+            disableCjpasscodeObj();
+            cjpasscodeObj.val("正在发送..");
+            $.post("{:U('DrawLottery/NewSpinTurnplate/sendCheckCode')}", {
+                "id": id,
+                "phone_no": phone_no
+            }, function (data) {
+                if (data.status == '1') {
+                    modifyCjpasscodeBtn();
+                } else {
+                    enableCjpasscodeObj();
+                    $('#mobile').addClass("erro");
+                }
+            }, "json");
+        } else {
+            $('#cjpasscode-btn').attr('disabled', false);
+            alert("您输入的手机号：" + phone_no + " 无效!");
+        }
+    }
+
+    var cjpasscodeObj = null;
+    var modifyCjpasscodeLeftTimes;//当前剩余秒数
+    var modifyCjpasscodeTotalTimes = '{$verifyCodeExpireTime}';
+    var modifyCjpasscodeTimeInter;
+    var cjpasscodeStyle = null;
+
+    function disableCjpasscodeObj()
+    {
+        if (cjpasscodeObj == null) {
+            cjpasscodeObj = $("#cjpasscode-btn");
+            cjpasscodeStyle = cjpasscodeObj.attr('style');
+            cjpasscodeObj.attr('style', 'with:100px;background:grey none repeat scroll 0 0');
+            cjpasscodeObj.attr('disabled', true);
+            cjpasscodeObj.attr('id', '');
+        }
+    }
+
+    function enableCjpasscodeObj()
+    {
+        if (cjpasscodeObj != null) {
+            cjpasscodeObj.attr('id', 'cjpasscode-btn');
+            cjpasscodeObj.attr("style",cjpasscodeStyle);
+            cjpasscodeObj.removeAttr('disabled');
+            cjpasscodeObj.val('获取验证码');
+            clearInterval(modifyCjpasscodeTimeInter);
+            cjpasscodeObj = null;
+        }
+    }
+
+    function modifyCjpasscodeBtn()
+    {
+        disableCjpasscodeObj();
+        modifyCjpasscodeLeftTimes = modifyCjpasscodeTotalTimes;
+        modifyCjpasscodeTimeInter = setInterval(function() {
+            if (modifyCjpasscodeLeftTimes == 0) {
+                enableCjpasscodeObj();
+            } else {
+                modifyCjpasscodeLeftTimes--;
+                cjpasscodeObj.val('剩余' + modifyCjpasscodeLeftTimes + '秒');
+            }
+        }, 1000);
+    }
+
+    /**
+     * 微信登录获得手机号（领取奖励）
+     * @param data
+     * @param goods_info
+     */
+    function loginWithWechatGetPhoneNum(data, goods_info) {
+        $("#getPhoneContent").remove();
+        var tplData = {};
+        var isBonus = false;
+        var isJf   = false;
+        if (typeof data.data.cj_code != 'undefined') {
+            _global.cj_code = data.data.cj_code;
+        } else {
+            _global.cj_code = '';
+        }
+        if (typeof goods_info.goods_name != 'undefined') {
+            if (typeof goods_info.bonus_id != 'undefined' && parseInt(goods_info.bonus_id) > 0) { //定额红包
+                isBonus = true;
+                link_url = '#';
+                if (typeof  goods_info.link_url != 'undefined') {
+                    link_url = goods_info.link_url;
+                }
+                var node_name = "旺财小店";
+                if (typeof goods_info.node_name !='undefined') {
+                    node_name = goods_info.node_name;
+                }
+                tplData.msg = "恭喜您获得了" + goods_info.goods_name + ",请输入手机号，去" + node_name + "使用!";
+                if (typeof data.data.bonus_use_detail_id != 'undefined') {
+                    tplData.bonus_use_detail_id = data.data.bonus_use_detail_id;
+                }
+                tplData.real_post_url = "<?php echo U('Label/ShareBatch/getBonus');?>";
+            }  else if(typeof data.data && data.data != 'undefined' && typeof data.data.prize_type != 'undefined' && data.data.prize_type == 4){ //积分
+                isJf = true;
+                tplData.msg = "恭喜您获得了" +  goods_info.goods_name + "X" + goods_info.num + ",请输入手机号，以便我们为您发放奖品!";
+                tplData.real_post_url = "<?php echo U('Label/ShareBatch/getPrize');?>";
+            }  else if(typeof data.data && data.data != 'undefined' && typeof data.data.prize_type != 'undefined' && data.data.prize_type == 6){ //微信红包
+                cj.content({
+                    html: "<p><img src='__PUBLIC__/Label/Image/lottery/element_36.png' width='100%' /></p><p><img src='__PUBLIC__/Label/Image/lottery/element_17.png' width='100%' /></p><p class='text'>恭喜您获得了" + goods_info.goods_name + ",请去微信领取打开红包!</p>",
+                    btn: [{
+                        text: "继续抽奖",
+                        url: "javascript:void(0)",
+                        callback: function () {
+                            cj.close();
+                        }
+                    }]
+                });
+                return false;
+            } 
+            //流量包
+            else if (typeof data.data && data.data != 'undefined' && typeof data.data.batch_class != 'undefined' && data.data.batch_class == 15) {
+            	tplData.msg = "恭喜您获得了" +  goods_info.goods_name + ",请输入手机号进行充值!";
+                tplData.real_post_url = "<?php echo U('Label/ShareBatch/getPrize');?>";
+            } else { //卡券
+                tplData.msg = "恭喜您获得了" +  goods_info.goods_name + ",请输入手机号，以便我们发送中奖凭证给您!";
+                tplData.real_post_url = "<?php echo U('Label/ShareBatch/getPrize');?>";
+            }
+        } else {
+            tplData.real_post_url = "<?php echo U('Label/ShareBatch/getPrize');?>";
+        }
+
+        if (typeof tplData.msg == 'undefined' || tplData.msg == '') {
+            tplData.msg = "恭喜您中奖了,请您输入手机号，以便我们发送中奖凭证给您！";
+        }
+
+        tplData.id = _global.id;
+        tplData.full_id = _global.full_id;
+        tplData.pay_token = _global.pay_token;
+        tplData.from_user_id = _global.from_user_id;
+        tplData.from_type = _global.from_type;
+        tplData.cj_code = _global.cj_code;
+
+        cj.content({
+            msg:data.msg,
+            html:template("js-tmpl-phoneForm", tplData),
+            id:"getPhoneContent",
+            btn:[{
+                text:"立即领取",
+                callback:function(){
+                    if(_global.onsub)return false;
+                    _global.onsub = true;
+                    var _that = $(this);
+                    var _form = $('#js-phoneform');
+                    var url = _form.data('action');
+                    var data = _form.serialize();
+                    var regex = /^([\+][0-9]{1,3}[ \.\-])?([\(]{1}[0-9]{2,6}[\)])?([0-9 \.\-\/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$/;
+                    var phone = $('input[name=phone]',_form).val();
+                    if(!regex.test(phone)){$('input[name=phone]',_form).addClass("erro");_global.onsub = false;return false;}
+                    cj.tip("正在领取...");
+                    $.post(url,data,function(res){
+                        cj.hide();
+                        cj.tip(1);
+                        if(+res.status == 0){ //失败
+                            cj.content({
+                                msg:res.info,
+                                isclose:false,
+                                btn:[{
+                                    callback:function(){cj.close();$("#getphone").show();}
+                                }]
+                            });
+                        } else { //成功
+                            var btnContent = false;
+                            if (isBonus) { //红包
+                                btnContent = [{
+                                    text:"去使用",
+                                    url:link_url
+                                }];
+                            } else if (isJf){ //积分
+                                btnContent = [{
+                                    text:"继续抽奖"
+                                }, { text:"查看", url:"{$memberCenterUrl}"}];
+                            } else { //卡券
+                                btnContent = [{
+                                    text:"继续抽奖"
+                                }];
+                            }
+                            cj.content({
+                                msg:res.info,
+                                isclose:false,
+                                btn:btnContent
+                            });
+                        }
+                    },'json').fail(function(){
+                        cj.tip("系统正忙...,请重新尝试");
+                        $("#getPhoneContent").show();
+                    }).always(function(){
+                        cj.tip(1);
+                        _global.onsub = false;
+                        _that.text("立即领取");
+                    });
+                }
+            }]
+        });
+    }
+
+</script>
+
+<script type="text/html" id="js-tmpl-msg">
+    <div class="cjText">
+        {{if !html}}
+        <div class="cjText-con">
+            {{if !icon}}
+            <div class="cjText-text noicon">{{#msg}}</div>
+            {{else}}
+            <div class="cjText-text">{{#msg}}</div>
+            <div class="cjText-img">
+                {{if icon==1}}
+                <img src="__PUBLIC__/Label/Image/lottery/element_17.png" width="">
+                {{else if icon==0}}
+                <img src="__PUBLIC__/Label/Image/lottery/element_34.png" width="">
+                {{else}}
+                <img src="__PUBLIC__/Label/Image/lottery/element_34.png" width="">
+                {{/if}}
+            </div>
+            {{/if}}
+        </div>
+        {{else}}
+        {{#html}}
+        {{/if}}
+    </div>
+    <div class="cjBtn">
+        {{each btn as value i}}
+        <a href="{{value.url}}" class="cjBtn-back {{if btn.length>1}}{{if i==0}}first sm{{/if}}{{/if}}">{{value.text}}</a>
+        {{/each}}
+    </div>
+</script>
+<!--大转盘-->
+<script type="text/html" id="js-tmpl-cjtype2">
+    <div id="lottery"
+         class="{{if arry.length==1}}l3{{else if arry.length==2}}l4{{else if arry.length==3}}l6{{else if arry.length==4}}l6{{else if arry.length==5}}l6{{else if arry.length==6}}l8{{else if arry.length==7}}l8{{/if}}">
+        <div class="lotBg">
+            <div class="lotBg2"></div>
+            <div class="lotBg3"></div>
+            <div class="lotBg4"></div>
+            <div class="lotLight lotLight-animation2">
+                <li class="lotLight1"><i></i></li>
+                <li class="lotLight3"><i></i></li>
+                <li class="lotLight5"><i></i></li>
+                <li class="lotLight7"><i></i></li>
+                <li class="lotLight9"><i></i></li>
+                <li class="lotLight11"><i></i></li>
+                <li class="lotLight13"><i></i></li>
+                <li class="lotLight15"><i></i></li>
+            </div>
+            <div class="lotCon">
+                {{if arry.length==1}}
+                <div class="prize prize1" data-id="{{arry[0]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize2" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize3" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                {{else if arry.length==2}}
+                <div class="prize prize1" data-id="{{arry[0]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize2" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize3" data-id="{{arry[1]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize4" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                {{else if arry.length==3}}
+                <div class="prize prize1" data-id="{{arry[0]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize2" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize3" data-id="{{arry[1]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize4" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize5" data-id="{{arry[2]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize6" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                {{else if arry.length==4}}
+                <div class="prize prize1" data-id="{{arry[0]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize2" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize3" data-id="{{arry[1]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize4" data-id="{{arry[2]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize5" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize6" data-id="{{arry[3]}}">
+                    <div class="prizebg"></div>
+                </div>
+                {{else if arry.length==6}}
+                <div class="prize prize1" data-id="{{arry[0]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize2" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize3" data-id="{{arry[1]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize4" data-id="{{arry[2]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize5" data-id="{{arry[3]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize6" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize7" data-id="{{arry[4]}}">
+                    <div class="prizebg"></div>
+                </div>
+                <div class="prize prize8" data-id="{{arry[5]}}">
+                    <div class="prizebg"></div>
+                </div>
+                {{else}}
+                {{each arry as value i}}
+                <div class="prize prize{{i+1}}" data-id="{{arry[i]}}">
+                    <div class="prizebg"></div>
+                </div>
+                {{/each}}
+                <div class="prize prize{{arry.length+1}}" data-id="noprize">
+                    <div class="prizebg"></div>
+                </div>
+                {{/if}}
+            </div>
+            <div class="lotTxt">
+                {{if arry.length==1}}
+                <p class="txt1"><span>{{arryname[0]}}</span></p>
+
+                <p class="txt2"><span>未中奖</span></p>
+
+                <p class="txt3"><span>未中奖</span></p>
+                {{else if arry.length==2}}
+                <p class="txt1"><span>{{arryname[0]}}</span></p>
+
+                <p class="txt2"><span>未中奖</span></p>
+
+                <p class="txt3"><span>{{arryname[1]}}</span></p>
+
+                <p class="txt4"><span>未中奖</span></p>
+                {{else if arry.length==3}}
+                <p class="txt1"><span>{{arryname[0]}}</span></p>
+
+                <p class="txt2"><span>未中奖</span></p>
+
+                <p class="txt3"><span>{{arryname[1]}}</span></p>
+
+                <p class="txt4"><span>未中奖</span></p>
+
+                <p class="txt5"><span>{{arryname[2]}}</span></p>
+
+                <p class="txt6"><span>未中奖</span></p>
+                {{else if arry.length==4}}
+                <p class="txt1"><span>{{arryname[0]}}</span></p>
+
+                <p class="txt2"><span>未中奖</span></p>
+
+                <p class="txt3"><span>{{arryname[1]}}</span></p>
+
+                <p class="txt4"><span>{{arryname[2]}}</span></p>
+
+                <p class="txt5"><span>未中奖</span></p>
+
+                <p class="txt6"><span>{{arryname[3]}}</span></p>
+                {{else if arry.length==6}}
+                <p class="txt1"><span>{{arryname[0]}}</span></p>
+
+                <p class="txt2"><span>未中奖</span></p>
+
+                <p class="txt3"><span>{{arryname[1]}}</span></p>
+
+                <p class="txt4"><span>{{arryname[2]}}</span></p>
+
+                <p class="txt5"><span>{{arryname[3]}}</span></p>
+
+                <p class="txt6"><span>未中奖</span></p>
+
+                <p class="txt7"><span>{{arryname[4]}}</span></p>
+
+                <p class="txt8"><span>{{arryname[5]}}</span></p>
+                {{else}}
+                {{each arry as value i}}
+                <p class="txt{{i+1}}"><span>{{arryname[i]}}</span></p>
+                {{/each}}
+                <p class="txt{{arry.length+1}}"><span>未中奖</span></p>
+                {{/if}}
+            </div>
+            <div class="lotCenter lotCenter-market">
+                <i></i>
+                <a href="javascript:void(0)"><span>我要<br/>抽奖</span></a>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/html" id="js-tmpl-rule">
+<div class="gameRule">
+	<div class="divRule">
+		<h2>活动规则</h2>
+		<p>{{#wapInfo}}</p>
+		<div class="prizeList">
+			<h2>活动奖品</h2>
+			{{each cjCateList as value i}}
+			<div class="prizeItem">
+				<h3>{{value.name}}</h3>
+				{{each prize as value2 j}}
+				{{if value2.cj_cate_id == value.id}}
+				<div class="prize">
+				<div class="img"><img src="{{value2.batch_img}}"></div>
+				<p>{{value2.batch_name}}</p>
+				</div>
+				{{/if}}
+				{{/each}}
+			</div>
+			{{/each}}
+		</div>
+	</div>
+</div>
+</script>
+<!--微信分享 start-->
+<script>
+    var wxShareData = {$wxShareData};
+</script>
+<include file="Label/Public/_shareWx"/>
+<!--微信分享 end-->
+
+</html>

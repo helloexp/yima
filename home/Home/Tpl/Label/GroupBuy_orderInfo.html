@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>订单信息</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<load href="__PUBLIC__/Label/Css/wap_Purchase.css"/>
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<script>
+$(document).ready(function(e){
+	$("#sub_button").click(function(){
+		var consignee_phone = $("#consignee_phone").val();
+		if(consignee_phone == ''){
+			alert('收货人手机号不能为空');
+			return false;
+		}
+		setTimeout(function(){
+	        $('#loadingBox').show();
+	    },1);
+		$("form").submit();
+	});
+	var buy_num = {$buyNum};
+	$("#numPrice-minus").click(function(){    //按-号
+        var unitPrice=parseInt($("#unitPrice").text());
+            numPrice=parseInt($("#numPrice").val());
+            totalPrice="";
+            if(numPrice<=1){
+            	$("#numPrice").val(1);
+            }else{
+                numPrice=numPrice-1;
+                totalPrice=numPrice*unitPrice;
+                $("#numPrice").val(numPrice);
+                $("#totalPrice").text(totalPrice);
+            }
+    });
+    $("#numPrice-add").click(function(){    //按+号
+        var unitPrice=parseInt($("#unitPrice").text());
+            numPrice=parseInt($("#numPrice").val());
+            totalPrice="";
+            if(numPrice>=buy_num){
+            	 alert("您购买的数量太多了");
+            	 $("#numPrice").val(buy_num);
+            }else{
+            	 numPrice=numPrice+1;
+                 totalPrice=numPrice*unitPrice;
+                 $("#numPrice").val(numPrice);
+                 $("#totalPrice").text(totalPrice);
+            }
+    });
+    $("#numPrice").change(function(){    //直接输入框修改
+        var unitPrice=parseInt($("#unitPrice").text());
+            numPrice=parseInt($("#numPrice").val());
+            if(numPrice<1 || numPrice==""){
+                numPrice=1;
+                $("#numPrice").val(numPrice);
+                totalPrice=numPrice*unitPrice;
+                $("#numPrice").val(numPrice);
+                $("#totalPrice").text(totalPrice);
+            }else if(numPrice >= buy_num){
+            	alert("您购买的数量太多了");
+            	numPrice=buy_num;
+                $("#numPrice").val(numPrice);
+                totalPrice=numPrice*unitPrice;
+                $("#numPrice").val(numPrice);
+                $("#totalPrice").text(totalPrice);
+            }else{
+                totalPrice=numPrice*unitPrice;
+                $("#numPrice").val(numPrice);
+                $("#totalPrice").text(totalPrice);
+            }
+    });
+}); 
+function link_to(url,fun){
+    setTimeout(function(){
+        $('#loadingBox').show();
+    },1);
+    setTimeout(function(){
+    if(typeof url == 'string'){
+    location.href=url;
+    }
+    if(typeof url == 'function'){
+    url();
+    }
+    },500);
+    setTimeout(function(){$('#loadingBox').hide();},6000);
+    if(typeof fun == 'string'){
+    var jscode = new Function('return function(){'+fun+'}')();
+        jscode();
+    }else if(typeof fun == 'function'){
+        fun();
+    }
+}
+</script>
+</head>
+<body>
+<div id="wrapper" class="bgf3f3f3">
+    <div id="container">
+        <div id="main">
+            <form action="{:U('Label/GroupBuy/orderInfo')}" method="post">
+                <div class="orderForm">
+                    <div class="orderForm-title">订单信息</div>
+                    <div class="orderForm-msg fn">
+                        <li class="fn"><p class="l">商品名称</p><p class="r">{$goodsInfo['group_goods_name']}</p></li><!--最多11个字-->
+                        <li class="fn"><p class="l">商品单价</p><p class="r"><span>￥</span><span id="unitPrice">{$goodsInfo['group_price']}</span><span>元</span></p></li>
+                        <li class="fn"><p class="l">购买数量</p><p class="r"><a href="javascript:void(0)" class="numPrice-minus" id="numPrice-minus">-</a><span><input type="text" class="numPrice" id="numPrice" name="goods_num" value="1"></span><a href="javascript:void(0)" class="numPrice-add" id="numPrice-add">+</a></p></li>
+                        <li class="fn"><p class="l">商品总价</p><p class="r"><span>￥</span><span id="totalPrice">{$goodsInfo['group_price']}</span><span>元</span></p></li>
+                    </div>
+                    <div class="orderForm-title">收货人手机号<span>（很重要）</span></div>
+                    <div class="orderForm-msg">
+                        <li class="fn"><input type="tel" class="orderInput" name="consignee_phone" id="consignee_phone" placeholder="收货人手机号" value="{$Think.session.groupPhone}"></li>
+                    </div>
+                    <div class="orderForm-title">选择支付方式</div>
+                    <div class="orderForm-msg">
+                        <li class="fn">
+                            <select class="orderSelect" name="payment_type">
+                                <option value="1">支付宝</option>
+                            </select>
+                        </li>
+                    </div>
+                    <div class="orderForm-update">
+                        <input type="hidden" value="{$id}" name="id" id="id">
+                        <input type="button" id="sub_button" class="orderBtn" value="提交订单" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="dn-bg dn"></div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>

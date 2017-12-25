@@ -1,0 +1,365 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>码上有红包</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,码上有红包" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<load href="__PUBLIC__/Label/Css/activity/wap_20140131.css"/>
+<script>
+$(document).ready(function(e) {
+	//判断字符
+	$("hr:eq(0)").hide();
+	var fData=$(".top-title").text();
+	var intLength=0;
+    for (var i=0;i<fData.length;i++)
+    {
+        if ((fData.charCodeAt(i) < 0) || (fData.charCodeAt(i) > 255))
+            intLength=intLength+2
+        else
+            intLength=intLength+1    
+    }
+	if(intLength<=20){ 
+		$(".top-title").css("font-size","20px"); 
+	}else{ 
+		$(".top-title").css("font-size","18px"); 
+	}
+    //抽奖
+    var _is_sub = false;
+    $('#subcj').click(function(){
+         if(_is_sub)
+            return false;
+        _is_sub = true;
+       $.post(
+        "{:U('Label/Cj/submit')}",
+		$('#theform').serialize(),
+		function(data) {
+		  popForm('popMsg',data.info,data.status);
+          _is_sub = false;
+
+		},
+		'json'
+	   ); 
+    });
+	
+	//页面大小
+	var snownum=0;
+	initialise();
+	snowman(snownum);
+	$(".go-prize").live("click",function(){
+		$(this).removeClass("snow-deg2").removeClass("snow-deg1").addClass("click-prize");
+		$(".go-prize-click").hide();
+		setTimeout("popForm('popForm',0)",800);
+	});
+});
+    
+$(window).resize(function(e) {
+	initialise();
+});
+
+function initialise(){
+	var windowwidth=$(window).width();
+	if(windowwidth>640){windowwidth=640;}
+	var scale=windowwidth/320;
+//	$(".logo").width(80*scale+"px")
+//	$(".logo").css("marginLeft",-40*scale);
+//	$(".logo").css("border-radius",50*scale);
+//	$(".logo img").css("border-radius",50*scale);
+//	$(".logo").height(80*scale+"px");
+//	$(".logo").css("marginTop",-80*scale);
+	$(".top-title").css("marginTop",5*scale);
+	$(".snow-sOne").width(85*scale+"px");
+	$(".snow-sTwo").width(95*scale+"px");
+	$(".snow-sThree").width(77*scale+"px");
+	$(".present-all").width(70*scale+"px");
+	$(".snow-sThree").css("left",120*scale);
+	$(".snow-light").width(90*scale+"px");
+	$(".snow-light").height(90*scale+"px");
+	$(".snow-flow").width(107*scale+"px");
+	$(".snow-flow").height(72*scale+"px");
+	$(".snow-say").width(88*scale+"px");
+	$(".snow-say").height(74*scale+"px");
+	
+	$(".present-sOne").css("left",$(".snow-sOne").css("left"));
+	$(".present-sOne").css("top",$(".snow-sOne").css("top"));
+	$(".present-sTwo").css("right",$(".snow-sTwo").css("right"));
+	$(".present-sTwo").css("top",$(".snow-sTwo").css("top"));
+	$(".present-sThree").css("left",$(".snow-sThree").css("left"));
+	$(".present-sThree").css("top",$(".snow-sThree").css("top"));
+	$(".present-sOne").css("marginTop",75*scale);
+	$(".present-sOne").css("marginLeft",5*scale);
+	$(".present-sTwo").css("marginTop",60*scale);
+	$(".present-sTwo").css("marginRight",15*scale);
+	$(".present-sThree").css("marginTop",65*scale);
+	$(".present-sThree").css("marginLeft",1*scale);
+	
+}
+function snowman(snownum){
+	$(".snow-flow").live("touchstart",function(event){
+		$(".snow-flow").addClass("flow");
+		setTimeout("$('.snow-flow').removeClass('flow')",2000);
+	});
+	$(".snow-sOne").live("touchstart",function(event){
+		$(".snow-sOne").removeClass("snowman1");
+		var IstartX,IstartY,nStartX,nStartY,nStartXX,nStartYY,nStartXXX,nStartYYY
+			IstartX=parseInt($(this).css("left"));
+			IstartY=parseInt($(this).css("top"));
+			nStartX=event.originalEvent.changedTouches[0].clientX;
+			nStartY=event.originalEvent.changedTouches[0].clientY;
+		$(".snow-sOne").unbind("touchmove").bind("touchmove",function(event){
+			event.preventDefault();
+			nStartXX = event.originalEvent.changedTouches[0].clientX;
+			nStartYY = event.originalEvent.changedTouches[0].clientY;
+			nStartXXX=nStartXX-nStartX+IstartX;
+			nStartYYY=nStartYY-nStartY+IstartY;
+			$(this).css("left",nStartXXX);
+			$(this).css("top",nStartYYY);
+		});
+
+
+
+		$(".snow-sOne").unbind("touchend").bind("touchend",function(event){
+			if(nStartXXX>=50 || nStartXXX<=-40 || nStartYYY<=-40 || nStartYYY>=100){
+				if($(".snow-sOne.already").length>=1){return false;};
+				$(".snow-sOne").addClass("already");
+				prize(snownum,1);
+			}
+		});
+	});
+	$(".snow-sTwo").live("touchstart",function(event){
+		$(".snow-sTwo").removeClass("snowman2");
+		var IstartX,IstartY,nStartX,nStartY,nStartXX,nStartYY,nStartXXX,nStartYYY
+			IstartX=parseInt($(this).css("right"));
+			IstartY=parseInt($(this).css("top"));
+			nStartX=event.originalEvent.changedTouches[0].clientX;
+			nStartY=event.originalEvent.changedTouches[0].clientY;
+		$(".snow-sTwo").unbind("touchmove").bind("touchmove",function(event){
+			event.preventDefault();
+			nStartXX = event.originalEvent.changedTouches[0].clientX;
+			nStartYY = event.originalEvent.changedTouches[0].clientY;
+			nStartXXX=nStartX-nStartXX+IstartX;
+			nStartYYY=nStartYY-nStartY+IstartY;
+			$(this).css("right",nStartXXX);
+			$(this).css("top",nStartYYY);
+		});
+		$(".snow-sTwo").unbind("touchend").bind("touchend",function(event){
+			if(nStartXXX>=50 || nStartXXX<=-40 || nStartYYY<=-40 || nStartYYY>=100){
+				if($(".snow-sTwo.already").length>=1){return false;};
+				$(".snow-sTwo").addClass("already");
+				prize(snownum,2);
+			}
+		});
+	});
+	$(".snow-sThree").live("touchstart",function(event){
+		$(".snow-sThree").removeClass("snowman3");
+		var IstartX,IstartY,nStartX,nStartY,nStartXX,nStartYY,nStartXXX,nStartYYY
+			IstartX=parseInt($(this).css("left"));
+			IstartY=parseInt($(this).css("top"));
+			nStartX=event.originalEvent.changedTouches[0].clientX;
+			nStartY=event.originalEvent.changedTouches[0].clientY;
+		$(".snow-sThree").unbind("touchmove").bind("touchmove",function(event){
+			event.preventDefault();
+			nStartXX = event.originalEvent.changedTouches[0].clientX;
+			nStartYY = event.originalEvent.changedTouches[0].clientY;
+			nStartXXX=nStartXX-nStartX+IstartX;
+			nStartYYY=nStartYY-nStartY+IstartY;
+			$(this).css("left",nStartXXX);
+			$(this).css("top",nStartYYY);
+		});
+		$(".snow-sThree").unbind("touchend").bind("touchend",function(event){
+			if(nStartXXX>=170 || nStartXXX<=70 || nStartYYY<=10 || nStartYYY>=160){
+				if($(".snow-sThree.already").length>=1){return false;};
+				$(".snow-sThree").addClass("already");
+				prize(snownum,3);
+			}
+		});
+	});
+}
+function prize(snownum,snowid){
+	switch(snowid){
+	case 1:
+		var snowmath=Math.floor(Math.random()*5);
+		var time = 3;
+		var checkTime = function(){
+			var $present=$(".present-sOne");
+			var $presentp=$(".present-sOne p");
+			$(".present-sOne p").text(time);
+			if(time==0){
+				if(snownum>=3){
+					$presentp.hide();
+					$present.append("<img src='__PUBLIC__/Label/Image/20140131/snow-prize.png' class='snow-prize go-prize'><div class='go-prize-click'></div>");
+						setTimeout("$('.present-sOne .snow-prize').removeClass('snow-prize').addClass('snow-deg1')",1000);
+					clearInterval(Int);
+				}else{
+					if(snowmath==1){
+						$presentp.hide();
+						$present.append("<img src='__PUBLIC__/Label/Image/20140131/snow-prize.png' class='snow-prize go-prize'><div class='go-prize-click'></div>");
+						setTimeout("$('.present-sOne .snow-prize').removeClass('snow-prize').addClass('snow-deg1')",1000);
+            			clearInterval(Int);
+					}else{
+						$presentp.hide();
+						$present.append("<img src='__PUBLIC__/Label/Image/20140131/snow-noprize.png' class='snow-prize'>");
+						setTimeout("$('.present-sOne .snow-prize').removeClass('snow-prize').addClass('snow-deg2')",1000);
+            			clearInterval(Int);
+					}
+				}
+			}
+			time--;
+		}
+		var Int=setInterval(checkTime,500);
+		snownum++;
+		snowman(snownum);
+	  break;
+	case 2:
+		var snowmath=Math.floor(Math.random()*8);
+		var time = 3;
+		var checkTime = function(){
+			var $present=$(".present-sTwo");
+			var $presentp=$(".present-sTwo p");
+			$presentp.text(time);
+			if(time==0){
+				if(snownum>=3){
+						$presentp.hide();
+					$present.append("<img src='__PUBLIC__/Label/Image/20140131/snow-prize.png' class='snow-prize go-prize'><div class='go-prize-click'></div>");
+						setTimeout("$('.present-sTwo .snow-prize').removeClass('snow-prize').addClass('snow-deg1')",1000);
+					clearInterval(Int);
+				}else{
+					if(snowmath==1){
+						$presentp.hide();
+						$present.append("<img src='__PUBLIC__/Label/Image/20140131/snow-prize.png' class='snow-prize go-prize'><div class='go-prize-click'></div>");
+						setTimeout("$('.present-sTwo .snow-prize').removeClass('snow-prize').addClass('snow-deg1')",1000);
+            			clearInterval(Int);
+					}else{
+						$presentp.hide();
+						$present.append("<img src='__PUBLIC__/Label/Image/20140131/snow-noprize.png' class='snow-prize'>");
+						setTimeout("$('.present-sTwo .snow-prize').removeClass('snow-prize').addClass('snow-deg1')",1000);
+            			clearInterval(Int);
+					}
+				}
+			}
+			time--;
+		}
+		var Int=setInterval(checkTime,500);
+		snownum++;
+		snowman(snownum);
+	  break;
+	case 3:
+		var snowmath=Math.floor(Math.random()*8);
+		var time = 3;
+		var checkTime = function(){
+			var $present=$(".present-sThree");
+			var $presentp=$(".present-sThree p");
+			$presentp.text(time);
+			if(time==0){
+				if(snownum>=3){
+					$presentp.hide();
+					$present.append("<img src='__PUBLIC__/Label/Image/20140131/snow-prize.png' class='snow-prize go-prize'><div class='go-prize-click'></div>");
+						setTimeout("$('.present-sThree .snow-prize').removeClass('snow-prize').addClass('snow-deg1')",1000);
+					clearInterval(Int);
+				}else{
+					if(snowmath==1){
+						$presentp.hide();
+						$present.append("<img src='__PUBLIC__/Label/Image/20140131/snow-prize.png' class='snow-prize go-prize'><div class='go-prize-click'></div>");
+						setTimeout("$('.present-sThree .snow-prize').removeClass('snow-prize').addClass('snow-deg1')",1000);
+            			clearInterval(Int);
+					}else{
+						$presentp.hide();
+						$present.append("<img src='__PUBLIC__/Label/Image/20140131/snow-noprize.png' class='snow-prize'>");
+						setTimeout("$('.present-sThree .snow-prize').removeClass('snow-prize').addClass('snow-deg2')",1000);
+            			clearInterval(Int);
+					}
+				}
+			}
+			time--;
+		}
+		var Int=setInterval(checkTime,500);
+		snownum++;
+		snowman(snownum);
+	  break;
+	}	
+}
+function wrapperLoadend(){
+	$("#wrapper").show();
+	$("#wrapperLoad").animate({top:"-1000px"},1000);
+}
+function wrapperLoad(){
+	$(".btn-snow-one").removeClass("btn-snow-one").addClass("btn-snow-two");
+}
+</script>
+</head>
+<body onLoad="wrapperLoad()">
+<div id="wrapperLoad">
+	<div class="wrapperLoad">
+        <?php if($row['log_img']!= ''){?>
+                <div class="logo">
+                    <img src="__UPLOAD__/<?php echo $row['log_img']?>"/>
+                </div>
+        <?php }else{?>
+    	<div class="loadgif"></div>
+    	<div class="loadgif-con"></div>
+        <?php }?>
+        <div class="loadcon"><img src="__PUBLIC__/Label/Image/20140131/wrapperLoad-bg.png"><h2>{$row['node_name']}</h2><p><?php echo $row['wap_info']?></p></div>
+        <div class="loadbtn"><a href="javascript:void(0)" class="btn-snow-one" onClick="wrapperLoadend()"><p>抢红包喽</p></a></div>
+        <div class="loadinstruction">拖动雪人找到惊喜红包点击抽奖。</div>
+    </div>
+</div>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div id="mainCon" class="mainCon fn" <?php if($row['sns_type']!=''){?> style="padding-bottom:10px;"<?php }?>>
+            	<img src="__PUBLIC__/Label/Image/20140131/bg.jpg" id="bg-img">
+            	<img src="__PUBLIC__/Label/Image/20140131/snow-light2.png" class="snow-light2">
+            	<img src="__PUBLIC__/Label/Image/20140131/snow-flow.png" class="snow-flow">
+            	<img src="__PUBLIC__/Label/Image/20140131/snow-star.png" class="snow-star star1">
+            	<img src="__PUBLIC__/Label/Image/20140131/snow-star.png" class="snow-star star2">
+            	<img src="__PUBLIC__/Label/Image/20140131/snow-star.png" class="snow-star star4">
+            	<img src="__PUBLIC__/Label/Image/20140131/snow-light.png" class="snow-light" onClick="audio()">
+				<?php if($row['music'] != ''){?>
+              <audio src="__UPLOAD__/<?php echo $row['music']?>" autoplay="true" loop id="audio" style="display:none; width:0; height:0; overflow:hidden;"></audio>
+					<script>
+                        function audio(){
+                            var audio = document.getElementById('audio');
+                                if(audio.paused){
+                                    audio.play();
+									$(".voice_button").css("background","url(__PUBLIC__/Label/Image/voice_button.png)");
+									$(".voice_button").css("background-size","100%");
+                                }else{
+                                    audio.pause();
+									$(".voice_button").css("background","url(__PUBLIC__/Label/Image/stop_button.png)");
+									$(".voice_button").css("background-size","100%");
+                                }
+                            }
+                    </script>
+                <?php }?>
+                <div class="mainCon-contenter">
+                	<div class="mainCon-contenter-bg">
+                        <img src="__PUBLIC__/Label/Image/20140131/snow-sOne.png" class="snow-sOne snow-img snowman1">
+                        <img src="__PUBLIC__/Label/Image/20140131/snow-sTwo.png" class="snow-sTwo snow-img snowman2">
+                        <img src="__PUBLIC__/Label/Image/20140131/snow-sThree.png" class="snow-sThree snow-img snowman3">
+                      <div class="present-sOne present-all">
+                        	<p></p>
+                        	<img src="__PUBLIC__/Label/Image/20140131/snow-box.png" class="snow-box">
+                        </div>
+                        <div class="present-sTwo present-all">
+                        	<p></p>
+                        	<img src="__PUBLIC__/Label/Image/20140131/snow-box.png" class="snow-box">
+                        </div>
+                        <div class="present-sThree present-all">
+                        	<p></p>
+                        	<img src="__PUBLIC__/Label/Image/20140131/snow-box.png" class="snow-box">
+                        </div>
+                	</div>
+                </div>
+            </div>
+      		<include file="Public:share"/>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+</div>
+<include file="Public:pop"/>
+</body>
+</html>

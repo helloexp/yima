@@ -1,0 +1,922 @@
+<!--popNew-->
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<php>
+    //设置cookie手机
+    $_global_user_mobile = cookie('_global_user_mobile');
+    $phone = !empty($phone) ? $phone : $_global_user_mobile;
+    $u_arr = array();
+    if(in_array($jb_label_id, array(49735, 49734, 49733, 49732, 49730, 49728, 49727, 49725, 49724, 49726, 49964))){
+        $u_arr['id'] = $jb_label_id;
+    }
+</php>
+<script>
+var _global = {
+		isgocj:true,
+		zp_type:"{$row['cj_phone_type']}",//抽奖形式:1==普通，2==大转盘，3==老虎机，4==砸金蛋，5==摇一摇
+		member_registration:"{:U('Label/MemberRegistration/index',array('id'=>$member_reg_label_id))}",//招募会员链接
+		return_commission_flag:"{$return_commission_flag}",//"{$return_commission_flag}",//全民营销:0==普通，1==全民营销,3==微信登录
+		islogin:"{$islogin}",//是否登录,0==未登录,1==已登录
+		join_mode:"{$join_mode}",//是否微信参加,0==否,1==是
+		isVcard:"{$vcard}",//二维码名片,vcard==二维码名片活动
+		cjText:"<?php if($batch_id == '704' && $batch_type == '3'){echo '请确认您的手机号信息';}else{echo '感谢参与！请输入您的信息';}?>",
+		id:"{$id}",
+		cj_check_flag:"{$cj_check_flag}",
+		full_id:"{$full_id}",
+		pay_token:"{$pay_token}",
+		phone:"{$phone}",
+		specialCj:"{$row['cj_phone_type']}",
+		from_user_id:"{$from_user_id}",
+		from_type:"{$from_type}",
+		pay_token:"{$pay_token}",
+        url:{
+            cjSubmit:"{:U('Label/CjNew/submitQueue')}"
+        },
+		onsub:false,
+		cjprize:{
+			arry:[{$cjInfo.cjCateId}],
+			arryname:[{$cjInfo.cjCateName}],
+			probability:"{$cjInfo.total_chance}"
+		}
+	}
+template.helper('_global', _global);
+window['getWxCard'] = function(){
+    alert('您点得太快了，请多点几次');
+};
+document.addEventListener('WeixinJSBridgeReady', function(){
+   window['getWxCard'] = function(data){
+       //todo debug
+        if(typeof(WeixinJSBridge) == 'undefined'){
+            alert('wait...');
+            return;
+        }
+        /*alert(data.card_id);
+        alert(data.card_ext);*/
+        WeixinJSBridge.invoke('batchAddCard', {
+            "card_list": [{
+                "card_id": data.card_id,
+                "card_ext": data.card_ext
+            }]
+        },function(res){
+			/*for(var i in res){
+				alert(res[i]);
+			}*/
+		});
+    }
+}, false);
+
+$(document).ready(function(e) {
+	//开始抽奖
+	$('body').on("click","#sub_button",function(){
+        //如果是微信登录
+		if(_global.zp_type == 1){
+			cj.login({
+                updateurl:_global.url.cjSubmit,
+				updatedata:{
+                    "id":_global.id,
+                    "from_user_id":_global.from_user_id,
+                    "from_type":_global.from_type,
+                    "pay_token":_global.pay_token
+                }//返佣抽奖数据
+			});
+		}else{
+			//转盘、老虎机、砸金蛋...
+			var game = template("js-tmpl-cjtype"+_global.zp_type, _global.cjprize);
+			$("body").append(game);
+			if(_global.zp_type=="3"){
+				prizeList(0,Math.ceil(_global.cjprize.arry.length/2));
+			}else if(_global.zp_type=="5"){
+				_global["shake"] = {shake:true,g:false,count:0};
+				if(_global.shake.shake){shake()};
+			}
+			$('body').on("click",".lotCenter",game,function(){
+				if(_global.onsub)return false;
+				_global.onsub = true;
+				cj.login({
+                    updateurl:_global.url.cjSubmit,
+					updatedata:{"id":_global.id,"from_user_id":_global.from_user_id,"from_type":_global.from_type,"pay_token":_global.pay_token}
+				});
+				window.egg=$(this).attr("data-rel");
+			});
+			$('body').on("click",".close-specialCj",game,function(){
+				_global.onsub = false;
+				$(".specialCj").remove();
+			})
+		}
+	});
+	
+	//普通抽奖
+	$('body').on("click","#subcj",function(){
+		var regex = /^([\+][0-9]{1,3}[ \.\-])?([\(]{1}[0-9]{2,6}[\)])?([0-9 \.\-\/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$/;
+		var phone = $('#mobile').val();
+		var verify = $('#verify').val();
+		if(!regex.test(phone)){$("#mobile").addClass("erro");cj.show();_global.onsub = false;return false;}
+		if(!verify){$("#verify").addClass("erro");cj.show();_global.onsub = false;return false;}
+		if(_global.onsub)return false;
+		_global.onsub = true;
+		if(_global.zp_type=="5"){
+			yyAction();
+		}else{
+			update({
+				url:_global.url.cjSubmit,
+				data:$('#theform').serialize()
+			});
+		}
+	});
+
+});
+function update(data){
+	cj.tip();
+	cjajax({
+		url:data.url,
+		data:data.data
+	});
+}
+//转换响应值，比如，把 默认的{status:0,info:[]}转成 {code:0,msg:'',data:{}}
+function convertRes(res){
+    if(typeof(res.status) != 'undefined'){
+        res = {
+            code:(+res.status == 1)?0:1,
+            msg : typeof(res.info) == 'string' ? res.info:'',
+            data : res.data
+        };
+    }
+    return res;
+}
+/*
+* 抽奖查询
+* */
+var query_url;
+var i=1;
+function cjajax(postdata,repost){
+    cj.close();
+	var url = postdata.url;
+	var data = postdata.data;
+	$.ajax({
+		url:url,
+		type:"POST",
+		data:data,
+		timeout:10000,
+		dataType:"json",
+		success:function(data){
+            data = convertRes(data);
+			/*var data = {
+					code:1001,//查询，1001==继续查,其他==结果,0==有结果(返佣登录成功一样),1==手机号错误,2==验证码错误,3==未知错误
+					msg:"恭喜您中奖啦",//提示信息
+					data:{
+						msgid:"123",//如果存在，重新请求新url
+						url:"{:U('Label/Cj/submit')}",
+						lottery:""//中奖结果
+					}
+				};
+			if(i==2){
+				//第二次返回格式
+				data = {
+					code:0,//查询，1001==继续查,其他==结果,0==有结果,1==其它错误,2==手机号错误,3==验证码错误,4==未知错误
+					msg:"恭喜您中奖啦",//提示信息
+					data:{
+						lottery:"1",//中奖结果,""==没中,id==中的奖
+						card:{
+							iscard:true,
+							card_id:"id",
+							card_ext:"card_ext"
+						}//卡券中的奖
+					}
+				};
+			}*/
+            data.code = +data.code;
+			if(data.code==2){cj.show();$("#mobile").addClass("erro");_global.onsub = false;return false;}
+			if(data.code==3){cj.show();$("#verify").addClass("erro");_global.onsub = false;return false;}
+			if(data.code==1){
+                cj.tip(1);
+				cj.content({
+					msg:data.msg,
+					btn:[{
+						text:"返回",
+						callback:function(){
+							cj.login();
+						}
+					}]
+				});
+				_global.onsub = false;
+				return false;
+			}
+			//抽奖结果
+			if(data.code==0){
+				handelCjResult(data);
+			}
+            //继续查询
+            else if(data.code==1001){
+                query_url = (data.data && data.data.url)||query_url;
+                i++;
+                console.log('第'+i+'次查询');
+				cj.tip("开始抽奖...");
+				setTimeout(function(){
+					cjajax({
+						url:query_url
+					},true)
+				},2000);
+			}else{
+                cj.tip(1);
+				cj.content({
+					msg:data.msg
+				});
+			}
+		},
+		error:function(XMLHttpRequest, textStatus, errorThrown){
+			if(textStatus=="timeout"){
+				cj.tip("链接超时,请查看您的网络连接");
+			}else{
+				cj.tip("请求失败,请刷新页面重试");
+			}
+			_global.onsub = false;
+			setTimeout(function(){
+				cj.tip(1);
+			},8000);
+		}
+	});
+}
+//处理中奖结果
+function handelCjResult(data){
+	cj.tip(1);
+	cj.close();
+    var showResult = function(){
+        _global.onsub = false;
+        //如果中的是卡券
+        if(data.data && data.data.card_id){
+            cj.content({
+                msg:data.msg,
+                btn:[{
+                    text:"点击领取卡券",
+                    callback:function(){
+                        getWxCard({
+                            card_id:data.card_id,
+                            card_ext:data.card_ext
+                        });
+                    }
+                }]
+            });
+        }
+        //判断是不是积分奖品
+        else if (data.data && data.is_jf == 1) {
+        	//例：优豆 +100
+        	var msg2 = data.jf_name + ' +' + data.batch_amt;
+            cj.content({
+                msg:"<p>"+data.msg+"</p><p><span>"+msg2+"</span></p>",
+                btn:[{
+                    text:"返回"
+                },{
+                    text:"查看我的" + data.jf_name,
+                    url:data.link_url
+                }]
+            });
+        }
+        //中的是普通奖品
+        else{
+            cj.content({
+                msg:data.msg
+            });
+        }
+        return;
+        //以下是微信登录后要输手机号
+        $("#getphone").remove();
+		var _isjf = data.is_jf;
+        cj.content({
+            msg:data.msg,
+            html:template("js-tmpl-phoneForm", _global),
+            id:"getphone",
+            btn:[{
+                text:"立即领取",
+                callback:function(){
+                    if(_global.onsub)return false;
+                    _global.onsub = true;
+                    var _that = $(this);
+                    var _form = $('#js-phoneform'),
+                            url = _form.data('action'),
+                            data = _form.serialize();
+                    var regex = /^([\+][0-9]{1,3}[ \.\-])?([\(]{1}[0-9]{2,6}[\)])?([0-9 \.\-\/]{3,20})((x|ext|extension)[ ]?[0-9]{1,4})?$/;
+                    var phone = $('input[name=phone]',_form).val();
+                    if(!regex.test(phone)){$('input[name=phone]',_form).addClass("erro");_global.onsub = false;return false;}
+                    cj.tip("正在领取...");
+                    $.post(url,data,function(res){
+                        cj.hide();
+                        if(+res.status == 0){
+                            cj.content({
+                                msg:res.info,
+                                isclose:false,
+                                btn:[{
+                                    callback:function(){cj.close();$("#getphone").show();}
+                                }]
+                            });
+                        }
+                        else{
+							if(_isjf==1){
+								//例：优豆 +100
+								var msg2 = data.jf_name + ' +' + data.batch_amt;
+								cj.content({
+									msg:"<p>"+data.msg+"</p><p><span>"+msg2+"</span></p>",
+									btn:[{
+										text:"返回"
+									},{
+										text:"查看我的" + data.jf_name,
+										url:data.link_url
+									}]
+								});
+							}else{
+								cj.content({
+									msg:res.info,
+									isclose:false,
+									btn:[{
+										callback:function(){cj.close();$("#getphone").remove();}
+									}]
+								});
+							}
+                        }
+                    },'json').fail(function(){
+                        cj.tip("系统正忙...,请重新尝试");
+                        $("#getphone").show();
+                    }).always(function(){
+                        cj.tip(1);
+                        _global.onsub = false;
+                        _that.text("立即领取");
+                    });
+                }
+            }]
+        });
+        return false;
+    }
+
+	
+	if(_global.zp_type==1 || _global.zp_type==5){
+		_global.onsub = false;
+        showResult();
+        //摇一摇
+		if(_global.zp_type==5){
+			$("#startGame span").text("获取抽奖机会");
+			$("#startGame").removeClass("erro");
+			$(".shaking").removeClass("end");
+		}
+	}else{
+		if(_global.zp_type==2){
+			zpAction(data.data.cate_id,showResult);
+		}else if(_global.zp_type==3){
+			lhAction(data.data.cate_id,showResult);
+		}else if(_global.zp_type==4){
+			jdAction(data.data.cate_id,showResult);
+		}else{
+			_global.onsub = false;
+			cj.tip("抽奖错误类型");
+		}
+	}
+}
+</script>
+<script>
+//验证码
+function fleshVerify(){
+	$('#verifyImg').src = '{:U('Label/VerifyCode/index/')}'+"&_t="+Math.random();
+}
+</script>
+
+<script>
+//特殊抽奖动画
+function zpAction(id,callback){
+	var Pnum=$(".prize").length,classid
+	!id ? classid=$("[data-id='noprize']").index()+1 : classid=$("[data-id='"+id+"']").index()+1;
+	if(classid==-1){cj.tip("转盘出错了,刷新后重试");setTimeout(function(){cj.tip(1)},4000);return false;};
+	$(".lotCenter").addClass("lotCenter-animation"+Pnum+"-"+classid);
+	$(".lotLight").removeClass("lotLight-animation2").addClass("lotLight-animation1");
+	setTimeout(function(){
+		$(".lotCenter").removeClass("lotCenter-animation"+Pnum+"-"+classid);
+		$(".lotLight").removeClass("lotLight-animation1").addClass("lotLight-animation2");
+	},6000);
+    setTimeout(callback,6500);
+}
+function lhAction(id,callback){
+	//初始化;
+	$(".lotWindowBegin1").attr("class","lotWindow lotWindowBegin1 one");
+	$(".lotWindowBegin2").attr("class","lotWindow lotWindowBegin2 two");
+	$(".lotWindowBegin3").attr("class","lotWindow lotWindowBegin3 three");
+	$(".lotEgg").addClass("begin");
+	var one = Math.floor(Math.random()*6),two = Math.floor(Math.random()*6),three = Math.floor(Math.random()*6);
+	if(one==two&&two==three&&one==three){
+		two = two-1;
+		if(two<0){two = 4;}
+	}
+	if(!id){
+		//不中奖
+		$(".lotWindowBegin1").addClass("lotWindow-animation"+one);
+		$(".lotWindowBegin2").addClass("lotWindow-animation"+two);
+		$(".lotWindowBegin3").addClass("lotWindow-animation"+three);
+	}else{
+		//中奖
+		var p = $("[data-id='"+id+"']").attr("data-rel");
+		if(!p){
+			$(".lotWindowBegin1").addClass("lotWindow-animation"+one);
+			$(".lotWindowBegin2").addClass("lotWindow-animation"+two);
+			$(".lotWindowBegin3").addClass("lotWindow-animation"+three);
+			return false;
+		};
+		$(".lotWindowBegin1,.lotWindowBegin2,.lotWindowBegin3").addClass("lotWindow-animation"+p);
+	}
+	setTimeout(function(){
+		$(".lotEgg").removeClass("begin");
+        callback();
+	},6000);
+    setTimeout(callback,6500);
+}
+function jdAction(id,callback){
+	$(".lotHammer").show();
+	if(window.egg==1){
+		$(".lotHammer").css("left",80);$(".lotCenter-none,.lotCenter-prize").css("left",51);
+	}else if(window.egg==2){
+		$(".lotHammer").css("left",150);$(".lotCenter-none,.lotCenter-prize").css("left",123);
+	}else if(window.egg==3){
+		$(".lotHammer").css("left",220);$(".lotCenter-none,.lotCenter-prize").css("left",193);
+	}
+	setTimeout(function(){
+		if(!id){
+			$(".lotCenter-none").addClass("show");$(".lotCenter-prize").removeClass("show");
+		}else{
+			$(".lotCenter-prize").addClass("show");$(".lotCenter-none").removeClass("show");
+		}
+		$("[data-rel='"+window.egg+"']").hide();
+	},4000);
+	$(".lotHammer").addClass("lotHammer-animation");
+	setTimeout(function(){
+		//初始化
+		$("[data-rel='"+window.egg+"']").show();
+		$(".lotCenter-prize").removeClass("show");
+		$(".lotCenter-none").removeClass("show");
+		$(".lotHammer").hide();
+		$(".lotHammer").removeClass("lotHammer-animation");
+		$(".lotCenter:eq(0)").addClass("lotCenter-animation1");
+		$(".lotCenter:eq(1)").addClass("lotCenter-animation2");
+		$(".lotCenter:eq(2)").addClass("lotCenter-animation3");
+	},7000);
+    setTimeout(callback,6500);
+}
+function yyAction(){
+	_global["shake"]["count"] = 0;
+	_global.shake.g = true;
+	$(".shaking").removeClass("end");
+	$("#startGame span").text("可以开始摇啦");
+	$("#startGame").addClass("erro");
+	cj.hide();
+}
+</script>
+
+<script>
+//抽奖基础
+var cj = {
+		basic:function(msg){
+			cj.close();
+			if(!msg.title){var notitle="notitle";msg.title="";}
+			if(msg.isclose){var closehtml = '<a href="javascript:void(0)" class="close-msgPop"><i><span>+</span></i></a>'}else{var closehtml = "";}
+			var html = ['<div class="msgPop bg" id="'+msg.id+'">',
+				'<div class="msgBg">',
+				'<div class="msgTitle '+notitle+'">'+msg.title+closehtml+'</div>',
+				'<div class="msgCon">'+msg.html+'</div>',
+				'</div>',
+				'</div>'].join('');
+			$("body").append(html);
+			if(typeof(msg.start) == 'string'){
+				window[msg.start].call(this,$(this));
+			}else if(typeof(msg.start) == 'function'){
+				msg.start.call(this,$(this));
+			}
+			$("body").find(".msgBg",html).on("click",".cjBtn-back",function(){
+				var index = $(this).index();
+				if(typeof(msg.btn[index].callback) == 'string'){
+					window[msg.btn[index].callback].call(this,$(this));
+				}else if(typeof(msg.btn[index].callback) == 'function'){
+					msg.btn[index].callback.call(this,$(this));
+				}else{
+					msg.repeat ? (cj.close(),cj.login({repeat:msg.repeat})) : cj.close();
+					if($(this).attr("href")!="javascript:void(0)"){
+						window.location.href = $(this).attr("href");
+					}
+				}
+			});
+			$("body").find(".msgBg",html).on("click",".close-msgPop",function(){
+				if(typeof(msg.after) == 'string'){
+					window[msg.after].call(this,$(this));
+				}else if(typeof(msg.after) == 'function'){
+					msg.after.call(this,$(this));
+				}
+				msg.repeat ? (cj.remove(),cj.login({repeat:msg.repeat})) : cj.remove();
+			});
+			$("body").on("click","input",msg.html,function(){
+				$(this).removeClass("erro");
+			});
+		},
+		tip:function(msg){
+			$(".cjTip").remove();
+			if(!msg){msg = "正在请求抽奖数据..."};
+			if(msg==1){return false;}
+			var html = '<div class="cjTip"><div class="cjTipTxt"><i></i><p>'+msg+'</p></div><div class="cjTipbg"></div></div>';
+			$("body").append(html);
+		},
+		login:function(msg){
+			$(".msgPop").not("[id!='']").remove();
+            //如果是手机号参与，弹出登录按钮
+			if(_global.join_mode == "0"){
+				var html;
+                html = template("js-tmpl-popForm", _global);
+				msg = $.extend(true, {}, cj.msg,msg);
+				msg.html = html;
+				cj.basic(msg);
+			}else{
+				update({
+					url:msg.updateurl,
+					data:msg.updatedata
+				});
+			}
+		},
+		content:function(msg){
+			msg = $.extend(true, {}, cj.msg,msg);
+			msg.html = template("js-tmpl-msg",msg);
+			cj.basic(msg);
+		},
+		hide:function(msg){
+			$(".msgPop").hide();
+		},
+		show:function(msg){
+			$(".msgPop").show();
+		},
+		close:function(msg){
+			_global.onsub = false;
+			var _MsgPopglobal = {
+				refurbish:false,
+				repeat:true
+			}
+			msg = $.extend(true, {}, _MsgPopglobal,msg);
+			$(".msgPop").not("[id!='']").remove();
+			if(msg.refurbish){
+				location.href = location.href ;
+			}
+			if(_global.isVcard == 'vcard'){
+                window.location.href = 'index.php?g=Wap&m=Vcard&a=viewUser&mobile='+_global.phone;
+            }
+		},
+		remove:function(msg){
+			_global.onsub = false;
+			var _MsgPopglobal = {
+				refurbish:false,
+				repeat:true
+			}
+			msg = $.extend(true, {}, _MsgPopglobal,msg);
+			$(".msgPop").remove();
+			if(_global.isVcard == 'vcard'){
+                window.location.href = 'index.php?g=Wap&m=Vcard&a=viewUser&mobile='+_global.phone;
+            }
+		},
+		msg:{
+			id:"",
+			title:false,//标题
+			html:false,//内容
+			refurbish:false,//是否刷新
+			msg:"未知错误",//内容
+			icon:false,//小狗，1==笑，2==哭
+			repeat:false,//重新填出登陆框
+			btn:[
+				{
+					text:"返回",//按钮文字
+					url:"javascript:void(0)",//按钮链接
+					callback:false
+				}
+			],
+			isclose:true,
+			start:false,//弹出之后callback
+			after:false//关闭之后callback
+		}
+	}
+</script>
+
+
+<?php if($return_commission_flag != '1' && !empty($member_reg_label_id)){?>
+<!--粉丝招募 -->
+<div id="memberLogin" class="memberLogin"><div class="memberLogin-cloose" onclick="javascript:$('#memberLogin').hide();">返回抽奖</div><iframe src="<?php echo U('Label/MemberRegistration/index',array('id'=>$member_reg_label_id)); ?>" name="iframeChild" style="width:100%; height:100%; border:none;" onload="javasctipt:$(window.frames['iframeChild'].document).find('.Gloading').hide()"></iframe></div>
+<?php }?>
+
+<!-- 返佣-->
+<?php
+if(strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') === false && $return_commission_flag == '1' && $tongbaozhai_flag != 1){
+    $style = $share_button_position=='2' ? 'bottom:0px;' : 'top:50%; margin-top:-40px;';
+    $button_img = $share_button_image_flag == '1' ? __PUBLIC__ . '/Label/Image/icon-Marketing.png' : __UPLOAD__ . '/' .$share_button_image;
+?>
+<div style=" position:fixed; z-index:151; <?php echo $style;?> right:0px; width:50px; height:146px;background: url(<?php echo $button_img;?>) no-repeat 0 0; background-size:100%;"><a href="javascript:void(0)" class="a-hide" id="fanyong"></a></div>
+<?php }?>
+
+<!-- 卡券-->
+<script type="text/html" id="js-tmpl-phoneForm">
+    <div class="cjText">
+        <div class="cjText-con">
+            <div class="cjText-img"><img id="showPic" src="__PUBLIC__/Label/Image/icon-ok.png"></div>
+            <div class="cjText-text">{{msg}}<br/>请输入手机号领取</div>
+        </div>
+    </div>
+    <div class="cjCon">
+        <form id="js-phoneform" data-action="<?php echo U('Label/ShareBatch/getPrize');?>" method="post">
+            <input type="hidden" name="id" value="{{id}}" />
+            <input type="hidden" name="from_user_id" value="{{from_user_id}}" />
+            <input type="hidden" name="from_type"  value="{{from_type}}" />
+            <input type="hidden" name="full_id" value="{{full_id}}" />
+            <input type="hidden" name="cj_code" value="{{cj_code}}" />
+            <input type="hidden"   name="pay_token" value="{{pay_token}}" />
+            <div class="cjForm">
+                <ul class="sOne-cjForm">
+                    <li><p>手机号:</p><input type="tel" name="phone" id="phone" class="sOne-cjInput from_mobile" placeholder="请输入手机号" maxlength="11" value="{$phone}"/><div class="formError">手机号错误</div></li>
+                </ul>
+            </div>
+        </form>
+    </div>
+</script>
+
+<!--普通抽奖-->
+<script type="text/html" id="js-tmpl-popForm">
+<div class="cjCon" id="popForm">
+	<div class="cjText">{{cjText}}</div>
+	<form id="theform" action="{{_global.url.cjSubmit}}" method="post" name="theform">
+		<input type="hidden" id="id" name="id" value="{{id}}" />
+		<input type="hidden" id="cj_check_flag" name="cj_check_flag" value="{{cj_check_flag}}" />
+		<input type="hidden" id="full_id" name="full_id" value="{{full_id}}" />
+		<input type="hidden" id="pay_token" name="pay_token" value="{{pay_token}}" />
+		
+		<?php if(C('GWYL_NODE') == $node_id && $batch_type=='3' && $row['defined_one_name'] == '小票号') {?>
+		<input type="hidden" name="shopping_trace" id="shopping_trace" value=""/>
+		<?php }?>
+
+		<div class="cjForm">
+			<ul class="sOne-cjForm">
+				{{if full_id =='1'}}
+				<li><p>参与码:</p><input type="text" name="check_code" id="check_code" class="sOne-cjInput" maxlength="6" placeholder="请输入您的参与码"/><div class="formError">参与码错误</div></li>
+				{{/if}}
+				<li><p>手机号:</p><input type="tel" name="mobile" id="mobile" class="sOne-cjInput from_mobile" placeholder="请输入手机号" maxlength="11" value="{{phone}}" /><div class="formError">手机号错误</div></li>
+				<li>
+					<p>验证码:</p>
+					<input type="tel" class="sOne-cjInput-half" name="verify" id="verify" maxlength="4" placeholder="验证码" ><div class="formError">验证码错误</div>
+					<a href="javascript:void(0);"><img src="<?php echo U('Label/VerifyCode/index/', array('_t'=>time()))?>" class="sOne-cjpasscode-img" id="verifyImg" onclick="fleshVerify()"></a>
+				</li>
+				<li class="pt20"><input type="button" id="subcj" value="提交" class="cj-input-button" /></li>
+			</ul>
+		</div>
+	</form>
+</div>
+</script>
+
+<script type="text/html" id="js-tmpl-msg">
+<div class="cjText">
+	{{if !html}}
+	<div class="cjText-con">
+		{{if icon}}
+		<div class="cjText-img">
+			{{if icon == 1 }}
+				<img id="showPic" src="__PUBLIC__/Label/Image/icon-ok.png">
+			{{else icon == 2 }}
+				<img id="showPic" src="__PUBLIC__/Label/Image/icon-error.png">
+			{{/if}}
+		</div>
+		{{/if}}
+		{{if !icon}}
+		<div class="cjText-text noicon">{{msg}}</div>
+		{{else}}
+		<div class="cjText-text">{{msg}}</div>
+		{{/if}}
+	</div>
+	{{else}}
+	{{#html}}
+	{{/if}}
+</div>
+<div class="cjBtn">
+{{each btn as value i}}
+	<a href="{{value.url}}" class="cjBtn-back {{if btn.length>1}}sm{{/if}}">{{value.text}}</a>
+{{/each}}
+</div>
+</script>
+
+<!--大转盘-->
+<script type="text/html" id="js-tmpl-cjtype2">
+<div class="specialCj" style="display:block;">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Lottery.css">
+	<div class="specialCj-con">
+		<div id="lottery" class="{{if arry.length==1}}l3{{else if arry.length==2}}l4{{else if arry.length==3}}l6{{else if arry.length==4}}l5{{else if arry.length==5}}l6{{else if arry.length==6}}l7{{else if arry.length==7}}l8{{/if}}">
+			<div class="close-specialCj">+</div>
+			<div class="lotBg">
+				<div class="lotLight lotLight-animation2">
+					<li class="lotLight1"><i></i></li><li class="lotLight2"><i></i></li><li class="lotLight3"><i></i></li><li class="lotLight4"><i></i></li><li class="lotLight5"><i></i></li><li class="lotLight6"><i></i></li><li class="lotLight7"><i></i></li><li class="lotLight8"><i></i></li><li class="lotLight9"><i></i></li><li class="lotLight10"><i></i></li><li class="lotLight11"><i></i></li><li class="lotLight12"><i></i></li><li class="lotLight13"><i></i></li><li class="lotLight14"><i></i></li><li class="lotLight15"><i></i></li><li class="lotLight16"><i></i></li>
+				</div>
+				<div class="lotCon-shadow"></div>
+				<div class="lotCon">
+					{{if arry.length==1}}
+						<div class="prize prize1" data-id="{{arry[0]}}"><div class="prizebg"></div></div>
+						<div class="prize prize2" data-id="noprize"><div class="prizebg"></div></div>
+						<div class="prize prize3" data-id="noprize"><div class="prizebg"></div></div>
+					{{else if arry.length==2}}
+						<div class="prize prize1" data-id="{{arry[0]}}"><div class="prizebg"></div></div>
+						<div class="prize prize2" data-id="noprize"><div class="prizebg"></div></div>
+						<div class="prize prize3" data-id="{{arry[1]}}"><div class="prizebg"></div></div>
+						<div class="prize prize4" data-id="noprize"><div class="prizebg"></div></div>
+					{{else if arry.length==3}}
+						<div class="prize prize1" data-id="{{arry[0]}}"><div class="prizebg"></div></div>
+						<div class="prize prize2" data-id="noprize"><div class="prizebg"></div></div>
+						<div class="prize prize3" data-id="{{arry[1]}}"><div class="prizebg"></div></div>
+						<div class="prize prize4" data-id="noprize"><div class="prizebg"></div></div>
+						<div class="prize prize5" data-id="{{arry[2]}}"><div class="prizebg"></div></div>
+						<div class="prize prize6" data-id="noprize"><div class="prizebg"></div></div>
+					{{else}}
+						{{each arry as value i}}
+							<div class="prize prize{{i+1}}" data-id="{{arry[i]}}"><div class="prizebg"></div></div>
+						{{/each}}
+						<div class="prize prize{{arry.length+1}}" data-id="noprize"><div class="prizebg"></div></div>
+					{{/if}}
+				</div>
+				<div class="lotTxt">
+					{{if arry.length==1}}
+						<p class="txt1"><span>{{arryname[0]}}</span></p>
+						<p class="txt2"><span>未中奖</span></p>
+						<p class="txt3"><span>未中奖</span></p>
+					{{else if arry.length==2}}
+						<p class="txt1"><span>{{arryname[0]}}</span></p>
+						<p class="txt2"><span>未中奖</span></p>
+						<p class="txt3"><span>{{arryname[1]}}</span></p>
+						<p class="txt4"><span>未中奖</span></p>
+					{{else if arry.length==3}}
+						<p class="txt1"><span>{{arryname[0]}}</span></p>
+						<p class="txt2"><span>未中奖</span></p>
+						<p class="txt3"><span>{{arryname[1]}}</span></p>
+						<p class="txt4"><span>未中奖</span></p>
+						<p class="txt5"><span>{{arryname[2]}}</span></p>
+						<p class="txt6"><span>未中奖</span></p>
+					{{else}}
+						{{each arry as value i}}
+						<p class="txt{{i+1}}"><span>{{arryname[i]}}</span></p>
+						{{/each}}
+						<p class="txt{{arry.length+1}}"><span>未中奖</span></p>
+					{{/if}}
+				</div>
+				<div class="lotImg">
+					{{if arry.length==1}}
+						<p class="img1"><img src="__PUBLIC__/Label/Image/icon-lottery2.png"></p>
+						<p class="img2"><img src="__PUBLIC__/Label/Image/icon-lottery3.png"></p>
+						<p class="img3"><img src="__PUBLIC__/Label/Image/icon-lottery3.png"></p>
+					{{else if arry.length==2}}
+						<p class="img1"><img src="__PUBLIC__/Label/Image/icon-lottery2.png"></p>
+						<p class="img2"><img src="__PUBLIC__/Label/Image/icon-lottery3.png"></p>
+						<p class="img3"><img src="__PUBLIC__/Label/Image/icon-lottery2.png"></p>
+						<p class="img4"><img src="__PUBLIC__/Label/Image/icon-lottery3.png"></p>
+					{{else if arry.length==3}}
+						<p class="img1"><img src="__PUBLIC__/Label/Image/icon-lottery2.png"></p>
+						<p class="img2"><img src="__PUBLIC__/Label/Image/icon-lottery3.png"></p>
+						<p class="img3"><img src="__PUBLIC__/Label/Image/icon-lottery2.png"></p>
+						<p class="img4"><img src="__PUBLIC__/Label/Image/icon-lottery3.png"></p>
+						<p class="img5"><img src="__PUBLIC__/Label/Image/icon-lottery2.png"></p>
+						<p class="img6"><img src="__PUBLIC__/Label/Image/icon-lottery3.png"></p>
+					{{else}}
+						{{each arry as value i}}
+						<p class="img{{i+1}}"><img src="__PUBLIC__/Label/Image/icon-lottery2.png"></p>
+						{{/each}}
+						<p class="txt{{arry.length+1}}"><img src="__PUBLIC__/Label/Image/icon-lottery3.png"></p>
+					{{/if}}
+				</div>
+				<div class="lotCenter lotCenter-market">
+					<i></i>
+					<a href="javascript:void(0)"><span>我要<br />抽奖</span></a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</script>
+
+<!--老虎机-->
+<script type="text/html" id="js-tmpl-cjtype3">
+<div class="specialCj" style="display:block;">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Lottery3.css">
+	<div class="specialCj-con">
+		<div id="lottery">
+			<div class="close-specialCj">+</div>
+			<div class="lotBg">
+				<div class="lotEgg">
+					<div class="lotEggLight shiny1"></div>
+					<div class="lotWindow lotWindowBegin1 one" style="left:62px;"><a></a></div>
+					<div class="lotWindow lotWindowBegin2 two" style="left:133px;"><a></a></div>
+					<div class="lotWindow lotWindowBegin3 three" style="left:201px;"><a></a></div>
+					<div id="lotHammer" class="lotCenter"><a href="javascript:void(0)"></a></div>
+					<div id="lotHammerbtn" class="lotCenter"><a href="javascript:void(0)"></a></div>
+					<div class="prize-arry dn">
+						{{each arry as value i}}
+						<div data-rel="{{i}}" data-id="{{arry[i]}}">{{arryname[i]}}</div>
+						{{/each}}
+					</div>
+				</div>
+			</div>
+			<div class="prizeList">
+			<ul>
+			{{each arry as value i}}
+				<li><i class="icon-fruit{{i}}"></i><span>{{arryname[i]}}</span></li>
+			{{/each}}
+			</ul>
+			</div>
+		</div>
+	</div>
+</div>
+</script>
+<script>
+function prizeList(len,maxlen){
+	setTimeout(function(){
+		if(len>=maxlen){
+			$(".prizeList ul").animate({marginTop:0},200);
+			prizeList(0,maxlen);
+		}else{
+			$(".prizeList ul").animate({marginTop:-len*44},200);
+			len++;
+			prizeList(len,maxlen);
+		}
+	},2000)
+}
+</script>
+
+<!--砸金蛋-->
+<script type="text/html" id="js-tmpl-cjtype4">
+<div class="specialCj" style="display:block;">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Lottery2.css">
+	<div class="specialCj-con">
+		<div id="lottery">
+			<div class="close-specialCj">+</div>
+			<div class="lotBg">
+				<div class="lotEgg">
+					<div class="lotCenter" data-rel="1" style="left:70px;">
+						<a></a>
+					</div>
+					<div class="lotCenter" data-rel="2" style="left:140px;">
+						<a></a>                            	
+					</div>
+					<div class="lotCenter" data-rel="3" style="left:210px;">
+						<a></a>                            	
+					</div>
+					<div class="lotHammer lotHammer-animation"></div>
+					<div class="lotCenter-prize"><p></p></div>
+					<div class="lotCenter-none"><p></p></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</script>
+
+<!--摇一摇-->
+<script type="text/html" id="js-tmpl-cjtype5">
+<div class="specialCj" style="display:block;">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_shaking.css">
+    <img src="__PUBLIC__/Label/Image/shaking/box.png" class="dn">
+    <img src="__PUBLIC__/Label/Image/shaking/box2.png" class="dn">
+    <img src="__PUBLIC__/Label/Image/shaking/box3.png" class="dn">
+	<div class="specialCj-con">
+    	<div class="close-specialCj">+</div>
+    	<div class="shaking">
+        	<div class="sprizeBox">
+                <img class="img-bg" src="__PUBLIC__/Label/Image/shaking/light.png">
+                <img src="__PUBLIC__/Label/Image/shaking/bling.png" class="img-bling">
+                <div class="divBox">
+                	<div class="boxTop"></div>
+                    <div class="boxCon"></div>
+                </div>
+            </div>
+            <div class="sprizeMsg">
+                <a href="javascript:void(0);" id="startGame" class="lotCenter"><img class="wobble" src="__PUBLIC__/Label/Image/shaking/hands.png"><span>获取抽奖机会</span></a>
+            </div>
+        </div>
+	</div>
+</div>
+</script>
+<script>
+function shake(){
+	_global.shake.shake = false;
+	if(window.DeviceMotionEvent) {
+		var speed = 2;
+		var x = y = lastX = lastY = 0;
+		window.addEventListener('devicemotion',function(){
+			if(_global.shake.g){
+				var acceleration = event.accelerationIncludingGravity,
+				x = acceleration.x; 
+				y = acceleration.y;
+				if(Math.abs(x-lastX) > speed || Math.abs(y-lastY) > speed ){
+					if(_global.shake.count>=3){
+						_global.shake.g = false;
+						$(".shaking").addClass("end");
+						setTimeout(function(){
+                            update({
+                                url:_global.url.cjSubmit,
+                                data:$('#theform').serialize()
+                            });
+                        },3000);
+					}else{
+						_global.shake.count++
+					}
+				}
+				lastX = x; 
+				lastY = y;
+			}
+		},false);
+	}
+}
+</script>

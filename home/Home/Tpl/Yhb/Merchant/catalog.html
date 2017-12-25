@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>翼惠宝分类管理</title>
+        <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+        <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+        
+        <link href="__PUBLIC__/Css/Wyhb.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function (e) {
+
+
+                $(".js_add_child").click(function (e) {
+                    var parent_id = $(this).attr('parent_id');
+                    //alert("{:U('Home/Store/edit')}?id="+storeId);return false;
+                    art.dialog.open("{:U('Yhb/Merchant/add_catalog')}&parent_id=" + parent_id, {
+                        parent_id: 'parent_id',
+                        title: '添加子类',
+                        width: '500px',
+                        lock: true,
+                        height: '250px',
+                        close: function () {
+                            //location.reload();
+                        }
+                    });
+                });
+                $(".js_edit").click(function (e) {
+                    var catalog_id = $(this).attr('catalog_id');
+                    //alert("{:U('Home/Store/edit')}?id="+storeId);return false;
+                    art.dialog.open("{:U('Yhb/Merchant/edit_catalog')}&id=" + catalog_id, {
+                        id: 'catalog_id',
+                        title: '编辑分类',
+                        width: '500px',
+                        lock: true,
+                        height: '250px',
+                        close: function () {
+                            //location.reload();
+                        }
+                    });
+                });
+                $(".js_delete").click(function (e) {
+                    var catalog_id = $(this).attr('catalog_id');
+                    art.dialog({
+                        id: 'art_deleted',
+                        lock: true,
+                        content: '是否确认删除该分类？',
+                        ok: function () {
+                            dialog = art.dialog({title: false, content: "<div class='msg-all-succeed'>正在删除...</div>", fixed: true, padding: 0});
+                            othis = this;
+                            $.post("{:U('Yhb/Merchant/delete_catalog')}", {id: catalog_id}, function (resp) {
+                                if (resp.status == '1') {
+                                    dialog.time(1).content("<div class='msg-all-succeed'>" + resp.info + "</div>");
+                                    setTimeout(function () {
+                                        othis.close();
+                                        reload();
+                                    }, 1000);
+                                }
+                                else {
+                                    othis.close();
+                                    dialog.time(2).content("<div class='msg-all-error'>" + resp.info + "</div>");
+                                }
+                            }, 'json');
+                            return false;
+                        },
+                        cancelVal: '关闭',
+                        cancel: true //为true等价于function(){}
+                    });
+                });
+                $("#add-classify").click(function (event) {
+                    art.dialog.open("{:U('Yhb/Merchant/add_catalog',array('parent_id'=>0))}", {
+                        id: 'uduf',
+                        title: '添加分类',
+                        width: 500,
+                        height: 250,
+                        lock: true,
+                        close: function () {
+                            //location.reload();
+                        }
+                    })
+                });
+            });
+            function show_child(trid)
+            {
+                $("." + trid).toggle();
+            }
+        </script>
+        <style type="text/css">
+            .link a { color: #666666;}
+            .main-name h5 { line-height: 22px; margin-bottom: 15px; font-size: 16px; color: #595959;}
+            .main-name h5 i { width: 22px; height: 22px; margin-right: 8px; vertical-align: bottom; background: url(__PUBLIC__/Image/Whdm/icon-hdm.png) -14px -14px no-repeat;}
+            .subcon .limitBox p { width: 100%; float: left; font-size: 14px; line-height: 20px; color: #a3a3a3; padding: 0; margin: 4px 0 15px 0;}
+            .subcon .tbtn.btn-red { margin: 2px 15px 0 15px; border: 1px #ed3f41 solid; background: #ed3f41;}
+            .subcon .limitBox .tabs { line-height: 26px; border: 1px #cccccc solid; float: left;}
+            .subcon .tabs .tabList { padding: 5px 11px; margin: 0; line-height: 18px; background: #ffffff; color: #6e6e6e; cursor: pointer;}
+            .subcon .tabs .tabList.active { background: #ff8a00; color: #ffffff;}
+            .subcon .tabList.active:after { display: none;}
+            .subcon .classify { border: solid 1px #e3e2e2; border-top: solid 0px #e3e2e2;}
+            .subcon .classify li { text-align: center; background: #eeeeee; border-top: solid 1px #e3e2e2;}
+            .subcon .classify li .list { height: 40px;}
+            .subcon .classify li .list span { display: inline-block; width: 30%; font-size: 14px; line-height: 38px;cursor: default;}
+            .subcon .classify li .last a { margin-right: 10px;}
+            .subcon .classify li .list i.downArrow { cursor: pointer; font-size: 16px; width: 0; height: 0; margin-left: 10px; border-left: 6px transparent solid; border-right: 6px transparent solid; border-top: 6px transparent solid; border-top-color: #afafaf;}	
+            .subcon .classify li .list.level-1 { background: #f7f7f7;}
+            .subcon .classify li .list.level-1 .js_orderdetail { color: #3d86ba; pointer-events: auto; cursor: pointer;}
+            .subcon .classify li .list.level-2 {/* display: none;*/ background: #ffffff;}
+            .subcon .classify li .list.level-2 .tbtn.btn-add { background: #c8cace; pointer-events: none; border-color: #c8cace;}
+            .subcon .classify li .list.level-2 .js_orderdetail { color: #3d86ba; pointer-events: auto; cursor: pointer;}
+            .subcon .classify li i.downArrow.active { -webkit-transform: rotate(180deg); -ms-transform: rotate(180deg); -o-transform: rotate(180deg); transform: rotate(180deg);}
+            .subcon .classify li .active.level-2 { display: none;}
+
+        </style>
+    </head>
+    <body>
+        <div id="wrapper" class="login-bg">
+            <div id="headerTwo" style="z-index: 999">
+                <include file="Login:loginHeader"/>
+            </div>
+
+
+            <div id="container" class="bgfff">
+                <div id="main" class="rel">
+                    <!--开始引入左菜单-->
+                    <include file="Store:Yhb_menu" leftmenuid="merchant_catalog"/>
+                    <div class="subcon fn">
+                        <div class="main-name fn">
+                            <h4>分类列表<a class="tbtn btn-add btn-red first" id="add-classify" href="javascript:;"><i></i>新增分类</a></h4>
+
+                            <ul class="classify" style="overflow: scroll;height: 600px;">
+                                <li class="title">
+                                    <div class="list">
+                                        <span>分类ID</span>
+                                        <span>分类名称</span>
+                                        <span class="last">&nbsp;&nbsp;</span>
+                                    </div>
+                                </li>
+                                <php> if($queryList){
+                                    foreach($queryList as $v){ </php>
+                                <li>
+                                    <div class="list level-1">
+                                        <span>{$v['id']}</span>
+                                        <span class="class_down">{$v['catalog_name']}<i class="downArrow"></i></span>
+                                        <span class="last">
+
+                                            <a class="tbtn btn-add first js_add_child" parent_id="{$v['id']}"><i></i>添加子类</a>
+                                            <a href="javascript:void(0);" class="js_orderconfirm js_edit" catalog_id="{$v['id']}">修改</a>
+                                            <a href="javascript:void(0);" class="js_orderdetail js_delete" catalog_id="{$v['id']}">删除</a>
+                                        </span>
+                                    </div><!-- 一级分类循环 -->
+                                    <php>foreach($child_catalog[$v['id']] as $vo){</php>
+                                    <div class="list level-2">
+                                        <span>{$vo['id']}</span>
+                                        <span>{$vo['catalog_name']}</span>
+                                        <span class="last">
+                                            <a class="first ml120"></a>
+                                            <a href="javascript:void(0);" class="js_orderconfirm js_edit" catalog_id="{$vo['id']}">修改</a>
+                                            <a href="javascript:void(0);" class="js_orderdetail js_delete" catalog_id="{$vo['id']}">删除</a>
+                                        </span>
+                                    </div><!-- 二级分类循环 -->
+                                    <php> } </php>
+                                </li><!-- 循环 -->
+                                <php> } </php>
+                                <php> } </php>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html" />
+        </div>
+    </body>
+</html>
+<script>
+$(function(){
+	//添加子类节点
+	//一级分类图标切换
+	$(".classify li").each(function(){
+		if($(this).find(".level-2").length>0){
+			$(this).find(".downArrow").show();
+			//$(this).find(".downArrow").addClass("active");
+		}else{
+			$(this).find(".downArrow").hide();
+			//$(this).find(".downArrow").removeClass("active");
+		};
+	});
+	//展开子类
+	$(".classify .level-2").addClass("active");
+	$(".classify .downArrow,.classify .level-1 span:nth-child(2)").click(function(){
+		$(this).parents("li").find(".downArrow").toggleClass("active");
+		$(this).parents("li").find(".level-2").toggleClass("active");
+	});
+});
+</script>

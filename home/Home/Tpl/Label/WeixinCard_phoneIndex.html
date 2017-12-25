@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$batchInfo['name']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研,微信卡券" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_main_a.css">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/Wcard.css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script>
+var card_id = "{$batchInfo['card_id']}";
+var uid = "{$uid}";
+var id = "{$id}";
+
+var readyFunc = function onBridgeReady() {
+    document.querySelector('#batchAddCard').addEventListener('click',function(e) {
+        $.ajax({
+            url:"{:U('Label/WeixinCard/getCardtext')}",
+            data:{"uid":uid,"id":id},
+            async:false,
+            cache:false,
+            dataType:"json",
+            success:function(data){
+                if(data.status==1){
+                    WeixinJSBridge.invoke('batchAddCard', {
+                        "card_list": [{
+                        "card_id": card_id,
+                        "card_ext": data.data
+                        }]
+                        },function(res){});
+                }else{
+                    alert(data.info);
+                    return false;
+                }
+            }
+        });
+    }); 
+}
+if (typeof WeixinJSBridge === "undefined") {
+document.addEventListener('WeixinJSBridgeReady', readyFunc, false);
+} else {
+readyFunc(); }
+
+
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div class="shopMod disabled" style="width:100%;">
+                <div class="shopModBox-8">
+                    <div class="shopModText viewshop-con">
+                        <?php echo htmlspecialchars_decode($batchInfo['wap_info'])?>
+                    </div>
+                </div>
+                <div class="shopModBox-14">
+                    <div class="shopModText">
+                        <a href="javascript:void(0)" id="batchAddCard" class="viewshop-btn">{$batchInfo['button_text']}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

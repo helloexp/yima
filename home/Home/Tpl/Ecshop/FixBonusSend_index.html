@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>批量派发</title>
+<link href="__PUBLIC__/Css/style.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+
+
+<script>
+window._g = {
+    url_checkfile: '{:U('check_file')}',
+};
+ $(function(){
+    $('#save').click(function(){
+        if($('#mobile').val() ==''){
+            art.dialog('请填写手机号!');
+            return false;
+        }
+        $('#type').val('1');
+        $("#theform").submit();
+    });
+    $('#save2').click(function(){
+        if($('#resp_log_img').val() ==''){
+            art.dialog('请上传文件!');
+            return false;
+        }
+        $('#type').val('2');
+        $("#theform").submit();
+    });
+ });
+ 
+ //文件上传
+function ajaxFileUpload(imgid,hiddenid,showid,url){
+$("#loading")
+.ajaxStart(function(){
+	$(this).show();
+})
+.ajaxComplete(function(){
+	$(this).hide();
+});
+$.ajaxFileUpload
+({
+	url:url,
+	secureuri:false,
+	fileElementId:imgid,
+	dataType: 'json',
+	data:{name:'logan', id:'id'},
+	success: function (data, status)
+	{
+		if(typeof(data.error) != 'undefined')
+		{
+			if(data.error != '')
+			{
+				alert(data.error);
+			}else{
+
+				var resp = data.msg;
+				if(resp != '0000'){
+					alert('上传失败！');
+					return false;
+				}else{
+					   alert('上传成功！');
+				}
+               $('#'+hiddenid).val(data.imgurl);
+			}
+		}
+	},
+	error: function (data, status, e)
+	{
+
+		alert(e);
+	}
+})
+
+return false;
+}
+ 
+</script>
+</head>
+
+<body>
+<form action="{:U('Ecshop/FixBonusSend/submit')}" method="post" id="theform" enctype="multipart/form-data">
+<input type="hidden" name="batch_id" value="{$batch_id}"/>
+<input type="hidden" name="batch_class" id="batch_class" value="{$batch_class}" />
+<input type="hidden" name="type" id="type" value="" />
+	<div id="global-libs" class="num-libs">
+    	<div class="fn-clear relative" style="z-index:10">
+        <p class="hover">单条派发</p>
+        <p>批量派发</p>
+        </div>
+        <div id="global-libs-content" class="relative" style="padding-top:0; margin-top:-1px; z-index:1">
+            <div id="globallibscontent" class="hover c_bd_t_d2">
+                <div class="num-con fn-clear">
+                	<div class="global-input3">
+                        <ul>
+                            <li class="global-input3-name">手机号：</li>
+                            <li class="global-input3-input"><input maxlength="11" name="mobile" id="mobile" type="text"  class="textbox w100" /></li>
+                        </ul>
+                        <ul>
+                            <li class="global-input3-name">&nbsp;</li>
+                            <li class="global-input3-input"><a href="javascript:;" id="save" class="btn-110">确认派发</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div id="globallibscontent" class="hide c_bd_t_d2">
+                <div class="num-con fn-clear">
+                	<div class="global-input3">
+                        <div id="msg" style="color:red;"></div>
+                        <ul>
+                            <li class="global-input3-name">批量派发：</li>
+                            <li class="global-input3-input relative">
+                            	<input name="log_img_show" type="text" id="log_img_show" class="textbox w100" />
+                                <input type="file" id="log_img" name="log_img" class="upload_file" onChange="$('#log_img_show').val($(this).val())"/>
+                                <a href="javascript:;" class="btn-60 ml10">浏览</a>
+                                <a href="javascript:;" class="btn-60 ml10" onclick="return ajaxFileUpload('log_img','resp_log_img','showpage1','{:U('WangcaiPc/Upfile/index','')}');" >上传</a>
+                                <br />
+                                 <input type="hidden" value="" name="resp_log_img" id="resp_log_img" />
+                                <span><a href="{:U('FixBonusSend/down/')}" >【批量派发模板下载】</a>每次最多导入1000条手机号</span></li>
+                                
+                        </ul>
+                       
+                        <ul>
+                            <li class="global-input3-name">&nbsp;</li>
+                            <li class="global-input3-input"><a href="javascript:;" id="save2" class="btn-110">确认派发</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </form>
+</body>
+</html>

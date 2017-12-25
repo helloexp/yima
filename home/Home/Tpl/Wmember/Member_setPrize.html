@@ -1,0 +1,360 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>会员管理-招募活动创建-奖项设定</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wmember.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script>
+function editPrize(cateId, b_id){
+	//有b_id参数表示编辑奖品，没有的是增加
+	art.dialog.open("{:U('Common/SelectJp/addToPrizeItem', array('m_id' => $m_id))}&prizeCateId=" + cateId + '&b_id=' + b_id,{
+		title: '编辑奖品',
+		width:'900px',
+		lock:true,
+		height:'600px'
+	});
+}
+//启用和停用奖品
+function setPrizeStatus(batch_id, cj_batch_id, status) {
+	var postUrl  = "{:U('Common/SelectJp/jpStop')}";
+	//2表示停用
+	if (status == '2') {
+		postUrl = "{:U('Common/SelectJp/jpStart')}";
+	}
+	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+	var data = {cj_batch_id : cj_batch_id,batch_id : batch_id}
+	$.post(postUrl, data, function(resp){
+		if (resp.status == '1') {
+			window.location.reload();
+		} else {
+			dialog.close();
+			dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+		}
+	}, 'json');
+}
+//删除奖项
+function delCate(cj_cate_id){
+	var batch_id = $('#m_id').val();
+	art.dialog({
+		title:"确认",
+		content:'您确定要删除该奖项吗？',
+		fixed: true,
+		lock:true,
+		okVal: '确认',
+		ok: function () {
+			var data = {
+				cj_cate_id : cj_cate_id,
+				batch_id : batch_id
+			}
+			$.post('{:U('Common/SelectJp/jpCateDel')}', data, function(resp){
+			var tips = art.dialog({width:"200px",title:"提示",lock:true,content:resp.info,
+				okVal: '确认',
+				ok: function () {
+					if(resp.status=='1'){
+						window.location.reload();
+					} else {
+						tips.close();
+						dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+					}
+				}
+			});
+			
+			}, 'json');
+		},
+		cancel: true
+	});
+}
+
+function initialSkip() {
+	if ($('#skip.hover') && $('#skip.hover').length > 0) {
+		$('#switch2').hide();
+	}
+}
+
+function changeIsCj() {
+	var data = {
+		m_id : $('#m_id').val()
+	}
+	$.post("{:U('Wmember/Member/changeIsCj')}", data, function(resp){
+		if (resp.status == '1') {
+			window.location.reload();
+		} else {
+			dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+		}
+	}, 'json');
+}
+
+$(function(){
+	Gform();
+	initialSkip();
+	$(".addAward_btn").click(function(e) {
+		var prizeCateId = $(this).next('[name="prizeCateId"]').val();
+        art.dialog.open("{:U('Wmember/Member/addAward', array('m_id' => $m_id))}&prizeCateId=" + prizeCateId,{
+			title: '添加奖品',
+			width:'900px',
+			lock:true,
+			height:'600px'
+		});
+    });
+	
+	$('.setElectric').click(function(){
+		art.dialog.open("{:U('Common/SelectJp/index')}&showSetElec=1", {
+			title: '设置卡券',
+			width:'900px',
+			lock:true,
+			height:'600px'
+		});
+	});
+        
+        $(document).on('blur', 'input[name=total_chance]', function(){
+            var rate = $(this).val();
+            $.post("{:U('Common/SelectJp/saveRate')}", {'rate':rate}, function(data){
+                
+            });
+        });
+	
+	$(".js_edit").click(function(e) {
+                var content = '<div class="Gform" style="margin-left:-60px;"><ul><li class="Gname">奖项名称</li><li class="Ginput">';
+		var cj_cate_id = $(this).attr('data-cate');
+                var name = $(this).text();
+                if(name == '编辑'){
+                    name = '编辑奖项';
+                    var prizeName = $('#'+cj_cate_id).text();
+                    content += '<input type="text" id="demo-labs-input" name="cj_cate_name" value="'+prizeName+'" />'
+                }else{
+				    name = '添加奖项';
+                    content += '<input type="text" id="demo-labs-input" name="cj_cate_name" value="" />'
+                }
+                content += '</li></ul></div>';
+        var dialog = art.dialog({
+			content: content,
+			width: '500px',
+			id: 'Fm7',
+			okVal: '确  定',
+			noText:"取  消",
+			title:name,
+			ok: function () {
+				var input = document.getElementById('demo-labs-input');
+				dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+				var data = {
+						cj_cate_id : cj_cate_id,
+						cj_cate_name : $('[name="cj_cate_name"]').val(),
+						//member_id : member_id,
+						batch_id : $('#m_id').val()
+					}
+				$.post("{:U('Common/SelectJp/jpLevelSave')}", data, function(resp){
+					if (resp.status == '1') {
+						/* art.dialog({
+							content: '恭喜你，添加成功！',
+							icon: 'succeed',
+							fixed: true,
+							lock: true,
+							time: 1.5
+						});
+						setTimeout("window.location.reload();", 1500); */
+						changeIsCj();
+					} else {
+						dialog.close();
+						dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+					}
+				}, 'json');
+			},
+			cancel: true
+		});
+    });
+})
+
+function postPrize() {
+	var cj_resp_text = '';
+	$('[name^="cj_resp_text"]').each(function(){
+		cj_resp_text += $(this).val() + '|';
+	});
+	cj_resp_text = cj_resp_text.substr(0, (cj_resp_text.length - 1));
+	
+	var no_award_notice = '';
+	$('[name^="no_award_notice"]').each(function(){
+		no_award_notice += $(this).val() + '|';
+	});
+	no_award_notice = no_award_notice.substr(0, (no_award_notice.length - 1));
+	//提交保存数据
+	var readyData = {
+	        "is_cj": $('#is_cj').val(),
+	        "m_id":$('#m_id').val(),
+	        "isReEdit":$('#isReEdit').val(),
+	        "total_chance" : $('[name="total_chance"]').val(),
+	        "cj_resp_text" : cj_resp_text,
+	        'no_award_notice' : no_award_notice
+	    };
+	var sort = $('[name^=cj_cate_to_sort]').serialize();
+	
+	if($("#cj_rule").validationEngine('validate')){
+		$.post("{:U('Wmember/Member/publish')}&"+sort, readyData,
+			    function(data) {
+			        if (data.status) {
+			        	if ($('#isReEdit').val() == 1) {
+			        		window.location.href="{:U('Wmember/Member/recruit')}";
+			        	} else {
+			        		window.location.href="{:U('Wmember/Member/publish',array('m_id' => $m_id, 'isReEdit' => 0))}";
+			        	}
+			        } else {
+			            alert(data.info);
+			        }
+			    },
+			    "json");
+	}
+}
+
+function reEditSort(obj) {
+	var selectedDl = $(obj).parentsUntil('dl').parent().clone();
+	var selectedSort = $(obj).val();
+	//比自己小的插前面，比自己大的插后面
+	var originPosition = $(obj).attr('data-origin');
+	if (selectedSort > originPosition) {
+		//$('.sort_for:eq('+(selectedSort-1)+')').after(selectedDl);
+		$('.sort_for').each(function(){
+			var s = $(this).find('[name^=cj_cate_to_sort]');
+			var origin_data = $(s[0]).attr('data-origin');
+			if (origin_data == selectedSort) {
+				$(this).after(selectedDl);
+			}
+		});
+	} else {
+		//selectedDl.prependTo('.sort_for:eq('+(selectedSort-1)+')');
+		$('.sort_for').each(function(){
+			var s = $(this).find('[name^=cj_cate_to_sort]');
+			var origin_data = $(s[0]).attr('data-origin');
+			if (origin_data == selectedSort) {
+				$(this).before(selectedDl);
+			}
+		});
+	}
+	$(obj).parentsUntil('dl').parent().replaceWith('');
+	$('[name^=cj_cate_to_sort]').off('change', '', 'reEditSort');
+	var sort = 1;
+	$('[name^=cj_cate_to_sort]').each(function(){
+		$(this).val(sort);
+		$(this).attr('data-origin', sort);
+		sort++;
+	});
+	$('[name^=cj_cate_to_sort]').each(function(){
+		var temp = $(this).val();
+		//$(this).children().removeAttr('selected');
+		$(this).children().each(function(){
+			if ($(this).val() == temp) {
+				$(this).attr('selected', 'selected');
+			} else {
+				$(this).removeAttr('selected');
+			}
+		});
+	});
+	$('[name^=cj_cate_to_sort]').on('change', '', 'reEditSort');
+}
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+    	<include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+            	<div class="member_con">
+                	{$stepBar}
+                	<div class="Gform w1">
+                	<input name="m_id" id="m_id" value="{$m_id}" type="hidden"/>
+                    <h3 class="tc mt20">是否为该活动配置奖项？</h3>
+                    <ul class="tc pb30 pl0" style="width:40%; margin:0 auto">
+                        <li class="Ginput">
+                            <div class="switch" data-show="switch2">
+                                <input type="radio" value="{$is_cj}" name="is_cj" id="is_cj" checked="checked">
+                                <div class="newRadio">
+                                    <span class='<eq name="is_cj" value="0">hover</eq>' data-val="0" id="skip">直接跳过</span>
+                                    <span class='<eq name="is_cj" value="1">hover</eq>' data-val="1">配置奖品</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div id="switch2" class="award_setting">
+                    	<div class="shadow"></div>
+                        <h3>奖项设定</h3>
+                        <form name="cj_rule" id="cj_rule" method="post">
+                        <input type="hidden" id="isReEdit" value="{$isReEdit}" name="isReEdit"/>
+                        <ul>
+                            <li class="Gname"><span>*</span>&nbsp;中奖概率</li>
+                            <li class="Ginput">
+                                <input type="text" name="total_chance" value="{$cj_rule_arr['total_chance']}" class="validate[custom[integer],required,min[1],max[100],maxSize[3]]" maxlength="20" class="Gview-text"><span class="maxTips forInput">%</span>
+								<span class="txtTips">不得为0，数值越大，参与者越有可能中奖<br>设置为100时，所有参与者都会中奖<br>如无奖品或奖品发完，则所有参与者都无法中奖</span>
+                            </li>
+                        </ul>
+                        
+                        <ul class="nothing-tips rel">
+                        <li class="Gname">&nbsp;用户中奖提示</li>
+                         <li class="Ginput">
+                         	<volist name="cj_rule_arr['cj_resp_text']" id="zjxx">
+                            <div class="Gadd" data-min="1" data-max="5">
+                                <input value="{$zjxx}" name="cj_resp_text[]" type="text" maxlength="20"><span class="maxTips forInput" data-max="20" style="right:0">0/20</span>
+                                <a href="javascript:void(0)" class="Gbtn-add" style="right:-37px;"><i></i></a>
+                                <a href="javascript:void(0)" class="Gbtn-del" style="right:-64px;"><i></i></a>
+                            </div>
+                            </volist>
+                            <span class="txtTips">随机显示，最多可以设置五条，每条最多可以输入20个字符</span>
+                        </li>
+                    </ul>
+                    	
+                        <ul class="nothing-tips rel">
+                            <li class="Gname">&nbsp;用户未中奖提示</li>
+                             <li class="Ginput">
+                             	<volist name="cj_rule_arr['no_award_notice']" id="wzjxx">
+                                <div class="Gadd" data-min="1" data-max="5">
+                                    <input value="{$wzjxx}" type="text" name="no_award_notice[]" maxlength="20"><span class="maxTips forInput" data-max="20" style="right:0">0/20</span>
+                                    <a href="javascript:void(0)" class="Gbtn-add" style="right:-37px;"><i></i></a>
+                                    <a href="javascript:void(0)" class="Gbtn-del" style="right:-64px;"><i></i></a>
+                                </div>
+                                </volist>
+                                <span class="txtTips">随机显示，最多可以设置五条，每条最多可以输入20个字符</span>
+                            </li>
+                        </ul>
+                        </form>
+                        <div class="award_list">
+                        	<include file="./Home/Tpl/LabelAdmin/Public_prize.html" />
+                            <div class="cl"></div>
+                            <a href="javascript:void(0)"  class="btn_add_list js_edit" data-cate=""><i>✚</i> 新增奖项</a>
+                        </div>
+                    </div>
+                    
+                    <div class="fn tc noName">
+                            <!-- <a href="{:U('Wmember/Member/recruit')}" class="btn-all-del">取消</a>
+                            <eq name="isReEdit" value="0">
+                            <a href="{:U('Wmember/Member/setActConfig',array('m_id' => $m_id, 'isReEdit' => 0))}" class="btn-all">上一步</a>
+                            <a href="javascript:postPrize()" class="btn-all">下一步</a>
+                            <else />
+                            <a href="javascript:postPrize()" class="btn-all">保存</a>
+                            </eq> -->
+							<a href="javascript:postPrize()" class="btn-all">保存</a>
+						</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>会员管理-招募活动创建-奖项设定</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wmember.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script>
+function editPrize(cateId, b_id){
+	//有b_id参数表示编辑奖品，没有的是增加
+	art.dialog.open("{:U('Wmember/Member/addToPrizeItem', array('m_id' => $m_id))}&prizeCateId=" + cateId + '&b_id=' + b_id,{
+		title: '编辑奖品',
+		width:'900px',
+		lock:true,
+		height:'600px'
+	});
+}
+
+$(function(){
+	Gform();
+	
+	$(".addAward_btn").click(function(e) {
+		var prizeCateId = $(this).next('[name="prizeCateId"]').val();
+        art.dialog.open("{:U('Wmember/Member/addAward', array('m_id' => $m_id))}&prizeCateId=" + prizeCateId,{
+			title: '添加奖品',
+			width:'900px',
+			lock:true,
+			height:'600px'
+		});
+    });
+	
+	$(".js_edit").click(function(e) {
+        var dialog = art.dialog({
+		content:  '<ul class="Gform">'
+				+ '<li class="Gname">奖项名称：</li>'
+				+ '<li class="Ginput"><input type="text" id="demo-labs-input"/></li>'
+				+ '</ul>',
+		fixed: true,
+		width: '50%',
+		height: '40%',
+		left: '50%',
+		top: '50%',
+		id: 'Fm7',
+		okVal: '确  定',
+		noText:"取  消",
+		title:"添加奖项",
+		ok: function () {
+			var input = document.getElementById('demo-labs-input');
+			
+			if (input.value !== '\u52ff\u65bd\u4e8e\u4eba') {
+				this.shake && this.shake();// 调用抖动接口
+				input.select();
+				input.focus();
+				return false;
+			} else {
+				art.dialog({
+					content: '恭喜你，添加成功！',
+					icon: 'succeed',
+					fixed: true,
+					lock: true,
+					time: 1.5
+				});
+			}
+		},
+		cancel: true
+	});
+
+	dialog.shake && dialog.shake();// 调用抖动接口
+    });
+})
+
+function postPrize() {
+	//提交保存数据
+    $.post("{:U('Wmember/Member/publish')}", {
+        "json_data": returndata,
+        "m_id":$('#m_id').val(),
+        "isReEdit":$('#isReEdit').val()
+    },
+    function(data) {
+        if (data.status) {
+        	if ($('#isReEdit').val() == 1) {
+        		window.location.href="{:U('Wmember/Member/recruit')}";
+        	} else {
+        		window.location.href="{:U('Wmember/Member/publish',array('m_id' => $m_id, 'isReEdit' => 0))}";
+        	}
+        } else {
+            alert(data.msg);
+        }
+    },
+    "json");
+}
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+    	<include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+            	<div class="member_con">
+                	<div class="member_steps">
+                    	<ul>
+                        	<li class="past">基础信息</li>
+                            <li class="past">活动配置</li>
+                            <li class="current">奖项设定</li>
+                            <li>活动发布</li>
+                            <li>发布成功</li>
+                        </ul>
+                    </div>
+                	<div class="Gform w100p">
+                    <h3 class="tc mt20">是否为该活动配置奖项？</h3>
+                    <ul class="tc pb30 pl0" style="width:40%; margin:0 auto">
+                        <li class="Ginput">
+                            <div class="switch" data-show="switch2">
+                                <input type="radio" value="1" checked="checked">
+                                <div class="newRadio">
+                                    <span class="valfirst" data-val="0">直接跳过</span>
+                                    <span class="vallast" data-val="1">配置奖品</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div id="switch2" class="award_setting">
+                    	<div class="shadow"></div>
+                        <h3>奖项设定</h3>
+                        <ul>
+                            <li class="Gname">* 中奖概率：</li>
+                            <li class="Ginput">
+                                <input type="text" value="{$cj_rule_arr['total_chance']}" class="validate[custom[integer],required,min[1],max[100],maxSize[3]]" maxlength="20" class="Gview-text"><span class="maxTips forInput" style="left:338px;">%</span>
+                            </li>
+                        </ul>
+                        
+                        <ul class="nothing-tips rel">
+                        <li class="Gname">&nbsp;用户中奖提示：</li>
+                         <li class="Ginput">
+                         	<volist name="cj_rule_arr['cj_resp_text']" id="zjxx">
+                            <div class="Gadd" data-min="1" data-max="5">
+                                <input value="{$zjxx}" type="text" maxlength="20"><span class="maxTips forInput" data-max="20" style="right:0">0/20</span>
+                                <a href="javascript:void(0)" class="Gbtn-add" style="right:-37px;"><i></i></a>
+                                <a href="javascript:void(0)" class="Gbtn-del" style="right:-64px;"><i></i></a>
+                            </div>
+                            </volist>
+                            <span class="txtTips">随机显示，最多可以设置五条，每条最多可以输入20个字符</span>
+                        </li>
+                    </ul>
+                    	
+                        <ul class="nothing-tips rel">
+                            <li class="Gname">&nbsp;用户未中奖提示：</li>
+                             <li class="Ginput">
+                             	<volist name="cj_rule_arr['no_award_notice']" id="wzjxx">
+                                <div class="Gadd" data-min="1" data-max="5">
+                                    <input value="{$wzjxx}" type="text" maxlength="20"><span class="maxTips forInput" data-max="20" style="right:0">0/20</span>
+                                    <a href="javascript:void(0)" class="Gbtn-add" style="right:-37px;"><i></i></a>
+                                    <a href="javascript:void(0)" class="Gbtn-del" style="right:-64px;"><i></i></a>
+                                </div>
+                                </volist>
+                                <span class="txtTips">随机显示，最多可以设置五条，每条最多可以输入20个字符</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="award_list">
+                        	<volist name="cj_cate_arr" id="cate_list">
+                        	<div class="cl"></div>
+                        	<dl>
+                            	<dt>
+                                <strong>{$cate_list['name']}</strong>
+                                <span><a href="javascript:void(0)" class="pl20 js_edit">编辑</a><a href="javascript:void(0)" class="ml10">删除</a></span>
+                                <select>
+                                	<option>序列1</option>
+                                    <option>序列2</option>
+                                    <option>序列3</option>
+                                </select>
+                                </dt>
+                                <notempty name="jp_arr[$cate_list['id']]">
+                                <volist name="jp_arr[$cate_list['id']]" id="prize">
+                                <dd>
+                                	<p class="adward_title">
+                                        <strong>{$prize['batch_name']}</strong>
+                                        <span>
+                                        <a href="javascript:void(0)" onclick="editPrize({$cate_list['id']}, {$prize['b_id']})">编辑</a>
+                                        <a href="javascript:void(0)" class="ml10" onclick="stopPrize({$cate_list['id']}, {$prize['b_id']})">停用</a>
+                                        </span>
+                                    </p>
+                                    
+                                    <p class="imgCenter"><img src="__PUBLIC__/Image/member/quan2.png"></p>
+                                    
+                                    <span class="Astatic">总投入数量<em>{$prize['storage_num']}</em></span>
+                                    <span class="Astatic">剩余数量<em>{$prize['remain_num']}</em></span>
+                                    <p class="AstaticDate">有效期：{$prize['available_time_txt']}</p>
+                                </dd>
+                                </volist>
+                                </notempty>
+                                <dd class="blank">
+                                	<p class="btn_area">
+                                    <a href="javascript:void(0)" class="addAward_btn"><i>✚</i> 添加奖品</a>
+                                    <input name="prizeCateId" value="{$cate_list['id']}" type="hidden"/>
+                                    </p>
+                                    <p class="tips">奖品以“卡券”的形式发给中奖者，<br /> 还未添加过卡券，<a href="">点击这里设置卡券</a></p>
+                                </dd>
+                            </dl>
+                            </volist>
+                            <div class="cl"></div>
+                            <a href="javascript:void(0)"  class="btn_add_list js_edit"><i>✚</i> 新增奖项</a>
+                        </div>
+                    </div>
+                    
+                    <div class="fn tc">
+                            <a href="javascript:void(0)" class="btn-all-del ml10">取消</a>
+                            <a href="{:U('Wmember/Member/setActConfig',array('m_id' => $m_id, 'isReEdit' => 0))}" class="btn-all ml10">上一步</a>
+                            <a href="javascript:postPrize()" class="btn-all ml10">下一步</a>
+						</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

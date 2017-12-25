@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-批量创建门店渠道</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript">
+$(function(){
+	Gform();
+	$(".shoplist li").toggle(function(){
+		$(this).addClass("selected");
+		$(this).children(":checkbox").attr("checked",'checked');
+    },function(){
+		$(this).removeClass("selected");
+		$(this).children(":checkbox").attr("checked",false);
+    });
+	
+	$("#smb").click(function(){
+	var dialog;
+	if($("form").validationEngine('validate')){
+		$("form").ajaxSubmit({
+			beforeSubmit:function(){
+				dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+			},
+			success:function(data){
+				 if(data.status == '1'){
+					   dialog.time(8).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+					   return false;
+				  }else{
+					   dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+					    setTimeout(function(){
+                            top.location.href = '{:U("Home/Store/channellist")}';
+                        }, 2000);
+				  }
+			},
+			dataType:'json'
+		});
+		return false;
+	}
+	
+});
+});
+</script>
+<style type="text/css">
+.newRadio-input .shoplist{ text-align:left}
+</style>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab db" id="Wcanal-tabon">
+<div class="Wcanal-tab-list">
+    <div class="Gform eTicket">
+    <form id="theform" action="{:U('Home/Store/channeladd')}" method="post">
+        <ul>
+            <li class="Gnmae">渠道类型</li>
+            <li class="Ginput">
+                <div class="switch">
+                    <input type="radio" name="channelType" id="channelType" value="21" checked="checked">
+                    <div class="newRadio">
+					    <?php 
+						$i=0;
+						foreach($channelType as $k=>$v){
+						
+						?>
+                          <span class=" <?php if($i == 0){?>hover<?php } ?>" data-val="{$k}">{$v}</span>
+						<?php 
+						 $i++;
+						} ?>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        
+        <ul>
+            <li class="Gnmae">渠道名称前缀</li>
+            <li class="Ginput">
+            <input type="text" name="jg_name" id="jg_name" class="validate[required,maxSize[5]] textbox" value="">
+            <p class="font-12-cc" style="font-size:12px;">5个字以内，如“大门海报”，批量创建好的渠道名则是“大门海报 - 南京路店” “大门海报 - 平川路店”</p>
+            </li>
+        </ul>
+        
+        <ul>
+            <li class="Gnmae">*&nbsp;可验证门店</li>
+            <li class="Ginput">
+	            <div class="switch">
+                    <input type="radio" name="storeNumber" id="storeNumber" value="1" checked="checked">
+                    <div class="newRadio">
+                        <span class="valfirst hover" data-val="1">所有门店</span>
+                        <span class="vallast" data-val="2">指定门店</span>
+                    </div>
+					<div class="newRadio-input cl">
+						<ul class="shoplist">
+						    <?php if($list){ foreach($list as $v){ ?>
+						     	<li class="">{$v.store_short_name}
+							<input type="checkbox" name="storeCheckStatus[]" class="storeCheckStatus" value="<?php echo $v['store_id']; ?>" style="display:none;"/>
+								</li>
+							<?php } }else{ ?>
+							    <li>没有数据</li>
+							<?php } ?>
+						</ul>
+					</div>
+                </div>
+            </li>
+        </ul>
+        <div class="DiabtnCon">
+            <a href="javascript:void(0)" class="Diabtn-all" id="smb">确定</a>
+            <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+        </div>
+    </form> 
+    </div>
+</div>
+</div>
+</div>
+</body>
+</html>

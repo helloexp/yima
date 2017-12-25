@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加本层机构</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wfx.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<style>
+.shopTable tr td{ font-size:14px;word-break: break-all; line-height:24px; padding:7px 15px; text-align:left; word-break:break-all;}
+.shopTable tr:first-child td{ border-top: solid 1px #e3e3e3; }
+.shopTable tr td a{ color:#2e7dc6; line-height:24px;}
+.shopTable tr td a img{ width:104px; height:104px;}
+.shopTable tr td a.licences img{ width:80px; height:58px;}
+.shopTable tr td a span{ padding-left:10px;}
+.shopTable tr td em{ font-size:12px; color:#666}
+.shopTable td:nth-of-type(odd){ background:#fcfcfc; text-align:left; color:#666;width: 20%}
+.shopTable td:nth-of-type(even){ background:#fff; text-align:left; color:#666;width: 30%}
+.shopTable tr.gap td{ border-left:0;border-right:0; background:#FFF}
+.shopTable.editHistory tr td{ text-align:center; background:#FFF}
+.shopTable.editHistory th{border:0; border-top: solid 1px #e3e3e3; font-size:14px}
+.shopTable.editHistory th.first{border-left: solid 1px #e3e3e3;}
+.shopTable.editHistory th.last{border-right: solid 1px #e3e3e3;}
+
+</style>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab inPop" id="Wcanal-tabon">
+<div class="Wcanal-tab-title fn">
+    <p class="Wcanal-tab-hover first" id="p1" onclick="detail()"><a href="javascript:void(0);">会员详情</a></p>
+    <p id="p2" onclick="vxyj();"><a href="javascript:void(0);">分销业绩</a></p>
+    <p id="p3" class="last" onclick="vxyj1();"><a href="javascript:void(0);">本人消费</a></p>
+    <p id="p4" class="last" onclick="vxyj2();"><a href="javascript:void(0);">客户消费</a></p>
+    <p id="p5" class="last" onclick="editlog()"><a href="javascript:void(0);">编辑记录</a></p>
+</div>
+<div class="Wcanal-tab-list" id="d1">
+    <div>
+    <table cellpadding="0" cellspacing="0" class="shopTable">
+    <tbody>
+    <tr class="title">
+      <td class="hover">会员名称</td>
+      <td>{$info['name']}</td>
+      <td>上级会员</td>
+      <td>{$info['parent_name']}</td>
+    </tr>
+    <tr class="title">
+      <td class="hover">所在层级</td>
+      <td>{$meiHuiInfo[$info['level']]}</td>
+      <td>审核状态</td>
+      <td>{$statusArr[$info['status']]}</td>
+    </tr>
+    <tr class="title">
+      <td class="hover">负责人姓名</td>
+      <td>{$info['contact_name']}</td>
+      <td>负责人手机号码</td>
+      <td>{$info['phone_no']}</td>
+    </tr>
+    <eq name="accountType" value="1">
+    <tr class="title">
+      <td class="hover">支付宝账号</td>
+      <td colspan="3">{$info['alipay_account']}</td>
+    </tr>
+    <else/>
+    <tr class="title">
+      <td class="hover">银行名称</td>
+      <td>{$info['bank_name']}</td>
+      <td>银行账号</td>
+      <td>{$info['bank_account']}</td>
+    </tr>
+    </eq>
+    <tr class="gap">
+      <td class="hover" colspan="4"></td>
+    </tr>
+    <tr class="title">
+      <td class="hover">营业执照</td>
+      <td colspan="3"><if condition="!empty($info['business_licence'])"><a href="__UPLOAD__/{$info['business_licence']}" target="_black" class="licences"><img src="__UPLOAD__/{$info['business_licence']}" /><span>查看大图</span></a><else />您还没有上传营业执照！</if></td>
+    </tr>
+    <tr class="title">
+      <td class="hover">下级会员</td>
+      <td colspan="3">{$count} 个（正常）</td>
+    </tr>
+    <if condition="$info['status'] eq 3 or $info['status'] eq 4">
+    <tr class="title">
+      <td class="hover">分销链接</td>
+      <td><a class="codeUrl" target="_blank" href="{$jsonData}">{$jsonData}</a></td>
+      <td>分销二维码</td>
+      <td><a href="javascript:void(0);" onclick="window.location.href=('{:U('Wfx/Fxgl/loadOneIcon',array('saler_id'=>$info['id']))}');"><img src="{$info['codePng']}"></a><br /><em>点击二维码图片下载</em></td>
+    </tr> 
+    </if>   
+    </tbody>
+    </table>
+    <div class="tc"><a class="btn-all btn_primary mt30">关闭</a></div>
+    </div>
+</div>
+<div class="Wcanal-tab-list" style="display: none;" id="d2">
+	<table cellpadding="0" cellspacing="0" class="shopTable editHistory">
+    <tbody>
+    <tr class="title">
+        <th class="hover first">时间</th>
+        <th class="hover">分销订单数</th>
+        <th class="hover">分销订单总金额</th>
+        <th class="hover last">提成总金额</th>
+    </tr>
+    <if condition="!empty($traceArr)">
+    <volist name="traceArr" id="vo">
+    <tr class="title">
+        <td>{$vo['add_time']}</td>
+        <td>{$vo['order_amt']}</td>
+        <td>{$vo['amount_amt']}</td>
+        <td>{$vo['bonus_amt']}</td>
+    </tr>
+    </volist>
+    <else />
+    <tr class="title">
+        <td colspan="4"><div class="nonedata"></div></td>
+    </tr>
+    </if>
+    </tbody>
+    </table>
+    <div class="fn tc pt20">
+        <div class="pageBase-sm dib">
+            <ul class="pageul">
+                {$page}
+            </ul>
+        </div>
+    </div>
+    <div class="tc"><a class="btn-all btn_primary mt30">关闭</a></div>
+</div>
+    <div class="Wcanal-tab-list" style="display: none;" id="d3">
+        <table cellpadding="0" cellspacing="0" class="shopTable editHistory">
+            <tbody>
+            <tr class="title">
+                <th class="hover first">时间</th>
+                <th class="hover">订单数</th>
+                <th class="hover">订单总金额</th>
+                <!--<th class="hover last">提成总金额</th>-->
+            </tr>
+            <if condition="!empty($traceArrMh)">
+                <volist name="traceArrMh" id="vo">
+                    <php>if($vo['add_time'] !='' && $vo['order_amt']>0){</php>
+                    <tr class="title">
+                        <td>{$vo['add_time']}</td>
+                        <td>{$vo['order_amt']}</td>
+                        <td>{$vo['amount_amt']}</td>
+                        <!--<td>{$vo['bonus_amt']}</td>-->
+                    </tr>
+                    <php>}</php>
+                </volist>
+                <else />
+                <tr class="title">
+                    <td colspan="3"><div class="nonedata"></div></td>
+                </tr>
+            </if>
+            </tbody>
+        </table>
+        <div class="fn tc pt20">
+            <div class="pageBase-sm dib">
+                <ul class="pageul">
+                    {$pageMh}
+                </ul>
+            </div>
+        </div>
+        <div class="tc"><a class="btn-all btn_primary mt30">关闭</a></div>
+    </div>
+    <div class="Wcanal-tab-list" style="display: none;" id="d4">
+        <table cellpadding="0" cellspacing="0" class="shopTable editHistory">
+            <tbody>
+            <tr class="title">
+                <th class="hover first">时间</th>
+                <th class="hover">订单数</th>
+                <th class="hover">订单总金额</th>
+                <!--<th class="hover last">提成总金额</th>-->
+            </tr>
+            <if condition="!empty($traceArrMhBy)">
+                <volist name="traceArrMhBy" id="vo">
+                    <tr class="title">
+                        <td>{$vo['add_time']}</td>
+                        <td>{$vo['order_amt']}</td>
+                        <td>{$vo['amount_amt']}</td>
+                        <!--<td>{$vo['bonus_amt']}</td>-->
+                    </tr>
+                </volist>
+                <else />
+                <tr class="title">
+                    <td colspan="4"><div class="nonedata"></div></td>
+                </tr>
+            </if>
+            </tbody>
+        </table>
+        <div class="fn tc pt20">
+            <div class="pageBase-sm dib">
+                <ul class="pageul">
+                    {$pageMhBy}
+                </ul>
+            </div>
+        </div>
+        <div class="tc"><a class="btn-all btn_primary mt30">关闭</a></div>
+    </div>
+<div class="Wcanal-tab-list" style="display: none;" id="d5">
+    <table cellpadding="0" cellspacing="0" class="shopTable editHistory">
+        <tbody>
+        <tr class="title">
+            <th class="hover first">时间</th>
+            <th class="hover">操作员</th>
+            <th class="hover">操作类型</th>
+            <th class="hover last">详情</th>
+        </tr>
+        <notempty name="logInfo" >
+        <volist name="logInfo" id="vl">
+        <tr>
+            <td>{$vl['add_time']|strtotime|date='Y-m-d',###}<br/>{$vl['add_time']|strtotime|date='H:i:s',###}</td>
+            <td>{$vl['user_name']}</td>
+            <td>{$vl['type_name']}</td>
+            <td>{$vl['detail']}</td>
+        </tr>
+        </volist>
+        <else/>
+        <tr class="title">
+          <td colspan="4"><div class="nonedata"></div></td>
+        </tr>
+        </notempty>
+        </tbody>
+    </table>
+    <div class="fn tc pt20">
+        <div class="pageBase-sm dib">
+            <ul class="pageul">
+                {$pageEx}
+            </ul>
+        </div>
+    </div>
+    <div class="tc"><a class="btn-all btn_primary mt30">关闭</a></div>
+</div>
+</div>
+</div>
+</body>
+</html>
+<script>
+function vxyj(){
+    $.cookie('v_toggle','vxyj');
+}
+function detail(){
+    $.cookie('v_toggle','detail');
+}
+function editlog(){
+    $.cookie('v_toggle','editlog');
+}
+function vxyj1(){
+    $.cookie('v_toggle','vxyj1');
+}
+function vxyj2(){
+    $.cookie('v_toggle','vxyj2');
+}
+$(function(){
+    if($.cookie('v_toggle') == 'detail'){
+        $("#p1").addClass("Wcanal-tab-hover");
+        $("#p2").removeClass("Wcanal-tab-hover");
+        $("#p3").removeClass("Wcanal-tab-hover");
+        $("#p4").removeClass("Wcanal-tab-hover");
+        $("#p5").removeClass("Wcanal-tab-hover");
+        $("#d1").attr('style','display: block;');
+        $("#d2").attr('style','display: none;');
+        $("#d3").attr('style','display: none;');
+        $("#d4").attr('style','display: none;');
+        $("#d5").attr('style','display: none;');
+    }else if($.cookie('v_toggle') == 'vxyj'){
+        $("#p1").removeClass("Wcanal-tab-hover");
+        $("#p2").addClass("Wcanal-tab-hover");
+        $("#p3").removeClass("Wcanal-tab-hover");
+        $("#p4").removeClass("Wcanal-tab-hover");
+        $("#p5").removeClass("Wcanal-tab-hover");
+        $("#d1").attr('style','display: none;');
+        $("#d2").attr('style','display: block;');
+        $("#d3").attr('style','display: none;');
+        $("#d4").attr('style','display: none;');
+        $("#d5").attr('style','display: none;');
+    }else if($.cookie('v_toggle') == 'editlog'){
+        $("#p1").removeClass("Wcanal-tab-hover");
+        $("#p2").removeClass("Wcanal-tab-hover");
+        $("#p3").addClass("Wcanal-tab-hover");
+        $("#p4").addClass("Wcanal-tab-hover");
+        $("#p5").addClass("Wcanal-tab-hover");
+        $("#d1").attr('style','display: none;');
+        $("#d2").attr('style','display: none;');
+        $("#d3").attr('style','display: block;');
+        $("#d4").attr('style','display: block;');
+        $("#d5").attr('style','display: block;');
+    }
+    $(".tc .btn-all").click(function(){
+        $.cookie('v_toggle','');
+        art.dialog.close();
+    });
+
+})
+
+</script>

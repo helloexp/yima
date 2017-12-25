@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券中心</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+$(document).ready(function(e) { 
+    $("#search").click(function(){
+        $("form").attr("action","{:U('WangcaiPc/BatchTrace/index')}").submit();
+    });
+    $("#down").click(function(){
+        $("form").attr("action","{:U('WangcaiPc/BatchTrace/downParcodeTrace')}").submit();
+    });
+
+});
+function revocation(id,type){
+	if(type == 'resend'){
+		var url = "{:U('WangcaiPc/BatchTrace/reSend')}";
+		var tip_str = '确认重发?';
+	}else{
+		var url = "{:U('WangcaiPc/BatchTrace/revocationCode')}";
+        var tip_str = '确认撤销?';
+	}
+    art.dialog.confirm(tip_str,function(){
+		Dialoading("正在提交...");
+		$.post(url,{"id":id},function(data){
+			Dialoading();
+			if(data.status==1){
+				art.dialog.msg({
+					content:data.info,
+					ok:function(){
+						window.location.reload();
+					}
+				});
+			}else{
+				art.dialog.msg({content:data.info});
+			}
+		},"json");
+	});
+}
+</script>
+
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="dzqsj"/>  
+        </div>
+
+        
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                    <include file="WangcaiPc/NumGoods/dataMenu" leftmenuid="detailCount"/>                   
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>卡券明细数据<a href="javascript:void(0);" id="down" class="btn-down first"><i></i>下载列表</a></h4>
+                    </div>
+                    <div class="tipNormal">
+                    	<p>1、只能撤销当天的验证或线上提领交易</p>
+                        <p>2、每条卡券重发补发的次数不可超过3次（微信卡券下发暂不支持撤销和重发）</p>
+                        <p>3、“自用业务”指：商家在自行布放的、且由该商家支付受理服务费的验证终端上开展的业务。 “异业联盟业务”指：业务商（即实际开展业务的商家）使用商家的卡券开展业务，发出的卡券在商家的验证终端上被验证的业务。</p>
+                        <p>4、通过交易时间查询发码明细或验证明细时，起止时间不要超过30天。</p>
+                    </div>
+                    <div class="Wcanal-tab mt15" id="Wcanal-tabon">
+                    <div class="Wcanal-tab-title fn">
+                        <p class="Wcanal-tab-hover"><a href="{:U('WangcaiPc/BatchTrace/index')}">发码明细</a></p>
+                        <p class=""><a href="{:U('WangcaiPc/BatchTrace/posTrace')}">验证明细</a></p>
+                        <if condition="$_SESSION['userSessInfo']['node_id'] eq '00023332'">
+                        <p><a href="{:U('WangcaiPc/BatchTrace/failTrace')}">送达失败明细</a></p>
+                        </if>
+                    <p><a href="{:U('WangcaiPc/Withdraw/withdrawList')}">线上提领明细</a></p>
+                    </div>
+                    <div class="Wcanal-tab-list" style="display: block; width:100%;">
+                        <div class="SearchArea fn" style="margin-top:15px;">
+                        <form id="theform" action="{:U('WangcaiPc/BatchTrace/index')}" method="post">
+                        <div class="SearchAreaLeft">
+                        <label>
+                        <span>券名</span><input type="text" name="name" id="name"  value="{$Think.request.name}" />
+                        </label>
+                        
+                        <label>
+                        <span>手机</span><input type="text" name="mobile" id="mobile"  value="{$Think.request.mobile}" />
+                        </label>
+                        
+                        <label>
+                        <span>交易时间</span><input type="text" name="btrans_time" onclick="WdatePicker()" value="{$Think.request.btrans_time}"  />-<input type="text" name="etrans_time" onclick="WdatePicker()" value="{$Think.request.etrans_time}"  />
+                        </label>
+    
+                       <label>
+                        <span>所属商户</span><select name="node_id">
+                                <option value="" class="">全部</option>
+                                <volist name="nodeList" id="vo">
+                                <option value="{$vo['node_id']}"  <if condition="$vo['node_id'] eq $_REQUEST['node_id']">selected="selected"</if>>{$vo['node_name']}</option>
+                                </volist>
+                            </select>
+                        </label>
+                        <label>
+                        <span>状态</span><select name="code_status">
+                                <option value="" class="">全部</option>
+                                <volist name="status" id="vo">
+                                <option value="{$key}" class="" <if condition="strval($key) heq $_REQUEST['code_status']">selected="selected"</if>>{$vo}</option>
+                                </volist>
+                            </select>
+                        </label>
+                        
+                        <label>
+                        <span>交易类型</span><select name="trans_type">
+                                <option value="" class="">全部</option>
+                                <volist name="transType" id="vo">
+                                <option value="{$key}" class="" <if condition="$key eq $_REQUEST['trans_type']">selected="selected"</if>>{$vo}</option>
+                                </volist>
+                            </select>
+                        </label>
+                        </div>
+                        <div class="SearchAreaRight">                   
+                        <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                        </div>
+                        <input type="hidden" name="sort_field" id="sort_field" value="{:I('sort_field')}" />
+                        </form>
+                        </div>
+                        <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="W-table">
+                        <tr class="th">
+                        <th>券名</th>
+                        <!--
+                        <th>业务</th>
+                        -->
+                        <th>交易时间</th>
+                        <!--
+                        <th><a href="javascript:;" class="sort" data-field="time_sort">交易时间<i class=""></i></a></th>
+                        -->
+                        <th>交易类型</th>
+                        <!--
+                        <th>下发通道</th>
+                        -->
+                        <th>手机号</th>
+                        <th>交易状态</th>
+                        <th width="20%">所属商户</th>
+                        <th>操作</th>
+                        </tr>
+                        <empty name="list" >
+                                <tr class="info">
+                                    <td colspan="10" class="last">
+                                        <div class="nonedata"></div>
+                                    </td>
+                                </tr>
+                        </empty>
+                        <volist name="list" id="vo">
+                        <tr>
+                        <td>{$vo.goods_name}</td>
+                        <!--
+                        <td>{$batchTypeName[$vo['batch_type']]}</td>
+                        -->
+                        <td>{$vo.trans_time|dateformat=###,'Y-m-d H:i:s'}</td>
+                        <td>{$transType[$vo['trans_type']]}</td>
+                        <!--
+                        <td><?php if(empty($vo['wx_open_id'])){echo '运营商';}else{echo '微信卡券';}?></td>
+                        -->
+                        <td>{$vo.phone_no}</td>
+                        <td>{$status[$vo['status']]}</td>
+                        <td>{$vo['node_name']}</td>
+                        <td>
+                        <if condition="($vo['trans_type'] eq 0001) AND ($vo['status'] eq 0) and ($vo['data_from'] neq '9') and ($userInfo['node_id'] eq $vo['node_id']) AND $vo['wx_open_id']=='' "> 
+                        <eq name="vo['resend_allow_flag']" value="0">
+                        <a href="javascript:void(0)" onclick="revocation({$vo[id]},'resend');">重发</a> | 
+                        </eq>
+                        <a href="javascript:void(0)" onclick="revocation({$vo[id]},'cannel');">撤销</a> |
+                        </if>
+                        <a href="javascript:void(0)" onclick="art.dialog.open('{:U('WangcaiPc/BatchTrace/sendCodeDetail',array('id'=>$vo['id']));}',{width: 800,title:'发码详情'})">详情</a>
+                        </td>
+                        </tr>
+                        </volist>
+                        
+                        </table>
+                        <div class="page">{$page}</div>
+                        </div>
+                    </div>
+                    </div>
+                    
+                
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+<script type="text/javascript">
+    $(function(){
+    // icon-orderdown
+    // icon-orderup
+    var arr = $('#sort_field').val().split('|')
+    if(arr.length == 2){
+        $('.sort[data-field="'+arr[0]+'"] i').addClass(arr[1]=='asc' ? 'icon-orderup' : 'icon-orderdown');
+    }
+    $('.sort').click(function(){
+        var obj = $(this), field=obj.data('field')+'|', obji = obj.find('i');
+
+        if(obji.hasClass('icon-orderdown'))
+            field += 'asc';
+        else if(obji.hasClass('icon-orderup'))
+            field += 'desc';
+        else
+            field += 'desc';
+        $('#sort_field').val( field );
+        $('#theform').submit();
+    });
+});
+</script>    
+</body>
+</html>

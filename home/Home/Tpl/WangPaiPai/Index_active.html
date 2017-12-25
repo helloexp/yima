@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>激活旺水牌</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wpaipai20150705.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script>
+$(function(){
+    Gform();
+    CityCode({
+        province:$("#province_code2"),//省
+        city:$("#city_code2"),//市
+        town:$("#town_code2"),//区
+        business:$("#business_code2"),//商圈
+        selected:"{:$_POST['province_code2'].$_POST['city_code2'].$_POST['town_code2'].$_POST['business_code2']}",//默认选中的省市区代号
+        url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+    });
+
+    $('#sub_button_1').click(function(){
+        $('#theform').submit();
+    });
+    $('#cencel').click(function(){
+        parent.location.reload();
+        parent.art.dialog.list['adactive'].close();
+    })
+
+        $("#sub_button_2").click(function(){
+
+            if ($('#title').val() == '') {
+                Diaerror('水牌名不能为空！');
+                return false;
+            }
+
+            var title = $('#title').val();
+
+            var city = $("#city").val();
+            var province_code = $("#province").val();
+            var town_code = $("#town").val();
+
+            var addressOne = $(".selected>#addr").text();
+            var addressOne2 = $("input[name=addrre2]").val();
+            if('' != addressOne2){
+                addressOne = addressOne2;
+            }
+            if('' == addressOne){
+                Diaerror("请选择门店");
+                return false;
+            }
+            var store_id = $(".selected>input:first").val();
+
+            $.post("{:U('WangPaiPai/Index/addChannel')}",
+                    {
+                        name:title,
+                        city:city,
+                        province_code:province_code,
+                        town_code:town_code,
+                        title:title,
+                        addre:addressOne,
+                        id:{$_GET['id']},
+                        store_id:store_id,
+                    },function(d){
+                        if(1 == d.status){
+					art.dialog.msg({content:d.info,width:400});
+                            parent.location.reload();
+                            parent.art.dialog.list['adactive'].close();
+                        }else{
+					art.dialog.msg({content:d.info,width:400});
+                        }
+        },'json')
+    });
+});
+
+</script>
+<style>
+.Gform .Ginput label{ padding:0}
+.Diabody .Gform .Ginput select.n3 {
+    width: 96.33px;
+    padding: 3px;
+}
+</style>
+</head>
+<body>
+<div id="content">
+    <div class="newRule">
+        <div class="Gform">
+        	<ul>
+            	<li class="Gname">水牌标号</li>
+                <li class="Ginput"><p>{$id}</p></li>
+            </ul>
+            <ul>
+            	<li class="Gname">水牌名称</li>
+                <li class="Ginput"><input name="title" id="title" type="text" maxlength="20" value="" class="Gview-id1pagetitle validate[required,optional,maxSize[20]]"><span class="maxTips forInput" data-max="20">0/20</span></li>
+            </ul>
+            
+            <ul>
+            	<li class="Gname">水牌位置</li>
+                <li class="Ginput">
+                    <div class="switch hover">
+
+                        <input type="radio" value="0" checked="checked">
+                        <div class="newRadio">
+                            <span class="valfirst hover" data-val="0">现有门店</span>
+                            <span class="vallast" data-val="1">其他位置</span>
+                        </div>
+                        <div class="newRadio-input mt15 mb15 shuipai">
+                        <include file="./Home/Tpl/Public/Public_StoresAdnAddress.html" />
+                        </div>
+                        <div class="newRadio-default mt15 mb15 dn">
+                            <p class="w1">
+                                <select class="n3" name="province_code2" id="province_code2">
+                                    <option value="">选择省</option>
+                                </select>
+                                <select class="n3" name="city_code2" id="city_code2">
+                                    <option value="">选择市</option>
+                                </select>
+                                <select class="n3" name="town_code2" id="town_code2">
+                                    <option value="">选择区</option>
+                                </select>
+                            </p>
+                           <input type="text" class="mt15" name="addrre2" value="" placeholder="输入门店的详细地址">
+                        </div>
+                    </div>
+            	</li>
+            </ul>
+            
+            <div class="DiabtnCon">
+            		<a href="javascript:void(0)" class="Diabtn-all" id="sub_button_2">确认</a>
+                    <a href="javascript:void(0)"  class="Diabtn-all-del" id="cencel">取消</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

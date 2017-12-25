@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>操作平台_{:C('SITE_TITLE')}</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+
+<script>
+$(function(){
+	var batch_type = {$batch_type};
+	$('#sub_button').click(function(){
+        $('#theform').attr("action","{:U('Ecshop/O2OHot/index')}").submit();
+    });
+    $("#down").click(function(){
+		$("#theform").attr("action","{:U('Ecshop/O2OHot/export')}").submit();
+    });
+	$("#add_new").click(function(){
+    	if(batch_type == 26){
+			location.href = "{:U('Ecshop/GoodsSale/add')}";
+		}else if(batch_type == 55){
+			var hotline = '{$hotLine}';
+			if(!hotline){
+				art.dialog.open("{:U('Home/AccountInfo/node_service_hotline',array('node_id'=>$userInfo['node_id'],'type'=>'4'))}",{
+			        title: '配置企业服务热线',
+			        width:500
+			    });
+				return false;
+			}
+			location.href = "{:U('Ecshop/ZqCut/add')}";
+		}else{
+			var is_new={$is_new};
+			if(is_new==2){
+				location.href = "{:U('Ecshop/O2OHot/newadd')}";
+			}else{
+				location.href = "{:U('Ecshop/MaShangMai/add')}";
+			}
+		}
+    });
+})
+function statusChange(batch_id,status,id,isNew){
+    if(status==1){
+        var title="您确认启用该活动？";
+    }else{
+        var title="您确认停止该活动？";
+    }
+	var batch_type = {$batch_type};
+        var isNew = {$is_new};
+	if(batch_type == 26){
+		var url = "{:U('Ecshop/GoodsSale/editBatchStatus')}";
+	}else if(batch_type == 55){
+		var url = "{:U('Ecshop/ZqCut/editBatchStatus')}";
+	}else{
+		var url = "{:U('Ecshop/MaShangMai/editBatchStatus')}";
+	}
+        
+        if(batch_type == 26){
+		var editUrl = "index.php?g=Ecshop&m=GoodsSale&a=edit&id=";
+	}else{
+            if(isNew == 2)
+		var editUrl = "index.php?g=Ecshop&m=O2OHot&a=newedit&id=";
+            else
+                var editUrl = "index.php?g=Ecshop&m=MaShangMai&a=edit&id=";
+	}
+		
+    art.dialog.confirm(title,function(){
+        $.post(url,{"batch_id":batch_id,"status":status, "isNew":isNew},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>更新成功</div>",fixed: true,padding:0,time:2});
+                if(data.url.status == '1'){
+                    window.location.href = editUrl + data.url.id;
+                }else{ 
+                    window.location.reload();
+                }
+            }else{
+                if(data.url.reload == undefined){
+                    art.dialog.msg({
+                        content:data.info
+                    });
+                    window.location.reload();
+                }else{
+                    art.dialog.msg({
+                        content:data.info,
+                        okVal:"重新上架",
+                        ok:function(){
+                                //window.location.href = "{:U('Weixin/Weixin/index')}";
+                                window.open(data.url.reload,'_blank');
+                        },
+                        cancel: true
+                    });
+                }
+            }
+        },"json");
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper">
+    	<include file="./Home/Tpl/Public/Public_header.html" />
+        <!--开始引入头部菜单-->
+        <include file="Shop/nav" navmenuid="Navhot"/>
+
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <if condition="$batch_type eq '26'">
+
+						<include file="Hot/menu" leftmenuid="sg_zdy"/>
+                    <elseif condition="$batch_type eq '55'" />
+                        <include file="Hot/menu" leftmenuid="zqkj"/>
+					<else />
+						<if condition="$is_new eq '2'">
+						<include file="Hot/menu" leftmenuid="msm_xptj"/>
+						<else />
+						<include file="Hot/menu" leftmenuid="msm_zdy"/>
+						</if>
+					</if>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+						<h4><if condition="($batch_type eq 26) AND ($is_new eq 1)">闪购<elseif condition="($batch_type eq 55)" />吴刚砍树<elseif condition="($batch_type eq 27) AND ($is_new eq 1)" />码上买<else />新品发售</if><a href="javascript:void(0)" class="btn-add first" id="add_new"><i></i>创建新品</a><a href="javascript:void(0)" class="btn-down" id="down"><i></i>下载列表</a></h4>
+					</div>
+                    <div class="SearchArea fn">
+					<form id="theform" action="{:U('Ecshop/O2OHot/index')}" method="post">
+						<input type="hidden" id="batch_type" name="batch_type" value="{$batch_type}">
+						<input type="hidden" id="is_new" name="is_new" value="{$is_new}">
+                        <div class="SearchAreaLeft">
+                        <label>
+                        <span>名称</span>
+                        <input type="text" name="batch_name" id="batch_name" class="textbox w100" value="{$post['batch_name']}">
+                        </label>
+                        
+                        <label>
+                        <span>活动时间</span>
+                        <input type="text" name="begin_time" id="begin_time" value="{$post['begin_time']}" onclick="var min_date=$('#begin_time').val();var max_date=$('#end_time').val();WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})">
+                           -
+                           <input type="text" name="end_time" id="end_time" value="{$post['end_time']}" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'begin_time\\')}'})">
+                       	</label>
+                        <label>
+                        <select class="selectbox w100" name="batch_status" id="batch_status">
+							<option value="" >活动状态</option>
+							{:show_arr_opt($batchStatusArr,$post['batch_status'])}
+						</select>
+                        </label>
+                        </div>
+                        
+                        <div class="SearchAreaRight">
+                        <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                        </div>
+                    </form>
+                    </div>
+                    <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                                <tbody><tr class="th">
+                                    <th class="first">活动状态</th>
+                                    <th>活动时间</th>
+                                    <th>访问量</th>
+                                    <th>
+                                    	<div class="shop-btn-lock">
+                                        	<a href="javascript:;" class="sort" data-field="lock_num"><p>锁定<i class=""></i></p></a>
+                                            <div class="shop-btn-lock-tip">
+                                            	消费者提交订单未完成支付的商品会有半小时的锁定期，方便消费者完成订单支付，锁定数量就是锁定期商品数量总和
+                                                <span class="msg-arrow a-out"></span>
+                                                <span class="msg-arrow a-in"></span>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th><a href="javascript:;" class="sort" data-field="sale_num">商品总数<i class=""></i></a></th>
+                                    <th><a href="javascript:;" class="sort" data-field="sale_num">已售数量<i class=""></i></a></th>
+                                    <th><a href="javascript:;" class="sort" data-field="sale_num">剩余数量<i class=""></i></a></th>
+                                    <th class="last">操作</th>
+                                </tr>
+                                <!--循环-->
+                                <?php if($list){ ?>
+								<volist name="list" id="vo" empty="$empty">
+									<tr class="title">
+										<td class="title" colspan="8">
+											<div class="r">
+											<?php if($batch_type == '26'){?>
+												<a href="<?php echo U('Ecshop/GoodsSale/edit/',array('id'=>$vo['id']));?>" class="ml10 mr10">编辑</a>
+                                            <?php }elseif($batch_type == '55'){?>
+                                                <a href="<?php echo U('Ecshop/ZqCut/edit/',array('id'=>$vo['id']));?>" class="ml10 mr10">编辑</a>
+											<?php }else{?>
+												<?php
+												if($is_new==2){
+												?>
+												<a href="<?php echo U('Ecshop/O2OHot/newedit/',array('id'=>$vo['id']));?>" class="ml10 mr10">编辑</a>
+												<?php
+												}else{
+												?>
+												<a href="<?php echo U('Ecshop/MaShangMai/edit/',array('id'=>$vo['id']));?>" class="ml10 mr10">编辑</a>
+												<?php
+												}
+												?>
+											<?php }?>|
+											<?php if($vo['status'] == '1'){?>
+												<a href="javascript:void(0);" onclick="statusChange('<?php echo $vo['id']?>','2','change_<?php echo $vo['id']?>','<?php echo $is_new?>')"><i class="icon-stop"></i><span>停止</span></a>
+											<?php }else{?>
+												<a href="javascript:void(0);" onclick="statusChange('<?php echo $vo['id']?>','1','change_<?php echo $vo['id']?>','<?php echo $is_new?>')"><i class="icon-begin"></i><span>启用</span></a>
+											<?php }?>|
+											<a href="<?php echo U('Ecshop/O2OHot/channelChart',array('batch_type'=>$vo['batch_type'],'batch_id'=>$vo['id'],'is_new'=>$is_new));?>" class="ml10 mr10" id="qdfx">渠道分析</a>|
+											<a href="javascript:void(0)" class="ml10 mr10" onclick="javascript:art.dialog.open('{:U('Ecshop/GoodsSale/orderList',array('batch_no'=>$vo['id']))} ',{width: 800, ok: true ,title:'查看订单信息',id:'orderList'})">查看订单信息</a>|
+											<a href="javascript:void(0)" class="ml10 mr10" onclick="javascript:art.dialog.open('{:U('LabelAdmin/MarketChangeTrace/index',array('batch_no'=>$vo['id'],'batch_type'=>$vo['batch_type']))} ',{width: 1200, ok: true ,title:'查看编辑记录',id:'ChangeTrace'})">查看编辑纪录</a>
+											</div>
+											{$vo['name']}
+										</td>
+									</tr>
+									<tr class="info">
+										<td class="first">
+											<i <if condition="$vo['status'] eq 1">class="icon-on"<else />class="icon-off"</if> ></i>
+										</td>
+										<td>{$vo['start_time']|dateformat='Y-m-d'}<br />至<br />{$vo['end_time']|dateformat='Y-m-d'}</td>
+										<td>{$vo['click_count']}</td>
+										<td>{$vo['lock_num']}</td>
+										<td><if condition="$vo['storage_num'] eq -1"> 不限 <else /> {$vo['storage_num']} </if></td>
+										<td>{$vo['sale_num']}</td>
+										<td><if condition="$vo['storage_num'] eq -1"> 不限 <else /> {$vo['remain_num']} </if></td>
+										<td class="last">
+											<a href="{:U('LabelAdmin/BindChannel/index',array('batch_id'=>$vo['id'],'batch_type'=>$batch_type))}" title="发布活动">发布活动</a>
+										</td>
+									</tr>
+								</volist>
+                                <?php }else{ ?>
+                                <tr><td colspan="8"><div class="nonedata"></div></td></tr>
+                                <?php } ?>
+                                <!--循环-->
+                            </table>
+                    </div>
+					<div class="page">{$page}</div>
+                    <if condition="$batch_type eq 55">
+                    <div class="fn pt20">
+                    	<div class="tipNormal">
+                        	<p><b>活动创建说明</b></p>
+                            <div class="addFlow">
+                            	<p><a href="{:U('Ecshop/BusiOption/index')}">绑定收款账号信息</a></p>
+                            	<p>创建并发布活动</p>
+                            	<p><a href="{:U('Home/Index/marketingShow5')}">&nbsp;&nbsp;&nbsp;&nbsp;提现</a></p>
+                            </div>
+                            <p>1、为了能保证活动的最佳效果，您可以将您的认证服务号与旺财平台进行绑定，即可开启微信支付功能。<a href="{:U('Weixin/Weixin/bind')}">前往设置</a></p>
+                            <p>2、为更好的保障您的账户安全和利益，请确保您的收款账号开户名称与您的注册企业名称一致</p>
+                            <p>3、您可以在订单中心查看您的商品订单情况。<a href="{:U('LabelAdmin/OrderList/index')}">前往查看</a></p>
+                            <p>4、提现时间为活动结束后的14个自然日。</p>
+                        </div>
+                    </div>
+                    </if>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

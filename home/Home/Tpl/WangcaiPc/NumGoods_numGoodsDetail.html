@@ -1,0 +1,533 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>自建卡券列表_卡券_翼码旺财</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript">
+$(document).ready(function(e) {
+	$("#shop_more").click(function(e){
+		art.dialog.open("{:U('WangcaiPc/NumGoods/getPosgroupShop',array('group_id'=>$goodsInfo['pos_group']))}",{
+            title: '可验门店',
+            width:'500px'
+        });
+	});
+        
+    //tab显示
+    var tab = '{$top_type}';
+    $("#tab_"+tab).addClass("Wcanal-tab-hover").siblings().removeClass("Wcanal-tab-hover");
+    $("#tab_"+tab+"_view").show().siblings().not(".Wcanal-tab-title").hide();
+    $("#down-data").click(function(){
+        var url = $("#data-record").attr('action')+"&down=1";
+        $("#data-record").attr('action',url);
+        $("#data-record").submit();
+    });
+});
+function edit_log_more(id){
+    art.dialog.open('{:U('WangcaiPc/NumGoods/editDetailLog')}'+'&id='+id, {
+        title : '编辑详情'
+        ,width : '800px'
+    });
+}
+
+function used_log_more(seq){
+    $.post("{:U('WangcaiPc/NumGoods/getGoodsVerifyDetail')}",{seq:seq},function(data){
+    	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在查询...</div>",fixed: true,padding:0});
+    	if(data.status==1){
+    		dialog.close();
+    		var html = template('usedLog',data.data);  
+    	    //document.getElementById("content").innerHTML = html;  
+    	    art.dialog({
+    	        content:html,
+    	        title : '使用明细',
+    	        width : '800px'
+    	    });
+    	}else{
+    		dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+    	}
+    },"json");
+    
+}
+function from_search(form_id){
+    if(form_id == 'data-record')
+    {
+        $("#"+form_id).attr('action',"{:U('WangcaiPc/NumGoods/priPublishLog')}");
+    }
+	$("#"+form_id).submit();
+}
+
+//日期
+function initDate(date){
+  var newdate=new Date();
+  newdate.setYear(date.split("-")[0]);
+  newdate.setMonth(date.split("-")[1]-1);
+  newdate.setDate(date.split("-")[2]);
+  return newdate;
+ }
+function getDicMonth(olddate,month){
+  var d = initDate(olddate);
+  d.setMonth(d.getMonth()-month); 
+  var day = d.getDate()+1;
+  var year = d.getFullYear();
+  var month = d.getMonth()+1;
+  if(month<10){
+	   month='0'+month;
+	}
+	if(day<10){
+	   day='0'+day;
+	}
+  return year+"-"+month+"-"+day;
+ }
+
+$(function(){
+	var mydate = new Date();  
+    var myyear=mydate.getFullYear();  
+    var mymonth=mydate.getMonth()+1; 
+	var myday=mydate.getDate();					   
+	if(mymonth<10){
+	   mymonth='0'+mymonth;
+	}
+	if(myday<10){
+	   myday='0'+myday;
+	}
+	var str1=""+myyear+"-";
+		str1+=mymonth+"-";
+		str1+=myday;
+	var prevmoth=getDicMonth(str1,"1");
+    if($("#date-end").val()==""){
+		$("#date-end").val(str1);
+		$("#date-start").val(prevmoth);
+	}
+	//下载列表
+	if($("#tab_4").hasClass("Wcanal-tab-hover")){
+	  $("#down-data").show();
+	}else{
+	  $("#down-data").hide();
+	}
+})
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="wddzq"/>  
+        </div>
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                    <include file="WangcaiPc/NumGoods/tabMenu" leftmenuid="lxck"/>
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>翼码卡券详情 
+						<a href="javascript:void(0);" class="btn-down first dn" id="down-data"><i></i>下载数据</a></h4>
+                    </div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-title fn"><!--  class="Wcanal-tab-hover" -->
+                            <p id='tab_1'><a href="{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$goods_id))}">基本信息</a></p>
+                            <p id='tab_2'><a href="{:U('WangcaiPc/NumGoods/storageTrace',array('goods_id'=>$goods_id))}">库存变动</a></p>
+                            <p id='tab_3'><a href="{:U('WangcaiPc/NumGoods/goodsUseList',array('goods_id'=>$goods_id))}">使用记录</a></p>
+                            <neq name="goodsInfo['goods_type']" value="15">
+                            <p id='tab_4'><a href="{:U('WangcaiPc/NumGoods/priPublishLog',array('goods_id'=>$goods_id))}">发布到个人记录</a></p>
+                            <p id='tab_5'><a href="{:U('WangcaiPc/NumGoods/editLog',array('goods_id'=>$goods_id))}">编辑记录</a></p>
+                            </neq>
+                        </div>
+						<!-- 基本信息 -->
+                        <div class="Wcanal-tab-list" id='tab_1_view'>
+                            <div class="receiveInfoShow mt10">
+                            	<div class="receiveInfoImg l mr30 mt5">
+                                    <img src="__UPLOAD__/{$goodsInfo['goods_image']}" width="100" height="62" />
+                                </div>
+                                <div class="receiveInfo l w800">
+                                    <dl>
+                                    <dd><label>卡券名称</label><span>{$goodsInfo['goods_name']}</span></dd>
+                                    <if condition="$goodsInfo['node_id'] eq C('df.node_id')">
+                                    <dd><label>商品编号</label><span>{$goodsInfo['batch_no']}</span></dd>
+                                    </if>
+                                    <dd><label>卡券类型</label><span>{$goodsType[$goodsInfo['goods_type']]}&nbsp;</span></dd>
+                                    <dd><label>微信卡券</label><span>
+                                        <if condition="empty($wxCardInfo)">
+                                            <em class="redfont">未创建</em>&nbsp;</li>
+                                            <else />
+                                            已创建/<a href="{:U('Weixin/WeixinCard/cardDetail',array('id'=>$wxCardInfo['id']))}">查看详情</a>&nbsp;
+                                        </if>
+                                    </span></dd>
+                                    <dd><label>卡券数量</label><span><?php if($goodsInfo['storage_type'] == '0'){echo '不限';}else{echo $goodsInfo['storage_num'];}?></span></dd>
+                                    <dd><label>剩余库存</label><span class="redfont"><?php if($goodsInfo['storage_type'] == '0'){echo '不限';}else{echo $goodsInfo['remain_num'];}?></span></dd>
+                                    <if condition="$goodsInfo['goods_type'] eq '1'">
+                                    <dd><label>核销限制</label><span><eq name="goodsInfo.validate_type" value="1">按金额核销<else/>限一次核销</eq></span></dd>
+                                    <dd><label>卡券面额</label><span>{$goodsInfo['goods_amt']}</span></dd>
+                                    </if>
+                                    <if condition="$goodsInfo['goods_type'] eq '3'">
+                                     <dd><label>折扣额度</label><span>{$goodsInfo['goods_discount']}%</span></dd>
+                                    </if>
+                                    <dd><label>线上提领</label><span><if condition="$goodsInfo['online_verify_flag'] eq '1'">是<else />否</if></span></dd>
+                                    <dd><label>创建时间</label><span>{$goodsInfo['add_time']|strtotime|date="Y-m-d H:i:s",###}</span></dd>
+                                    <dd><label>操作人</label><span>{$user_name}&nbsp;</span></dd>
+                                    </dl>
+                                    <dl class="w1">
+                                    <dd><label><if condition="$goodsInfo['goods_type'] eq '0'">优惠详情<else/>小票内容</if></label><span>{$goodsInfo['print_text']}</span></dd>
+                                    </dl>
+                                </div>
+                                
+                             </div>
+                            <neq name="goodsInfo['goods_type']" value="15">
+                            <div class="steps mt15 mb15">可验门店</div>
+                            <eq name="shopList" value="1">
+                            所有门店
+                            <else />
+                                <table cellpadding="0" cellspacing="0" class="shopTable">
+                                <tbody>
+                                <tr class="th">
+                                <th>名称</th>
+                                <th>地址</th>
+                                </tr>
+                                <volist name="shopList" id="vo" offset="0" length='5'>
+                                <tr>
+                                <td>{$vo['store_short_name']}</td>
+                                <td>{$vo['province']}&nbsp;{$vo['city']}&nbsp;{$vo['town']}</td>
+                                </tr>
+                                </volist>
+                                <if condition="count($shopList) gt 5">
+                                <td colspan='2'><a href="javascript:void(0);" id="shop_more">更多</a></td>
+                                </if>
+                                </tbody>
+                                </table>
+                           
+                            </eq>
+                            </neq>
+                             <if condition="!empty($publishData)">
+                            <div class="steps mt15 mb15">审核记录</div>
+                            <table cellpadding="0" cellspacing="0" class="shopTable">
+                                    <tbody>
+                                    <tr class="th">
+                                    <th>提交日期</th>
+                                    <th>审核状态</th>
+                                    <th>备注</th>
+                                    </tr>
+                                    <volist name="publishData" id='vo'>
+                                    <tr>
+                                    <td>{$vo.add_time|dateformat=###,'Y-m-d'}</td>
+                                    <td>{$checkStatus[$vo['check_status']]}</td>
+                                    <td>{$vo['check_memo']|default="--"}</td>
+                                    </tr>
+                                    </volist>
+                                    </tbody>
+                            </table>
+                            </if> 
+                        </div>
+						<!-- 库存变动 -->
+                        <div class="Wcanal-tab-list" id='tab_2_view' style="display:none">
+                        	<div>
+                                <!--<h3 class=" mt20 mb10">库存统计</h3>-->
+                                <div class="supply-detail">
+									<dl class="mb15 ghsq">
+										<dt>
+										 <span>【{$goods_type[$goodsInfo['goods_type']]}】</span><a href="{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$goods_id))}" >{$goodsInfo['goods_name']}</a>   
+										</dt>
+										<dd>
+										 <span class="left">&nbsp;&nbsp;当前库存：<a href="javascript:void(0)">{$goodsInfo['remain_num']}</a></span>
+										</dd>
+									</dl>
+									<h5 class="mb15">库存变动明细</h5>
+							    </div>
+                                <div class="SearchArea fn">
+                                    <form id="storage_form" action="{:U('WangcaiPc/NumGoods/storageTrace')}" method="post">
+                                        <input type="hidden" name="goods_id" value="{$goods_id}" />
+                                        <div class="SearchAreaLeft">
+                                            <label>
+                                                <span>时间</span>
+                                                <input name="badd_time" type="text" value="{$_REQUEST['badd_time']}" onclick="WdatePicker()" />
+                                                -
+                                                <input name="eadd_time" type="text" value="{$_REQUEST['eadd_time']}" onclick="WdatePicker()" />
+                                            </label>
+                                        
+                                            <label>
+                                                <span>变动类型</span>
+                                                <select name="change_flag">
+                                                    <option value="">全部</option>
+                                                    <option value="1" <if condition="$_REQUEST['change_flag'] eq '1'">selected="selected"</if>>增加</option>
+                                                    <option value="2" <if condition="$_REQUEST['change_flag'] eq '2'">selected="selected"</if>>减少</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        <div class="SearchAreaRight">
+                                        <a href="javascript:void(0);" onclick="from_search('storage_form');" class="searchBtn">查询</a>
+                                        </div>
+                                    </form>
+                                </div>
+                                <table cellpadding="0" cellspacing="0" class="shopTable mt10">
+                                    <tbody>
+                                    <tr>
+                                        <th>时间</th>
+                                        <th>变动类型</th>
+                                        <th>变动原因</th>
+                                        <th>活动名称</th>
+                                        <th>活动类型</th>
+                                        <th>变动前库存</th>
+                                        <th>变动数量</th>
+                                        <th>变动后库存</th>
+                                    </tr>
+									<if condition="!empty($dataList)">
+                                    <volist name="dataList" id='vo'>
+                                    <tr>
+                                        <td>{$vo.add_time|dateformat=###,'Y-m-d H:i:s'}</td>
+                                        <td><if condition="$vo['change_flag'] gt 0">增加<else />减少</if></td>
+                                        <td
+                                            <notempty name="vo['opt_desc']">
+                                                title="{$vo['opt_desc']}"
+                                            </notempty>
+                                        >{$storageTraceOptType[$vo['opt_type']]|default="--"}</td>
+                                        <td>{$vo['batch_name']}</td>
+                                        <td>{$vo['batch_type']}</td>
+                                        <td>{$vo['pre_num']}</td>
+                                        <if condition="$vo['change_flag'] gt 0">
+                                        <td>+{$vo['change_num']}</td>
+                                        <else />
+                                        <td class="redfont" >-{$vo['change_num']}</td>
+                                        </if>
+                                        <td>{$vo['current_num']}</td>
+                                    </tr>
+                                   </volist>
+								   <else/>
+								      <tr><td colspan="8"><div class="nonedata"></div></td></tr>
+								   </if>
+                                    </tbody>
+                                </table>
+                                <div class="page">{$page}</div>
+                            </div>
+                        </div>
+						<!-- 使用记录 -->
+                        <div class="Wcanal-tab-list" id='tab_3_view' style="display:none">
+                        	<div class="supply-detail">
+								<dl class="mb15 ghsq">
+									<dt><span>【{$goodsTypeArr[$goodsInfo['goods_type']]}】</span><a href="{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$goods_id))}">{$goodsInfo['goods_name']}</a></dt>
+									<dd>
+										<span class="left" style="margin-right:45px">&nbsp;&nbsp;累计发送 ：<a href="javascript:void(0)">{$svNumInfo['send_num']|default="0"}</a></span>
+										<span class="left">累计验证 ：<a href="javascript:void(0)">{$svNumInfo['verify_num']|default="0"}</a></span>
+									</dd>
+								</dl>
+								<h5 class="mb15">发送明细</h5>
+							</div>
+                            <div class="SearchArea fn">
+                                <form id="use_form" action="{:U('WangcaiPc/NumGoods/goodsUseList')}" method="post">
+                                    <input type="hidden" name="goods_id" value="{$goods_id}" />
+                                    <div class="SearchAreaLeft">
+                                        <label>
+                                            <span>时间</span>
+                                            <input name="badd_time" type="text" value="{$_REQUEST['badd_time']}" onclick="WdatePicker()" />
+                                            -
+                                            <input name="eadd_time" type="text" value="{$_REQUEST['eadd_time']}" onclick="WdatePicker()" value="" />
+                                        </label>
+                                        
+                                        <label>
+                                            <span>手机号</span>
+                                            <input name="phone_no" type="text" value="{$_REQUEST['phone_no']}" />
+                                        </label>
+                                        <label>
+                                            <span>活动名称</span>
+                                            <input name="batch_name" type="text" value="{$_REQUEST['batch_name']}" />
+                                        </label>
+                                        <in name="goodsInfo['goods_type']" value="7,15">
+                                        <label>
+                                            <span>充值记录</span>
+                                            <select name="cz_status">
+                                                <option value="">全部</option>
+                                                <volist name="czStatusArr" id="vo">
+                                                <option value="{$key}" class="" <if condition="strval($key) eq $_REQUEST['cz_status']">selected="selected"</if> >{$vo}</option>
+                                                </volist>
+                                            </select>
+                                        </label>
+                                        <else />
+                                        <label>
+                                            <span>送达状态</span>
+                                            <select name="send_status">
+                                                <option value="">全部</option>
+                                                <volist name="sendStatusArr" id="vo">
+                                                <option value="{$key}" class="" <if condition="strval($key) eq $_REQUEST['send_status']">selected="selected"</if> >{$vo}</option>
+                                                </volist>
+                                            </select>
+                                        </label>
+                                        <label>
+                                            <span>使用状态</span>
+                                            <select name="use_status">
+                                                <option value="">全部</option>
+                                                <volist name="userStatusArr" id="vo">
+                                                <option value="{$key}" class="" <if condition="strval($key) eq $_REQUEST['send_status']">selected="selected"</if> >{$vo}</option>
+                                                </volist>
+                                            </select>
+                                        </label>
+                                        </in>
+                                    </div>
+                                    <div class="SearchAreaRight">
+                                    <a href="javascript:void(0);" class="searchBtn" onclick="from_search('use_form');">查询</a>
+                                    <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+                                    </div>
+                                </form>
+                            </div>
+                            <table cellpadding="0" cellspacing="0" class="shopTable mt10">
+                                    <tbody>
+                                    <tr>
+                                        <th>时间</th>
+                                        <th>手机号</th>
+                                        <th>活动名称</th>
+                                        <th>活动类型</th>
+                                        <in name="goodsInfo['goods_type']" value="7,15">
+                                        <th>充值状态</th>
+                                        <else/>
+                                        <th>送达状态</th>
+                                        <th>使用状态</th>
+                                        </in>
+                                    </tr>
+									<if condition="!empty($dataList)">
+                                    <volist name="dataList" id="vo">
+                                    <tr>
+                                        <td>{$vo.trans_time|dateformat=###,'Y-m-d H:i:s'}</td>
+                                        <td>{$vo['phone_no']}</td>
+                                        <td>{$vo['name']|default="--"}</td>
+                                        <td>{$batchTypeArr[$vo['batch_type']]|default="--"}</td>
+                                        <in name="goodsInfo['goods_type']" value="7,15">
+                                        <td>{$czStatusArr[$vo['send_status']]}</td>
+                                        <else />
+                                        <td>{$sendStatusArr[$vo['send_status']]}</td>
+                                        <if condition="$vo['use_status'] eq '2'">
+                                        <td><a href="javascript:void(0);" onclick="used_log_more('{$vo['req_seq']}')">{$userStatusArr[$vo['use_status']]}</td>
+                                        <else />
+                                        <td>{$userStatusArr[$vo['use_status']]}</td>
+                                        </if>
+                                        </in>
+                                    </tr>
+                                    </volist>
+									<else/>
+                                        <tr><td colspan="6"><div class="nonedata"></div></td></tr>
+                                    </if>
+                                    </tbody>
+                           </table>
+                           <div class="page">{$page}</div>
+                        </div>
+						<!-- 发布到个人记录 -->
+                        <div class="Wcanal-tab-list mt15" id='tab_4_view' style="display:none">
+						      <div class="supply-detail">
+								 <dl class="mb15 ghsq">
+									<dt><span>【{$goodsTypeArr[$goodsInfo['goods_type']]}】</span><a href="{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$goods_id))}">{$goodsInfo['goods_name']}</a></dt>
+								 </dl>
+							   </div>
+							   <div class="SearchArea fn">
+                                    <form id="data-record" action="{:U('WangcaiPc/NumGoods/priPublishLog')}" method="post">
+                                        <input type="hidden" name="goods_id" value="{$goods_id}" />
+                                        <div class="SearchAreaLeft">
+                                            <label>
+                                                <span>统计时间</span>
+												<input id="date-start" name="start_time" type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\\'date-end\\',{M:-3,d:+1})}',maxDate:'#F{\\$dp.\\$D(\\'date-end\\')}'})" value="{$start_time}"/>
+												 -
+												<input id="date-end" name="end_time" type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd',startDate:'%y-%M-%d',minDate:'#F{$dp.$D(\\'date-start\\')}',maxDate:'#F{\\$dp.\\$D(\\'date-start\\',{M:+3,d:-1})}'})"  value="{$end_time}"/>
+                                            </label>
+                                        </div>
+										 <div class="SearchAreaRight">
+										   <a href="javascript:void(0);" class="searchBtn" id="data-search"  onclick="from_search('data-record');">查询</a>
+										</div>
+                                    </form>
+                                </div>
+                               <table cellpadding="0" cellspacing="0" class="shopTable mt20">
+                                        <tbody>
+                                        <tr class="th">
+                                        <th width="30%">发送时间</th>
+                                        <th width="20%">接收手机号</th>
+                                        <th width="30%">备注</th>
+                                        <th width="20%">发送状态</th>
+                                        </tr>
+                                        <if condition="!empty($list)">
+                                        <volist name="list" id="vb">
+                                        <tr class="title">
+                                            <td>{$vb['trans_time']|strtotime|date='Y-m-d H:i:s',###}</td>
+                                            <td>{$vb['phone_no']}</td>
+                                            <td>{$vb['prize_key']}</td>
+                                            <td><if condition="$vb['status'] eq '0'">成功<elseif condition="$vb['status'] eq '1'" />已撤销<else/>失败</if></td>
+                                        </tr>
+                                        </volist>
+                                        <else/>
+                                        <tr><td colspan="4"><div class="nonedata"></div></td></tr>
+                                        </if>
+                                        </tbody>
+                                </table>
+                                <div class="page">{$page}</div>
+                                
+                        </div>
+						<!-- 编辑记录  -->
+                        <div class="Wcanal-tab-list" id='tab_5_view' style="display:none">
+                        	<div>
+                                <table cellpadding="0" cellspacing="0" class="shopTable mt20">
+                                <tbody>
+                                    <tr class="th">
+                                    <th>编辑时间</th>
+                                    <th>编辑内容</th>
+                                    <th>操作员</th>
+                                    <th>操作</th>
+                                    </tr>
+                                    <if condition="!empty($log_arr)">
+                                    <volist name="log_arr" id="vo">
+                                    <tr class="title">
+                                        <td>{$vo['add_time']|strtotime|date="Y-m-d H:i:s",###}</td>
+                                        <td>{$vo['mod_content']}</td>
+                                        <td>{$vo['user_name']}</td>
+                                        <td><a href="javascript:void(0)" onclick="edit_log_more('{$vo['log_id']}')"><if condition="$vo['mod_content'] neq '无'">详情</if></a></td>
+                                    </tr>
+                                    </volist>
+                                    <else/>
+                                    <tr><td colspan="4"><div class="nonedata"></div></td></tr>
+                                    </if>
+                                </tbody>
+                                </table>
+                                <div class="page">{$page}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/html" id="usedLog">
+    <table cellpadding="0" cellspacing="0" class="shopTable" style="table-layout: fixed;">
+        <tbody>
+        <tr>
+            <th width="250">验证时间</th>
+            <th>门店简称</th>
+            <th>终端号</th>
+            <th>验证金额（元）</th>
+            <th>状态</th>
+        </tr>
+        <tr>
+            <td>{{trans_time}}</td>
+            <td>{{store_name}}</td>
+            <td>{{pos_id}}</td>
+            <td>{{exchange_amt}}</td>
+            <td>{{status}}</td>
+        </tr>
+        </tbody>
+    </table>
+</script>

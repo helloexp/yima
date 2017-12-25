@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>自定义来源</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<!-- <link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" /> -->
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<!-- <script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script> -->
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<style>
+    form{margin: 20px;}
+    form p{padding: 10px 16px;font-size: 14px;line-height: 20px;}
+    ul{float: left;}
+    ul li{float: left;padding: 10px 0 4px 30px;}
+    ul li.name{width:100px;text-align: right;}
+    ul li input{width: 300px;border: 1px #aaa solid;}
+    form ul li{font-size: 16px;}
+</style>
+<script>
+        //$(".btn-next").click(function(event) {
+          // $(".showsaloonForm1").hide();
+          // $(".showsaloonForm2").show();
+        //});
+		$(document).ready(function(e){
+
+			$("#sub_cancel").click(function(){		
+				art.dialog.close();
+			});
+
+
+			$("#save_form").click(function(){					
+				var dialog;
+				if($("form").validationEngine('validate')){
+					//提交表单
+		
+					 $("form").ajaxSubmit({
+							beforeSubmit:function(){
+								dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,time:1});
+							},
+							success:function(data){								
+								if(data.status == '1'){                        
+									
+									//art.dialog.close();
+									parent.location.reload();
+									//return false;
+								}else{
+									dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+									$('#msg').html(data.info);
+								}
+							},
+							error:function(data){
+								alert("获取token失败！");
+								return false;
+							}
+							
+							
+							,
+							dataType:'json'
+					});
+
+
+
+
+
+
+
+
+
+
+				};
+			});
+	  });
+    </script>
+</head>
+
+<body class="bgfff">
+    <form method="post" action="{:U('LabelAdmin/Weibo/save_auth_code')}" name="theform">
+	<input type="hidden" name="pid" id="pid" value="<?php echo $pid;?>">
+	<input type="hidden" name="node_id" id="node_id" value="<?php echo $node_id;?>">       
+        <div class="showsaloonForm2 ">
+            <p>由于来源被修改，您必须重新使用 xx 的账号进行授权，点击下方授权按钮进行授权。</p>
+            <a href="index.php?g=LabelAdmin&m=Weibo&a=authorize2&pid=<?php echo $pid;?>&node_id=<?php echo $node_id;?>" class="btn-all" style="display:block;width:140px;;margin:30px auto;" target="_blank">通过新浪微博授权</a>
+            <p  style="margin-bottom:30px;">并在授权完成后，将自动跳转后的网址填入下方文本框内。</p>
+            <ul>
+                <li>授权后网址：</li>
+                <li><input type="text" value="" name="callback" id="callback" class="validate[required,maxSize[300]]"/></li>
+            </ul>
+             <div class="mt30 l" style="width:320px;margin-left:140px;">
+                <a href="javascript:void(0)" class="btn-all w120" id="save_form">保存</a>
+                <a href="javascript:void(0)" id="sub_cancel" class="ml20 btn-all w120 wb-cancel" style="background:gray;">取消</a>
+            </div>
+        </div>
+    </form>
+    
+</body>

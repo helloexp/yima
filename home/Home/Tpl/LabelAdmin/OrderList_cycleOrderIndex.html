@@ -1,0 +1,847 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>翼码旺财商品订单</title>
+        <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" href="__PUBLIC__/Css/Wshop.css?v=__VR__"/>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+        <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+        <js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+        <script>
+            $(document).ready(function (e) {
+            var searcht = false;
+            $(".Gsearch input").each(function (index, element) {
+            if ($(this).val() != "") {
+            searcht = true;
+            }
+            });
+            if (searcht) {
+            $(".btn-more").click();
+            }
+
+            $("#down").click(function () {
+            var udata = {};
+            var objInfo = false;
+            $(".Gsearch input,select").each(function (index, element) {
+            if ($(this).val() != "") {
+            switch ($(this).attr('name')) {
+            case 'order_id':
+                    udata['order_id'] = $(this).val();
+            break;
+            case 'pay_status':
+                    udata['pay_status'] = getStatusName(1, $(this).val());
+            break;
+            case 'delivery_status':
+                    udata['delivery_status'] = getStatusName(2, $(this).val());
+            break;
+            case 'order_status':
+                    udata['order_status'] = getStatusName(3, $(this).val());
+            break;
+            case 'receiver_type':
+                    udata['receiver_type'] = getStatusName(4, $(this).val());
+            break;
+            case 'start_time':
+                    udata['start_time'] = getDateString($(this).val());
+            break;
+            case 'end_time':
+                    udata['end_time'] = getDateString($(this).val());
+            break;
+            case 'is_gift':
+                    udata['is_gift'] = getStatusName(5, $(this).val());
+            break;
+            case 'rece_phone':
+                    udata['rece_phone'] = $(this).val();
+            break;
+            case 'channel_name':
+                    udata['channel_name'] = $(this).val();
+            break;
+            case 'order_phone':
+                    udata['order_phone'] = $(this).val();
+            break;
+            default:
+                    break;
+            }
+            objInfo = true;
+            }
+            });
+            var uhtml = template("down-list", udata);
+            art.dialog({
+            id: 'down_tips',
+                    title: "数据下载",
+                    width: 800,
+                    content: uhtml,
+                    ok: function () {
+                    var data = "";
+                    $('input[name^="a["]').each(function () {
+                    var id = $(this).attr("data-val");
+                    if ($(this).attr("checked")) {
+                    var val = 1;
+                    } else {
+                    var val = 0;
+                    }
+                    data += id + "=" + val + "&";
+                    });
+                    $('#col_list').val(data);
+                    $("#theform").attr("action", "{:U('LabelAdmin/OrderList/export')}").submit();
+                    },
+                    cancel: true
+            });
+            Gform();
+            Gformbegin();
+            if (objInfo) {
+            $('#msgshow').show();
+            } else {
+            $('#msgshow').hide();
+            }
+            });
+            $("body").on("click", ".down-list .checkdiv li:not('.disabled')", function () {
+            $(this).toggleClass("checked");
+            $(this).hasClass("checked") ? $(this).find("input").attr("checked", true) : $(this).find("input").attr("checked", false);
+            var checknum = $(this).closest("td").find(".checkdiv li.checked:not('.disabled')");
+            var num = $(this).closest("td").find(".checkdiv li:not('.disabled')");
+            var p = $(this).closest("td").prev("td").find("p");
+            var allcheck = 0;
+            num.each(function (index, element) {
+            if (!$(this).hasClass("checked")) {
+            allcheck = 1;
+            }
+            });
+            if (checknum.length == 0) {
+            allcheck = 2;
+            }
+            ;
+            if (checknum.length == num.length) {
+            allcheck = 0;
+            }
+            ;
+            if (allcheck == 1) {
+            p.attr("class", "nochecked")
+            } else if (allcheck == 2) {
+            p.attr("class", "")
+            } else if (allcheck == 0) {
+            p.attr("class", "checked")
+            }
+            });
+            $("body").on("click", ".down-list td.title p:not('.disabled')", function () {
+            var li = $(this).closest("td").next("td").find(".checkdiv li:not('.disabled')");
+            $(this).removeClass("nochecked");
+            $(this).toggleClass("checked");
+            if ($(this).hasClass("checked")) {
+            li.each(function (index, element) {
+            $(this).addClass("checked");
+            $(this).find("input").attr("checked", true);
+            });
+            } else {
+            li.each(function (index, element) {
+            $(this).removeClass("checked");
+            $(this).find("input").attr("checked", false);
+            });
+            }
+            });
+            $("#sub_button").click(function () {
+            $("#theform").attr("action", "{:U('LabelAdmin/OrderList/cycleOrderIndex')}").submit();
+            });
+            $("body").on("click", "#StatusChange", function () {
+            var openUrl = $(this).attr("data-url") || 'about:blank';
+            var dialogHeight;
+            art.dialog.open(openUrl, {
+            id: "editstatus",
+                    title: "修改状态",
+                    width: 500
+            });
+            });
+            $("body").on("click", "#OrderCycle", function () {
+            var openUrl = $(this).attr("data-url") || 'about:blank';
+            var dialogHeight;
+            art.dialog.open(openUrl, {
+            id: "orderprint",
+                    title: "订购信息",
+                    width: 800
+            });
+            });
+            $("body").on("click", "#OrderPrint", function () {
+            var openUrl = $(this).attr("data-url") || 'about:blank';
+            var jumpType = $(this).attr("data-type") || '1';
+            var titles = '';
+            if(jumpType == '1'){
+                titles = "订购详情";
+            }else{
+                titles = "配送计划"; 
+            }
+            var dialogHeight;
+            art.dialog.open(openUrl, {
+            id: "orderprint",
+                    title: titles,
+                    width: 800
+            });
+            });
+            $("body").on("click", "#CodeOption", function () {
+            var openUrl = $(this).attr("data-url") || 'about:blank';
+            var dialogHeight;
+            art.dialog.open(openUrl, {
+            id: "orderoption",
+                    title: "凭证操作",
+                    width: 800
+            });
+            });
+            $("body").on("click", ".deliConfirm", function () {
+            var order_id = $(this).attr("data-o");
+            var status = $(this).attr("data-s");
+            Dialoading("正在提交...");
+            $.post("{:U('LabelAdmin/OrderList/deliOrderConfirm')}",
+            {"order_id": order_id, "status": status},
+                    function (cdata) {
+                    Dialoading();
+                    var c_status = cdata.status;
+                    if (c_status == 1) {
+                    Diasucceed(cdata.info, function () {
+                    top.location.reload();
+                    });
+                    } else {
+                    Diaerror(cdata.info);
+                    }
+                    }, 'JSON');
+            });
+            //修改价格
+            $(".UpdatePrice").on("click", function () {
+            var orderId = $(this).attr("data-o");
+            var price = $(this).attr("data-p");
+            var optionv = '';
+            var udata = {
+            "price": price
+            };
+            var uhtml = template("inputEditPrice", udata);
+            art.dialog({
+            title: '修改订单价格',
+                    width: 500,
+                    padding: 0,
+                    content: uhtml,
+                    okVal: "提交",
+                    ok: function () {
+                    var cyclePrice = $('#order_price').val();
+                    if (cyclePrice == '') {
+                    alert('请您输入订购订单价格后再提交');
+                    return false;
+                    }
+                    Dialoading("正在提交...");
+                    $.post("{:U('LabelAdmin/OrderList/updateCyclePrice')}",
+                    {
+                    "cyclePrice": cyclePrice, "order_id": orderId
+                    },
+                            function (cdata) {
+                            Dialoading();
+                            var c_status = cdata.status;
+                            if (c_status == 1) {
+                            Diasucceed(cdata.info, function () {
+                            top.location.reload();
+                            });
+                            } else {
+                            Diaerror(cdata.info);
+                            }
+                            }, 'JSON');
+                    },
+                    cancel: true
+            });
+            var receiveNum = $(this).attr('receiveNum');
+            var receiveName = $(this).attr('receiveName');
+            var cycleInfo = $(this).attr('date-cycle');
+            var goodsName = $(this).attr('goodsName');
+            $('#orderNum').empty();
+            $('#orderNum').html(orderId);
+            $('#receiveNum').empty();
+            $('#receiveNum').html(receiveNum);
+            $('#receiveName').empty();
+            $('#receiveName').html(receiveName);
+            $('#cycleInfo').empty();
+            $('#cycleInfo').html(cycleInfo);
+            $('#goodsName').empty();
+            $('#goodsName').html(goodsName);
+            });
+            })
+                    ;
+            function codeOperate(order_id, type) {
+            var dialog;
+            var url;
+            switch (type) {
+            case 1:
+                    url = "{:U('Ecshop/GoodsSale/sendCode')}";
+            break;
+            case 2:
+                    url = "{:U('Ecshop/GoodsSale/cancelCode')}";
+            break;
+            case 3:
+                    url = "{:U('Ecshop/GoodsSale/resendCode')}";
+            }
+            dialog = art.dialog({
+            title: false,
+                    content: "<div class='msg-all-succeed'>正在提交...</div>",
+                    fixed: true,
+                    padding: 0
+            });
+            $.post(url, {"order_id": order_id}, function (data) {
+            if (data.status == 1) {
+            dialog.time(1).content("<div class='msg-all-succeed'>" + data.info + "</div>");
+            setTimeout("window.location.reload();", 500);
+            return false;
+            } else {
+            dialog.time(1).content("<div class='msg-all-error'>" + data.info + "</div>");
+            }
+            }, "json");
+            }
+
+            function getDateString(d) {
+            return d.substr(0, 4) + "-" + d.substr(4, 2) + "-" + d.substr(6, 2) + " " + d.substr(8, 2) + ":" + d.substr(10, 2);
+            }
+            //获取各个状态的值 1 支付状态 2 配送状态 3 订单状态 4 订单类型 5 用途 6 旺分销
+            function getStatusName(type, value) {
+            var pay_s = new Array('', '未支付', '已支付');
+            var del_s = new Array('', '待配送', '', '已配送', '凭证自提');
+            var odr_s = new Array('正常', '已过期', '已取消');
+            var rec_s = new Array('凭证自提订单', '物流订单');
+            var gif_s = new Array('自消费', '送礼');
+            var saler_s = new Array('销售员', '上级分销商');
+            if (type == 1)
+                    return pay_s[value];
+            else if (type == 2)
+                    return del_s[value];
+            else if (type == 3)
+                    return odr_s[value];
+            else if (type == 4)
+                    return rec_s[value];
+            else if (type == 5)
+                    return gif_s[value];
+            else if (type == 6)
+                    return saler_s[value];
+            }
+
+
+        </script>
+    </head>
+    <body class="bgfff">
+        <div id="wrapper">
+            <include file="./Home/Tpl/Public/Public_header.html"/>
+            <!--开始载入头部菜单-->
+            <include file="Ecshop/Shop/nav" navmenuid="Navorder"/>
+            <div id="container" class="bgfff">
+                <div id="main" class="rel">
+
+                    <div class="sidenav">
+                        <!--开始引入左菜单-->
+                        <include file="OrderList/menu" leftmenuid="cycle"/>
+                    </div>
+
+                    <div class="subcon fn">
+                        <div class="main-name fn">
+                            <h4>
+                                <eq name="err_flag" value="1">错误</eq>
+                                订单中心
+                                <neq name="err_flag" value="1"><a href="javascript:void(0);" class="btn-down first"id="down"><i></i>下载订单列表</neq>
+                                </a>
+                                <a href="{:U('OrderList/batchHandleDelivery')}" class="btn-add sub_luru" ><i></i>批处理配送</a>
+                                <a href="{:U('OrderList/stockData')}" class="btn-add stock_data" ><i></i>备货数据</a> 
+                                <style>
+                                    .sub_luru i{background: url(__PUBLIC__/Image/dd-import.png) no-repeat;background-position:-1px -2px;}
+                                </style>
+                                <if condition="$err_count gt 0">&nbsp;&nbsp;<a
+                                        href="{:U('LabelAdmin/OrderList/cycleOrderIndex',array('err_flag'=>'1'))}"><i></i><font
+                                            color="red">你有电子凭证下发失败的订单，请及时处理！点击处理</font></a></if>
+                            </h4>
+                        </div>
+
+                        <div class="SearchArea fn">
+                            <form action="{:U('LabelAdmin/OrderList/cycleOrderIndex')}" method="post" name="theform" id="theform">
+                                <input type="hidden" name="col_list" id="col_list">
+
+                                    <div class="SearchAreaLeft">
+                                        <label>
+                                            <span>订单号</span>
+                                            <input name="order_id" type="text" value="{$post.order_id}">
+                                            <!-- 订购 -->
+                                            <input name="other_type" type="hidden" value="1">    
+                                        </label>
+
+                                        <label>
+                                            <select name="pay_status" class="selectbox">
+                                                <option value="">支付状态</option>
+                                                {:show_arr_opt($payStatus,$post['pay_status'])}
+                                            </select>
+                                        </label>
+                                        <label>
+                                            <select name="receiver_type" class="selectbox">
+                                                <option value="">订单类型</option>
+                                                {:show_arr_opt($receiverType,$post['receiver_type'])}
+                                            </select>
+                                        </label>
+                                        <label>
+                                            <span>下单时间</span>
+                                            <input type="text" name="start_time" id="start_time"
+                                                   onClick="WdatePicker({dateFmt:'yyyyMMddHHmm', maxDate:'#F{$dp.$D(\\'end_time\\')}'})"
+                                                   value="{$Think.request.start_time|dateformat='YmdHi'}"/>
+                                            -
+                                            <input type="text" name="end_time" id="end_time"
+                                                   onClick="WdatePicker({dateFmt:'yyyyMMddHHmm', minDate:'#F{$dp.$D(\\'start_time\\')}'})"
+                                                   value="{$Think.request.end_time|dateformat='YmdHi'}"/>
+                                        </label>
+                                        <label>
+                                            <span>收货人手机</span>
+                                            <input name="rece_phone" type="text" value="{$post['rece_phone']}">
+                                        </label>
+                                        <label>
+                                            <span>订单来源</span>
+                                            <input name="channel_name" type="text" value="{$post['channel_name']}">
+                                        </label>
+                                        <label>
+                                            <span>购买人手机</span>
+                                            <input name="order_phone" type="text" value="{$post['order_phone']}">
+                                        </label>
+
+                                        <label>
+                                            <if condition="$tongbaozhai_flag eq 1">
+                                                <span>销售员</span>
+                                                <input name="saler_id" type="text" value="{$post.saler_id}">
+                                            </if>
+                                        </label>
+
+                                        <label>
+                                            <if condition="$boya_flag eq 1">
+                                                <span>推广员</span>
+                                                <input name="saler_name" type="text" value="{$post.saler_name}">
+                                            </if>
+                                        </label>
+                                    </div>
+                                    <div class="SearchAreaRight">
+                                        <a href="javascript:void(0);" class="more-filter ml10 l">更多筛选</a>
+                                        <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                                    </div>
+                            </form>
+                        </div>
+                        <!--列表-->
+                        <div class="shopCon">
+                            <table cellpadding="0" cellspacing="0" class="shopTable">
+                                <tr>
+                                    <th class="first">下单时间</th>
+                                    <th>金额</th>
+                                    <th>订购周期</th>
+                                    <th>商品数量</th>
+                                    <th>订购来源</th>
+                                    <th>支付状态</th>
+                                    <th>配送状态</th>
+                                    <th>结算状态</th>
+                                    <if condition="$tongbaozhai_flag eq 1">
+                                        <th>销售员</th>
+                                    </if>
+                                    <if condition="$boya_flag eq 1">
+                                        <th>推广员</th>
+                                    </if>
+                                    <th class="last">操作</th>
+                                </tr>
+                                <volist name="orderList" id="vo">
+                                    <tr class="title <if condition=" $vo['pay_status'] eq 2">hover</if>">
+                                        <td class="title"
+                                            <if condition="($tongbaozhai_flag eq 1) or ($boya_flag eq 1)">colspan="10"
+                                                <else/>
+                                                colspan="9"
+                                            </if>
+                                            >
+                                            订单号:<span>{$vo['order_id']}</span>
+                                            <span class="ml20">购买人手机:{$vo['order_phone']}</span>
+                                            <span class="ml20">收货人手机:{$vo['receiver_phone']}</span>
+                                            <span class="ml20"><if condition="$vo['receiver_type'] eq 0">凭证自提订单
+                                                    <else/>
+                                                    物流订单
+                                                </if></span>
+                                            <span class="ml20"><eq name="vo.is_gift" value="1">送礼
+                                                    <else/>
+                                                    自消费
+                                                </eq></span>
+                                            <if condition="$vo['receiver_type'] neq 0 && $vo['delivery_number'] != '' ">
+                                                <span class="ml20">运单号:{$vo['delivery_number']}</span>
+                                            </if>
+                                            <span class="ml20"><eq name="vo.pay_channel" value="4">货到付款</eq></span>
+                                        </td>
+                                    </tr>
+                                    <tr class="info <if condition="$vo['pay_status'] eq 2">hover</if>" >
+                                        <td class="first">{$vo['add_time']|dateformat=###,'Y-m-d'}<br/>{$vo['add_time']|dateformat=###,'H:i:s'}
+                                        </td>
+                                        <td>{$vo['order_amt']}<br/>（含运费：{$vo['freight']|default_nvl='0.00'}）</td>
+                                        <td>{$vo['cycle_info']}</td>
+                                        <td>{$vo['buy_num']}</td>
+                                        <td>{$vo['channel_name']}</td>
+                                        <td>{$payStatus[$vo['pay_status']]}</td>
+                                        <td>
+                                            <if condition="$vo['send_count'] eq $vo['cycle_num']">
+                                                已完成
+                                                <else />
+                                                <if condition="$vo['send_count'] eq 0">
+                                                    未开始
+                                                    <else />
+                                                    已送{$vo['send_count']}份<br>
+                                                        待送{$vo['cycle_num']-$vo['send_count']}份
+                                                </if>
+                                            </if>
+                                        </td>
+                                        <td><if condition="$vo['send_count'] neq ''">已结算<br>￥{$vo['get_cash']}元</if></td>
+                                        <if condition="$tongbaozhai_flag eq 1">
+                                            <td>{$vo['petname']}</td>
+                                        </if>
+                                        <if condition="$boya_flag eq 1">
+                                            <td>{$vo['petname']}</td>
+                                        </if>
+                                        <td class="last">
+                                            <if condition="($vo['pay_status'] eq 2) and ($vo['receiver_type'] eq '0')">
+                                                <a id="CodeOption" href="javascript:void(0)"
+                                                   data-url="{:U('LabelAdmin/OrderList/orderOption',array('order_id'=>$vo['order_id']))}">凭证操作</a>
+                                                <br/>
+                                            </if>
+                                            <a id="OrderPrint" href="javascript:void(0)" data-type='1'
+                                               data-url="{:U('LabelAdmin/OrderPrint/index',array('order_id'=>$vo['order_id']))}">订单详情</a><br/>
+                                            <if condition="$vo['pay_status'] eq '1'">
+                                                <!--
+                                                <a class='UpdatePrice' href="javascript:void(0)" 
+                                                   data-o="{$vo['order_id']}" data-p="{$vo.order_amt}" 
+                                                   receiveName="{$vo['receiver_name']}" receiveNum="{$vo['receiver_phone']}"
+                                                   date-cycle="{$vo['cycle_info']}" goodsName="{$vo['batch_name']}">手动改价</a> 
+                                                -->
+                                            </if>    
+                                            <if condition="(($vo['pay_status'] eq 2) AND ($vo['receiver_type'] eq 1)) OR ($vo['pay_channel'] eq 4)">
+                                                <a id="OrderPrint" href="javascript:void(0)" data-type='2' data-url="{:U('LabelAdmin/OrderPrint/cycleIndex',array('order_id'=>$vo['order_id']))}">
+                                                    <if condition="$vo['send_count'] eq $vo['cycle_num']">
+                                                        配送记录
+                                                        <else />
+                                                        配送
+                                                    </if>
+                                                </a> 
+
+                                                <!--                                    <a class="UpdateDelivery" href="javascript:void(0)"
+                                                                                       receiveName="{$vo['receiver_name']}" receiveNum="{$vo['receiver_phone']}"
+                                                                                       data-o="{$vo['order_id']}" data-d="{$vo.delivery_status}"
+                                                                                       data-c="{$vo.delivery_company}" data-n="{$vo.delivery_number}"
+                                                                                       data-dd="{$vo.delivery_date}">
+                                                                                        <if condition="$vo['delivery_company'] eq '' ">绑定运单
+                                                                                            <else/>
+                                                                                            修改运单
+                                                                                        </if>
+                                                                                    </a>-->
+                                                <br/>
+                                            </if>
+                                            <if condition="($vo['pay_status'] eq '1') and ($vo['pay_channel'] eq '4') and($vo['order_status'] eq '0')">
+                                                <a class="deliConfirm" href="javascript:void(0)" data-o="{$vo['order_id']}"
+                                                   data-s="2">确认收货</a>
+                                                <br/>
+                                                <a class="deliConfirm" href="javascript:void(0)" data-o="{$vo['order_id']}"
+                                                   data-s="1">取消订单</a>
+                                            </if>
+                                        </td>
+                                    </tr>
+                                </volist>
+                                <empty name="orderList">
+                                    <tr>
+                                        <td colspan="10" class="last">
+                                            <div class="nonedata"></div>
+                                        </td>
+                                    </tr>
+                                </empty>
+                            </table>
+                        </div>
+                        <div class="shopPage fn">
+                            <?php echo $page;?>
+                        </div>
+                        <!--列表-->
+                    </div>
+                </div>
+            </div>
+            <include file="Public:Public:footer"/>
+        </div>
+        <div class="service"></div>
+
+    </body>
+    <script id="down-list" type="text/html">
+        <form>
+            <div class="down-list">
+                <div id="msgshow" style="display:none" class="top">
+                    <h6>您将下载符合以下条件的订单数据：</h6>
+                    {{if order_id }}
+                    <dd><span class="left">订单号：</span><span class="right">{{order_id}}</span></dd>
+                    {{/if}}
+                    {{if pay_status }}
+                    <dd><span class="left">支付状态：</span><span class="right">{{pay_status}}</span></dd>
+                    {{/if}}
+                    {{if delivery_status }}
+                    <dd><span class="left">配送状态：</span><span class="right">{{delivery_status}}</span></dd>
+                    {{/if}}
+                    {{if order_status }}
+                    <dd><span class="left">订单状态：</span><span class="right">{{order_status}}</span></dd>
+                    {{/if}}
+                    {{if receiver_type }}
+                    <dd><span class="left">订单类型：</span><span class="right">{{receiver_type}}</span></dd>
+                    {{/if}}
+                    {{if is_gift }}
+                    <dd><span class="left">订单用途：</span><span class="right">{{is_gift}}</span></dd>
+                    {{/if}}
+                    {{if rece_phone }}
+                    <dd><span class="left">收货人手机：</span><span class="right">{{rece_phone}}</span></dd>
+                    {{/if}}
+                    {{if channel_name }}
+                    <dd><span class="left">订单来源：</span><span class="right">{{channel_name}}</span></dd>
+                    {{/if}}
+                    {{if order_phone }}
+                    <dd><span class="left">购买人手机：</span><span class="right">{{order_phone}}</span></dd>
+                    {{/if}}
+                    {{if start_time || end_time }}
+                    <dd><span class="left">下单时间：</span><span class="right" style="width:130px;">{{start_time}}</span><i>到&nbsp;&nbsp;</i><span
+                            class="right" style="width:130px;">{{end_time}}</span></dd>
+                    {{/if}}
+                </div>
+                <h6>请选择您需要下载的数据项</h6>
+                <table cellpadding="3">
+                    <tr>
+                        <td class="title"><p class="checked"><i></i><span>订单信息</span></p></td>
+                        <td>
+                            <div class="checkdiv">
+                                <ul>
+                                    <li class="disabled checked">订单号<input type="checkbox" value="1" name="a[1]"
+                                                                           data-val="1" checked="checked"/></li>
+                                    <li class="disabled checked">下单时间<input type="checkbox" value="1" name="a[2]"
+                                                                            data-val="2" checked="checked"/></li>
+                                    <li class="disabled checked">下单手机号<input type="checkbox" value="1" name="a[3]"
+                                                                             data-val="3" checked="checked"/></li>
+                                    <li class="checked">订单用途<input type="checkbox" value="1" name="a[7]" data-val="7"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">订单类型<input type="checkbox" value="1" name="a[6]" data-val="6"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">订单状态<input type="checkbox" value="1" name="a[20]" data-val="20"
+                                                                   checked="checked"/></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="title"><p class="checked"><i></i><span>商品信息</span></p></td>
+                        <td>
+                            <div class="checkdiv">
+                                <ul>
+                                    <li class="checked">商品名称<input type="checkbox" value="1" name="a[5]" data-val="5"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">购买商品<input type="checkbox" value="1" name="a[22]" data-val="22"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">商品总数<input type="checkbox" value="1" name="a[25]" data-val="25"
+                                                                   checked="checked"/></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="title"><p class="checked"><i></i><span>交易信息</span></p></td>
+                        <td>
+                            <div class="checkdiv">
+                                <ul>
+                                    <li class="disabled checked">订单金额<input type="checkbox" value="1" name="a[4]"
+                                                                            data-val="4" checked="checked"/></li>
+                                    <li class="checked">支付状态<input type="checkbox" value="1" name="a[16]" data-val="16"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">支付方式<input type="checkbox" value="1" name="a[19]" data-val="19"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">运费<input type="checkbox" value="1" name="a[15]" data-val="15"
+                                                                 checked="checked"/></li>
+                                    <li class="checked">优惠金额<input type="checkbox" value="1" name="a[14]" data-val="14"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">支付扣费<input type="checkbox" value="1" name="a[17]" data-val="17"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">实收金额<input type="checkbox" value="1" name="a[18]" data-val="18"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">{:L('INTEGRAL_NAME')}抵扣金额<input type="checkbox" value="1" name="a[29]" data-val="29"
+                                                               checked="checked"/></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="title"><p class="checked"><i></i><span>物流信息</span></p></td>
+                        <td>
+                            <div class="checkdiv">
+                                <ul>
+                                    <li class="checked">快递公司<input type="checkbox" value="1" name="a[8]" data-val="8"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">物流单号<input type="checkbox" value="1" name="a[9]" data-val="9"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">配送时间<input type="checkbox" value="1" name="a[10]" data-val="10"
+                                                                   checked="checked"/></li>
+                                    <li class="checked">收货人姓名<input type="checkbox" value="1" name="a[11]" data-val="11"
+                                                                    checked="checked"/></li>
+                                    <li class="checked">收货人手机号<input type="checkbox" value="1" name="a[12]" data-val="12"
+                                                                     checked="checked"/></li>
+                                    <li class="checked">收货地址<input type="checkbox" value="1" name="a[13]" data-val="13"
+                                                                   checked="checked"/></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="title"><p><i></i><span>其他信息</span></p></td>
+                        <td>
+                            <div class="checkdiv">
+                                <ul>
+                                    <li>销售员<input type="checkbox" value="1" name="a[23]" data-val="23"/></li>
+                                    <li>上级经销商<input type="checkbox" value="1" name="a[24]" data-val="24"/></li>
+                                    <li>渠道来源<input type="checkbox" value="1" name="a[26]" data-val="26"/></li>
+                                    <li>是否为微信粉丝<input type="checkbox" value="1" name="a[27]" data-val="27"/></li>
+                                    <li>粉丝标签<input type="checkbox" value="1" name="a[28]" data-val="28"/></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </form>
+    </script>
+
+    <!--  订购价格修改  -->    
+    <script id="inputEditPrice" type="text/html">
+        <div class="tipNormal Diagray">
+            <p>订单号<span id="orderNum" class="ml10">{{orderName}}</span></p>
+
+            <p>订购周期<span id="cycleInfo" class="ml10">{{cycleInfo}}</span></p>
+
+            <p>订购人电话<span id="receiveNum" class="ml10">{{receiveNum}}</span></p>
+
+            <p>收货人姓名<span id="receiveName" class="ml10">{{receiveName}}</span></p>
+
+            <p>商品名称<span id="goodsName" class="ml10">{{goodsName}}</span></p>
+        </div>
+        <div class="Gform fn pb30">
+            <ul>
+                <li class="Gname"><span>*</span>当前价格：</li>
+                <li class="Ginput">
+                    <input type="text" name="cyclePrice" id='order_price' value="{{price}}"
+                           class="validate[required,custom[number],min[0]]"/>
+                </li>
+            </ul>
+        </div>
+    </script>    
+    <script type="text/javascript">
+        $(document).ready(function (e) {
+        $("body").on("click", "[name='experess']", function (e) {
+        e.stopPropagation();
+        var val = $(this).val();
+        if (val != "") {
+        var erro = 0;
+        $(".bankList").show();
+        $(".bankList>ul>li").each(function (index, element) {
+        var text = $(this).text();
+        if (text.indexOf(val) >= 0) {
+        $(this).removeClass("hover");
+        if (index == 0) {
+        $(this).addClass("hover");
+        }
+        $(this).removeClass("dn");
+        erro++;
+        } else {
+        $(this).removeClass("hover");
+        $(this).addClass("dn");
+        }
+        });
+        erro == 0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+        } else {
+        $(".bankList").show();
+        $(".bankList>ul>li").each(function (index, element) {
+        if (index == 0) {
+        $(this).addClass("hover");
+        }
+        var hasErrorClass = $(this).attr('rel');
+        if (hasErrorClass != 'error') {
+        $(this).removeClass("dn");
+        }
+        });
+        }
+        });
+        $("body").on("keyup", "[name='experess']", function (e) {
+        if (e.keyCode != 38 && e.keyCode != 40) {
+        var val = $(this).val();
+        var erro = 0;
+        $(".bankList").show();
+        $(".bankList>ul>li").each(function (index, element) {
+        var text = $(this).text();
+        if (text.indexOf(val) >= 0) {
+        $(this).removeClass("dn");
+        erro++;
+        } else {
+        $(this).addClass("dn");
+        }
+        });
+        $(".bankList>ul>li").removeClass("hover");
+        $(".bankList li:not(.dn):first").addClass("hover");
+        erro == 0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+        }
+        if (e.keyCode == 13) {
+        if ($(".bankList li.hover:not(.dn)").length >= 1) {
+        var v = $(".bankList li.hover").attr("data-city");
+        var key = $(".bankList li.hover").attr("data-key");
+        return false;
+        } else {
+        alert("输入的快递不存在")
+        }
+        }
+        if (e.keyCode == 38) {
+        var t = $(".bankList li.hover");
+        var tnext = t.prevAll("li:not(.dn):first");
+        if (tnext.length > 0) {
+        tnext.addClass("hover");
+        t.removeClass("hover");
+        if (t.nextAll("li:not(.dn)").index() > 4) {
+        $(".bankList ul").scrollTop($(".bankList ul").scrollTop() - 30);
+        }
+        var text = $(".bankList li.hover").text();
+        $(this).val(text);
+        }
+        }
+        if (e.keyCode == 40) {
+        var t = $(".bankList li.hover");
+        var tnext = t.nextAll("li:not(.dn):first");
+        if (tnext.length > 0) {
+        if (tnext.hasClass("erro")) {
+        return false;
+        }
+        tnext.addClass("hover");
+        t.removeClass("hover");
+        if (tnext.index() > 4) {
+        $(".bankList ul").scrollTop($(".bankList ul").scrollTop() + 30);
+        }
+        var text = $(".bankList li.hover").text();
+        $(this).val(text);
+        }
+        }
+        });
+        $("body").on('focus', '#delivery_company', function (e) {
+        $('.bankList ul').css('display', 'block');
+        });
+        $("body").on("click", ".bankList ul li:not('.erro')", function (e) {
+        e.stopPropagation();
+        var val = $(this).text();
+        $("[name='experess']").val(val);
+        $(".bankList").addClass("dn");
+        $('.bankList ul').css('display', 'none');
+        })
+                //点击以外区域隐藏分组
+                $("body").on("click", function () {
+        $(".bankList").hide();
+        });
+        });
+        document.onkeypress = function (e) {
+        if (e.keyCode == 13) {
+        return false;
+        }
+        if (e.keyCode == 38) {
+        return false;
+        }
+        if (e.keyCode == 40) {
+        return false;
+        }
+        }
+    </script>

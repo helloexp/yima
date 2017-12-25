@@ -1,0 +1,836 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title><?php echo $row['wap_title']; ?></title>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/jquery.form.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog6/dialog-min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/fastclick.js?v=__VR__"/>
+<load href="__PUBLIC__/Label/Css/wap_Hgds.css"/>
+<load href="__PUBLIC__/Js/artDialog6/ui-dialog.css"/>
+<script type="text/javascript" src="http://api.map.baidu.com/api?type=quick&ak=WRzAu3DNewWB4oeOELaczjsM&v=1.0"></script>
+<script>
+var _map = null, _marker1 = null, _store_point = null;
+var _g = {
+	hgds_range_remain: '{$hgds_range_remain}',
+	url_check_phone: '{:U('hgds_check_phone')}',
+	id: '{:I('id')}'
+};
+
+
+function handleSuccess(position) {
+	console.log(position)
+    // 获取到当前位置经纬度  本例中是chrome浏览器取到的是google地图中的经纬度
+    var lng = position.coords.longitude;
+    var lat = position.coords.latitude;
+    // 调用百度地图api显示
+    var map = new BMap.Map("map");
+    var ggPoint = new BMap.Point(lng, lat);
+    // 将google地图中的经纬度转化为百度地图的经纬度
+    BMap.Convertor.translate(ggPoint, 2, function(point) {
+    	console.log(point);
+//      var marker = new BMap.Marker(point);
+//      map.addOverlay(marker);
+//      map.centerAndZoom(point, 15);
+    });
+}
+
+function handleError(error) {}
+
+
+$(document).ready(function(e) {
+	/*if (window.navigator.geolocation) {
+	    var options = {
+	        enableHighAccuracy: true,
+	    };
+	    window.navigator.geolocation.getCurrentPosition(handleSuccess, handleError, options);
+	} else {
+	    alert("浏览器不支持html5来获取地理位置信息");
+	}*/
+
+	if(_g.hgds_range_remain == '-'){
+		
+	}
+	else if(_g.hgds_range_remain == '0'){
+		dialog({
+		    title: '提示',
+		    content: '当前时段奖品已发完，是否继续参加问卷调查？',
+		    okValue: '确定',
+		    fixed: true,
+		    ok: function () {
+		    	
+		        //this.title('提交中…');
+		        return true;
+		    },
+		    cancelValue: '取消',
+		    cancel: function () {
+		    	popForm('popMsg','感谢您的参与！',3)
+		    }
+		}).show();
+	}
+	else if(_g.hgds_range_remain > 0 && _g.hgds_range_remain < 4){
+		var d = dialog({
+		    content: '当前的奖品数量仅剩'+_g.hgds_range_remain+'份，请尽快填写问卷并提交！',
+		    // quickClose: true
+		    ok: function (){return true;}
+		}).show();
+		/*setTimeout(function(){
+			d.close().remove();
+		}, 2000)*/
+	}
+	
+	//开始答题
+	var num=0;
+	$(".begin-answer").click(function(){
+		var err = [];
+		$('.baseForm li').each(function(){
+			var a = $('input[type="text"],select', $(this)).first(); 
+			if(a.length > 0) {
+				var obj = $(a), name = obj.attr('name'), val = obj.val();
+				if(val == ''){
+					var txt = obj.closest('li').find('p:first,h6:first').text();
+					err.push(txt+'不能为空！');
+				}
+				else if( name == 'defined_one' && /^1[34578][0-9]{9}$/.exec(val) == null ){
+					var txt = obj.closest('li').find('p:first,h6:first').text();
+					err.push(txt+'格式不对！');
+				}
+			}
+		});
+		if(err.length > 0){
+			popForm('popMsg',err.join('<br>'), 0);
+			return false;
+		}
+
+		var that = this;
+
+		var mobile = $('input[name="defined_one"]').val();
+		var loading = dialog().show();
+		$.post(_g.url_check_phone, {mobile: mobile, id: _g.id}, function(resp){
+			loading.close();
+			if(resp.status != 1){
+				dialog({
+				    title: '提示',
+				    content: '您已参加过本次活动，非常感谢您的参与！',
+				    okValue: '确定',
+				    fixed: true,
+				    ok: true
+				}).show();
+			}
+			else{
+				var width=$(".Formlist").width();
+				var _this=$(that).closest(".Formlist").next(".Formlist");
+				var index=_this.index();
+				_this.show();
+				var bmForm=$(".bmForm").width();
+				var length=$(".bmFormList").length;
+				if(num==0){
+					$(".bmFormList").width(bmForm);
+					$(".bmForm").width(bmForm*length+20*length);
+					num++;
+				}
+				$(".mainForm").animate({marginLeft:-width},500);
+				$(".bmFormList:eq(0)").show().css("margin-left","0");
+				progress(1);
+			}
+		}, 'json');
+		return ;
+	})
+	$(".answer-pre").click(function(){
+		var _this=$(this).closest(".bmFormList");
+		var _thisFather=$(this).closest(".bmForm");
+		var _thispre=_this.prev(".bmFormList");
+		var index=_this.index()-1;
+		var width=_this.width()+20;
+
+		if(!_thispre.width()){
+			$(".mainForm").animate({marginLeft:0},500);
+		}else{
+			_thisFather.animate({marginLeft:-width*index+10},500);			
+		};
+		progress(index+1);
+	})
+	$(".answer-next").click(function(){
+		var _this=$(this).closest(".bmFormList");
+		
+		if(!check_single(_this))
+			return false;
+
+		var index=_this.index()+1;
+		var _thisFather=$(this).closest(".bmForm");
+
+		// 特殊处理
+		if(index == 1){
+			if( $('.bmFormList:eq(0) :checked').val() != '1' ){
+				popForm('popMsg','感谢您的参与！本次问卷调查活动仅针对居住地在上海的顾客开展。',2)
+			}
+		}
+		
+		if(index == 9){
+			var next_el = $('.bmFormList:eq(9)');
+			if( $('.bmFormList:eq(8) :checked').val() == '1' ){
+				next_el.find(':checkbox[value=1]').attr('checked', 'checked')
+				next_el.find(':checkbox[value!=1]').attr('disabled', 'disabled')
+			}
+			else{
+				next_el.find(':checkbox').removeAttr('disabled')
+				next_el.find(':checkbox[value=1]').attr('disabled', 'disabled')
+			}
+		}
+		if(index == 5){
+			var next_el = $('.bmFormList:eq(5)');
+			//已婚有孩子
+			if( $('.bmFormList:eq(4) :checked').val() == '3' ){
+				next_el.find(':radio').removeAttr('disabled');
+				next_el.find(':radio[value=1]').attr('disabled', 'disabled')
+			}
+			else{
+				next_el.find(':radio').removeAttr('disabled');
+				next_el.find(':radio[value=1]').attr('checked', 'checked')
+				next_el.find(':radio[value!=1]').attr('disabled', 'disabled')
+			}
+		}
+		
+
+
+		
+		var _thisnext=$(this).closest(".bmFormList").next(".bmFormList");
+
+		var width=_this.width()+20;
+		_thisnext.show();
+		_thisFather.animate({marginLeft:-width*index+10},500);
+		progress(index+1);
+	})
+	//地图-手动输入
+	$(".btn-map-erro").click(function(){
+		$("#AjaxMap").fadeIn(300);
+		$("#AjaxMap #AjaxMap-input").fadeIn(300);
+		$(".map-input").val('');
+		$(".map-input").attr('map_id',$(this).attr('id'));
+	})
+	$(".close-AjaxMap").click(function(){
+		if($(this).hasClass("checked")){
+			$("#AjaxMap #AjaxMap-check").fadeOut(300);
+			return false;
+		}
+		$("#AjaxMap").fadeOut(300);
+		$("#AjaxMap #AjaxMap-input").fadeOut(300);
+		$("#AjaxMap .AjaxMap-map").animate({top:"100%"},600,function(){
+			$("#AjaxMap #allmap").hide();
+			$("#AjaxMap #AjaxMap-check").fadeOut(300);
+			$("#searchList").hide();
+		});
+	})
+
+	$("#AjaxMap-input .btn-input.ok").click(function(){
+		$("#AjaxMap").fadeOut(300);
+		$("#AjaxMap #AjaxMap-input").fadeOut(300);
+		var obj = $(this).closest("#AjaxMap-input").find(".map-input");
+		var val= obj.val();
+		var map_id = obj.attr('map_id');
+		$("#map-"+map_id).val('');
+		$("#map-lbs-"+map_id).val('');
+
+		var options = {      
+			  onSearchComplete: function(results){      
+				  if (local.getStatus() == BMAP_STATUS_SUCCESS){      
+						// 判断状态是否正确      
+						var s = '';   
+						for (var i = 0; i < 1; i ++){
+							s = results.getPoi(i).point.lng+"|#|"+results.getPoi(i).point.lat;
+						}
+					 
+					 $("#map-lbs-"+map_id).val(s);      
+					 //document.getElementById("searchList").innerHTML = s.join("<br>");      
+				  }      
+			  }      
+		 };
+		var local = new BMap.LocalSearch(_map, options);  
+		local.search(val);
+
+		$("#map-"+map_id).val(val);
+		$("#map-"+map_id).closest(".Formlist-map").slideDown();
+		scrollTop()
+	})
+	//地图-地图选址
+
+	$("#AjaxMap").unbind("touchmove").bind("touchmove",function(){
+		event.preventDefault();
+	});
+	$(".btn-map").click(function(){
+		var map_id = $(this).attr('id');
+		var text=$("#h3_"+map_id).text();
+		$("#allmap").attr('map_id',map_id);
+		$("#AjaxMap").show();
+		$('body,html').animate({scrollTop:0},17);
+		$("#AjaxMap .AjaxMap-map").animate(
+			{top:0},
+			600,
+			function(){
+				$("#AjaxMap #allmap").show();
+				$(".AjaxMap-main-title span").text(text);
+				init_map();
+				}
+			);
+	})
+	$(".btn-search").click(function(){
+		$("#AjaxMap #allmap").hide();
+		$("#searchList ul").html('<li>正在搜索</li>');
+		var options = {      
+			  onSearchComplete: function(results){      
+				  if (local.getStatus() == BMAP_STATUS_SUCCESS){      
+						// 判断状态是否正确      
+						var s = '';   
+						for (var i = 0; i < results.getCurrentNumPois(); i ++){
+							if(typeof(results.getPoi(i).address) == 'undefined') results.getPoi(i).address = '';
+							s = s+'<li data-lbs='+results.getPoi(i).point.lng+"|#|"+results.getPoi(i).point.lat+'><i></i>'+results.getPoi(i).title+' '+results.getPoi(i).address+'</li> ';           
+						}
+					 $("#searchList ul").html(''); 
+					 $("#searchList ul").html(s);      
+					 //document.getElementById("searchList").innerHTML = s.join("<br>");      
+					  }      
+				  }      
+			 };
+		      
+		var local = new BMap.LocalSearch(_map, options); 
+		var key_word = $("#key_word").val();     
+		local.search(key_word);
+		$("#searchList").fadeIn(300);
+		scrollTop()
+	});
+	$("#searchList li").live("click",function(){
+		var val=$(this).text();
+		var lbs=$(this).attr("data-lbs");
+		$("#AjaxMap-check").fadeIn(300);
+		$("#AjaxMap-check p span").text(val);
+		$("#AjaxMap-check p span").attr("data-rel",val);
+		$("#AjaxMap-check p span").attr("data-lbs",lbs);
+	});
+	$("#AjaxMap-check .close-AjaxMap").click(function(){
+		$("#AjaxMap #AjaxMap-check").fadeOut(300);
+	})
+	$("#AjaxMap-check .btn-input.ok").click(function(){
+		$("#AjaxMap").fadeOut(300);
+		$("#AjaxMap #AjaxMap-check").fadeOut(300);
+		$("#AjaxMap .AjaxMap-map").animate({top:"100%"},600,function(){$("#AjaxMap #allmap").hide();$("#searchList").hide();});
+		var obj = $(this).closest("#AjaxMap-check").find("p span");
+		var lbs = obj.attr("data-lbs");
+		var val = obj.attr("data-rel");
+		var map_id = $('#allmap').attr('map_id');
+		$("#map-"+map_id).val(val);
+		$("#map-lbs-"+map_id).val(lbs);
+		$("#map-"+map_id).closest(".Formlist-map").slideDown();
+		scrollTop()
+	})
+	
+    //抽奖
+    var _is_sub = false;
+    $('#subcj').click(function(){
+		if(_is_sub)
+			return false;
+		_is_sub = true;
+		$.post(
+			"{:U('Label/Cj/submit')}",
+			$('#theform').serialize(),
+			function(data) {
+				popForm('popMsg',data.info,data.status,data.data);
+				_is_sub = false;
+			},
+			'json'
+		); 
+    });
+    
+    //调研
+    var _one_sub = false;
+    $('#bm_sub_id').click(function(){
+        if(_one_sub)
+            return false;
+
+        var lastul = $('.bmFormList').last();
+        if(!check_single(lastul))
+			return false;
+
+        _one_sub = true;
+        $("#bmform").ajaxSubmit({
+            beforeSubmit:function(){
+                $('#loadingBox').fadeIn(300).find('span').html('提交中，请等待...');
+            },
+            success:function(data){
+                $('#loadingBox').hide();
+                _one_sub = false;
+				
+                if(data.data.type == 'success_cj'){
+					$(".from_mobile").val($("input[name='defined_one']").val());
+					if(data.data.hgds_range_remain == '0'){
+						popForm('popMsg','',4);
+					}else{
+                    	popForm('popForm',data.info,data.status);
+					}
+                    $('#bm_sub_id').attr('disabled',true);
+                    $('#bm_sub_id').css('background','#dddddd');
+                }else if(data.data == 'success'){
+                    popForm('popForm',data.info,data.status);
+                    $('#bm_sub_id').attr('disabled',true);
+                    $('#bm_sub_id').css('background','#dddddd');
+                }else{
+                    popForm('popMsg',data.info,data.status);
+                }
+            },
+            dataType:'json'
+        });
+    });
+    
+    FastClick.attach(document.body);
+	
+	<notempty name="lbs_arr">
+	_store_point = new BMap.Point({$lbs_arr.lbs_y},{$lbs_arr.lbs_x});
+	</notempty>
+});
+
+// 初始化登录
+function init_map(){
+	if(_map == null){
+		// 百度地图API功能
+		_map = new BMap.Map("allmap");
+		_map.centerAndZoom(_store_point ? _store_point : '上海',17);
+		
+		//添加门店图标
+		if(_store_point){
+			var myIcon = new BMap.Icon("__PUBLIC__/Label/Image/shop1.png", new BMap.Size(25,25));
+			var store_marker = new BMap.Marker(_store_point, {icon:myIcon});
+			//var label = new BMap.Label("哈根达斯",{offset:new BMap.Size(20,-10)});
+			//store_marker.setLabel(label);
+			_map.addOverlay(store_marker);
+		}
+		
+		//添加地图缩放控件
+		var zoomc= new BMap.ZoomControl();
+		zoomc.defaultAnchor = BMAP_ANCHOR_TOP_LEFT;
+		_map.addControl(zoomc);
+		
+		_map.addEventListener("click", function(e){
+			if(_marker1 == null){
+				_marker1 = new BMap.Marker(e.point);
+				_map.addOverlay(_marker1);
+			}
+			else{
+				_marker1.setPosition(e.point);
+			}
+		
+			var gc = new BMap.Geocoder();
+			var map_id = $("#allmap").attr('map_id');
+			gc.getLocation(e.point, function(resp){
+				var opts = {
+				  width : 200,     // 信息窗口宽度
+				}
+				var str = resp.address+'<div class="cl"></div><input type="button"  name="button" id="map_button"  onclick="close_map_add_lbs()" value="确定" style="position: relative;z-index:11; background:#f7f7f7; padding:2px 8px;-moz-border-radius:2px;-webkit-border-radius:2px; border-radius:2px; float:right; margin:5px 10px 0 0;">';
+				
+				var infoWindow = new BMap.InfoWindow(str,opts);  // 创建信息窗口对象
+				_map.openInfoWindow(infoWindow,e.point); //开启信息窗口
+				
+				$("#map-"+map_id).val(resp.address);
+				$("#map-lbs-"+map_id).val(resp.point.lng+'|#|'+resp.point.lat);
+				$("#map-"+map_id).closest(".Formlist-map").slideDown();
+			});	
+		});
+	}
+}
+
+
+function check_single(odiv){
+	var obj = $('input,select,textarea', odiv).eq(0);
+	if(obj){
+		$flag = false; // 为true时，需要提示请完成当前题目
+		var name = obj.attr('name'), tagName = obj.get(0).tagName;
+		if(tagName == 'INPUT'){
+			type = obj.attr('type');
+			if(type == 'text'){
+				$flag = obj.val() == '';
+			}
+			else if(type == 'radio'){
+				$flag = $(':radio[name="'+name+'"][disabled!="disabled"][checked]').length == 0;
+			}
+			else if(type == 'checkbox'){
+				$flag = $(':checkbox[name="'+name+'"][disabled!="disabled"][checked]').length == 0;
+			}
+		}
+		if(tagName == 'TEXTAREA'){
+			$flag = obj.val() == '';
+		}
+		if($flag){
+			popForm('popMsg', '请先完成当前题目', 0);
+			return false;
+		}
+	}
+	return true;
+}
+function close_map_add_lbs(){
+	$(".close-AjaxMap").click();
+	scrollTop();
+}
+function progress(n){
+	var alllength = $(".bmFormList").length;
+	var per = 1/alllength*100;
+	var left= per*n;
+	if(left>=97){left=97}else if(left<=9.7){ left=9.7};
+	$(".Formlist-progress p span").text(n+"/"+alllength);
+	$(".Formlist-progress p").animate({left:left+"%"},500);
+	$(".Formlist-progressLine").animate({width:per*n+"%"},500);
+}
+function scrollTop(){
+	//苹果响应不及时
+	var scrollTop=$('body').scrollTop()-1;
+    $('body,html').animate({scrollTop:scrollTop},1000);
+}
+</script>
+
+<script>
+$(document).ready(function(e) {
+	$(".close-AjaxWrapper").click(function(){
+		$("#AjaxWrapper").fadeOut(300);
+	});
+});
+function popForm(type,msg,isTrue) {
+	var width=$(".Formlist").width();
+    if(type=="popForm"){
+		$(".Formlist:eq(2)").show();
+		$(".mainForm").animate({marginLeft:-width*2},500);
+        fleshVerify();
+        $('.Formlist-progress').hide();
+    }else if(type == 'popMsg'){
+        if(isTrue == '1'){
+			var width=$(".Formlist").width();
+			$(".Formlist:eq(3)").show();
+			$(".mainForm").animate({marginLeft:-width*3},500);
+			$(".completeMsg-msg").html('领取成功！<br/>稍后我们会将奖品信息以短信形式发送至您的手机，请注意查收。');
+
+			$(".icon-prize").css('background-image', 'url('+arguments[3]['prize_img']+')').show();
+        }
+        //地区不符
+        else if(isTrue == '2'){
+			var width=$(".Formlist").width();
+			$(".Formlist:eq(3)").show();
+			$(".mainForm").animate({marginLeft:-width*2},500);
+			$(".completeMsg-msg").html(msg);
+        }
+        //当前时段奖品已发完,不继续答题
+        else if(isTrue == '3'){
+			var width=$(".Formlist").width();
+			$(".Formlist:eq(3)").show();
+			$(".mainForm").animate({marginLeft:-width*1},500);
+			$(".completeMsg-msg").html(msg);
+        }
+        else if(isTrue == '4'){
+        	var width=$(".Formlist").width();
+			$(".Formlist:eq(3)").show();
+			$(".mainForm").animate({marginLeft:-width*2},500);
+			$(".icon-noprize").show();
+			var myDate = new Date();
+			var t = parseInt(myDate.getHours()/2);
+			var str = (t*2)+":00~"+((t+1)*2)+":00";
+			$(".completeMsg-msg").html('亲，很遗憾，'+str+'的中奖名额已满，您未能获得奖品，非常感谢您的热心参与。');
+        }
+        else{
+			if(msg=="很遗憾，未中奖,感谢您的参与！"){
+				var width=$(".Formlist").width();
+				$(".Formlist:eq(3)").show();
+				$(".mainForm").animate({marginLeft:-width*3},500);
+				$(".icon-noprize").show();
+				$(".completeMsg-msg").html(msg);
+			}else{
+				$("#AjaxWrapper").fadeIn(300);
+				$("#popMsg").show();
+				$("#popMsg .cjText-text").html(msg);
+				if(isTrue == '1'){
+					$('#showPic').attr('src','__PUBLIC__/Label/Image/icon-ok.png');
+				}else{
+					$('#showPic').attr('src','__PUBLIC__/Label/Image/icon-error.png');
+				}
+			}
+        }
+    }
+}
+</script>
+
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div class="mainTop">
+                <div class="top-img">
+                    <img src="__PUBLIC__/Label/Image/Item/hgds-01.png"  class="vip-img" />
+                    <div class="logo-con"><img src="__PUBLIC__/Label/Image/Item/hgds-02.png" /></div>
+                </div>
+            </div>
+            <div id="mainCon" class="mainCon fn">
+                <div class="mainCon-title"><span><?php echo $row['wap_title']?></span></div>
+                <div class="mainCon-contenter">
+                    <div class="cl"></div>
+                    <div class="mainForm">
+                    	<form name="bmform" id="bmform" action="<?php echo U('Label/Bm/Submit')?>" method="post" enctype="multipart/form-data">
+                    	<div class="Formlist">
+                            <div class="mainCon-prize fn">
+							<?php
+							if($map_img!= ''){?>
+							<!-- <div class="mainCon-img"><img src="__UPLOAD__/<?php echo $map_img?>" /></div> -->
+							<?php }else{?>
+                                <!-- <div class="mainCon-img"><img src="__PUBLIC__/Label/Image/Item/hgds-11.jpg" /></div> -->
+							<?php } ?>
+                                <div class="mainCon-text"><?php echo $row['wap_info'];?></div>
+                            </div>
+                                <input type="hidden" value="<?php echo $_GET['id']?>" name="id" id="id" />
+                                <input type="hidden" value="<?php echo $row['select_type']?>" name="select_type" />
+                                <div class="baseForm">
+                                     <?php 
+                                     $bm_arr=C('BM_TYPE_ARR');
+                                       $get_bm_arr = array(
+                                        '1'=>'true_name',
+                                        '2'=>'mobile',
+                                        '3'=>'sex',
+                                        '4'=>'age',
+                                        '5'=>'edu',
+                                        '6'=>'address',
+                                        '7'=>'email',
+                                        '8'=>'company',
+                                        '9'=>'position',
+                                        '10'=>'defined_one',
+                                        '11'=>'defined_two',
+                                        '12'=>'defined_three',
+                                        '13'=>'pic_one',
+                                        );
+    
+                                     foreach($query_arr as $v){ ?>
+                                     <li>
+                                            <?php
+                                            if($v == '10')echo "<h6>您的".$row['defined_one_name']."</h6>";
+                                            elseif($v == '11')echo "<h6>".$row['defined_two_name']."</h6>";
+                                            elseif($v == '12')echo "<h6>".$row['defined_three_name']."</h6>";
+                                            else echo "<p>".$bm_arr[$v]."</p>";
+                                            ?>
+                                        <?php if($get_bm_arr[$v]=='sex'){?>
+                                        <label><input type="radio" name="<?php echo $get_bm_arr[$v]?>" value='男' checked="checked" class="sOne-Radio" id="sex-boy">&nbsp;男</label>
+                                        <label><input type="radio" name="<?php echo $get_bm_arr[$v]?>" value="女"  class="sOne-Radio" id="sex-girl"/>&nbsp;女</label>
+                                        <?php }elseif($get_bm_arr[$v]=='edu'){ ?>
+                                        <select name="edu" id="edu" class="sOne-select">
+                                            <option value="">请选择</option>
+                                            <option value='小学'>小学</option>
+                                            <option value='初中'>初中</option>
+                                            <option value='高中'>高中</option>
+                                            <option value='专科'>专科</option>
+                                            <option value='本科'>本科</option>
+                                            <option value='硕士'>硕士</option>
+                                            <option value='博士'>博士</option>
+                                            <option value='其他'>其他</option>
+                                        </select>
+                                        <?php }elseif($get_bm_arr[$v]=='pic_one'){ ?>
+                                         <div id="pic_one_view"></div>
+                                         <div class="sOne-file-div">
+                                            <i class="icon-photo"></i><p class="sOne-file-name">传照片</p>
+                                            <input type="file" name="pic_one" id="pic_one" class="sOne-file sOne-Input" onChange="javascript:file_change('pic_one');">
+                                        </div>
+                                         <div class="fn"></div>
+                                         <span id="update_notice" style="display: none;">请升级微信至最新版本，或点击右上角选择“在浏览器中打开”，否则无法上传图片。</span>
+                                        <?php }else{?>
+                                        <div class="baseForm-input"><input name="<?php echo $get_bm_arr[$v]?>" id="<?php echo $get_bm_arr[$v]?>" type="text" class="sOne-Input"/></div>
+                                        <?php } ?>
+                                    </li>
+                                    <?php }?>
+                                    <li><a class="input_button begin-answer">开始答题</a></li>
+                                </div>
+                            </div>
+                            <div class="Formlist dn">
+                            	<div class="Formlist-msg">
+                                	<h4><?php echo $row['memo']?></h4>
+                                    <div class="Formlist-progress">
+                                    	<p style="left:9.7%;"><span>1/10</span><i></i></p>
+                                        <div class="Formlist-progressBg">
+                                        	<div class="Formlist-progressLine" style="width:10%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bmForm">
+                                    <?php
+                                    $q_type= array('1'=>'单选题','2'=>'多选题','3'=>'问答题');
+                                    $add_count = 0;
+                                    $arr_num = count($resp_arr)-1;
+                                     foreach($resp_arr as $k=>$v){
+                                        $add_count++;
+                                    ?>
+                                    <ul class="bmFormList">
+                                        <li>
+                                            <h3 id="h3_<?=$v['info']['id']?>"><b><?php echo $add_count;?>:</b><?php echo $v['info']['questions']?></h3>
+                                        </li>
+                                        <?php if($v['info']['type'] == '3'){?>
+                                        <li>
+                                            <textarea name="textarea-<?php echo $v['info']['id']?>" class="sOne-Textarea"></textarea>
+                                        </li>
+                                        <!--地图li>
+                                        	<div class="Formlist-map fn">
+                                            	<a href="javascript:void(0)" class="btn-map l"><i class="icon-map"></i>地图选址</a>
+                                                <a href="javascript:void(0)" class="btn-map-erro r"><i class="icon-key"></i>手动输入</a>
+                                            </div>
+                                            <div class="Formlist-map fn dn"><input name="map" type="text" class="sOne-Input map" disabled /></div>
+                                        </li-->
+										<?php }elseif($v['info']['type'] == '4'){?>
+										<div class="Formlist-map fn">
+                                            	<a href="javascript:void(0)" class="btn-map l" id="<?=$v['info']['id']?>" ><i class="icon-map"></i>地图选址</a>
+                                                <a href="javascript:void(0)" class="btn-map-erro r" id="<?php echo $v['info']['id']?>"><i class="icon-key"></i>手动输入</a>
+                                            </div>
+                                            <div class="Formlist-map fn dn"><input name="map-<?=$v['info']['id']?>" type="text" class="sOne-Input map" id="map-<?=$v['info']['id']?>" readonly />
+											<input name="map-lbs-<?=$v['info']['id']?>" type="hidden" class="sOne-Input map-lbs" id="map-lbs-<?=$v['info']['id']?>" readonly />
+											</div>
+                                        <?php }else{?>
+                                        <?php
+                                        foreach($v['list'] as $kk=>$vv){ ?>
+                                        <li>
+                                            <?php if($v['info']['type'] == '1'){?>
+                                            <input type="radio" name="radio-<?php echo $v['info']['id']?>" value="<?php echo $vv['value']?>" class="sOne-Radio" id="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><label for="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><?php echo $vv['answers'];?></label>
+                                            <?php }elseif($v['info']['type'] == '2'){?>
+                                            <input type="checkbox" name="checkbox-<?php echo $v['info']['id']?>[]" value="<?php echo $vv['value']?>" class="sOne-Checkbox" id="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><label for="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><?php echo $vv['answers'];?></label>
+                                            <?php }?>
+                                        </li>
+                                        <?php }}?>
+                                        <li class="btn-li">
+                                        	<a href="javascript:void(0)" class="btn-answer answer-pre">上一题</a>
+                                            <br>
+                                            <?php if($k != $arr_num){?>
+                                           
+                                            <a href="javascript:void(0)" class="btn-answer answer-next">下一题</a>
+                                      
+                                            <?php }if($k == $arr_num){?>
+                                            <a href="javascript:void(0)" class="input_button bm_sub_id" id = "bm_sub_id"><?php if($row['is_cj'] == '1'){echo $cj_text!='' ? $cj_text :'点击提交'; }else{echo '点击提交';}   ?></a>
+                                            <?php }?>
+                                        </li>
+                                    </ul>
+                                    <?php }?>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="Formlist dn">
+                            <div class="completeMsg">
+                                <div class="icon-thanks"></div>
+                                <p class="completeMsg-text"><?php if($row['is_cj'] == '1'){echo $cj_text!='' ? $cj_text :'感谢您参与我们的问卷调查，<br />马上参与领奖吧'; }else{echo '感谢您参与我们的问卷调查';}   ?></p>
+                            </div>
+							
+							<?php if($row['is_cj'] == '1') {?>		
+							<div class="cjCon" id="popForm">
+                                <form id="theform" action="<?php echo U('Label/Cj/Submit');?>" method="post" name="theform">
+                                <input type="hidden" id="id" name="id" value="<?php echo $id;?>" />
+                                <input type="hidden" id="cj_check_flag" name="cj_check_flag" value="{$cj_check_flag}" />
+                                <div class="cjForm">
+                                    <ul class="sOne-cjForm">
+                                        <?php if($cj_check_flag == '1'){ ?>
+                                        <li><p>参与码:</p><input type="text" name="check_code" id="check_code" class="sOne-cjInput" maxlength="6"  placeholder="请输入您的参与码"/></li>
+                                        <?php }?>
+                                        <li><p>手机号:</p><input type="text" name="mobile" id="mobile" class="sOne-cjInput from_mobile" readonly="readonly" placeholder="请输入手机号" maxlength="11" /></li>
+                                        <li>
+                                            <p>验证码:</p>
+                                            <input type="text" class="sOne-cjInput-half" name="verify" id="verify" maxlength="4" placeholder="验证码" >
+                                            <a href="javascript:void(0);"><img src="<?php echo U('Label/VerifyCode/index/')?>" class="sOne-cjpasscode-img" id="verifyImg"  onclick="fleshVerify()"></a>
+                                        </li>
+                                        <li class="pt20"><input type="button" id="subcj" value="马上领奖" class="cj-input-button" /></li>
+                                    </ul>
+                                </div>
+                                </form>
+                                <script language="JavaScript">
+                                function fleshVerify(){ 
+                                    //重载验证码 
+                                    var obj = document.getElementById('verifyImg'); 
+                                    var captcha_img = obj.src; 
+                                    var i = captcha_img.indexOf('#'); 
+                                    if(i != -1){ 
+                                    captcha_img = captcha_img.substr(0,i); 
+                                    } 
+                                    obj.src = captcha_img+"#"+Math.random(); 
+                                
+                                }
+                                </script>
+                            </div>
+							<?php } ?>
+                            
+							
+                        </div>
+                        <div class="Formlist dn">
+                            <div class="completeMsg">
+							<?php
+							if($map_img!= ''){?>
+                                <div class="icon-prize dn" style="background:url(__PUBLIC__/Label/Image/Item/hgds-11.jpg) no-repeat center center; background-size:100% auto;"></div>
+							<?php }else{?>
+                                <div class="icon-prize dn" style="background:url(__PUBLIC__/Label/Image/Item/hgds-11.jpg) no-repeat center center; background-size:100% auto;"></div>
+							<?php } ?>
+                                <div class="icon-noprize dn"></div>
+                                <p class="completeMsg-msg"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      		<include file="Public:share"/>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+</div>
+<div id="AjaxWrapper" class="dn">
+	<div class="cjWrapper">
+    	<div class="cjWrapper-close"><a href="javascript:void(0)" class="close-AjaxWrapper">+</a></div>
+    	<div class="cjCon pb10 dn" id="popMsg">
+            <div class="cjText">
+            	<div class="cjText-con">
+                    <div class="cjText-img"><img id="showPic" src="__PUBLIC__/Label/Image/icon-error.png"></div>
+                    <div class="cjText-text">您填写的信息有误，<br />请重新输入！</div>
+                </div>
+            </div>
+            <div class="cjBtn">
+                <a href="javascript:void(0)" class="cjBtn-back close-AjaxWrapper" id="nocj_resp_id">返回</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--地图-->
+<div id="AjaxMap">
+	<div class="AjaxMap-map">
+    	<div class="AjaxMap-main">
+        	<div class="AjaxMap-main-title"><span></span><i class="close-AjaxMap">+</i></div>
+        	<div class="AjaxMap-main-search"><div class="AjaxMap-main-search-div"><input type="text" id="key_word"/><a href="javascript:void(0)" class="btn-search">搜索</a></div></div>
+            <div id="allmap"></div>
+			
+            <div id="searchList">
+            	<ul>
+                	<!--<li data-rel="张江镇"><i></i>张江镇</li>
+                	<li data-rel="张江镇2"><i></i>张江镇2</li>
+                	<li data-rel="张江3镇"><i></i>张江3镇</li>
+                	<li data-rel="张江4镇"><i></i>张江4镇</li>
+                	<li data-rel="张江5镇"><i></i>张江5镇</li>
+                	<li data-rel="张江6镇"><i></i>张江6镇</li>-->
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="AjaxMap-check" class="AjaxMap-input">
+    	<p>您确定使用地点：<span data-rel=""></span></p>
+        <p class="btn-p">
+            <a href="javascript:void(0)" class="btn-input erro checked close-AjaxMap">取消</a>
+            <br>
+            <a href="javascript:void(0)" class="btn-input ok">确定</a>
+        </p>
+    </div>
+    <div id="AjaxMap-input" class="AjaxMap-input">
+    	<p><input name="map-input" type="text" class="sOne-Input map-input" placeholder="例:上海黄浦区南京东路299号1层" /></p>
+        <p class="btn-p">
+            <a href="javascript:void(0)" class="btn-input erro close-AjaxMap">取消</a>
+            <br>
+            <a href="javascript:void(0)" class="btn-input ok">确定</a>
+        </p>
+    </div>
+</div>
+<!--地图-->
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>

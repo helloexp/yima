@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+        <meta content="telephone=no" name="format-detection" />
+        <meta content="email=no" name="format-detection" />
+        <meta name="apple-touch-fullscreen" content="NO">
+        <title>{$title}</title>
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_wfx.css?v=__VR__">
+        <script src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+        <include file="Public:Public:wechatAllShareJsdk" />
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+        <script type="text/javascript">
+            $(function () {
+                wx.ready(function () {
+                    wx.hideOptionMenu();
+                })
+            })
+        </script>
+        <style>
+		.cjFormTitle span.onlyTitle{ font-size:16px; line-height:20px; display:block}
+        .cjFormTitle i.tipIcon{ width:20px; height:20px; vertical-align:middle; display:inline-block; margin-right:10px; background:url(__PUBLIC__/Label/Image/tips_icon.png) left center no-repeat; background-size:100%}
+		.msgPopCon a.close{ font-size:26px;}
+		i.downIcon{ position:absolute; right:20px; width:20px; height:20px; vertical-align:middle; display:inline-block; margin-right:10px; background:url(__PUBLIC__/Label/Image/tips_icon.png) left center no-repeat; background-size:100%}
+		select {
+			color: #ccc;
+			background: #fff;
+			border-radius: 5px;
+			-webkit-border-radius: 5px;
+			-moz-border-radius: 5px;
+			border: solid 1px #bfbfbf;
+			-webkit-appearance: menulist;
+			padding-left: 3px;
+		}
+        </style>
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="container">
+                <div id="main">
+                <include file="Wfx:top"/>
+                    <div class="m-my-comm" style="height:100%;">
+                        <div class="header">
+                            <span id="thisMonthCommission" class="fl" style="float:left">本月提成</span>
+                            <span class="fr viewtcDetail">查看提成明细</span>
+                            <div class="cl db fn"></div>
+                            <h1>￥<span class="int-num">{$thisMonthCommission.0}</span>.{$thisMonthCommission.1}<span class="font">元</span></h1>
+                        </div>
+                        <div class="data fn">
+                            <div class="module left" id="totalCommission">
+                                <p class="tit">总提成</p>
+                                <p class="cont">￥<span class="int-num">{$totalCommission.0}</span>.{$totalCommission.1}<span class="font">元</span></p>
+                            </div>
+                            <div class="module right" id="gotCommission">
+                                <p class="tit">已发提成</p>
+                                <p class="cont">￥<span class="int-num">{$commission.0}</span>.{$commission.1}<span class="font">元</span></p>
+                            </div>	
+                        </div>
+                        <div class="m-gap"></div>
+                        <p class="list">
+                        	<i class="icon icon12"></i>
+                            <a href="{:U('Label/MyOrder/myCode',array('node_id'=>$node_id))}">
+                                我的推广二维码<i class="left-arrow"></i>
+                            </a>
+                        </p>
+                        <p class="list">
+                        	<i class="icon icon14"></i>
+                            <a href="{:U('Label/MyOrder/soldPercentage')}&node_id={$_SESSION['node_id']}">
+                                查看提成比例<i class="left-arrow"></i>
+                            </a>
+                        </p>
+                        <if condition="$commissionType eq '2' ">
+                            <p class="list" id="getBonus">
+                            	<i class="icon icon15"></i>
+                                <a href="javascript:;">申请提现<i class="left-arrow"></i></a>
+                            </p>
+                            <p class="list">
+                            	<i class="icon icon12"></i>
+                                <a href="{:U('Label/MyOrder/showGetBonus')}&node_id={$_SESSION['node_id']}">
+                                    查看提现明细<i class="left-arrow"></i>
+                                </a>
+                            </p>
+                        </if>
+                        <div class="m-gap"></div>
+                        <if condition="$customer eq '2' ">
+                        <p class="list">
+                        	<i class="icon icon15"></i>
+                            <a href="{$customerUrl}">
+                                我的客户<i class="left-arrow"></i>
+                                <span style='float:right;margin-right:30px;'>{$customerCount}人</span>
+                            </a>
+                        </p>
+                        </if>
+                        <p class="list">
+                        	<i class="icon icon16"></i>
+                            <a 
+                                <if condition="$_SESSION['twfxRole'] eq '1' ">
+                                    href="{:U('Label/MyOrder/distributionDetail',array('node_id'=>$node_id))}"
+                                <elseif condition="$_SESSION['twfxRole'] eq '2' " />
+                                    href="{:U('Label/MyOrder/myDistribution',array('node_id'=>$node_id))}"
+                                </if>>
+                            我的分销订单<i class="left-arrow"></i>
+                            </a>
+                        </p>
+                        <p class="list bindAlipay">
+                        	<i class="icon icon17"></i>
+                            <a href="javascript:;">绑定{$accountType}号
+                                <i class="left-arrow"></i>
+                                <span id='accountStatus' style='float:right;margin-right:30px;'>
+                                    <if condition="$account neq ' ' AND $account neq '' ">已绑定<else />未绑定</if>
+                                </span>
+                            </a>
+                        </p>
+                        <if condition="$_SESSION['twfxRole'] eq '2' ">
+                        <p class="list">
+                        	<i class="icon icon18"></i>
+                            <a href="{:U('Label/WfxShop/shopGoods',array('node_id'=>$node_id))}">
+                            订货<i class="left-arrow"></i>
+                            </a>
+                        </p>
+                        <p class="list">
+                        	<i class="icon icon7"></i>
+                            <a href="{:U('Label/WfxShop/bookOrder',array('node_id'=>$node_id))}">
+                            订货订单<i class="left-arrow"></i>
+                            
+                            <span id='accountStatus' style='float:right;margin-right:30px;'>
+                                {$bookCount}个待发货订单
+                            </span>
+                            </a>
+                        </p>
+                        <div class="m-gap"></div>
+                        <p class="list">
+                        	<i class="icon icon19"></i>
+                            <a href="{:U('Label/MyOrder/mySalerIndex',array('node_id'=>$node_id))}">销售员管理
+                                <i class="left-arrow"></i>
+                                <span id='accountStatus' style='float:right;margin-right:30px;'>
+                                    直管销售员<span>{$saleCount}</span>人
+                                </span>
+                            </a>
+                        </p>
+                        </if>
+                        <if condition="$_SESSION['twfxRole'] eq '2' AND $recruitStatus eq '1' ">
+                        <p class="list">
+                        	<i class="icon icon20"></i>
+                            <a href="{:U('Label/MyOrder/activityShare',array('node_id'=>$node_id))}">招募销售员
+                                <i class="left-arrow"></i>
+                            </a>
+                        </p>
+                        </if>
+                        <div class="m-gap last-gap" style="margin-bottom:50px;"></div>
+	<include file="Store:nav"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="aliAccount" value="{$account}"/>
+        <input type="hidden" name="bankName" value="{$bankName}" />
+        <input type="hidden" name="lowestMoney" value="{$lowestMoney}" />
+        <input type="hidden" name="accountType" value="{$accountType}" />
+        <script id="return_get" type="text/html">
+            <div class="m-bind" style="margin-top: 10px;">
+                <div class="m-input">
+                    <p class="s-line">您可提领的现金总额<span id="money">{$remain_amount}</span>元</p>
+                </div>
+                <p class="tip" style="margin-bottom:5%;">确认提领后，提成将在月底统一发放。</p>
+                <a class="m-btn" id="btn_get_return" href="javascript:;">确认提领</a>
+            </div>
+        </script>
+        <script type='text/javascript'>
+            var bankArray = {$bankArray};
+            function msgPop(msg) {
+                msgPopclose();
+                var html = ['<div class="msgPop">',
+                    '<div class="msgPopCon" style="left:0;">',
+                    '<a href="javascript:void(0)" class="close" onclick="msgPopclose()">+</a>',
+                    '' + msg + '',
+                    '</div>',
+                    '</div>'].join('');
+                $("body").append(html);
+            }
+
+            function msgPopclose() {
+                $(".msgPop").remove();
+            }
+            
+            var num = 0;
+            function inputAccount(){
+                var str = $('#aliaccount').val();
+                var elem = document.getElementById("aliaccount");
+                if(str.length > num){
+                    var c = str.replace(/\s/g,  ""); 					  
+                    if(str != "" && c.length > 4 && c.length % 4 == 1){
+                          $('#aliaccount').val(str.substring(0, str.length - 1)+ " " + str.substring(str.length - 1, str.length));
+                    }
+                }
+                if(elem.setSelectionRange){
+                    setTimeout(function(){
+                        elem.setSelectionRange(elem.value.length,elem.value.length);
+                        elem.focus();
+                    },0);
+                    }else if(elem.createTextRange){
+                        var textRange=elem.createTextRange();
+                        textRange.moveStart("character",elem.value.length);
+                        textRange.moveEnd("character",0);
+                        textRange.select();
+                    }
+                num = str.length;
+            }
+            
+            function bindAlipay(){
+                var aliAccount = $('input[name=aliAccount]').val();
+                var str = '<form id="bindform" name="bindform"><div class="cjForm">';
+                    str += '<div class="cjFormTitle"><span class="onlyTitle"><i class="tipIcon"></i>绑定{$accountType}号</span>';
+                    str += '<span class="tips" style="font-size:14px;">请确保您输入的{$accountType}号无误。</span></div><ul class="sOne-cjForm">';
+                var accountType = '{$accountType}';
+                if(accountType == '银行卡卡'){
+                    var bankName = $('input[name=bankName]').val();
+                    str += '<li><select style="color:#555555;" class="sOne-alipayInput" name="bankName" id="bankArray">';
+                    if(aliAccount == ''){
+                        str += '<option>请选择所属银行</option>';
+                    }
+                    for(var i=0;i < 23 ; i++){
+                        if(i==0){
+                            str += '<option selected="selected" value="'+bankArray[i]+'">'+bankArray[i]+'</option>';
+                        }else{
+                            str += '<option value="'+bankArray[i]+'">'+bankArray[i]+'</option>';
+                        }
+                    }
+//                    str += '<?php foreach($bankArray as $val){ $str = "<option "; if($bankName == $val){ $str .= "selected = selected "; }; $str .= "value=".$val.">".$val."</option>"; echo $str;} ?>';
+                    str +='</select></li><li><input style="border: solid 1px #bfbfbf;-webkit-border-radius: 5px;font-size:14px;" type="text" oninput="inputAccount()" name="aliaccount" id="aliaccount" class="sOne-alipayInput" value="'+aliAccount+'" placeholder="请输入{$accountType}号" /></li>';
+                }else{
+                    str +='<li><input style="font-size:14px;" type="text" name="aliaccount" id="aliaccount" class="sOne-alipayInput" value="'+aliAccount+'" placeholder="请输入{$accountType}号" /></li>';
+                }
+                str += '<input type="hidden" name="accountType" value="{$accountType}" />';
+                str +='<li class="pt20"><input type="button" name="but" id="but" value="立即绑定" class="btn-alipay-button" style="background:#ed3f41"/></li>';
+                str +='<li id="bind_error" class="tips"></li></ul></div></form>';
+                var html = [str].join('');
+                msgPop(html);
+                if(accountType == '银行卡卡'){
+                    inputAccount();
+                }
+                if(bankName != ''){
+                    $('#bankArray').find("option:selected").attr("selected",false);
+                    $('#bankArray option[value='+bankName+']').attr("selected",true);
+                }
+            }
+            
+            function alipayBind(){
+                var sub_url = "{:U('Label/MyOrder/bind')}";
+                var data = $('#bindform').serialize();
+                $.post(sub_url, data, function(resp) {
+                    if (resp.error != '0') {
+                        $('#bind_error').html(resp.msg);
+                    } else {
+                        $('input[name=aliAccount]').val(resp.account);
+                        $('input[name=bankName]').val(resp.bankName);
+                        if(resp.bankName != null){
+                            bankArray.splice($.inArray(resp.bankName, bankArray), 1);
+                            bankArray.unshift(resp.bankName);
+                        }
+                        msgPopclose();
+                        msgPop(resp.msg);
+                        var accountStatus = $('#accountStatus').html();
+                        if(accountStatus == '未绑定'){
+                            $('#accountStatus').html('已绑定');
+                        }
+                        setTimeout(function() {
+                            msgPopclose()
+                        }, 500);
+                    }
+                }, 'json');
+            }
+            
+            $(function() {
+                $('.bindAlipay').click(function() {
+                    bindAlipay();
+                    $('#but').click(function() {
+                        alipayBind();
+                    });
+                });
+                
+                $('#getBonus').click(function(){
+                    var getBonusAccount = $('input[name=aliAccount]').val();
+                    if(getBonusAccount == ''){
+                        msgPop('请先绑定{$accountType}信息！<br><a class="bindAlipay btn" >马上绑定</a>');
+                        $('.bindAlipay').click(function() {
+                            bindAlipay();
+                            $('#but').click(function() {
+                                alipayBind();
+                            });
+                        });
+                        return false;
+                    }
+                    msgPop($('#return_get').text());
+                    $('#btn_get_return').click(function(){
+                        var account = $('#money').html();
+                        var lowestMoney = $('input[name=lowestMoney]').val();
+                        if(account >= lowestMoney){
+                            $.post("{:U('Label/MyOrder/getBonus')}",{'account':account},function(data){
+                                data = eval("("+data+")");
+                                msgPop(data.msg);
+                                if(data.error == 0){
+                                    setTimeout(function(){location.reload();}, 1500);
+                                }
+                            });
+                        }else{
+                            msgPop('提成高于'+lowestMoney+'元才能申请提现。');
+                        }
+                    });
+                });
+                
+                $("body").keydown(function(e) {
+                    if(e && e.keyCode == 13){
+                        return false;
+                    }
+                });
+                
+                $("body").keyup(function(e) {
+                    if(e && e.keyCode == 13){
+                        return false;
+                    }
+                });
+                
+                $('#thisMonthCommission').click(function(){
+                    window.location.href = "{:U('Label/MyOrder/commissionDetails')}&node_id={$_SESSION['node_id']}"+'&type=thisMonth';
+                });
+                
+                $('#totalCommission').click(function(){
+                    window.location.href = "{:U('Label/MyOrder/commissionDetails')}&node_id={$_SESSION['node_id']}";
+                });
+                $('.viewtcDetail').click(function(){
+                    window.location.href = "{:U('Label/MyOrder/commissionDetails')}&node_id={$_SESSION['node_id']}";
+                });
+                
+                $('#gotCommission').click(function(){
+                    window.location.href = "{:U('Label/MyOrder/commissionDetails')}&node_id={$_SESSION['node_id']}"+'&type=got';
+                });
+            });
+        </script>
+    </body>
+</html>

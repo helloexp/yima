@@ -1,0 +1,1463 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>创建商品_旺财小店_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+
+<script>
+var discount = 0;
+var isopencusMsg = "{$startUp}"; //1：设置了短信内容自定义 0：未设置自定义
+$(function(){
+    if(isopencusMsg==1){
+            $(".nocusMsg").hide();
+            $(".cusMsg").show();
+        }else{
+            $(".nocusMsg").show();
+            $(".cusMsg").hide();
+        }
+    $("#selectShop").click(function(e){
+        art.dialog.open("{:U('WangcaiPc/NumGoods/shopList')}",{
+            title: '选择门店',
+            width:'800px'
+        });
+        //$(".newRadio-default").show();
+    });
+    
+    $("#editStore").click(function(){
+        art.dialog.open("{:U('WangcaiPc/NumGoods/shopList')}",{
+            title: '选择门店',
+            width:'800px'
+        });
+    });
+    //爱蒂宝上架门店选择
+    $("#chooseStore").click(function(){
+        art.dialog.open("{:U('Home/Store/storePopup')}",{
+            title: '选择门店',
+            width:'800px'
+        });
+    })
+    $("#edit_store").click(function(){
+        art.dialog.open("{:U('Home/Store/storePopup')}",{
+            title: '选择门店',
+            width:'800px'
+        });
+    });
+    
+    $("#theform").validationEngine();
+    var is_submit = false;
+    $("#sub_button").click(function(){
+        if($("#theform").validationEngine('validate')){
+            if(is_submit){return false;}
+            var dialog;
+            var price = [];
+            $(".skuTable [name='price']").each(function(index, element) {
+                var p = $(this).val();
+                var nid = $(this).attr("data-newid").split(",");
+                var sid = new Array();
+                var n = $(this).closest("tr").find("[name='num']").val();
+                $.each(nid,function(i,n){
+                    sid.push(n);
+                })
+                var arr = {
+                    newid:sid,
+                    price:p,
+                    num:n
+                };
+                price.push(arr);
+            });
+            data["price"] = price;
+
+            var minPrice = 0;
+            if(price.length > 0) {
+                $.each(price, function(i, d) {
+                    if(i == 0) {
+                        minPrice = d.price;
+                    }
+                    if(minPrice > d.price) {
+                        minPrice = d.price;
+                    }
+                });
+            } else {
+                minPrice = $("input[name='batchAmt']").val();
+            }
+
+            var sub_flag = true;
+            $.each($('.RuleItem li'), function(d) {
+                var disc = $(this).find('input').val();
+                if(parseFloat(minPrice) < parseFloat(disc)) {
+                    art.dialog.msg({content: "会员优惠价不可高于商品价格！"});
+                    sub_flag = false;
+                    return false;
+                }
+            });
+            if(!sub_flag) {
+                return false;
+            }
+
+            $('#data_price_info').val(JSON.stringify( data.price ));
+            $('#data_name_info').val(JSON.stringify( data.namelist ));
+            $('#rgoodsIds').val(cb_rgoodsinit().join(','));
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(arr, $form, options){
+                    $form["sku"] = data;
+                    is_submit = true;
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                 is_submit = false;
+                 if(data.status == '1'){
+                       all_art_close();
+                       $('#div_content').hide();
+                       window.location.href="{:U('GoodsInfo/successPage')}";
+                       return false;
+                  }else{
+                       dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                  }
+            },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+    $(".message-show").click(function(){
+        var message=$("#mms_text").val();
+        var html=
+        ['<div class="aipai-iphone">',
+          '<div class="aipai-iphone-text">',
+              message,
+          '</div>',
+          '</div>'].join('');
+          art.dialog({
+            padding: 20,
+            title: '短信预览',
+            content: html
+        });
+    });
+    $(".print-show").click(function(){
+        var message=$("#mms_text").val();
+        var html=['<img src="__PUBLIC__/Image/iphone_bg2_print.png" />'].join('');
+          art.dialog({
+            padding: 0,
+            title: '什么是小票内容？',
+            content: html,
+            width:690
+        });
+    });
+    $("body").on("click",".GsearchInput .closebtn",function(e){
+        var g = $(this).closest(".GsearchChoose");
+        $(this).closest("dd").remove();
+    });
+})
+//分组定义数组使用
+function addClassify(t){
+    var g = t.closest(".GsearchInput"),
+        c = g.find(".GsearchChoose"),
+        i = g.find(".input input"),
+        v = i.val(),
+        erro = 1,
+        isrepeat = 1;
+    $(c).find("dd").each(function(){
+        if($(this).find("span").text()==v){
+            erro = 2;
+            return false;
+        }
+    })
+    g.find(".GsearchVal dd:not('.nosearchVal')").each(function(){
+        if($(this).text()==v){
+            isrepeat = $(this).attr("data-val");
+            return false;
+        }
+    })
+    if(erro!=2){
+        var valid = "";
+        if(typeof(isrepeat)=="string"){valid = isrepeat};
+        var html = "<dd><input type='hidden' name='group[]' value='"+v+','+valid+"'><span>"+v+"</span><em class='closebtn'></em></dd>";
+        c.append(html);
+    }else{
+        Diaerror("已经存在该分组","","",false)
+    }
+    i.val("");
+}
+function openOrder(t){
+    var isorder = findorder();
+    var v = t.attr("data-val");
+    if(v==1){
+        //显示限制按钮
+        $('.goods_list').show();
+        $("#openOrder").hide();
+        if(isorder!=false || isorder===0){
+            data.namelist.splice(isorder,1);
+        }
+        $(".addsku").removeClass("hide");
+        begin(data);
+    }else{
+        if(data.namelist.length>=3){
+            t.closest(".newRadio").find("span[data-val='1']").click();
+            art.dialog.msg({content: '订购商品最多支持两个商品规格,您可以先删除一个商品规格后开启'});
+            return false;
+        }
+        //隐藏限制按钮
+        $('.goods_list').hide();
+        $("#openOrder").show();
+        var name = "月";
+        $("#dg2").val()==1&&(name="月");
+        $("#dg2").val()==2&&(name="周");
+        $("#dg2").val()==3&&(name="日");
+        if(isorder!=false || isorder===0){
+            data.namelist[isorder].name = name;
+            data.namelist[isorder].ordertype = $("#dg2").val();
+        }else{
+            data.namelist.push({
+                name:name,
+                ordertype:$("#dg2").val(),
+                list:[]
+            })
+        }
+        begin(data);
+    }
+}
+function openOrderTime(t){
+    var v = t.attr("data-val");
+    var name = "月";
+    v==1&&(name="月");
+    v==2&&(name="周");
+    v==3&&(name="日");
+    var isorder = findorder();
+    if(isorder!=false || isorder===0){
+        data.namelist[isorder].name = name;
+        data.namelist[isorder].ordertype = v;
+    }
+    begin(data);
+}
+function checkorder(field, rules, i, options){
+    var c = field.closest(".skuRuleAdd"),
+        v = field.val().replace(/\s/,""),
+        cid = parseInt(field.closest(".skuRule").attr("data-newid"));
+        for(var i=0;i<data.namelist.length;i++){
+            if(data.namelist[i].newid == cid ){
+                for(var j=0;j<data.namelist[i].list.length;j++){
+                    if(data.namelist[i].list[j].val==field.val()){
+                        return "该类型下您已经创建过一次'"+field.val()+"'了"
+                    }
+                }
+            }
+        }
+}
+function BuyNumFlag(field, rules, i, options){
+    var dayBuyNumFlag = parseInt($("[name='dayBuyNumFlag']").val());
+    var personBuyNumFlag = parseInt($("[name='personBuyNumFlag']").val());
+    var fristBuyNumFlag = parseInt($("[name='fristBuyNumFlag']").val());
+    var dayBuyNum = parseInt($("[name='dayBuyNum']").val());
+    var personBuyNum = parseInt($("[name='personBuyNum']").val());
+    var fristBuyNum = parseInt($("[name='fristBuyNum']").val());
+    var ischeck = (dayBuyNumFlag+personBuyNumFlag+fristBuyNumFlag) < 2 ? true : false;
+    if(!dayBuyNumFlag){dayBuyNum=99999999};
+    if(!personBuyNumFlag){personBuyNum=99999999};
+    if(!fristBuyNumFlag){fristBuyNum=0};
+    if(!ischeck){
+        if(fristBuyNum>dayBuyNum){return "起购数量需要小于每日限购";}
+        if(fristBuyNum>personBuyNum){return "起购数量需要小于每人限购";}
+    }
+    if(fristBuyNum>parseInt($("#salesNum").val())){return "起购数量需要小于出售数量";}
+}
+
+//微信粉丝专享
+function memJoin(t){
+    var val = t.attr("data-val");
+    if(val=='0'){return false;};
+    Diasucceed("正在验证...","","",false);
+    var checkWxFn = function(){
+            $.post("{:U('Ecshop/GoodsInfo/checkwxyx')}",{id:1},function (data) {
+                Diasucceed("验证成功","",0.1,false);
+                if(data.status!=1){
+                    Diamsg({
+                        content:'由于本功能需要<font color="red"><b>微信服务号</b></font>参与，<br />请在“微信助手”中绑定您的<font color="red"><b>微信服务号</b></font>。',
+                        ok:function(){
+                            Diamsg({
+                                content:'由于本功能需要<font color="red"><b>微信服务号</b></font>参与，<br />请在“微信助手”中绑定您的<font color="red"><b>微信服务号</b></font>。',
+                                ok:function(){
+                                    checkWxFn();
+                                },
+                                okVal:"绑定成功",
+                                cancelVal:"绑定失败",
+                                cancel:function(){
+                                    t.closest(".switch").find("span[data-val='0']").click();
+                                }
+                            });
+                            window.open("{:U('Weixin/Weixin/index',array('backUrl'=>1))}",'_blank');
+                        },
+                        okVal:"去设置",
+                        cancel:function(){
+                            t.closest(".switch").find("span[data-val='0']").click();
+                        }
+                    });
+                }
+            },'json');
+        }
+    checkWxFn();
+}
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <!--开始载入头部菜单--> 
+        <include file="Shop/nav" navmenuid="Navproduct"/>
+        <div id="container">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <include file="Goods/menu" leftmenuid="tjsp"/>
+                </div>
+                <div class="subcon">
+                <div id="div_content">
+                    <div class="main-name fn">
+                        <h4>添加商品</h4>
+                    </div>
+                    <div id="store_check">
+                        <form method="post" action="<?php echo U('Ecshop/GoodsInfo/addSumbit');?>" id="theform">
+                        <div class="Gform w1 fn <eq name='addStore' value='1'>dn</eq> fistForm">
+                            <div id="Wform">
+                                <ul class="Gtitle">商品基本内容</ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;商品名称</li>
+                                    <li class="Ginput"><input name="goodsName" id="name" type="text" class="validate[required]" maxlength="24" /><span class="maxTips forInput" data-max="24">0/24</span><span class="txtTips important">商品创建后名称无法修改</span></li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;商品图片</li>
+                                    <li class="Ginput">
+                                        <div class="Gchoosemore">
+                                            <div class="Gchoosemore-add">
+                                                <a href="javascript:void(0)" class="Gbtn-picmore" title="选择图片" data-rel="{width:640,height:400,type:1,menuType:1,maxlength:6,inputname:'goodsImg[]'}"><i></i><span>增加图片</span></a>
+                                            </div>
+                                        </div>
+                                        <span class="txtTips">第一张图片作为商品主图片；最多添加6张</span>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;商品编号</li>
+                                    <li class="Ginput"><input name="customerNo" id="" type="text" maxlength="24" /></li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;商品简述</li>
+                                    <li class="Ginput">
+                                        <textarea name="goodsDesc" maxlength="200"></textarea><span class="maxTips forArea" data-max="200">0/200</span>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;商品分组</li>
+                                    <li class="Ginput" style="z-index:11">
+                                        <div class="GsearchInput">
+                                            <div class="GsearchChoose"></div>
+                                            <div class="input">
+                                                <i class="icon-searchOk erro" data-callback="addClassify"><a href="javascript:void(0)" class="a-hide">确定</a></i>
+                                                <input name="classify" id="classify" type="text" maxlength="24" />
+                                                <div class="GsearchVal">
+                                                    <dl>
+                                                        <volist name="classify" id="vo">
+                                                        <dd data-val="{$vo.id}">{$vo.class_name}</dd>
+                                                        </volist>
+                                                        <dd class="nosearchVal dn">"回车"创建新分组</dd>
+                                                    </dl>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="txtTips">将上架的商品进行分组，有助于您对上架商品进行管理</span>
+                                    </li>
+                                </ul>
+                                <ul class="Gtitle">商品设置</ul>
+                                <if condition="$adb_flag eq 1">
+                                    <ul>
+                                        <li class="Gname">可上架门店</li>
+                                        <li class="Ginput">
+                                            <a class="btn_inner" href="javascript:void(0)" id="chooseStore">选择门店</a>
+                                            <input type="hidden" id="openStores" name="open_stores" value=""/>
+                                            <input type="hidden" id="store_id" name="store_id" value="{$store_id}"/>
+                                            <input type="hidden" id="adb_flag" name="adb_flag" value="{$adb_flag}"/>
+                                        </li>
+                                        <li>
+                                            <div class="newRadio-input">
+                                            <div class="sweet_tips2" id="htmlss">您总共选择了<span id="number">0</span>家门店&nbsp;&nbsp;<a href="javascript:void()" id="edit_store"  name="choose_shop">点击查看</a>&nbsp;&nbsp;默认发布至总店</div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </if>
+                                <ul>
+                                    <li class="Gname">&nbsp;商品规格</li>
+                                    <li class="Ginput">
+                                        <div class="skuForm">
+                                        </div>
+                                        <span class="txtTips">商品规格最多添加3个</span>
+                                    </li>
+                                </ul>
+                                <ul class="sku1">
+                                    <li class="Gname"><span>*</span>&nbsp;价格与库存</li>
+                                    <li class="Ginput">
+                                        <div class="fn skuTable"></div>
+                                        <span class="txtTips"></span>
+                                    </li>
+                                </ul>
+                                <ul class="sku2">
+                                    <li class="Gname"><span>*</span>&nbsp;商品价格</li>
+                                    <li class="Ginput">
+                                        <input name="batchAmt" type="text" class="l validate[required,custom[number],min[0]]" maxlength="10"/>
+                                        <span class="maxTips forInput">元</span>
+                                    </li>
+                                </ul>
+                                <notempty name="vipGroup">
+                                <ul>
+                                    <li class="Gname">&nbsp;会员优惠(分销员)</li>
+                                    <li class="Ginput">
+                                        <div class="RuleList">
+                                            <ul class="RuleItem">
+                                            </ul>
+                                            <a id="addRule" class="addRule" href="javascript:void(0)"><span class="plus">+</span> 添加优惠规则</a>
+                                        </div>
+                                    </li>
+                                </ul>
+                                </notempty>
+                                <ul class="isShowPrice">
+                                    <li class="Gname"><span>*</span>&nbsp;显示市场价</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="isShowPrice" value="0" checked="checked">
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">不显示</span>
+                                                <span class="vallast" data-val="1" id="date_type_1">显示</span>
+                                            </div>
+                                            <div class="newRadio-input">
+                                               <input type="text" name="marktPrice" class="validate[required,custom[number],min[0]]"  style="width:138px"><span class="maxTips forInput" style="left:415px;">元</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="sku2">
+                                    <li class="Gname"><span>*</span>&nbsp;出售数量</li>
+                                    <li class="Ginput">
+                                        <input name="salesNum" id="salesNum" type="text" maxlength="9" class="l validate[required,min[0],max[999999999],custom[integer]]" />
+                                        <span class="maxTips forInput">份</span>
+                                        <div class="cl"></div>
+                                        <span class="txtTips">出售数量不能超过999,999,999个</span>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;显示销量</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="isShowSalesNum" value="0" checked="checked">
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">否</span>
+                                                <span class="vallast" data-val="1">是</span>
+                                            </div>
+                                            <div class="newRadio-input">
+                                                <label style="margin-left:5px;margin-right:0px;">1：</label><input type="text" name="saleProportion" value="1" maxlength="3" class="validate[required,min[0],custom[integer]]" style="width:152px"><span class="maxTips forInput" style="left:415px;">倍</span>
+                                            </div>
+                                        </div>
+                                        <span class="txtTips">如显示销量设置1:2，则库存为1时，小店显示为2；每出售1份，小店显示库存减2</span>
+                                    </li>
+                                </ul>
+                                <php>if($is_cnpc_gx){</php>
+                                <ul>
+                                    <li class="Gname">&nbsp;所属商户</li>
+                                    <li class="Ginput">
+                                        <select name="merchantId" id="merchant_id">
+                                                <option value="">请选择</option>
+                                                <php>
+                                                    $parentArr = array_valtokey($merchantInfo,'id','merchant_name');
+                                                </php>
+                                                {:show_arr_opt($parentArr,'')}
+                                            </select>
+                                    </li>
+                                </ul>
+                                <php>}</php>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;出售时间</li>
+                                    <li class="Ginput">
+                                        <div class="Gtime2 fn l">
+                                            <input type="text" name="beginTime" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%m-%d 00:00:00'})" style="width:140px;">
+                                            <em>至</em>
+                                            <input type="text" name="endTime" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%m-%d 23:59:59'})" style="width:140px;">
+                                        </div>
+                                        <label class="ml10"><input name="isShowSalesTime" value="1" type="checkbox">显示销售时间</label>
+                                        <div class="cl"></div>
+                                        <span class="txtTips">商品会根据销售时间自动下架；选择显示销售时间，则在商品详情页会显示销售时间</span>
+                                    </li>
+                                </ul>
+                                <ul class="Gtitle">配送设置</ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;配送设置</li>
+                                    <li class="Ginput">
+                                        <div class="switch auto" data-callback="logistics">
+                                            <input type="checkbox" name="deliveryFlag" value="1" checked>
+                                            <input type="checkbox" name="storeFlag" value="1">
+                                            <div class="newRadio">
+                                                <span class="hover" data-val="1" data-showid="logistics1">物流配送</span>
+                                                <span data-val="1" data-showid="logistics2">门店提领</span>
+                                            </div>
+                                        </div>
+                                        <span class="txtTips">物流配送由商家配送给消费者；门店提领指发商品卡券给消费者，消费者凭商品卡券到店消费提领商品（或服务）</span>
+                                    </li>
+                                </ul>
+                                <ul id="logistics1">
+                                    <li class="Gnmae">*&nbsp;是否货到付款</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="deliPayFlag" id="" value="1" checked="checked" />
+                                            <div class="newRadio">
+                                                <span class="valfirst hover" data-val="0">否</span>
+                                                <span class="vallast" data-val="1">是</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <div id="logistics2" class="dn">
+                                <ul>
+                                    <li class="Gname"><span>*</span>卡券有效期</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="verifyTimeType" value="0" checked="checked">
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">按日期设置</span>
+                                                <span class="vallast" data-val="1" id="date_type_1">按天数设置</span>
+                                            </div>
+                                            <div class="cl"></div>
+                                            <div class="newRadio-default">
+                                                <div class="Gtime1 fn special mt10">
+                                                    <em class="em1">使用开始时间</em>
+                                                    <input type="text" name="verifyBeginDate" id="verify_begin_date" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'});" class="validate[required,condRequired[verify_begin_type1]]" maxlength="8">
+                                                </div>
+                                                <div class="Gtime1 fn special mt10">
+                                                    <em class="em1">使用结束时间</em>
+                                                    <input type="text" name="verifyEndDate" id="verify_end_date" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')||\\'%y-%M-%d\\'}'});" class="validate[required,condRequired[verify_begin_type1]]">
+                                                </div>
+                                                <span class="txtTips important">自定义验码开始的日期,如:"4月1号至6月1号"</span>
+                                            </div>
+                                            <div class="newRadio-input">
+                                               <div class="Gtime1 fn special mt10">
+                                                    <em class="em1">发送卡券后</em>
+                                                    <input name="verifyBeginDays" id="verify_begin_days" type="text" class="validate[required,custom[integer],condRequired[verify_begin_type2]]" value="{$begin_day}">
+                                                    <em class="em2">天开始使用</em>
+                                                </div>
+                                                <div class="Gtime1 fn special mt10">
+                                                    <em class="em1">发送卡券后</em>
+                                                    <input name="verifyEndDays" id="verify_end_days" type="text" class="validate[required,custom[integer],condRequired[verify_begin_type2]]" value="{$end_day}">
+                                                    <em class="em2">天结束使用</em>
+                                                </div>
+                                                <span class="txtTips important">自定义验码时间,如:"发送卡券后3天开始使用,5天结束使用"</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gnmae">&nbsp;是否支持送礼</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="sendGift" id="" value="1" checked="checked" />
+                                            <div class="newRadio">
+                                                <span class="valfirst hover" data-val="0">否</span>
+                                                <span class="vallast" data-val="1">是</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gnmae">&nbsp;可验证门店</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="shop" id="shop" value="1" checked="checked" />
+                                            <div class="newRadio">
+                                                <span class="valfirst hover" data-val="1">所有门店</span>
+                                                <span class="vallast" data-val="2" id="selectShop">指定门店</span>
+                                            </div>
+                                            <div class="cl fn"></div>
+                                            <div class="newRadio-input">
+                                                <div class="sweet_tips2" id="htmlss">您总共选择了<span id="number">0</span>家门店&nbsp;&nbsp;<a href="javascript:void()" id="editStore"  name="choose_shop">点击查看</a></div>
+                                            <input type="hidden" id="openStores" name="openStores" value=""/>
+                                            </div>
+                                        </div>
+                                        <p class="txtTips">注：仅限已安装核验终端的门店</p>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;卡券说明</li>
+                                    <li class="Ginput">
+                                        <textarea name="smsText" maxlength="200"></textarea><span class="maxTips forArea" data-max="200">0/200</span>
+                                        <p class="txtTips"><span class="red">短信内容</span>，商品提领卡券将通过短信发送给消费者，您可编辑短信内容</p>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;打印小票内容</li>
+                                    <li class="Ginput">
+                                        <textarea name="printText" id="print_text" class="validate[maxSize[100]]"></textarea>
+                                        <span class="maxTips forArea" data-max="100">0/100</span>
+                                        <span class="txtTips">编辑以上内容，可在消费者自提商品时，在打印小票上添加个性信息。<a href="javascript:void(0)" class="print-show">什么是小票内容?</a></span>
+                                    </li>
+                                </ul>
+                                <ul class="showSendtype cusMsg dn">
+                    <li class="Gname"><span>*</span>&nbsp;短信内容</li>
+                    <li class="Ginput">
+                        <textarea maxlength="40" name="cusMsg" id="cusMsg"  class="validate[required,maxSize[40]] Gview-cusMsg" placeholder="您收到哈根达斯100元代金券"></textarea>
+                        <span class="maxTips forArea" data-max="40">0/40</span>
+                    </li>
+                </ul>
+                                </div>
+                                <ul class="Gtitle">促销设置</ul>
+                                <!-- <ul>
+                                    <li class="Gname">参与红包优惠</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="bonusFlag" value="0" checked="checked">
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">否</span>
+                                                <span class="vallast" data-val="1">是</span>
+                                            </div>
+                                        </div>
+                                        <span class="txtTips">选择参与红包优惠，则消费者在线购买此商品时，可以使用红包抵用支付金额</span>
+                                    </li>
+                                </ul> -->
+                                <ul>
+                                    <li class="Gname">支持积分支付</li>
+                                    <li class="Ginput">
+                                        <div class="switch <if condition="$isIntergral neq true">disabled</if>">
+                                            <input type="radio" name="integralFlag" value="0" checked="checked">
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">否</span>
+                                                <span class="vallast" data-val="1">是</span>
+                                            </div>
+                                        </div>
+                                        <if condition="$isIntergral eq true"><span class="txtTips">选择支持积分支付，此商品即允许消费者使用积分来购买；<a href="{:U('Integral/Integral/integralRuleList/')}" target="_blank">点击查看积分支付规则</a></span></if>
+                                        <if condition="$isIntergral neq true"><span class="txtTips">您尚未开启积分支付功能，<a href="{:U('Integral/Integral/integralRuleList/')}" target="_blank">点击立即开通</a></span></if>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;每日限购</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="dayBuyNumFlag" value="0" checked="checked">
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">不限</span>
+                                                <span class="vallast" data-val="1" id="date_type_1">限制</span>
+                                            </div>
+                                            <div class="newRadio-input">
+                                                <input type="text" name="dayBuyNum" class="validate[required,min[0],custom[integer],funcCall[BuyNumFlag]]" style="width:152px"><span class="maxTips forInput" style="left:415px;">份</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;每人限购</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="personBuyNumFlag" value="0" checked="checked">
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">不限</span>
+                                                <span class="vallast" data-val="1" id="date_type_1">限制</span>
+                                            </div>
+                                            <div class="newRadio-input">
+                                                <input type="text" name="personBuyNum" id="personBuyNum" class="validate[required,min[0],custom[integer],funcCall[BuyNumFlag]]" style="width:152px"><span class="maxTips forInput" style="left:415px;">份</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;起购数量</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="fristBuyNumFlag" value="0" checked="checked">
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">不限</span>
+                                                <span class="vallast" data-val="1" id="date_type_1">限制</span>
+                                            </div>
+                                            <div class="newRadio-input">
+                                               <input type="text" name="fristBuyNum" class="validate[required,min[0],custom[integer],funcCall[BuyNumFlag]]" style="width:152px"><span class="maxTips forInput" style="left:415px;">份</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;购买对象</li>
+                                    <li class="Ginput">
+                                        <div class="switch" data-callback="memJoin">
+                                            <input type="radio" name="" value="0" checked="checked">
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">不限</span>
+                                                <span class="vallast" data-val="1">微信粉丝</span>
+                                            </div>
+                                            <div class="newRadio-input">
+                                                <label>如需允许新粉丝关注后购买，请配置<a href="/index.php?g=Weixin&m=Weixin&a=focus" target="_blank">关注引导页</a></label>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;关联商品</li>
+                                    <li class="Ginput">
+                                        <div class="re-good">
+                                            <div id="div_rgoods">
+                                            </div>
+                                            <a id="add_relationgoods" class="a-more" href="javascript:void(0)">+　添加关联商品</a>
+                                        </div>
+                                        <span class="txtTips">最多8个商品</span>
+                                    </li>
+                                </ul>
+                                <ul class="Gtitle">详情设置</ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;商品详情</li>
+                                    <li class="Ginput">
+                                        <div class="ueditorDiv" id="wap_tip">
+                                            <textarea name="wapInfo" id="wap_info" data-view="val,info,previewData" >{$goodsInfoEx.wap_info}</textarea>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <input type="hidden" value="" name="dataPriceInfo" id="data_price_info" />
+                                <input type="hidden" value="" name="dataNameInfo" id="data_name_info" /> 
+                                <input type="hidden" name="rgoodsIds" id="rgoodsIds" value="" />
+                                <input type="hidden" value="" name="countNum" id="count_num" /> 
+                                <ul>
+                                    <li class="Gname">&nbsp;</li>
+                                    <li class="Ginput">
+                                    <a href="javascript:void(0);" id="sub_button" class="btn-all">确认</a>
+                                    <a href="javascript:history.go(-1)" class="btn-all-del">取消</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+</div>
+<include file="./Home/Tpl/Public/Public_footer.html" />
+<div class="service"></div>
+</body>
+</html>
+<script>
+var newid = 1;
+var _rgoods_list = [];
+var data = {
+    cookiename:"",
+    cookielist:"",
+    length:function(){
+        var l = 0;
+        for(var i=0;i<data.namelist.length;i++){
+            if(data.namelist[i].list!=""){
+                l++;
+            }
+        }
+        if(l==0){l="";}
+        return l;
+    },
+    length2:function(){
+        var l = 0;
+        for(var i=0;i<data.namelist.length;i++){
+            if(data.namelist[i].list!=""){
+                l++;
+            }
+        }
+        return l+2;
+    },
+    length3:function(){
+        var l = 0;
+        if(data.namelist.length==1){
+            l = 0;
+        }else if (data.namelist.length==2){
+            l = data.namelist[1].list.length;
+        }else if (data.namelist.length==3){
+            if(data.namelist[2].list.length!=0){
+                l = data.namelist[1].list.length*data.namelist[2].list.length;
+            }else{
+                l = data.namelist[1].list.length;
+            }
+        }
+        if(l==0){l="";}
+        return l;
+    },
+    length4:function(){
+        var l = 0;
+        if (data.namelist.length==2){
+            l = 0;
+        }else if (data.namelist.length==3){
+            l = data.namelist[2].list.length;
+        }
+        if(l==0){l="";}
+        return l;
+    },
+    namelist:[],
+    price : []
+};
+
+//大部分修改预览
+$(document).ready(function(e){
+    var ue = UE.getEditor('wap_info',{
+        imageUrl:"{:U('LabelAdmin/Upfile/editoImageSave')}",
+        imagePath:"__UPLOAD__",
+        catcherUrl:"{:U('LabelAdmin/Upfile/getRemoteImage')}",
+        catcherPath:"__UPLOAD__",
+        initialFrameWidth:320,
+        initialFrameHeight:280
+    });
+    cookie();
+    begin(data);
+    $(".skuRuleAdd input").validationEngine();
+    //输入规则
+    $("body").on("change keyup click",".searchInput-edit input[type='text'],.skuRuleAdd input[type='text']",function(e){
+        var t = $(this),
+            i = t.closest(".input").find(".icon-skuOk"),
+            v = t.val(),
+            l = t.closest(".input").next("dl"),
+            erro = 1;
+        v=="" ? i.addClass("erro") : i.removeClass("erro");
+        if(e.keyCode != 13){
+            l.find("dd:not('.nodata')").each(function(index, element) {
+                var text = $(this).text();
+                text.indexOf(v)>=0 ? ($(this).removeClass("dn"),erro++) : $(this).addClass("dn");
+            });
+            erro>=7 ? l.height(200) : l.height(erro*26-26);
+            erro==1 ? (l.height(erro*26),l.find(".nodata").removeClass("dn")) : l.find(".nodata").addClass("dn");
+        }
+        if(e.keyCode == 13){
+            i.click();
+            return false;
+        }
+    });
+    //设置总库存:检测数值
+    $("body").on("change keyup click","input[name='allprice'],input[name='allnum']",function(e){
+        var t = $(this),
+            i = t.closest("td").find(".icon-skuOk"),
+            v = t.val();
+        v=="" ? i.addClass("erro") : i.removeClass("erro");
+    });
+    //设置总库存:确认
+    $("body").on("click",".skuOk-allprice:not('.erro'),.skuOk-allnum:not('.erro')",function(e){
+        var t = $(this),
+            h = t.hasClass("skuOk-allprice"),
+            i = t.closest("td").find("input"),
+            v = i.val();
+        if(h){
+            var r = /^[\-\+]?((([0-9]{1,3})([,][0-9]{3})*)|([0-9]+))?([\.]([0-9]+))?$/;
+            r = r.test(v);
+            if(r){
+                $("input[name='price']").val(v);
+            }else{
+                i.addClass("shopFormBannerAn");
+                setTimeout(function(){
+                    i.removeClass('shopFormBannerAn')
+                },1000);
+            }
+        }else{
+            var r = /^[\-\+]?\d+$/;
+            r = r.test(v);
+            if(r){
+                $("input[name='num']").val(v);
+                 $('#count_num').val($("input[name='num']").length*v);
+                $("#all").text("已设置的总库存为："+$("input[name='num']").length*v);
+            }else{
+                i.addClass("shopFormBannerAn");
+                setTimeout(function(){
+                    i.removeClass('shopFormBannerAn')
+                },1000);
+            }
+        }
+        t.addClass("erro");
+        i.val("");
+    });
+    //设置总库存:库存总数预览
+    $("body").on("change keyup","input[name='num']",function(e){
+        var l = 0;
+        $("input[name='num']").each(function(){
+            if(parseInt($(this).val())){
+                l += parseInt($(this).val());
+            }
+        })
+        $('#count_num').val(l);
+        $("#all").text("已设置的总库存为："+l);
+    });
+    //下拉菜单:点击dd
+    $("body").on("click",".valLsit dd:not('.nodata')",function(e){
+        $(".searchInput-edit").hide();
+        var t = $(this),
+            v = t.text(),
+            i = t.closest(".valLsit").prev(".input").find("input"),
+            ok = t.closest(".valLsit").prev(".input").find(".icon-skuOk");
+            i.val(v);
+            ok.removeClass("erro").click();
+    });
+    //下拉菜单:关闭
+    $("body").on("click",".valLsitclose",function(e){
+        $(this).closest(".searchInput-edit").hide();
+        $(this).closest(".skuRuleAdd").removeClass("edit");
+    });
+    //修改规则
+    $("body").on("click",".searchInput .icon-skuEdit,.searchInput>span",function(e){
+        $(".searchInput-edit").hide();
+        var t = $(this),
+            s = t.closest(".searchInput").find(".searchInput-edit"),
+            i = t.closest(".searchInput").find(".searchInput-edit input[type='text']");
+            s.show();
+            i.focus();
+    });
+    //规则删除
+    $("body").on("click",".icon-skuDel",function(e){
+        var t = $(this),
+            c = $(this).closest(".skuList"),
+            cid = parseInt(c.attr("data-newid"));
+        for(var i=0;i<data.namelist.length;i++){
+            if(data.namelist[i].newid == cid ){
+                data.namelist = data.namelist.slice(0,i).concat(data.namelist.slice(i+1,data.namelist.length))
+            }
+        }
+        begin(data);
+    });
+    //规则类别删除
+    $("body").on("click",".skuRuleItem i",function(e){
+        var t = $(this),
+            c = $(this).closest(".skuList"),
+            s = $(this).closest(".skuRuleItem"),
+            cid = parseInt($(this).closest(".skuRule").attr("data-newid")),
+            sid = parseInt(s.attr("data-newid"));
+            for(var i=0;i<data.namelist.length;i++){
+                if(data.namelist[i].newid == cid ){
+                    for(var j=0;j<data.namelist[i].list.length;j++){
+                        if(data.namelist[i].list[j].newid == sid ){
+                            data.namelist[i].list = data.namelist[i].list.slice(0,j).concat(data.namelist[i].list.slice(j+1,data.namelist[i].list.length))
+                        }
+                    }
+                }
+            }
+        begin(data);
+    });
+    //规则类别添加
+    $("body").on("click",".skuRuleAdd .skuRuleBtn",function(e){
+        $(".skuRuleAdd").removeClass("edit");
+        $(this).closest(".skuRuleAdd").addClass("edit");
+        $(this).closest(".skuRuleAdd").find("input").focus();
+    });
+    //规则确定
+    $("body").on("click",".searchInput-edit .icon-skuOk:not('.erro')",function(e){
+        var t = $(this),
+            e = t.closest(".searchInput-edit")
+            s = t.closest(".searchInput").find("span"),
+            i = t.closest(".input").find("input"),
+            v = i.val().replace(/\s/,""),
+            cid = parseInt($(this).closest(".skuList").attr("data-newid"));
+        if(v!=""){
+            s.text(v);
+            t.addClass("erro");
+            i.val("");
+            e.find("dl,dd").attr("style","");
+        };
+        e.hide();
+        for(var i=0;i<data.namelist.length;i++){
+            if(data.namelist[i].newid == cid ){
+                data.namelist[i].name = v
+            }
+        }
+        cookie(v,1);
+        begin(data);
+    });
+    //类别确定
+    $("body").on("click",".skuRuleAdd .icon-skuOk:not('.erro')",function(e){
+        var t = $(this),
+            c = $(this).closest(".skuRuleAdd"),
+            i = c.find("input"),
+            v = i.val().replace(/\s/,""),
+            cid = parseInt($(this).closest(".skuRule").attr("data-newid")),
+            isorder = findorder();
+            var pushList = {
+                id:"0",
+                val:v
+            }
+            if(!$(this).closest(".skuRuleAdd").find(".orderAddinput").validationEngine('validate')){
+                for(var i=0;i<data.namelist.length;i++){
+                    if(data.namelist[i].newid == cid ){
+                        data.namelist[i].list.push(pushList)
+                    }
+                }
+            }else{
+                return false;
+            }
+            t.addClass("erro");
+            c.removeClass("edit");
+            cookie(v,2);
+            begin(data);
+    });
+    
+    //类别确定
+    $("body").on("click",".skuRuleAdd .icon-skuOk.erro",function(e){
+        var t = $(this),
+            c = $(this).closest(".skuRuleAdd");
+            t.addClass("erro");
+            c.removeClass("edit");
+    });
+    //添加规则
+    $("body").on("click",".addsku",function(e){
+        if(data.namelist.length>=3){
+            return false;
+        }else{
+            var pushList = {
+                id:"0",
+                name:"",
+                list:[]
+            }
+            data.namelist.push(pushList);
+            begin(data);
+            $(".skuList:last").find(".searchInput .icon-skuEdit").click();
+            $(".skuList").each(function(index, element) {
+                var z = 10-index;
+                $(this).css("z-index",z);
+            });
+        }
+    });
+
+    //添加会员优惠规则
+    $("body").on("click",".addRule",function(e){
+        var html = template("discountList");    
+        $(".RuleItem").append(html);
+        discount = discount + 1;
+        if(discount >= 3) {
+            $("#addRule").hide();
+        }
+    });
+    //删除会员优惠规则
+    $("body").on("click",".delRule",function(e){
+        var _t = $(this).closest("li");
+        _t.detach();
+        discount = discount - 1;
+        if(discount < 3) {
+            $("#addRule").show();
+        }
+    });
+    //控制相同会员等级不可多次选择
+    $("body").on("click", ".discountSel", function(e) {
+        var sel_id = $(this).val();
+        if(sel_id != '') {
+            $(this).find("option").removeAttr("selected");
+            var sel_flag = selJudge(sel_id);
+            if(!sel_flag) {
+                art.dialog.msg({content: '该会员类型已存在优惠价，请选择其它的会员类型！'});
+                $(this).find("option[value='']").attr("selected", "selected");
+            } else {
+                $(this).find("option[value='"+sel_id+"']").attr("selected", "selected");
+            }
+        }
+    });
+
+    $("body").on("focus","input[name='price']",function(){
+        $("input[name='price']").prev(".formError").remove();
+    });
+
+    //关联商品    
+    $('#add_relationgoods').click(function(){
+        var store_id=$("#store_id").val();
+        var adb_flag=$("#adb_flag").val();
+        if(adb_flag==1){
+            var url = "{:U('GoodsPutOn/SelectRgoods',array('cb_init'=>'cb_rgoodsinit', 'cb_rgoodsadd'=>'cb_rgoodsadd', 'is_sku'=>'is_sku', 'cb_rgoodsdel'=>'cb_rgoodsdel'))}&store_id="+store_id;
+        }else{
+            var url = "{:U('GoodsPutOn/SelectRgoods',array('cb_init'=>'cb_rgoodsinit', 'cb_rgoodsadd'=>'cb_rgoodsadd', 'is_sku'=>'is_sku', 'cb_rgoodsdel'=>'cb_rgoodsdel'))}";
+        }
+       art.dialog.open(url,{
+            width: 800,
+            title:'选择商品',
+            id: 'selectjp'
+        }) 
+    });
+});
+function selJudge(s_id)
+{
+    var flag = true;
+    $.each($(".discountSel"), function(k) {
+        if((k+1) < discount) {
+            if($(this).val() == s_id) {
+                flag = false;
+            }
+        }
+    });
+    return flag;
+}
+function cookie(v,type){
+    if(v){var v=v}else{var v="";};
+    var cookiename = "颜色,尺寸,尺码,规格,款式,净含量,种类,内存";
+    var cookielist = "";
+    if(!$.cookie('shopsku')){
+        $.cookie('shopsku',cookiename+"||"+cookielist, { expires: 365 });
+        cookiename = $.cookie('shopsku').split("||")[0].split(",");
+        cookielist = $.cookie('shopsku').split("||")[1].split(",");
+        data.cookiename = cookiename;
+        data.cookielist = cookielist;
+    }else{
+        cookiename = $.cookie('shopsku').split("||")[0];
+        cookielist = $.cookie('shopsku').split("||")[1];
+        if(v){
+            if(type==1){
+                if(cookiename.indexOf(v)<0){
+                    cookiename = cookiename + "," + v
+                };
+            }else{
+                if(cookielist.indexOf(v)<0){
+                    if(cookielist!=""){
+                        cookielist = cookielist + "," + v;
+                    }else{
+                        cookielist = v;
+                    }
+                }
+            }
+            $.cookie('shopsku',cookiename+"||"+cookielist, { expires: 365 });
+        };
+        cookiename = $.cookie('shopsku').split("||")[0].split(",");
+        cookielist = $.cookie('shopsku').split("||")[1].split(",");
+        data.cookiename = cookiename;
+        data.cookielist = cookielist;
+    };
+}
+function findorder(){
+    var isorder = false;
+    for(var i=0;i<data.namelist.length;i++){
+        if(data.namelist[i].ordertype){
+            if(data.namelist[i].ordertype==0){
+                data.namelist[i].ordertype=false;
+            }else{
+                isorder = i
+                break;
+            }
+        }
+    }
+    return isorder
+}
+function begin(data){
+    var isorder = findorder();
+    if(data.namelist.length!=0){
+        $(".sku1").show();
+        $(".sku2,.isShowPrice").hide();
+        for(var i=0;i<data.namelist.length;i++){
+            var namelist = data.namelist[i];
+            namelist["newid"] = newid;
+            newid++;
+            if(namelist.list!=""){
+                for(var j=0;j<namelist.list.length;j++){
+                    var list = namelist.list[j];
+                    list["newid"] = newid;
+                    newid++;
+                }
+            }
+        }
+        if(isorder!=false || isorder===0){
+            var newdata = data.namelist;
+            data.namelist = data.namelist.slice(0,isorder).concat(data.namelist.slice(isorder+1,data.namelist.length));
+            data.namelist.push(newdata[isorder]);
+        }
+    }else{
+        $(".sku1").hide();
+        $(".sku2,.isShowPrice").show();
+    };
+    isorder = findorder();
+    data["erromsg"] = "";
+    for(var i=0;i<data.namelist.length;i++){
+        if(data.namelist[i]){
+            if(data.namelist[i].name == ""){
+                data["erromsg"] = "您的第"+i+"项sku未设置，无法显示价格与库存";
+                if(data.namelist[i].ordertype){
+                    data["erromsg"] = "您的订购周期未设置，无法显示价格与库存";
+                }
+                break;
+            }else{
+                if(data.namelist[i].list.length == 0){
+                    data["erromsg"] = '您的"'+data.namelist[i].name+'"未设置，无法显示价格与库存';
+                    if(data.namelist[i].ordertype){
+                        data["erromsg"] = "您的订购周期未设置，无法显示价格与库存";
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    var html = template("skuList",data);
+    var html2 = template("skuTable",data);
+    if(isorder!=false || isorder===0){
+        var html3 = template("skuOrderRule",data.namelist[isorder]);
+        $(".skuOrderRule").html(html3);
+    }
+    $(".skuForm").html(html);
+    $(".skuTable").html(html2);
+    $(".skuList").each(function(index, element) {
+        var z = 10-index;
+        $(this).css("z-index",z);
+    });
+    $("input[name='price']").each(function(index, element) {
+        var t = $(this),
+            id = t.attr("data-id");
+        for(var i=0;i<data.price.length;i++){
+            if(data.price[i].id.toString()==id){
+                t.val(data.price[i].price);
+                data.price[i]["newid"]=t.attr("data-newid");
+            }
+        }
+    });
+    $("input[name='num']").each(function(index, element) {
+        var t = $(this),
+            id = t.attr("data-id");
+        for(var i=0;i<data.price.length;i++){
+            if(data.price[i].id.toString()==id){
+                t.val(data.price[i].num);
+            }
+        }
+    });
+    if(isorder!=false || isorder===0){
+        $("[name='allnum']").attr("disabled",true);
+        $("[name='num']").attr("disabled",true);
+        $('#count_num').val('-1');
+        $("#all").html("<p class='red'>开启订购功能后，商品库存全部为不限</p>");
+    }else{
+        var l = 0;
+        $("input[name='num']").each(function(){
+            if(parseInt($(this).val())){
+                l += parseInt($(this).val());
+            }
+        })
+        $('#count_num').val(l);
+        $("#all").text("已设置的总库存为："+l);
+    }
+    if(data.namelist.length>=3){
+        $(".addsku").addClass("hide");
+    }else{
+        $(".addsku").removeClass("hide");
+    }
+}
+
+function logistics(t){
+    var showid = t.attr("data-showid");
+    t.hasClass("hover")?$("#"+showid).show():$("#"+showid).hide();
+}
+//关联商品
+function refresh_rgoods(){
+    var html = '', i=1
+    for(k=0; k<_rgoods_list.length; k++){
+        var id = _rgoods_list[k].id
+        var name = _rgoods_list[k].goods_name
+        var image = _rgoods_list[k].goods_image
+        html += '<p data-val="'+id+'">关联商品'+i+'.　<a href="javascript:void(0)" data-view="text,otherdata'+i+',previewData">'+name+'</a><i class="icon-delother" onclick="rgoods_delete('+id+')"></i><img src="'+image+'" class="dn" data-view="src,otherimg'+i+',previewData" /></p>';
+        i++;
+    }
+    $('#div_rgoods').html(html);
+    windowheight();
+}
+function rgoods_delete(id){
+    for(i = 0; i < _rgoods_list.length; i++){
+        if(_rgoods_list[i].id == id){
+            _rgoods_list.splice(i,1)
+            refresh_rgoods()
+            break;
+        }
+    }
+}
+function clear_rgoodsinit(){
+    _rgoods_list = [];
+	$('#div_rgoods').html("");
+}
+function cb_rgoodsinit(){
+    var arr = [];
+    for(i = 0; i<_rgoods_list.length; i++)
+        arr.push(_rgoods_list[i].id);
+    return arr;
+}
+function cb_rgoodsadd(data){
+    _rgoods_list.push(data)
+    refresh_rgoods()
+    return cb_rgoodsinit()
+}
+function cb_rgoodsdel(data){
+    for(i=0; i<_rgoods_list.length; i++){
+        if(_rgoods_list[i].id == data.id){
+            _rgoods_list.splice(i,1)
+            refresh_rgoods()
+            break;
+        }
+    }
+
+    return cb_rgoodsinit();
+}
+</script>
+
+<script id="skuList" type="text/html">
+{{each namelist}}
+{{if !value.ordertype}}
+<div class="skuList" data-id="{{value.id}}" data-newid="{{value.newid}}">
+    <div class="skuListHead fn">
+        <i class="icon-skuDel r"><a href="javascript:void(0)" class="a-hide">删除</a></i>
+        <div class="searchInput">
+            <span data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.name}}</span>
+            <i class="icon-skuEdit">
+                <a href="javascript:void(0)" class="a-hide">修改</a>
+            </i>
+            <div class="searchInput-edit dn">
+                <div class="input">
+                <input type="text" maxlength="6">
+                    <i class="icon-skuOk erro">
+                        <a href="javascript:void(0)" class="a-hide">修改</a>
+                    </i>
+                </div>
+                <dl class="valLsit">
+                    {{each cookiename}}
+                    <dd>{{value}}</dd>
+                    {{/each}}
+                    <dd class="nodata dn">"回车"创建临时规格</dd>
+                </dl>
+                <div class="valLsitclose"></div>
+            </div>
+        </div>
+    </div>
+    <div class="skuCon fn">
+        <div class="skuRule" data-newid="{{value.newid}}">
+            {{each value.list}}
+            <div class="skuRuleItem" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}<i></i></div>
+            {{/each}}
+            <div class="skuRuleAdd">
+                <div class="input">
+                    <input type="text" maxlength="8" class="validate[required,funcCall[checkorder]] orderAddinput">
+                    <i class="icon-skuOk erro">
+                        <a href="javascript:void(0)" class="a-hide">修改</a>
+                    </i>
+                </div>
+                <dl class="valLsit">
+                    {{each cookielist}}
+                    <dd>{{value}}</dd>
+                    {{/each}}
+                    <dd class="nodata dn">"回车"创建临时类别</dd>
+                </dl>
+                <div class="valLsitclose"></div>
+                <div class="skuRuleBtn">
+                    <i></i>添加类型
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}
+{{/each}}
+<div class="addsku">
+    <i></i>
+    <span>添加规格</span>
+</div>
+</script>
+
+<script id="skuRuleItem" type="text/html">
+<div class="skuRuleItem">{{name}}<i></i></div>
+</script>
+
+<script id="skuTable" type="text/html">
+{{if erromsg!=""}}
+    <p class="erro">{{erromsg}}</p>
+{{else}}
+    <table cellpadding="0" cellspacing="0" class="sku-table">
+        <tr>
+        {{each namelist}}
+            {{if value.list!=""}}<th data-id="{{value.id}}" data-newid="{{value.newid}}">{{if value.ordertype}}订购周期{{else}}{{value.name}}{{/if}}</th>{{/if}}
+        {{/each}}
+            <th width="123" >原价(元)</th>
+            <th width="123" >商品总数</th>
+        </tr>
+        <tr>
+            <td colspan="{{length}}" class="top">批量设置</td>
+            <td class="top"><input type="text" name="allprice" /><i class="icon-skuOk skuOk-allprice erro"><a href="javascript:void(0)" class="a-hide">确定</a></i></td>
+            <td class="top"><input type="text" name="allnum" placeholder="请输入数字" /><i class="icon-skuOk skuOk-allnum erro"><a href="javascript:void(0)" class="a-hide">确定</a></i></td>
+        </tr>
+        <tr>
+        {{if namelist.length == 1}}
+            {{each namelist[0].list as value j}}
+            <tr>
+                <td rowspan="{{length3}}" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}{{if namelist[0].ordertype}}{{if namelist[0].ordertype==1}}个{{/if}}{{namelist[0].name}}{{/if}}</td>
+                <td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /></td>
+                <td><input type="text" name="num" class="validate[required,custom[integer],max[99999],min[0]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /></td>
+            </tr>
+            {{/each}}
+        {{/if}}
+        {{if namelist.length == 2}}
+            {{each namelist[0].list as value j}}
+            <tr>
+                <td rowspan="{{length3}}" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}{{if namelist[0].ordertype}}{{if namelist[0].ordertype==1}}个{{/if}}{{namelist[0].name}}{{/if}}</td>
+                    {{each namelist[1].list as value1 j}}
+                        <td rowspan="{{length4}}" data-id="{{value1.id}}" data-newid="{{value1.newid}}">{{value1.val}}{{if namelist[1].ordertype}}{{if namelist[1].ordertype==1}}个{{/if}}{{namelist[1].name}}{{/if}}</td>
+                        <td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}},{{value1.id}}"  data-newid="{{value.newid}},{{value1.newid}}" /></td>
+                        <td><input type="text" name="num" class="validate[required,custom[integer],max[99999],min[0]]" data-id="{{value.id}},{{value1.id}}"  data-newid="{{value.newid}},{{value1.newid}}" /></td>
+                        </tr>
+                    {{/each}}
+            {{/each}}
+        {{/if}}
+        {{if namelist.length == 3}}
+            {{each namelist[0].list as value j}}
+            <tr>
+                <td rowspan="{{length3}}" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}{{if namelist[0].ordertype}}{{if namelist[0].ordertype==1}}个{{/if}}{{namelist[0].name}}{{/if}}</td>
+                    {{each namelist[1].list as value1 j}}
+                        <td rowspan="{{length4}}" data-id="{{value1.id}}" data-newid="{{value1.newid}}">{{value1.val}}{{if namelist[1].ordertype}}{{if namelist[1].ordertype==1}}个{{/if}}{{namelist[1].name}}{{/if}}</td>
+                            {{each namelist[2].list as value2 j}}
+                                <td data-id="{{value2.id}}" data-newid="{{value2.newid}}">{{value2.val}}{{if namelist[2].ordertype}}{{if namelist[2].ordertype==1}}个{{/if}}{{namelist[2].name}}{{/if}}</td>
+                                <td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}},{{value1.id}},{{value2.id}}"  data-newid="{{value.newid}},{{value1.newid}},{{value2.newid}}" /></td>
+                                <td><input type="text" name="num" class="validate[required,custom[integer],max[99999],min[0]]" data-id="{{value.id}},{{value1.id}},{{value2.id}}"  data-newid="{{value.newid}},{{value1.newid}},{{value2.newid}}" /></td>
+                                </tr>
+                            {{/each}}
+                    {{/each}}
+            {{/each}}
+        {{/if}}
+        <tr>
+            <td colspan="{{length2}}" id="all">{{allnum}}</span></td>
+        </tr>
+    </table>
+{{/if}}
+</script>
+
+<script id="skuOrderRule" type="text/html">
+<div class="skuRule" data-newid="{{newid}}">
+    {{each list as value i}}
+    <div class="skuRuleItem" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}{{if ordertype==1}}个{{/if}}{{name}}<i></i></div>
+    {{/each}}
+    <div class="skuRuleAdd">
+        <div class="input">
+            <input type="text" maxlength="3" class="validate[required,custom[integer],min[1],funcCall[checkorder]] orderAddinput">
+            <i class="icon-skuOk erro">
+                <a href="javascript:void(0)" class="a-hide">修改</a>
+            </i>
+        </div>
+        <div class="skuRuleBtn">
+            <i></i>添加订购周期
+        </div>
+    </div>
+</div>
+</script>
+
+<script id="discountList" type="text/html">
+<li>
+    <div>
+        <select class="discountSel validate[required]" name="discountType[]">
+            <option value="">请选择会员等级</option>
+            <php>foreach($vipGroup as $k=>$v) {</php>
+            <option value="{$k}">{$v}</option>
+            <php>}</php>
+        </select>
+    </div>
+    <div>
+        <label>减</label>
+        <input type="text" name="discountPrice[]" class="validate[required,custom[number],min[0.1]]" />
+        <span>元</span>
+    </div>
+    <a class="delRule" href="javascript:void(0);">删除</a>
+</li>
+</script>

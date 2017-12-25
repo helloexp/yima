@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>翼码旺财注册__{:C('SITE_TITLE')}</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wdefault.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/artDialog6/ui-dialog.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.nivo.slider.pack.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wdefault.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog6/dialog-min.js"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<style>
+	.correct{visibility:hidden;margin-right:20px;color:#51dc14;font-size:20px;font-weight:bold;}
+</style>
+<script type="text/javascript">
+    $(function(){
+    	$("#sub_button").click(function(){
+			if($("#regform").validationEngine('validate')){
+	            $("#regform").ajaxSubmit({
+	                success:function(data){
+	                 	if(data.status == '1'){
+						   	window.location.href="{:U('Home/AccountInfo/finishResult')}";
+	                       	return false;
+	                  	}else{
+	                       	art.dialog.alert(data.info);
+	                       	return false;
+	                  	}
+	            	},
+	                dataType:'json'
+	            });
+	            return false;
+	        }
+		});
+    	// 初始化城市信息
+        CityCode({
+            'province_code':$('#province_code'),
+            'city_code':$('#city_code'),
+            'selected':'{$_SESSION["province_code"]}',
+            'url':"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+        });
+    });
+</script>
+</head>
+<body>
+
+<div id="wrapper">
+	<include file="Public:loginHeader"/>
+	<div id="container">
+		<div id="main">
+			<p class="reg-title">完善注册信息</p>
+			<form action="{:U('Home/AccountInfo/finishReg')}" method="post" name="regform" id="regform">
+			<div class="reg-wrap mt15 mb30">
+				<table>
+					<tr>
+						<td class="l-info">登录信息</td>
+						<td class="r-info">
+							<table class="input-table">
+								<tr>
+									<td class="reg-item-tit"><span>*</span>用户名</td>
+									<td class="reg-item-input"><input type="text" disabled="disabled" readonly="readonly" style="ime-mode:disabled" value="{$username}"/></td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr>
+									<td class="reg-item-tit"><span>*</span>输入新密码</td>
+									<td class="reg-item-input"><input placeholder="请填写您的新登录密码" class="validate[required,minSize[6],maxSize[16]]" name="newPassword" id="newPassword"  type="password"/></td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr><td colspan="3" style="padding:10px 0 0;"><div class="b-bottom"></div></td></tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td class="l-info">企业信息</td>
+						<td class="r-info">
+							<table class="input-table">
+								<tr>
+									<td class="reg-item-tit"><span>*</span>企业名称</td>
+									<td class="reg-item-input"><input type="text" disabled="disabled" readonly="readonly" value="{$nodeName}"/></td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr>
+									<td class="reg-item-tit"><span>*</span>姓名</td>
+									<td class="reg-item-input"><input name="contact_name" id="contact_name" class="validate[required]" type="text" placeholder="请填写您的姓名" value="" /></td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr>
+									<td class="reg-item-tit"><span>*</span>邮箱</td>
+									<td class="reg-item-input rel">
+										<input name="contact_eml" id="contact_eml" type="text" placeholder="请填写您的邮箱" class="validate[required,custom[email]]" value=""/>
+										<div class="veryfy-win" id="veryfy-win">
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td class="reg-item-tit"><span>*</span>所在城市</td>
+									<td class="reg-item-input">
+										<select name="province_code" id="province_code"  class="validate[required] ml30">
+											<option value="">请选择</option>
+											<php>
+                                				$provinceArr = array_valtokey($provinceInfo,'province_code','province');
+                            				</php>
+                            				{:show_arr_opt($provinceArr,$_SESSION['province_code'])}
+										</select>
+										<select name="city_code" id="city_code" class="validate[required] ml25">
+											<option value="">请选择</option>
+										</select>
+									</td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr><td colspan="3" style="padding:10px 0 0;"><div class="b-bottom"></div></td></tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div class="tc mt25 mb30"><input type="button" id="sub_button" class="btn-all w200" value="确定" /></div>
+			</form>
+		</div>
+	</div>
+	<include file="./Home/Tpl/Public/Public_footer.html" />
+	<include file="Public:login"/>
+</div>
+</body>
+</html>
+<script type="text/javascript" src="__PUBLIC__/Js/visit_log.js?v=__VR__"></script>

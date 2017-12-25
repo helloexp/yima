@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{:L('DA_PAO')}总动员</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20150218.css?v=2015021001">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.new.js?v=__VR__"></script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+    	<div id="main">
+        	<div id="header">
+            	<img src="__PUBLIC__/Label/Image/20150218/headerbg2.jpg" class="headerbg1" />
+            </div>
+            <div class="page1">
+            	<h3><span>为您的企业加油</span></h3>
+                <div class="bddashed"><p class="tc">您支持的{$node_name}当前排名</p><p class="tc">第<a>{$my_rank}</a>位</p></div>
+            </div>
+            <div class="page1">
+            	<h3>
+                    <volist name="community_arr" id="vo">
+                	    <span class="{:$vo['community_id']==$_GET['community_id']?'':'erro'}"><a href="{:U('',array('community_id'=>$vo['community_id'],'id'=>$id))}">{$vo['community_name']}</a></span>
+                    </volist>
+                </h3>
+                <div id="orderList1" class="orderList">
+                	<ul id="masonry">
+                        <volist name="ranking_list" id="vo" key="k">
+                            <php>
+                                $kk = ($_GET['p']-1)*10+$k;
+                                $spanClass = array(1=>'one','two','three');
+                                $spanClass = isset($spanClass[$kk])?$spanClass[$kk]:'other';
+                            </php>
+                            <li class="box"><span class="{$spanClass}">{$kk}</span><img src="{$vo.head_photo}" /><p class="l">{$vo.node_name}</p><p class="r"><a>{$vo.total_score}</a>金币</p></li>
+
+                        </volist>
+
+                        <nav id="page-nav">
+                            <notemtyp name="nextPageUrl">
+                            <a href="{$nextPageUrl}" class="btn-more load">加载更多企业</a>
+                            </notemtyp>
+                        </nav>
+                    </ul>
+                </div>
+            </div>
+            <div class="page3 ptb20">
+                <p class="tc">去赚取更多金币，冲击大奖，<br />冲击官方排行榜吧！</p>
+                <p class="tc"><a href="javascript:void(0);" class="btn-all w180 btnshow">邀好友，赚金币</a></p>
+                <p class="tc">邀请<a>1</a>名好友就可以获得<a>1</a>局{:L('DA_PAO')}机会，<br />赶紧去邀请吧！</p>
+                <p class="tc pt20"><a href="{:U('index',array('id'=>$id))}" class="btn-gohome">返回首页</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    $('#masonry').infinitescroll({
+        navSelector  : '#page-nav',    // selector for the paged navigation 
+        nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
+        itemSelector : '.box',     // selector for all items you'll retrieve
+		loadingImg   : '__PUBLIC__/Label/Image/Item/loading.gif',
+        loading: {
+            	finishedMsg: '没有更多数据了',
+            	loadingImg: '__PUBLIC__/Label/Image/Item/loading.gif'
+			}
+	});
+	$(window).unbind('.infscr');
+	$('a.btn-more').click(function(){
+		$(document).trigger('retrieve.infscr');
+		return false;
+	});
+	$(document).ajaxError(function(e,xhr,opt){
+		if(xhr.status==404)$('a.btn-more').remove();
+	});
+});
+</script>

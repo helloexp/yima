@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>优惠管理_翼惠宝</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wyhb.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        .W-table th{
+            position:relative;
+            margin-left: 10px;
+        }
+    </style>
+    <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+    <js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+    <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+    $(function(){
+        $("#sub_button").click(function(){
+            $("#down_type").val("");
+            $("#theform").submit();
+        });
+    });
+    var _sel_street_info = "{:I('town_code')}",
+            _sel_street_code = "{:I('street_code')}",
+            _sel_village_code = "{:I('village_code')}";
+    $(document).ready(function(e) {
+        $("#street_info").change(function(){
+            var town_code=$(this).val();
+            $.post("{:U('Yhb/YhbStore/street_info')}",{"town_code":town_code},function(data){
+                if(data.status =='0'){
+                    $(".street_option").remove();
+                    $(".village_option").remove();
+//                    alert(data.info);
+                }else{
+                    $("#street_code").find(".street_option").remove();
+                    $("#village_code").find(".village_option").remove();
+                    $(data.info).each(function(index,item){
+                        $("#street_code").append("<option class='street_option' value='"+item.street_code+"'>"+item.street+"</option>");
+                    });
+                    if(_sel_street_code){
+                        $("#street_code").val(_sel_street_code).trigger('change');
+                        _sel_street_code = '';
+                    }
+                }
+            },'json');
+        });
+        $("#street_code").change(function(){
+            var street_code=$(this).val();
+            $.post("{:U('Yhb/YhbStore/village_info')}",{"street_code":street_code},function(data){
+                if(data.status =='0'){
+                    $(".village_option").remove();
+//                    alert(data.info);
+                }else{
+                    $("#village_code").find(".village_option").remove();
+                    $(data.info).each(function(index,item){
+                        $("#village_code").append("<option class='village_option' value='"+item.village_code+"'>"+item.village+"</option>");
+                    });
+                    if(_sel_village_code){
+                        $("#village_code").val(_sel_village_code);
+                        _sel_village_code = '';
+                    }
+                }
+            },'json');
+        });
+
+        if(_sel_street_info != ''){
+            $('#street_info').val(_sel_street_info).trigger('change');
+        }
+        $(".jiantou_up").click(function(){
+            $("#order_sort").val("1");
+            $("#theform").submit();
+        });
+        $(".jiantou_down").click(function(){
+            $("#order_sort").val("2");
+            $("#theform").submit();
+        });
+    });
+function statusChange(goods_id,status){
+        var title="您确认下线该优惠？";
+    art.dialog.confirm(title,function(){
+        $.post("{:U('Yhb/YhbCoupon/goods_offline')}",{"goods_id":goods_id,"status":status},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>更新成功</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+
+function chg_order(goods_id, order){
+    $.post("{:U('Yhb/YhbCoupon/chg_order')}",{"goods_id":goods_id,"order":order},function(data){
+
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>操作成功</div>",fixed: true,padding:0,time:2});
+                window.location.href="/index.php?g=Yhb&m=YhbCoupon&a=couponlist";
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+}
+    $(function(){
+        $("#parent_id").change(function() {
+            loadCatalog($("#parent_id option:selected").val());
+        });
+        if($("#parent_id option:selected").val()!='')
+        {
+            loadCatalog($("#parent_id option:selected").val());
+        }
+        function loadCatalog(parentid) {
+            var selected_id='{$post["catalog_id"]}';
+            $.ajax({
+                url: "{:U('Yhb/Merchant/AjaxCatalog')}&parent_id="+ parentid,
+                type: 'POST',
+                dataType: 'JSON',
+                timeout: 5000,
+                error: function() { alert('Error loading data!'); },
+                success: function(msg) {
+                    $("#catalog_id").empty();
+                    $("<option value=''>请选择</option>").appendTo($("#catalog_id"));
+                    $.each(eval(msg), function(i, item) {
+                        if(selected_id==item.id){
+                            $("<option value='" + item.id + "' selected='selected'>" + item.catalog_name + "</option>").appendTo($("#catalog_id"));
+                        }else{
+                            $("<option value='" + item.id + "'>" + item.catalog_name + "</option>").appendTo($("#catalog_id"));
+                        }
+
+                    });
+                }
+            });
+        }
+    });
+</script>
+</head>
+<body>
+<div id="wrapper" class="bgeee">
+    <div id="headerTwo" style="z-index: 999">
+        <include file="Login:loginHeader"/>
+    </div>
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+            <div class="sidenav">
+                <!--开始引入左菜单-->
+                <include file="Store:Yhb_menu" leftmenuid="yhbcoupon_couponlist"/>
+        </div>
+            <div class="subcon fn">
+                <div class="main-name fn">
+                    <eq name="online" value="1">
+						<h4>展示区优惠列表</h4>
+					<else />
+						<h4>优惠展示区</h4>
+					</eq>
+                </div>
+				<div class="Wcanal-tab-list">
+                            <div class="SearchArea fn">
+                                <form method="get" action="" id="theform">
+                                	<div class="SearchAreaLeft">
+                                		<input type="hidden" name="g" value="Yhb"/>
+	                                    <input type="hidden" name="m" value="YhbCoupon"/>
+	                                    <input type="hidden" name="a" value="couponlist"/>
+										<input type="hidden" name="online" value="{$online}">
+	                                    <input type="hidden" value="" name="order_sort" id="order_sort"/>
+                                		<label><span>优惠名称</span><input name="key" type="text" value="{$post.key}" class="textbox w100"/></label>
+                                		<label><span>商户简称</span><input name="merchant_short_name" type="text" value="{$post.merchant_short_name}" class="textbox w100"/></label>
+                                		<label><span>城市商圈</span><select class="validate[required] selectbox ml10"  style="width:100px;margin-left:5px;"name="town_code" id="street_info">
+	                                            <option value="">选择区</option>
+	                                            {:show_arr_opt($townCode_list,$town_code)}
+	                                        </select><select class="validate[required] selectbox ml10"  style="width:100px;margin-left:5px;" name="street_code"  id="street_code">
+	                                            <option value="">选择</option>
+	                                        </select><select class="validate[required] selectbox ml10"  style="width:100px;margin-left:5px;" name="village_code" id="village_code">
+	                                            <option value="">选择</option>
+	                                        </select>
+                                		</label>
+                                		<label><span>所属分类</span><select name="parent_id" id="parent_id"  class="validate[required]">
+	                                            <option value="">请选择</option>
+	                                            <php>
+	                                                $parentArr = array_valtokey($parentInfo,'id','catalog_name');
+	                                            </php>
+	                                            {:show_arr_opt($parentArr,$post['parent_id'])}
+	                                        </select><select name="catalog_id" id="catalog_id" class="catalog_id validate[required] ml10">
+	                                            <option value="">请选择</option>
+	                                        </select>
+                                		</label>
+                                	</div>
+                                	<div class="SearchAreaRight">
+	                                	<a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+	                                </div>
+                                </form>
+                            </div>
+                            <div class="fn">
+                                <table cellpadding="0" cellspacing="0" class="W-table">
+                                    <tr>
+                                        <if condition="$is_admin heq true">
+                                        <th id="sort">排序<a href="javascript:;" class="jiantou_up">↑</a><a href="javascript:;" class="jiantou_down">↓</a></th>
+                                        </if>
+                                        <th width="22%">优惠名称</th>
+                                        <th width="20%">商户简称</th>
+										<th width="12%">分类</th>
+										<th width="12%">子类</th>
+										<th>总数</th>
+										<th>已领取</th>
+										<th>上架状态</th>
+										<th>操作</th>
+                                    </tr>
+                                    <volist name="list" id="vo" >
+                                    <tr>
+                                        <if condition="$is_admin heq true">
+                                        <td>
+                                        <input type="text" maxlength="5" value="{$vo.order_sort}" class="w50" onchange="chg_order('{$vo.goods_id}', this.value);" />
+                                        </td>
+                                            </if>
+                                        <td>{$vo.name}</td>
+                                        <td>{$vo.merchant_short_name}</td>
+                                        <td>{$catalog_array[$vo['parent_id']]}</td>
+                                        <td>{$catalog_array[$vo['catalog_id']]}</td>
+                                        <td><if condition="$vo.storage_num eq -1">不限<else />{$vo.storage_num}</if></td>
+                                        <td><if condition="$vo.storage_num eq -1">不限<else />{$vo['storage_num'] - $vo['remain_num']}</if></td>
+										<td>{$shelfStatus[$vo['line_status']]}</td>
+                                        <td>
+                                            <a href="javascript:;" onclick="statusChange('{$vo.goods_id}','1')">下架</a>
+                                        </td>
+                                    </tr>
+                                    </volist>
+                                    <php>if(empty($list)){</php>
+                                    <tr><td colspan="9"><div class="nonedata"></div></td></tr>
+                                    <php>}</php>
+                                </table>
+                                <div class="page">{$page}</div>
+                            </div>
+                        </div>
+            </div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>群发消息_旺分销</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wfx.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript">
+$(function(){
+	Gform();
+	
+	var ue = UE.getEditor('content',{
+		imageUrl:"/index.php?g=LabelAdmin&m=Upfile&a=editoImageSave",
+		imagePath:"http://test.wangcaio2o.com/Home/Upload",
+		catcherUrl:"/index.php?g=LabelAdmin&m=Upfile&a=getRemoteImage",
+		catcherPath:"http://test.wangcaio2o.com/Home/Upload",
+		initialFrameWidth:340,
+		initialFrameHeight:280,
+		ready:function(){
+			windowheight();
+		}
+	});
+	ue.ready( function( editor ) {windowheight();});
+    $("#sub_btn").click(function(){
+        var dialog;
+        if(!ue.getContent()){
+            art.dialog.alert("请填写正文内容");
+            return false;
+        }
+        if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        dialog.time(1).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                        top.location.href="{:U('Wfx/SendMsg/storeMsg')}"
+                        return false;
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+    $("#selectBatch").click(function(){
+        art.dialog.open("{:U('LabelAdmin/SelectBatches/index')}",{
+            width:800,
+            height:600,
+            lock:true,
+            fixed:true,
+            title:'选择互动模块'
+        })
+    });
+})
+//选择互动模块的回调函数
+function selectActivityCallback(data) {
+    $("#urlTitle").html(data.info);
+    $("#m_id").val(data.batch_id);
+}
+function show(t)
+{
+    var v = t.attr("data-val");
+    $("#show1,#show2,#show3").hide();
+    $("#show"+v).show();
+}
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <include file="./Home/Tpl/Wfx/topMenu.html" topmenuid="wfxqfxx"/>
+        </div>
+
+        
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            	<div class="sidenav">
+                <!--<include file="./Home/Tpl/Wfx/leftMenu-BatchSendMsg.html" leftmenuid="xdxx"/>-->
+                <ul id="accordion" class="accordion">
+                    <li>
+                        <div class="title">群发消息</div>
+                    </li>
+                    <li id="xdxx" class="open2">
+                        <div class="link"><a href="{:U('Wfx/SendMsg/storeMsg')}">旺财小店消息</a></div>
+                    </li>
+                    <li id="wxxx">
+                        <div class="link"><a href="{:U('Wfx/SendMsg/weixinMsg')}">微信模板消息</a></div>
+                    </li>
+                </ul>
+                </div>
+                <div class="subcon fn">
+                <div class="fn">
+                    <div class="main-name fn">
+                        <h4>新消息</h4>
+                    </div>
+                    
+                    <div class="Gform" style="width:100%">
+                    <form action="{:U('Wfx/SendMsg/storeMsgAdd')}" method="post" id="theform">
+                    <div class="steps">设置消息内容</div>
+                    <ul class="first">
+                    	<li class="Gname"><span>*</span>标题</li>
+                        <li class="Ginput">
+                            <input name="title" id="title" type="text" class="validate[required,maxSize[15]]" maxlength="15">
+                            <span class="maxTips forInput" data-max="15">0/15</span>
+                        </li>
+                    </ul>
+                    
+                    <ul>
+                    	<li class="Gname"><span>*</span>发送对象</li>
+                        <li class="Ginput">
+                            <div class="switch hover" data-callback="show">
+                                <input type="radio" id="reader" name="reader" value="1" checked="checked">
+                                <div class="newRadio">
+                                    <span class="valfirst hover" data-val="1">所有人</span>
+                                    <span class="vallast" data-val="2">经销商</span>
+                                    <span class="vallast" data-val="3">销售员</span>
+                                </div>
+                                <div class="cl"></div>
+                            </div>
+                            <div id="show1">
+                                <span class="txtTips" style="width:100%">消息将发送给所有的经销商和销售员</span>
+                            </div>
+                            <div id="show2" class="dn">
+                                <span class="txtTips" style="width:100%">消息将发送给所有的经销商</span>
+                            </div>
+                            <div id="show3" class="dn">
+                                <span class="txtTips" style="width:100%">消息将发送给所有的销售员</span>
+                            </div>
+                        </li>
+                    </ul>
+                    
+                    <ul>
+                    	<li class="Gname">附带活动</li>
+                        <li class="Ginput">
+                            <div class="Gchoose">
+                                <input name="m_id" type="hidden" id="m_id" value="">
+                                <a href="javascript:void(0)" id="urlTitle"></a>
+                                <a href="javascript:void(0)" class="Gbtn-url" title="选择地址" id="selectBatch"><i></i></a>
+                            </div>
+                        </li>
+                    </ul>
+                    
+                    <ul>
+                    	<li class="Gname"><span>*</span>正文内容</li>
+                        <li class="Ginput">
+                        	<textarea name="content" id="content"></textarea>
+                        </li>
+                    </ul>
+                    
+                    <ul>
+                    	<li class="Gname"></li>
+                        <li class="Ginput">
+                        	<a href="javascript:void(0)" id="sub_btn" class="btn-all">立即发送</a>
+                        </li>
+                    </ul>
+                    </form>    
+                    </div>
+                    
+                </div>
+            </div>
+           </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

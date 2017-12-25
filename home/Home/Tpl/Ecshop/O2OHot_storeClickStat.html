@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>访问分析_翼码旺财</title>
+<load href="__PUBLIC__/Css/main.css"/>
+<load href="__PUBLIC__/Css/layout.css"/>
+<load href="__PUBLIC__/Css/module.css"/>
+<load href="__PUBLIC__/Css/Wcanal.css"/>
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js"/>
+<js href="__PUBLIC__/Js/global.js"/>
+<load href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<load href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js"/>
+<js href="__PUBLIC__/Js/highcharts.js"/>
+<script type="text/javascript">
+$(function () {
+var jsChartDataOrder = {$jsChartDataOrder};
+ $('#container-report').highcharts({
+            chart: {
+                type: 'spline',
+                marginRight: 130,
+                marginBottom: 100
+            },
+            title: {
+                text: '{$begin_date|dateformat='Y-m-d'}到{$end_date|dateformat='Y-m-d'}',
+                x: -20 //center
+            },
+            subtitle: {
+                text: '',
+                x: -20
+            },
+            xAxis: {
+                    type: 'datetime',
+                    dateTimeLabelFormats: { // don't display the dummy year
+                            day: '%e. %b',
+                        }          
+            },
+            yAxis: {
+                title: {
+                    text: '单位(个)'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }],
+                min: 0
+            },
+            tooltip: {
+                formatter: function() {
+                    return '<b>'+ this.series.name +'</b><br>'+
+                    Highcharts.dateFormat('%Y-%m-%e', this.x) +': '+ this.y +' 个';
+                }
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'top',
+                x: -10,
+                y: 100,
+                borderWidth: 0
+            },
+            series: [{
+                name: '销量',
+                data: jsChartDataOrder
+            }]
+        });
+        $("#searchF").click(function(){
+            $("#searchForm").submit();
+})
+    });
+    
+</script>
+
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+		<!--开始引入头部菜单-->                   
+			<include file="Shop/nav" navmenuid="Navshop"/>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+					 <!--开始引入左菜单-->
+					<!--开始引入左菜单-->
+						<include file="Shop/menu" leftmenuid="mdfx"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">{$batch_name}-活动报表</h4>
+                    </div>
+                    <div class="form-search fn">
+                        <form method="post" action="{:U('Ecshop/O2OHot/storeClickStat')}" id="searchForm">
+                            <input type="hidden" name="order_store_id" value="{$order_store_id}"/>
+                             <input type="hidden" name="batch_type" value="{$batch_type}"/>
+                            <p>日期</p>
+                            <p><input name="begin_date" value="{$begin_date}" type="text"  onClick="WdatePicker()" class="textbox w100"/></p><p class="mlr5">-</p><p><input name="end_date" type="text" value="{$end_date}" onClick="WdatePicker()" class="textbox w100"/></p>
+                           
+                            <a href="javascript:void(0);" class="btn-all w110 r" id="searchF">查询</a>
+                        </form>
+                    </div>
+                    <div class="global-report">
+                        <div id="container-report" style="width:830px; height: 500px; margin: 0 auto"></div>
+                    </div>
+
+                    <div class="fn">
+                        <table cellpadding="0" cellspacing="0" class="W-table">
+                            <tr>
+                                <th>日期</th>
+                                <th>销量</th>
+                            </tr>
+                            <php>
+                            $empty = '<td colspan="2">无数据</td>';
+                            </php>
+                            <volist name="query_list" id="v" empty="$empty">
+                            <tr>
+                                <td>{:dateformat($v['day'],'Y-m-d')}</td>
+                                <td><?php echo $v['order_count'];?></td>
+                            </tr>
+                           </volist>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

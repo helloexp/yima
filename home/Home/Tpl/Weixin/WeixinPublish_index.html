@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信自定义菜单</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/msg.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<script>
+	$(function(){
+		//绑定事件
+		$("#saveMenu,#saveKwd,#saveAuto,#saveFollow").click(function(){
+			var m_id = '{$m_id}';//获取php中的
+			var ckid = '';
+			var subAct = $(this).attr('id');
+			//如果被点击的是保存菜单
+			if(subAct == 'saveMenu'){
+				ckid = $("input[name='ckidMenu']:checked").val();
+				if(!ckid){
+					alert("请选择菜单");
+					return false;
+				}
+			}
+			//保存关键词
+			else if(subAct == 'saveKwd'){
+				ckid = $("input[name='ckidMsg']:checked").val();
+				if(!ckid){
+					alert("请选择关键词规则");
+					return false;
+				}
+			}
+			else{
+				ckid = '';
+			}
+			
+			var data = {
+				subAct:subAct,//保存方式
+				m_id:m_id,
+				ckid:ckid
+			};
+			var dialog = art.dialog({ title:false,lock:true });
+			$.post("{:U('Weixin/WeixinPublish/publishSave')}",data,function(d){
+				dialog.close();
+				art.dialog({
+					title:'请选择',
+					content:d.info,
+					button:[
+						{
+							name:'确定',
+							callback:function(){
+								
+							}
+						},
+						{
+							name:'返回素材管理',
+							focus:true,
+							callback:function(){
+								window.location.href = "{:U('Weixin/Weixin/materialImgTxtManage')}";
+							}
+						}
+					],
+					lock:true
+				});
+			},'json');
+		});
+	});
+
+	function viewMaterialInfo(mid){
+		var loading = art.dialog({ title:false,lock:true });
+		$.get("{:U('WeixinResp/showMaterialById')}",{material_id:mid},function(d){
+			loading.close();
+			art.dialog({ 
+				title:'详情',
+				content:d,
+				width:500,
+				lock:true,
+			});
+		});
+	}
+</script>
+<body>
+	<div id="wrapper" >
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            	<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>&gt;</p>
+                            <p>微信助手</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                  <!--开始载入左菜单-->
+				  <include file="LabelAdmin/Batch/leftMenu" leftmenuid="wxzs"/>
+                </div>
+                <div class="subcon fn">
+                    <div id="Wcanal-tabon" class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover">自定义菜单</p>
+                            <p>关键词回复</p>
+                            <p>消息自动回复</p>
+                            <p>被添加自动回复</p>
+                        </div>
+                        <div class="Wcanal-tab-list">
+                            <table class="Msg-table mt20" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th>选择</th><th>菜单</th><th>类型</th><th>当前已配置内容</th>
+                                </tr>
+								<empty name="menuList">
+									<tr><td colspan="4"><A href="{:U('WeixinMenu/index')}">您未配置菜单，请先配置菜单</A></td></tr>
+								</empty>
+								<volist name="menuList" id="vo">{//一级菜单}
+                                <tr>
+                                    <td><input type="radio" name="ckidMenu" value="{$vo.id}"/></td>
+                                    <td>{$vo.title}</td>
+                                    <td>一级菜单</td>
+                                    <td><if condition="$vo['response_class'] eq 1">
+											<!--图文信息-->
+											<li>
+												图文：<A href="javascript:void(0);" onclick="javascript:viewMaterialInfo('{$vo.response_info}');">查看详情</A>
+											</li>
+											<elseif condition="$vo['response_class'] eq 2"/>
+											<!--链接-->
+											<li class="item float-p replyWords">
+												链接：{$vo['response_info']}
+											</li>
+											<else/>
+											<!--文字-->
+											<li class="item float-p replyWords">
+												文字：{$vo['response_info']}
+											</li>
+											</if></td>
+                                </tr>
+									<volist name="vo.sub_menu" id="v2">{//二级菜单}
+									<tr>
+										<td><input type="radio" name="ckidMenu" value="{$v2.id}"/></td>
+										<td style="padding-left:20px">-- {$v2.title}</td>
+										<td>二级菜单</td>
+										<td>
+											<if condition="$v2['response_class'] eq 1">
+											<!--图文信息-->
+											<li>
+												图文：<A href="javascript:void(0);" onclick="javascript:viewMaterialInfo('{$v2.response_info}');">查看详情</A>
+											</li>
+											<elseif condition="$v2['response_class'] eq 2"/>
+											<!--链接-->
+											<li class="item float-p replyWords">
+												链接：{$v2['response_info']}
+											</li>
+											<else/>
+											<!--文字-->
+											<li class="item float-p replyWords">
+												文字：{$v2['response_info']}
+											</li>
+											</if>
+										
+										</td>
+									</tr>
+									</volist>
+
+								</volist>
+                            </table>
+                            <div class="fn tl mt10">
+                                注：配置新的内容将覆盖已经存在的内容
+                            </div>
+                            <div class="fn tc mt10">
+                                <a href="javascript:;" id="saveMenu" class="btn-all w110">确定</a>
+                            </div>
+                        </div>
+                        <div class="Wcanal-tab-list dn">
+                            <table class="Msg-table mt20" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th>选择</th><th>规则</th><th>关键词</th><th>当前已配置内容</th>
+                                </tr>
+								<empty name="keywordsList">
+									<tr><td colspan="4"><A href="{:U('WeixinResp/keywords')}">您未配置关键词，请先配置关键词</A></td></tr>
+								</empty>
+								<volist name="keywordsList" id="vo" empty="$empty">
+                                <tr>
+                                    <td><input type="radio" name="ckidMsg" value="{$vo.message_id}"/></td>
+                                    <td>{$vo.title}-{$vo.message_name}</td>
+                                    <td>{$vo.msgKeywords}</td>
+                                    <td>
+									 <ul>
+										<volist name="vo['msgResponse']" id="voRespContent">
+											<eq name="voRespContent['response_class']" value="1">
+											<!--图文信息-->
+											<li>
+												<div class="contentWrap l">
+													<div class="l fileInfo">
+														<div class="appmsgImgArea">
+															<img src="{$voRespContent['material_img_url']}"/>
+														</div>
+														<div class="appmsgContentArea">
+															<a href="javascript:void(0);" onclick="javascript:viewMaterialInfo('{$voRespContent.response_info}');">[&nbsp;图文消息&nbsp;]</a><br />
+															{$voRespContent['material_title']}
+														</div>
+														<div class="cl"></div>
+													</div>
+												</div>
+											</li>
+											<else/>
+											<!--文字-->
+											<li class="item float-p replyWords">
+												<div class="contentWrap l">
+													<div class="wordContent">{$voRespContent['response_info']}</div>
+												</div>
+											</li>
+											</eq>
+                                        </volist>
+									 </ul>
+
+									</td>
+                                </tr>
+								</volist>
+                            </table>
+                            <div class="fn tl mt10">
+                                注：配置新的内容将覆盖已经存在的内容
+                            </div>
+                            <div class="fn tc mt10">
+                                <a href="javascript:;" id="saveKwd" class="btn-all w110">确定</a>
+                            </div>
+                        </div>
+                        <div class="Wcanal-tab-list dn">
+                            <div class="txtImg">
+                                    <div class="functionBar">
+                                        <div class="opt">您刚创建的图文信息 - 
+										当前已配置内容：
+
+										</div>
+                                        <div class="cl"></div>
+                                    </div>
+                                    <div class="editArea" style="min-height:80px">
+                                        <include file="WeixinResp/showMaterialById" />{//引入素材详情模板}
+									</div>
+                                </div>
+                            <div class="fn tl mt10">
+                                注：配置新的内容将覆盖已经存在的内容
+                            </div>
+                            <div class="fn tc mt10">
+                                <a href="javascript:;" id="saveAuto" class="btn-all w110">确定</a>
+                            </div>
+                        </div>
+                        <div class="Wcanal-tab-list dn">
+                            <div class="txtImg">
+                                    <div class="functionBar">
+                                        <div class="opt">您刚创建的图文信息</div>
+                                        <div class="cl"></div>
+                                    </div>
+                                    <div class="editArea" style="min-height:80px">
+                                        <include file="WeixinResp/showMaterialById" />{//引入素材详情模板}
+									</div>
+                                </div>
+                            <div class="fn tl mt10">
+                                注：配置新的内容将覆盖已经存在的内容
+                            </div>
+                            <div class="fn tc mt10">
+                                <a href="javascript:;" id="saveFollow" class="btn-all w110">确定</a>
+                            </div>
+                        </div>
+                    </div>            
+                 </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+</body>
+</html>

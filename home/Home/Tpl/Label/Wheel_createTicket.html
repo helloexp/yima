@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>添加奖品</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_dzp.css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+        	<div class="goback"><i onclick="javascript:window.history.go(-1);"></i></div>
+            <div class="title"><span><em>③</em>&nbsp;添加奖品</span></div>
+        </div>
+        <div id="main">
+            <div id="mainCon">
+            	<div class="mainTips">
+            		<p class="tips">有活动没奖品怎么行？来准备一份豪礼吧！</p>
+            	</div>
+            	<div class="Gform">
+                	<form id="form" action="{:U('Label/Wheel/createTicket')}" method="post" name="form" enctype="multipart/form-data">
+                		<div class="item">
+                			<ul>
+		                        <li class="name w72">奖品名称</li>
+		                        <li class="input pl72">
+		                        	<input name="name" id="name" <notempty name="wheelInfo['is_treaty']">readonly="readonly"</notempty> type="text" class="textbox validate[required,minSize[3]]" maxlength="24" value="{$ticketData['name']}" placeholder="&nbsp;如“50元代金券”（≤24个字）" data-rel=""  />
+		                        </li>
+		                    </ul>
+		                    <ul>
+		                        <li class="name w72">有效期</li>
+		                        <li class="input pl72 date">
+		                        	<input name="startTime" <notempty name="wheelInfo['is_treaty']">readonly="readonly"</notempty> type="date" readonly="readonly" class="textbox validate[required,maxSize[50]]" maxlength="20" value="{$curDate}" placeholder="&nbsp;2015-01-01" data-rel="">至<input name="endTime" type="date" class="textbox validate[required,maxSize[50]]" value="{$ticketData['endTime']}" maxlength="20" placeholder="&nbsp;2015-12-31" data-rel="">
+		                        </li>
+		                    </ul>
+	                		<ul>
+		                        <li class="name w72">奖品图片</li>
+		                        <li class="input pl72">
+		                        	<empty name="ticketData['logoUrl']">
+		                        	<img src="__PUBLIC__/Label/Image/Item/dzp/dzp_logo.png" width="42" height="42" />
+		                        	<else/>
+		                        	<img src="{$ticketData['logoUrl']}" width="42" height="42" />
+		                        	<input type="hidden" name="haslogo" id="haslogo" value="{$ticketData['logoUrl']}">
+		                        	</empty>
+		                        	<eq name="wheelInfo['is_activity']" value="0">
+			                        <input type="file" name="logo" id="logo" class="textbox" value="">
+			                        <i></i>
+			                        <else/>
+			                        <input type="file" class="textbox" value="">
+			                        <i></i>
+			                        </eq>
+		                        </li>
+		                    </ul>
+                			<ul>
+		                        <li class="name w72">奖品数量</li>
+		                        <li class="input pl72">
+		                        	<input name="number" <notempty name="wheelInfo['is_goods']">readonly="readonly"</notempty> id="number" type="number" class="textbox validate[required,minSize[1]]" maxlength="3" value="{$ticketData['number']}" placeholder="&nbsp;请填写您的奖品数量" data-rel=""  />
+		                        </li>
+		                    </ul>
+                		</div>
+	                    <ul class="btn-ul">
+	                        <li class="btn-li"><input type="submit" id="sub" value="下一步" class="btn-up" /></li>
+	                    </ul>
+                	</form>
+                	<ul>
+						<li><p>友情提示：</p></li>
+						<li><p>1、本次活动您可以免费发送奖品兑换短信100条， 故奖品数量不得大于100；</p></li>
+						<li><p>2、请保持奖品真实性，参与者中奖会收到奖品的兑换短信；</p></li>
+						<li><p>3、创建活动成功后，您可以登录旺财官网申请卡券验证助手核验您发出的奖品。</p></li>
+                	</ul>
+	            </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    $('#form').validationEngine({
+    	'allrules': {
+			"carname":{
+				"alertText":""
+			}
+		},
+    });
+    
+    $(".Gform .clause label").eq(0).addClass("active");
+	$('.Gform .clause input').attr("checked","checked");
+	$(".Gform .clause input").click(function(){
+		$(this).parent("label").toggleClass("active");
+	});
+	$("#sub").click(function(){
+		if($("#form").validationEngine('validate')){
+            $("#form").ajaxSubmit({
+                success:function(data){
+                 if(data.status == '1'){
+					   window.location.href="{:U('Label/Wheel/setLuckDraw')}";
+                       return false;
+                  }else{
+                       art.dialog.alert(data.info);
+                       return false;
+                  }
+            },
+                dataType:'json'
+            });
+            return false;
+        }
+	});
+	$("input[type='file']").change(function(){
+		var val = $(this).prop('files')[0],
+			src = createObjectURLfun(val);
+		$(this).prev("img").attr("src",src);
+	})
+
+});
+function createObjectURLfun(file) {
+	if (window.navigator.userAgent.indexOf("Chrome") >= 1 || window.navigator.userAgent.indexOf("Safari") >= 1) {
+		return window.webkitURL.createObjectURL(file);
+	} else {
+		return window.URL.createObjectURL(file);
+	}
+};
+</script>

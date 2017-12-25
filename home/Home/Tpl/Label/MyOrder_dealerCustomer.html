@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+        <meta content="telephone=no" name="format-detection" />
+        <meta content="email=no" name="format-detection" />
+        <meta name="apple-touch-fullscreen" content="NO">
+        <title>我的客户</title>
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_wfx.css?v=__VR__">
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+    <include file="Public:Public:wechatAllShareJsdk" />
+    <script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.new.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+    <style>
+        .m-center ul{padding-left: 0%;background-color: #fff;}
+        .m-center li p{font-size:14px;margin-left:6%;color: #666;float:left}
+        .m-center li p:first-child{ float:none;font-size:14px;margin-left:4%;color: #666; float:right; right:0; padding-right:40px; color:#48a6ef;}
+        .m-center{ padding-bottom:50px;}
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            wx.ready(function () {
+                wx.hideOptionMenu();
+            })
+        })
+    </script>
+    <script type='text/javascript'>
+        $(document).ready(function (e) {
+            var customerID = '';
+            $(".js_edit").click(function (e) {
+                $('.cd-popup').addClass('is-visible');
+                $(this).find("section").children("p").eq(1).addClass("current");
+                customerID = $(this).attr('rel');
+            });
+
+            $(".js_select").click(function (e) {
+                var salerID = $(this).attr('rel');
+                $.post("{:U('Label/MyOrder/changeCustomer')}", {'changeID': customerID, 'changeToID': salerID}, function (data) {
+                    data = eval("(" + data + ")");
+                    if (data['error'] == '0') {
+                        $('.cd-popup').removeClass('is-visible');
+                        $(".current").removeClass("current");
+                        location.reload();
+                    } else {
+
+                    }
+                });
+            });
+
+            //open popup
+            event.preventDefault();
+
+            //close popup
+            $('.cd-popup').on('click', function (event) {
+                if ($(event.target).is('.cd-popup-close') || $(event.target).is('.cd-popup')) {
+                    event.preventDefault();
+                    $(this).removeClass('is-visible');
+                }
+            });
+            //close popup when clicking the esc keyboard button
+            $(document).keyup(function (event) {
+                if (event.which == '27') {
+                    $('.cd-popup').removeClass('is-visible');
+                }
+            });
+        });
+    </script>
+</head>
+<body class="bg-f5">
+    <div id="wrapper">
+        <div id="container">
+            <div id="main">
+                <include file="Wfx:top"/>
+                <form method="post">
+                    <div class="search m-input">
+                        <input class="tipInput" tiptext="" type="text" placeholder="输入客户手机号码" value="" name="phone">
+                        <input type="hidden" name="salerID" value="{$salerID}"/>
+                        <button class="search_btn">搜索</button>
+                    </div>
+                </form>
+                <if condition="$role eq '2' ">
+                    <div class="no_bg">
+                        您可将绑定的客户指派给其他销售员
+                    </div>
+                </if>
+                <div class="m-center">
+                    <ul>
+                        <if condition="$client eq NULL ">
+                            <div class="nodata"><p style='margin-top: 115px;font-size: 16px;font-weight: bold;color: #C0C0C0;'>暂无已绑定的客户</p></div>
+                            <else />
+                            <volist name="client" id="item" key="k">
+                                <a href="javascript:void(0)" class="<if condition="$search neq 'Y' ">box</if> <if condition="$role eq '2' ">js_edit</if>" <if condition="$role eq '2' ">rel='{$item.id}'</if> >
+                                    <li>
+                                        <section class="list fn">
+                                            <if condition="$role eq '2' ">
+                                                <p style="padding-right: 80px;">修改绑定</p>
+                                                <p>{$item.phone_no}
+                                                <if condition="$item['status'] eq '2' ">(已解绑)</if>
+                                                </p>
+                                                <i class="left-arrow"></i>
+                                                <elseif condition="$role eq '1' OR $couldMove eq '' " />
+                                                <p style='color:#C0C0C0'>{:dateformat($item['add_time'],'Y-m-d H:i:s')}</p>
+                                                <p>{$item.phone_no}</p>
+                                            </if>
+                                        </section>
+                                    </li>
+                                </a>
+                            </volist>
+                        </if>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <nav id="page-nav">
+        <a href="<?php echo $nextUrl;?>"></a>
+    </nav>
+    <style>
+        .cd-popup-container dl{ margin:0 auto; padding:0 15px 15px; list-style:none;background:#FFF; color:#666; font-size:14px; width:90%; border-radius:4px;}
+        .cd-popup-container dl:after{ clear:both; display:block; height:0; content:""}
+        .cd-popup-container dl dt{font-size:14px; font-weight:bold; color:#000; height:32px; line-height:32px; text-align-last:left; display:block; padding:10px; border-top-left-radius:4px; border-top-right-radius:4px}
+        .cd-popup-container dl dd{ border:1px #ededed solid; line-height:24px; text-align:center; padding:10px; background:#FFF; width:31.8%; display:inline-block; float:left; margin:2px; box-sizing:border-box}
+        .cd-popup-container dl dd:last-child{border-bottom-left-radius:4px; border-bottom-right-radius:4px;}
+        .cd-popup-container dl dd:hover{ border:1px #ed3f41 solid; color:#ed3f41}
+        .cd-popup-container dl dd:hover a{ color:#ed3f41}
+        .cd-popup-container dl dd a{line-height:24px; color:#666; display:block;}
+    </style>
+    <div class="cd-popup" role="alert">
+        <div class="cd-popup-container">
+            <dl>
+                <dt>将此客户绑定到其他销售代表</dt>
+                <volist name="salerInfo" id="item">
+                    <dd><a href="javascript:void(0)" rel="{$item.id}" class="js_select">{$item.name}</a></dd>
+                </volist>
+            </dl>
+        </div>
+    </div>
+<if condition="$count eq 10 ">
+    <include file="Wfx:showMore"/>
+</if>
+<include file="Store:nav"/>
+<script type="text/javascript">
+    $(function () {
+        $('.m-center ul').infinitescroll();
+    });
+</script>
+</body>
+</html>	

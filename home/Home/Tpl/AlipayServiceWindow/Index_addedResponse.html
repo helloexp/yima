@@ -1,0 +1,214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>服务窗被添加自动回复</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/datetimepicker.min.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script src="__PUBLIC__/Js/weixin2/jq-emotion.js" type="text/javascript"></script>
+<script type="text/javascript">
+//选择后的回调函数
+var selectcallback = function(mid){
+	if(!mid) return false;
+	var dialog = art.dialog({title:false,lock:true});
+	var data = {material_id:mid};
+	$("#material_id_selected").val(mid);
+	$.post("{:U('AlipayServiceWindow/Index/showMaterialById')}",data,function(d){
+		dialog.close();
+        $("#reply_content_0").hide();
+        $("#reply_content_1").show();
+        $("#reply_content_0").html("");
+		$("#reply_content_1").html(d);
+		windowheight();
+	});
+}
+$(document).ready(function(e){
+    var msgId = $("#material_id_selected").val();
+    if(msgId){
+    $("#reply_content_0").hide();
+    $("#reply_content_1").show();
+    }else{
+    $("#reply_content_0").show();
+    $("#reply_content_1").hide();
+    }
+    var html = $("#reply_content_0").html();
+        html = html.replace(/\n/g,"<br>");
+    $("#reply_content_0").html(html);
+    check_lenght_weixin(600,"js_editorTip0","#reply_content_0");
+	$("#message_face").jqfaceedit("reply_content_0");
+	editArea();
+
+	$(".tab_text").click(function(){
+        $(".tab_text").addClass("selected");
+        $(".tab_appmsg").removeClass("selected");
+        $("#reply_content_0").show();
+        $("#reply_content_1").hide();
+        $("#material_id_selected").val("");
+        $("#reply_content_0").focus();
+    });
+    
+    $(".tab_appmsg").click(function(){
+        $(".tab_appmsg").addClass("selected");
+        $(".tab_text").removeClass("selected");
+    });
+	//确定按钮事件
+	$("#btn_submit").click(function(){
+        if($("#material_id_selected").val()!=""){
+            var data = {
+                response_info:$("#material_id_selected").val(),
+                respType:0,
+                respClass:1
+            };
+            var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+            $.post("{:U('AlipayServiceWindow/Index/followSubmit')}",data,function(d){
+            	if (d.status) {
+    				dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+    			} else {
+    				dialog.time(1).content("<div class='msg-all-error'>"+d.info+"</div>");
+    			}
+                location.reload();
+            },'json');
+        }else{
+    		var reply_text = $("#reply_content_0").html();
+                reply_text=reply_text.replace(/\n/g, "\\n");
+                reply_text=reply_text.replace(/<br\/?[^>]*>/g, "\n");
+                reply_text=reply_text.replace(/\&nbsp\;/g, ' ');
+            var text = $('#reply_content_0').text();
+    	    var imglength = $('#reply_content_0').find("img");	
+    	    if(imglength.length*3+text.length > 600){
+    	        alert('不能超过600字');
+                return ;
+    	    }
+    		var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+    		var data = {
+    			response_info:reply_text,
+    			respType:0,
+    			respClass:0
+    		};
+    		$.post("{:U('AlipayServiceWindow/Index/followSubmit')}",data,function(d){
+    			if (d.status) {
+    				dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+    			} else {
+    				dialog.time(1).content("<div class='msg-all-error'>"+d.info+"</div>");
+    			}
+    			location.reload();   
+    		},'json');
+        }
+	});
+	//初始化被选中的素材
+	selectcallback($("#material_id_selected").val());
+});
+</script>
+</head>
+<body>
+<div id="wrapper" class="bgeee">
+<include file="./Home/Tpl/Public/Public_header.html" />
+<include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="fuwuchuang"/>
+<div id="container" class="bge7e8eb">
+<div id="main" class="rel">
+<div class="sidenav">
+    <include file="AlipayServiceWindow/AlipayServiceWindow/leftMenu" leftmenuid="zdhf"/>
+</div>
+<div class="subcon fn">
+    <div class="msg-libs">
+        <div class="content_wrap global_mod">
+            <div class="section_tab">                
+            <ul class="tab_navs">                    
+            <li class="tab_nav"><a href="{:U('AlipayServiceWindow/Index/keyWordsResponse')}">关键词自动回复</a></li>
+            <li class="tab_nav selected"><a href="{:U('AlipayServiceWindow/Index/addedResponse')}">被添加自动回复</a></li>                   
+            <li class="tab_nav no_extra"><a href="{:U('AlipayServiceWindow/Index/msgResponse')}">消息自动回复</a></li>
+            </ul>            
+            </div>            
+			<style type="text/css">
+            .form-horizontal .control-group {
+            margin-bottom: 10px;
+            }
+            .form-horizontal .control-label {
+            float: left;
+            width: 160px;
+            padding-top: 5px;
+            text-align: right;
+            }
+            .form-horizontal .controls {
+            margin-left: 180px;
+            }
+            .controls > .radio, .controls > .checkbox {
+            display: inline-block;
+            padding: 0 !important;
+            margin: 0 !important;
+            margin-top: 8px !important;
+            margin-right: 15px !important;
+            vertical-align:middle;
+            }
+            .radio, .checkbox {
+            min-height: 16px;
+            padding-left: 16px;
+            }
+            .form-horizontal input{
+            color: #333333;
+            outline: 0;
+            font-size: 14px;
+            font-weight: normal;
+            border: 1px solid #e5e5e5;
+                }
+            fieldset {
+            border: 1px solid #e5e5e5;
+            margin:10px 20px 10px 0px;
+            padding:30px 0;
+                }
+            fieldset legend { margin-left:30px; font-size:16px}
+			.msg_sender{ margin:0 10px;}
+			.tab_navs{ margin-left:0; padding-left:0}
+			.content_wrap{ margin:0 10px;}
+			ul, ol{ margin-left:0;}
+            </style>
+            <div class="content_wrap" id="div_replyContent" style="">
+                <div class="msg_sender" id="js_msgSender">
+                <div class="msg_tab">
+                        <ul class="tab_navs">
+                                <li class="tab_nav tab_text" data-type="1" data-tab=".js_textArea" data-tooltip="文字">
+                                <a href="javascript:void(0);">&nbsp;<i class="icon_msg_sender"></i></a>
+                                </li>
+                                <li class="tab_nav tab_appmsg" data-type="10" data-tab=".js_appmsgArea" data-tooltip="图文消息"><a href="javascript:void(0);" class="libraryArea-add" data-url="{:U('AlipayServiceWindow/Index/selectImgTxt')}">&nbsp;<i class="icon_msg_sender" ></i></a></li>
+                        </ul>
+                                        <div class="tab_panel">
+                                            <div class="tab_content">
+                                                <div class="js_textArea inner no_extra">
+                                                    <div class="emotion_editor">
+                                                        <div class="edit_area js_editorArea editArea" id="reply_content_0"  contenteditable="true" style="overflow-y: auto; overflow-x: hidden; border:0px;" onkeydown="check_lenght_onkeydown(this)" onkeyup="check_lenght_weixin(600,'js_editorTip0',this);">{$respText}</div>
+                                                        <div class="edit_area js_editorArea editArea dn" id="reply_content_1" style="overflow-y: auto; overflow-x: hidden; border:0px;"></div>
+                                                        <input type="hidden" id="material_id_selected" value="{$imgId}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                </div>
+                </div>
+            </div>
+            <div class="tool_bar" style="margin-left:20px;">
+                <span class="btn btn_primary btn_input" id="btn_submit"><a href="javascript:void(0);" class="w110" title="确认">保存</a></span>
+            </div>
+            
+        </div>
+    </div>
+ </div>
+</div>
+</div>
+<include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+<div class="service"></div>
+</body>
+</html>

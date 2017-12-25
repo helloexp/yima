@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>审核详情</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnc.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script>
+$(function(){
+	$(".icon_checkbox").click(function(){
+		if ($(this).closest(".frm_checkbox_label").hasClass("selected")){
+			$(".frm_checkbox_label").removeClass("selected");
+			$(".frm_checkbox_label").find(".frm_checkbox").attr("checked",false);
+			$(".firstlay li").removeClass("selected");
+            $(".notCheck").children(":checkbox").attr("checked",false);
+		}else{
+			$(".frm_checkbox_label").removeClass("selected").addClass("selected");
+			$(".frm_checkbox_label").find(".frm_checkbox").attr("checked",true);
+			$(".firstlay li").addClass("selected");
+            $(".notCheck").children(":checkbox").attr("checked",'checked');
+		}
+	});
+	//取消
+	$("#cancel").click(function(){
+		art.dialog.close();
+	});
+    $("#nosubcarinfo").click(function(){
+        art.dialog.close();
+    });
+
+    $("#subcarinfo").click(function(){
+        $.ajax({
+             type: "POST",
+             url: "{:U('Chaowai/MovingCar/doexamine')}",
+             data: $("#notefrom").serialize(),
+            dataType: "html",
+             success: function(data){
+                        art.dialog.close();
+                        var win = art.dialog.open.origin;
+                        win.location.reload();
+                      }
+         });
+    });
+
+    $("#nosubcarinfo").click(function(){
+        $.ajax({
+             type: "POST",
+             url: "{:U('Chaowai/MovingCar/donoexamine')}",
+             data: $("#notefrom").serialize(),
+            dataType: "html",
+             success: function(data){
+                        art.dialog.close();
+                        var win = art.dialog.open.origin;
+                        win.location.reload();
+                      }
+         });
+    });
+
+})
+</script>
+    <style type="text/css">
+        tr { height:40px;}
+        td {text-align: center;}
+    </style>
+</head>
+<body>
+<div id="content">
+    <div class="newRule">
+    		<div class="Gform">
+                 <form name="notefrom" id="notefrom" action="{:U('Chaowai/MovingCar/doexamine')}" method="post" >
+                     <table border="1" width="400">
+                         <tr>
+                             <td colspan="2">
+                                 <h3>基本信息</h3>
+                             </td>
+                         </tr>
+                         <tr>
+                             <td width="80">
+                                 类型：
+                             </td>
+                             <td>
+                                 <span>{$re.card_attribute}</span>
+                             </td>
+                         </tr>
+                         <tr>
+                             <td>
+                                 申请人：
+                             </td>
+                             <td>
+                                 <span>{$re.proposer}</span>
+                             </td>
+                         </tr>
+                         <tr>
+                             <td>
+                                 联系方式：
+                             </td>
+                             <td>
+                                 <span>{$re.mobile}</span>
+                             </td>
+                         </tr>
+                         <tr>
+                             <td>
+                                 申请时间：
+                             </td>
+                             <td>
+                                 <span>{$re.add_time}</span>
+                             </td>
+                         </tr>
+                         <tr>
+                             <td>
+                                 状态：
+                             </td>
+                             <td>
+                                 <span>{$re.status}</span>
+                             </td>
+                         </tr>
+                         <tr>
+                             <td>
+                                 领取方式：
+                             </td>
+                             <td>
+                                 <?php if ($re['shipping_method'] == '自取') { ?>
+                                     <span>{$re.shipping_method}</span>
+                                     <?php } ?>
+                                     <?php if ($re['shipping_method'] == '物流配送') { ?>
+                                     <span>{$re.shipping_method}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span>配送地址：{$re.shipping_address}</span>
+                                     <?php } ?>
+                             </td>
+                         </tr>
+                         <?php if($re['record'] != "" || $re['carinfo'] != "" || $re['recurity'] != "") { ?>
+                         <tr>
+                             <td colspan="2">
+
+                                 <h3>文件表单</h3>
+                             </td>
+                         </tr>
+                         <tr>
+                             <td>
+                                 单位备案信息：
+                             </td>
+                             <td>
+                                 <span style="color:red;"><a href="{:U('Chaowai/MovingCar/down1',array('id' => $re['id']))}">请下载表单</a></span>
+                             </td>
+                         </tr>
+                         <tr>
+                             <td>
+                                 车辆相关信息：
+                             </td>
+                             <td>
+                                 <span style="color:red;"><a href="{:U('Chaowai/MovingCar/down2',array('id' => $re['id']))}">请下载表单</a></span>
+                             </td>
+                         </tr>
+                         <tr>
+                             <td>
+                                 安全协议书：
+                             </td>
+                             <td>
+                                 <span style="color:red;"><a href="{:U('Chaowai/MovingCar/down3',array('id' => $re['id']))}">请下载表单</a></span>
+                             </td>
+                         </tr>
+                         <?php } ?>
+                         <tr>
+                             <td colspan="2">
+                                 审核信息
+                             </td>
+                         </tr>
+                         <tr>
+                             <td colspan="2">
+                                 <span>{$re.examine_note}</span>
+                             </td>
+                         </tr>
+                         <?php if($re.send_note){ ?>
+                             <tr>
+                                 <td colspan="2">
+                                     发送信息
+                                 </td>
+                             </tr>
+                             <tr>
+                                 <td colspan="2">
+                                     <span>{$re.send_note}</span>
+                                 </td>
+                             </tr>
+                         <?php } ?>
+
+                         <tr>
+                             <td colspan="2">
+                                 <div class="Ginput" style="padding-left: 0px;">
+                                     <a href="javascript:void(0);"  class="btn btn_primary" id='nosubcarinfo'>取消</a>
+                                 </div>
+                             </td>
+                         </tr>
+                     </table>
+                    
+                </ul>
+                </form>
+        		
+                
+        	</div>
+
+    </div>
+</div>
+</body>
+</html>

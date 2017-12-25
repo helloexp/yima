@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>用户管理</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <style type="text/css">
+    .accordion .title a,
+    .accordion .title a:hover {
+        color: #ffffff;
+    }
+    
+    .accordion .title a i.downArrow {
+        display: none;
+    }
+    </style>
+    <script>
+    $(document).ready(function(e) {
+        $("#sub_button").click(function() {
+            $("#theform").submit();
+        });
+    });
+    </script>
+</head>
+
+<body class="bgfff">
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="new_sidenav">
+                    <include file="./Home/Tpl/GpEye/gpeye_sidenav.html" leftmenuid="merchant_user" />
+                </div>
+                <div id="div_content" class="subcon fn">
+                    <div class="shopCon">
+                        <div class="main-name fn">
+                            <h4>用户管理<a href="javascript:void(0);" class="btn-add first" gourl="{:U('GpEye/Merchant/add_user')}" onclick="add_user()"><i></i>添加用户</a></h4>
+                        </div>
+                        <div class="SearchArea fn">
+                            <form action="?" method="get" name="theform" id="theform">
+                                <input type="hidden" name="g" value="GpEye">
+                                <input type="hidden" name="m" value="Merchant">
+                                <input type="hidden" name="a" value="user">
+                                <div class="SearchAreaLeft">
+                                    <label>
+                                        <span>门店简称</span>
+                                        <select name="merchant_id" id="merchant_id">
+                                            <option value="" <?php if($data["merchant_id"]=='') {echo "selected='selected'";} ?>>全部</option>
+                                            {:show_arr_opt($merchant_list,$data['merchant_id'])}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>用户名</span>
+                                        <input name="user_name" id="user_name" type="text" class="textbox w90" style="width: 200px;" value="{$data['user_name']}" placeholder="">
+                                    </label>
+                                    <label><span>状态</span>
+                                        <select class="textbox w100" name="status" id="status" style="width:80px;">
+                                            <option value="-1" <?php if($data[ "status"]==-1) {echo "selected='selected'";} ?>>全部</option>
+                                            <option value="0" <?php if($data[ "status"]==0) {echo "selected='selected'";} ?>>正常</option>
+                                            <option value="1" <?php if($data[ "status"]==1) {echo "selected='selected'";} ?>>停用</option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <div class="SearchAreaRight">
+                                    <a href="javascript:void(0);" id="sub_button" class="searchBtn">查询</a>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="fn">
+                            <table cellpadding="0" cellspacing="0" class="W-table" style="width:100%;border-collapse:collapse; border:1px solid #e3e2e2;">
+                                <tr>
+                                    <th>操作人姓名</th>
+                                    <th>用户名</th>
+                                    <th>添加时间</th>
+                                    <th>用户角色</th>
+                                    <th>所属门店</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                                <volist name="list" id="vo" empty="$empty">
+                                    <tr>
+                                        <td>{$vo['true_name']}</td>
+                                        <td>{$vo['user_name']}</td>
+                                        <td>{$vo['add_time']|dateformat='Y-m-d H:i:s'}</td>
+                                        <td>{$role_list[$vo['new_role_id']]}</td>
+                                        <td>{$vo['store_short_name']}</td>
+                                        <td>
+                                            <php>if((int)$vo['status']==0){echo "正常";}if((int)$vo['status']==1){echo "停用";}if((int)$vo['status']==2){echo "已删除";}</php>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0);" class="btn-edit" onclick="edit_user({$vo['id']})">&nbsp;修改</a>
+                                            <php>if((int)$vo['status']==0){</php>
+                                            <a href="javascript:void(0);" onclick="change_status({$vo['id']},1)">&nbsp;停用</a>
+                                            <php>}</php>
+                                            <php>if((int)$vo['status']==1){</php>
+                                            <a href="javascript:void(0);" onclick="change_status({$vo['id']},0)">&nbsp;启用</a>
+                                            <php>}</php>
+                                        </td>
+                                    </tr>
+                                </volist>
+                                <empty name="list">
+                                    <tr class="info">
+                                        <td colspan="9" class="last">
+                                            <div class="nonedata"></div>
+                                        </td>
+                                    </tr>
+                                </empty>
+                            </table>
+                            <div class="page">
+                                <?php echo $page;?>&nbsp;&nbsp;</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="integralService"></div>
+</body>
+<script type="text/javascript">
+function add_user() {
+    var title = "新增用户";
+    art.dialog.open($(".btn-add").attr("gourl"), {
+        width: 500,
+        title: title
+    });
+}
+
+function edit_user(id) {
+    var title = "编辑";
+    art.dialog.open("{:U('GpEye/Merchant/edit_user')}&id=" + id, {
+        width: 500,
+        title: title
+    });
+}
+
+function change_status(id, status) {
+
+    if (status == 0) {
+        //var title = "审核确认";
+        var title = "您确认启用该用户？";
+    }
+    if (status == 1) {
+        var title = "您确认停用该用户？";
+    }
+
+    art.dialog.confirm(title, function() {
+        dialog = art.dialog({
+            title: false,
+            content: "<div class='msg-all-succeed'>正在处理...</div>",
+            fixed: true,
+            padding: 0
+        });
+        $.ajax({
+            type: "POST",
+            data: {
+                "id": id,
+                "status": status
+            },
+            url: "{:U('GpEye/Merchant/change_user_status')}",
+            dataType: "json",
+            success: function(data) {
+                if (data.status == '0') {
+                    dialog.time(5).content("<div class='msg-all-error'>" + data.info + "</div>");
+                } else {
+                    dialog.time(2).content("<div class='msg-all-succeed'>" + data.info + "</div>");
+                    setTimeout("var win = art.dialog.open.origin;win.location.href = win.location.href;", 500);
+                    return false;
+                }
+            }
+        });
+    });
+}
+</script>
+
+</html>

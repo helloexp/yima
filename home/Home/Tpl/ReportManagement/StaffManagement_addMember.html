@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>用户添加</title>
+	<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/Wprize.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/Whygl.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+	<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+	<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+	<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+	<style type="text/css">
+		.Gform .Ginput .Gbtn-papers {
+			right: -58px;
+			top: 0;
+		}
+	</style>
+</head>
+<body>
+<div class="fn" id="one_div">
+	<div class="cl"></div>
+	<div id="form1" class="fn">
+		<form method="post" id="form" name="form" action="{:U('addMember')}">
+			<div class="Gform fn">
+				<!--旺财卡券表单1-->
+				<ul>
+					<li class="Gname">添加方式</li>
+					<li class="Ginput">
+						<div class="switch">
+							<input type="radio" name="addMemberType" value="0" checked="checked" id="addMemberType"/>
+							<div class="newRadio">
+								<span class="valfirst hover" data-val="0" id="cardGoods">单个添加</span>
+								<span class="vallast" data-val="1" id="cardGoodsType">批量添加</span>
+							</div>
+						</div>
+					</li>
+				</ul>
+				<div id="onemember">
+				<ul>
+					<li class="Gnmae"><i>*</i>所属分公司：</li>
+					<li class="Ginput">
+						<select class="validate[required] textbox w100" name="company_id" id="company_id">
+							<option value="">请选择</option>
+							{:show_arr_opt($companyList,$getOneMember['company_id'])}
+						</select>
+					</li>
+				</ul>
+				<ul>
+					<li class="Gnmae"><i>*</i>员工姓名：</li>
+					<li class="Ginput">
+						<input type="text" value="" id="name" name="name" class="validate[required]" maxlength="15"/>
+					</li>
+				</ul>
+				<ul>
+					<li class="Gnmae"><i>*</i>手机号：</li>
+					<li class="Ginput">
+						<input type="text" value="" id="mobile" name="mobile" class="validate[required],min[11],custom[integer]" maxlength="11"/>
+					</li>
+				</ul>
+				<ul>
+					<li class="Gnmae">自定义编号：</li>
+					<li class="Ginput">
+						<input type="text" value="" id="custom_number"  name="custom_number" class="custom[integer]" />
+					</li>
+				</ul>
+				</div>
+				<div id="members" class="dn">
+					<ul>
+						<li class="Gname">上传文件</li>
+						<li class="Ginput">
+							<div class="Gadd" data-min="1" data-max="5" style="width: 240px;">
+								<input name="file_show" type="text" id="file_show" value="">
+								<input type="file" id="import_file" name="import_file" style="width: 298px; top: 0; left: 0; z-index: 100;" class="upload_file" onchange="document.getElementById('file_show').value=this.value">
+								<a href="javascript:void(0)" class="Gbtn-papers"><i></i></a>
+							</div>
+						</li>
+						<li class="Ginput">
+							<a href="__PUBLIC__/tmpDownload/member2.csv">【批量上传模板下载】</a>
+						</li>
+					</ul>
+				</div>
+			    <div class="DiabtnCon">
+				    <a href="javascript:void(0);" title="确认" id="btn" class="Diabtn-all">确定</a>
+				    <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+			    </div>
+	        </div>
+		</form>
+    </div>
+</div>
+</div>
+</body>
+</html>
+<script>
+	$("#cardGoodsType").click(function(){
+		$("#onemember").hide();
+		$("#members").show();
+	});
+	$("#cardGoods").click(function(){
+		$("#onemember").show();
+		$("#members").hide();
+	});
+	$(function(){
+		Gform();
+		$("#btn").click(function(){
+			var dialog;
+			if($("form").validationEngine('validate')){
+				$("form").ajaxSubmit({
+					beforeSubmit:function(){
+						dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+					},
+					success:function(data){
+						if(data.status == '1'){
+							dialog.time(20).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+							setTimeout(function(){
+								top.location.reload();
+								art.dialog.close();
+							},2000);
+						}else{
+							dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+						}
+					},
+					dataType:'json'
+				});
+				return false;
+			}
+		});
+	});
+</script>

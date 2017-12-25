@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加本层机构</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wfx.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.js?v=__VR__"></script>
+
+<style>
+.shopTable tr td{ font-size:14px;word-break: break-all; line-height:24px; padding:7px 15px; text-align:left; word-break:break-all;}
+.shopTable tr:first-child td{ border-top: solid 1px #e3e3e3; }
+.shopTable tr td a{ color:#2e7dc6; line-height:24px;}
+.shopTable tr td a img{ width:104px; height:104px;}
+.shopTable tr td a.licences img{ width:80px; height:58px;}
+.shopTable tr td a span{ padding-left:10px;}
+.shopTable tr td em{ font-size:12px; color:#666}
+.shopTable td:nth-of-type(odd){ background:#fcfcfc; text-align:left; color:#666;width: 20%}
+.shopTable td:nth-of-type(even){ background:#fff; text-align:left; color:#666;width: 30%}
+.shopTable tr.gap td{ border-left:0;border-right:0; background:#FFF}
+.shopTable.editHistory tr td{ text-align:center; background:#FFF}
+.shopTable.editHistory th{border:0; border-top: solid 1px #e3e3e3; font-size:14px}
+.shopTable.editHistory th.first{border-left: solid 1px #e3e3e3;}
+.shopTable.editHistory th.last{border-right: solid 1px #e3e3e3;}
+</style>
+<script>
+    function succSubmit(){
+        var id = "{$id}";
+        var curAgency = $("#agency").val();
+        var url = $("#theform").attr('action') + "&salerId="+id+"&agency="+curAgency;
+        var dialog;
+        var winparent = art.dialog.opener;
+        $("#theform").attr('action',url);
+        $("#theform").ajaxSubmit({
+            beforeSubmit: function () {
+                dialog = art.dialog({title: false, content: "<div class='msg-all-succeed'>正在提交...</div>", fixed: true, padding: 0});
+            },
+            success: function (data) {
+                if (data.status == '1') {
+                    dialog.time(2).content("<div class='msg-all-succeed'>" + data.info + "</div>");
+                    winparent.reload();
+                } else {
+                    dialog.time(5).content("<div class='msg-all-error'>" + data.info + "</div>");
+                }
+            },
+            dataType:'json'
+        });
+        return false;
+    }
+</script>
+</head>
+<body>
+<div class="popupWin">
+	<div class="Gform" style="margin-left:-50px;">
+    	<ul>
+        	<li class="Gname">所属经销商</li>
+            <li class="Ginput">
+                <eq name="role" value="1">
+                <include file="./Home/Tpl/Wfx/CommonSelect.html" stype="fromSaler"/>
+                <else/>
+                <include file="./Home/Tpl/Wfx/CommonSelect.html" stype="fromAgency"/>
+                </eq>
+                <span class="txtTips important">请勿频繁进行转移操作！</span>
+            </li>
+        </ul>
+    </div>
+    <form id="theform" action="{:U('Wfx/Fxgl/moveAjax')}" method="POST"></form>
+    <div class="tc"><a id="sub" href="javascript:void(0);" class="btn-all btn_primary  mt30 mb30">确认转移</a></div>
+</div>
+</body>
+</html>

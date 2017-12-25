@@ -1,0 +1,476 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加微博卡券-卡券中心</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<style type="text/css">
+.uploadarea li img{ z-index:-1; display:block}
+.editupload{ display:none; width:70px; height:50px; background:rgba(0, 0, 0, 0.5); position:absolute; top:0; z-index:600; color:#FFF; font-weight:bold; line-height:50px; text-align:center}
+ .tip_icon a{ color:#666; text-decoration:none; line-height:33px;}
+</style>
+<script type="text/javascript">
+$(function(){
+	$(".addAward_btn").click(function(e){
+		var _url="{:U('Common/SelectJp/index',array('show_type'=>'1,3','callback'=>'setcard','show_source'=>'0'))}";
+	   	 _url+='&goods_type='+$('input[name=type]').val();
+         art.dialog.open(_url,{
+            id: 'closeJp',
+            width: 800,
+            title:'选择卡券'
+        })  
+})
+})
+
+function setcard(data){
+     var goods_id=data.goods_id;
+     $('#thisoneform input[name=goods_id]').val(goods_id);
+     $('#thisoneform input[name=wx_card_id]').val(data.card_id);   
+     $('#prisename').html(data.goodsname + "<i></i>");
+     var _url="{:U('Common/SelectJp/addToPrizeItem')}";
+     art.dialog.open(_url+'&prizeId='+goods_id + '&card_id=' + data.card_id + '&callback=priseitem',{title:'奖品基本信息设置',width:800});
+}
+function openUploaderMeitu(url) {
+    var win_width = 700;
+    art.dialog.open(url, {
+        lock: true,
+        title: "上传图片",
+        width: win_width,
+        height: win_width / 1.6,
+        id: 'art_upload'
+    });
+} 
+
+function binduser(){
+	 art.dialog.open("{:U('Weibo/WeiboCard/adduser')}",{
+		    id:'adduser',
+			title: '官方微博账号绑定 ',
+			width:'400px',
+			lock:true,
+			height:'220px'
+		});	
+}
+
+function uploadCallback(data){ 
+    $('#picUrl').attr('src', data.src);
+        //上传用
+    $('input[name=picUrl]').val(data.savename); 
+}
+$(function(){
+	Gform();
+    var goods_info = <?php echo json_encode($goodsInfo);?>;
+    if(goods_info){
+        call_back(goods_info);
+    }
+	//卡券类型选择
+	$(".card_select div").click(function(){ 
+	$(".card_select div").removeClass("current");
+    $('.catespan').text($(this).find('p').text());
+    if($('input[name=type]').val()!=$(this).attr('data-value')){
+   		 $('input[name=type]').val($(this).attr('data-value'));
+   		 $('form')[0].reset();
+    }
+	$(this).addClass("current");
+    });	
+	 $('.catespan').text('代金券');
+	/*上传图片*/ 
+	$("ul.uploadarea li a").mouseover(function(){
+		$(this).children(".editupload").show();
+	});
+	$("ul.uploadarea li a").mouseleave(function(){
+		$(this).children(".editupload").hide();
+	});
+	
+	$(".js_editimg").click(function(){
+            var opt = {
+                cropPresets:'230x190',
+                callback:'uploadCallback'
+            };
+            open_img_uploader(opt);
+	});
+		
+    $("#smb").click(function(){
+    	var dialog;
+    	var type = $("input[name='type']:checked").val();
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                        	   var jump = "var win = art.dialog.open.origin;win.location.href='{:U('Weibo/WeiboCard/index')}';";
+                           setTimeout(jump,1000);
+                           return false;
+			           }
+                      else{
+                           dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                },
+                dataType:'json'
+            });
+            return false;
+        }  
+    });
+});
+function checkImg(){
+	if($("input[name=picUrl]").val() == '')
+        {
+            return "请上传营销图片";
+        }
+}
+function imgCheck(){
+	if($("input[name=picUrl]").val() == ''){
+        return "请上传营销图片";
+    }
+}
+
+/*获取图片路径中的图片名*/
+function base_name(url){
+    var urlList = url.split('/'); 
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+
+function uploadImg(url) {
+var win_width = 500;
+art.dialog.open(url, {
+    lock: true,
+    title: "上传图片",
+    width: win_width,
+    height: win_width / 1.6,
+    id: 'art_upload'
+});
+} 
+ function changegg(){
+	     var _url="{:U('Common/SelectJp/index',array('show_type'=>'1,3','callback'=>'call_back','show_source'=>'0'))}";
+	   	 _url+='&goods_type='+$('input[name=type]').val();
+         art.dialog.open(_url,{
+            id: 'closeJp',
+            width: 800,
+            title:'选择卡券'
+        })
+    };
+function call_back(datas){ 
+    if(datas.goods_type==1 ||  datas.goods_type==3 ){
+      	$('form')[0].reset();
+    	$("#subTitle,#title").html(datas.goods_name).val(datas.goods_name);
+        $('#intro').val(datas.print_text);
+        $("#goods_id").val(datas.goods_id);
+        $("#reduce_cost").closest("ul").hide();
+        $("#discount").closest("ul").hide();   
+        
+	    if(datas.goods_type == 1){
+	        $("#reduce_cost").val(datas.goods_amt); 
+	        $("#reduce_cost").closest("ul").show();
+	        $(".card_select div").removeClass("current");
+	        $('.card_select').find('div:eq(0)').addClass('current');
+	        $('input[name=type]').val(1);
+	        $('.catespan').text('代金券');
+	    }
+	    if(datas.goods_type == 3){ 
+	        $("#discount").val(datas.goods_discount);
+	        $("#discount").closest("ul").show();
+	        $(".card_select div").removeClass("current");
+	        $('.card_select').find('div:eq(1)').addClass('current');
+	        $('input[name=type]').val(3);
+	        $('.catespan').text('优惠券');
+	    }　
+	   if(datas.goods_image_url!=''){
+			$('#picUrl').attr('src',datas.goods_image_url);
+			$('input[name=picUrl]').val(datas.goods_image_url);
+		   }  
+       
+    if(datas.storage_type == '0'){
+        $("#kucun").val("不限").closest('ul').show();
+    }else{
+        $("#kucun").val(datas.remain_num).closest('ul').show();
+    }  
+    art.dialog({id:'closeJp'}).close(); 
+    }else art.dialog({
+		id:'errormsg',
+		content:'卡券类型错误，请重新选择'
+    }).show();
+}
+
+
+</script>
+
+
+<style>
+/*.sweet_tips{padding-left: 15px;margin-left: auto;margin-right: auto; border: 1px solid #f2e6ce;background-color: #fffbf2;color: #f0ab68;font-size: 12px; padding:10px 15px; margin-bottom:20px;}
+.sweet_tips a{ color:#f15755; font-weight:bold}
+.uploadarea li img{ z-index:-1; display:block}
+.editupload{ display:none; width:70px; height:50px; background:rgba(0, 0, 0, 0.5); position:absolute; top:0; z-index:600; color:#FFF; font-weight:bold; line-height:50px; text-align:center}
+
+.Gform .switch ul{}
+.Gform .switch ul li.Gname{ width:100px;}
+.Gform .switch ul li.Ginput{ padding: 12px 0 0 114px;}
+.Gform.eTicket .smallfont li.Gname{ font-size:12px;}
+.Gform.eTicket .smallfont li.Ginput textarea{ font-size:12px; width:203px;}
+
+
+a.btn-up{  display: inline-block;  padding: 4px 15px;  border: solid 1px #ffd0d3;  background: #fff2f3; border-radius:2px;  color: #f15755; text-decoration:none cursor:pointer}
+a.btn-up:hover { background:#ffd0d3; text-decoration:none}
+
+
+.sweet_tips {  padding-left: 15px;  margin-left: auto;  margin-right: auto;  border: 1px solid #f2e6ce;  background-color: #fffbf2;  color: #f0ab68;  font-size: 14px;  padding: 4px 15px;  margin-bottom: 10px; border-radius:2px;}
+
+
+ul#is_acount{ display:none}*/
+.Gform .Ginput .switch .Gtime2 input[type=text]{ width:14.5%; background:none; padding-right:5px;}
+</style>
+
+</head>
+<body>
+    <div id="wrapper">
+    	<include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        
+         <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="wbkq"/>  
+       
+        </div>
+        
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                     <include file="WangcaiPc/NumGoods/tabMenu" leftmenuid="WeixinCard"/>                   
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                    <h4>微博卡券添加<i class="tip_icon r"><a href="{:U('Home/Help/helpArt',array('news_id'=>1335,'leftId'=>'dzq','class_name'=>'卡券','type'=>7))}">什么是微博卡券？</a></i>
+					</h4>
+                    </div>
+                    
+                    <div class="tipNormal mb15">     
+                	    <h5>提示：如需添加新浪微博卡券，请确认</h5>
+						<p>1、您的旺财账户已经与您的新浪微博账号绑定
+						<if condition="$is_bind eq true">
+                       			<span style="font-size: 12px;margin-left: 20px;"> 你已绑定新浪微博</span>
+                        <a title="重新绑定微博商户版"    onclick="binduser()"  href="javascript:void(0);"  style=" display: inline-block;color: #EE1515;font-size: 14px;font-weight: bold;">重新绑定</a></p>
+                   		<else/>
+                   		 <a title="绑定微博商户版"    onclick="binduser()"  href="javascript:void(0);"  style="text-indent: 20px;display: inline-block;color: #EE1515;font-size: 14px;font-weight: bold;">马上绑定</a></p>
+						
+                   		</if>
+						<p>2、您的新浪微博商户版账号已开通微卡券功能,微博支付功能</p>
+						                    
+                    </div>
+                    
+                    <form method="post" action="<?php echo U('Weibo/WeiboCard/add');?>">
+                    <div class="steps">选择卡券类型</div>
+                       <div class="card_select">
+                        <input  type="hidden" name="type" value="1"/>
+                    	<div class="card1 current" data-value='1' id="t1">
+                         
+                        	<p>代金券</p>
+                        	<span style="text-align:left"><i class="quest"></i>代金券</span>
+                        </div>
+                        <div class="card4" id="t2" data-value='3'>
+                         
+                        	<p>优惠券</p>
+                        	<span><i class="quest"></i>优惠券</span>
+                        </div>
+                    </div>
+                    
+                    <div class="steps">创建<span class="catespan">卡券</span></div>
+                    
+                    <div class="eTicket_form">
+                    	
+                            <div id="Wform" class="Gform l">
+                            <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;添加<em class="catespan">卡券</em></li>
+                                    <li class="Ginput">
+                                    <div class="Gchoose">
+                                    <input type="text" class="validate[required]" name="goods_id" id="goods_id" value="" />
+                                    <a href="javascript:void(0)" id='prisename'></a>
+                                    <a href="javascript:void(0)" id="bind_cj" class="Gbtn-card addAward_btn" title="选择卡券"><i></i></a>
+                                    </div>
+                                        </li>                     
+                           </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;商家名称</li>
+                                    <li class="Ginput">
+                                        <input name="merchantName" id="merchantName" type="text" value="{$nodeInfo['node_name']}" onkeyup="check_lenght(12,'name_text',this);" maxlength="12" class="validate[required,maxSize[24]]"/>
+                                        <span class="maxTips forInput" data-max="12">0/12</span>
+                                    </li>
+                                </ul> 
+                                <ul>
+                                <li class="Gname"><span>*</span>&nbsp;卡券标题</li>
+                                <li class="Ginput"><input maxlength="85" name="title" id="title" type="text" onkeyup="check_lenght(85,'name_text',this);" class="validate[required,maxSize[24]] textbox w120"/>
+                                <span class="maxTips forInput" data-max="85">0/85</span>
+                                </li>
+                                </ul>
+                                <ul>
+                                <li class="Gname">&nbsp;卡券副标题</li>
+                                <li class="Ginput"><input maxlength="85" name="subTitle" id="subTitle" type="text" onkeyup="check_lenght(85,'name_text',this);" class="validate[maxSize[24]] textbox w120"/>
+                                <span class="maxTips forInput" data-max="85">0/85</span>
+                                </li>
+                                </ul>  
+                                
+                                 <ul class="dn">
+                                         <li class="Gname">&nbsp;减免金额</li>
+                                         <li class="Ginput">
+                                             <input type="text"  disabled="disabled" id="reduce_cost" disabled="disabled" class="validate[custom[number],min[0]] textbox view-price1" maxlength="9" value="" /><span class="maxTips forInput">元</span>
+                                         </li>
+                                 </ul> 
+                                 <ul class="dn">
+                                         <li class="Gname">&nbsp;折扣额度</li>
+                                         <li class="Ginput">
+                                             <input type="text" disabled="disabled" id="discount" class="validate[custom[number],min[0]] textbox view-discount" maxlength="5" value="" /><span class="maxTips forInput">%</span>
+                                         </li>
+                                  </ul>
+								<ul class="dn">
+                                         <li class="Gname">&nbsp;库存</li>
+                                         <li class="Ginput">
+                                             <input type="text" disabled="disabled" id="kucun" class="validate[custom[number],min[0]] textbox view-discount" maxlength="5" value="" />
+                                         </li>
+                                  </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;有效期</li>
+                                    <li class="Ginput">
+                                    <div class="Gtime2 fn">
+                                        <input type="text" style="width:89px;" class='validate[required]' onclick="WdatePicker({dateFmt:'yyyy-MM-dd',errDealMode:2})" name="startDate" value=""/>
+                                        <em>至</em>
+                                         <input type="text" style="width:89px;"  class='validate[required]' onclick="WdatePicker({dateFmt:'yyyy-MM-dd',errDealMode:2})" name="endDate" value=""/>
+                                    </div>
+                                </li>
+                                </ul>
+                                <!--<ul>
+                                    <li class="Gname">&nbsp;卡券上/下线时间</li>
+                                    <li class="Ginput">
+                                        <div class="Gtime1 fn l">
+                                        <input type="text" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',errDealMode:2})" name="vstartDate" value=""/>
+                                        <em></em>
+                                        </div>
+                                        <div class="Gtime2 noIcon">
+                                        	<em style="border-left:0">至</em>
+                                        </div>
+                                        <div class="Gtime1 fn l">
+                                        <input type="text"  onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',errDealMode:2})" name="vendDate" value="" style="width:136px;"/>
+                                        <em></em>
+                                        </div>
+                                </li>
+                                </ul>
+                                
+                                
+                                --><ul id="is_price_acount">
+                                    <li class="Gname"><span>*</span>&nbsp;价钱和数量</li>
+                                    <li class="Ginput">
+                                    <div class="switch">
+                                        <div class="newRadio-default">
+                                        <div class="Gtime2 fn noIcon addition">
+                                            <em>原价</em>
+                                            <input name="nominalPrice" id="nominalPrice" type="text" class="validate[required] view-time1"/>
+                                            <em>售卖价</em>
+                                            <input name="price" id="price" type="text" class="validate[required] view-time2"/>
+                                            <em>数量 </em>
+                                            <input placeholder='0无限量'  style="text-align: center;" value="0" name="circulation" id="circulation" type="text" class="validate[required] view-time3"/>
+                                            
+                                        </div>
+                                        </div>
+                                    </div>
+                                    </li>
+                                </ul>
+                               <ul id="is_limited">
+                                    <li class="Gname">&nbsp;单个用户限购</li>
+                                    <li class="Ginput">
+                                    
+                                    <div class="">
+                                        <div class="newRadio-input">
+				                            <input type="text" style="text-align: center;" value="99" 　　　　　　　　　　　　　　　　 class="" name="limited" value=""/>
+				                            <span class="maxTips forInput">张</span>
+				                        </div>
+                                    </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;商家/商品图片</li>
+                                    <li class="Ginput">
+                                    	<div class="Gchoose Gview-img">
+                                        <input name="picUrl" type="hidden" value=""/>
+                                        <a href="javascript:void(0)" class="Gbtn-pic" data-rel="{width:640,height:400}" title="选择图片"><i></i></a>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;客服电话</li>
+                                    <li class="Ginput">
+                                    
+                                    <div class="">
+                                        <div class="newRadio-input">
+				                            <input type="text" maxlength="20"   class="validate[maxSize[20],required]" name="contactPhone" value=""/>
+				                            <span class="maxTips forInput" data-max="20">0/20</span>
+				                        </div>
+                                    </div>
+                                    </li>
+                                </ul>
+                                 <ul>
+                                    <li class="Gname">&nbsp;分机号码</li>
+                                    <li class="Ginput">
+                                    
+                                    <div class="">
+                                        <div class="newRadio-input">
+				                            <input type="text" maxlength="10"   class="validate[maxSize[10]]" name="extension" value=""/>
+				                            <span class="maxTips forInput" data-max="10">0/10</span>
+				                        </div>
+                                    </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;<em class="catespan">卡券</em>介绍</li>
+                                    <li class="Ginput"><textarea name="intro" id="intro" placeholder="请填写代金券详细信息，如 适用时间、使用门店等,100个汉字以内" class="validate[maxSize[100],required] texttextarea w380"></textarea><br /><a href="javascript:void(0)" class="message-show"></a>
+                                    </li>
+                                </ul>
+                               
+                                <ul>
+                                    <li class="Gname"></li>
+                                    <li class="Ginput mt5">
+                                    <a href="javascript:void(0);" title="确认" id="smb" class="btn-all w110">确定</a>
+                                    <a href="javascript:void(0);window.history.back(-1);" title="取消"  class="btn-all-del w110 ml10">取消</a>
+                                    </li>
+                                </ul> 
+                                </div>
+                                </div>
+                        </form>
+                    </div>                   
+                
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

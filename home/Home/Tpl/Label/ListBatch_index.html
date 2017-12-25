@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+<title>{$row['node_name']}</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_List.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/json2.js?v=__VR__"></script>
+</head>
+<body>
+<div id="header">
+    <h1>{$row['name']}</h1>
+</div>
+<form name="selection" method="POST" action="{:U('Label/ListBatch/index', array('id' => $id))}">
+<input type="hidden" name="side_nav" value="{$side_nav}">
+<input type="hidden" name="keyword" value={$keyword}>
+</form>
+<div id="wrapper">
+    <div id="main">
+    	<div class="bannerImg"><img src="{:get_upload_url($row['banner_pic'])}"></div>
+    	<if condition="$row['nav_1'] or $row['nav_2']">
+        <div class="dateSideNav">
+            <ul class="control_nav">
+            	<notempty name="row['nav_1']">
+                <li class='<eq name="side_nav" value="1">hover</eq>'><a href="javascript:void(0);">{$row['nav_1']}</a></li>
+                </notempty>
+                <notempty name="row['nav_2']">
+                <li class='<eq name="side_nav" value="2">hover</eq>'><a href="javascript:void(0);">{$row['nav_2']}</a></li>
+                </notempty>
+            </ul>
+        </div>
+        </if>
+        <div class="TabNav">
+            <ul>
+            	<foreach name="row['tab_nav']" item="vo" key="tab_key" >
+                <li>
+                	<a href="javascript:void(0);">{$vo['title']}<i></i></a>
+                    <div class="TabNavList">
+                    	<dl>
+                        <dd data-keyword=""><a href="javascript:void(0)" >全部</a></dd>
+                    	<volist name="vo['list']" id="key_word">
+                        	<dd data-keyword="{$key_word}"><a href="javascript:void(0)" >{$key_word}</a></dd>
+                        </volist>
+                        </dl>
+                    </div>
+                </li>
+                </foreach>
+            </ul>
+        </div>
+        <div class="TabNavbg dn"></div>
+		<include file="ListBatch:page"/>
+    </div>
+</div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+	var hover = $(".TabNav li.hover").index();
+	if($("#masonry .box").length>0){
+		$("#masonry").infinitescroll({
+			navSelector  : '#page-nav',
+			nextSelector : '#page-nav a',
+			itemSelector : '.box',
+			dataType: 'html',
+			loading: {
+				finishedMsg: '没有更多活动了',
+				img: '__PUBLIC__/Label/Image/Item/loading.gif'
+			}
+		}, function(newElems){
+			//程序执行完的回调函数
+			//var $newElems = $(newElems);
+			//console.log(newElems);
+		});
+	}else{
+		$("#masonry").append("<div class='nodate'></div>")
+	}
+	$(".TabNav li").each(function(index, element) {
+        if($(this).find(">a").text()==""){
+			$(this).remove();
+		};
+		$(this).find(".TabNavList dd").each(function(index, element) {
+			if($(this).find(">a").text()==""){
+				$(this).remove();
+			};
+		});
+    });
+	$("body").click(function(e){
+		$(".TabNav li").removeClass("open");
+		$(".TabNav li").removeClass("hover");
+		$(".TabNav li:eq("+hover+")").addClass("hover");
+		$(".TabNavbg").addClass("dn");
+	})
+	$(".TabNav li").click(function(e){
+		e.stopPropagation();
+		if(!$(this).hasClass("open")){
+			$(".TabNav li").removeClass("open");
+			$(".TabNav li").removeClass("hover");
+			$(this).addClass("open");
+			$(this).addClass("hover");
+			$(".TabNavbg").removeClass("dn");
+		}else{
+			$(".TabNav li").removeClass("open");
+			$(".TabNav li").removeClass("hover");
+			$(".TabNav li:eq("+hover+")").addClass("hover");
+			$(".TabNavbg").addClass("dn");
+		}
+	})
+	$('.control_nav li').click(function(){
+		var index = parseInt($(this).index());
+		var nav_id = index + 1;
+		$('[name="side_nav"]').val(nav_id);
+		$('form[name="selection"]').submit();
+	});
+	$('.TabNavList dd').click(function(){
+		var keyword = $(this).attr('data-keyword');
+		var li = $(this).parentsUntil('li').parent();
+		var index = parseInt(li.index()) - 1;
+		var readyJson = $('[name="keyword"]').val();
+		var keywordData = JSON.parse(readyJson);
+		$.each(keywordData, function(k,v){
+			if (k == index) {
+				keywordData[k] = keyword;
+			}
+		});
+		keywordData = JSON.stringify(keywordData);
+		$('[name="keyword"]').val(keywordData);
+		$('form[name="selection"]').submit();
+	});
+	addHover();
+});
+
+function addHover() {
+	var readyJson = $('[name="keyword"]').val();
+	var keywordData = JSON.parse(readyJson);
+	$('.TabNav dd').each(function(){
+		var keyword = $(this).attr('data-keyword');
+		var li = $(this).parentsUntil('li').parent();
+		var index = parseInt(li.index()) - 1;
+		if (keywordData[index] == keyword) {
+			$(this).addClass('hover');
+		}
+	});
+}
+</script>
+<script>
+var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Public/_shareWx"/>

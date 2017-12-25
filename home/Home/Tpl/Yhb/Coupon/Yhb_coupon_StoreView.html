@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-新增街道</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+    
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=WRzAu3DNewWB4oeOELaczjsM"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script>
+$(function(){
+	//省市区初始化
+	CityCode({
+		province:$("#province_code"),//省
+		city:$("#city_code"),//市
+		town:$("#town_code"),//区
+		business:$("#business_code"),//商圈
+		selected:"{:$info['province_code'].$info['city_code'].$info['town_code'].$info['business_code']}",//默认选中的省市区代号
+		url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+	});
+    $("#smb").click(function(){
+        parent.location.href="index.php?g=Home&m=Store&a=index";
+    });
+	 function subclick(){
+         if($("#storeFromEdit").validationEngine('validate')){
+//      	   $("#smbmit").unbind('click',subclick);
+  	      $.post("{:U('Yhb/YhbStore/addVillage')}",$("#storeFromEdit").serialize(),function(d){
+  		       // alert(d.status+d.info);
+  			   if(d.status =='0'){
+    			   art.dialog({
+     					title:"提示",
+     					height:100,
+     					content:d.info,
+     					icon: 'error',
+     					lock:true,
+     					ok:function(){
+     					   //art.dialog.close();
+     					}
+     				})
+  			   }else if(d.status =='1'){
+  			     success(d.info);
+  			   }
+    		$("#smbmit").bind('click',subclick);
+  		  },'json');
+  	  }
+
+  	}
+
+	$("#smbmit").click(subclick);
+})
+
+function result_(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				   //art.dialog.close();
+				}
+			})
+   }
+   
+function success(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+//				    art.dialog.close();
+//				    parent.art.dialog.list['storeID'].close();
+				}
+			})
+   }
+    function editVillage(id,key){
+        $(".village_hide_"+key).css("display","block");
+        $(".village_"+key).hide();
+        $(".village_save_"+key).change(function(){
+            var village=$(".village_save_"+key).val();
+            $.ajax({
+                type: 'POST',
+                url: "{:U('Yhb/YhbStore/editVillage')}",
+                data: {id:id,village:village},
+                success: function(d){
+                    if(d.status =='0'){
+                        art.dialog({
+                            title:"提示",
+                            height:100,
+                            content:d.info,
+                            icon: 'error',
+                            lock:true,
+                            ok:function(){
+                                //art.dialog.close();
+                            }
+                        })
+                    }else if(d.status =='1'){
+                        success(d.info);
+                        window.location.reload();
+                    }
+                },
+                dataType: 'json'
+            });
+        });
+    }
+</script>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab" id="Wcanal-tabon">
+    <div class="steps">基本信息</div>
+    <div class="eTicket_form">
+        <div class="view">
+            <ul>
+                <li><label>优惠名称：</label><p>{$batch_info.batch_short_name}</p></li>
+                <li></li>
+                <li><label>优惠开始时间：</label><p><php>echo date("Y-m-d",strtotime($batch_info["begin_time"]));</php></p></li>
+                <li><label>优惠结束时间：</label><p><php>echo date("Y-m-d",strtotime($batch_info["end_time"]));</php></p></li>
+                <php>if($batch_info['verify_begin_type']==1 && $batch_info['verify_end_type']==1){</php>
+                <li><label>发送优惠：</label><p>{$batch_info["verify_begin_date"]}天开始使用</p></li>
+                <li><label>发送优惠：</label><p>{$batch_info["verify_end_date"]}天结束使用</p></li>
+                <php>}else{</php>
+                <li><label>凭证验证开始时间：</label><p><php>echo date("Y-m-d",strtotime($batch_info["verify_begin_date"]));</php></p></li>
+                <li><label>凭证验证结束时间：</label><p><php>echo date("Y-m-d",strtotime($batch_info["verify_end_date"]));</php></p></li>
+                <php>}</php>
+            </ul>
+        </div>
+    </div>
+    <div class="steps">门店列表</div>
+    <div class="eTicket_form">
+        <form method="" action="" id="storeFromEdit">
+            <input type="hidden" name="street_code" value="{$street_code}"/>
+		 <input type="hidden" name="id" value="{$Think.get.id}" />
+            <div id="Wform" class="Gform eTicket">
+                <div class="shopCon">
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                        <tbody>
+                        <tr class="th">
+                            <th>门店简称</th>
+                            <th>所在省市区</th>
+                            <th>门店负责人</th>
+                            <th>负责人电话</th>
+                            <th>负责人邮箱</th>
+                            <th>门店地址</th>
+                        </tr>
+                        <?php if($store_arr){
+					   foreach($store_arr as $key=>$v){  ?>
+                        <tr class="title">
+                            <td class="hover">{$v.store_short_name|default='未填写'}</td>
+                            <td>{$vo.province}{$vo.city}{$vo.town}</td>
+                            <td >{$v.principal_name}</td>
+                            <td>{$v.principal_tel}</td>
+                            <td>{$v.principal_email}</td>
+                            <td>{$v.address}</td>
+                        </tr>
+                        <?php } }else{ ?>
+                        <tr><td colspan="6"><div class="nonedata"></div></td></tr>
+                        <?php } ?>
+                    </table>
+                    <div class="page">{$page}</div>
+                </div>
+                </div>
+        </form>
+    </div>
+    </div>
+</div>
+</body>
+</html>

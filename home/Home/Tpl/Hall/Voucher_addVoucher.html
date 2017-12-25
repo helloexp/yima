@@ -1,0 +1,405 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>创建代金券_代金券分销助手_翼码旺财</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+
+	$(function(){
+		// 确定
+		 $("#smb").click(function(){
+				var dialog;
+    	var type = $("input[name='type']:checked").val();
+        if($("form").validationEngine('validate')){
+        	 $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                           if(type==5){
+                        	   var jump = "var win = art.dialog.open.origin;win.location.href='{:U('WangcaiPc/NumGoods/aiPaiList')}';";
+                           }else{
+                        	   var jump = "var win = art.dialog.open.origin;win.location.href='{:U('Hall/Voucher/index')}';";
+                           }
+                           setTimeout(jump,1000);
+                           return false;
+                      }else{
+                           dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                },
+                dataType:'json'
+            });
+           return false;
+        }
+    });
+		
+		
+		// 不限
+		$(".choosetext1").click(function(){
+	        $(this).closest("li").find(".choosetext").val("");
+	        $(this).closest("li").find(".choosetext").hide();
+	    });
+		// 限制
+	    $(".choosetext2").click(function(){
+	        $(this).closest("li").find(".choosetext").val("");
+	        $(this).closest("li").find(".choosetext").show();
+	    });
+	
+	    // 类目 
+	    $("#cate1").change(function(){
+	    	var obj = $(this);
+	    	var obj_2 = $("#cate2");
+	    	var val = obj.val();
+	    	if(val){
+	    		$.post("{:U('Hall/Voucher/ajaxGoodsCate')}",{"id":val},function(data){
+	    			if(data.status==1){
+	    				var datas = data.data;
+	    				obj_2.html('');
+	    				obj_2.append("<option value=''>请选择二级类目</option>");
+	    				$.each(datas,function(i,n){
+	    					obj_2.append("<option value='"+n.path+"'>"+n.name+"</option>"); 
+	    				});
+	    			}else{
+	    				return false;
+	    			}
+	    		},"json");
+	    	}else{
+	    		obj_2.html("<option value=''>请选择二级类目</option>");
+	    	}
+	    });
+	    // 下一步 
+	    $(".btn-next").click(function(){
+	    	if($("form").validationEngine('validate')){
+	    		$(".fistForm").hide();
+	            $(".sencodForm").show();
+	    	}
+	        return false;
+	    });
+	  //上一步
+	    $(".btn-pre").click(function(){
+	    	$(".fistForm").show();
+	        $(".sencodForm").hide();
+	        return false;
+	    });
+	    // 代金券门店选择
+	    $("input[name='shop']").change(function(){
+	        if($(this).val()==1){
+	            $("#chooseShop").css("display","none");
+	        }else{
+	            $("#chooseShop").css("display","block");
+	        }
+	    });
+	    $("input[name='shop2']").change(function(){
+	        if($(this).val()==1){
+	            $("#chooseShop2").css("display","none");
+	        }else{
+	            $("#chooseShop2").css("display","block");
+	        }
+	    });
+	    $("a[name='choose_shop'],a[name='choose_shop2']").click(function(){
+	    	var type = '&type=0';
+	    	if($(this).attr("name") == "choose_shop"){
+	    		type = "&type=1";
+	    	}
+	        art.dialog.open("{:U('WangcaiPc/NumGoods/shopList')}"+type,{
+	            lock: true,
+	            title:"选择门店",
+	            width:720,
+	            height:'80%'
+	        });
+	    });
+	    $(".icon-del").live('click',function(){
+	        $(this).closest(".numgoodsList-item").detach();
+	    });
+	})
+    // 代金券图片
+	    
+// 营销品图片
+function checkImg(){
+    if($("#resp_img").val() == '')
+        {
+            return "请上传营销图片";
+        }
+}
+function imgCheck(){
+	if($("#img_resp").val() == ''){
+        return "请上传营销图片";
+    }
+}
+
+/*获取图片路径中的图片名*/
+function base_name(url){
+    var urlList = url.split('/'); 
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+
+function uploadImg(url) {
+var win_width = 500;
+art.dialog.open(url, {
+    lock: true,
+    title: "上传图片",
+    width: win_width,
+    height: win_width / 1.6,
+    id: 'art_upload'
+});
+}
+
+//背景图片回调函数
+function bgCallback(d) {
+//填充缩略图
+$('#img_resp_show').attr('src', d.absolutepath).show();
+//上传用
+$('#img_resp').val(base_name(d.absolutepath));
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p>创建代金券</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                   <include file="Hall/Mypartner/left" leftmenuid="djqgl"/>
+                </div>
+                <div class="subcon fn">
+                 <div id="store_check">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">创建代金券</h4>
+                    </div>
+                  <div class="numgoods-info <eq name='addStore' value='1'>dn</eq>">
+                            <li>第一步代金券基本内容确定提交后不可修改</li>
+                            <li>第二步 代金券默认信息，用于营销活动配置参考信息，可在营销活动创建时修改</li>
+                            <li>按照模板字段填写代金券内容，“<span>*</span>”为必填字段</li>
+                            <li>财务编码 填写 商家商品编号，如：SKU编号等</li>
+                            <li>创建成功后，自用营销活动可直接调用，也可发布到异业联盟中心</li>
+                            <if condition="$userInfo['node_type'] eq 2">
+                            <li>如果您要创建优惠券,代金券,提领券请拨打业务咨询热线400-882-7770</li>
+                            </if>
+                        </div>
+                        <form method="post" action="<?php echo U('Voucher/addVoucher');?>">
+                        <div class="global-input6 fn <eq name='addStore' value='1'>dn</eq> fistForm">
+                               <div class="mem-repay-procedure fn">
+                                    <li class="hover"><a href="javascript:void(0);">代金券基本内容</a></li>
+                                    <li><a href="javascript:void(0);">代金券默认短彩信</a></li>
+                                </div>
+                                <ul class="numgoods-form-title">代金券基本内容</ul>
+                                <!--旺财营销品表单1-->
+                                <div id="Wform">
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;<span class="tip_name">代金券</span>名称：</li>
+                                    <li class="global-input6-input"><input name="name" id="name" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[24]] textbox w380"/><br /><p class="font-12-cc" id="name_text">还可以输入24个字</p></li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;<span class="tip_name">代金券</span>有效期：</li>
+                                    <li class="global-input6-input"><input name="goods_begin_date" id="goods_begin_date" type="text" onClick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'goods_end_date\\')}'})" class="validate[required] textbox w172"/><span class="mlr5">至</span><input name="goods_end_date" id="goods_end_date" type="text" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'goods_begin_date\\')||\\'%y-%M-%d\\'}'})" class="validate[required] textbox w172"/></li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;代金券核销限制：</li>
+                                    <li class="global-input6-input">
+                                    <input name="validate_type" id="num_type1" value="0" checked="checked" type="radio" class="choosetext1"/><p class="ml5 choosetext1">限一次核销</p>
+                                    <input name="validate_type" id="num_type2" value="1" type="radio" class="ml20 choosetext2"/><p class="ml5 choosetext2">按金额核销</p>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;<span class="tip_name">代金券</span>数量：</li>
+                                    <li class="global-input6-input">
+                                    <input name="num_type" id="num_type1" value="1" checked="checked" type="radio" class="choosetext1"/><p class="ml5 choosetext1">不限</p>
+                                    <input name="num_type" id="num_type2" value="2" type="radio" class="ml20 choosetext2"/><p class="ml5 choosetext2">限制</p>
+                                    <input name="goods_num" type="text" class="validate[min[1],condRequired[num_type2],custom[integer]] textbox dn w50 ml5 choosetext" />&nbsp;</li>
+                                </ul>
+                               <ul>
+                                    <li class="global-input6-name">*&nbsp;代金券面值：</li>
+                                    <li class="global-input6-input"><input name="price" type="text"  class="validate[custom[number],min[0],required] textbox w240" onkeyup="this.value=this.value.replace(/[^\d]/g,'')"/>&nbsp;元</li>
+                                </ul>
+
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;市场价格：</li>
+                                    <li class="global-input6-input">
+                                        <input name="market_price" type="text"  class="validate[custom[number],required,min[0]] textbox w240" onkeyup="this.value=this.value.replace(/[^\d]/g,'')"/>&nbsp;元
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;类目：</li>
+                                    <li class="global-input6-input">
+                                        <select id="cate1" class="selectbox" >
+                                                <option value="">请选择一级类目</option>
+                                                <volist name="goodsCate" id="vo">
+                                                    <option value="{$vo['code']}">{$vo['name']}</option>
+                                                </volist>
+                                        </select>
+                                        <select name="cate2" id="cate2" class="validate[required] selectbox" >
+                                                <option value="">请选择二级类目</option>
+                                        </select>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;打印小票内容：</li>
+                                    <li class="global-input6-input"><textarea name="print_text" id="print_text" class="validate[maxSize[100],required] texttextarea w380"></textarea><br /><a href="javascript:void(0)" class="message-show"></a>
+                                    <p class="font-12-cc">小票内容将显示在验证后的打印小票上，运营员根据打印小票内容提供服务</p>
+                                    </li>
+                                </ul>
+                               <ul>
+                                    <li class="global-input6-name">*&nbsp;代金券可验证门店：</li>
+                                    <li class="global-input6-input">
+                                        <input name="shop" id="shop" value="1" checked="checked" type="radio" />
+                                        <p class="ml5 mr20">所有子门店可用</p>
+                                        <input name="shop" id="shop" value="2" type="radio" />
+                                        <p class="ml5 mr20">自己选择可用门店</p>
+                                        <div id="chooseShop" class="fn dn">
+                                        <div class="numgoodsList mt10" id="shop_content">
+                                        </div>
+                                        <div class="mt10"><a href="javascript:void(0);" title="选择门店" name="choose_shop" class="btn-all w90 ml10 mt10">选择门店</a></div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">&nbsp;手工发送代金券指引：</li>
+                                    <li class="global-input6-input"><textarea name="join_rule" id="join_rule" class="validate[maxSize[100]] texttextarea w380"></textarea><br /><p class="font-12-cc">该指引用于指导发送营销品工作人员</p></li>
+                                </ul>
+                                <ul>                       
+                                    <li class="global-input6-name">&nbsp;代金券备注：</li>
+                                    <li class="global-input6-input"><textarea name="goods_desc" id="goods_desc" class="validate[maxSize[200]] texttextarea w380"></textarea></li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">&nbsp;财务物料编码：</li>
+                                    <li class="global-input6-input"><input name="material_code" type="text"  class="validate[maxSize[30]] textbox w380"/><br /><p class="font-12-cc">商户用此内容与自己的财务系统进行对账</p></li>
+                                </ul>
+    							</div>
+                                <!--旺财营销品表单1-->
+                                <ul>
+                                    <li class="global-input6-name"></li>
+                                    <li class="global-input6-input"><a href="javascript:void(0);" class="btn-all w110 btn-next">下一步</a></li>
+                                </ul>
+                        </div>
+                        <!--第二步-->
+                        <div class="global-input6 fn sencodForm dn">
+                         <div class="mem-repay-procedure fn">
+                                  <li><a href="javascript:void(0);">代金券基本内容</a></li>
+                                <li class="hover"><a href="javascript:void(0);">代金券默认短彩信</a></li>
+                            </div>
+                                    <ul class="numgoods-form-title">商品图片设置</ul>
+                                    <ul>
+                                        <li class="global-input6-name">*&nbsp;代金券图片：</li>
+                                        <li class="global-input6-input">
+                                            <div class="rel l">
+                                            <input type="hidden" value="" name="img_resp" id="img_resp"/>
+                                            <a href="javascript:;" title="上传" onclick="return uploadImg('{:U('ImgResize/Resize/index',array('ratioX'=>229,ratioY=>229,'callback'=>'bgCallback'))}')" class="btn-all w60">上传</a>
+                                            </div>
+                                            <div class="cl"></div>
+                                            <img src="" id="img_resp_show" width="150" class="mt10 dn"/>
+                                            <div class="cl"></div>
+                                            <p class="font-12-cc">建议尺寸230px*230px，请上传1M以内的jpg,jpeg,png图片</p>
+                                            <div class="cl"></div>
+                                        </li>
+                                    </ul>
+                                	<ul class="numgoods-form-title">代金券使用时间设置</ul>
+                                    <ul>
+                                        <li class="global-input6-name">*&nbsp;使用代金券时间：</li>
+                                        <li class="global-input6-input">
+                                            <div class="judgeDiv">
+                                                <label class="ml5" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();">
+                                                <input type="radio" checked="checked" name="verify_time_type" value="0" id="verify_begin_type1"/><span class="ml5">按日期设置</span></label>
+                                                <label class="ml10" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();">
+                                                <input type="radio" name="verify_time_type" value="1" id="verify_begin_type2"/><span class="ml5">按天数设置</span></label>
+                                            </div>
+                                            <div class="judgeCon-time judgeCon1">
+                                                <p class="ml5">使用开始时间</p>
+                                                <input name="verify_begin_date" id="verify_begin_date" type="text" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" value="<?php echo dateformat($jp_arr['verify_begin_date'],'Ymd')?>"/>
+                                                <p class="ml20">使用结束时间</p>
+                                                <input name="verify_end_date" id="verify_end_date" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')||\\'%y-%M-%d\\'}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="<?php echo dateformat($jp_arr['verify_end_date'],'Ymd')?>" />
+                                                <div class="cl"></div>
+                                                <p class="font-12-cc">商户可以自定义验码开始的日期如："4月1号,6月1号";</p>
+                                            </div>
+                                            <div class="judgeCon-time judgeCon2 dn">
+                                                <p class="ml5">发送代金券后</p>
+                                                <input name="verify_begin_days" id="verify_begin_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$jp_arr['verify_begin_date']}" />&nbsp;天开始使用
+                                                <p class="ml20">发送代金券后</p>
+                                                <input name="verify_end_days" id="verify_end_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$jp_arr['verify_end_date']}" />&nbsp;天结束使用
+                                                <div class="cl"></div>
+                                                <p class="font-12-cc">商户可以自定义验码时间，如：“发送代金券后3天开始使用-发送代金券后5天结束使用”</p>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <ul class="numgoods-form-title">代金券发送到用户手机短彩信设置<a href="javascript:void(0)" class="message-show ml180"><i class="icon-message"></i><span>点击预览</span></a></ul>
+                                    <ul>
+                                        <li class="global-input6-name">&nbsp;彩信标题：</li>
+                                        <li class="global-input6-input"><input id="mms_title" name="mms_title" type="text" onkeyup="check_lenght(10,'title_text',this);"  class="validate[maxSize[10]] textbox w380"/>
+                                        <br />
+                                        <p class="font-12-cc" id="title_text">还可以输入10个字</p>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="global-input6-name">&nbsp;彩信内容：</li>
+                                        <li class="global-input6-input"><textarea name="mms_text" id="mms_text" onkeyup="check_lenght(100,'text',this);" class="validate[maxSize[100]] texttextarea w380 h50"></textarea>
+                                        <br />
+                                        <span class="font-12-cc" id="text">还可以输入100个字</span><br/><p class="font-12-cc">该短彩信标题和内容属于代金券的附加信息，仅可作为营销活动短彩信标题和内容的参考模板，实际以营销活动调用代金券时添写的短彩信标题和内容为准</p>
+                                        </li>
+                                    </ul>
+                                    <?php if(in_array($nodeTyoe, C('NODE_PUBLISH_TYPE'))){ ?>
+                                    <ul>
+                                        <li class="global-input6-name">&nbsp;</li>
+                                        <li class="global-input6-input"><input type="checkbox" name="is_publish" checked="checked" value="1" class="mr5">同时发布到异业联盟中心</li>
+                                    </ul>
+                                    <?php }?>
+                                    <ul>
+                                        <li class="global-input6-name"></li>
+                                        <li class="global-input6-input">
+                                        <a href="javascript:void(0);" class="btn-all w110 btn-pre">上一步</a>
+                                        <a href="javascript:void(0);" title="确认" id="smb" class="btn-all w110 ml10">确定</a>
+                                        </li>
+                                    </ul>                                    
+                        </div>
+                    	<!--第二步结束-->
+                        </form>
+                    </div>
+                </div>
+             </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

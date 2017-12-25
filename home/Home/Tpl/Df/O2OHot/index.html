@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>操作平台_{:C('SITE_TITLE')}</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+
+<script>
+$(function(){
+	var batch_type = {$batch_type};
+	$('#sub_button').click(function(){
+        $('#theform').attr("action","{:U('Df/O2OHot/index')}").submit();
+    });
+    $("#down").click(function(){
+		$("#theform").attr("action","{:U('Df/O2OHot/export')}").submit();
+    });
+	$("#add_new").click(function(){
+		if(batch_type == 26){
+			location.href = "{:U('Df/GoodsSale/add')}";
+		}else{			
+			var is_new={$is_new};
+			if(is_new==2){
+				location.href = "{:U('Df/O2OHot/newadd')}";
+			}else{
+				location.href = "{:U('Df/MaShangMai/add')}";
+			}
+		}
+    });
+
+})
+function statusChange(batch_id,status,id){
+    if(status==1){
+        var title="您确认启用该活动？";
+    }else{
+        var title="您确认停止该活动？";
+    }
+	var batch_type = {$batch_type};
+	if(batch_type == 26)
+		var url = "{:U('Df/GoodsSale/editBatchStatus')}";
+	else
+		var url = "{:U('Df/MaShangMai/editBatchStatus')}";
+    art.dialog.confirm(title,function(){
+        $.post(url,{"batch_id":batch_id,"status":status},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>更新成功</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper">
+    	<include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <include file="Shop/nav" navmenuid="Navhot"/>
+        
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <if condition="$batch_type eq '26'">
+						 
+						<include file="Hot/menu" leftmenuid="sg_zdy"/>
+					<else />
+						<if condition="$is_new eq '2'">
+						<include file="Hot/menu" leftmenuid="msm_xptj"/>
+						<else />
+						<include file="Hot/menu" leftmenuid="msm_zdy"/>
+						</if>
+					</if>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4><if condition="($batch_type eq 26) AND ($is_new eq 1)">闪购<elseif condition="($batch_type eq 27) AND ($is_new eq 1)" />码上买<else />新品发售</if><a href="javascript:void(0)" class="btn-add first" id="add_new"><i></i>创建新品</a><a href="javascript:void(0)" class="btn-down" id="down"><i></i>下载列表</a></h4>
+                    </div>
+                    <div class="SearchArea fn">
+					<form id="theform" action="{:U('Df/O2OHot/index')}" method="post">
+                    	<div class="SearchAreaLeft">
+						<input type="hidden" id="batch_type" name="batch_type" value="{$batch_type}">
+						<input type="hidden" id="is_new" name="is_new" value="{$is_new}">
+                        <label><span>名称</span><input type="text" name="batch_name" id="batch_name" value="{$post['batch_name']}"></label>
+                        <label><span>活动时间</span><input type="text" name="begin_time" id="begin_time" value="{$post['begin_time']}" class="textbox w80" onclick="var min_date=$('#begin_time').val();var max_date=$('#end_time').val();WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})">
+                           -
+                           <input type="text" name="end_time" id="end_time" value="{$post['end_time']}" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'begin_time\\')}'})">
+                       	</label>
+                        <label>
+                        <select name="batch_status" id="batch_status">
+							<option value="" >活动状态</option>
+							{:show_arr_opt($batchStatusArr,$post['batch_status'])}
+						</select>
+                        </select>
+                        </label>
+                        </div>
+                        <div class="SearchAreaRight">
+                        <a href="javascript:void(0);" class="btn-all ml10 l" id="sub_button">查询</a>
+                        </div>
+                    </form>
+                    </div>
+                    <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                                <tbody><tr class="th">
+                                    <th class="first">活动状态</th>
+                                    <th>活动时间</th>
+                                    <th>访问量</th>
+                                    <th>
+                                    	<div class="shop-btn-lock">
+                                        	<a href="javascript:;" class="sort" data-field="lock_num"><p>锁定<i class=""></i></p></a>
+                                            <div class="shop-btn-lock-tip">
+                                            	消费者提交订单未完成支付的商品会有半小时的锁定期，方便消费者完成订单支付，锁定数量就是锁定期商品数量总和
+                                                <span class="msg-arrow a-out"></span>
+                                                <span class="msg-arrow a-in"></span>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th><a href="javascript:;" class="sort" data-field="sale_num">商品总数<i class=""></i></a></th>
+                                    <th><a href="javascript:;" class="sort" data-field="sale_num">已售数量<i class=""></i></a></th>
+                                    <th><a href="javascript:;" class="sort" data-field="sale_num">剩余数量<i class=""></i></a></th>
+                                    <th><a href="javascript:;" class="sort" data-field="remain_num"><p>剩余数量<i class=""></i></p></a></th>
+                                    <th class="last">操作</th>
+                                </tr>
+                                <!--循环-->
+								<volist name="list" id="vo" empty="$empty">
+									<tr class="title">
+										<td class="title" colspan="9">
+											<div class="r">
+											<?php if($batch_type == '26'){?>
+												<a href="<?php echo U('Df/GoodsSale/edit/',array('id'=>$vo['id']));?>" class="ml10 mr10">编辑</a>
+											<?php }else{?>
+												<?php
+												if($is_new==2){
+												?>
+												<a href="<?php echo U('Df/O2OHot/newedit/',array('id'=>$vo['id']));?>" class="ml10 mr10">编辑</a>
+												<?php
+												}else{
+												?>
+												<a href="<?php echo U('Df/MaShangMai/edit/',array('id'=>$vo['id']));?>" class="ml10 mr10">编辑</a>
+												<?php
+												}
+												?>
+											<?php }?>|
+											<?php if($vo['status'] == '1'){?>
+												<a href="javascript:void(0);" onclick="statusChange('<?php echo $vo['id']?>','2','change_<?php echo $vo['id']?>')"><i class="icon-stop"></i><span>停止</span></a>
+											<?php }else{?>
+												<a href="javascript:void(0);" onclick="statusChange('<?php echo $vo['id']?>','1','change_<?php echo $vo['id']?>')"><i class="icon-begin"></i><span>启用</span></a>
+											<?php }?>|
+											<a href="<?php echo U('Df/O2OHot/channelChart',array('batch_type'=>$vo['batch_type'],'batch_id'=>$vo['id'],'is_new'=>$is_new));?>" class="ml10 mr10" id="qdfx">渠道分析</a>|
+											<a href="javascript:void(0)" class="ml10 mr10" onclick="javascript:art.dialog.open('{:U('Df/GoodsSale/orderList',array('batch_no'=>$vo['id']))} ',{width: 1200, height: 600 ,title:'查看订单信息',id:'orderList'})">查看订单信息</a>|
+											<a href="javascript:void(0)" class="ml10 mr10" onclick="javascript:art.dialog.open('{:U('LabelAdmin/MarketChangeTrace/index',array('batch_no'=>$vo['id'],'batch_type'=>$vo['batch_type']))} ',{width: 1200, height: 600 ,title:'查看编辑记录',id:'ChangeTrace'})">查看编辑纪录</a>
+											</div>
+											{$vo['name']}
+										</td>
+									</tr>
+									<tr class="info">
+										<td class="first">
+											<i <if condition="$vo['status'] eq 1">class="icon-on"<else />class="icon-off"</if> ></i>
+										</td>
+										<td>{$vo['start_time']|dateformat='Y-m-d'}<br />至<br />{$vo['end_time']|dateformat='Y-m-d'}</td>
+										<td>{$vo['click_count']}</td>
+										<td>{$vo['lock_num']}</td>
+										<td><if condition="$vo['storage_num'] eq -1"> 不限 <else /> {$vo['storage_num']} </if></td>
+										<td>{$vo['sale_num']}</td>
+										<td><if condition="$vo['storage_num'] eq -1"> 不限 <else /> {$vo['remain_num']} </if></td>
+										<td><if condition="$vo['storage_num'] eq -1"> 不限 <else /> {$vo['remain_num']} </if></td>
+										<td class="last">
+											<a href="{:U('LabelAdmin/BindChannel/index',array('batch_id'=>$vo['id'],'batch_type'=>$batch_type))}" title="发布活动">发布活动</a>
+										</td>
+									</tr>
+								</volist>
+                                <!--循环-->
+                            </table>
+                    </div>
+					<div class="page">{$page}</div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

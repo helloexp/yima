@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>订单确认_df积分商城</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_df.css?v=__VR__">
+    <link href="__PUBLIC__/Js/artDialog6/ui-dialog.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Image/df/Item/wap_df.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+	$(function(){
+        $("#goodsNum").keyup(function(){
+            //获取用户输入的次数
+            var goodNum=$("#goodsNum").val();
+            //每次积分
+            var point_1=$("#time_price").val();
+            //扣除积分
+            var point_2=$("#point_now").text(point_1*goodNum);
+            var point_4=point_1*goodNum;
+            //拥有积分
+            var point_3=$("#point_total").text();
+            if(point_3-point_4>0){
+                $("#point_remain").text(point_3-point_4);
+            }else{
+                //算出当前积分最多兑换个
+                art.dialog.alert("积分不足！");
+                var goods_num=parseInt(point_3/point_1);
+                //扣减积分总数
+                $("#goodsNum").val(goods_num);
+                $("#point_now").text(goods_num*point_1);
+                $("#point_remain").text(point_3-goods_num*point_1);
+            }
+        });
+		$("#minus").click(function(){
+            var goodsNums=parseInt($("#goodsNum").val());
+			if(goodsNums<=1){
+				goodsNums=1;
+			}else{
+				goodsNums=goodsNums-1;
+			}
+			$("#goodsNum").attr("value",goodsNums);
+            changePrice();
+		});
+		$("#plus").click(function(){
+            var goodsNums=parseInt($("#goodsNum").val());
+			goodsNums=goodsNums+1;
+            //扣减金额为
+            var ponit_has_in=$("#time_price").val()*goodsNums;
+            var ponint_only1=$("#point_total").text();
+            if(ponit_has_in>ponint_only1){
+                art.dialog.alert("积分不足，无法扣减！");
+                goodsNums=goodsNums-1;
+                return;
+            }
+			 $("#goodsNum").attr("value",goodsNums);
+				changePrice();
+		});
+	});
+    function changePrice(){
+        //应该扣费金额
+        var time_price=$("#time_price").val();
+        //剩余金额
+        var remain_price=$("#remain_price").val();
+        var goodNum=$("#goodsNum").val();
+        var point_total=$("#point_total").text();
+        var point_remain=$("#point_remain").text();
+        //消费金额=积分*倍数
+        $("#point_now").text(time_price*goodNum);
+        //剩余积分
+        var remain_point=remain_price-time_price*(goodNum-1);
+        $("#point_remain").text(remain_point);
+    }
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+        	<div class="goback"><i></i></div>
+            <div class="logo"><span>订单确认_df积分商城</span></div>
+        </div>
+        <div id="main">
+        	<form method="post" action="" id="form">
+        		<div class="Gform order">
+        			<div class="mainTop orderBox">
+	            		<dl>
+	            			<dt>您将兑换的商品</dt>
+	            			<dd><img src="__UPLOAD__/{$goodsInfo['goods_image']}" width="100%" height="auto" /></dd>
+	            			<dd class="titile">DF冰淇淋</dd>
+	            			<dd class="fn">
+	            				<label class="l">商品数量：</label>
+	            				<div class="l num">
+	            					<a href="javascript:;" id="minus">-</a>
+                                    <input type="text" style="display: none;"/>
+									<input type="tel" name="buy_number"value="1" maxlength="4" id="goodsNum" />
+	            					<a href="javascript:;" id="plus">+</a>
+	            				</div>
+	            			</dd>
+	            		</dl>
+	            		<div class="line"></div>
+		                <ul>
+                            <input type="hidden" name="goods" id="goods" value="<?php echo $goodsInfo['b_id'];?>">
+                            <input type="hidden" value="{$batch_amt}" id="time_price"/>
+                            <input type="hidden" value="{$other_point}" id="remain_price"/>
+		                	<li class="fn"><label class="l">您现拥有积分：</label><span class="r" id="point_total">{$point}</span></li>
+		                	<li class="fn"><label class="l">本次消费将消耗积分：</label><span class="r" id="point_now">{$batch_amt}</span></li>
+		                	<li class="fn"><label class="l">消费后剩余积分：</label><span class="r" id="point_remain">{$other_point}</span></li>
+		                </ul>
+		                <div class="btn-div"><input type="button" value="确认兑换" class="btn" id="df_submit"/></div>
+		            </div>
+        		</div>
+        	</form>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+    var cfsub = false;
+    $("#df_submit").click(function(){
+        if(cfsub){
+            return false;
+        }
+        cfsub = true;
+            $("#form").ajaxSubmit({
+                success: function (data) {
+                    cfsub = false;
+                    if (data.status == 1) {
+                        $.dialog({
+                            title: '提示',
+                            content: "您已经兑换成功,点击确认跳转我的订单！",
+                            max: false,
+                            min: false,
+                            fixed: true,
+                            lock: true,
+                            ok: function () {
+                                window.location.href='index.php?g=Df&m=DFStore&a=showOrderList';
+                            }
+                        });
+                        return false;
+                    } else{
+                        $.dialog({
+                            title: '提示',
+                            content: data.info,
+                            max: false,
+                            min: false,
+                            fixed: true,
+                            lock: true,
+                            ok: function () {
+                            }
+                        });
+                    }
+                },
+                url: "{:U('Df/DFStore/add_goods_cart')}&id="+{$id},
+                data: {
+                    point_now:$("#point_now").text(),
+                    goods:$("#goods").val(),
+                    goodsNum:$("#goodsNum").val()
+                },
+                dataType: 'json'
+            });
+    });
+</script>

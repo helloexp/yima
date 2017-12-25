@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>操作平台_{:C('SITE_TITLE')}</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wmobile.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+</head>
+<body>
+    <div id="wrapper">
+     <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container">
+            <div id="main" class="w1000">
+            	<div class="mobileLogin">
+                	<div class="banner"><img src="__PUBLIC__/Image/12580/mobile-loginpic.png" /></div>
+                    <div class="Login">
+                    	<div class="LoginForm">
+                        	<ul>
+                        	<form method="post" action="{:U('Home/Login/ssologin')}" id="ginoForm">
+                            	<li><h1>登录</h1></li>
+                                <li class="input">
+                                    <input name="email" type="text" />
+                                    <p>登录ID</p>
+                                </li>
+                                <li class="input">
+                                    <input name="password" type="password" />
+                                    <p>登录密码</p>
+                                </li>
+                                <li class="input">
+                                    <input name="verify" type="text" style="width:80px;" />
+                                    <p>验证码</p>
+                                    <img id="verifyImg" src="/index.php?g=Home&amp;m=Verifycode&amp;a=verify&amp;_t=1415070179" onclick="fleshVerify()" class="ml10" style="vertical-align:bottom; height:30px;cursor:pointer;">
+                                    <span onclick="fleshVerify()" style="vertical-align:bottom;font-size:12px;cursor:pointer;">看不清?换一张</span>
+                                </li>
+                                <li class="input mt20">
+                                    <label class="l">
+                                    	<input type="checkbox" class="vm" name="rememberMe" id="rememberMe" value="1" checked=""><span class="vm ml5">记住用户名</span></label>
+                                    <label class="r"><a href="{:U('Home/ForgetPwd/index')}"><span class="vm">忘记密码</span></a></label>
+                                </li>
+                                <li class="btn"><a href="javascript:void(0)" id="loginsubmit" >登录</a></li>
+                            </ul>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+</body>
+</html>
+<script language="JavaScript">
+$(document).ready(function(e) {
+	var form_items = ['email', 'password', 'verify'];
+    $(".LoginForm input").keyup(function(){
+		var val = $(this).val();
+		$(this).css("border","solid 1px #c8c8c8");
+		if(val!=""){
+			$(this).next("p").hide();
+		}else{
+			$(this).next("p").show();
+		}
+	})
+    
+    $('#loginsubmit').click(function(){
+    	for (var i = 0; i < 3; i++) {
+    		var _this = $("input[name='"+form_items[i]+"']")
+    		if(_this.val() == ''){
+    			alert('请完善登录信息！');
+    			return false;
+    		}
+    	}
+
+    	$('#ginoForm').ajaxSubmit({
+                beforeSubmit:function(){
+                    
+                },
+                success:function(data){
+                     if(data.success == '1'){
+                           location.href = data.redirectUrl;
+                      }else{
+                            alert(data.error_msg);
+                      }
+                },
+                dataType:'json'
+        });
+    });
+});
+function fleshVerify(){ 
+  //重载验证码
+  var time = new Date().getTime();
+  document.getElementById('verifyImg').src= '/index.php?g=Home&m=Verifycode&a=verify&time='+time;
+}
+function erro(id){
+	var _this = $("input[name='"+id+"']");
+	_this.css("border","solid 1px #e33827");
+}
+</script>

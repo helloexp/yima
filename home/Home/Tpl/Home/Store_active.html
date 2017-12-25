@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-添加门店</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=WRzAu3DNewWB4oeOELaczjsM"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript">
+     $(document).ready(function(e) {
+         $("#sub_button").click(function(){
+             $("#activieForm").submit();
+         });
+     });
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+    	<include file="./Home/Tpl/Public/Public_header.html" />         
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav">
+                    <include file="Store:sidenav" leftmenuid="mdhd"/>      
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>门店活动<a class="btn-add first" href="./index.php?m=Store&a=activeEdit"><i></i>创建门店活动</a></h4>
+                    </div>
+                    <div class="SearchArea fn">
+                    <form id="activieForm" action="" method="get">
+                    <!--提交地址-->
+                    <input type="hidden" name="g" value="{$Think.GROUP_NAME}"/>
+                    <input type="hidden" name="m" value="{$Think.MODULE_NAME}"/>
+                    <input type="hidden" name="a" value="{$Think.ACTION_NAME}"/>
+                    <input type="hidden" name="node_id" value="{$node_id}"/>
+                    <div class="SearchAreaLeft">
+                    <label>
+                        <span>创建时间</span>
+                        <div class="Stime"><input type="text" value="{$s_time}" name="s_time" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" readonly="true"><em>至</em><input type="text" value="{$e_time}" name="e_time" onclick="WdatePicker({dateFmt:'yyyy-MM-dd'})" readonly="true"></div>
+
+                    </label>
+                    <label><span>活动类型</span>
+                            <select name="activity_type" id="from_type">
+                                <option value="">全部</option>
+                                {:show_arr_opt($activity_type_Arr, $activity_type)}
+                            </select>
+                    </label>
+                    <label>
+                    <span>关键字</span>
+                        <input type="text" name="keyWords" id="jg_name_email" value="{$keyWords}">
+                    </label>
+                    </div>
+                     <div class="SearchAreaRight">
+                        <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                        </div>
+                    </form>
+                    </div>
+
+                    <table cellpadding="0" cellspacing="0" class="W-table ng-scope">
+                    <thead>
+                        <tr>
+                            <th>创建时间</th> 
+                            <th>活动标题</th>
+                            <th>有效期</th>
+                            <th>活动类型</th>
+                            <th>可用门店</th>
+                            <th>操作</th>
+                             
+                        </tr>  
+                    </thead>
+                    <tbody>
+                            <?php if($ActivityList){
+					   foreach($ActivityList as $v){  ?>
+                        <tr class="title">
+                            <td class="hover">{$v['add_time']||dateformat=###,'Y-m-d'}</td>
+                            <td>{$v['activity_title']|default='未填写'}</td>
+                            <td>{$v['start_time']||dateformat=###,'Y-m-d'||default='未填写'} 至 {$v['end_time']||dateformat=###,'Y-m-d'||default='未填写'}</td>
+                            <td>{$v['activity_type']||default='未填写'}</td>
+                            <td>{$v['count']}</td>
+
+                            <td><a href="{:U('Store/activeEdit',array('id'=>$v['id']))}">编辑</a>
+                                <a  href="{:U('Store/activeDetils',array('id'=>$v['id']))}">详情</a>
+                            </td>
+                        </tr>
+                        <?php } }else{ ?>
+                        <tr><td colspan="6"><div class="nonedata"></div></td></tr>
+                        <?php } ?>
+                    </tbody>
+                </table>
+                    <div class="page"><?php echo $pageShow; ?></div>
+
+                    
+                
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

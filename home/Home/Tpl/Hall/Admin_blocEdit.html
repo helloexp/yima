@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券-编辑</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+    $("#smb").click(function(){
+        var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                           setTimeout("var win = art.dialog.open.origin;win.location.reload();",500);
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                              }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+    
+    $(".icon-del").click(function(){
+        $(this).closest(".numgoodsList-item").detach();
+    });
+    $(".message-show").click(function(){
+        var message=$("#mms_text").val();
+        var html=
+        ['<div class="aipai-iphone">',
+          '<div class="aipai-iphone-text">',
+              message,
+          '</div>',
+          '</div>'].join('');
+          art.dialog({
+            padding: 20,
+            title: '短信预览',
+            content: html,
+            lock: true
+        });
+    });
+    $("#verify_begin_date").click(function(){
+        $("input[name='verify_begin_type'][value='0']").attr("checked",true);
+    });
+    $("#verify_begin_days").click(function(){
+        $("input[name='verify_begin_type'][value='1']").attr("checked",true);
+    });
+    $("#verify_end_date").click(function(){
+        $("input[name='verify_end_type'][value='0']").attr("checked",true);
+    });
+    $("#verify_end_days").click(function(){
+        $("input[name='verify_end_type'][value='1']").attr("checked",true);
+    });
+})
+function get_min_date(){
+    var text = $("#goods_begin_date").val();
+    return text.substr(0, 4) + "-" + text.substr(4, 2) + "-" + text.substr(6, 2);
+}
+function get_max_date(){
+    var text = $("#goods_end_date").val();
+    return text.substr(0, 4) + "-" + text.substr(4, 2) + "-" + text.substr(6, 2);
+}
+function checkImg(){
+    if($("#resp_img").val() == ''){
+            return "请上传营销图片";
+        }
+}
+/*获取图片路径中的图片名*/
+function base_name(url){
+    var urlList = url.split('/'); 
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+
+function uploadImg(url) {
+var win_width = 500;
+art.dialog.open(url, {
+    lock: true,
+    title: "上传图片",
+    width: win_width,
+    height: win_width / 1.6,
+    id: 'art_upload'
+});
+}
+
+//背景图片回调函数
+function bgCallback(d) {
+//填充缩略图
+$('#img_resp_show').attr('src', d.absolutepath).show();
+//上传用
+$('#img_resp').val(base_name(d.absolutepath));
+}
+</script>
+</head>
+<body class="bgfff">
+<div style="width:800px; padding-left:30px;">
+
+                                        
+    <div class="global-input6 fn pt30">
+        <form method="post" action="<?php echo U('Hall/Admin/blocEdit');?>">
+            <ul>
+                <li class="global-input6-name">&nbsp;旺财联盟名称：</li>
+                <li class="global-input6-input"><p>{$goodsData['bloc_name']}</p></li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">&nbsp;旺财联盟卡券名称：</li>
+                <li class="global-input6-input"><p>{$goodsData['goods_name']}</p></li>
+            </ul>
+            <ul class="numgoods-form-title">卡券基本内容</ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;联盟合作有效期：</li>
+                <li class="global-input6-input">
+                    <input name="goods_begin_date" id="goods_begin_date" value="{$goodsData['begin_time']|dateformat=###,'Ymd'}" type="text" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'goods_end_date\\')}'})" disabled="disabled" class="validate[required] textbox w172"/>
+                    <span class="mlr5">至</span>
+                    <input name="goods_end_date" id="goods_end_date" value="{$goodsData['end_time']|dateformat=###,'Ymd'}" type="text" onClick="WdatePicker({minDate:'<?php echo dateformat($goodsData['end_time'],'Y-m-d')?>'})" class="validate[required] textbox w172"/>
+                    <br />
+                    <p class="font-12-cc">只能延长有效期结束时间</p>
+                </li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">*招募截止日期：</li>
+                <li class="global-input6-input"><input name="recruit_end_date" id="recruit_end_date" value="{$goodsData['recruit_end_date']|dateformat=###,'Ymd'}" type="text" onClick="var max_date=get_max_date();WdatePicker({maxDate:max_date})" class="validate[required] textbox w172"/></li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;卡券图片：</li>
+                <li class="global-input6-input">
+                    <div class="rel l">
+                    <input type="hidden" value="<?php echo basename($goodsData['goods_image'])?>" name="img_resp" id="img_resp"/>
+                    <a href="javascript:;" title="上传" onclick="return uploadImg('{:U('ImgResize/Resize/index',array('ratioX'=>230,ratioY=>190,'suggestX'=>230,'suggestY'=>190,'bathName'=>'这是您在异业联盟中的卡券图片','callback'=>'bgCallback'))}')" class="btn-all w60">上传</a>
+                    </div>
+                    <div class="cl"></div>
+                    <img src="__UPLOAD__/<?php echo $goodsData['goods_image']?>" id="img_resp_show" width="150" class="mt10"/>
+                    <div class="cl"></div>
+                </li>
+            </ul>
+            <ul class="numgoods-form-title">卡券发验时间设置</ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;使用卡券时间：</li>
+                <li class="global-input6-input">
+                    <div class="judgeDiv">
+                        <label class="ml5" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();">
+                        <input type="radio" <?php if($goodsData['verify_begin_type']=='0'){echo 'checked="checked"';}?> name="verify_time_type" value="0" id="verify_begin_type1"/><span class="ml5">按日期设置</span></label>
+                        <label class="ml10" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();">
+                        <input type="radio" <?php if($goodsData['verify_begin_type']=='1'){echo 'checked="checked"';}?> name="verify_time_type" value="1" id="verify_begin_type2"/><span class="ml5">按天数设置</span></label>
+                    </div>
+                    <div class="judgeCon-time judgeCon1 <?php if($goodsData['verify_begin_type']=='1'){echo 'dn';}?>">
+                        <p class="ml5">使用开始时间</p>
+                        <input name="verify_begin_date" id="verify_begin_date" type="text" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" value="<?php if($goodsData['verify_begin_type']==0){echo dateformat($goodsData['verify_begin_date'],'Ymd');}?>"/>
+                        <p class="ml20">使用结束时间</p>
+                        <input name="verify_end_date" id="verify_end_date" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')||\\'%y-%M-%d\\'}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="<?php if($goodsData['verify_end_type']==0){echo dateformat($goodsData['verify_end_date'],'Ymd');}?>" />
+                        <div class="cl"></div>
+                        <p class="font-12-cc">商户可以自定义验码开始的日期如："4月1号,6月1号";</p>
+                    </div>
+                    <div class="judgeCon-time judgeCon2 <?php if($goodsData['verify_begin_type']=='0'){echo 'dn';}?>">
+                        <p class="ml5">发送卡券后</p>
+                        <input name="verify_begin_days" id="verify_begin_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="<?php if($goodsData['verify_begin_type']==1){echo dateformat($goodsData['verify_begin_date'],'Ymd');}?>" />&nbsp;天开始使用
+                        <p class="ml20">发送卡券后</p>
+                        <input name="verify_end_days" id="verify_end_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="<?php if($goodsData['verify_end_type']==1){echo dateformat($goodsData['verify_end_date'],'Ymd');}?>" />&nbsp;天结束使用
+                        <div class="cl"></div>
+                        <p class="font-12-cc">商户可以自定义验码时间，如：“发送卡券后3天开始使用-发送卡券后5天结束使用”</p>
+                    </div>
+                </li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">&nbsp;<input type="hidden" name="goods_id" value="{$goodsData['goods_id']}" /> </li>
+                <li class="global-input6-input"><a href="javascript:void(0);" title="确认" id="smb" class="btn-all w110">提交</a><a href="javascript:art.dialog.close();" title="取消" id="" class="btn-all-del ml10 w110">取消</a></li>
+            </ul>
+            </form>
+     </div>
+</div>
+                    
+                   
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

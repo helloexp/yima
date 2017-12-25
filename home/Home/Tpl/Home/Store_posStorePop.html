@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>选择门店</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<body>
+    <div class='SearchArea SearchArea1' style="block">
+        <label>
+            <span>关键词</span>
+            <input type='text' id='searchStore' class='groupName' value='' />
+        </label>
+		<label id="hasPos" style="padding-left:15px;">
+		    <select class='n3'>
+				<option value='0'>全部</option>
+				<option value='1'>有终端</option>
+				<option value='2'>无终端</option>
+            </select>
+            <span class="hide_check dn" style="padding-left:15px"><input type="checkbox" value="2">EPOS &nbsp;<input type="checkbox" value="1">ER6800</span>
+		</label>
+        <div class='SearchAreaRight'>
+            <a href='javascript:void(0);' class='searchBtn' id='searchButton'>查询</a>
+        </div>
+    </div>
+	<include file="./Home/Tpl/Public/Public_StoresAdnAddress.html" />
+	<div class="DiabtnCon">
+        <a class="Diabtn-all" id="select" href="javascript:void(0);">确定</a>
+        <a href="javascript:art.dialog.close();" title="取消" class="Diabtn-all-del">取消</a>
+        <input type="hidden" name="adb_flag" id="adb_flag" value="{$adb_flag}"></input>
+    </div> 
+</body>
+<script>
+$(function(){
+    $('.SearchArea').hide();
+    $('.SearchArea .more-filter').hide();
+    $('.SearchArea1').show();
+	$("body").on("change","#hasPos .n3",function(e){
+		var value=$(this).find('option:selected').val();
+			if(value=='0'||value=='2'){
+			    $(".hide_check").hide();
+				$('#hasPos .hide_check input:checkbox').attr("checked", false);
+			}else{
+			    $(".hide_check").show();
+				$('#hasPos .hide_check input:checkbox').attr("checked", true);
+			}
+	 });
+	$("body").on("click","#hasPos .hide_check input:checkbox",function(e){
+	    var isck=$(this).prop("checked");
+	    if(!isck){
+		    $(this).attr("checked",false);
+		}else{
+		    $(this).attr("checked",true);
+		}
+	 });
+    //查询
+    $('#searchButton').click(function(){
+        //查询条件
+        var searchStore = $('#searchStore').val();
+        //选中的复选框
+        var isCheck = $('#hasPos input:checked');
+        //显示中的门店
+        var shoplist = $('#shoplist li');
+        //下拉框的值
+        var dat = $("#hasPos option:selected").val();
+
+        $("#shoplist li").appendTo("div.shopHide");
+        //无搜索条件
+        if(searchStore == ''){
+            //有终端
+            if(dat == 1){
+                if(isCheck.length == 1){
+                    $(".shopHide li[data-pos='"+isCheck.val()+"']").appendTo("#shoplist");
+                    $.each($(".shopHide li"),function(key,value){
+                        var nameV = $(value).attr('data-pos');
+                        var isOk = nameV.indexOf(isCheck.val());
+                        if(isOk != -1){
+                            $(this).appendTo("#shoplist");
+                        }
+                    })
+                }else if(isCheck.length == 2){
+                    $(".shopHide li[data-pos!='a']").appendTo("#shoplist");
+                }else{
+                    return false;
+                }
+            }
+            //无终端
+            if(dat == 2){
+                $(".shopHide li[data-pos='a']").appendTo("#shoplist");
+            }
+            //全部
+            if(dat == 0){
+                $(".shopHide li").appendTo("#shoplist");
+            }
+        }else{
+            var shopHide = $(".shopHide li");
+            if(dat == 1){
+                if(isCheck.length == 1){
+                    shopHide = $(".shopHide li[data-pos='"+isCheck.val()+"']");
+                    $.each($(".shopHide li"),function(key,value){
+                        var nameV = $(value).attr('data-pos');
+                        var isOk = nameV.indexOf(isCheck.val());
+                        if(isOk != -1){
+                            shopHide.push(value);
+                        }
+                    })
+                }else if(isCheck.length == 2){
+                    shopHide = $(".shopHide li[data-pos!='a']");
+                }else{
+                    return false;
+                }
+            }
+            //无终端
+            if(dat == 2){
+                shopHide = $(".shopHide li[data-pos='a']");
+            }
+            //匹配词
+            $.each(shopHide,function(key,value){
+                var nameV = $(value).attr('data-search');
+                var isOk = nameV.indexOf(searchStore);
+                if(isOk != -1){
+                    $(this).appendTo("#shoplist");
+                }
+            })
+        } 
+    })
+
+    var win = art.dialog.open.origin;
+    var oldshops = win.$("#openStores").val();
+    var old_shop = oldshops.split(",");
+    var allStores = $('.shoplist li');
+    // var storeNumbers = win.$("#number").text();
+    if(win.$("#number").text() == 0){
+        oldshops = '';
+        shopArray = [];
+    }
+
+    if(oldshops != ''){
+        if(allStores.length == old_shop.length){
+            $(".frm_checkbox_label").find(".frm_checkbox").attr("checked",true);
+            $(".frm_checkbox_label").removeClass("selected").addClass("selected");
+        }
+    }
+    //默认被选中的
+    if(oldshops != "") {
+        $('#number').text(old_shop.length);
+        $("#shoplist li").each(function(key,val) {
+            var sel_val = $(val).find('input:hidden').val();
+            if(in_array(sel_val, old_shop)) {
+                $(this).addClass("selected");
+                shopArray.push($(this).find('input').val());
+            }
+           
+        });
+    }
+    //数据传给父页面
+    $("#select").click(function(){
+            win.$("#openStores").val(shopArray.join(","));
+            win.$("span#number").text($('#number').text());
+            art.dialog({title:false,content:"<div class='msg-all-succeed'>添加成功</div>",fixed: true,padding:0,time:1});
+            art.dialog.close();
+    });
+});
+</script>
+</html>

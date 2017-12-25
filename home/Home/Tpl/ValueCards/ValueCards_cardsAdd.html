@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券消费券管理</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/card.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+    
+    $("#smb").click(function(){
+        var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                           setTimeout("var win = art.dialog.open.origin;win.location.href='{:U('ValueCards/ValueCards/index')}';",500);
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                              }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+        
+})
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="javascript:void(0)">购物卡</a></p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <ul>
+                        <li><i class="icon-sidenav"></i><a href="{:U('ValueCards/ValueCards/index')}">购物卡管理</a></li>
+                        <li class="hover"><i class="icon-sidenav"></i><a href="{:U('ValueCards/cardsAdd')}">新增购物卡</a></li>
+                    </ul>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4 class="bd-b-565656">新增购物卡</h4>
+                    </div>
+                    <div class="global-input1 fn">
+                    <form method="post" action="{:U('ValueCards/cardsAdd')}">
+                        <ul>
+                            <li class="global-input1-name">*&nbsp;购物卡名称：</li>
+                            <li class="global-input1-input"><input name="cards_name" type="text"  class="validate[required,maxSize[10]] textbox w240"/></li>
+                        </ul>
+                        <ul>
+                            <li class="global-input1-name">*&nbsp;发行日期：</li>
+                            <li class="global-input1-input"><input name="send_begin_date" id="send_begin_date" type="text"   onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'send_end_date\\')}'})" class="validate[required] textbox w106"/><p class="mlr5">-</p><input name="send_end_date" id="send_end_date" type="text"   onClick="WdatePicker({minDate:'#F{$dp.$D(\\'send_begin_date\\')}'})" class="validate[required] textbox w106"/></li>
+                        </ul>
+                        <ul>
+                            <li class="global-input1-name">*&nbsp;使用日期：</li>
+                            <li class="global-input1-input"><label for="verify_begin_type1"><input name="verify_begin_date" id="verify_begin_date" type="text"   onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w106"/></label><p class="mlr5">-</p><label for="verify_end_type1"><input name="verify_end_date" id="verify_end_date" type="text"   onClick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')}'})" class="validate[condRequired[verify_end_type1]] textbox w106"/><input name="verify_end_type" id="verify_end_type1" value="0" checked="checked" class="dn" type="radio"/><input name="verify_begin_type" id="verify_begin_type1" value="0" checked="checked" class="dn" type="radio"/></label>
+                            </li>
+                        </ul>
+                        <ul id="select-addnum2">
+                            <li class="global-input1-name">*&nbsp;面值：</li>
+                            <li class="global-input1-input"><input name="card_amt" type="text"  class="validate[custom[integer],min[0],required] textbox w240"/></li>
+                        </ul>
+                        <ul>
+                            <li class="global-input1-name">*&nbsp;发卡指引：</li>
+                            <li class="global-input1-input">
+                            <textarea name="join_rule" class="validate[required] texttextarea w240"></textarea>
+                            <br />
+                            <p class="font-12-cc">发卡人员需要遵循以上发卡指引的要求发送购物卡</p>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="global-input1-name">*&nbsp;彩信标题：</li>
+                            <li class="global-input1-input"><input id="mms_title" name="mms_title" type="text" onkeyup="check_lenght(10,'title_text',this);"  class="validate[required,maxSize[10]] textbox w240"/>
+                            <br />
+                            <p id="title_text">还可以输入10个字</p>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="global-input1-name">*&nbsp;彩信内容：</li>
+                            <li class="global-input1-input"><textarea name="using_rules" id="using_rules" onkeyup="check_lenght(100,'text',this);" class="validate[required,maxSize[100]] texttextarea w240"></textarea>
+                            <br />
+                            <p id="text">还可以输入100个字</p>
+                            </li>
+                        </ul>
+                        <ul>
+                            <input type="hidden" name="ajax" value="1" />
+                            <li class="global-input1-name"></li>
+                            <li class="global-input1-input"><a href="javascript:void(0);" title="确认" id="smb" class="btn-all w110">确认</a><a href="{:U('ValueCards/index')}" title="取消" class="btn-all-del w110 ml10">取消</a></li>
+                        </ul>
+                        </form>
+                    </div>
+                </div>
+             </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

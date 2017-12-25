@@ -1,0 +1,384 @@
+<assign name="cj_action" value="[cj_action]"/>
+<!--更多等级奖品标志-->
+<input type="hidden" name="is_reset" id="is_reset" value="0" />
+<input type="hidden" name="batchjson" id="batchjson" value="" />
+<style>
+    .add_more{margin-left: 160px; margin-top: 10px;}
+</style>
+<if condition="(ACTION_NAME=='add' or $row['is_cj'] != '1')">
+	<ul class="newsadd-title">活动卡券配置</ul>
+	<ul>
+		  <li class="global-input2-name">&nbsp;是否抽奖：</li>
+		  <li class="global-input2-input">
+		   <label><input name="is_cj" id="is_cj_t"  type="radio"  value="1" {:$row['is_cj']=='1'?'checked':'checked'}/><span class="ml5">是</span></label>
+		  </li>
+	</ul>
+	<div  id="jp_set" style="display: none;">
+	  <ul>
+		  <li class="global-input2-name">&nbsp;奖品设置：</li>
+		  <li class="global-input2-input">
+			  <input name="jp_set_type" id="is_cj_true"  type="radio"  value="1"  class="validate[condRequired[is_cj_t]]" {:$cjarr['jp_set_type']=='1'?'checked':''}/>
+			  <label for="logo-true" class="ml5">单奖品</label>
+			  <input name="jp_set_type" id="jp_set_true"   type="radio"  value="2"  {:$cjarr['jp_set_type']=='2'?'checked':''}/>
+			  <label for="logo-true" class="ml5">多奖品</label>
+		  </li>
+	  </ul>
+
+	  <?php if($show_total_chance){ ?>
+	    <ul class="hide_cj" >
+	        <li class="global-input2-name">*总中奖概率：</li>
+	        <li class="global-input2-input"><input id="chance" maxlength="3" name="chance" type="text"  class="validate[custom[integer],required,min[1],max[100],maxSize[3]] textbox w50 editcj" value=""/>%</li>
+	    </ul>
+	  <?php } ?>
+
+	  <div id="jp_set_one" style="display:none">
+	   <ul >
+		  <li class="global-input2-name">绑定抽奖：</li>
+		  <li class="global-input2-input c_bd_d1">
+			  <div class="ml10 mt10"  id="wc_style" >
+			  <input type="hidden" name="wc_batch_no" id="wc_batch_no" value="{$cjarr.wc_batch_no}"/>
+                          <input type="hidden" name="wc_batch_id" id="wc_batch_id" value="{$cjarr.wc_batch_id}"/>
+			  <input name="goods_name" id="goods_name" type="text"  class="validate[condRequired[is_cj_true]] textbox w120 ml10" value="{$cjarr.wc_goods_name}" readonly="readonly"/><a href="javascript:void(0)" class="btn-all w80 ml10" id="bind_cj">选择卡券</a>
+			  </div>
+			 
+			   <div class="ml10 mt10 db">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：<input id="goods_count" name="goods_count" type="text"  class="validate[condRequired[is_cj_true],custom[integer]] textbox w50" value="{$cjarr.goods_count}"/><span>&nbsp;份</span></div>
+			 <div class="cl"></div>
+			 
+		  </li>
+	  </ul>
+	  </div>
+
+	 <div id="jp_set_more" style="display:none">
+
+     <?php
+     $num_arr = array('1'=>'一','2'=>'二','3'=>'三');
+     if($batch_type == '22' && $pufa_flag)
+         $num_arr = array('1'=>'一','2'=>'二');
+     foreach($num_arr as $k=>$v){
+     ?>
+	  
+    <ul class="more_level">
+        <li class="global-input2-name">{$v}等奖：</li>
+        <li class="global-input2-input c_bd_d1">
+            <div class="ml10 pt10">
+            <input type="hidden" name="wc_batch_no[]" id="wc_batch_no_{$k}" value=""/>
+            <input type="hidden" name="wc_batch_id[]" id="wc_batch_id_{$k}" value=""/>
+            <input type="hidden" name="award_level[]" id="award_level_{$k}" value="{$k}"/>
+            <input name="goods_name[]" id="" type="text"  class="validate[condRequired[jp_set_true]] textbox w120 ml10" value="" readonly="readonly"/>
+            <a href="javascript:void(0)" class="btn-all w80 ml10 btn_choose" id="bind_cj_{$k}" >选择卡券</a>
+            </div>
+            <div class="cl"></div>
+
+            <div class="ml10 pt10">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：
+            <input id="goods_count_{$k}" name="goods_count[]" type="text"  class="validate[condRequired[jp_set_true],custom[integer]] textbox w50" value=""/>
+            <span>&nbsp;份</span>
+            </div>
+        <div class="cl"></div>
+        </li>
+    </ul>
+
+      <eq name="mg_flag" value="1">
+      <div id="level{$k}_more">
+
+      </div>
+
+      <a href="javascript:void(0)" class="btn-all w80 ml10 add_more" onclick="add_more('{$k}')">添加{$v}等奖</a>
+
+      <script type="text/html" id="level{$k}_tpl">
+      <ul class="more_level">
+          <li class="global-input2-name"></li>
+          <li class="global-input2-input c_bd_d1">
+              <div class="ml10 pt10">
+                  <input type="hidden" name="wc_batch_no[]" id="wc_batch_no_n" value=""/>
+                  <input type="hidden" name="wc_batch_id[]" id="wc_batch_id_n" value=""/>
+                  <input type="hidden" name="award_level[]" id="award_level_{$k}" value="{$k}"/>
+                  <input name="goods_name[]" id="goods_name_n" type="text"  class="validate[condRequired[jp_set_true]] textbox w120 ml10" value="" readonly="readonly"/>
+                  <a href="javascript:void(0)" class="btn-all w80 ml10 btn_choose" id="bind_cj_n">选择卡券</a>
+              </div>
+              <div class="cl"></div>
+
+              <div class="ml10 pt10">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：
+                  <input id="goods_count_n" name="goods_count[]" type="text"  class="validate[condRequired[jp_set_true],custom[integer]] textbox w50" value=""/>
+                  <span>&nbsp;份</span>
+              </div>
+              <div class="ml10"><a href="javascript:void(0)" onclick="javascript:if(confirm('是否确认删除？')) $(this).closest('ul').remove();">删除</a></div>
+              <div class="cl"></div>
+          </li>
+
+      </ul>
+      </script>
+          </eq>
+
+      <?php } ?>
+
+	 </div>
+	 </div>
+	
+<else/>
+
+<ul class="newsadd-title">
+<a href="javascript:;" id="resetcj" class="btn-all w90 r ml10" style="display: none;">重设</a> 
+<a href="javascript:;" id="reeditcj" class="btn-all w90 r">编辑</a> 
+活动卡券配置
+</ul>
+<input name="is_cj" id="is_cj_t"  type="hidden"  value="1"/>
+    <?php if($row['is_cj'] == '1'){?>
+    <div id="editcj">
+    <?php if($cjarr['jp_set_type'] == '1'){
+
+        foreach($cjbatch_arr as $k=>$row_){  
+        ?>
+       <ul>
+        <li class="global-input2-name">抽奖设置：</li>
+        <li class="global-input2-input c_bd_d1">
+            <div class="ml10 mt10 db"  > 
+            <input type="text" name="goods_name" class=" textbox w120 ml10" value="<?php echo $batch_name_arr[$row_['activity_no']];?>" readonly="readonly" disabled="disabled"/>卡券
+            </div>
+             <div class="ml10 mt10 db">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：
+                 <input id="b_<?php echo $row_['total_count']?>" name="goods_count_edit" type="text"  class="validate[custom[integer],required,min[1],maxSize[10]] textbox w50 editcj checkedit" value="<?php echo $row_['total_count']?>" disabled="disabled"/>
+                 <span>&nbsp;份</span></div>
+             <?php if($show_total_chance){ ?>
+             <div class="ml10 mt10 db">*&nbsp;中&nbsp;&nbsp;奖&nbsp;&nbsp;概&nbsp;&nbsp;&nbsp;率：
+                 <input id="c_<?php echo $row_['award_rate']?>" name="total_chance_edit"  type="text"  class="validate[custom[integer],required,min[1],max[100],maxSize[3]] textbox w50 editcj" value="<?php echo $row_['award_rate']?>"  disabled="disabled"/>
+                 <span>&nbsp;%</span>
+
+                 <input type="hidden" name="cj_batch_id" value="<?php echo $row_['id']?>" />
+             </div>
+             <?php } ?>
+
+        </li>
+    </ul>
+    <?php }}else{
+    	if($show_total_chance){
+    ?>
+    <ul class="hide_cj" >
+        <li class="global-input2-name">*总中奖概率：</li>
+        <li class="global-input2-input">
+            <input id="d_<?php echo $cjarr['total_chance'];?>" maxlength="3" name="total_chance_edit" type="text"  class="validate[custom[integer],required,min[1],max[100],maxSize[3]] textbox w50 editcj" disabled="disabled"  value="<?php echo $cjarr['total_chance'];?>"/>%
+        </li>
+    </ul>
+    <?php
+    	}
+    $num_arr = array('1'=>'一','2'=>'二','3'=>'三');
+     foreach($cjbatch_arr as $k=>$row_){
+    ?>
+    <ul id="cj_style_<?php echo $k;?>" class="hide_cj more_level">
+
+        <li class="global-input2-name"><?php echo $num_arr[$row_['award_level']];?>等奖：</li>
+        <li class="global-input2-input c_bd_d1">
+            <div class="ml10 mt10 db"  id="wc_style"> <input type="text" value="<?php echo $batch_name_arr[$row_['activity_no']];?>" disabled="disabled"/>卡券
+            </div>
+             <div class="ml10 mt10 db">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：
+                 <input type="hidden" name="cj_batch_id[]" value="<?php echo $row_['id']?>" />
+                 <input id="e<?php echo $k?>_<?php echo $row_['total_count']?>"  name="goods_count_edit[]"   type="text"  class="validate[custom[integer],required,min[1],maxSize[10]] textbox w50 editcj checkedit" value="<?php echo $row_['total_count']?>" disabled="disabled"/>
+                 <span>&nbsp;份</span>
+             </div>
+        </li>
+    </ul>
+    <?php }}?>
+    </div>
+    <?php }
+	?>
+</if>
+ <script>
+ var _moren = 10;
+ $(function(){
+    //是否抽奖
+     $("input[name=is_cj]").change(function(){
+        if(!this.checked) return;
+        if($(this).val() == '1'){
+         $("#jp_set").show();
+        }else{
+         $("#jp_set").hide();
+        }
+    }).change();
+    //单奖品多奖品
+     $("input[name=jp_set_type]").change(function(){
+        if(!this.checked) return;
+        if($(this).val() == '1'){
+            $('#jp_set_one').show();
+            $('#jp_set_more').hide();
+        }else{
+            $('#jp_set_one').hide();
+            $('#jp_set_more').show();
+        }
+    }).change();
+    //选择卡券
+    $('#bind_cj').click(function(){
+        var  name = '&name=goods_name&batch_no=wc_batch_no&batch_id=wc_batch_id';
+        art.dialog.open("{:U('LabelAdmin/SelectJp/index')}"+name,{
+            width: 800,
+            height: 500,
+            title:'选择卡券',
+            lock: true
+        })
+    });
+
+
+        //重新设置抽奖
+        $('#resetcj').click(function(){
+          if($(this).html() == '重设'){
+            if( !confirm('重置奖品后，已经发出的奖品数量不会计入新设置的总量内，您是否确认需要重置奖品?'))
+                return false;
+              $('#addcj').show();
+              $('#editcj').hide();
+              $('#is_reset').val('1');
+              $('#reeditcj').hide();
+              $(this).html('取消');
+          }else{
+              $('#is_cj_false').click();
+              $('#is_cj_true').click();
+              $('#is_cj_true').attr("checked",false);
+              $('#cj_style').hide();
+              $('#addcj').hide();
+              $('#editcj').show();
+              $('#is_reset').val('0');
+              $('#reeditcj').show();
+              $(this).html('重设');
+          }
+
+        });
+
+         //编辑抽奖
+         $('#reeditcj').click(function(){
+            if($('#reeditcj').html() == '编辑'){
+                //$('#resetcj').hide();
+                $('#reeditcj').html('取消');
+                $('.editcj').attr('disabled',false);
+                $('#is_reset').val('2');
+
+            }else{
+                $(".editcj").each(function(){
+                    var v_id = $(this).attr('id');
+                    var  obj = v_id.split('_');
+                     $(this).val(obj[1]);
+                });
+                $('#is_reset').val('0');
+                //$('#resetcj').show();
+                $('#reeditcj').html('编辑');
+                $('.editcj').attr('disabled',true);
+            }
+
+         });
+         
+         //选择卡券
+     (function(){
+         var _prize_i = 0;
+         $('.btn_choose').live('click', function() {
+             var odiv = $(this).closest('div');
+             if(odiv.data('set_id_flag') != '1'){
+                 _prize_i++;
+                 var goods_name = 'goods_name_' + _prize_i;
+                 var batch_no = 'wc_batch_no_' + _prize_i;
+                 var batch_id = 'wc_batch_id_' + _prize_i;
+                 $('input[name="goods_name[]"]', odiv).attr('id', goods_name);
+                 $('input[name="wc_batch_no[]"]', odiv).attr('id', batch_no);
+                 $('input[name="wc_batch_id[]"]', odiv).attr('id', batch_id);
+                 odiv.data('set_id_flag', 1).data('prize_id', _prize_i);
+             }
+
+             else{
+                 var prize_id = odiv.data('prize_id');
+                 goods_name = 'goods_name_' + prize_id;
+                 batch_no = 'wc_batch_no_' + prize_id;
+                 batch_id = 'wc_batch_id_' + prize_id;
+             }
+
+             var name = '&name='+goods_name+'&batch_no='+batch_no + '&batch_id='+batch_id;
+             art.dialog.open("{:U('LabelAdmin/SelectJp/index')}" + name, {
+                 width: 800,
+                 height: 500,
+                 title: '选择卡券',
+                 lock: true
+             })
+         });
+     })();
+ })
+ function open_wc(i){
+     var  name = '&name=goods_name_'+i+'&batch_no=wc_batch_no_'+i+'&batch_id=wc_batch_id_'+i;
+     art.dialog.open("{:U('LabelAdmin/SelectJp/index')}"+name,{
+         width: 800,
+         height: 500,
+         title:'选择卡券',
+         lock: true
+     })
+}
+
+function add_more(n){
+    var obj = $($('#level'+n+'_tpl').html());
+//    _moren++;
+    /*obj.find('input').each(function(){
+        var ni = this.id;
+        this.id = ni.substr(0, ni.length-1) + _moren;
+    });*/
+    /*obj.find('.btn_choose').bind('click', function(){
+        open_wc(_moren);
+    });*/
+    obj.appendTo($('#level'+n+'_more'));
+}
+</script>
+<if condition="(ACTION_NAME=='add')" >
+<script>
+function gen_batchjson(){
+
+    var jp_set_type = $(':radio[name="jp_set_type"][checked]').val();
+    var json_data = {
+        jp_set_type : jp_set_type,
+        chance : $('#chance').val(),
+        list :[]
+    };
+    //单奖品
+    if(jp_set_type == '1'){
+        json_data.list.push({
+            batch_no:$('#wc_batch_no').val(),
+            batch_id:$('#wc_batch_id').val(),
+            batch_name:$('#goods_name').val(),
+            total_count:$('#goods_count').val()
+        });
+    }
+    //多奖品
+    else{
+        $('.more_level').each(function(){
+            json_data.list.push({
+                batch_no:$(':input[name="wc_batch_no[]"]', this).val(),
+                batch_id:$(':input[name="wc_batch_id[]"]', this).val(),
+                batch_name:$(':input[name="goods_name[]"]', this).val(),
+                total_count:$(':input[name="goods_count[]"]', this).val(),
+                level:$(':input[name="award_level[]"]', this).val()
+            });
+        });
+    }
+
+    $('#batchjson').val(JSON.stringify(json_data));
+}
+</script>
+<else/>
+<script>
+var jp_set_type = "{$cjarr['jp_set_type']}";
+function gen_batchjson(){
+
+    var json_data = {
+        chance : $('input[name="total_chance_edit"]').val(),
+        list :[]
+    };
+    //单奖品
+    if(jp_set_type == '1'){
+        json_data.list.push({
+            cj_batch_id:$(':input[name="cj_batch_id"]').val(),
+            total_count:$(':input[name="goods_count_edit"]').val()
+        });
+    }
+    //多奖品
+    else{
+        $('.more_level').each(function(){
+            json_data.list.push({
+                cj_batch_id:$(':input[name="cj_batch_id[]"]', this).val(),
+                total_count:$(':input[name="goods_count_edit[]"]', this).val()
+            });
+        });
+    }
+
+    $('#batchjson').val(JSON.stringify(json_data));
+}
+</script>
+</if>

@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta property="qc:admins" content="1542570064671673117276375" />
+<title>{:C('SITE_TITLE')}</title>
+<meta name="keywords" content="{:C('SITE_KEYWORDS')}" />
+<meta name="description" content="{:C('SITE_DESCRIPTION')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wdefault.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<script>
+$(function(){
+     $("#aabbccdd").click(function(){
+         art.dialog.open("{:U('Home/Case/o2oshouzhe')}",{
+             width:'80%',
+             height:'90%',
+             title:'旺财平台用户留言守则',
+             lock:true
+			 })
+         });
+})
+</script>
+<body>
+	<div class="l-message">
+	<form action="" method="post" id="formwicket">
+		<p>*留言类型：<select class="selectbox vm" name="wicketType">
+		    <?php foreach($wicketType as $k=>$v){ ?>
+			<option value="<?php echo $k; ?>"><?php echo $v ;?></option>
+			<?php } ?>
+		</select></p>
+		<p>*留言标题：<input type="text" class="textbox vm" name="wicketTitle" placeholder="请输入留言标题（最少10个字，最多20个字）" /></p>
+		<p>*留言内容：<textarea class="texttextarea vt" placeholder="请输入留言内容（最少10个字，最多1000个字）" name="wicketContent" id="wicketContent"></textarea></p>
+		<p>上传截图：<a class="dib upload-btn ml5" href="javascript:void(0);" onclick="file_img()"><span>+</span>上传</a></p><input type="hidden" name="img_url" id="img_url" value=""/>
+		<p>联系方式：<input type="text" class="textbox vm" name="wicketIphone" placeholder="请输入联系方式" /></p>
+		<p style="padding-left:5em;"><label><input style="margin-top:-4px;" type="checkbox" class="mr5 vm" checked="checked" disabled="disabled"/>我同意遵守<a href="javascript:void(0);" id="aabbccdd">旺财平台用户留言守则</a></label></p>
+		<p><a href="javascript:void(0);" class="w130 btn-all" id="sub_formwicket">留言</a></p>
+	</form>
+	</div>
+</body>
+</html>
+<script>
+$(function(){
+      $('#sub_formwicket').click(function(){
+	            var wicketTitle=$('input[name=wicketTitle]').val();
+				var wicketContent=$('#wicketContent').val();
+				var wicketIphone=$('input[name=wicketIphone]').val();
+
+				if(wicketTitle.length < '10' || wicketTitle.length > '20'){
+				    result_('标题输入不符合规则！！！');return false;
+				}
+	          
+			    if(wicketContent.length < '10' || wicketContent.length > '1000'){
+				    result_('内容输入不符合规则！！！');return false;
+				}
+				
+				if(wicketIphone.length > '18'){
+				    result_('联系方式不符合规则！！！');return false;
+				}
+	   
+			 $.post("<?php echo U('Home/Board/wicket'); ?>",$("#formwicket").serialize(),function(d){
+			    if(d.code == '0'){
+				  resulterror(d.codeText);
+				}else{
+			      result(d.codeText,d.code);
+				 }
+				 //location.reload();
+			 },'json');
+			 
+			
+	  });
+})
+
+function file_img()
+{
+        var opt = [
+            ,"uploadUrl={:urlencode(U('ImgResize/Meitulogin/uploadFile','','','',true))}"
+            ,"cropPresets=800x800"
+            ,"callback=uploadCallback_message"
+            ,"menuType=1"
+        ].join('&');
+        openUploaderMeitu_message("{:U('ImgResize/Meitulogin/index')}&"+opt);
+ }
+ 
+function openUploaderMeitu_message(url) {
+    var win_width = 700;
+    art.dialog.open(url, {
+        lock: true,
+        title: "上传图片",
+        width: win_width,
+        height: win_width / 1.6,
+        id: 'art_upload',
+		zIndex:1600
+    });
+}
+
+function uploadCallback_message(data) {
+
+	     $('#img_url').val(data.info.imgName);
+        
+}
+
+  function result_(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				   //parent.art.dialog.list['wicket'].close()
+				}
+			})
+   }
+   
+    function resulterror(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				   //parent.art.dialog.list['wicket'].close()
+				}
+			})
+   }
+   
+    function result(contents,id){
+	  var url="{:U('Home/Board/detail')}";
+	  var url=url+'&Boardid='+id;
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				   //parent.art.dialog.list['wicket'].close();
+                   parent.window.location.href=url; 
+				}
+			})
+   }
+</script>

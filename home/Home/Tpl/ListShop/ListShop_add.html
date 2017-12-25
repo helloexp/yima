@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店列表_账户中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/dtree/dtree.js?v=__VR__"/>
+<script>
+$(function(){
+	$(".page a").click(function(){
+		var title="您确认是否保存当前页？";
+		var url = this.href;
+		art.dialog.confirm(title,function(){
+			post_data("page",url);
+		});
+		return false;
+	});
+
+	$(".ind-bread").click(function(){
+			history.go(-1);
+    });
+
+	$("#add-shop").click(function(){
+			art.dialog.open(this.href,{
+				title: '新增门店',
+				width:'900px',
+				height:'80%',
+				lock:true
+			});
+			return false;
+    });
+	
+	//保存
+	$("#update").click(function(){
+		post_data("","");
+    });
+
+	
+
+	function post_data(post_type,url){
+		var StoreId ="";
+		var StoreIdList ="";
+		if($("#check_box_all").attr("checked") == "checked"){
+			StoreId = "all";
+			StoreIdList = "all";
+		}else{
+			StoreId =  $("input[type=checkbox][id='check_box_arr[]']:checked").map(function(){
+									return $(this).val();
+									}).get().join(", ");
+			StoreIdList =  $("input[type=checkbox][id='check_box_arr[]']").map(function(){
+									return $(this).val();
+									}).get().join(", ");
+		}
+
+		$.post(
+                    "{:U('ListShop/ListShop/UpdateGps');}",
+                   {store_id:StoreId,store_id_list:StoreIdList},
+                    function (data) {
+                        if (data.status == '1') {
+							if(post_type=='page'){
+								window.location.assign(url);
+							}
+							else{
+								window.parent.location.reload();
+							}
+                        } else {
+                            art.dialog('保存失败！' + data.info);
+                        }
+                    },
+                    'json'
+            );
+	}
+	//省市区初始化
+	CityCode({
+		province:$("#province"),//省
+		city:$("#city"),//市
+		town:$("#town"),//区
+		selected:"{:$_GET['province'].$_GET['city'].$_GET['town']}",//默认选中的省市区代号
+		url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+	});
+	
+
+	//操作
+	$(".artD").click(function(){
+		var url = $(this).attr('href');
+		art.dialog.open(url,{
+			title: this.title,
+			width:'900px',
+			height:'450px',
+			lock:true
+		});
+		return false;
+	});
+	
+	$(".dtreeList").hoverDelay( 
+		function(){ 
+		    $(".dtreeCon").fadeIn(); 
+		}, 
+		function(){ 
+		    $(".dtreeCon").fadeOut(); 
+		} 
+	); 
+
+});
+//全选判断
+function checkAll(obj)
+{
+	$(':checkbox[name="check_box_arr[]"]').attr('checked', obj.checked);
+}
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+    	<div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+							<p>></p>
+                            <p>门店导航</p>							
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+					<assign name="leftMenuId" value="6"/>
+                    <include file="LabelAdmin/Batch/leftMenu" leftmenuid="mddh"/>
+                </div>
+
+				<div class="subcon">
+					
+					<div class="numgoods-info">您可以在这里录入您所管辖的门店信息 。<br/>
+您可以在这里为您的门店申请验证核销终端，用来验证核销您的卡券 。
+</div>
+
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">
+                            <div class="dtreeList r"> 
+                                <a href="javascript:void(0);" class="btn-dtree w110">选择分支机构</a> 
+                                <div class="dtreeCon"> 
+                                <script> 
+                                <!-- 
+                                d = new dTree('d'); 
+                                <?php 
+                                foreach($node_list as $k=>$v){
+                                	if($k == 0){
+                                		echo "d.add('".$v['node_id']."',-1,'".$v['node_name']."','".U('ListShop/ListShop/add',array('node_id'=>$v['node_id']))."');";
+                                	}else{
+                                		echo "d.add('".$v['node_id']."','".$v['parent_id']."','".$v['node_name']."','".U('ListShop/ListShop/add',array('node_id'=>$v['node_id']))."');";
+                                	}
+                                }
+                                ?>
+                                document.write(d); 
+                                
+                                //--> 
+                                
+                                </script> 
+                                </div> 
+                                </div>
+                                <?php 
+                                foreach($node_list as $k=>$v){
+                                    if($v['node_id'] == $node_id){
+                                        echo $v['node_name'].'-门店列表';
+										break;
+                                    }
+								}
+                                ?>
+                        </h4>
+                    </div>
+                 <div class="Wcanal-tab">
+					<div class="Wcanal-tab-title fn">
+						<p <eq name="_GET['pos_count_status']" value="">class="Wcanal-tab-hover"</eq>><a href="{:U('ListShop/add',array('node_id'=>$node_id))}">全部门店</a></p>
+						<!---
+						<p <eq name="_GET['pos_count_status']" value="1">class="Wcanal-tab-hover"</eq>><a href="{:U('Store/index',array('pos_count_status'=>'1','node_id'=>$node_id))}">已开通终端门店</a></p>
+						<p <eq name="_GET['pos_count_status']" value="0">class="Wcanal-tab-hover"</eq>><a href="{:U('Store/index',array('pos_count_status'=>'0','node_id'=>$node_id))}">未开通终端门店</a></p>
+						<a class="mem-updatego r w110" href="{:U('Store/add',array('node_id'=>$node_id))}" id="add-shop">门店录入</a>
+						--->
+					</div>
+					<form method="get" action="">
+					 <input type="hidden" name="g" value="{$Think.GROUP_NAME}"/>
+					 <input type="hidden" name="m" value="{$Think.MODULE_NAME}"/>
+					 <input type="hidden" name="a" value="{$Think.ACTION_NAME}"/>
+					 <input type="hidden" name="node_id" value="{$node_id}"/>
+					<div class="Wcanal-tab-list">
+						<div class="form-search fn">
+							
+
+								<p>门店名称</p>
+								<p><input type="text" class="textbox w120" name="store_name" value="{$_GET['store_name']}"/></p>
+								<!---
+								<p class="ml10">门店负责人</p>
+								<p><input type="text" class="textbox w120" name="principal_name" value="{$_GET['principal_name']}"/></p>
+								<p class="ml10">受理业务类型</p>
+								<p><select name="pos_range">
+								<option value="">全部</option>
+								{:show_arr_opt(array('0'=>'无','1'=>'仅爱拍赢大奖业务','2'=>'全部业务'),$_GET['pos_range'])}
+								</select></p>
+								--->
+								<button type="submit" class="btn-all w80 mr10" style="float:right;">查询</button>
+								<div class="cl pt10"></div>
+								<p>门店地址</p>
+								<p>
+									<select name="province" id="province" class="address-select" >
+										<option value="">省</option>
+									  </select>
+									<select name="city" id="city" class="address-select" >
+									<option value="">市</option>
+									</select>
+									<select name="town" id="town" class="address-select" >
+									<option value="">区</option>
+									</select>
+								</p>
+							
+						</div>
+						<table cellpadding="0" cellspacing="0" class="W-table">
+							<tr>
+								<th><input type="checkbox" id = "check_box_all" name = "check_box_all"  value="all" onclick="checkAll(this)">全选</th>
+								<th>所属机构</th>
+								<th>门店名称</th>
+								<th>所在省市区</th>
+								<th>详细地址</th>
+								<th>联系电话</th>
+								
+							</tr>
+							<php>
+							$empty = '<tr><td colspan="7">没有满足条件的数据</td></tr>';
+							</php>
+							<volist name="queryList" id="vo" empty="$empty">
+							<tr>
+								<td>
+								<input type="checkbox" id = "check_box_arr[]" name = "check_box_arr[]" value="{$vo['id']}" <if condition="$vo[gps_flag] eq '1'">checked</if> >
+								</td>
+								<td>{$vo.node_name}</td>
+								<td>{$vo.store_name|default='未填写'}</td>
+								<td>{$vo.province}{$vo.city}{$vo.town}</td>
+								<td>{$vo.address|default='未填写'}</td>
+								<td>{$vo.principal_tel|default='未填写'}</td>
+								
+								<!---
+								<a href="{:U('Store/view',array('id'=>$vo['id']))}" class="artD" title="详情">详情</a>
+								<a href="{:U('Store/edit',array('id'=>$vo['id']))}" class="mlr5 artD" title="编辑">编辑</a>
+								<a href="{:U('Pos/posApply',array('store_id'=>$vo['id']))}" class="mlr5 artD" title="申请验证终端">申请验证终端</a>
+								--->
+							</tr>
+							</volist>
+							
+						</table>
+						<div class="page">{$pageShow}</div>
+						<div style="text-align:center;">
+							<button type="button" id="update" class="btn-all w80 ml20">保存</button>
+						</div>
+					</form>	
+					</div>
+				 </div>
+				</div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

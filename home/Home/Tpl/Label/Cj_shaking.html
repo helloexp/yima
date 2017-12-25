@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>摇一摇抽奖</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_shaking.css">
+<script>
+var g = false;
+var count = 0 ;
+var _is_sub = false;
+$(document).ready(function(e){
+	var isSupportTouch = "ontouchend" in document ? true : false;
+	var cantouch = "click";
+	if(isSupportTouch){cantouch = "touchstart";}else{cantouch = "click";}
+	shake();
+    //抽奖
+	$('#subcj').on("click",function(){
+		if(window._is_sub) { //正在处理不可以再次提交
+			return false;
+		}
+		var needIgnore = $.cookie('{$needIgnoreKey}');
+		if (needIgnore == '1') { //不允许再抽奖
+
+			return false;
+		}
+		if (CountDowner.isCountdowning()) {//正在倒计时 不可以再次提交
+
+			return false;
+		}
+		CountDowner.notCountdowningAndInitAndStart();//开始倒计时
+        _is_sub = true;
+		beginAction();
+		$("#AjaxWrapper").hide();
+		$("#popForm").hide();
+    });
+	$("#startGame").on("click",function(){
+		if($(this).hasClass("erro")){return false;}
+        popForm('popForm',0);
+	});
+	$(".close-specialCj").click(function(){
+		$(".specialCj").hide();
+		$(".specialCj").html("");
+	})
+	$(".specialCj").css("background","rgba(0,0,0,0.6)");
+});
+function beginAction(data){
+    count = 0;
+    g = true;
+	$(".shaking").removeClass("end");
+	$("#startGame span").text("可以开始摇啦");
+	$("#startGame").addClass("erro");
+	if(data){
+		g = false;
+		var time = 3;
+		var checkTime = function(){
+			$("#startGame span").text(time+"秒后开奖");
+			if(time==0){
+				time = 3;
+				$(".shaking").addClass("end");
+				endAction();
+				clearInterval(CjInt);
+				return false;
+			}
+			time--;
+		}
+		CjInt = setInterval(checkTime,1000);
+	}
+}
+function endAction(){
+	$("#startGame span").text("获取抽奖机会");
+	$("#startGame").removeClass("erro");
+}
+function shake(){
+	if(window.DeviceMotionEvent) {
+		var speed = 2;
+		var x = y = lastX = lastY = 0;
+		window.addEventListener('devicemotion',function(){
+			if(g){
+				var acceleration = event.accelerationIncludingGravity,
+				x = acceleration.x; 
+				y = acceleration.y;
+				if(Math.abs(x-lastX) > speed || Math.abs(y-lastY) > speed ){
+					if(count>=3){
+						g = false;
+						$(".shaking").addClass("end");
+						setTimeout("update()",3000);
+					}else{
+						count++
+					}
+				}
+				lastX = x; 
+				lastY = y;
+			}
+		},false);
+	}
+}
+function update(){
+	$.post(
+	"{:U('Label/Cj/submit')}",
+	$('#theform').serialize(),
+	function(data) {
+		_is_sub = false;
+		if(data.status==0){
+			if(data.data==3){
+				$("#AjaxWrapper").hide();
+				$("#popForm").hide();       
+                //唐山非标
+            <php>if($node_id==C("tangshan.node_id")){</php>
+                    if(typeof(data.info.tangshan_url) === "string"){
+                        setTimeout(function(){tangshan_pingan(data.info.tangshan_url,4);},6000);
+                        return false;
+                    }else{
+                        setTimeout(function(){popForm('popMsg',data.info,data.status)},6000);
+                        return false;
+                    }
+                <php>}else{</php>
+                setTimeout(function(){popForm('popMsg',data.info,data.status)},6000);
+                    return false;
+                <php>}</php>
+            }
+            popForm('popMsg',data.info,data.status);
+            return false;
+		}else if(data.status==3){
+			popForm('popMsg',data.info,data.status);
+			return false;
+		}
+        //中奖了
+        //唐山平安非标
+        <php>if($node_id==C("tangshan.node_id")){</php>
+            if(typeof(data.tangshan_url) === "string"){
+                beginAction(data.data);
+                setTimeout(function(){tangshan_pingan(data.tangshan_url,3);},500);
+                return false;
+            }
+        <php>}</php>
+		var _endCj = handelCjResult(data);
+		setTimeout(_endCj,500);
+	},
+	'json'
+	);
+	endAction();
+}
+</script>
+</head>
+<body>
+    <img src="__PUBLIC__/Label/Image/shaking/box.png" class="dn">
+    <img src="__PUBLIC__/Label/Image/shaking/box2.png" class="dn">
+    <img src="__PUBLIC__/Label/Image/shaking/box3.png" class="dn">
+	<div class="specialCj-con">
+    	<div class="close-specialCj">+</div>
+    	<div class="shaking">
+        	<div class="sprizeBox">
+                <img class="img-bg" src="__PUBLIC__/Label/Image/shaking/light.png">
+                <img src="__PUBLIC__/Label/Image/shaking/bling.png" class="img-bling">
+                <div class="divBox">
+                	<div class="boxTop"></div>
+                    <div class="boxCon"></div>
+                </div>
+            </div>
+            <div class="sprizeMsg">
+                <a href="javascript:void(0);" id="startGame"><img class="wobble" src="__PUBLIC__/Label/Image/shaking/hands.png"><span>获取抽奖机会</span></a>
+            </div>
+        </div>
+	</div>
+</body>
+</html>

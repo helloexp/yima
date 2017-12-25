@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>翼码旺财业务配置</title>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/main.css?v=__VR__" />
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/layout.css?v=__VR__" />
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/module.css?v=__VR__" />
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/Wshop.css?v=__VR__" />
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+        <script>
+            var addshopFreight;
+            var data;
+            $(document).ready(function (e) {
+                addshopFreight = art.dialog.data('addshopFreight');
+                //点击左边展开
+                $(".shopCitytreeT").click(function (e) {
+                    e.stopPropagation();
+                    var t = $(this).closest(".shopCitytree");
+                    if (t.hasClass("close")) {
+                        t.removeClass("close").addClass("open");
+                    } else {
+                        t.removeClass("open").addClass("close");
+                    }
+                });
+                //点击左边选中
+                $(".shopCitytreeT a i.input").click(function (e) {
+                    e.stopPropagation();
+                    var t = $(this),
+                            tc = t.closest(".shopCitytreeT").next(".shopCitytreeC").find("a i.input");
+                    if (t.hasClass("check")) {
+                        t.removeClass("check").find("input").attr("checked", false);
+                        tc.each(function (index, element) {
+                            $(this).removeClass("check").find("input").attr("checked", false);
+                        });
+                    } else {
+                        t.removeClass("dcheck").addClass("check").find("input").attr("checked", true);
+                        tc.each(function (index, element) {
+                            $(this).removeClass("dcheck").addClass("check").find("input").attr("checked", true);
+                        });
+                    }
+                    shopCityChooseCon();
+                });
+                $(".shopCitytreeC a i.input").click(function (e) {
+                    e.stopPropagation();
+                    var t = $(this),
+                            tc = t.closest(".shopCitytreeC").find("a i.input"),
+                            tt = t.closest(".shopCitytreeC").prev(".shopCitytreeT").find("a i.input"),
+                            tclength = 0;
+                    if (t.hasClass("check")) {
+                        t.removeClass("check").find("input").attr("checked", false);
+                        tc.each(function (index, element) {
+                            if ($(this).hasClass("check") || $(this).hasClass("dcheck")) {
+                                tclength++;
+                            }
+                        });
+                        if (tclength == 0) {
+                            tt.removeClass("check").removeClass("dcheck").find("input").attr("checked", false);
+                        } else {
+                            tt.removeClass("check").addClass("dcheck").find("input").attr("checked", true);
+                        }
+                    } else {
+                        t.removeClass("dcheck").addClass("check").find("input").attr("checked", true);
+                        tc.each(function (index, element) {
+                            if ($(this).hasClass("check") || $(this).hasClass("dcheck")) {
+                                tclength++;
+                            }
+                        });
+                        if (tclength == tc.length) {
+                            tt.removeClass("dcheck").addClass("check").find("input").attr("checked", true);
+                        } else {
+                            tt.removeClass("check").addClass("dcheck").find("input").attr("checked", true);
+                        }
+                    }
+                    shopCityChooseCon();
+                });
+                //点击右边数据删除
+                $("body").on("click", ".shopCityChooseCon .p em", function (e) {
+                    e.stopPropagation();
+                    var cityid = $(this).attr("data-id");
+                    $(".shopCitytree").find("[data-id='" + cityid + "']").click();
+                    shopCityChooseCon();
+                });
+                $("body").on("click", ".shopCityChooseCon .p span.t", function (e) {
+                    e.stopPropagation();
+                    var cityid = $(this).attr("data-id");
+                    var t = $(".shopCitytree").find("[data-id='" + cityid + "']");
+                    t.removeClass("dcheck").removeClass("check").find("input").attr("checked", false);
+                    t.closest(".shopCitytreeT").next(".shopCitytreeC").find("a i.input").each(function (index, element) {
+                        $(this).removeClass("check").removeClass("dcheck").find("input").attr("checked", false);
+                    });
+                    shopCityChooseCon();
+                });
+                shopCityChooseCon();
+
+                $("#save").click(function () {
+                    var callback = addshopFreight.callback;
+                    var text = '';
+                    var rel = '';
+                    var cityCode = '';
+                    var uniqueCode = '{$key}';
+                    $(".shopCityChooseCon .p").each(function (index, element) {
+                        var addText = $(this).text();
+                        text = text + $(this).text();
+                    });
+                    
+                    $(".shopCityChooseCon .p span em").each(function(index, element){
+                        if(index == 0){
+                            cityCode = cityCode + $(this).attr('data-id');
+                            if(uniqueCode == '' || uniqueCode == '-1'){
+                                uniqueCode = $('.shopCityChooseCon .p span').attr('data-id') + cityCode;
+                            }
+                        }else{
+                            cityCode = cityCode + "," + $(this).attr('data-id');
+                        }
+                    });
+                    if(cityCode != ''){
+                        $.post("{:U('Ecshop/BusiOption/saveForCashe')}",{'key':uniqueCode,'val':cityCode}, function(){
+                            if (typeof (callback) == 'string') {
+                                art.dialog.opener[callback].call(this, data, text);
+                                art.dialog.close();
+                            } else {
+                                callback.call(this, data, text, cityCode, uniqueCode);
+                                art.dialog.close();
+                            }
+                        });
+                    }else{
+                        art.dialog.close();
+                    }
+                })
+            });
+            //生成右边数据
+            function shopCityChooseCon() {
+                data = {
+                    list: []
+                }
+                $(".shopCitytree").find(".shopCitytreeT a i.input.check,.shopCitytreeT a i.input.dcheck").each(function (index, element) {
+                    var t = $(this).closest(".shopCitytree");
+                    var province = {
+                        province: t.find(".shopCitytreeT a span").text(),
+                        id: $(this).attr("data-id"),
+                        list: []
+                    };
+                    if (t.find(".shopCitytreeC").length >= 1) {
+                        t.find(".shopCitytreeC").find("a i.input.check").each(function (index, element) {
+                            var citylist = {
+                                city: $(this).closest("a").find("span").text(),
+                                id: $(this).attr("data-id"),
+                            }
+                            province.list.push(citylist);
+                        });
+                    }
+                    data.list.push(province);
+                });
+                var html = template("shopCityChooseCon", data);
+                $(".shopCityChooseCon").html(html);
+            }
+        </script>
+    </head>
+
+    <body class="no">
+        <div class="shopCity">
+            <div class="shopCityCon">
+                <div class="shopCityList">
+                    <div class="title">选择城市</div>
+                    <div class="shopCityListCon">
+                        <volist name="city" id="item">
+                            <div class="shopCitytree close" data-id="{$item.0.province_code}">
+                                <div class="shopCitytreeT">
+                                    <a href="javascript:void(0)">
+                                        <i <if condition="$isCheckArray[$item[0]['province']] eq 'all'" >class="input check"<elseif condition="$isCheckArray[$item[0]['province']] eq 'half'" />class="input dcheck"<else/>class="input"</if> data-id="{$item.0.province_code}">
+                                            <input type="checkbox" name='{$item.0.province_code}[]' value='{$item.0.province_code}'/>
+                                        </i><span>{$key}</span>
+                                    </a>
+                                </div>
+                                <div class="shopCitytreeC">
+                                    <volist name="item" id="secondItem">
+                                        <a href="javascript:void(0)"><i <if condition="$secondItem.checked neq '' ">class="input check"<else />class="input"</if> data-id="{$item.0.province_code}{$secondItem.city_code}"><input type="checkbox" <if condition="$secondItem.checked neq '' ">checked="ckecked"</if> name='{$item.0.province_code}[]' value='{$secondItem.city_code}'/></i><span>{$secondItem.city}</span></a>
+                                    </volist>
+                                </div>
+                            </div>
+                        </volist>
+                    </div>
+                </div>
+                <i class="icon-add"></i>
+                <div class="shopCityChoose">
+                    <div class="title">已选择</div>
+                    <div class="shopCityChooseCon">
+                    </div>
+                </div>
+            </div>
+            <div class="DiabtnCon">
+            	<a href="javascript:void(0)" class="Diabtn-all" id="save">确定</a>
+                <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+            </div>
+        </div>
+    </body>
+
+    <script id="shopCityChooseCon" type="text/html">
+        {{each list as value i}}
+        <div class="p">
+            <span class="t" data-id="{{value.id}}">{{value.province}}{{if value.list.length>=1}}({{/if}}</span>
+            <span>{{each value.list as city j}}<em data-id="{{city.id}}">&nbsp;{{city.city}};</em>{{/each}}</span>
+            {{if value.list.length>=1}}<span>)</span>{{/if}}
+        </div>
+        {{/each}}
+    </script>
+</html>

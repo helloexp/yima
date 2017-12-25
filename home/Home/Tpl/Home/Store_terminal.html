@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-收银系统对接</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+$(function(){
+/*    $("#sub_button").click(function(){
+	    $("#terFrom").submit();
+	});*/
+	
+    $("#sub_button").click(function(){
+	 var dialog;
+	//var type = $("input[name='type']:checked").val();
+	if($("#terFrom").validationEngine('validate')){
+		$("#terFrom").ajaxSubmit({
+			beforeSubmit:function(){
+				dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+			},
+			success:function(data){
+				 if(data.codeId == '0000'){
+					   dialog.time(10).content("<div class='msg-all-succeed'>"+data.codeText+"</div>");
+                       setTimeout(function(){
+                            location.href = '{:U("Home/Store/terminal")}';
+                        }, 10000);
+                   
+				  }else{
+					   dialog.time(8).content("<div class='msg-all-error'>"+data.codeText+"</div>");
+					   return false;
+				  }
+				
+			},
+			dataType:'json'
+		});
+		return false;
+	}
+	
+   });
+});
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+    	<include file="./Home/Tpl/Public/Public_header.html" /> 
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav">
+                    <include file="Store:sidenav" leftmenuid="sydj"/>
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>收银系统对接</h4>
+                    </div>
+                    
+                    <div class="sweet_tips">您可在此提交申请，在您现有的收银机、柜台机上做接口接入，使其具备核验卡券的能力。</div>
+                    <div class="popupWin">
+                        <div class="applyform">
+						<?php if($terInfo){ ?>
+                                <br/><br/> <br/><br/> <h3 align="center">申请成功！我们的工作人员会在2个工作日之内联系您！</h3>
+						<?php }else{ ?>
+                        <form name="" method="post" action="{:U('Home/Store/terminal')}" id="terFrom">
+                        	<div class="colgroups"><label>业务联络人：</label><input type="text" name="servicer" id="servicer" class="validate[required,maxSize[5]] textbox" value=""></div>
+                            <div class="colgroups"><label>手机：</label><input type="text" name="servicernumber" id="servicernumber" class="validate[required,maxSize[11]] textbox" value=""></div>
+                            <div class="colgroups"><label>技术联络人：</label><input type="text" name="skill" id="skill" class="validate[required,maxSize[5]] textbox" value=""></div>
+                            <div class="colgroups"><label>手机：</label><input type="text" name="skillnumber" id="skillnumber" class="validate[required,maxSize[11]] textbox" value=""></div>
+                            <div class="colgroups"><label>对接设备：</label><textarea name="allege" placeholder="请在此处说明对接设备的生产厂家、设备型号、接入数量等情况" class="validate[required,maxSize[500]]"></textarea></div>
+                            <div class="colgroups"><label>&nbsp;</label><a href="javascript:void(0);" class="btn-all w110" id="sub_button">提交申请</a></div>
+                        </form>
+						<?php } ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

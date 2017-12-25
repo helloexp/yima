@@ -1,0 +1,389 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>员工管理_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wmarketing.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<link href="__PUBLIC__/Css/member.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msguser.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/member.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script type="text/javascript">
+$(document).ready(function(e){
+    $(".frm_checkbox_label").css("margin-right","0");
+    //点击全选
+    $(".group_select .icon_checkbox").click(function(){
+        if ($(this).closest(".frm_checkbox_label").hasClass("selected")){
+            $(".frm_checkbox_label").removeClass("selected");
+            $("#userGroups .frm_checkbox_label").find(".frm_checkbox").attr("checked",false);
+        }else{
+            $(".frm_checkbox_label").removeClass("selected").addClass("selected");
+            $("#userGroups .frm_checkbox_label").find(".frm_checkbox").attr("checked",true);
+        }
+        if($("#userGroups .selected").length>=1){
+            $(".dropdown_wrp").removeClass("disabled");
+        }else{
+            $(".dropdown_wrp").addClass("disabled");
+        }
+    });
+    //点击单个input
+    $("#userGroups .icon_checkbox").click(function(){
+        
+        $(this).closest(".frm_checkbox_label").toggleClass("selected");
+        if($("#userGroups .selected").length>=1){
+            $(".dropdown_wrp").removeClass("disabled");
+        }else{
+            $(".dropdown_wrp").addClass("disabled");
+        }
+    });
+    //点击分组显示分组
+    $(".dropdown_menu").live("click",function(event){
+        event.stopPropagation();
+        if($(this).hasClass("disabled")){return false;};
+        $(this).addClass("open");
+        $(this).find(".dropdown_data_list").show();
+    });
+    //群添加组
+    $("#allGroup .jsDropdownItem").click(function(){
+        var check_box = $("[name='id[]']:checked");
+        if(check_box.length==0){
+            art.dialog({title:false,content:"<div class='msg-all-error'>请选择要添加的员工</div>",fixed: true,padding:0,time:1});
+            $("#member_group option:first").attr("selected","selected");
+            return false;
+        }
+        var group_id = $(this).attr("data-value");
+        var member_str = '';
+        $(check_box).each(function(){
+            var sNum = $(this).val();
+            member_str += sNum+','; 
+        });
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+        $.post("{:U('OnlineSee/InsuranceEmployee/memberGroupAdd')}",{"group_id":group_id,"member_str":member_str},function(data){
+            if(data.status==1){
+                dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                setTimeout("window.location.reload();",1000);
+           }else{
+               dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+           }
+        },"json");
+    });
+
+    var url = '{:U("OnlineSee/InsuranceEmployee/importAdd/")}';
+    $('.emp_bulkAdd').click(function(){
+        art.dialog.open(url,{
+            lock: true,
+            title:"批量添加",
+            width:500,
+            height:350,
+            id:'div'
+        });
+                    
+    });
+
+    $('.emp_add').click(function(){
+        art.dialog.open("{:U('OnlineSee/InsuranceEmployee/add/')}",{
+            lock: true,
+            title:"添加员工",
+            width:500,
+            height:400
+        });
+    });
+
+    $("#add_group").click(function(){
+        $("#group_id,#group_name").val('');
+        art.dialog({
+            title:"添加分组",
+            id:"group_info",
+            content:document.getElementById("group_info"),
+            width:300,
+            lock:true
+        });
+    });
+
+    $("#checkAll").change(function(){
+        if(this.checked){ 
+            $("input[name='id[]']").each(function(){this.checked=true;}); 
+        }else{ 
+            $("input[name='id[]']").each(function(){this.checked=false;}); 
+        } 
+    });
+
+    //点击添加分组
+    $("#js_groupAdd").click(function(){
+        $("#js_groupAddCon").show();
+    });
+
+    //点击修改分组
+    $(".edit_gray").click(function(){
+        $(this).closest(".inner_menu_item").addClass("editing")
+    });
+
+    $(".enter_gray").click(function(){
+        var group_id=$(this).closest(".frm_input_box").attr("data-gid");
+        var group_name=$(this).closest(".frm_input_box").find("input[name=group_name]").val();
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+        $.post("{:U('OnlineSee/InsuranceEmployee/groupSave')}",{"group_id":group_id,"group_name":group_name},function(data){
+            if(data.status==1){
+                dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                setTimeout("window.location.reload();",1000);
+            }else{
+               dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+            }
+            
+        },"json");
+    });
+
+    // $(".del_gray").click(function(){
+    //     var group_id=$(this).attr("data-value");
+    //     dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+    //     $.post("{:U('OnlineSee/InsuranceEmployee/delGroup')}",{"group_id":group_id},function(data){
+    //         if(data.status==1){
+    //             dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+    //             setTimeout("window.location.reload();",1000);
+    //        }else{
+    //            dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+    //        }
+            
+    //     },"json");
+    // });
+});
+    
+    function edit(id){
+        $.get("{:U('OnlineSee/InsuranceEmployee/ajaxGroup')}",{"group_id":id},function(datas){
+            var data = datas.data;
+            if(datas.status==1){
+                $("#group_name").val(data.name);
+                $("#group_id").val(data.id);
+                art.dialog({
+                    title:"编辑分组",
+                    id:"group_info",
+                    content:document.getElementById("group_info"),
+                    width:300,
+                    lock:true
+                });
+            }else{
+                art.dialog({title:false,time:3,content:"<div class='msg-all-error'>"+datas.info+"</div>",fixed:true,padding:0});
+            }
+        },"json");
+    }
+
+    function del(id){
+        $.get("{:U('OnlineSee/InsuranceEmployee/delGroup')}",{"group_id":id},function(datas){
+            var data = datas.data;
+            if(datas.status==1){
+                 art.dialog({title:false,time:3,content:"<div class='msg-all-succeed'>"+datas.info+"</div>",fixed:true,padding:0});
+                 setTimeout("window.location.reload();",1000);
+            }else{
+                art.dialog({title:false,time:3,content:"<div class='msg-all-error'>"+datas.info+"</div>",fixed:true,padding:0});
+            }
+        },"json");
+    }
+
+    //点击分组以外区域隐藏分组
+    $("body").live("click",function(){
+        $(".dropdown_menu").removeClass("open").find(".dropdown_data_list").hide();
+    });
+
+    function empSee(mid) {
+        art.dialog.open("{:U('OnlineSee/InsuranceEmployee/see/')}&id="+mid,{
+            lock: true,
+            title:"查看员工",
+            width:500,
+            height:400
+        });
+    }
+
+    function empEdit(mid) {
+        art.dialog.open("{:U('OnlineSee/InsuranceEmployee/add/')}&id="+mid+"&type=2",{
+            lock: true,
+            title:"添加员工",
+            width:500,
+            height:400
+        });
+    }
+
+    function statusChange(mid){
+        var title="您确认复活该员工？";
+        var url = "{:U('OnlineSee/InsuranceEmployee/emplife')}";
+        art.dialog.confirm(title, function(){
+            $.post(url, {"id":mid}, function(data){
+                if(data.status==1){
+                    art.dialog({title:false,content:"<div class='msg-all-succeed'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+                    window.location.reload();
+                }else{
+                    art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+                }
+            },"json");
+        });
+    }
+</script>
+</head>
+<body>
+	<div id="wrapper" class="">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <!--开始引入头部菜单-->  
+        <include file="OnlineSee/nav" navmenuid="Navinsu"/>
+
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <ul class="m-menu">
+                        <li>
+                            <a href="{:U('OnlineSee/InsuranceEmployee/index')}">员工管理 </a>
+                        </li>
+                        <li class="hover">
+                            <a href="{:U('OnlineSee/InsuranceEmployee/trash')}">员工回收站 <i class="icon-masternav" style="margin-top:0px;"></i></a>
+                        </li>
+                        <li>
+                            <a href="{:U('OnlineSee/InsuranceEmployee/crew')}">组员关系管理</a>
+                        </li>
+                        <li>
+                            <a href="{:U('OnlineSee/InsuranceEmployee/short_url_list')}">短链任务管理</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mt30 dn subcon2">
+                </div>
+                <div class="subcon fn subcon1">
+                    <div class="Wcanal-tab">
+                        <div class="inner_container_box side_r split">
+                        <!--右侧用户分类管理-->
+                        <div class="inner_side">
+                            <div class="bd mt15">
+                                <div class="group_list">
+                                    <div class="inner_menu_box" id="groupsList">
+                                        <dl class="inner_menu">
+                                            <dt class="inner_menu_item">
+                                                <a href="{:U('OnlineSee/InsuranceEmployee/trash')}" class="inner_menu_link">
+                                                    <strong>全体员工</strong><em class="num">({$empNum})</em>
+                                                </a>
+                                            </dt>
+                                            <volist name="groupList" id="vo">
+                                            <dd class="inner_menu_item " id="group100">
+                                                <a href="{:U('OnlineSee/InsuranceEmployee/trash',array('group_id'=>$vo['id']))}" class="inner_menu_link"><strong>{$vo['group_name']}</strong><em class="num">({$vo['num']})</em></a>
+                                                <neq name="vo.id" value="1">
+                                                <span class="frm_input_box append" id="groupInput100" data-gid="{$vo['id']}" data-gname="{$vo['group_name']}" data-gnum="{$vo['id']}">
+                                                    <input name="group_name" type="text" value="{$vo['group_name']}" class="frm_input js_groupInput">
+                                                    <a href="javascript:void(0);" class="frm_input_append icon16_common enter_gray js_groupNameEnter">确定</a>
+                                                </span>
+                                                <span class="menu_opr" style="margin-top: 10px;">
+                                                    <a data-gid="100" href="javascript:void(0);" class="icon16_common edit_gray no_extra js_iconEdit">编辑</a>
+                                                    <!-- <a data-gid="100" href="javascript:void(0);" class="icon16_common del_gray js_iconDel" data-value="{$vo['id']}">删除</a> -->
+                                                </span>
+                                                </neq>
+                                            </dd>
+                                            </volist>
+                                        </dl>
+                                        <div class="inner_menu_item editing dn" id="js_groupAddCon">
+                                            <span class="frm_input_box append">
+                                                <input name="group_name" type="text" class="frm_input" id="groupNew">
+                                                <a href="javascript:void(0);" class="frm_input_append icon16_common enter_gray js_enter">确定</a>
+                                            </span>
+                                        </div>
+                                        <div class="inner_menu_item extra" id="js_groupAdd">
+                                            <a href="javascript:void(0);" class="inner_menu_link"><i class="icon14_common add_gray"></i><strong>新建分组</strong></a>
+                                        </div>
+                                        <dl class="inner_menu no_extra">
+                                            <dt class="inner_menu_item selected"></dt>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--左侧用户信息-->
+                        <div class="inner_main">
+                            <div class="form-search fn c_bd_e1 mt15">
+                            <form action="{:U('OnlineSee/InsuranceEmployee/trash/')}" method="post" name="theform" id="theform">
+                                <div class="fn mt10">
+                                    <p class="ml10">员工编号</p>
+                                    <p><input id="emp_number" name="emp_number" type="text" style="width:70px" value="{$emp_number}" /></p>
+                                    <p class="ml20">员工姓名</p>
+                                    <p><input id="emp_name" name="emp_name" type="text" style="width:70px" value="{$emp_name}" /></p>
+                                    <p class="ml10">分组名称</p>
+                                    <p><select style="width:130px" id="group_id" name="group_id">
+                                            <option value="">全体员工</option>
+                                            <volist name="groupList" id="vo">
+                                            <option value="{$vo['id']}" <?php if($group_id == $vo['id']) {echo "selected='selected'";} ?>>{$vo['group_name']}</option>
+                                            </volist>
+                                        </select>
+                                    </p>
+                                    <a href="javascript:void(0);" onclick="return $('#theform').submit();" id="sub_button" class="btn-all r w70 mr30">查询</a>
+                                </div>
+                            </form>
+                            </div>
+                            <div>
+
+                            </div>
+                            <div class="bd mt15">
+                                <div class="sub_title_bar default">
+                                    <div class="group_select">
+                                        <label for="selectAll" class="frm_checkbox_label l ml5"><i class="icon_checkbox"></i><input type="checkbox" class="frm_checkbox" id="selectAll" />全选</label>
+                                        <div id="allGroup" class="dropdown_wrp dropdown_menu disabled" >
+                                            <a href="javascript:;" class="btn dropdown_switch jsDropdownBt"><label class="jsBtLabel">添加到</label><i class="arrow"></i></a>
+                                            <ul class="dropdown_data_list jsDropdownList" style="display: none;">
+                                                <volist name="groupList" id="vo">
+                                                <?php if($vo['id'] != 1) { ?>
+                                                <li class="dropdown_data_item">
+                                                    <a href="javascript:;" class="jsDropdownItem" data-value="{$vo['id']}" data-index="{$vo['id']}" data-name="{$vo['group_name']}">{$vo['group_name']}</a>
+                                                </li>
+                                                <?php } ?>
+                                                </volist>
+                                            </ul>
+                                        </div>
+                                        <a href="javascript:void(0);" class="emp_add">+  添加员工</a>
+                                        <a href="javascript:void(0);" class="emp_bulkAdd">+  批量添加</a>
+                                    </div>
+                                </div>
+                                <div class="table_wrp user_list">
+                                    <table class="table W-table" cellspacing="0" style="border:none;">
+                                        <thead>
+                                            <tr>
+                                                <th class="tc" style="width:8px;"></th>
+                                                <th class="tc" style="width:98px;">员工编号</th>
+                                                <th class="tc" style="width:90px;">员工姓名</th>
+                                                <th class="tc" style="width:110px;">分组</th>
+                                                <th class="tc" style="width:130px;">操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="userGroups">
+                                            <volist name="queryList" id="query">
+                                            </tr>
+                                                <td><label for="id<?php echo $query['id'];?>" class="frm_checkbox_label l ml5"><i class="icon_checkbox"></i><input class="frm_checkbox js_select" type="checkbox" name="id[]" value="<?php echo $query['staff_number'];?>" id="id<?php echo $query['id'];?>"></td>
+                                                <td>{$query["staff_number"]}</td>
+                                                <td>{$query["name"]}</td>
+                                                <td>{$query["group_name"]}</td>
+                                                <td>
+                                                    <a href="javascript:void(0);" onclick="empSee({$query['id']})">查看</a>
+                                                    <a href="javascript:void(0);" onclick="empEdit({$query['id']})">修改</a>
+                                                    <a href="javascript:void(0);" onclick="statusChange({$query['id']})">复活</a>
+                                                </td>
+                                            </tr>
+                                            </volist>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="page">{$page}</div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

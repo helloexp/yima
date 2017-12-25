@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>电子交易大厅_立即供货</title>
+		<meta name="keywords" content=""/>
+		<meta name="description" content="" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/Wdefault.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/eTrade.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+		<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+		<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+		<script type="text/javascript" src="__PUBLIC__/Js/Wdefault.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+		<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+		<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+		<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+		<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+		<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+		<script>
+			$(function() {
+				$(".login-url").attr("href", "{:U('Home/Login/showLogin',array('fromurl'=>urlencode(U('Hall/Procurement/supply','',true,false,true))),true,false,true)}");
+				$("#add").click(function(){
+					if($(".tr").length == 5){
+						alert('最多可添加5条');
+						return false;
+					}
+					art.dialog.open("{:U('Hall/Procurement/selectGoods',array('callback'=>'call_back','show_source'=>'0'))}",{
+			            id: 'closeJp',
+			            width: 800,
+			            title:'选择电子券'
+			        })
+					
+                    
+				});
+				$("#smb").click(function(){
+                    var dialog;
+                    if($("#ginoForm").validationEngine('validate')){
+                        $("#ginoForm").ajaxSubmit({
+                            beforeSubmit:function(){
+                                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                            },
+                            success:function(data){
+                                 if(data.status == '1'){
+                                       dialog.close();
+                                       $('.form_content').hide();
+                                       $("#Succeed").show();
+                                  }else{
+                                       dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                                  }
+                            },
+                            dataType:'json'
+                        });
+                        return false;
+                    }
+                    
+                });
+				
+			})
+			function call_back(datas){
+				var tr = '<tr class="tr tddem">'+
+                '<td> <span><input type="hidden" name="goods_id[]" value="'+datas.goods_id+'" /></span> </td>'+
+                '<td><p class="rel">'+datas.goods_name+'</p></td>'+
+                '<td> <input type="text" name="city_str[]" value="" class="validate[required]" style="width: 130px" /></td>'+
+                '<td> <input name="price[]" class="validate[required]" value="" type="text"  style="width: 80px"/> </td>'+
+                '<td> <textarea name="remark[]" placeholder="可填写备注说明，如优惠条件等" class="validate[required]" style="width:205px"></textarea> </td>'+
+                '</tr>';
+                $(".rpdemand .title .W-table.sully tbody").append(tr);
+			}
+		</script>
+		
+	</head>
+	<body>
+		<div id="wrapper" class="wrapper">
+			<!--开始引入顶部菜单-->
+			<include file="./Home/Tpl/Hall/Index_hallHeader.html" topmenuid="cgxq"/>
+            <form method="post" id="ginoForm" action="{:U('Hall/Procurement/supply')}">
+            <input type="hidden" name="id" value="{$_REQUEST['id']}" />
+			<div class="bbs-container form_content">
+				<h4 class="h4demand"> 申请供货</h4>
+				<div class="rpdemand sqgh">
+					<h5><a href="{:U('Hall/Index/purchasingDemandMore')}" target="_blank"> 求购上海地区各品牌面包券</a></h5>
+					<div class="title">
+					   <table class="W-table">
+                            <tbody>
+                                <tr>
+                                    <th>电子券</th>
+                                    <th>数量 (份) </th>
+                                    <th>电子券描述</th>
+                                </tr>
+                                <volist name="demandInfo['demand_memo']" id="vo">
+                                <tr >
+                                    <td><span>{$vo['name']}</span> </td>
+                                    <td><span>{$vo['num']}</span></td>
+                                    <td>{$vo['descrition']}</td>
+                                </tr>
+                                </volist>
+                            </tbody>
+
+                        </table>
+					</div>
+					<h5>供货信息<a id="add" href="javasript:void()">添加</a></h5>
+					<div class="title cgxq">
+						<table class="W-table sully">
+							<tbody>
+								<tr class="thdem"> 
+									<th></th>
+									<th>电子券</th>
+									<th>可兑换城市 </th>
+									<th>市场价(元) </th>
+									<th>供货说明 </th>
+								</tr>	
+								
+								
+								
+							</tbody>
+							
+						</table>
+					</div>
+					
+					
+					<h5>供货方信息</h5>
+					<div class="title">
+						<dl>
+							<dd><label><i>*</i>联系人</label><input type="text" name="linkman" class="w400 validate[required]" value="" /> </dd>
+							<dd><label><i>*</i>联系电话</label><input type="text" name="tel" class="w400 validate[required,custom[phone]]" value="" /> 	</dd>
+							<dd><label><i>*</i>联系邮箱</label><input type="text" name="email" class="w400 validate[required,custom[email]]" value="" /> 	</dd>
+							
+						</dl>
+					</div>
+					</div>
+                    <div style="text-align: center;">
+                        <dl>
+                            <dd class="mt30"><input name="agree" checked="checked" class="validate[required]"  type="checkbox"/> 我已知晓 <a href="" target="_blank">《电子券供货规则》</a></dd>
+                            <dt><a class="btn-all btn-red" id="smb" style="margin-top: 15px;margin-bottom: 40px;" href="javascript:void(0);">确认发布</a></dt>
+                        </dl>
+                    </div>
+			</div>
+			
+			</form>
+            <!-- 提交成功后显示页面 -->
+            <div id="Succeed" class="dn">
+                <div class="succeed_icon"><img src="http://192.168.0.242/imageco/home/Home/Public/Image/start_icon.png"></div>
+                <div class="succeed_content">
+                    <dl>
+                        <dt class="mb10">供货需求发布成功！</dt>
+                        <dd> 您还可以</dd>
+                        
+                        <dd>
+                            <a style="border: none;padding-left: 0"  href="{:U('Hall/Index/purchasingDemandMore')}" target="_blank">查看更多的采购需求</a>
+                            <a href="{:U('WangcaiPc/OnlineTrading/purchaserDemand')}" target="_blank">管理供货申请</a>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+			<include file="./Home/Tpl/Hall/Index_hallFooter.html"/>
+		</div>
+		<script type="text/javascript">
+			
+			$(document).ready(function() {
+				$("body").on('click','.rpdemand .title .W-table tr td span',function(){
+                    $(this).closest("tr").remove(); 
+                    if($(".tr").length==1){ 
+                        $('.rpdemand .title .W-table tr td span').hide();
+                    }
+                })
+			});
+
+		</script>
+	</body>
+</</html>

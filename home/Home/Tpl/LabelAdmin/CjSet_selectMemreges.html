@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>选择招募活动</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wselect_et.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"/></script>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script>
+$(function(){
+	$(".etList ul li").click(function(e) {
+    	var is_selected=$(this).hasClass("selected")
+    	if(is_selected == true)
+        {
+            $(this).removeClass("selected");
+        }
+        else
+        {
+            $(".etList ul li").removeClass("selected");
+            $(this).addClass("selected");
+        }
+	});
+    var _this=art.dialog.data('_this');
+    $("#sub_back").click(function(){
+    	var call_back = "{$_REQUEST['call_back']}";
+        var ckdata = $(".etList .selected").find("#ckid_data").html();
+        if(!ckdata){
+            alert('请选择招募活动');
+            return false;
+        }
+        ckdata = eval('('+ckdata+')');
+        var win = art.dialog.opener;
+        win[call_back].call(null,ckdata);
+        art.dialog.close();
+        
+    });
+    $("#sub_button").click(function(){
+        $("#theform").submit();
+    });
+    $("[data-id='batch_{$batch_type}']").addClass("hover");
+    $(".Menu .SubNav").prev("a").addClass("more");
+    $(".Menu a").next(".SubNav").hide();
+    $(".Menu a.hover").parents(".SubNav").show();
+    $(".Menu a.hover").next(".SubNav").show();
+    $(".Menu a").click(function(e) {
+        var t = $(this);
+        t.hasClass("hover") ? (t.next(".SubNav").slideToggle(300,MenuHeight())) : ($(".Menu a").removeClass("hover"),t.addClass("hover"),t.next(".SubNav").slideToggle(300,MenuHeight()));
+    });
+});
+function closeart(){
+	window.open("{:U('Home/Index/marketingShow')}");
+	art.dialog.close();
+}
+function MenuHeight(){
+    setTimeout(function(){
+        var windowheight=$(window).height()-140;
+        $("#main").height("auto");
+        $(".subcon").height("auto");
+        var leftMenuheiht=$(".Menu").height();
+        if($(".subcon").height()<leftMenuheiht){
+            $(".subcon").height(leftMenuheiht);
+        }
+        if($("#main").height()<windowheight){
+            $("#main").height(windowheight); 
+        }else{
+            $("#main").height("auto"); 
+        }
+    },300)
+}
+</script>
+</head>
+
+<body>
+	<div class="iframeCon">
+        <div class="etList">
+        	<notempty name="list">
+            <ul>
+                <foreach name="list" item="batchls" >
+                <li class="noImg">
+                	<input type="hidden" name="ckid" value="{$batchls['batch_id']}" />
+                    <input type="hidden" name="batchType" value="{$batchls['batch_type']}" />
+                    <script id="ckid_data" type="text/json">{$batchls|json_encode}</script>
+                    <div class="text">
+                        <h3><span>{$batchls['smallname']}</span>
+                            <if condition="$batchls['batch_status'] eq '3'" ><i class="gray type2">已过期</i><elseif condition="$batchls['batch_status'] eq '1'" /><i class="gray type2">未开始</i><elseif condition="$batchls['batch_status'] eq '2'" /><i class="gray">进行中</i></if>
+                        </h3>
+                        <p>有效期：{$batchls['start_time']|strtotime|date="Y-m-d",###}至{$batchls['end_time']|strtotime|date="Y-m-d",###}</p>
+                        <p>点击量：{$batchls['click_count']}</p>
+                    </div>
+                </li>
+                </foreach>
+            </ul>
+            <else />
+            <div class="iframeCon">
+                <div class="Dianodate">
+                    <img src="__PUBLIC__/Image/member/nodata.gif" />
+                    <p>空空如也，您还没有创建该类活动~~</p>
+                    <p>您可以<a href="{:U('Home/MarketActive/createNew')}" target="_blank">创建活动</a></p>
+                </div>
+            </div>
+            </notempty>
+            <div class="page mini"><div class="pagelink"><a href="{:U('Home/MarketActive/createNew')}" target="_blank">快速创建</a></div>{$page}</div>
+        </div>
+        <div class="DiabtnCon">
+            <a class="Diabtn-all btn-next" id="sub_back">确定</a>
+            <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+        </div>
+    </div>
+</body>

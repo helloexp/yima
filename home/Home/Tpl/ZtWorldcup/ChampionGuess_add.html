@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>冠军竞猜_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnewsadd.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/Wnewsadd.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jsScroll.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jscolor/jscolor.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script src=" http://libs.baidu.com/json/json2/json2.js"></script>
+<script>
+$(document).ready(function(e){
+    PreviewnewsAdd();
+});
+$(function(){
+        $('#sub_button').click(function(){
+        var dialog;
+        if($("#theform").validationEngine('validate')){
+        	art.dialog.confirm("活动创建成功之后，您的卡券将不可以更改，请确认您选择的卡券",function(){
+        		gen_batchjson();
+        		$("#theform").ajaxSubmit({
+                    beforeSubmit:function(){
+                        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                    },
+                    success:function(data){
+                         if(data.status == '1'){
+                               var datas = data.data;
+                               dialog.close();
+                               $(".text_form").hide();
+                               $(".tip_msg").show();
+                               $("#jump_url").attr("href",datas.url);
+                               $(window).scrollTop(0);
+                               return false;
+                          }else{
+                                dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                          }
+                          },
+                    dataType:'json'
+                });
+            });
+        }
+        //$("#theform").validationEngine().submit();
+    }) ;
+   $("input[name=is_log_img]").change(function(){
+       if($(this).val() == '1'){
+           $('#logo-upload2').show();
+       }else{
+           $('#resp_log_img').val('');
+           $('#logo-upload2').hide();
+       }
+   });
+})
+function checkActLogo(){
+    if($("#resp_log_img").val() == '')
+        {
+            return "请上传wap页面Logo";
+        }
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div id="main" class="rel text_form">
+                    <div class="bread">
+                        <div class="bread-con fn">
+                            <include file="./Home/Tpl/LabelAdmin/Path_index.html" />
+                            <div class="bread-history">
+                                <i class="icon-history"></i>
+                                <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <form action="{:U('ZtWorldcup/ChampionGuess/add')}" method="post" name="theform" id="theform">
+                        <div class="global-input2 fn w2 pb30">
+                            <ul class="newsadd-title">活动基础信息</ul>
+                          <ul>
+                              <li class="global-input2-name">*&nbsp;活动名称：</li>
+                              <li class="global-input2-input"><input name="name" id="name"  type="text"  class="validate[required,optional,maxSize[20]] textbox w300" value="冠军竞猜"/></li>
+                          </ul>
+                          <ul>
+                              <li class="global-input2-name">商户名称：</li>
+                              <li class="global-input2-input"><input name="node_name" id="node_name"  type="text"  class="validate[optional,maxSize[20]] textbox w300" value="{$userInfo['node_name']}"/></li>
+                          </ul>
+                          <include file="./Home/Tpl/LabelAdmin/Logo_add.html" />
+                          <ul>
+                              <li class="global-input2-name">*&nbsp;活动页面内容：</li>
+                              <li class="global-input2-input" id="wap_tip"><textarea name="wap_info" id="wap_info" class="validate[required,maxSize[200]] texttextarea w300 h126" >请从32支参赛球队中选择您认为的一支冠军球队，猜对即有可能获得商家提供的相关奖品！</textarea></li>
+                              
+                          </ul>
+                          <ul>
+                              <li class="global-input2-name">SNS分享：</li>
+                              <li class="global-input2-input">
+                              <?php 
+                              $sns_arr = C('SNS_ARR');
+                                          foreach($sns_arr as $sns_k=>$sns_v){
+                                          if($sns_k>4) continue;
+                                          ?>
+                              <input name="sns_type[]" type="checkbox" value="<?php echo $sns_k?>"/><p class="ml5"><?php echo $sns_v?></p>
+                              <?php }?>
+                              <br /><p class="font-12-cc">勾选后，允许消费者将您的营销活动分享给他的社交网络好友</p>
+                              </li>
+                                  
+                          </ul>
+                          <assign name="show_total_chance" value="0"/>
+                          <include file="./Home/Tpl/ZtWorldcup/MatchGuess_cjadd.html" cj_action="{$Think.ACTION_NAME}" mg_flag="{$mg_flag}"/>
+                          <ul>
+                              <li class="global-input2-name"></li>
+                              <li class="global-input2-input">
+                              <a href="javascript:void(0);" id="sub_button" title="确认" class="btn-all w110">确认</a>
+                              <a href="javascript:history.go(-1)" title="取消" class="btn-all-del w110 ml10">取消</a></li>
+                          </ul>
+                      </div>
+
+                    </form>
+
+                    <div class="activityread_iphone tc mt70">
+                          <div class="activityread_iphone_con">
+                              <div id="iphonePreview">
+                                    <img src="__PUBLIC__/Image/ap-iphone-Valentine1.png" />
+                              </div>
+                          </div>
+                      </div>
+                </div>
+            <!-- 添加成功 begin-->
+            <div id="main" class="rel tip_msg dn">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="/index.php?g=Home&amp;m=Index&amp;a=index">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="javascript:void(0)">操作成功！</a></p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:window.location.reload()" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="fn">
+                    <div class="pop-up fn mt40">
+                            <dd class="pop-img tc pt40"><img src="__PUBLIC__/Image/ok_img.png" width="46" height="46" class="mr30" style="vertical-align:middle;">创建成功！</dd>
+                            <dd class="pop-hint"></dd>
+                            <dd class="pop-btn tc mt40">
+                                <a href="{:U('ZtWorldcup/ChampionGuess/index')}" class="btn-all w110 mr10">冠军竞猜列表</a>
+                                <a class="btn-all w110 mr10" id="jump_url">发布渠道</a>                           
+                            </dd>
+                    </div>
+               </div>
+            </div>
+            <!-- 添加成功 end-->
+            </div>
+        </div>
+    </div>
+    </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

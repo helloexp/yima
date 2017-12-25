@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title><?php echo $row['node_name'];?></title>
+    <meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+    <meta content="O2O,O2O营销,二维码,旺财,列表模板" name="Keywords">
+    <meta content="telephone=no" name="format-detection"/>
+    <meta content="email=no" name="format-detection"/>
+    <meta name="apple-touch-fullscreen" content="NO">
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            font: 13px/1.5em "microsoft yahei";
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            text-decoration: none;
+        }
+
+        .header {
+            background: #ebebeb;
+            line-height: 35px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #999;
+        }
+
+        .list {
+            min-height: 340px;
+        }
+
+        .item {
+            position: relative;
+            border-bottom: solid 1px #e8e8e8;
+            padding: 10px;
+        }
+
+        .item i {
+            position: absolute;
+            top: 50%;
+            margin-top: -25px;
+            right: 0;
+            width: 40px;
+            height: 30px;
+        }
+
+        .item i:before {
+            position: absolute;
+            top: 33px;
+            left: 10px;
+            width: 16px;
+            height: 2px;
+            border-radius: 1px;
+            background: #4d4d4d;
+            content: "";
+            -webkit-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+        }
+
+        .item i:after {
+            position: absolute;
+            top: 23px;
+            left: 10px;
+            width: 16px;
+            height: 2px;
+            border-radius: 1px;
+            background: #4d4d4d;
+            content: "";
+            -webkit-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+
+        .item .title {
+            margin: 0 40px 0 50px;
+            text-align: left;
+            color: #0e90d2;
+        }
+
+        .item .text {
+            margin: 5px 40px 5px 50px;
+            text-align: left;
+            color: #777;
+            height: 40px;
+            overflow: hidden;
+        }
+        .item .icon {position: absolute; top: 50%; margin-top: -20px; left: 0; width: 40px; height: 40px;}
+    </style>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div>
+                <div class="header">DF列表</div>
+                <div class="list">
+                    <ul id="masonry">
+                        <foreach name="list" item="vo">
+                            <li class="item box">
+                                <a href="javascript:void(0)" onclick="location_action('{$vo.dfid}')">
+                                    <i class="arrow"></i>
+                                    <php>
+                                        if($vo['batch_type']==2){
+                                           $str_img="df-icon6.png";
+                                        }elseif($vo['batch_type']==3){
+                                            $str_img="df-icon7.png";
+                                        }elseif($vo['batch_type']==10){
+                                            $str_img="df-icon8.png";
+                                        }elseif($vo['batch_type']==1004){
+                                            $str_img="df-icon9.png";
+                                        }
+                                    </php>
+                                    <div class="icon"><img src="__PUBLIC__/Label/Image/df/<php>echo $str_img;</php>" width="40" /></div>
+                                    <div class="boxText">
+                                    	<div class="title">{$vo.wap_title}</div>
+                                    	<div class="text">{$vo['wap_info']}</div>
+                                    </div>
+                                </a>
+                            </li>
+                        </foreach>
+                    </ul>
+
+                    <div class="get-more" data-url="{$nextUrl}" style="padding:10px 0; margin:0 10px;"><a
+                            style=" display:block; height:30px; border:solid 1px #ddd; border-radius:5px; line-height:30px; color:#999;">加载更多...</a>
+                    </div>
+                    <nav id="page-nav">
+                        <a href="{$nextUrl}"></a>
+                    </nav>
+                </div>
+            </div>
+
+            </nav>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        $(".box:odd").css("background", "#f4f4f4");
+        var loadhtml = '<div id="infscr-loading" style="text-align: center; display:none;"><img src="__PUBLIC__/Label/Image/df/Item/loading.gif"><div><em>加载中...</em></div></div>';
+        $(loadhtml).insertAfter("#masonry");
+        $("body").append("<div id='masonry2' style='display:none;'></div>");
+        $('.get-more').on("click", function () {
+            if ($("#masonry2").hasClass("erro")) {
+                return false;
+            }
+            $("#masonry2").addClass("erro");
+            var url = $(this).attr("data-url");
+            $("#infscr-loading").show();
+            $('#masonry2').load(url + ' ' + ".box", null, function (data, status) {
+                $(".box:odd").css("background", "#f4f4f4");
+                var l = $("#masonry2 .box").length;
+                if (l == 0) {
+                    $('.get-more a').text('没有更多数据');
+                    $("#infscr-loading").hide();
+                    $("#masonry2").addClass("erro");
+                } else {
+                    $('#masonry').append($('#masonry2').html());
+                    $("#infscr-loading").fadeOut(500);
+                    $("#masonry2").removeClass("erro");
+                }
+                var newpath = newPath(url);
+                $(".get-more").attr("data-url", newpath);
+
+            });
+        });
+    });
+    function newPath(path) {
+        path = path.split("p=");
+        var p = path[1] * 1 + 1;
+        newpath = path[0] + "p=" + p;
+        return newpath;
+    }
+    function location_action(id) {
+        if (id) {
+            window.location.href = 'index.php?&g=Label&m=Label&a=index&id=' + id;
+        }
+    }
+</script>

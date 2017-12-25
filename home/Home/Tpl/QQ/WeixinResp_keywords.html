@@ -1,0 +1,412 @@
+<?php 
+//本模板同时被 respType=0 以及 respType=1 以及respType=2 使用，所以，根据不同的respClass进行文字替换
+if($respType == '0'){
+	$title = "被添加自动回复";
+}
+elseif($respType == '1'){
+	$title = "消息自动回复";
+}
+elseif($respType == '2'){
+	$title = "关键词自动回复";
+}
+else{
+	$title = "自动回复";
+}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>关键词自动回复_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wqq.css?v=__VR__" rel="stylesheet" type="text/css" />
+<style type="text/css">
+.btnArea{ position:relative; width:auto; background:none;}
+.ivrSettingPage .detail .operator{ height:40px; line-height:40px; padding-bottom:0;}
+</style>
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script type="text/javascript">
+
+//选择回调函数
+var selectcallback = function(mid,mdata){
+	if(!mid) return false;
+	//计算图文数量
+	var countInfo = function(obj){
+		var txtNum = $(obj).find(".replyItems li.replyWords").length;
+		var imgNum = $(obj).find(".replyItems li.replyImages").length;
+		$(".wordsCnt",obj).text(txtNum);
+		$(".appMsgCnt",obj).text(imgNum);
+	}
+	var currentForm = art.dialog.data("currentForm");
+	var addid=$(currentForm).find(".replyItems li").length;  //写入 name=name+addid
+	if(addid<1){
+		var data = {
+			title:mdata.material_title,
+			img_url:mdata.img_url,
+			material_link:mdata.material_link,
+			material_id:mdata.id
+		};
+		var addbox = template.render('tpl_item', data);
+		$(currentForm).find(".replyItems").append(addbox);
+		countInfo(currentForm);
+	}else{
+		alert("最多添加1条信息");
+	}
+}
+$(document).ready(function(e){
+	unfold();
+	pickup();
+	listItemNew();
+	matchMode();
+	Editor();
+	change();
+	editArea();
+	//选择图片
+	$(".addAppImg").click(function(){
+		var currentForm = $(this).closest(".replyList");
+		var addid=currentForm.find(".replyItems li").length;
+		if(addid>=1){alert("最多添加1条信息");return false;}
+        var opt = {
+            cropPresets:'720x400',
+            callback:function(data){
+				var data = {src:data.src};
+				var addbox = template.render('tpl_img', data);
+				currentForm.find(".replyItems").append(addbox);
+            }
+        };
+        open_img_uploader(opt);
+    });
+	
+	//启用停用自定义菜单
+$("#btn_warn_stop").click(function(){
+var dialog = art.dialog({
+    title: '温馨提示',
+    content: '<h4>操作确认</h4><p>关闭自动回复之后，将立即对所有用户生效。确认关闭？</p>',
+    width: '722px',
+    button: [{
+    	name: '确认',
+        callback:function (){},
+        focus: true
+    }]
+});
+
+dialog.button(
+    {
+        name: '取消',
+        callback: function () {},
+        disabled: true
+    }
+)
+});
+	//处理按钮事件
+	$(".saveRule").click(function(){
+		var currentForm = $(this).closest("form");
+		//表单内容校验
+		if(!check_form(currentForm)){
+			return false;
+		}
+		if($("input[name='keywordStr[]']",currentForm).length==0){
+			alert("请添加至少一条关键词");
+			return false;
+		}
+		if($("input[name='respClass[]']",currentForm).length==0){
+			alert("请添加一条回复内容");
+			return false;
+		}
+		var formData = getFormData(currentForm);
+		var dialog = art.dialog({title:false,lock:true});
+		var actionUrl = currentForm.attr("action");
+		$.post(actionUrl,formData,function(d){
+			dialog.close();
+			alert(d.info);
+			window.location.reload();
+		},'json');
+	});
+
+	//删除按钮
+	$(".delRule").click(function(){
+		var currentForm = $(this).closest("form");
+		var msgId = $("input[name='msgId']",currentForm).val();
+		if(!msgId){
+			$(this).closest("#listItemNew").removeClass("ruleItemEditing");
+			return false;
+		}
+		if(!confirm("确定要删除吗？")){
+			return false;
+		}
+		var formData = {
+			actType:"delete",
+			msgId:msgId
+		};
+		var dialog = art.dialog({title:false,lock:true});
+		var actionUrl = currentForm.attr("action");
+		$.post(actionUrl,formData,function(d){
+			alert(d.info);
+			window.location.reload();
+		},'json');
+	});
+});
+</script>
+<!-- 以下是artTemplate模板变量 -->
+<!-- 选择的图片信息 -->
+<script id="tpl_img" type="text/html">
+<li class="item float-p replyAppMsg">
+	<div class="contentWrap l">
+		<div class="l fileInfo">
+            <input type="checkBox" name="replycheckbox" class="l replycheckbox"/>
+            <input type="hidden" name="respId[]" value=""/>
+			<input type="hidden" name="respClass[]" value="3">
+			<input type="hidden" name="wordContent[]" value="<%=src%>">
+			<div class="appmsgImgArea">
+				<img src="<%=src%>"/>
+			</div>
+			<div class="appmsgContentArea">
+				<a href="" target="_blank">[&nbsp;图片消息&nbsp;]</a>
+			</div>
+			<div class="cl"></div>
+		</div>
+	</div>
+</li>
+</script>
+<!-- 选择的图文信息 -->
+<script id="tpl_item" type="text/html">
+<li class="item float-p replyImages">
+	<input type="checkBox" name="replycheckbox" class="l replycheckbox"/>
+	<input type="hidden" name="respId[]" value=""/>
+	<input type="hidden" name="wordContent[]" value="<%=material_id%>"/>
+	<input type="hidden" name="respClass[]" value="1"/>
+	<div class="contentWrap l ">
+		<div class="l fileInfo">
+			<div class="appmsgImgArea">
+				<img src="<%=img_url%>"/>
+			</div>
+			<div class="appmsgContentArea">
+				<a target="_blank" href="<%=material_link%>">[&nbsp;图文消息&nbsp;]</a><br>
+				<%=title%>
+			</div>
+			<div class="cl"></div>
+		</div>
+	</div>
+</li>
+</script>
+</head>
+
+<body>
+    <div id="wrapper" >
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="qqgzh"/>
+        <div id="container" >
+            <div id="main" class="rel">
+            	
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+					<php>
+					if($respType == '0'){
+						$leftmenuid = 'btjzdhh';
+					}
+					else{
+						$leftmenuid = 'xxzdhh';
+					}
+					</php>
+					<include file="Batch/WleftMenu" leftmenuid="zdhf"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                    <h4>{$title}<a href="javascript:;" class="btn-add first listItemNew"><i></i>添加规则</a></h4>
+                    </div>
+                    <div class=" icon_wrap icon_small border">
+                    
+                    <div class="msg-libs">
+                        <div class="content_wrap" id="div_replyContent" style="">        
+                            <div class="section_tab">                
+                            <ul class="tab_navs">                    
+                            <li class="tab_nav"><a href="{:U('QQ/WeixinResp/index')}">被添加自动回复</a></li>
+                            <li class="tab_nav"><a href="{:U('QQ/WeixinResp/msg')}">消息自动回复</a></li>                   
+                            <li class="tab_nav no_extra selected"><a href="{:U('QQ/WeixinResp/keywords')}">关键词自动回复</a></li>
+                            </ul>            
+                            </div>            
+                            <style type="text/css">
+                                .msg_sender{ margin:0 10px;}
+                                .tab_navs{ margin-left:0; padding-left:0}
+                                ul, ol{margin: 0 0 0px 0px;}
+                            </style>
+                            <div class="ivrSettingPage">
+                                <div id="ivrSettingArea" class="settingArea">
+                                    <ul id="listContainer">
+                                     <volist name="msgListData" id="msgInfo">
+                                        <li id="listItemNew" class="ruleItem <?php echo $key==='add'?' ruleItemEditing':''?>">
+                                         <form action="{:U('QQ/WeixinResp/keywordsSubmit')}" onsubmit="return false;">
+                                            <div class="title">
+                                                <div class="l">
+                                                    <h5 style="margin:0"><span class="b">{$msgInfo['title']|default_nvl=新规则}</span>
+                                                    &nbsp;<span class="n headerRuleName" style=" vertical-align:middle">{$msgInfo['message_name']}</span>
+                                                    </h5>
+                                                </div>
+                                                <div class="r">
+                                                    <a class="unfold" href="javascript:;">编辑</a>
+                                                    <a class="pickup" href="javascript:;">收起</a>
+                                                </div>
+                                                <div class="cl"></div>
+                                            </div>
+                                            <nheq name="key" value="add">
+                                                <div class="settingPre">
+                                                    <div class="preBox">
+                                                        <label class="b">关键词：</label>
+                                                        <ul class="items keywordsPre">
+                                                         <volist name="msgInfo['msgKeywords']" id="voKey">
+                                                            <li class="item">{$voKey['key_words']}</li>
+                                                         </volist>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="preBox">
+                                                        <label class="b">回复：</label>
+                                                        <p class="items replyPre">
+                                                            <span class="replyCnt">{$msgInfo['replyCnt']}</span>条 （<span class="wordsCnt">{$msgInfo['wordsCnt']}</span>条文字，<span class="fileCnt">{$msgInfo['wordsCnt']}</span>个文件，<span class="appMsgCnt">{$msgInfo['appMsgCnt']}</span>条图文）
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </nheq>
+                                            <div class="detail">
+                                                <div class="cLine ruleNameWrap">
+                                                    <label class="c-g9">规则名：<input type="text" value="{$msgInfo['message_name']}" class="txtInput ruleName" name="ruleName" maxlength="60" jscheckrule="null=0" jschecktitle="规则名"/></label><span class="c-g9 pl10">规则名最多60个字</span>
+                                                </div>
+                                                <div class="float-p">
+                                                    <div class="l keywordsList">
+                                                        <div class="cLine header">
+                                                            <span class="left b">关键字</span>
+                                                        </div>
+                                                        <ul class="keywordItems">
+                                                         <volist name="msgInfo['msgKeywords']" id="voKey">
+                                                            <li class="item float-p">
+                                                                <input type="checkBox" class="l keywordcheckbox"/>
+                                                                <input type="hidden" name="kwdId[]" value="{$voKey['id']}"/>
+                                                                <div class="val l">{$voKey['key_words']}</div>
+                                                                <input type="text" name="keywordStr[]" class="val-input l" value="{$voKey['key_words']}" style="display:none;" maxlength="20" jscheckrule="null=0" jschecktitle="关键词">
+                                                                <label class="r c-gA matchMode">全匹配</label>
+                                                                <input type="hidden" name="matchMode[]" class="matchMode-input" value="{$voKey['match_type']|default_nvl='0'}">
+                                                                <a href="javascript:;" class="keywordEditor r">编辑</a>
+                                                            </li>
+                                                         </volist>
+                                                        </ul>
+                                                        <div class="btnArea float-p">
+                                                            <button class="delKeyword btnGreenS l">删除选中</button>
+                                                            <button class="addKeyword btnGrayS r">添加关键字</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="replyList">
+                                                        <div class="cLine header">
+                                                            <p class="left b">回复</p>
+                                                            <label class="r"><!-- <input class="allReply" type="checkBox">发送全部回复--></label>
+                                                        </div>
+                                                        <div class="cntBox">
+                                                            文字(<span class="wordsCnt">{$msgInfo['wordsCnt']}</span>)&nbsp;&nbsp;&nbsp;&nbsp;
+                                                            <!-- 文件(<span class="fileCnt">0</span>)&nbsp;&nbsp;&nbsp;&nbsp;-->
+                                                            图文(<span class="appMsgCnt">{$msgInfo['appMsgCnt']}</span>)
+                                                        </div>
+                                                        <ul class="replyItems showWords showFile showAppMsg">
+                                                        
+                                                          <volist name="msgInfo['msgResponse']" id="voRespContent">
+                                                            <php>if(1 == $voRespContent['response_class']){</php>
+                                                            <!--图文信息-->
+                                                            <li class="item float-p replyAppMsg">
+                                                                <input type="checkBox" class="l replycheckbox" name="replycheckbox"/>
+                                                                <div class="contentWrap l">
+                                                                    <div class="l fileInfo">
+                                                                        <input type="hidden" name="respId[]" value="{$voRespContent['id']}"/>
+                                                                        <input type="hidden" name="wordContent[]" value='{$voRespContent['response_info']}'/>
+                                                                        <input type="hidden" name="respClass[]" value="1">
+                                                                        <div class="appmsgImgArea">
+                                                                            <img src="{$voRespContent['material_img_url']}"/>
+                                                                        </div>
+                                                                        <div class="appmsgContentArea">
+                                                                            <a href="" target="_blank">[&nbsp;图文消息&nbsp;]</a><br />
+                                                                            {$voRespContent['material_title']}
+                                                                        </div>
+                                                                        <div class="cl"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                            <php>}elseif(0 == $voRespContent['response_class']){</php>
+                                                            <!--文字-->
+                                                            <li class="item float-p replyWords">
+                                                                <input type="checkBox" class="l replycheckbox" name="replycheckbox">
+                                                                <a class="r replyEditor c-opr" href="javascript:void(0);">编辑</a>
+                                                                <div class="contentWrap l">
+                                                                    <input type="hidden" name="respId[]" value="{$voRespContent['id']}"/>
+                                                                    <input type="hidden" name="respClass[]" value="0">
+                                                                    <div class="wordContent">{$voRespContent['response_info']}</div>
+                                                                    <div class="wordContent-input" style="display:none">
+                                                                    <input type="text" name="wordContent[]" value='{$voRespContent['response_info']}' jscheckrule="null=0" jschecktitle="文字回复"></div>
+                                                                </div>
+                                                            </li>
+                                                            <php>}elseif(3 == $voRespContent['response_class']){</php>
+                                                            <!--图片-->
+                                                            <li class="item float-p replyAppMsg">
+                                                                <input type="checkBox" class="l replycheckbox" name="replycheckbox"/>
+                                                                <div class="contentWrap l">
+                                                                    <div class="l fileInfo">
+                                                                        <input type="hidden" name="respId[]" value="{$voRespContent['id']}"/>
+                                                                        <input type="hidden" name="wordContent[]" value='{$voRespContent['response_info']}'/>
+                                                                        <input type="hidden" name="respClass[]" value="1">
+                                                                        <div class="appmsgImgArea">
+                                                                            <img src="{$voRespContent['response_info']}"/>
+                                                                        </div>
+                                                                        <div class="appmsgContentArea">
+                                                                            <a href="" target="_blank">[&nbsp;图片消息&nbsp;]</a>
+                                                                        </div>
+                                                                        <div class="cl"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                            <php>}</php>
+                                                          </volist>
+                                                            <!--图片-->
+                                                        </ul>
+                                                        <div class="btnArea float-p">
+                                                            <button class="delReply btnGreenS l">删除选中</button>
+                                                            <a href="javascript:;"><button class="addAppMsg btnAdd c-opr" data-url="{:U('QQ/WeixinResp/selectImgTxt',array('callback'=>'selectcallback'))}">图文</button></a>
+
+                                                            <a href="javascript:;"><button class="addAppImg btnAdd c-opr">图片</button></a>
+                                                            <a href="javascript:;"><button class="addWords btnAdd c-opr">文字</button></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="btnArea operator">
+                                                    <input type="hidden" name="actType" value="{$msgInfo['actType']}"/>
+                                                    <input type="hidden" name="msgId" value="{$msgInfo['message_id']}"/>
+                                                    <button class="delRule btnGrayS r" type="button">删除</button>
+                                                    <button class="saveRule r btnGreenS" type="button">保存</button>
+                                                </div>
+                                            </div>
+                                         </form>
+                                        </li>
+                                     </volist>
+                                    </ul>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

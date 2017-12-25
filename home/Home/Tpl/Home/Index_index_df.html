@@ -1,0 +1,603 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>操作平台-{:C('SITE_TITLE')}</title>
+<meta name="keywords" content="{:C('SITE_KEYWORDS')}" />
+<meta name="description" content="{:C('SITE_DESCRIPTION')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Windex.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.easing.min.js?v=__VR__"></script>
+<!--
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+-->
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Windex.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<style>
+    .list-wrapper a:hover{text-decoration:none;}
+	.sysmsg_special{display:inline !important;
+					color:#990000;
+				 	font-family: "Arial Negreta","Arial";
+				    font-style: normal;
+				    font-weight: 700;
+					border:1px solid #990000;
+		}
+		.sysmsgtitle,.sysmsgtitle:hover{
+				 color:#4D4D4D;
+		         text-decoration: none;
+			
+		}
+	.list-wrapper .hot-part i.hot-part-i-3,.list-wrapper .hot-part i.hot-part-i-4,.list-wrapper .hot-part i.hot-part-i-5,.list-wrapper .hot-part i.hot-part-i-9 { background-image: url(__PUBLIC__/Image/df/icon-index-df.png);}
+	.hot-part-i-3 { background-position: 0 0;}
+	.hot-part-i-4 { background-position: -64px 0;}
+	.hot-part-i-5 { background-position: 0 -64px;}
+	.hot-part-i-9 { background-position: -64px -64px;}
+</style>
+<?php 
+    $check_memo = str_replace(array("\r\n", "\r", "\n"), '<br/>', $node['check_memo']);
+    $tipStr = '';
+    $url = C('YZ_RECHARGE_URL')."&node_id=".$userInfo['node_id']."&name=".$userInfo['user_name']."&token=".$token;
+    $wcVersion = get_wc_version();
+    $overPrice = $FlowInfo['AccountPrice'] + $wbInfo['wbOver'];
+    if($node['check_status']==1){
+        $tipStr = "<p style='padding:5px 0;'>您的企业资质信息未通过审核，您可以在账户中心的<a href='index.php?g=Home&m=AccountInfo&a=index'>企业资质信息</a>内重新上传并提交。</p>";
+    }
+    if($userInfo['status_tips']==1){
+         $tipStr .= "<p style='padding:5px 0;'>截止到".date('Y年m月d日').",您的账户已欠费。为了不影响您继续使用旺财,请您<a href='".$url."'>尽快充值</a>。如有疑问,请致电客服热线400-8827770。</p>";
+    }
+    if($userInfo['status_tips']!=1&&$overPrice>=0&&$overPrice<=50&&$wcVersion!='v0'&&$wcVersion!='v0.5'&&$wcVersion!='v4'&&$userInfo['pay_type']=='1'){
+       $tipStr .= "<p style='padding:5px 0;'>截止到".date('Y年m月d日').",您的账户余额和旺币余额合计已不足50元。为了不影响您继续使用旺财,请您<a href='".$url."'>尽快充值</a>。如有疑问,请致电客服热线400-8827770。</p>";
+    }
+    if(!empty($tipStr)&&$_SESSION['tips']!=1){
+?>
+<script type="text/javascript">  
+$(function(){
+	art.dialog({title:'提示信息',width:500,content:"<img src='__PUBLIC__/Image/msgerror.png' class='l'><div style='margin-left:100px; font-size:14px;line-height:18px;'><?php echo $tipStr; ?></div>",lock: true,fixed:true});
+ });
+</script>
+<?php 
+	$_SESSION['tips']=1;
+}
+?>
+
+<script>
+$(document).ready(function(e){
+    //上传logo图片
+    $("#js-header-logo").click(function(){
+        var opt = {
+            obj:$("#img_resp_show"),
+            height:160,
+            width:160,
+            callback:function(data){
+                //更新头销
+                var loading = art.dialog({title:false,content:'正在更新...'});
+                $.post("{:U('Home/Index/saveHeadLogo')}",{
+                    savename:data.savename
+                },function(res){
+                    loading.close();
+                    if(!res.status){
+                        alert(res.info);
+                        return;
+                    }
+                    $("#img_resp_show").attr('src',data.src);
+                },'json');
+            }
+        };
+        open_img_uploader(opt);
+    });
+});
+</script>
+</head>
+<body>
+<div id="wrapper" class="edeff5">
+	<include file="./Home/Tpl/Public/Public_header.html" />  
+    <div class="IndHeader">
+     	<div class="w1100 fn">
+        	<div class="userbar">
+                <div class="userbar-portrait">
+                    <div class="portrait" id="js-header-logo">
+                        <?php
+                        if($nodeInfo['head_photo']!=""){
+                        ?>
+                        <img src="<?php echo get_upload_url($nodeInfo['head_photo'])?>" name="img_resp_show" id="img_resp_show"/>
+                        <?php 
+                        }else{
+                        ?>
+                        <img src="__PUBLIC__/Image/portrait.gif" name="img_resp_show" id="img_resp_show"/>
+                        <?php
+                        }
+                        ?>
+                        <input type="hidden" value="" name="img_resp" id="img_resp" />
+                    </div>
+                </div>
+                <div class="userbar-name">
+                	{$nodename}
+                	<?php if($nodeInfo['node_type']=='2'&&$nodeInfo['check_status']!='2'){?>
+                    <a href="javascript:void(0);" onclick="certif('<?php echo C('CERTIF_URL').$token;?>');"><i class="icon-novip">
+                        </i></a>
+                    <?php }else{?>
+                    	<i class="icon-vip"></i>
+                    <?php }?>
+                </div>
+                <div class="userbar-id">企业旺号：{$clientid}</div>
+                <?php 
+                //if($nodetype=='1'){
+                if($nodeInfo['pay_type']==1&&$nodeInfo['node_type']<=2){
+                ?>
+                <div class="userbar-money">
+                	余额：<span><?php if(!empty($FlowInfo['AccountPrice'])){?><?php echo $FlowInfo['AccountPrice']; ?><?php}else{?>0.00<?php }?></span>元
+                    &nbsp;&nbsp;&nbsp;&nbsp;旺币：<span>{$wbInfo['wbOver']}</span>个
+                    <a href="javascript:void(0)" onclick="wbMsg()"><i class="icon-question"></i></a>
+                </div>
+                <?php }?>
+                <div class="userbar-money mt10">
+                	<a href="{:U('Home/AccountInfo/index')}">账户中心</a>
+                	<?php 
+                    //&&($nodeInfo['node_type']==1||($nodeInfo['node_type']==2&&$nodeInfo['check_status']==2)
+                    if(($nodeInfo['pay_type']==1||$nodeInfo['pay_type']==0)&&$nodeInfo['node_type']<=2){?>
+                        <a href="<?php echo C('YZ_RECHARGE_URL')?>&node_id=<?php echo $userInfo['node_id'];?>&name=<?php echo $userInfo['user_name'];?>&token=<?php echo $token;?>" target="_blank" class="ml10">充值</a>
+                    <?php }
+                    if( $nodeInfo['pay_type'] == '1' && ($nodeInfo['node_type'] == '2' || $nodeInfo['node_type'] == '5')  ){
+                    ?>
+                    <a href="{:U('Home/Wservice/buywc')}" class="ml10 red">在线签约</a>
+                    <?php } ?>
+                </div>
+            </div>
+            <div class="wcService fn">
+                <a href="javascript:void(0)" onclick="managercard()"><img src="__PUBLIC__/Image/wcService.png" class="l" /></a>
+            	<dl>
+                	<dd class="qq"><a href="http://wpa.b.qq.com/cgi/wpa.php?ln=1&key=XzkzODA2Njc3MF8zNzA4NjdfNDAwODgwNzAwNV8yXw" target="_blank"><i class="icon-wcService4"></i>在线QQ咨询</a></dd>
+                	<dd class="class">
+                    	<a href="javascript:void(0)" onclick="oClass()"><i class="icon-wcService5"><?=date('Y')?><br /><?=date('m.d')?></i>O2O营销公开课</a>
+                    	<div class="dn">
+                        	<span id="oClassTeacher">讲师{$o2o_info.lector_name}</span>
+                            <span id="oClassName">{$o2o_info.content}</span>
+                            <span id="oClassTime"><?=dateformat($o2o_info['apply_time'],'Y-m-d H:i:s')?></span>
+                            <span id="oClassOrder">{$o2o_info.apply_info}</span>
+                            <span id="oClassUrl">./Home/Upload/oto/{$o2o_info.lector_url}</span>
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+            <div class="activityData">
+            	<ul class="fn">
+                	<li><p><a href="{:U('LabelAdmin/RecentActivity/index')}">{$batchNum}</a></p><a href="{:U('LabelAdmin/RecentActivity/index')}"><h4>活动数</h4></a></li>
+                    <li><p><a href="{:U('DataCenter/DateData/index')}">{$visitSum}</a></p><a href="{:U('DataCenter/DateData/index')}"><h4>活动访问人数</h4></a></li>
+                    <li><p><a href="{:U('DataCenter/CompareData/goodsData')}">{$sendSum}</a></p><a href="{:U('DataCenter/CompareData/goodsData')}"><h4>卡券发放数</h4></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>  
+	<div id="container">
+    	<div id="main">    		
+			<?php
+				if($haveCoupon==0){			
+			?>
+			<div class="ind-steps fn">
+                <a href="{:U('Home/Store/index',array('IsOpen'=>1))}">
+    			<div class="ind-step">
+    				<i class="step-icon1"></i>
+    				<div class="step-text pl15">
+    					<h1 class="pl5">创建门店</h1>
+    					<p>O2O营销第一步</p>
+    				</div>
+    			</div>
+                </a>
+    			<i class="step-next"></i>
+                <a href="{:U('Home/Store/index')}">
+    			<div class="ind-step">
+    				<i class="step-icon2"></i>
+    				<div class="step-text pl5">				
+    					<h1>申请核验机具</h1>
+    					<p class="pl10">O2O营销第二步</p>
+    				</div>
+    			</div>
+                </a>
+    			<i class="step-next"></i>
+                <a href="{:U('WangcaiPc/NumGoods/addNumGoods')}">
+    			<div class="ind-step">
+    				<i class="step-icon3"></i>
+    				<div class="step-text pl15">
+    					<h1>创建卡券</h1>
+    					<p>O2O营销第三步</p>
+    				</div>
+    			</div>
+                </a>
+    		</div>
+			<?php
+			}
+			?>
+			
+			<if condition="!empty($sysmsglist)">
+			<div class="ind-voice rel" style="z-index:2;">
+            	<div class="t"><i></i><a class="sysmsgtitle"  href="{:U('AccountInfo/message')}">系统消息：</a></div>
+                <div class="opr">
+                	<i class="pre"></i>
+                    <i class="next"></i>
+                </div>
+                <div class="list">
+                	<ul>
+                	<volist name='sysmsglist' id='v'>
+                	 <li  >
+                	   <volist name='v' id='item'>
+                        <a href="javascript:void(0)" 
+                        data-url="{:U('AccountInfo/message_view',array('id'=>$item[id],'seq'=>$item['seq_id']))}">
+                      			{:msubstr($item['title'],0,25)}
+                      			<if condition="$item['is_special'] eq 1">
+                      			<span class="sysmsg_special">
+                      					特
+                      			</span>
+                      			
+                      			
+                      			</if>
+                      			
+                        </a>
+                        </volist>
+                        </li>
+                	</volist>
+                    </ul>
+                </div>
+            </div>
+            </if>
+			<div class="ind-main rel" style="z-index:2;">	
+  				<div class="nav-hot">
+ 					<div class="left-nav">
+ 						<div class="news-sign"></div>
+ 						<h1>DF菜单</h1>
+ 					</div>
+    				<ul class="list-wrapper fn">
+						<a target="_blank" href="{:U('Weixin/Weixin/index')}">
+							<li class="mt70 first-row">
+								<div class="hot-part hot-part2">
+									<i class="hot-part-i36"></i>
+								</div>
+								<h1>微信服务号</h1>
+								<p></p>
+							</li>
+						</a>
+
+                        <?php $store_url = $new_role_id == C('df.store_admin_role_id') ? U('Df/DfStoreData/storeNumber') : U('Home/Store/index'); ?>
+						<a target="_blank" href="{$store_url}">
+							<li class="mt70 first-row">
+								<div class="hot-part hot-part3">
+									<i class="hot-part-i33"></i>
+								</div>
+								<h1>门店管理</h1>
+								<p></p>
+							</li>
+						</a>
+
+						<a target="_blank" href="{:U('Home/NodeUserNew/index')}">
+							<li class="mt70 first-row">
+								<div class="hot-part hot-part4">
+									<i class="hot-part-i-3"></i>
+								</div>
+								<h1>账号管理</h1>
+								<p></p>
+							</li>
+						</a>
+						<a target="_blank" href="{:U('Df/Member/index')}">
+							<li class="mt70 first-row">
+								<div class="hot-part hot-part3">
+									<i class="hot-part-i-4"></i>
+								</div>
+								<h1>会员管理</h1>
+								<p></p>
+							</li>
+						</a>
+						<a target="_blank" href="{:U('Home/Index/marketingShow')}">
+							<li class="mt70 first-row">
+								<div class="hot-part hot-part1">
+									<i class="hot-part-i-5"></i>
+								</div>
+								<h1>活动管理</h1>
+								<p></p>
+							</li>
+						</a>
+						<a target="_blank" href="{:U('Ecshop/Index/preview')}">
+							<li class="mt70 first-row">
+								<div class="hot-part hot-part3">
+									<i class="hot-part-i20"></i>
+								</div>
+								<h1>商城管理</h1>
+								<p></p>
+							</li>
+						</a>
+						<a target="_blank" href="{:U('MicroWeb/Index/index')}">
+							<li class="mt70 first-row">
+								<div class="hot-part hot-part4">
+									<i class="hot-part-i24"></i>
+								</div>
+								<h1>微官网</h1>
+								<p></p>
+							</li>
+						</a>
+						<a target="_blank" href="{:U('MarketActive/NewPoster/index')}">
+							<li class="mt70 first-row">
+								<div class="hot-part hot-part1">
+									<i class="hot-part-i9"></i>
+								</div>
+								<h1>微场景</h1>
+								<p></p>
+							</li>
+						</a>
+						<a target="_blank" href="{:U('Df/PointShop/index')}">
+							<li class="mt70 first-row">
+								<div class="hot-part hot-part2">
+									<i class="hot-part-i-9"></i>
+								</div>
+								<h1>积分商城</h1>
+								<p></p>
+							</li>
+						</a>
+    				</ul>
+				</div>
+				<img src="__PUBLIC__/Image/index-line-shadow.png" alt="" />
+				<div class="nav-normal bbm" style="padding-top:6px;">
+					<div class="left-nav">
+						<h2 style="padding-top:0;">旺业务</h2>
+					</div>
+					<ul class="list-wrapper fn list-yw">						
+						<a href="{:U('Home/Index/marketingShow1')}">
+						<li>
+							<i class="normal-icon normal-icon1"></i>
+							<h2>常见营销活动</h2>
+						</li>
+						</a>
+						<a href="{:U('Home/Index/marketingShow2')}">
+						<li>
+							<i class="normal-icon normal-icon2"></i>
+							<h2>节日营销活动</h2>
+						</li>
+						</a>
+                        <a href="{:U('Home/Index/marketingShow5')}">
+                            <li>
+                                <i class="normal-icon normal-icon3"></i>
+                                <h2>多宝电商</h2>
+                            </li>
+                        </a>
+
+                        <a href="{:U('Alipay/Index/index')}">
+                            <li>
+                                <i class="normal-icon normal-icon46" style="background-position: -1409px -190px;background-image:url(__PUBLIC__/Image/icon-index.png);"></i>
+                                <h2>条码支付</h2>
+                            </li>
+                        </a>
+                        <a href="{:U('Hall/Index/build')}">
+                            <li>
+                                <i class="normal-icon normal-icon19"></i>
+                                <h2>卡券商城</h2>
+                            </li>
+                        </a>
+                        <a href="{:U('Home/Help/helpArt', array('news_id' =>'1289', 'leftId' => 'zxwt', 'class_name' =>'最新问题', 'type' => '1'))}">
+                            <li>
+                                <i class="normal-icon normal-icon20"></i>
+                                <h2>12580商户联盟</h2>
+                            </li>
+                        </a>
+                        <a href="{:U('Hall/Mypartner/index')}">
+                            <li>
+                                <i class="normal-icon normal-icon22"></i>
+                                <h2>卡券分销</h2>
+                            </li>
+                        </a>
+					</ul>
+				</div>	
+				<div class="nav-normal bbm">
+					<div class="left-nav">
+						<h2>旺渠道</h2>
+					</div>
+					<ul class="list-wrapper fn list-qd">
+						<a href="{:U('Weixin/Weixin/index')}">
+						<li>
+							<i class="normal-icon normal-icon6"></i>
+							<h2>微信营销</h2>
+						</li>
+						</a>
+						<a href="{:U('LabelAdmin/Weibo/index')}">
+						<li>
+							<i class="normal-icon normal-icon7"></i>
+							<h2>新浪微博</h2>
+						</li>
+						</a>
+						<a href="{:U('Number/Index/index')}">
+						<li>
+							<i class="normal-icon normal-icon8"></i>
+							<h2>百度直达号</h2>
+						</li>
+						</a>
+						<a href="{:U('LabelAdmin/Channel/offlineCancel')}">
+						<li>
+							<i class="normal-icon normal-icon9"></i>
+							<h2>二维码标签渠道</h2>
+						</li>
+						</a>
+					</ul>
+				</div>
+				<div class="nav-normal bbm">
+					<div class="left-nav">
+						<h2>旺管理</h2>
+					</div>
+					<ul class="list-wrapper fn list-gl">						
+						<a href="{:U('WangcaiPc/NumGoods/index')}">
+						<li>
+							<i class="normal-icon normal-icon10"></i>
+							<h2>卡券管理</h2>
+						</li>
+						</a>						
+						<a href="{:U('Home/Store/index')}">
+						<li>
+							<i class="normal-icon normal-icon11"></i>
+							<h2>门店管理</h2>
+						</li>	
+						</a>
+						<a href="{:U('Member/Member/index')}">
+						<li>
+							<i class="normal-icon normal-icon12"></i>
+							<h2>粉丝管理</h2>
+						</li>
+						</a>						
+						<a href="{:U('DataCenter/DateData/index')}">
+						<li>
+							<i class="normal-icon normal-icon13"></i>
+							<h2>数据分析</h2>
+						</li>
+						</a>
+                    </ul>
+				</div>				
+				<div class="nav-normal">
+					<div class="left-nav">
+						<h2>旺工具</h2>
+					</div>
+					<ul class="list-wrapper fn list-gj">						
+						<a href="{:U('MicroWeb/Index/index')}">
+						<li>
+							<i class="normal-icon normal-icon14"></i>
+							<h2>微官网</h2>
+						</li>
+						</a>						
+						<a href="{:U('VisualCode/Index/index')}">
+						<li>
+							<i class="normal-icon normal-icon15"></i>
+							<h2>炫码</h2>
+						</li>
+						</a>
+						<a href="{:U('MarketActive/Tool/pictext')}">
+						<li>
+							<i class="normal-icon normal-icon16"></i>
+							<h2>图文编辑</h2>
+						</li>
+						</a>
+						<a href="{:U('Home/Store/navigation')}">
+						<li>
+							<i class="normal-icon normal-icon17"></i>
+							<h2>门店导航</h2>
+						</li>
+						</a>
+						<a href="{:U('Home/Case/entrance')}">
+						<li>
+							<i class="normal-icon normal-icon18"></i>
+							<h2>O2O活动</h2>
+						</li>
+						</a>
+						<if condition="in_array($_SESSION['userSessInfo']['node_id'], C('access_jd_node_id'))">
+						<a href="{:U('Fb/Jingdong/groupBuyList')}">
+						<li>
+							<i class="normal-icon" style="background-position:-448px -64px;"></i>
+							<h2>京东团购</h2>
+						</li>
+						</a>
+						</if>
+					</ul>
+				</div>
+    		</div>
+			</div>
+    	</div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+    <div class="service"></div>
+</div>
+</body>
+</html>
+<script>
+
+$(function(){
+	
+	//信息提示
+	$.get("<?php echo U('Home/Popwindow/pop_up'); ?>","",function(url){
+		artTip(url.data);
+	},'json');
+	
+	$("#add-shop").click(function(){
+			art.dialog.open(this.href,{
+				title: '新增门店',
+				width:'900px',
+				height:'80%',
+				lock:true
+			});
+			return false;
+    });
+    //营销课呀，谁再不加，劳资哦
+    $(".windowForm .min").live("click",function(){
+        var node=$(".windowForm form p");
+        var padd="<p class='mt10'><input class='windowtextbox w1-b validate[custom[integer],required]' type='text' name='qq[]' maxlength='12' placeholder='QQ' /></p>";
+        if(node.size()>4){
+            node.eq($(this).size()-3).remove();
+        }
+    })
+    $(".windowForm .add").live("click",function(){
+        var node=$(".windowForm form p");
+        var padd="<p class='mt10'><input class='windowtextbox w1-b validate[custom[integer],required]' type='text' name='qq[]' maxlength='12'  placeholder='QQ' /></p>";
+        if(node.size()<6){
+            node.eq($(this).size()-3).after(padd);
+        }
+    })
+    $('#sub_button2').live("click",function(){
+        $("#theform2").ajaxSubmit({
+            success:function(data){
+                $('.windowBg').hide();
+                art.dialog({
+                        width:"200px",
+                        title:"提示",
+                        lock:true,
+                        content:data.info,
+                        ok:true
+                    });
+            },
+            dataType:'json'
+        });
+        return false;
+    });
+
+    var fr = $('.first-row');
+    for(var i=0;i<=4;i++){
+        fr.eq(i).css('margin-top',0);
+    }
+
+});
+function certif(url){
+    art.dialog.open(url,{
+        title:'企业资质认证',width:750,height:600,lock:true,
+        close:function(){
+            var win = art.dialog.open.origin;
+            win.location.href = "index.php?m=AccountInfo&a=index";
+        }
+    });
+}
+function windowBg(){
+    var html=
+    ['<div class="oClass" style="height:240px;">',
+        '<div class="title">O2O实战培训免费报名</div>',
+        '<div class="windowForm">',
+                '<div class="add"></div>',
+                '<div class="min"></div>',
+                '<form action="index.php?g=Home&amp;m=O2oSchool&amp;a=training" method="post" id="theform2">',
+                    '<p>输入您的QQ号，我们会将您加入直播培训群</p>',
+                    '<p class="mt10"><input class="windowtextbox w1-b validate[custom[integer],required]" type="text" name="qq[]" maxlength="12" placeholder="QQ"></p>',
+                    '<p class="mt30 mb20"><input type="button" id="sub_button2" class="windowsubmit" value="免费报名"></p>',
+                '</form>',
+            '</div>',
+            '<a href="javascript:void(0)" class="close-mySec blue" onclick="windowBgclose()"></a>',
+        '</div>'].join('');
+    art.dialog({
+        id:'windowBg',
+        title:false,
+        content:html,
+        padding:"0",
+        top:"50%",
+        lock:true
+    });
+
+    //$(".windowBg").fadeIn();
+}
+function windowBgclose(){
+    art.dialog({id:'windowBg'}).close();
+}
+</script>

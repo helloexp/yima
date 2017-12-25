@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券爱拍特供卡券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script language="JavaScript">
+ function fleshVerify(){ 
+    //重载验证码
+    var time = new Date().getTime();
+        document.getElementById('verifyImg').src= '{:U("Home/Verifycode/bookverify")}&time='+time;
+ } 
+ </script>
+</head>
+<body class="bgfff">
+    <div class="showsaloonForm pb20">
+    	<form action="{:U('Hall/Index/mix')}" method="post" >
+		<input type="hidden" name="id" id="id" value="<?php echo $id;?>" />
+    	<div class="global-input4 fn w1">
+        	<ul class="pt30">
+                <li class="global-input4-name">*&nbsp;联盟活动：</li>
+                <li class="global-input4-input"><select name="lm" class="validate[required] selectbox">
+				 <option value="">请选择</option>
+				 <?php foreach($lm as $k=>$v){?>
+				 <option value="<?php echo $k;?>"><?php echo $v;?></option>
+				 <?php } ?>
+				</select></li>
+            </ul>
+              <ul>
+                <li class="global-input4-name">*&nbsp;留言：</li>
+                <li class="global-input4-input"><textarea name="remark" id="remark" class="validate[required,maxSize[32]] texttextarea w380" maxlength="100" style="height:100px;"></textarea></li>
+            </ul>
+        	<ul>
+                <li class="global-input4-name">&nbsp;</li>
+                <li class="global-input4-input">
+                	<a href="javascript:void(0)" class="btn-all w120" id="smb">确定</a>
+            		<a href="javascript:void(0)" class="btn-all w120 ml20" id="cancel">取消</a>
+            	</li>
+            </ul>
+        </div>
+        </form>
+    </div>
+    
+    <div class="dn showsaloonmsg mt70 tc">
+    	<p class="font-18-99 pt50">邀请成功,等待对方审核</p>
+        <div class="fn tc mt50">
+            <a href="javascript:void(0)" onclick="art.dialog.close();" class="btn-all w120 btn-ok ml20">确定</a>
+        </div>
+    </div>
+</body>
+<script>
+$(function(){
+    $("#smb").click(function(){
+        var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,time:1});
+                },
+				success:function(data){
+                    if(data.status == '1'){                        
+						$(".msg-all-succeed").hide();
+						$('.showsaloonForm').hide();
+                        $('.showsaloonmsg').show();						
+                        return false;
+                    }else{
+                        dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                        $('#msg').html(data.info);
+                    }
+                },
+                dataType:'json'
+            });
+        }
+
+    });
+	//取消
+	$("#cancel").click(function(){
+		art.dialog.close();
+	});
+});
+</script>

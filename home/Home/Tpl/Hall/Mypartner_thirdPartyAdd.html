@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>我要供货</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js?v=__VR__"></script>
+<script>
+function call_back(datas){
+    $("#goods_name").val(datas.goods_name);
+    $("#goods_id").val(datas.goods_id);
+    var goods_type=datas.goods_type;
+    $("#ticket_type").val(datas.goods_type);
+    if(goods_type==0){
+        $("#goods_type").val("优惠卷");
+    }
+    if(goods_type==1){
+        $("#goods_type").val("代金券");
+    }
+    if(goods_type==2){
+        $("#goods_type").val("提领券");
+    }
+    if(goods_type==3){
+        $("#goods_type").val("折扣券");
+    }
+
+}
+$(function() {
+    Gform();
+
+    
+    
+    $("#choose_ecard").click(function() {
+        art.dialog.open("index.php?g=Hall&m=Mypartner&a=chooseVou&type=1&call_back=call_back", {
+            width: 800,
+            title: '选择卡券'
+        })
+    });
+
+    var ue = UE.getEditor('wap_info',{
+	    	imageUrl:"index.php?g=LabelAdmin&m=Upfile&a=editoImageSave",
+	    	imagePath:"./Home/Upload/",
+	    	catcherUrl:"index.php?g=LabelAdmin&m=Upfile&a=getRemoteImage",
+	    	catcherPath:"./Home/Upload/",
+	    	initialFrameWidth:320,
+	    	initialFrameHeight:280
+	    });
+	
+    $("#smb").click(function(){
+        if($("#the_form").validationEngine('validate')){
+        	var content = "您已成功提交申请，我们会尽快将您的信息提交至第三方电商平台。<br />请耐心等待";
+        	var type = $("#type").val();
+        	if(type=='6'){
+        		content = "您已成功提交申请";
+        	}
+            $("#the_form").ajaxSubmit({
+                beforeSubmit:function(){
+                    Dialoading("正在提交...");
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                         art.dialog.msg({
+                             id:'html',
+                             content:content,
+							 ok:function(){
+								 window.location.href="{:U('Hall/Mypartner/thirdPartyAdd')}";
+							 },
+							 okVal:"继续添加",
+							 cancel:function(){
+								 window.location.href="{:U('Hall/Mypartner/thirdPartyApply')}";
+							 },
+							 cancelVal:"返回列表"
+                         });
+                      }else{
+                           Diaerror(data.info);
+                      }
+                },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+})
+
+ var chose_a=function(){
+		var a_val=$(".chose_a").val();
+		if(a_val==6){
+			$(".new_tab").css("display","block");
+			$(".old_tab").css("display","none");
+		}else{
+			$(".new_tab").css("display","none");
+			$(".old_tab").css("display","block");
+		}
+		}
+$(function(){
+ $(".newRadio span").live('click',chose_a);
+})
+</script>
+
+</head>
+<body>
+    <div id="wrapper">
+    	<include file="./Home/Tpl/Public/Public_header.html" />
+<div class="shopNav">
+<include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="fxzs"/>
+</div>
+        <!--开始引入头部菜单-->
+
+        <div id="container">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <include file="Hall/Mypartner/leftMenu" leftmenuid="dsfdspt"/>
+                </div>
+                <div class="subcon fn">
+                   <div class="main-name fn">
+                        <h4>填写供货申请</h4>
+                    </div>
+                    <form id="the_form" method="post" action="{:U('Hall/Mypartner/thirdPartyAdd')}">
+                    <div id="Wform" class="Gform l w1">
+                    	<div class="Gtitle">选择第三方电商平台</div>
+                        <ul>
+                            <li class="Gname"><span>*</span>&nbsp;平台名称</li>
+                            <li class="Ginput">
+                                <div class="switch auto" id="newRadio">
+                        			<input type="radio" name="type" id="type" value="0" checked="checked" class="chose_a">
+                                    <div class="newRadio">
+                                        <span class="valfirst" data-val="0">天猫</span>
+                                        <span data-val="1">京东</span>
+                                        <span data-val="2">美团</span>
+                                        <span data-val="3">大众点评</span>
+                                        <span data-val="4">1号店</span>
+                                        <span class="vallast" data-val="5">淘点点</span>
+                                        <span data-val="6">融e购</span>
+                                    </div>
+                                </div>
+                        		<span class="txtTips">注：上架到天猫，需要您已在天猫开设旗舰店</span>
+                            </li>
+                        </ul> 
+                        <div class="Gtitle">添加卡券信息</div>
+                        	<ul>
+                                <li class="Gname"><span>*</span>&nbsp;选择卡券</li>
+                                <li class="Ginput">
+                                <div class="newRadio-input">
+                                    <a href="javascript:void(0);" class="btn_inner" id="choose_ecard">选择卡券</a>
+                                </div>
+                                </li>
+                                <input type="hidden" value="" id="goods_id" name="goods_id" />
+                            </ul>
+                            <ul>
+                                <li class="Gname"><span>*</span>&nbsp;卡券类型</li>
+                                <li class="Ginput">
+                                    <input name="goods_type" id="goods_type" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[24]]" readonly="readonly" style="color: #8B8787;"/>
+                                </li>
+                                <input type="hidden" value="" id="ticket_type" name="ticket_type" />
+                            </ul>
+                            
+                            <ul>
+                                <li class="Gname"><span>*</span>&nbsp;卡券名称</li>
+                                <li class="Ginput">
+                                <input name="name" id="goods_name" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[24]]" readonly="readonly" style="color: #8B8787;"/>
+                                </li>
+                            </ul>
+                            
+                            <div class="old_tab">
+								<ul>
+									<li class="Gname"><span>*</span>&nbsp;平台销售价</li>
+									<li class="Ginput"><input name="pay2"  type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[24]] textbox w380"/><span class="maxTips forInput">元</span></li>
+								</ul>
+								
+								<ul>
+									<li class="Gname"><span>*</span>&nbsp;计划销售时间</li>
+									<li class="Ginput">
+										<div class="Gtime2">
+										<input type="text" class="validate[required]" onclick="WdatePicker()" name="sale_start_time" value="">
+										<em>至</em>
+										<input type="text" class="validate[required]" onclick="WdatePicker()" name="sale_end_time" value="">
+										</div>
+									</li>
+								</ul>
+								
+								<ul>
+									<li class="Gname"><span>*</span>&nbsp;供货数量</li>
+									<li class="Ginput">
+									<input type="text" class="validate[required]" id="goods_amt" name="goods_amt" value=""><span class="maxTips forInput">个</span>
+									</li>
+								</ul>
+								
+								<ul>
+									<li class="Gname">&nbsp;卡券详情</li>
+									<li class="Ginput">
+									<textarea name="wap_info" id="wap_info"></textarea>
+									</li>
+								</ul>
+							</div>
+							<div class="new_tab dn">
+							   <ul>
+							    <li class="Gname"><span>*</span>&nbsp;卡券使用时间</li>
+								<li class="Ginput">
+									<div class="switch">
+										<input type="radio" name="date_type"  value="0" checked="checked">
+										<div class="newRadio fn db w100p">
+											<span class="valfirst  hover" data-val="0">按日期设置</span>
+											<span class="vallast" data-val="1">按天数设置</span>
+										</div>
+										<div class="cl"></div>
+										<div class="newRadio-default fl db mt10">
+											<div class="Gtime2 fn">
+												<input type="text"  class="validate[required]" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'use_time_to\\')}',dateFmt:'yyyyMMdd'})" name="use_time_from"  id="use_time_from" value="" style="width:89px;">
+												<em>至</em>
+												<input type="text" class="validate[required]" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'use_time_from\\')}',dateFmt:'yyyyMMdd'})" name="use_time_to" id="use_time_to" value="" style="width:89px;">
+										    </div>
+										</div>
+										<div class="cl"></div>
+										<div class="newRadio-input fn">
+											<div class="Gtime1 fn special mt10">
+												<em class="em1">发送营销品后</em>
+												<input type="text" style="padding-right:82px;width:145px" maxlength="18" class="validate[required]" name="verify_begin_days">
+												<em class="em2">天开始使用</em>
+											</div>
+											<div class="Gtime1 fn special mt10">
+												<em class="em1">发送营销品后</em>
+												<input type="text" style="padding-right:82px;width:145px" maxlength="18" class="validate[required]" name="verify_end_days">
+												<em class="em2">天结束使用</em>
+											</div>
+										    <span class="txtTips">商户可以自定义验码开始的日期如：“4月1号至6月1号”</span>
+										</div>
+									</div>
+								  </li>
+							   </ul>
+							   
+							   <ul>
+									<li class="Gname"><span>*</span>&nbsp;使用说明</li>
+									<li class="Ginput">
+										<textarea maxlength="100" class="Gview-textarea introduce validate[required]" name="introduce" style="resize:none;" placeholder=""></textarea>
+										<span class="maxTips forArea" data-max="100">0/100</span>
+									</li>
+								</ul>
+							
+								<ul>
+									<li class="Gname"><span>*</span>&nbsp;工商行ID</li>
+									<li class="Ginput">
+									<input name="icbc_id" id="icbc_id" type="text" maxlength="10" class="validate[required,maxSize[10]]" style="color:#8B8787;"/>
+									<span class="maxTips forInput" data-max="10">0/10</span>
+									</li>
+								</ul>
+							</div>
+                            
+                            <ul>
+                                <li class="Gname"></li>
+                                <li class="Ginput mt5">
+                                <a href="javascript:void(0);" title="确认" id="smb" class="btn-all w110">确定</a>
+                                <a href="javascript:void(0);" title="取消" onclick="url()" class="btn-all-del w110 ml10">取消</a>
+                                </li>
+                            </ul>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

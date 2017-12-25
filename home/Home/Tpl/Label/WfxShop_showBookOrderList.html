@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+        <meta content="telephone=no" name="format-detection" />
+        <meta content="email=no" name="format-detection" />
+        <meta name="apple-touch-fullscreen" content="NO">
+        <title>订货单</title>
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_wfx.css?v=__VR__">
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+        <style>
+            .del{float:right;color:#ed3f41;line-height:30px;}
+            </style>
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="container">
+                <div id="header" class="fn">
+                    <div class="goback"><i></i></div>
+                    <div class='del'> 删除 </div>
+                    <div class="title">{$title}</div>
+                </div>
+                <div id="main">
+                    <div class="bgGray bgbe5e5e5">
+                        <div class="txtTips">确认您的订货信息，提交后的订单在订单中心查看</div>
+                    </div>
+
+                    <div class="orderFormAddress" onClick="adressPop()">
+                        <div class="orderFormAddressNodata dn"><img src="__PUBLIC__/Label/Image/icon_tan.png" class="l"><p>请先填写收货人信息</p></div>
+                        <div id="orderFormAddress">
+                            <p><span id="user_name">{$addressInfo['user_name']}<input type="hidden" name="receive_name" id="receive_name" value="{$addressInfo['user_name']}"/></span><span>{$addressInfo['phone_no']}<input type="hidden" name="receive_phone" id="receive_phone" placeholder="收货人手机号码" maxlength="11" value="{$addressInfo['phone_no']}"/></span></p>
+                            <p>
+                                {$addressInfo['province']}{$addressInfo['city']}{$addressInfo['town']}{$addressInfo['address']}
+                                <input type="hidden" name="receive_address" id="receive_address" class="input-address" value="{$addressInfo['province']}{$addressInfo['city']}{$addressInfo['town']}{$addressInfo['address']}"/>
+                                <input type='button' name='selectAddr' value='选择地址'/>
+                                <input type="hidden" name="addr_id" value="{$addressInfo['id']}" />
+                            </p>
+                        </div>
+                    </div>
+                    <if condition="$goods neq '' AND $goods neq null">
+                    <div class="proList order" style="margin-bottom: 35px;">
+                        <form id='data'>
+                            <ul>
+                                <li>
+                                    <div class="proImg"><img src="{:get_upload_url($goodsInfo['goods_image'])}"></div>
+                                    <div class="proContent">
+                                        <h2 class="protitle">{$goodsInfo['name']}</h2>
+                                    </div>
+                                </li>
+                                <li style="height:auto">
+                                    <div class="cart clear">
+                                        <div class="c_list cb">
+                                            <ul>
+                                                <foreach name='goods' item='goodsItem' key='k'>
+                                                    <li>
+                                                        <table>
+                                                            <tr>
+                                                                <td width="10%">
+                                                                    <input type="checkbox" class="checkbox"  name="check_item" id="check_item" value="{$k}*{$goodsItem['goodsId']}" />
+                                                                </td>
+                                                                <td width="65%" style="background:#f8f8f8">
+                                                                    <span style="padding-left:10px;">
+                                                                        <if condition="$goodsItem['goods_info']['remain_num'] neq '-1' ">
+                                                                            库存：{$goodsItem['goods_info']['remain_num']}
+                                                                            <else />
+                                                                            库存：不限量
+                                                                        </if>
+                                                                        <span class="proprice">
+                                                                            <em>￥</em>{$goodsItem['goods_info']['sale_price']} 
+                                                                        </span>
+                                                                    </span>
+                                                            <if condition="$goodsItem['class_type'] neq '' ">
+                                                                <volist name='goodsItem.class_type' id='classItem'>
+                                                                    <p><strong>{$classItem['sku_name']}：</strong>{$classItem['sku_detail_name']}</p>
+                                                                </volist>
+                                                            </if>
+                                                            </td>
+                                                            <td style="background:#f8f8f8"><input type="text" name="{$k}" value="{$goodsItem['count']}"  class="num"></td>
+                                                            </tr>
+                                                        </table>
+                                                    </li>
+                                                </foreach>
+                                            </ul>
+                                        </div>
+
+                                    </div>
+                                </li>
+                            </ul>
+                        </form>
+                    </div>
+                    </if>
+                </div>
+                <div class="cl"></div>
+                <div class="cart clear">
+                    <div class="c_list cb">
+                        <div class="cart_bg">
+                            <table width="100%" border="0">
+                                <tr>
+                                    <td align="left" style="padding-left:5%; height:45px;"><input type="checkbox" class="checkbox" id="box_all"> 全选</td>
+                                    <td align="right"><a href="javascript:void(0);" class="submit">提交订单</a></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript">
+            function adressPop() {
+                window.location.href = "{$selectAddrUrl}";
+            }
+
+            function login_to($url) {
+                window.location.href = $url;
+            }
+            
+            $(function () {
+                $('.goback').click(function(){
+                    history.go(-1);
+                });
+                
+                $("input[name='check_item']").click(function () {
+                    var index = $("input[name='check_item']").index(this);
+                    $("input[name='check_item']").eq(index).toggleClass("checked");
+                    if ($("input[name='check_item']").eq(index).is(':checked') == true) {
+                        $(".submit").addClass("ok");
+                    } else {
+                        $(".submit").removeClass("ok");
+                    }
+                });
+
+                $("#check_all,#box_all").click(function () {
+                    var ifHasCheckedInput = '';
+                    $("input[name='check_item']:checked").each(function () {
+                        ifHasCheckedInput = $(this).val();
+                    });
+
+                    if (ifHasCheckedInput == '') {
+                        $(".submit").addClass("ok");
+                        $("input[name='check_item']").attr("checked", true);
+                        $("input[name='check_item'],#check_all,#box_all").addClass("checked");
+                    } else {
+                        $(".submit").removeClass("ok");
+                        $("input[name='check_item']").attr("checked", false);
+                        $("input[name='check_item'],#check_all,#box_all").removeClass("checked");
+                    }
+                });
+
+                $(".submit").click(function (e) {
+                    var result = new Array();
+                    $("input[name='check_item']:checked").each(function () {
+                        result.push($(this).val());
+                    });
+                    var count = $('#data').serialize();
+                    var addrId = $('input[name=addr_id]').val();
+
+                    $.post("{:U('Label/WfxShop/commitBookOrder')}", {'goods': result, 'count': count, 'addrId': addrId}, function (data) {
+                        data = eval('(' + data + ')');
+                        art.dialog({
+                            title: '订单状态',
+                            width: '300px',
+                            content: data['msg'],
+                            okVal: '确定',
+                            ok: function () {
+                                if (data['error'] == '0') {
+                                    window.location.href = "{:U('Label/WfxShop/bookOrder')}";
+                                }
+                            },
+                            cancel: function () {
+                                if (data['error'] == '0') {
+                                    window.location.href = "{:U('Label/WfxShop/bookOrder')}";
+                                }
+                            }
+                        });
+                    });
+                });
+
+                $('input[name=selectAddr]').click(function () {
+                    adressPop();
+                });
+                
+                $('.del').click(function(){
+                    $.post("{:U('Label/WfxShop/delSelectGoods')}", {}, function(data){
+                        window.location.href = data;
+                    });
+                });
+
+            })
+        </script>
+    </body>
+</html>

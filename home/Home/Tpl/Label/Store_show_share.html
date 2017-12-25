@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+	<meta content="telephone=no" name="format-detection" />
+	<meta content="email=no" name="format-detection" />
+	<meta name="apple-touch-fullscreen" content="NO">
+	<title>分享商品赚钱</title>
+	<link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_marketing.css?v=__VR__">
+</head>
+<body>
+	<div id="wrapper">
+		<div id="container">
+			<div id="main">
+				<div class="m-money">
+					<php>
+						$url = U(
+							'Label/ShareBatch/index',
+							array(
+								'id' => $label_id,
+								'from_user_id' => $from_user_id,
+								//'from_user_type' => '9'
+							)
+						);
+					</php>
+					<a href="{$url}">
+						<div class="shop-info">
+							<empty name="shop_logo">
+							<img class="logo" src="__PUBLIC__/Label/Image/doge.png" width="80" height="80" alt="">
+							<else/>
+							<div class="logo"><img src="__UPLOAD__/{$shop_logo}" width="80" height="80" style="" /></div>
+							</empty>
+							<div class="info">
+								<p class="tit"><?php if(session('login_title')!=""){?><?php echo session('login_title');?><?php }?></p>
+								<p style="color:#666;margin-bottom:4px;">
+									<eq name="return_type" value="0">
+										单笔交易返   <span>{$return_money}</span>元
+									<else/>
+										佣金比例   <span>{$return_money}%</span>
+									</eq>
+								</p>
+								<p>点击进分享页转发小店地址</p>
+								<p>全店商品返佣。</p>
+
+								<p style="color:#ff0000;margin-left: 10px;"></p>
+							</div>
+							<i class="left-arrow"></i>
+						</div>
+					</a>
+					<div class="m-gap m-mt6"></div>
+					<div class="intro fn">
+						<div class="icon"></div>
+						<div class="text">
+							您的分享累计已被访问{$return_stat.flow_count|intval}次<br/>
+							您的分享共带来{$return_stat.trans_count|intval}笔订单，订单总金额{$return_stat.trans_money_count|floatval}元<br/>
+							通过分享您总共获得{$return_stat.return_amount|floatval}元返佣<br/><br/>
+						</div>
+						<div class="text">下面是旺财小店内各商品的返佣金额，点击后可以转发某个商品链接，您朋友点开后购买其他商品也按对应金额返佣。</div>
+					</div>
+					<div class="m-gap"></div>
+					<volist name="goods_list" id="goods">
+						<php>
+							$r_money = $return_money;
+							if($return_type == '1'){
+								$r_money = $goods['batch_amt'] * $return_money / 100;
+							}
+							$url = U(
+								'Label/ShareBatch/index',
+								array(
+									'id' => $label_id,
+									'gl_id' => $goods['label_id'],
+									'from_user_id' => $from_user_id,
+									//'from_user_type' => '9'
+								)
+							);
+						</php>
+						<!--index.php?g=Label&m=Label&a=index&id=<?php echo $gal['label_id'];?>-->
+						<a href="{$url}">
+							<div class="goods">
+								<div class="info">
+									<img src="__UPLOAD__/{$goods['goods_image']}" alt="" class="logo">
+									<div class="cont">
+										<p>{$goods['batch_name']}</p>
+										<!--<p>免费500名额</p>-->
+										<p class="tr">￥{$goods['batch_amt']}</p>
+										<p class="tr">佣金<span>￥{$r_money}</span></p>
+									</div>
+								</div>
+							</div>
+						</a>
+					</volist>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

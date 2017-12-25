@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>翼码旺财添加已创建活动</title>
+<css href="__PUBLIC__/Css/main.css?v=__VR__"/>
+<css href="__PUBLIC__/Css/layout.css?v=__VR__" />
+<css href="__PUBLIC__/Css/module.css?v=__VR__" />
+<css href="__PUBLIC__/Css/Wcanal.css?v=__VR__" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+
+
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+
+<script>
+$(function(){
+	$(".subcon").css({marginLeft:200,marginRight:0});
+	
+	var _this=art.dialog.data('_this');
+	var vtype="{$type}";
+	if(vtype=='fms'){
+		 $(".sidenav").hide();
+	}
+	$("#save").click(function(){
+		// 如果是 付满送
+		var vtype=$("#fmstype").val();
+		if(vtype=='fms'){
+			dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+			var check_obj=$("input[name='ckid']:checked");
+			var b_id=check_obj.val();
+			var call_back = "{$_REQUEST['call_back']}";
+			if(!check_obj.length){
+				dialog.time(2).content("<div class='msg-all-error'</div>"+请选择互动模块+"</div>");
+				return false;
+			}else{
+				$.post("{:U('Alipay/Paysend/getBatchList')}",{"id":b_id},function(data){
+					if(data.status=='1'){
+						dialog.close();
+	                    var win = art.dialog.open.origin;   //获取弹窗的父类窗口
+	                    var datas = data.data;
+	                    if(call_back && win[call_back] && typeof(win[call_back])=='function'){ 
+	                        try{ 
+	                            win[call_back].call(this, datas); 
+	                            art.dialog.close();
+	                        }catch(e){
+	                            alert('选择异常');          
+	                        }; 
+	                    }
+					}else{
+						dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+					}
+				},"json");
+			}
+		}else{
+	    if($('#id').val() != ''){
+           var data = getFormData($('#theform'));
+        	var url = $('#theform').attr('action');
+        	var loading = art.dialog({title:false,lock:true});
+        	$.post(url,data,function(d){
+        	   if(d.status==1){
+        	      loading.time(2).content(d.info);  
+                 setTimeout("window.parent.location.reload()",2000);
+                  
+        	   }else{
+        	      loading.time(2).content(d.info);  
+               }
+        		            
+        	},'json');
+        	return false;
+	   }else{
+		var ckdata = $("input[name='ckid']:checked").closest(".ckid_data_area").find("#ckid_data").html();
+		if(ckdata == 'on' || ckdata == ''){
+			ckdata = { };
+		}
+		else{
+			try{
+				ckdata = eval('('+ckdata+')');
+				ckdata.batch_type = '{$batch_type}';
+				ckdata.rid = '{$rid}';
+			}catch(e){
+				alert('请选择互动模块');
+			}
+		}
+		var win = art.dialog.opener;
+		win['selectActivityCallback'].call(null,ckdata,_this);
+		art.dialog.close();
+        }
+		}
+	});
+})
+</script>
+</head>
+<body class="bgfff" style="overflow:;">
+<form action="{:U('LabelAdmin/SelectBatch/Submit')}" method="post" name="theform" id="theform">
+<input type="hidden" id="id" name="id" value="{$id}" />
+<input type="hidden" id="batchType" name="batchType" value="{$batch_type}" />
+<input type="hidden" id="fmstype" name="fmstype" value="{$type}" />
+<div class="sidenav">
+<ul class="left-Menu fn">
+    <li id="menu_id-cjyx" data-rel="0"><i class="icon-masternav" data-gid="0"></i><a href="javascript:void(0)" class="menu_1">常见营销</a></li>
+    <div class="cl"></div>
+    <ul class="sidenav-div">
+	  
+        <li id="menu_id-cj" class="ml16 <?php if($batch_type=='2'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>2,'id'=>$id,'rid'=>$rid));?>">抽奖</a></li>  
+      
+        <li id="menu_id-scdy" class="ml16 <?php if($batch_type =='3'){echo 'hover';}?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>3,'id'=>$id,'rid'=>$rid));?>">市场调研</a></li>   
+	  
+        <li id="menu_id-yjdt" class="ml16 <?php if($batch_type =='10'){echo 'hover'; }?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>10,'id'=>$id,'rid'=>$rid));?>">有奖答题</a></li> 
+
+		<li id="menu_id-wtp" class="ml16 <?php if($batch_type =='20'){echo 'hover'; }?>" ><a href="<?php echo U(MODULE_NAME.'/'.ACTION_NAME,array('batch_type'=>20,'id'=>$id,'rid'=>$rid));?>">投票</a></li> 
+    </ul>
+  
+ </ul>
+</div>
+    <div class="fn" style="margin-left: 200px;">
+    	<div class="main-name fn">
+            <h4>{$batch_name}</h4>
+        </div>
+        <div class="fn">
+        	<table class="Msg-table" cellpadding="0" cellspacing="0">
+                <tr>
+                   <th width="48">选择</th>
+                   <th width="200">活动名称</th>
+                   <th width="300">有效期</th>
+                </tr>
+                <notempty name="queryList">
+				<volist name="queryList" id="v">
+                <tr>
+                    <td>
+					<div class="ckid_data_area">
+					<input type="radio" name="ckid" value="{$v.batch_id}" />
+					<script id="ckid_data" type="text/json">{:json_encode($v)}</script>
+					</div>
+					</td>
+                    <td>{$v.name}</td>
+                    <td>
+                        <if condition="$batch_type eq 29">
+                            - - -
+                        <else />
+        					{$v.start_time|dateformat='Y-m-d H:i:s'} - 
+        					{$v.end_time|dateformat='Y-m-d H:i:s'}
+    					</if>
+					</td>
+                </tr>
+				</volist>
+                <else/>
+                <tr><td colspan="3">暂无活动</td></tr>
+                </notempty>
+                
+            </table>
+            <div class="page">{$page}</div>
+        </div>
+        <div class="fn tc mt10">
+        	<a href="javascript:;" id="save" class="btn-all w110">确定</a>
+        </div>
+    
+    </div>
+    </form>
+</body>
+</html>
+
+<script>
+//设置当前菜单
+
+
+$(function(){
+		$(".hover").closest(".sidenav-div").height("auto");
+		$(".hover").closest(".sidenav-div").prev("div").prev("li").find("i").removeClass("icon-masternav").addClass("icon-masternavclose");
+	windowheight();
+    /*以后如果要高亮父菜单时用，现在不用
+    var parent_id = _currentMenu.attr('data-parent');
+    if(parent_id){
+        $("#"+parent_id,".left-Menu").addClass('hover');
+    }
+    */
+	//菜单收缩
+	$(".icon-masternav").live("click",function(){
+		$(this).removeClass("icon-masternav").addClass("icon-masternavclose");
+		var index=$(this).attr("data-gid");
+		var $this=$(".sidenav-div:eq("+index+")")
+		$this.height("auto");
+		var heightval=$this.height();
+		$this.height("0");
+		$this.animate({height:heightval},200,function(){windowheight();});
+	});
+	$(".icon-masternavclose").live("click",function(){
+		$(this).removeClass("icon-masternavclose").addClass("icon-masternav");
+		var index=$(this).attr("data-gid");
+		var $this=$(".sidenav-div:eq("+index+")")
+		$this.animate({height:0},200,function(){windowheight();});
+	});
+});
+
+</script>

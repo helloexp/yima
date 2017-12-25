@@ -1,0 +1,1093 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>{:session('title')}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_ShopNew.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.inputbox.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.ganged.js"></script>
+<include file="Public:Public:wechatAllShareJsdk" />
+<style type="text/css">
+	.searchShopConList { padding-top: 0;}
+	.search {/* position:fixed; z-index:2; top:44px; left:0; */width:100%; padding:7px 0; height:30px;/* border-bottom:solid 1px #ea5518;*/ background:#e4e4e3;/* margin-top:-44px;*/-webkit-transition:margin-top 0.5s;transition:margin-top 0.5s;}
+	.search.show { margin-top:0;-webkit-transition:margin-top 0.5s;transition:margin-top 0.5s;}
+	.searchForm { margin:0 15px; padding:5px 0; height:20px; background:#fff; border-radius:3px; position: relative;}
+	.searchForm .searchTitle { float:left; height:20px; overflow:hidden;border-right:solid 1px #ea5518; color:#ea5518; padding:0 5px; font-size:14px; line-height:20px;}
+	.searchForm a.btn-search i { float:left; margin: 7px 0 0 10px; display: inline-block; width: 16px; height: 16px; background: url(__PUBLIC__/Label/Image/Shop/icon-search1.png) no-repeat; background-size: 100%;}
+	.searchForm form { margin:0 35px; height:20px;}
+	.searchForm .search-input { padding: 0; width:100%; line-height:20px; font-size:14px; color:#999;}
+	.searchForm a.btn-search { background: none; position: absolute; left: 0; top: 0; width:30px; height:30px; display:block;}
+	
+	.choose .selectbox i { position: absolute; right: 10px; bottom: 50%; z-index: 1; margin-bottom: 0px; width: 8px; height: 8px; overflow: hidden; border: 2px #bbbbbb solid; border-width: 0 2px 2px 0; -webkit-transform: rotate(45deg);}
+	/*.choose .selectbox#provinceSelect i { right: 53%;}*/
+	.choose .selectbox p { display: block; height: 36px; line-height: 36px; border-bottom: 1px #e5e5e5 solid; border-right: 1px #e5e5e5 solid; background: #ffffff; color: #333333;}
+	.choose .selectbox a { display: block; height: 36px; line-height: 36px; border: 1px #e5e5e5 solid; border-top: 0px #e5e5e5 solid; background: #ffffff; color: #333333;}
+	.choose .opts { display: none; width: 100%; height: 300px; position: absolute; top: 37px; left: 0; overflow-y: auto; z-index: 1;}
+	
+	.address { background: #ffffff; position:relative; height:auto; overflow:hidden; padding: 15px; text-align:left; border-bottom: solid 1px #eeeeee;}
+	.address .title { margin-right: 50px; padding-right: 10px; font-size:15px; line-height: 24px; color:#666; font-weight:bold; border-right: 1px #eeeeee solid;}
+	.address .con { margin-right: 50px; padding-right: 10px; border-right: 1px #eeeeee solid; text-overflow: ellipsis; overflow: hidden; white-space:nowrap; position: relative; font-size:13px; color:#999;}
+	.address .con .km { position: absolute; top: 0; right: 10px;}
+	.address .phone { display: inline-block; text-indent: -9999px; position: absolute; right: 15px; top: 50%; margin-top: -12px; width: 25px; height: 25px; background: url(__PUBLIC__/Label/Image/Shop/icon-tel1.png) no-repeat; background-size: 100%;}
+	
+	.choose { position: relative;}
+	.choose .selectbox { /*height: 37px;*/ width: 50%; position: relative; float: left; line-height: 36px;/* border-right: solid 1px #dedbd9;*/}
+	.choose .selectbox.fn { border-right: 0;}
+	.choose .sb .sb_icon { position: absolute; right: 10px; bottom: 50%; margin-bottom: 0px; width: 8px; height: 8px; overflow: hidden; border: 2px #bbbbbb solid; border-width: 0 2px 2px 0; -webkit-transform: rotate(45deg);}
+	
+	
+</style>
+<script type="text/javascript">
+    $(function () {
+        wx.ready(function () {
+            wx.showOptionMenu();
+        })
+    })
+</script>
+<script>
+var skuId;
+var isscroll = 0;
+var saleProportion = '{$saleProportion}' || 1; //销售比例
+$(window).scroll(function(){
+    if($(document).scrollTop() >= ($(document).height() - $(window).height()) ){
+        isscroll++;
+        if(isscroll>=1){
+            $(".proInfoOpen").click();
+        }
+    }
+});
+var storage_num = "<neq name='$goodsInfo.storage_num' value='-1'>{$remainNum}<else/>99999999</neq>";
+	storage_num = storage_num ? Math.round(storage_num) : -1;
+$(document).ready(function(e) {
+	var phoneNo = '{$phoneNo}';
+	var nodeId = '{$nodeId}';
+	if(phoneNo && nodeId){
+		$.get("index.php?g=Common&m=AjaxCommon&a=getCartList&phone_num="+phoneNo+"&node_id="+nodeId,function(data){
+			if(data.status==1){
+				var addTrolleyNum = 0;
+				$.each(data.data,function(i,n){
+					addTrolleyNum+=n*1
+				})
+				addTrolley(addTrolleyNum);
+			}
+		},'json');
+	}
+	otherpro();//其他产品
+	proOtherlist();//其他产品适应
+	var buytype="";
+	<if condition="$goodsInfo.is_sku eq '1'">
+		data = {
+			namelist: [{$goodsInfo.skuType}],
+                        price : [{$goodsInfo.skuDetail}]
+		}
+	sku(data);
+	</if>
+	var proMsgOtherheight = 0;
+	$(".proMsgOther").each(function(index, element) {
+        var _this = $(this);
+		if(_this.find("dd").length==0){
+			$(this).remove();
+		}
+    });
+	$(".proMsgOther dd").each(function(index, element) {
+        proMsgOtherheight = parseInt($(this).height())+proMsgOtherheight;
+    });
+	if(proMsgOtherheight>20){
+		$(".proMsgOther dl").addClass("hasmore");
+		$(".proMsgOther").click(function(){
+			$(".proMsgOther dl").toggleClass("open");
+		})
+	};
+	$(".proInfoOpen").click(function(){
+		$(this).hide();
+		$(".proInfo").show();
+	});
+	$("#addcart").click(function(){
+		if(storage_num != '-1') {
+			if (storage_num <= 0) {
+				var html = "<p style='color:#333; font-size:14px;'><img src='__PUBLIC__/Label/Image/loginForm-erro.png' width='40'></p><p style='line-height:30px; color:#333; font-size:14px; margin-bottom:10px;'>商品已售尽</p><p><a href='javascript:void(0)' class='btn-go' onclick='msgPopclose()'>确定</a></p>";
+				msgPop(html);
+				return false;
+			}
+		}
+                //判断登录
+		$("[name='delivery'][value='1']").closest("label").show();
+		var id="<?php echo session('id');?>";
+		$.post("{:U('Label/Store/checkPhoneLogin')}",{'id':id},function(data){
+            if(data.status!=1){
+                //如果是登录
+                var surl = "<?php echo urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);?>";
+                location.href = "{:U('O2OLogin/index')}"+"&node_id={$node_id}&backcall=cclick"+"&surl="+surl;
+                return false;
+            }
+			$("#nextbuy").attr("data-type",2);
+			$("#nextbuy").text("加入购物车");
+			$("#directbuy").addClass("open");
+			$("[name='delivery'][value='1']").closest("label").show();
+			buytype=1;
+		},'json');
+	});
+
+	//直接购买
+	$("#buy,#buy2").click(function(){
+		if(storage_num != '-1') {
+			if (storage_num <= 0) {
+				var html = "<p style='color:#333; font-size:14px;'><img src='__PUBLIC__/Label/Image/loginForm-erro.png' width='40'></p><p style='line-height:30px; color:#333; font-size:14px; margin-bottom:10px;'>商品已售尽</p><p><a href='javascript:void(0)' class='btn-go' onclick='msgPopclose()'>确定</a></p>";
+				msgPop(html);
+				return false;
+			}
+		}
+		//判断登录
+		$("[name='delivery'][value='1']").closest("label").show();
+		var id="<?php echo session('id');?>";
+		$.post("{:U('Label/Store/checkPhoneLogin')}",{'id':id},function(data){
+			if(data.status==1){
+				//如果是登录
+				$("#nextbuy").attr("data-type",1);
+				$("#nextbuy").text("下一步");
+				$("#directbuy").addClass("open");
+				buytype=2;
+			}else{
+				var surl = "<?php echo urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);?>";
+			location.href = "{:U('O2OLogin/index')}"+"&node_id={$node_id}&backcall=bclick"+"&surl="+surl;
+			}
+		},'json');
+                skuAndBookOrderTypeCheck();
+	});
+	
+	$("#nextbuy").click(function(){
+		if($(this).hasClass("erro")){return false;}
+		$(this).addClass("erro");
+		$(this).text("提交中...");
+		if($(this).attr("data-type")==1){
+			if(buytype==1){
+				$("#buyform").attr("action","{:U('Label/Store/add_goods_cart')}");
+			}else if(buytype==2){
+				$("#buyform").attr("action","<?php echo U('Label/Store/direct_to_check', array('id'=>$batchChannel));?>");
+			}else if(buytype==3){
+				$("#buyform").attr("action","{:U('Label/Store/send_gift')}");
+			}
+			$("#buyform").submit();
+		}else{
+			$("form").ajaxSubmit({
+				success:function(data){
+					 if(data.status == '1'){
+							addTrolley(data.goodsnum);//加入购物车动画
+							adressPopclose();
+					  }else{
+						  msgPop(data.info);
+                         $("#nextbuy").removeClass("erro");
+					  }
+				},
+				dataType:'json'
+			});
+		}
+	});
+	
+	//送礼
+	$("#gift").click(function(){
+		if(storage_num != '-1') {
+			if (storage_num <= 0) {
+				var html = "<p style='color:#333; font-size:14px;'><img src='__PUBLIC__/Label/Image/loginForm-erro.png' width='40'></p><p style='line-height:30px; color:#333; font-size:14px; margin-bottom:10px;'>商品已售尽</p><p><a href='javascript:void(0)' class='btn-go' onclick='msgPopclose()'>确定</a></p>";
+				msgPop(html);
+				return false;
+			}
+		}
+		var deli_flag = "{$goodsInfo['delivery_flag']}";
+		$("[name='delivery'][value='0']").closest("label").click();
+		$("[name='delivery'][value='1']").closest("label").hide();
+//		if(deli_flag != '0'){
+//			alert('送礼的商品仅支持自提方式');
+//			return false;
+//		}
+		//判断登录
+		var id="<?php echo session('id');?>";
+		$.post("{:U('Label/Store/checkPhoneLogin')}",{'id':id},function(data){
+			if(data.status==1){
+				$("#nextbuy").attr("data-type",1);
+				$("#nextbuy").text("下一步");
+				$("#directbuy").addClass("open");
+				buytype=3;
+			}else{
+				var surl = "<?php echo urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);?>";
+				location.href = "{:U('O2OLogin/index')}"+"&id="+{$id}+"&backcall=gclick"+"&surl="+surl;
+			}
+		},'json');
+	})
+
+	$("#js-waitinglogin").click(function(){
+		var surl = "<?php echo urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);?>";
+		location.href = "{:U('O2OLogin/index')}"+"&node_id={$node_id}&backcall=bclick"+"&surl="+surl;
+	})
+	var reloadCookie = document.cookie.split("; ");
+	var reloadCookie_g = true;
+	var nowreloadCookie=1;
+	$.each(reloadCookie,function(i,n){
+		var arr = n.split("=");
+		if (arr[0]=="reloadCookie"){
+			nowreloadCookie = parseInt(arr[1])+1;
+			if(nowreloadCookie>5){nowreloadCookie=5;}
+			document.cookie = "reloadCookie="+nowreloadCookie;
+			reloadCookie_g = false;
+			setInterval(function(){
+				nowreloadCookie -= 1;
+				if(nowreloadCookie<=1){
+					nowreloadCookie=1;
+				}
+				document.cookie = "reloadCookie="+nowreloadCookie;
+			},1000);
+			if(nowreloadCookie>4){
+				alert("请不要频繁刷新");
+			}
+			return false;
+		};
+	})
+	if (reloadCookie_g) {
+		document.cookie = "reloadCookie=1";
+	}
+	$.post("{:U('Label/Store/checkPhoneLogin')}",{'id':"<?php echo session('id');?>"},function(data){
+		setTimeout(function(){
+			if(data.status==1){
+				$("#js-waiting,#js-waitingshop").fadeIn(200);
+			}else{
+				$("#js-waitinglogin,#js-waitingshop").fadeIn(200);
+			}
+		},nowreloadCookie*300);
+	},'json');
+});
+function login_to(url){
+    var id="<?php echo session('id');?>";
+    $.post("{:U('Label/Store/checkPhoneLogin')}",{'id':id},function(data){
+        if(data.status==1){
+            link_to(url);
+        }else{
+            var surl = urlencode(url);
+            location.href = "{:U('O2OLogin/index')}"+"&id="+id+"&surl="+surl;
+        }
+    },'json');
+}
+
+function skuAndBookOrderTypeCheck(){
+    var price = []; 
+    $("#skuDiv .proPopSku,#proPopOrder .proPopOrder").each(function(index, element) {
+        price[index] = $(this).find("input:checked").val();
+    });
+    return price;
+}
+function findorder(){
+	var isorder = false;
+	for(var i=0;i<data.namelist.length;i++){
+		if(data.namelist[i].ordertype){
+			if(data.namelist[i].ordertype==0){
+				data.namelist[i].ordertype=false;
+			}else{
+				isorder = i
+				break;
+			}
+		}
+	}
+	return isorder
+}
+function sku(data){
+	var isorder = findorder();
+	var html = template("skuHtml",data);
+	$("#skuDiv").html(html);
+	if(isorder!=false || isorder===0){
+		var html3 = template("orderHtml",data.namelist[isorder]);
+		$("#proPopOrder").html(html3);
+	}
+	var minprice=data.price[0].sellprice,maxprice=data.price[0].sellprice;
+	for(var i=0;i<data.price.length;i++){
+		if(Number(data.price[i].sellprice)<=minprice){
+			minprice = data.price[i].sellprice;
+		};
+		if(Number(data.price[i].sellprice)>=maxprice){
+			maxprice = data.price[i].sellprice;
+		}
+	}
+        if(minprice != maxprice){
+            $("#price").text(minprice+"~"+maxprice);
+        }else{
+            $("#price").text(minprice);
+        }
+	$("#endprice").text(data.price[0].sellprice);
+        skuId = data.price[0].id;
+        $('#sku_info').val(skuId);
+        if(Number(data.price[0].sku_remain)==-1){
+                $("#goodcount").attr("data-max",1000);
+                $("#storage_num").text("不限量");
+        }else{
+                $("#goodcount").attr("data-max",data.price[0].sku_remain);
+                $("#storage_num").text("还剩"+data.price[0].sku_remain*saleProportion);
+        }
+	
+	$("body").on("click",".proPopOrder label,.proPopSku label",function(){
+		var isorderDate = $(this).find("input[name='orderDate']").length>0 ? true : false;
+		var isproPopOrder = $(this).closest(".proPopOrder").length>0 ? true : false;
+		if(isorderDate){
+			$("#datechange").text($(this).find("a").text());
+			$("[name='specifyOderDate']").val("");
+		}else{
+            price = skuAndBookOrderTypeCheck();
+			if(isproPopOrder){
+				var orderDate = $(this).find("a").text();
+				$("#orderchange").html(orderDate);
+			}
+			$("#endprice").text("未找到匹配价格");
+			for(var i=0;i<data.price.length;i++){
+				if(data.price[i].id.toString()==price.toString()){
+					$("#endprice").text(data.price[i].sellprice);
+									skuId = data.price[i].id;
+									$('#sku_info').val(skuId);
+					if(Number(data.price[i].sku_remain)==-1){
+											$("#goodcount").attr("data-max",1000);
+						$("#storage_num").text("不限量");
+					}else{
+											$("#goodcount").attr("data-max",data.price[i].sku_remain);
+						$("#storage_num").text("还剩"+data.price[i].sku_remain*saleProportion);
+					}
+				}
+			}
+		}
+	});
+	$("body").on("keyup","[name='specifyOderDate']",function(){
+		var v = parseInt($(this).val());
+		if(!v){
+			$("[name='orderDate']:eq(0)").attr("checked",true);
+			$(this).val("");
+		}else{
+			if(v>=31){v=31;$(this).val(v);}else if(v<=1){v=1;$(this).val(v);}
+			$("[name='orderDate']:checked").attr("checked",false);
+			$("#datechange").html(v+"号");
+		}
+	});
+}
+</script>
+
+<script type="text/javascript">
+$(function(){
+	//点击省份获取城市列表
+	$('#provinceSelect a').click(function($province){
+		var chooseProvince = $(this).text();
+		$('#citySelect p').text("请选择市");
+		$.ajax({
+		    dataType: "json",
+		    type: "POST",
+		    url: "{:U('Store/htmlSelectShow')}",
+		    data:{'pro':chooseProvince},
+		    success: function(result) {
+			       	$('#citySelect .opts').html("");
+			    	var html='';
+			    	var htmlStore ="";
+			    	var citys = result.citys;
+			    	console.info(citys);
+			       	for(var i=0;i<citys.length;i++){
+						html+='<a href="javascript:;" value="'+citys[i]+'">'+citys[i]+'</a>';
+//						getCityStore(citys[i],htmlStore);
+			       	}
+			       	
+			       	$.ajax({
+					    dataType: "json",
+					    type: "POST",
+						url: "{:U('Store/htmlSelectShow')}",
+					    data:{'pro':chooseProvince},
+					    success: function(result){
+					    	$('.searchShopConList').html("");
+			    			var htmlStore='';
+							var shops = result.shops;
+						    console.info(shops);
+					       	for(var i=0;i<shops.length;i++){
+								//显示门店列表
+								htmlStore+='<div class="address"><p class="title">'+shops[i].store_name+'</p><p class="con">地址：'+shops[i].address+'</p><a href="tel:'+shops[i].store_phone+'" class="phone">'+shops[i].store_phone+'</a></div>';
+							}
+					       	$(".searchShopConList").append(htmlStore);
+					   	}
+					});
+			       	$('#citySelect .opts').append(html);
+		   	}
+		});
+		var txt = $(this).text();
+		$(this).parent(".opts").hide();
+		$(this).parents(".selectbox").find("p").text(txt);
+		$(".searchShopCon").css("overflow","auto");
+	});
+});
+$(function(){
+	//点击城市获取门店列表
+	$('#citySelect').delegate("a","click",function($area){
+		var chooseCity = $(this).text();
+		$.ajax({
+		    dataType: "json",
+		    type: "POST",
+		    url: "{:U('Store/htmlSelectShow')}",
+		    data:{'city':chooseCity},
+		    success: function(data) {
+		    	$('.searchShopConList').html("");
+		    	var html='';
+		    	console.info(data);
+		       	for(var i=0;i<data.length;i++){
+					//显示门店列表
+					html+='<div class="address"><p class="title">'+data[i].store_name+'</p><p class="con">地址：'+data[i].address+'</p><a href="tel:'+data[i].store_phone+'" class="phone">'+data[i].store_phone+'</a></div>';
+				}
+		        $(".searchShopConList").html(html);
+		   	}
+		});
+		var txt = $(this).text();
+		$(this).parent(".opts").hide();
+		$(this).parents(".selectbox").find("p").text(txt);
+		$(".searchShopCon").css("overflow","auto");
+	});
+	
+	$('.selectbox').on("click","p",function(){
+		$(".opts").hide();
+		$(this).next(".opts").toggle();
+		var display = $(".opts").css("display");
+		if(display == "none"){
+			$(".searchShopCon").css("overflow","auto");
+		}else{
+			$(".searchShopCon").css("overflow","hidden");
+		};
+	});
+});
+</script>
+
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="fn">
+            <div class="back"><i></i></div>
+            <eq name="cmPayId" value="0"><div class="headerorder" onClick="login_to('{:U('Label/Member/index',array('node_id'=>$node_id))}')"></div></eq>
+            <div class="title">{$goodsInfo.batch_name}</div>
+        </div>
+        <div id="main">
+            <form name="buyform" id="buyform" action="{:U('Label/Store/add_goods_cart')}" method="post">
+                <input type="hidden" name="g_delivery" value="0" />
+                <input type="hidden" name="goods[]" id="goods" value="{$goodsInfo['b_id']}" />
+                <input type="hidden" name="id"  value="{$id}" />
+                <input type="hidden" name="mid"  value="{$mid}" />
+                <input type="hidden" id="sku_info" name="sku_info" value="" />
+                <input type="hidden" name="is_sku" value="{$goodsInfo.is_sku}" />
+                <input type="hidden" name="bookOrder" value="{$goodsInfo['is_order']}" />
+            <div class="mainTop">
+            	<div class="flash">
+                    <div class="flash-img">
+						<notempty name="configData['showImgs']">
+                        <div class="swiper-wrapper">
+                            <volist name="configData['showImgs']" id="vo">
+                                <div class="swiper-slide" style="background-image:url('__UPLOAD__/{$vo}')"></div>
+                            </volist>
+                        </div>
+						<else/>
+						<div class="swiper-wrapper">
+                            <if condition="$goodsInfo['show_picture1'] neq '' ">
+                                <div class="swiper-slide" style="background-image:url(__UPLOAD__/{$goodsInfo['show_picture1']})"></div>
+                            </if>
+                            <if condition="$goodsInfo['show_picture2'] neq '' ">
+                                <div class="swiper-slide" style="background-image:url(__UPLOAD__/{$goodsInfo['show_picture2']})"></div>
+                            </if>
+                            <if condition="$goodsInfo['show_picture3'] neq '' ">
+                                <div class="swiper-slide" style="background-image:url(__UPLOAD__/{$goodsInfo['show_picture3']})"></div>
+                            </if>
+                        </div>
+						</notempty>
+                        <div class="pagination"></div>
+                        <php>
+                        	$purchase_time_limit = $configData['isShowSalesTime'];
+                        	if($purchase_time_limit){
+                                        $js_begin_time = strtotime($goodsInfo['begin_time'])*1000;
+                                        $js_end_time = strtotime($goodsInfo['end_time'])*1000;
+
+                                        $notice = '';
+                                        if(date('YmdHis') < $goodsInfo['begin_time']){
+                                                $notice = '开始';
+                                        }
+                                        else if(date('YmdHis') > $goodsInfo['begin_time'] && date('YmdHis') < $goodsInfo['end_time']){
+                                                $notice = '结束';
+                                        }
+                                        else{
+                                                $purchase_time_limit = 0;
+                                        }
+                        	}
+                        </php>
+                        <php>if($purchase_time_limit && $goodsInfo['status'] == '0'){</php>
+                        <div id="countdown" class="hd abs dn">
+					    	<div class="floatleft clock">
+					    		<span>距离{$notice}还剩：</span>
+					        	<em id="emD"></em><strong>天</strong>
+					        	<em id="emH"></em><strong>时</strong>
+					        	<em id="emM"></em><strong>分</strong>
+					        	<em id="emS"></em><strong>秒</strong>
+					        </div>
+						</div>
+						<php>}</php>
+                    </div>
+                </div>
+            </div>
+            <div id="mainCon" class="mainCon fn mainConNew">
+                <div class="pro">
+                	<div class="proMsg">
+                            <if condition="$goodsInfo['is_order'] eq '2' ">
+                                <h1 class="order">{$goodsInfo.batch_name}<a href="javascript:void(0)" onClick="helpOrder()">如何订购?</a></h1>
+                            <else />
+                                <h1>{$goodsInfo.batch_name}</h1>
+                            </if>
+                        <div class="proMsgPrice">
+                            <em>￥</em>
+                            <b id="price">{$goodsInfo['batch_amt']}</b>
+                            <neq name='goodsInfo.market_show' value='0'><s>￥{$goodsInfo['market_price']}</s></neq>
+                            <span>
+                                <eq name='configData.isShowSalesNum' value='1'>
+                                    <neq name='goodsInfo.storage_num' value='-1'>
+                                        已售<span>{$sellNum}</span>份，还剩{$remainNum}份
+                                    <else/>
+                                        不限量
+                                    </neq>
+                                </eq>
+                            </span>
+                            <notempty name="goodsInfo['vip_price']">
+                           		<h2>会员价：￥{$goodsInfo['vip_price']}</h2>
+                            </notempty>
+                            <div class="cl"></div>
+                            <if condition="$marketInfo.integral_flag eq '1'"><i class="icon-integral"></i></if>
+                        </div>    
+                        <div class="proMsgInfo">
+                            {$goodsInfo.goods_desc|nl2br}
+                        </div>
+                        <div class="proMsgOther">
+                            <neq name="intergralType" value='0'>
+                                <eq name="marketInfo['integral_flag']" value='1'>
+                                <dl>
+                                    <dt>{:L('INTEGRAL_NAME')}</dt>
+                                    <if condition="$intergralType eq '1'">
+                                        <dd>该商品参与{:L('INTEGRAL_NAME')}抵用订单金额</dd>
+                                    <else />
+                                        <dd><volist name="integralRule" id="vo">订单满{$vo['rev_amount']|number_format=0}元，可用{:L('INTEGRAL_NAME')}抵扣{$vo['use_amount']|number_format=0}元；<br /></volist></dd>
+                                    </if>  
+                                </dl>
+                                </eq>
+                            </neq>
+                            <neq name="ruleType" value='0'>
+                                <eq name="marketInfo['bonus_flag']" value='1'>
+                                <dl>
+                                    <dt>红包</dt>
+                                    <if condition="$ruleType eq '1'">
+                                        <dd>该商品参与红包抵用订单金额</dd>
+                                    <else />
+                                        <dd><volist name="bonusRule" id="vo">订单满{$vo['rev_amount']}元,可用{$vo['use_amount']}元红包；<br /></volist></dd>
+                                    </if>
+                                </dl>
+                                </eq>
+                            </neq>
+                            <notempty name="fullReduceRule">
+                            <dl>
+                                <dt>满减</dt>
+                                <volist name="fullReduceRule" id="vo">
+                                    <volist name="vo" id="list">
+                                        <dd>消费满{$list['full_money']}元,立减{$list['reduce_money']}元；<br /></dd>
+                                    </volist>
+                                </volist>
+                            </dl>
+                            </notempty>
+                        </div>
+                        <if condition="$goodsInfo['is_order'] eq 2">
+                            <div class="proMsgOther2">
+                                <dl>
+                                    <dd class="proMsgOther2-num">已售<span>{$sellNum}</span>份，剩余<if condition="$goodsInfo['remain_num'] eq '-1' ">无限<else /><span>{$remainNum}</span>份 </if> </dd>
+                                    <if condition="$goodsInfo['day_buy_num'] neq -1 "><dd>每天限购{$goodsInfo['day_buy_num']}份</dd></if>
+                                    <if condition="$goodsInfo['person_buy_num'] neq -1"><dd>个人限购{$goodsInfo['person_buy_num']}份</dd></if>
+                                </dl>
+                            </div>
+                        </if>
+                        
+                        <if condition="($goodsInfo['day_buy_num'] neq -1 OR $goodsInfo['person_buy_num'] neq -1 OR $configData['fristBuyNum'] gt 0) AND $goodsInfo['is_order'] neq 2 ">
+                            <div class="proMsgOther2">
+                                <dl>
+                                    <dt>限购条件</dt>
+                                    <dd><if condition="$configData['fristBuyNum'] gt 0">起购数{$configData['fristBuyNum']}份</if></dd>  
+                                    <dd><if condition="$goodsInfo['day_buy_num'] gt 0 ">每天限购{$goodsInfo['day_buy_num']}份</if></dd>
+                                    <dd><if condition="$goodsInfo['person_buy_num'] gt 0">个人限购{$goodsInfo['person_buy_num']}份</if></dd>                         
+                                </dl>
+                            </div>
+                        </if>
+                    </div>
+                    <!-- <if condition="$relationGoods neq '' ">
+                        <div class="proOther">
+                        <h2>您可能还需要</h2>
+                        <div class="proOther-list">
+                            <ul>
+                                <volist name='relationGoods' id='val' key='k'>
+                                    <li>
+                                        <div class="shade"></div>
+                                        <input type="checkbox" name="goods[]" id="goods_{$k}" value="{$val['b_id']}"/>
+                                        <div class="img"><img src="__UPLOAD__/{$val['goods_image']}" /></div>
+                                        <p>{$val['batch_name']}</p>
+                                    </li>
+				            </volist>
+                            </ul>
+                        </div>
+                        </div>
+                    </if> -->
+                </div>
+				<div class="procut"></div>
+                <div class="pro" style="padding:0px;width:100%;margin-left:0px">
+                    <if condition="$goodsInfo['delivery_flag'] neq '1'">
+                        <div class="searchShop searchsp fn">
+                            <a href="javascript:void(0)">可提领门店</a>
+                        </div>
+						<div class="procut"></div>
+                    </if>
+					<!-- 增加组合门店 -->
+					<div class="searchShop fn" style="background:none">
+                        <a href="javascript:void(0)">组合推荐</a>
+                    </div>
+					<!-- //增加组合门店 -->
+					<if condition="$relationGoods neq '' ">
+                      <div class="proOther">
+                        <div class="proOther-list">
+						    <ul>
+							    <volist name='relationGoods' id='val' key='k'>
+                                <li>
+                                   <div class="img" style="background:url(__UPLOAD__/{$val['goods_image']}) no-repeat;background-size:cover"></div>
+                                  <p>{$val['batch_name']}</p>
+                                </li>
+                                <span class="split">+</span>
+								</volist>				
+							</ul>
+                         </div>
+                       </div>
+                    </if>
+                </div>
+				
+                <!-- <div class="procut"></div>
+                <div class="pro">
+                    <div class="proInfoOpen"><i></i><span>点击加载商品图文介绍</span></div>
+                    <div class="proInfo fn dn">
+                        {:htmlspecialchars_decode($goodsInfo['wap_info']);}
+                    </div>
+                    <if condition="$goodsInfo['delivery_flag'] neq '1'">
+                        <div class="searchShop fn">
+                            <a href="javascript:void(0)">查看可用门店</a>
+                        </div>
+                    </if>
+                    <div class="detailNav fn">
+                        <eq name="cmPayId" value="0">
+                        <a href="javascript:void(0)" onClick="link_to('{:U('Label/Store/index','id='.session('id'));}')"><i class="icon-navHome"></i><span>店铺首页</span></a>
+                        <a href="javascript:void(0)" onClick="link_to('{:U('Label/Store/cart','id='.session('id'));}')"><i class="icon-navTrolley"></i><span>购&nbsp;物&nbsp;车</span></a>
+                        <a href="javascript:void(0)" onClick="login_to('{:U('Label/Member/index',array('node_id'=>$node_id))}')"><i class="icon-navOeder"></i><span>个人中心</span></a>
+                        </eq>
+                    </div>
+                </div> -->
+				<!-- 拖动查看更多 -->
+				<div class="procut"></div>
+				<div class="proInfoOpen"><em class="eml"></em><span>继续拖动，查看商品图文介绍</span><em class="emr"></em></div>
+				<!-- //拖动查看更多 -->
+            </div>
+            <div class="proNav zhproNav fn" <?php
+                if($nowtime < $goodsInfo['begin_time']){
+                ?>
+                	style="background-image:url(__PUBLIC__/Label/Image/Item/loading.gif);background-position: center center; background-size:8px; background-repeat: no-repeat;"
+                <?php
+                }
+                ?>>
+                <?php
+                if($goodsInfo['status']=='0'){
+                ?>
+                <?php
+                $nowtime = date('YmdHis');
+                if($nowtime>$goodsInfo['end_time']){
+                ?>
+                <a href="javascript:void(0)" class="btn-erro l" style="width:50%;">销售时间过期</a>
+                <a href="<?php echo U('Label/Store/index','id='.session('id'));?>" class="btn-ok r">商城首页</a>
+                <?php
+                }elseif($nowtime < $goodsInfo['begin_time']){
+                ?>
+                <a href="javascript:void(0)" id="js-waiting" class="btn-erro l" style="display:none">敬请期待</a>
+                <a href="javascript:void(0)" id="js-waitinglogin" class="btn-ok l" style="display:none">预先登录</a>
+                <a href="<?php echo U('Label/Store/index','id='.session('id'));?>" id="js-waitingshop" class="btn-ok r" style="display:none">商城首页</a>
+                <?php
+                }else{
+                ?>
+					<?php if($marketInfo['member_join_flag'] == '1' ){ ?>
+						<?php if($wx_flag == 0){?>
+							<a href="javascript:void(0)" class="btn-erro btn-wxerro">仅限微信粉丝购买</a>
+						<?php }else{ ?>
+							<?php if($mem_flag != 1){ ?>
+                                                                <eq name="marketInfo['fans_collect_url']" value="">
+                                                                    <if condition="$wxUrlInfo neq ''">
+                                                                        <a href="{$wxUrlInfo}" class="btn-ok btn-wxerro">请先关关注{$wxName}</a>
+                                                                    <else />
+                                                                        <a href="javascript:void(0)" class="btn-erro btn-wxerro">该商品只限微信粉丝购买</a>
+                                                                    </if>
+                                                                <else/>
+                                                                    <a href="{$marketInfo['fans_collect_url']}" class="btn-ok btn-wxerro">请先关关注{$wxName}</a>
+                                                                </eq>
+							<?php }else{ ?>
+								<?php if($sendGift == '1'){ ?>
+                                                                <eq name="cmPayId" value="0"><a href="javascript:void(0)" class="btn-send" id="gift">送给他人</a></eq>
+								<?php } ?>
+                                                                <?php if($goodsInfo['is_order'] != '2'){ ?>
+                                                                <eq name="cmPayId" value="0"><a href="javascript:void(0)" class="btn-ok l" style="background:#fff;">
+																  <dl  onClick="link_to('{:U('Label/Store/index','id='.session('id'));}')"><dt></dt><dd>店铺<dd></dl>
+																  <dl id="addcart"><dt></dt><dd>购物车<dd></dl>
+																</a></eq>
+                                                                <?php } ?>
+								<a href="javascript:void(0)" <?php if($goodsInfo['is_order'] != '2' && $cmPayId == 0){ echo 'class="btn-ok r"'; } else {echo 'class="btn-ok"';}?> id="buy">立即购买</a>
+					<?php }}}else{ ?>
+						<?php if($sendGift == '1'){ ?>
+                                                <eq name="cmPayId" value="0"><a href="javascript:void(0)" <?php if($goodsInfo['is_order'] != '2' && $cmPayId == 0){ echo ' class="btn-send"'; } else {echo ' class="btn-ok l"';}?> id="gift">送给他人</a></eq>
+						<?php } ?>
+                                                <?php if($goodsInfo['is_order'] != '2'){ ?>
+                                                <eq name="cmPayId" value="0"><a href="javascript:void(0)" class="btn-ok l" style="background:#fff;">
+												  <dl onClick="link_to('{:U('Label/Store/index','id='.session('id'));}')"><dt></dt><dd>店铺<dd></dl>
+												  <dl id="addcart"><dt></dt><dd>购物车<dd></dl>
+												</a></eq>
+                                                <?php } ?>
+						<a href="javascript:void(0)" <?php if($goodsInfo['is_order'] != '2' && $cmPayId == 0){ echo 'class="btn-ok r"'; } else {echo 'class="btn-ok r"';}?> id="buy">立即购买</a>
+					<?php } ?>
+                <?php
+                }
+                ?>
+                <?php
+                    }else{
+                ?>
+                <a href="javascript:void(0)" class="btn-erro l" style="width:50%;">商品已下架</a>
+                <a href="<?php echo U('Label/Store/index','id='.session('id'));?>" class="btn-ok r">商城首页</a>
+                <?php
+                }
+                ?>
+                <!--点击购买或送礼后的div-->
+                <div id="directbuy" class="proPop">
+                	<div class="proPopbg"></div>
+                    <div class="proPopCon">
+                        <a href="javascript:void(0)" class="close" onclick="adressPopclose()">+</a>
+                        <div class="proPopName">
+                        	<div class="img" style="background-image:url(__UPLOAD__/{$goodsInfo['batch_img']})"></div>
+                            <h4>{$goodsInfo.batch_name}</h4>
+                            <p><em>￥</em><b id="endprice">{$goodsInfo['batch_amt']}</b>
+                            	<eq name='configData.isShowSalesNum' value='1'>
+                            		<span id='storage_num'>
+                            		<neq name='goodsInfo.storage_num' value='-1'>已售<span>{$sellNum}份，还剩{$remainNum}份</span>
+                                    <else/>
+                                        不限量
+                                    </neq>
+                                    </span>
+                                </eq>
+                            </p>
+                        </div>
+                        <div class="proPopScroll">
+                            <div class="proPopLogistics">
+                                <div class="title">配送方式:</div>
+                                <div class="text">
+                                    <if condition="$goodsInfo['delivery_flag'] eq '0'">
+                                        <label><input type="radio" name="delivery" checked="checked" value="0"><a href="javascript:void(0)">自提</a></label>
+                                    <elseif condition="$goodsInfo['delivery_flag'] eq '1'" />
+                                        <label><input type="radio" name="delivery" checked="checked" value="1"><a href="javascript:void(0)">物流</a></label>
+                                    <else />
+                                        <label><input type="radio" name="delivery" checked="checked" value="0"><a href="javascript:void(0)">自提</a></label>
+                                        <label><input type="radio" name="delivery" value="1"><a href="javascript:void(0)">物流</a></label>
+                                    </if>
+                                </div>
+                            </div>
+                            <div id="skuDiv"></div>
+                            <div class="proPopNum">
+                                <div class="title"><if condition="$goodsInfo['is_order'] eq '2' ">订购份数<else />数量</if>:</div>
+                                <div class="text">
+                                    <div class="numInput">
+                                        <em class="minus">-</em>
+                                        <span><input id="goodcount" name="goodcount" type="tel" value="1" data-max="<?php if($goodsInfo['storage_num']!=-1){?><?php echo $goodsInfo['remain_num'];?> <?php }else{?>1000<?php }?>"></span>
+                                        <em class="add">+</em>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="proPopOrder"></div>                            
+                            <if condition="$goodsInfo['is_order'] eq '2' ">
+                                <input type="hidden" name='orderType' value='bookOrder' />
+                            <div class="proPopOrder">
+                                <div class="title">配送日期:</div>
+                                <div class="text">
+                                    <if condition="$goodsInfo['config_data']['cycle_type'] eq '1' ">
+                                        <label><input type="radio" name="orderDate" checked="checked" value="10"><a href="javascript:void(0)">10号</a></label>
+                                        <label><input type="radio" name="orderDate" value="20"><a href="javascript:void(0)">20号</a></label>
+                                        <label><input type="radio" name="orderDate" value="30"><a href="javascript:void(0)">30号</a></label>
+                                    <elseif condition="$goodsInfo['config_data']['cycle_type'] eq '2' " />
+                                        <label><input type="radio" name="orderDate" checked="checked" value="1"><a href="javascript:void(0)">周一</a></label>
+                                        <label><input type="radio" name="orderDate" value="2"><a href="javascript:void(0)">周二</a></label>
+                                        <label><input type="radio" name="orderDate" value="3"><a href="javascript:void(0)">周三</a></label>
+                                        <label><input type="radio" name="orderDate" value="4"><a href="javascript:void(0)">周四</a></label>
+                                        <label><input type="radio" name="orderDate" value="5"><a href="javascript:void(0)">周五</a></label>
+                                        <label><input type="radio" name="orderDate" value="6"><a href="javascript:void(0)">周六</a></label>
+                                        <label><input type="radio" name="orderDate" value="7"><a href="javascript:void(0)">周日</a></label>
+                                    </if>
+                                    <if condition="$goodsInfo['config_data']['cycle_type'] eq '1' ">
+                                    <div class="cl"></div>
+                                    <p class="mt5">指定每月<input name='specifyOderDate' type="tel" data-min='1' data-max='31'/>号配送</p>
+                                    </if>
+                                    <div class="cl"></div>
+                                    <p>您指定了<if condition="$goodsInfo['config_data']['cycle_type'] eq '2' "><span>每<em id="datechange">周一</em></span><elseif condition="$goodsInfo['config_data']['cycle_type'] eq '1' " /><span>每月<em id="datechange">10号</em></span><else />每日</if>配送商品
+                                    </p>
+                                </div>
+                            </div>
+                            </if>
+                            <div class="proPopBtn">
+                                <a href="javascript:void(0)" class="btn-ok" id="nextbuy" data-type="1">下一步</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+    </script>
+
+<div class="searchShopCon">
+    <div class="searchShopHeader fn">
+        <div class="close"><i></i></div>
+        <eq name="cmPayId" value="0"><div class="headerorder" onClick="login_to('{:U('Label/Member/index',array('node_id'=>$node_id))}')"></div></eq>
+        <div class="title">{$goodsInfo.batch_name}</div>
+    </div>
+	<div class="choose fn">
+    	<input type="hidden" class="province" value="">
+		<input type="hidden" class="city" value="">
+		<div name="province" type="selectbox" class="selectbox" id="provinceSelect"><p>请选择省</p><div class="opts">
+			
+			<volist name="provinces" id="vo">
+				<a href="javascript:;" value="{$vo}">{$vo}</a>
+			</volist>
+		</div><i></i></div>
+		<div name="city" type="selectbox" class="selectbox fn" id="citySelect"><p>请选择市</p><div class="opts"></div><i></i></div>
+    </div>
+    <div class="searchShopConList">
+        <volist name="storeList" id="vo"  key="k">        	
+            <div class="address">
+                <p class="title">{$vo.store_name}</p>
+                <p class="con">地址：{$vo.address}</p>
+                <a href="tel:{$vo.store_phone}" class="phone">{$vo.store_phone}</a>
+            </div>
+        </volist>
+    </div>
+    <eq name="cmPayId" value="0">
+    <div class="detailNav fn">
+        <a href="javascript:void(0)" onClick="link_to('{:U('Label/Store/index','id='.session('id'));}')"><i class="icon-navHome"></i><span>店铺首页</span></a>
+        <a href="javascript:void(0)" onClick="link_to('{:U('Label/Store/cart','id='.session('id'));}')"><i class="icon-navTrolley"></i><span>购&nbsp;物&nbsp;车</span></a>
+        <a href="javascript:void(0)" onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"><i class="icon-navOeder"></i><span>个人中心</span></a>
+    </div>
+    </eq>
+</div>
+<if condition="$cartCount gt 0 "><div class="fixTrolley"><span>{$cartCount}</span></div></if>
+
+<!--爱蒂宝-->
+<include file="adb"/>
+</body>
+</html>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/idangerous.swiper.min.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) {
+	var mySwiper = new Swiper('.flash-img',{
+		pagination: '.pagination',
+		loop:true,
+		grabCursor: true,
+		paginationClickable: true,
+		autoplay:5000,
+		autoplayDisableOnInteraction : false
+	});
+	var isSupportTouch = "ontouchend" in document ? true : false;
+	var cantouch = "click";
+	if(isSupportTouch){cantouch = "touchstart";}else{cantouch = "click";}
+	
+	$("body").on("click",".fixTrolley",function(){
+		link_to('<?php echo U('Label/Store/cart','id='.session('id'));?>');
+	});
+	$(".searchsp").click(function(){
+		$(".searchShopCon").addClass("open");
+		$("body").css("overflow","hidden");
+	});
+	$(".searchShopHeader .close").click(function(){
+		$(".searchShopCon").removeClass("open");
+		$("body").css("overflow","auto");
+	});
+	$(".searchShopConList dl").click(function(){
+		$(".searchShopConList dl").removeClass("hover");
+		$(this).addClass("hover");
+	});
+	$("body").on(cantouch,".numInput .minus",function(){
+		var gdc=$("#goodcount").val();
+		if(!isNaN(gdc)&&gdc>1){
+			$("#goodcount").val(gdc-1);
+			$("em.erro").removeClass("erro");
+		}else{
+			$("em.erro").removeClass("erro");
+			$(".numInput .minus").addClass("erro");
+		}
+	});
+	$("body").on(cantouch,".numInput .add",function(){
+		var gdc=$("#goodcount").val();
+		var maxnum=parseInt($("#goodcount").attr("data-max"));
+		if(!isNaN(gdc)&&gdc<maxnum){
+			$("#goodcount").val(++gdc);
+			$("em.erro").removeClass("erro");
+		}else{
+			$("em.erro").removeClass("erro");
+			$(".numInput .add").addClass("erro");
+		}
+	});
+	$("#goodcount").change(function(){
+		var gdc=$(this).val();
+		var maxnum=parseInt($("#goodcount").attr("data-max"));
+		if(isNaN(gdc)){
+			$(this).val(1);
+			$("em.erro").removeClass("erro");
+			$(".numInput .minus").addClass("erro");
+		}else if(gdc>=maxnum){
+			$(this).val(maxnum);
+			$("em.erro").removeClass("erro");
+			$(".numInput .add").addClass("erro");
+		}else if(gdc<maxnum){
+			$("em.erro").removeClass("erro");
+		}
+	})
+		
+	//图片链接
+	var openimg=$(".proInfo img").length; 
+	if(openimg!=0){ 
+		var img=$(".proInfo img"); 
+		var imgurl; 
+		$(".proInfo img").each(function() { 
+			if($(this).closest("a").length=="0"){ 
+				imgurl="<?php echo U('Label/Img/index');?>"+'&url='+$(this).attr("src"); 
+				$(this).wrapAll("<a href='"+imgurl+"'></a>"); 
+			}; 
+		}); 
+	}
+	//获取cookie
+	var cookname = "bcall";
+	var bcall = "";
+	var msgcookie = document.cookie.split("; ");
+	for(var i=0;i<msgcookie.length;i++){
+		var arr=msgcookie[i].split("=");
+		if(arr[0]==cookname){
+			bcall = arr[1];
+		}
+	}
+	if( bcall == 'bclick'){
+		$('#buy').click();
+	}else if( bcall == 'gclick'){
+		$('#gift').click();
+	}else if( bcall == 'cclick'){
+		$('#addcart').click();
+	}
+	document.cookie = "bcall=none";
+});
+
+function adressPopclose(){
+	$("#directbuy").addClass("close");
+	$("#nextbuy").text("下一步");
+    $("#nextbuy").removeClass("erro");
+	setTimeout(function(){
+		$("#directbuy").removeClass("close");
+		$("#directbuy").removeClass("open");
+	},500)
+}
+</script>
+<php>if($purchase_time_limit && $goodsInfo['status'] == '0'){</php>
+<script>
+$(function(){
+	(function(){
+		var js_begin_time = {:sprintf("%.0f",$js_begin_time)};
+		var js_end_time = {:sprintf("%.0f",$js_end_time)};
+		$.post("{:U('Common/Empty/stime')}", function(stime){
+			var s_time = +stime;
+			var next_end_time = 0, _nowtime = new Date().getTime(), _status = 0, _time_diff = _nowtime - s_time;
+			function get_real_time(time){
+				return time - _time_diff;
+			}
+			if(get_real_time(_nowtime) < js_begin_time){
+				next_end_time = js_begin_time;
+			}
+			else if(get_real_time(_nowtime) > js_begin_time && get_real_time(_nowtime) < js_end_time){
+				next_end_time = js_end_time;
+				_status = 1;
+			}
+
+			function fresh() {
+			    var endtime = next_end_time;
+			    var nowtime = new Date().getTime();
+			    var leftsecond = parseInt((endtime - get_real_time(nowtime)) / 1000);
+			    d = parseInt(leftsecond / 3600 / 24);
+			    h = parseInt((leftsecond / 3600) % 24);
+			    m = parseInt((leftsecond / 60) % 60);
+			    s = parseInt(leftsecond % 60);
+			    var td = d * 24 + h;
+			    $("#emD").html(d);
+			    $("#emH").html(h);
+			    $("#emM").html(m);
+			    $("#emS").html(s);
+			    if (leftsecond <= 0) {
+			    	if(_status == 0){
+			    		_status = 1;
+			    		next_end_time = js_end_time;
+			    		$('#emD').prev().html('距离结束剩余：');
+			    		$('#early').hide();
+			    		$('#addcart,#buy').show();
+			    		return;
+			    	}
+			    	if(_status == 1){
+			    		$("#emD").parent().parent().remove();
+			    		$('#addcart,#buy').hide();
+			    		$('#late').show();
+			    		clearInterval(sh);
+			    	}
+			    }
+			}
+			fresh();
+			var sh;
+			sh = setInterval(fresh, 1000);
+			$('#countdown').show();
+		});
+	})();
+	
+	
+});
+</script>
+<php>}</php>
+
+<script id="skuHtml" type="text/html">
+{{each namelist as v}}
+{{if !v.ordertype}}
+<div class="proPopSku">
+    <div class="title">{{v.name}}:</div>
+    <div class="text">
+        {{each v.list as value i}}
+            <label>
+                <input type="radio" name="sku{{v.id}}" {{if i ==0 }}checked="checked"{{/if}} value="{{value.id}}" rel="{{value.val}}"/>
+                <a href="javascript:void(0)">{{value.val}}</a>
+            </label>
+        {{/each}}
+    </div>
+</div>
+{{/if}}
+{{/each}}
+</script>
+
+<script id="orderHtml" type="text/html">
+<div class="proPopOrder">
+	<div class="title">订购周期:</div>
+	<div class="text">
+	{{each list as value i}}
+		<label><input type="radio" name="sku{{id}}" {{if i ==0 }}checked="checked"{{/if}} value="{{value.id}}"><a href="javascript:void(0)">{{value.val}}{{if ordertype==1}}个{{/if}}{{name}}</a></label>
+	{{/each}}
+		<div class="cl"></div><p>您订购了<span><em id="orderchange">{{list[0].val}}{{if ordertype==1}}个{{/if}}{{name}}</em></span>的商品，每{{name}}自动配送一次</p>
+	</div>
+</div>
+</script>

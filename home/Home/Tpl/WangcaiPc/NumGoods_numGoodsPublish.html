@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券中心-发布卡券（交易大厅）</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jsScroll.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e){
+    var ue = UE.getEditor('show_batch_desc',{
+        imageUrl:"{:U('LabelAdmin/Upfile/editoImageSave')}",
+        imagePath:"__UPLOAD__",
+        catcherUrl:"{:U('LabelAdmin/Upfile/getRemoteImage')}",
+        catcherPath:"__UPLOAD__",
+        initialFrameWidth:340,
+        initialFrameHeight:280
+    });
+    ue.addListener("contentChange",function(){
+        $(".Preview-mainCon-text").html(this.getContent());
+        jsScroll(document.getElementById('iphonePreview'),11, 27, 'divSrollBar');
+    });
+    $("#smb,#smb1").click(function(){
+        var dialog;
+        if(!ue.getContent()){
+            $('#show_batch_desc').validationEngine('showPrompt', '不能为空','error','topRight',true);
+        }else{
+            $('#show_batch_desc').validationEngine('hide');
+        }
+        if($("form").validationEngine('validate')){
+            //手动提交需要手动同步编辑器数据
+            ue.sync();
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.close();
+                           $(".showsaloonChoose").hide();
+                           $(".showsaloonForm1").hide();
+                           $(".showsaloonForm2").hide();
+                           $(".showsaloonmsg").show();
+                           return false;
+                      }else{
+                           dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+    $(".choosetext1").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").hide();
+        $(".contract").hide();
+    });
+    $(".choosetext2").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").show();
+       $(".contract").show();
+    });
+    
+    //类目
+    requestCate2($("#cate1"));
+    $("#cate1").change(function(){
+        var obj = $(this);
+        requestCate2(obj);
+    });
+    $("#cate2").change(function(){
+        var ele_cate2 = $(this).val();
+        $.cookie('ele_cate2', ele_cate2);
+    });
+});
+function requestCate2(obj) {
+    var obj_2 = $("#cate2");
+    var val = obj.val();
+    if(val){
+        $.post("{:U('WangcaiPc/NumGoods/ajaxGoodsCate')}",{"id":val},function(data){
+            if(data.status==1){
+                var datas = data.data;
+                obj_2.html('');
+                obj_2.append("<option value=''>请选择二级类目</option>");
+                $.each(datas,function(i,n){
+                    obj_2.append("<option value='"+n.path+"'>"+n.name+"</option>"); 
+                });
+                if ($.cookie('ele_cate2')) {
+                    obj_2.val($.cookie('ele_cate2'));
+                }
+            }else{
+                return false;
+            }
+        },"json");
+    }else{
+        obj_2.html("<option value=''>请选择二级类目</option>");
+    }
+}
+</script>
+<style>
+.Gform .Ginput input[type=text], .Gform .Ginput input[type=password] {
+    padding-right: 50px;
+}
+</style>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="wddzq"/>  
+        </div>
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                    <ul class="shop-Menu"> 
+                        <include file="WangcaiPc/NumGoods/tabMenu" leftmenuid="lxck"/>
+                    </ul>              
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>上架到卡券商城</h4>
+                    </div>
+                    
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-list">
+                        <form method="post" action="{:U('WangcaiPc/NumGoods/numGoodsPublish')}">
+                            <input type="hidden" name="type" value="{:I('get.type')}" />
+                            <input type="hidden" name="goods_id" value="{$goodsData[goods_id]}" />
+                            <div class="showsaloonForm2">
+                                <div class="Gform l">
+                                    <ul>
+                                        <li class="Gname">&nbsp;卡券名称</li>
+                                        <li class="Ginput saloon-channel"><p>{$goodsData['goods_name']}</p></li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*&nbsp;</span>类目</li>
+                                        <li class="Ginput">
+                                            <select id="cate1" class="n2" >
+                                                <option value="">请选择一级类目</option>
+                                                <volist name="goodsCate" id="vo">
+                                                    <option value="{$vo['code']}">{$vo['name']}</option>
+                                                </volist>
+                                            </select>
+                                            <select name="cate2" id="cate2" class="validate[required] n2" >
+                                                <option value="">请选择二级类目</option>
+                                            </select>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;卡券图片</li>
+                                        <li class="Ginput">
+                                        	<div class="Gchoosemore">
+                                            <div class="Gchoosemore-list" style="bottom: 0px; opacity: 1; display: block;">
+                                                <input type="text" name="batch_img[]" value="{$goodsData['goods_image']}" />
+                                                <div class="Gchoosemore-img" style="background-image:url({:get_upload_url($goodsData['goods_image'])})"></div>
+                                                <div class="Gchoosemore-opr"><a href="javascript:void(0)" class="Gchoosemore-edit"></a><a href="javascript:void(0)" class="Gchoosemore-del"></a></div>
+                                            </div>
+                                            <div class="Gchoosemore-add">
+                                                <a href="javascript:void(0)" class="Gbtn-picmore" title="选择图片" data-rel="{width:641,height:321,maxlength:3,inputname:'batch_img[]'}"><i></i><span>选择图片</span></a>
+                                            </div>
+                                            
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;卡券售价</li>
+                                        <li class="Ginput">
+                                            <input name="show_price" type="text" class="validate[custom[number],required,min[0.01]]"/>
+                                            <br/>
+                                            <span class="txtTips">其他商户在卡券商城采购该卡券时需支付的单价</span>
+                                        </li>
+                                    </ul>
+                                    
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;卡券描述</li>
+                                        <li class="Ginput">
+                                        <textarea name="show_batch_desc" id="show_batch_desc">{$goodsData['goods_desc']|nl2br}</textarea>
+                                        <span class="txtTips">在卡券描述中,建议填写卡券使用规则、可兑换城市、消费者常见问题、<br/>品牌信息等,并配以相应的图片,以便浏览者更加全面地了解卡券详情.</span>
+                                        </li>
+                                    </ul>
+                                    <ul id="use_setting">
+                                        <li class="Gname"><span>*&nbsp;</span>发票类型</li>
+                                        <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="invoice_type" value="0" checked="checked" />
+                                            <div class="newRadio">
+                                                <span class="valfirst hover" data-val="0">不提供发票</span>
+                                                <span class="vallast" data-val="1">地税通用发票</span>
+                                                <span class="vallast" data-val="2">增值税发票</span>
+                                            </div>
+                                        </div>
+                                        <span class="txtTips">其他商户在卡券商城采购该卡券时可获得发票</span>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;采购联系人</li>
+                                        <li class="Ginput"><input name="cg_name" id="cg_name" type="text" value="{$goodsData['busi_contact_name']}" class="validate[required,maxSize[24]] "/></li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;邮箱</li>
+                                        <li class="Ginput"><input name="cg_mail" id="cg_mail" type="text" value="{$goodsData['busi_contact_tel']}" class="validate[required,custom[email]] "/></li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;电话</li>
+                                        <li class="Ginput"><input name="cg_phone" id="cg_phone" type="text" value="{$goodsData['busi_contact_eml']}" class="validate[required,custom[onlyNumberSp],minSize[11],maxSize[11]] "/></li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname">&nbsp;采购条件</li>
+                                        <li class="Ginput"><textarea name="cg_mark" class="validate[maxSize[100]]" placeholder="例：本卡券100元/100个起购；
+       采购数量达1000个或以上时，结算价格可酌情优惠。" ></textarea> <!--富文本--></li>
+                                    </ul>
+                                    <if condition="$publishNum eq 0">
+                                    <ul class="dn contract">
+                                        <li class="Gname"></li>
+                                        <li class="Ginput">
+                                            <input type="checkbox" value="1" name="contract" checked="checked" class="validate[required]"/>
+                                                                                                                                      我已知晓<a href="{:U('Hall/Index/hallHelpView',array('news_id'=>1354,'leftId'=>gz,'type'=>3))}" target="_blank">《卡券发布规则》</a>
+                                            </li>
+                                    </ul>
+                                    </if>
+                                </div>
+                                <div class="tc cl fn">
+                                    <a href="javascript:void(0)" id="smb" class="btn-all w120 btn-updata ml20">确定</a>
+                                    <a href="javascript:history.go(-1);" class="btn-all-del w120 ml10">取消</a>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="dn showsaloonmsg mt70 tc">
+                            <p class="font-18-99 pt50">卡券需要审核,审核之后我们会把您的卡券上架到卡券商城</p>
+                            <div class="fn tc mt50">
+                                <a href="javascript:history.go(-1);" class="btn-all w120 btn-ok ml20">确定</a>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    
+                
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

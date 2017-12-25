@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>素材管理_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/jquery-ui.css" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/datepicker.css" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<script type="text/javascript" src="__PUBLIC__/Js/weixin2/jquery-ui-datepicker.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(e){
+	addAppmsg();    //添加
+	
+	///////////////新增加的//////////////////
+		$("#date_8").datepicker({
+		showOn: "button",
+		buttonImage: "__PUBLIC__/Image/weixin2/calendar.gif",
+		buttonImageOnly: true
+	});
+	
+	$("#date_9").datepicker({
+		showOn: "button",
+		buttonImage: "__PUBLIC__/Image/weixin2/calendar.gif",
+		buttonImageOnly: true
+	});
+});
+
+function deleteMaterial(mid) {
+	var success_url = "{:U('AlipayServiceWindow/Index/picTextManage')}";
+	var removeUrl = "{:U('AlipayServiceWindow/Index/removeMaterial')}&materialId=" + mid;
+	art.dialog({width:"200px",title:"提示",lock:true,content:'确认要删除吗?',
+		okVal: '确认',
+		ok: function () {
+			$.ajax({
+				   type: "GET",
+				   url: removeUrl,
+				   success: function(dat){
+					   if (dat.status == '1') {
+						   location.href = success_url;
+					   }
+				   },
+				   dataType: "json"
+			});
+		},
+		cancel: true
+	});
+}
+</script>
+<style type="text/css">
+.msg-col{ width:46%;}
+</style>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="fuwuchuang"/>
+        <div id="container" class="bge7e8eb">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+					<include file="AlipayServiceWindow/AlipayServiceWindow/leftMenu" leftmenuid="twgl"/>
+                </div>
+                <div class="subcon">
+                <div class="main-name fn">
+                <h4>图文管理</h4>
+                </div>
+                	<div class="Wcanal-tab">
+                         <form action="{:U('AlipayServiceWindow/Index/picTextManage')}" method="post">
+                        <div class="Wcanal-tab-list">
+                        	<div class="SearchArea">
+                                <div class="SearchAreaLeft">
+                            	<label>
+                                <span>图文名称</span>
+                                <input type="text" name="filter_name" class="selectbox">
+                                </label>
+
+                                <label>
+                                <span>图文类型</span>
+                                <select name="filter_type" class="selectbox">
+                                	<option value="">所有分组</option>
+                                    <option value="1">单图文</option>
+                                    <option value="2">多图文</option>
+                                </select>
+                                </label>
+                                <label>
+                                <span>创建时间</span>
+                                <input type="text" id="date_8" readonly="" name="filter_date_start">-&nbsp;&nbsp;<input type="text" id="date_9" readonly="" name="filter_date_last">
+                                </label>
+                            </div>
+                            <div class="SearchAreaRight">
+                                <span><input type="submit" class="searchBtn" value="查询"></span>
+                                <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+                            </div>
+                        </div>
+                    </form>
+                            
+                            <div class="msg-list mt20 fn">
+                            <!--左边列表 判断ID为单数的列表-->
+                                <div id="first_col" class="msg-col">
+                                    <div id="addAppmsg" class="add-access">
+                                        <span class="add-tip">新建消息入口</span>
+                                        <a href="{:U('AlipayServiceWindow/Index/materialEdit',array('material_type'=>1))}" class="add-btn">单图文消息</a>
+                                        <a href="{:U('AlipayServiceWindow/Index/materialEdit',array('material_type'=>2))}" class="add-btn multi-access">多图文消息</a>
+                                    </div>
+                                    <assign name="materialInfo" value="$materialGroupArr[0]"/>
+                                    <include file="picTextTag"/>
+                                 </div>
+                                 <!--左边列表结束-->
+                                 <!--右边列表 判断ID为双数的列表-->
+                                 <div id="second_col" class="msg-col">
+                                    <assign name="materialInfo" value="$materialGroupArr[1]"/>
+                                    <include file="picTextTag"/>
+                                 </div>
+                                 <!--右边列表结束-->
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

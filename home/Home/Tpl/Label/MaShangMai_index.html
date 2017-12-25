@@ -1,0 +1,290 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title><?php if($node_id == '00017467'){echo '爱恋珠宝';}else{echo $row['name'];}?></title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,优惠劵" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<if condition="$row.page_style eq '1'">
+    <load href="__PUBLIC__/Label/Css/wap_main_a.css"/>
+<elseif condition="$row.page_style eq '2'" /> 
+    <load href="__PUBLIC__/Label/Css/wap_main_b.css"/>
+<elseif condition="$row.page_style eq '3'" />   
+    <load href="__PUBLIC__/Label/Css/wap_main_c.css"/>
+<else />   
+    <load href="__PUBLIC__/Label/Css/wap_main_d.css"/>
+</if> 
+<!--
+<load href="__PUBLIC__/Label/Css/wap_Mashangmai.css"/>
+-->
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_News.css?v=__VR__">
+<style>
+#container { padding-bottom:50px;}
+</style>
+<script>
+$(document).ready(function(e) {
+
+    var bgnum = Math.floor(Math.random()*4);
+	$(".loginFormwap").addClass("bg"+bgnum);
+	
+	$(".out-box").click(function(){
+		$(this).hide();
+	})
+
+    //判断字符
+    $("hr:eq(0)").hide();
+    var fData=$(".top-title").text();
+    var intLength=0;
+    for (var i=0;i<fData.length;i++)
+    {
+        if ((fData.charCodeAt(i) < 0) || (fData.charCodeAt(i) > 255))
+            intLength=intLength+2
+        else
+            intLength=intLength+1    
+    }
+    if(intLength<=20){ 
+        $(".top-title").css("font-size","20px"); 
+    }else{ 
+        $(".top-title").css("font-size","18px"); 
+    }
+
+});
+$(function(){
+	$('#login_button').live('click',function(){
+		$("#phone_err,#pass_err").hide();
+	    $("form").ajaxSubmit({
+	        success:function(data){
+	             if(data.status == '1'){
+	            	   $(".dn-bg,.loginForm").hide();
+	            	   var url = $("#jump_url").val();
+	            	   link_to(url);
+	                   return false;
+	              }else{
+	                 var datas = data.data;
+	                 if(datas.type == 'phone'){
+	                	 $("#phone_err").html(data.info).show();
+	                 }else if(datas.type == 'pass'){
+	                	 $("#pass_err").html(data.info).show();
+	                 }
+	              }
+	        },
+	        dataType:'json'
+	    });
+	    return false;
+	});
+	var Int;
+	$("#getpasscode2").live("click",function(){
+		$("#phone_err,#pass_err").hide();
+        $(this).val("正在发送..");
+        var phone = $("#phoneNo").val();
+        var id = $("#id").val();
+		var verify =$("#verify").val();
+        $.post("{:U('Label/MaShangMai/sendCheckCode')}",{"id":id,"phone":phone,"verify":verify},function(data){
+            if(data.status=='1'){
+                $("#getpasscode2").attr("id","noSend");
+                Int = setInterval(checkTime,1000)
+            }else{
+            	$("#phone_err").html(data.info).show();
+                setTimeout("$('#loadingBox').hide()",2000);
+                $("#getpasscode2").val("获取验证码");
+            }
+        },"json");
+    });
+    var time = {$expiresTime};
+    var checkTime = function(){
+        $("input[name='getpasscode2']").val("已发送,"+time+"秒");
+        if(time==0){
+            $("input[name='getpasscode2']").val("获取验证码");
+            $("input[name='getpasscode2']").attr("id","getpasscode2");
+            time = {$expiresTime};
+            clearInterval(Int);
+            return false;
+        }
+        time--;
+    }
+});
+function link_to(url,fun){
+    setTimeout(function(){
+        $('#loadingBox').show();
+    },1);
+    setTimeout(function(){
+    if(typeof url == 'string'){
+    location.href=url;
+    }
+    if(typeof url == 'function'){
+    url();
+    }
+    },500);
+    setTimeout(function(){$('#loadingBox').hide();},6000);
+    if(typeof fun == 'string'){
+    var jscode = new Function('return function(){'+fun+'}')();
+        jscode();
+    }else if(typeof fun == 'function'){
+        fun();
+    }
+}    
+function login_to(url){
+	var id={$id};
+	$.post("{:U('Label/MaShangMai/checkPhoneLogin')}",{'id':id},function(data){
+		if(data.status==1){
+			link_to(url);
+		}else{
+			setTimeout(function(){
+	            $('#loadingBox').show();
+	        },1);
+	        setTimeout(function(){$('#loadingBox').hide();},1000);
+			setTimeout(function(){$(".loginForm").show();$(".loginForm").animate({top:"0%"},500);},1000);
+	        setTimeout(function(){$(".dn-bg").show();},1000);
+	        $("#jump_url").val(url);
+		}
+	},'json');
+}
+function close_to(){
+    $('.loginForm').animate({top:"-120%"},500,function(){
+    	$('.loginForm').hide();
+	});
+    $('.dn-bg').hide();
+}
+</script>
+</head>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div class="mainTop">
+                <div class="top-img"> 
+                    <if condition="$row.bg_style eq '1'">
+                        <img src="__PUBLIC__/Label/Image/topbg-sOne.png"  class="vip-img" />
+                    <elseif condition="$row.bg_style eq '2'" /> 
+                        <img src="__PUBLIC__/Label/Image/topbg-sTwo.png"  class="vip-img" />
+                    <elseif condition="$row.bg_style eq '3'" />   
+                        <img src="__UPLOAD__/<?php echo $row['bg_pic']?>"  class="vip-img" />
+                    <elseif condition="$row.bg_style eq '4'" />    
+                        <img src="__PUBLIC__/Label/Image/topbg-sThree.png"  class="vip-img" />
+                    <elseif condition="$row.bg_style eq '5'" /> 
+                        <img src="__PUBLIC__/Label/Image/topbg-sFour.png"  class="vip-img" />
+                    </if> 
+                </div>
+            </div>
+            <div id="mainCon" class="mainCon fn <eq name="row.log_img" value=''>noLogo</eq> <eq name="row.node_name" value="">noTitle</eq>">
+                <div class="top-title">{$row['node_name']}</div>
+                <div class="logo-bg">
+                    <neq name="row.log_img" value=''>
+                    <div class="logo-con"><img src="<?php echo $row['log_img']?>"  class="vip-img" /></div>
+                    </neq>
+                </div>
+                
+                <div class="multimedia">
+                    <?php if($row['music'] != ''){?>
+                    <audio src="__UPLOAD__/<?php echo $row['music']?>" autoplay="true" loop id="audio" style="display:none; width:0; height:0; overflow:hidden;"></audio>
+                    <div class="voice_button"><a href="javascript:void(0)" class="a-hide" onClick="audio()">音乐</a></div>
+                    <script>
+                        function audio(){
+                            var audio = document.getElementById('audio');
+                                if(audio.paused){
+                                    audio.play();
+                                    $(".voice_button").css("background","url(__PUBLIC__/Label/Image/voice_button.png)");
+                                    $(".voice_button").css("background-size","100%");
+                                }else{
+                                    audio.pause();
+                                    $(".voice_button").css("background","url(__PUBLIC__/Label/Image/stop_button.png)");
+                                    $(".voice_button").css("background-size","100%");
+                                }
+                            }
+                    </script>
+                    <?php }?>
+                    <?php if($row['video_url'] != ''){?>
+                    <div class="video_button"><a href="<?php echo $row['video_url']?>" class="a-hide" target="_blank">视频</a></div>
+                    <?php }?>
+                </div>
+                <div class="mainCon-contenter">
+                    <div class="mainCon-title"><?php echo $row['wap_title']?></div>
+                    <div class="mainCon-contenter-bg">
+                        <div class="moreContenter">
+                            <?php echo htmlspecialchars_decode($row['wap_info'])?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <neq name="show_menu" value="1">
+                <include file="Public:share" />
+			</neq>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+    <div class="proNav fn">
+        <if condition="$row['b_end_time'] LT date('YmdHis')">
+            <a href="javascript:void(0);" class="btn-erro">已过期</a>
+        <elseif condition="$row['begin_time'] GT date('YmdHis')"/>
+            <a href="javascript:void(0);" class="btn-erro">尚未开始</a>
+        <else />
+            <eq name="row.batch_type" value="31">
+                <a href="javascript:void(0);" onClick="link_to('{:U('Label/Store/detail',array('id'=>$id,'saler'=>$saler_id,'wechat_card_js'=>1))}')" class="btn-ok w1">马上购买</a>
+            <else/>    
+        	<a href="javascript:void(0);" onClick="link_to('{:U('Label/MaShangMai/goodsInfo',array('id'=>$id,'m_id'=>$row['id'],'from_type'=>$from_type,'from_user_id'=>$from_user_id,'saler_id'=>$saler_id))}')" class="btn-ok w1">马上购买</a>    
+            </eq>
+        </if>
+    </div>
+    <div class="loginForm dn">
+               <div class="loginFormwap">
+                <form action="{:U('Label/MaShangMai/loginPhone')}" method="post">
+                    <ul class="sOne-loginForm wap2">
+                        <li class="loginFormTop">
+                            <div class="loginFormTopLogo">
+                                <p><a><span>
+                                    <notempty name="logoInfo['img_url']">
+                                        <img src="__UPLOAD__/<?php echo $logoInfo['img_url'];?>" />
+                                    </notempty>  
+                                </span></a></p>
+                            </div>
+                            <p><?php echo $logoInfo['biaoti'];?></p>
+                        </li>
+                        <!--
+                        <li class="bd-b">
+                            <input type="tel" class="sOne-loginInput-half" name="verify" id="verify" value="" maxlength="4"/><img id="verifyImg" src="{:U('Home/Verifycode/verify')}" onclick="fleshVerify()" class="ml10" style="vertical-align:bottom; height:32px;cursor:pointer;" />
+                            <span style="display: none;" id="verify_err">图片验证码错误</span>
+                        </li>-->
+                        <li>
+                            <input type="tel" class="sOne-loginInput-half" name="phoneNo" id="phoneNo" placeholder="请输入您的手机号">
+                            <input type="button" class="sOne-getpasscode2" value="获取验证码" id="getpasscode2" name='getpasscode2' data-href="">
+                            <span style="display: none;" id="phone_err">手机号错误</span>
+                        </li>
+                        <li class="bd-b">
+                            <input type="password" class="sOne-loginInput" name="check_code" placeholder="验证码">
+                            <span style="display: none;" id="pass_err">验证码错误</span>
+                        </li>
+                        
+                        <li>
+                            <input type="hidden" value="{$id}" name="id" id="id">
+                            <input type="hidden" name="ajax" value="1"/>
+                            <input type="hidden" id="jump_url" value="{:U('Label/MaShangMai/goodsInfo',array('id'=>$id,'m_id'=>$row['id'],'from_type'=>$from_type,'from_user_id'=>$from_user_id))}"/>
+                            <input type="submit" id="login_button" class="sOne-loginInput-btn" value="快速登录" />
+                        </li>
+                        <li class="loginFormMsg">
+                            <h4>亲，请输入您的有效手机号码以便查询您的订单及商品凭证</h4>
+                        </li>
+                        
+                    </ul>
+                    <div class="fn"><a href="javascript:void(0)" class="close-loginForm" onClick="close_to()">+</a></div>
+                </form>
+            </div>
+       </div>
+</div>
+<div class="out-box dn">
+	<img class="img" src="__PUBLIC__/Label/Image/tip-pay.png" alt="">
+</div>
+<include file="Public:pop"/>
+<div class="dn-bg dn"></div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>
+<eq name="show_menu" value="1">
+<script>
+var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Public/_hideWxMenu"/>
+</eq>

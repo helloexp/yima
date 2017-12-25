@@ -1,0 +1,1007 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>抽奖设置_营销活动_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wprize.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script>
+window._g = window._g || {};
+_g.batch_id = '<?php echo $batch_id;?>';
+$(function(){
+	var initobj = $(".EditGprize-conItemList");
+	$(initobj).each(function(index, element) {
+		var _thisVal = $(this);
+		var initStatus = _thisVal.hasClass("erro");
+		var totalNum = _thisVal.attr("data-restNum");
+		if(initStatus && (totalNum != 0)){
+			_thisVal.find(".icon-prizeRollback").removeClass("dn");
+		}
+	})
+	
+	//中秋节隐藏参数数
+	var batch_type = "{$batch_type}";
+	if(batch_type == '30'){
+		$('.zqj').hide();
+		$('.zqj_cy').show();
+	}
+	$("input[name='cj_phone_type']").change(function(){
+		var _thisval = parseInt($(this).val());
+		if(_thisval>=2){
+			var _thislength = $(".EditGprize").length;
+			if(_thislength>7){
+				art.dialog.msg({
+                    content:'特殊抽奖最多设置7个奖项',
+                    ok: function () {
+                        this.close();
+                        return false;
+                    }
+                });
+				$("input[name='cj_phone_type']:first").attr("checked",true);
+				return false;
+			}
+		}
+	});
+	showOrHideWxzmhd();
+	//抽奖设置
+		var _one_sub = false;
+        $('#smb').click(function(){
+            var is_fromadd = $(this).attr('fromadd') == '1';
+	        if($("#form1").validationEngine('validate')){
+	       	var phone_total_count = '0',phone_day_count ='0',phone_total_part='0',phone_day_part = '0',param1 = '0';
+	        	if($("input[name='phone_total_count']:checked").val() >= 1){
+	        		phone_total_count = $('#zzj').val();
+	        	}
+	        	if($("input[name='phone_day_count']:checked").val() >= 1){
+	        		phone_day_count = $('#rzj').val();
+	        	}
+	        	if($("input[name='phone_total_part']:checked").val() >= 1){
+	        		phone_total_part = $('#zcj').val();
+	        	}
+	        	if($("input[name='phone_day_part']:checked").val() >= 1){
+	        		phone_day_part = $('#rcj').val();
+	        	}
+            <?php if(C('GWYL_NODE') == $userInfo['node_id'] && $defined_one_name=='小票号'){?>
+              if($("input[name='param1']:checked").val() >= 1){
+                param1 = $('#ticket_seq').val();
+              }
+            <?php }?>
+	        	var no_award_notice='';
+	        	$.each($("input[name='no_award_notice']"),function(){
+	        		if($(this).val() != ''){
+	        			no_award_notice += $(this).val()+'|';
+	        		}
+	        	});
+	        	if(_one_sub)
+					return false;
+
+				 _one_sub = true;
+				
+                var jointype = $('#join_mode').val(), arr = [], is_limit = 0, member_reg_mid = '', fans_collect_url = '', arr_zj = [];
+                if (jointype == '0') {
+                    arr = $('input[name="phone_member_group"]:checked').map(function(){return this.value}).get();
+                    arr_zj = $('input[name="phone_member_group_zj"]:checked').map(function(){return this.value}).get();
+                    is_limit = $("#ul_jointype_0").find('[name="limit"]').val();
+                    is_limit_zj = $("#ul_jointype_0").find('[name="limit_zj"]').val();
+                    if ($('[name="phone_recruit"]').val() == 1) {
+                    	member_reg_mid = $('[name="member_reg_mid"]').val();
+                    }
+                } else {
+                    arr = $('input[name="wx_member_group"]:checked').map(function(){return this.value}).get();
+                    arr_zj = $('input[name="wx_member_group_zj"]:checked').map(function(){return this.value}).get();
+                    is_limit = $("#ul_jointype_1").find('[name="limit"]').val();
+                    is_limit_zj = $("#ul_jointype_1").find('[name="limit_zj"]').val();
+                    //如果是微信，微信的招募活动选择是，并且没有被隐藏掉（当未选中“未分组”这个微信分组时，会隐藏）
+                    if ($('[name="wx_recruit"]').val() == 1 && $('#wx_zmhd').css('display') != 'none') {
+                    	fans_collect_url = $('[name="fans_collect_url"]').val();
+                    }
+                }
+                if (is_limit_zj == 1) {
+                	var is_in_arr = 0;
+                    for (var i = 0; i < arr_zj.length; i++) {
+                    	is_in_arr = $.inArray(arr_zj[i], arr);
+                    	if (is_in_arr == -1) {
+                    		break;
+                    	}
+                    }
+                }
+                
+                if (is_limit == 1 && is_in_arr == -1) {
+                	dialog = art.dialog({title:false,content:"<div class='msg-all-error'>勾选抽奖限制的分组必须在参与的分组范围内</div>",fixed: true,padding:0,lock:true,time:2});
+                	_one_sub = false;
+                	return false;
+                }
+                
+                var member_batch_id = arr.join();
+                var member_batch_id_zj = arr_zj.join();
+                if (is_limit == 1 && member_batch_id == '') {
+                	dialog = art.dialog({title:false,content:"<div class='msg-all-error'>请勾选参与限制的分组</div>",fixed: true,padding:0,lock:true,time:2});
+                	_one_sub = false;
+                	return false;
+                }
+                if (is_limit_zj == 1 && member_batch_id_zj == '') {
+                	dialog = art.dialog({title:false,content:"<div class='msg-all-error'>请勾选抽奖限制的分组</div>",fixed: true,padding:0,lock:true,time:2});
+                	_one_sub = false;
+                	return false;
+                }
+                
+                var data = {
+                jointype : jointype,
+                is_limit : is_limit,
+                is_limit_zj : is_limit_zj,
+				total_chance : $('#total_chance', '#form1').val(),
+				cj_button_text : $('#cj_button_text', '#form1').val(),
+				phone_total_count : phone_total_count,
+				phone_day_count : phone_day_count,
+				phone_total_part : phone_total_part,
+				phone_day_part : phone_day_part,
+				cj_resp_text : $('#cj_resp_text', '#form1').val(),
+				batch_id : _g.batch_id,
+				cj_phone_type : $("input[name='cj_phone_type']:checked").val(),
+				//member_join_flag : $("input[name='member_join_flag']:checked").val(),
+				member_reg_mid : member_reg_mid,
+                member_batch_id : member_batch_id,
+                member_batch_id_zj : member_batch_id_zj,
+                fans_collect_url : fans_collect_url,
+				param1 : param1,
+				no_award_notice : no_award_notice,
+                version:3
+			}
+
+			dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+			$.post('{:U('Common/SelectJp/jpRuleSave')}', data, function(resp){
+                dialog.close();
+				art.dialog.msg({
+					content:resp.info,
+					ok: function () {
+						_one_sub = false;
+						if(resp.status=='1'){
+                            if(is_fromadd){
+                                location.href = '<php> echo U('LabelAdmin/Public/addSubmit', array('id'=>$batch_id));</php>';
+                            }else{
+                                this.close();
+                            }
+						}
+					}
+				});
+			}, 'json');
+        }
+    }) ; 
+
+	//奖项删除   
+	//选择抽奖
+   $('#chooseMember').click(function(){
+        art.dialog.open("{:U('LabelAdmin/CjSet/selectMemreg?call_back=call_back')}",{
+             width: 800,
+             title:'会员招募活动',
+        })
+   });
+   $('.nothing-tips .plus').on('click',function(){
+       var node = $('.nothing-tips');
+       var add ='<ul class="nothing-tips"><li class="Gnmae" >&nbsp;</li><li class="Ginput"><input type="text" name="no_award_notice" class="validate[maxSize[20]] textbox w200" /></li></ul>'
+       if(node.size()<5){
+           node.eq(node.size()-1).after(add);
+       }
+   });
+   $('.nothing-tips').on('click','.mins',function(){
+       var node = $('.nothing-tips');
+       if(node.size()>1){
+           node.eq(node.size()-1).remove();
+       }
+   })
+   $("#jointype").on("click",".Gform .switch .newRadio span",function(){
+	   var t = $(this),
+	       s = t.closest(".switch"),
+		   val = t.attr("data-val");
+       checkjoin(val);
+   })
+
+   //参与对象处理
+   $('body').on('click', '#phone_member .newRadio span,#wx_member .newRadio span', function(){
+        var t = $(this), v = t.data('val'), p = t.closest('.switch'), h = t.hasClass("hover"), pp = t.parent().parent(), id = pp.attr('id');
+        if(id == 'phone_member'){
+            $obj = $('#ul_member_join');
+            if( pp.find('input[value="0"]:checked').length > 0 ){
+                $obj.hide();
+            }
+            else{
+                $obj.show();
+            }
+        }
+        //是否显示微信招募活动
+        showOrHideWxzmhd();
+   })
+
+   if( ($('#join_mode').val() == '0' && $("#phone_member").find('input[value="0"]:checked').length > 0 ) 
+		   || $('#join_mode').val() == '1' && $("#wx_member").find('input[value="0"]:checked').length > 0){
+        $('#ul_member_join').hide();
+   }
+
+    $('.prizeIntroduceNav li').click(function(){
+        var i = $(this).index();
+        $('.prizeIntroduceNav li').removeClass('hover').eq(i).addClass('hover');
+        $('.lotteryPrizeCon').hide().eq(i).show();
+    });
+    
+    checkHasMemberGroup();
+});
+//是否显示微信招募活动
+function showOrHideWxzmhd() {
+	var is_select_ungroup = false;
+	$('#ul_jointype_1_1 #wx_member').find('input[name="wx_member_group"]:checked').each(function(){
+		if ($(this).val() == 0) {
+			is_select_ungroup = true;
+		}
+	});
+	//如果选中了未分组这个组，就显示
+	if (is_select_ungroup == true) {
+		$('#wx_zmhd').show();//微信招募活动
+	} else {
+		$('#wx_zmhd').hide();
+	}
+}
+
+function call_back(datas){
+	$("#chooseMemberName").html(datas.name);
+    $("#va_choose_mem").val('1');
+    $("#member_reg_mid").val(datas.id);
+}
+function checkposen(field, rules, i, options){
+	var name = field.closest(".switch").find(">input").attr("name");
+	var a = parseInt($("#zcj").val()),b = parseInt($("#rcj").val()),c = parseInt($("#zzj").val()),d = parseInt($("#rzj").val());
+	if(name=="phone_total_part" || name=="phone_day_part"){
+        var e = $('input[name="phone_total_part"]').val(),f = $('input[name="phone_day_part"]').val();
+		if(e=='1' && f == 1 && a<b){return "手机参与次数必须大于日参与次数";}
+	}else if(name=="phone_total_count" || name=="phone_day_count"){
+        var e = $('input[name="phone_total_count"]').val(),f = $('input[name="phone_day_count"]').val();
+		if(e=='1' && f == 1 && c<d){return "总中奖次数必须大于日中奖次数";}
+	};
+}
+function checkjoin(type){
+	var w = [$("#allprize"),$("#dayprize"),$("#phone_member"),$("#wx_member"),$('#ul_member_join')];
+	var i = [w[0].find(".newRadio-input input[type='text']"),w[1].find(".newRadio-input input[type='text']")];
+	if(type==0){
+		w[0].removeClass("disabled");
+		w[1].removeClass("disabled");
+		w[0].find("span[data-val='1']").click();
+		w[1].find("span[data-val='1']").click();
+		// w[2].find("span[data-val!='']").show();
+		// w[2].find("span[data-val='6']").hide();
+        $('#ul_jointype_0').show();
+        $('#ul_jointype_1').hide();
+		i[0].attr("disabled",false);
+		i[1].attr("disabled",false);
+        w[4].show();
+
+        if( $("#phone_member").find('input[value="0"]:checked').length > 0 ){
+            w[4].hide();
+        }
+        else{
+            w[4].show();
+        }
+	}
+	if(type==1){
+		if($("input[name='wx_bd']").val()!=1){
+			art.dialog({
+				id:"msgcheck",
+				title:"微信号参与提醒",
+				content:'<p style="color:#333; line-height:25px; font-size:14px;padding-bottom:10px;">亲，由于不同类型的公众号接口权限不一。因此，本功能仅限<span style="color:#ff0000; font-size:18px;">认证服务号</span>使用！此外，使用本功能还需要您的微信公众号与旺财账户已完成绑定！</p><p style="color:#333; line-height:25px; font-size:14px;"><label class="vm"><input type="checkbox" class="vm" name="wxcheckbox"><span class="vm ml5">我确认已绑定旺财平台</span></label></p>',
+				width:400,
+				ok: function () {
+					if(!$("input[name='wxcheckbox']").attr("checked")){
+						return false
+					}else{
+						$("input[name='wx_bd']").val(1);
+						$.ajax({
+						   type: "GET",
+						   url: "{:U('LabelAdmin/CjSet/ajaxAgreeSelectWxNotice')}",
+						   dataType: "json"
+						});
+					}
+				},
+				cancel:function () {
+					$("#jointype span[data-val='0']").click();
+				}
+			});
+		}
+		w[0].find("span[data-val='1']").click();
+		w[1].find("span[data-val='1']").click();
+		w[0].addClass("disabled");
+		w[1].addClass("disabled");
+        // w[2].find("span[data-val!='']").hide();
+        // w[2].find("span[data-val='0'],span[data-val='6']").show();
+        $('#ul_jointype_0').hide();
+        $('#ul_jointype_1').show();
+        w[4].hide();
+	}
+}
+function checkHasMemberGroup() {
+	var switcher = $('#ul_jointype_0 > ul .switch');
+	var nogroup = switcher.attr('data-nogroup');
+	var isFreeUser = '{$isFreeUser}';
+	//没有分组，并且认证过的会员
+	if (nogroup == 1 && isFreeUser != 1) {
+		switcher.addClass('disabled');
+		var switherspan = switcher.find(".newRadio span:eq(1)");
+		switherspan.attr("title","<span class='red'>如需使用该功能，请先创建会员分组</span>").attr("data-placement","right");
+	}
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            	<div class="bread">
+                    <div class="bread-con fn">
+                    	<include file="./Home/Tpl/LabelAdmin/Path_index.html" />
+                    </div>
+                </div>
+                
+                <form name="form1" id="form1">
+                <input type="hidden" name="wx_bd" value="{$wx_bd}">
+                <input type="hidden" id="batch_id" value="{$batch_id}"/>
+				<div class="Gform prize l">
+                    <ul class="Gtitle" id="isAllowCj" >奖品设置</ul>
+                    <ul id="cj_style" <?php if(!$cj_rule_arr){?>style="display:none;"<?php }?>>
+                        <li class="Gnmae">绑定抽奖：</li>
+                        <li class="Ginput">
+                            <div class="Gprize">
+                                <div class="AddGprize icon-prizeAdd" data-rel="0" onclick="editjp('')">
+                                    <i></i>
+                                    <span>添加奖品</span>
+                                </div>
+                                <div id="all_jp">
+                                <?php if($cj_cate_arr){foreach($cj_cate_arr as $cate_arr){?>  
+                                <div class="EditGprize IngGprize" data-rel="+datarel+" >
+                                    <div class="EditGprize-head">
+                                        <i class="icon-prizeDel r"><a href="javascript:void(0)" class="a-hide btn-DelEditGprize" onclick="delCate('<?php echo $cate_arr['id'];?>')">删除</a></i>
+                                        <p class="GprizeName">
+                                            <span><?php echo $cate_arr['name'];?></span>
+                                            <i class="icon-prizeEdit dib vm">
+                                                <a href="javascript:void(0)" 
+                                                    class="a-hide btn-ChangeEditGprize" 
+                                                    onclick="editcate('<?php echo $cate_arr['id'];?>')">修改</a>
+                                            </i>
+                                            <?php if($cate_arr['member_batch_id']){?>
+                                            <i class="icon-prizeMember dib vm"></i><span class="GprizeName-tip">会员专享</span>
+                                            <?php }	?>
+                                            </p>
+                                    </div>
+                                    <!-- <div class="EditGprize-add">
+                                        <div class="fn"><a href="javascript:void(0)" class="btn-EditGprizeAdd" onclick="editjp('<?php echo $cate_arr['id'];?>','')">添加奖品</a></div>
+                                    </div> -->
+                                    <div class="EditGprize-con">
+                                    	<?php 
+                                    	if($jp_arr){foreach($jp_arr as $jparr){
+                                    	if($cate_arr['id']!=$jparr['cj_cate_id'])
+                                    		continue;	
+                                    	?>  
+                                    	<div class="EditGprize-conItem fn" >
+                                            <div id="item_<?php echo $jparr['id']?>" class="EditGprize-conItemList <?php echo $jparr['status']=='2' ? 'erro' :'';    ?> fn" data-restNum="<?php echo $jparr['total_count'];?>">
+                                                <div class="EditGprize-con-name"><?php echo $jparr['batch_name'];?></div>
+                                                <div class="EditGprize-con-all"><eq name="jparr['online_verify_flag']" value="1">可线上提领<else />&nbsp;</eq></div>
+                                                <div class="EditGprize-con-day">共<?php echo $jparr['total_count'];?>份</div>
+                                                <div class="EditGprize-con-all">每日限<?php echo $jparr['day_count'];?>份</div>
+                                                <div class="EditGprize-con-edit">
+                                                    <i class="icon-prizeRollback dn"><a href="javascript:void(0)" class="a-hide btn-EditGprizeAdd-rollback" onclick="prize_back('<?php echo $jparr['id'];?>')">回退到库存</a></i>
+                                                    <i class="icon-prizeDel2 "><a href="javascript:void(0)" class="a-hide btn-EditGprizeAdd-del" onclick="jpStatus('<?php echo $jparr['id'];?>','<?php echo $jparr['status']=='1' ? '1' :'2';    ?>')">停用</a></i>
+                                                    <i class="icon-prizeEdit2 "><a href="javascript:void(0)" class="a-hide btn-EditGprizeAdd-edit" onclick="editjp('<?php echo $jparr['id']?>')">修改</a></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <?php }}?>
+                                    </div>
+                                </div>
+                                <?php }}?>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="dn">
+                        <div class="Html-EditGprize">
+                                <div class="EditGprize-member-title">是否会员独享:</div>
+                                <div class="EditGprize-member-div">
+                                     <?php if($member_off!=1){?>
+                                     <?php if($mem_batch){foreach($mem_batch as $mem_arr){?>
+                                     <label class="ml5"><input type="checkbox" name="mem_batch[]" class="mem_batch" value="<?php echo $mem_arr['id'];?>"/><span><?php echo $mem_arr['level_name'];?></span></label>
+                                     <?php }}else{?>
+                                     <label class="ml5">还没配置粉丝类别<a href="<?php echo U('Member/Regulation/index');?>">去配置(只能粉丝中奖)</a></label>
+                                     <?php }}?>
+                                </div>
+                        </div>
+                    </div>
+                    <ul class="Gtitle">基础设置</ul>
+                    <?php if(in_array($batch_type,array(2,3,10,20,32))){?>
+                    <ul>
+                        <li class="Gnmae">&nbsp;抽奖形式：</li>
+                        <li class="Ginput">
+                        	<div class="switch auto">
+                            	<input type="radio" name="cj_phone_type"  value="<?php if($cj_phone_type ==''){?>1<?php }else{ echo $cj_phone_type;} ?>" checked="checked" />
+                                <div class="newRadio">
+                                    <span data-val="1">普通抽奖</span>
+                                    <span data-val="2">转盘抽奖</span>
+                                    <span data-val="3">老虎机抽奖</span>
+                                    <span data-val="4">砸金蛋抽奖</span>
+                                    <span data-val="5">摇一摇抽奖</span>
+                                </div>
+                            </div>
+                            <span class="txtTips important">特殊抽奖最多可设置7个奖项</span>
+                        </li>
+                    </ul>
+                        <?php }?>
+                    <ul>
+                        <li class="Gnmae" >&nbsp;中奖概率：</li>
+                        <li class="Ginput">
+                            <input id="total_chance" type="text" class="validate[custom[integer],required,min[1],max[100],maxSize[3]]" value="{$cj_rule_arr['total_chance']}" maxlength="3" /><span class="maxTips forInput">%</span>
+                        </li>
+                    </ul>
+                    <div class="Gmore">
+                        <div class="Gbtn-more"><span>更多设置：<i></i></span></div>
+                        <div class="GmoreForm">
+                            <?php if($isShowCjButton ===true){?>
+                            <ul>
+                                <li class="Gnmae" >&nbsp;抽奖按钮文字：</li>
+                                <li class="Ginput">
+                                    <input id="cj_button_text" type="text" class="validate[required,maxSize[6]]" maxlength="6" value="<?php echo $cj_rule_arr['cj_button_text'] ? $cj_rule_arr['cj_button_text'] : '开始抽奖' ;?>" /><span class="maxTips forInput" data-max="6">0/6</span>
+                                    <span class="txtTips">最多可以输入6个字符</span>
+                                </li>
+                            </ul>
+                            <?php }?>
+                            <ul>
+                                <li class="Gnmae" >&nbsp;用户中奖提示：</li>
+                                <li class="Ginput">
+                                    <input id="cj_resp_text" type="text" class="validate[required,maxSize[{$cj_resp_text_len}]]" maxlength="{$cj_resp_text_len}" value="<?php echo $cj_rule_arr['cj_resp_text'] ? $cj_rule_arr['cj_resp_text'] : '恭喜您！中奖了' ;?>" /><span class="maxTips forInput" data-max="{$cj_resp_text_len}">0/{$cj_resp_text_len}</span>
+                                </li>
+                            </ul>
+                            <ul class="nothing-tips rel">
+                                <li class="Gnmae" >&nbsp;用户未中奖提示：</li>
+                                 <li class="Ginput">
+                                    <div class="Gadd" data-min="1" data-max="5">
+                                        <input name="no_award_notice" type="text" class="validate[required,maxSize[{$cj_resp_text_len}]]" maxlength="{$cj_resp_text_len}" value="<?php echo $cj_rule_arr['no_award_notice'][0] ? $cj_rule_arr['no_award_notice'][0] : '很遗憾！未中奖' ;?>" /><span class="maxTips forInput" data-max="{$cj_resp_text_len}">0/{$cj_resp_text_len}</span><a href="javascript:void(0)" class="Gbtn-add"><i></i></a><a href="javascript:void(0)" class="Gbtn-del"><i></i></a>
+                                    </div>
+                                    <?php 
+                                    foreach($cj_rule_arr['no_award_notice'] as $k=>$v){ 
+                                        if($k==0) continue;
+                                    ?>
+                                    <div class="Gadd" data-min="1" data-max="5">
+                                        <input name="no_award_notice" type="text" class="validate[required,maxSize[20]]" maxlength="20" value="{$v}" /><span class="maxTips forInput" data-max="20">0/20</span><a href="javascript:void(0)" class="Gbtn-add"><i></i></a><a href="javascript:void(0)" class="Gbtn-del"><i></i></a>
+                                    </div>
+                                    <?php } ?>
+                                    <span class="txtTips">设置多条将随机显示，最多可以设置五条</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                	<ul class="Gtitle">参与人群设置</ul>
+                    <ul>
+                        <li class="Gnmae">&nbsp;参与方式：</li>
+                        <li class="Ginput">
+                        	<div id="jointype" class="switch auto">
+                                {:Gform_radio('join_mode',array('0'=>'手机号码','1'=>'微信号'),$query_arr['join_mode'])}
+                            </div>
+                        </li>
+                    </ul>
+                    <php>$dn = intval($query_arr['join_mode']) == 0 ? '' : 'dn';</php>
+                    <div id="ul_jointype_0" class="{$dn}">
+                        <ul>
+                            <li class="Gnmae">&nbsp;参与限制：</li>
+                            <li class="Ginput">
+                                <div class="switch" data-show="ul_jointype_0_0" data-nogroup="{:empty($mem_batch)}">
+                                    <input type="radio" value="{$member_batch_id_flag}" checked="checked" name="limit">
+                                    <div class="newRadio">
+                                        <span class="valfirst" data-val="0">不限</span>
+                                        <span class="vallast" data-val="1">限制</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <div id="ul_jointype_0_0" class="dn">
+                        <ul>
+                            <li class="Gnmae">&nbsp;</li>
+                            <li class="Ginput">
+                                <div id="phone_member" class="switch auto">
+                                    {:Gform_checkbox('phone_member_group', $mem_batch, $phone_selected)}
+                                </div>
+                            </li>
+                        </ul>
+	                    <ul>
+	                        <li class="Gnmae">&nbsp;招募活动：</li>
+	                        <li class="Ginput">
+	                        	<div class="switch">
+	                                <input type="radio" name="phone_recruit" value="{$phone_recruit}" checked="checked">
+	                                <div class="newRadio">
+	                                    <span class="valfirst" data-val="0">否</span>
+	                                    <span class="vallast" data-val="1">是</span>
+	                                </div>
+	                                <div class="newRadio-input">
+	                                    <div class="Gchoose"><a id="chooseMemberName" href="javascript:void(0)">{$regName}</a><input type="text" class="validate[required]" id="va_choose_mem" value="{$query_arr['member_reg_mid']}" remark="validate" /> <input type="hidden" name="member_reg_mid" id="member_reg_mid" value="{$query_arr['member_reg_mid']}" class=""/><a href="javascript:void(0)" id="chooseMember" class="Gbtn-url" title="选择粉丝招募活动"><i></i></a></div>
+	                                </div>
+	                            </div>
+	                            <span class="txtTips">选择"是"后,非粉丝将被引导注册为您粉丝</span>
+	                        </li>
+	                    </ul>
+	                    </div>
+                        <ul>
+                            <li class="Gnmae">&nbsp;中奖限制：</li>
+                            <li class="Ginput">
+                                <div class="switch" data-show="ul_jointype_0_0_0">
+                                    <input type="radio" value="{$member_zj_flag}" checked="checked" name="limit_zj">
+                                    <div class="newRadio">
+                                        <span class="valfirst" data-val="0">不限</span>
+                                        <span class="vallast" data-val="1">限制</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <ul id="ul_jointype_0_0_0" class="dn">
+                            <li class="Gnmae">&nbsp;</li>
+                            <li class="Ginput">
+                                <div id="phone_member" class="switch auto">
+                                    {:Gform_checkbox('phone_member_group_zj', $mem_batch, $phone_selected_zj)}
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <php>$dn = intval($query_arr['join_mode']) == 1 ? '' : 'dn';</php>
+                    <div id="ul_jointype_1" class="{$dn}">
+                        <ul>
+                            <li class="Gnmae">&nbsp;参与限制：</li>
+                            <li class="Ginput">
+                                <div class="switch" data-show="ul_jointype_1_1">
+                                    <input type="radio" value="{$member_batch_id_flag}" checked="checked" name="limit">
+                                    <div class="newRadio">
+                                        <span class="valfirst" data-val="0">不限</span>
+                                        <span class="vallast" data-val="1">限制</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <div id="ul_jointype_1_1" class="dn">
+                        <ul>
+                            <li class="Gnmae">&nbsp;</li>
+                            <li class="Ginput">
+                                <div id="wx_member" class="switch auto">
+                                    {:Gform_checkbox('wx_member_group', $user_wx_group, $wx_selected)}
+                                </div>
+                            </li>
+                        </ul>
+	                    <ul id="wx_zmhd">
+	                        <li class="Gnmae">&nbsp;招募活动：</li>
+	                        <li class="Ginput">
+	                        	<div class="switch">
+	                                <input type="radio" name="wx_recruit" value="{$wx_recruit}" checked="checked">
+	                                <div class="newRadio">
+	                                    <span class="valfirst" data-val="0">否</span>
+	                                    <span class="vallast" data-val="1">是</span>
+	                                </div>
+	                                <div class="newRadio-input">
+	                                    <input type="text" class="validate[required]" name="fans_collect_url" value="{$fans_collect_url}" remark="validate"  />
+	                                </div>
+	                            </div>
+	                            <span class="txtTips">选择"是"后,非粉丝将被引导关注您的公众号。<!-- <a href="">点击查看微信关注引导页案例</a> --></span>
+	                        </li>
+	                    </ul>
+                        </div>
+                        <ul>
+                            <li class="Gnmae">&nbsp;中奖限制：</li>
+                            <li class="Ginput">
+                                <div class="switch" data-show="ul_jointype_1_1_0">
+                                    <input type="radio" value="{$member_zj_flag}" checked="checked" name="limit_zj">
+                                    <div class="newRadio">
+                                        <span class="valfirst" data-val="0">不限</span>
+                                        <span class="vallast" data-val="1">限制</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <ul id="ul_jointype_1_1_0" class="dn">
+                            <li class="Gnmae">&nbsp;</li>
+                            <li class="Ginput">
+                                <div id="wx_member" class="switch auto">
+                                    {:Gform_checkbox('wx_member_group_zj', $user_wx_group, $wx_selected_zj)}
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="Gmore">
+                        <div class="Gbtn-more"><span>更多设置：<i></i></span></div>
+                        <div class="GmoreForm">
+                            <ul class="zqj_cy dn">
+                                <li class="Gnmae">&nbsp;手机码参与次数：</li>
+                                <li class="Ginput">
+                                    <p class="Gtext">由于该活动可被分享至新浪微博和腾讯微博这两个渠道，参与者分享到一个渠道，可再获得一次抽奖机会。因此，手机号码参与次数（3次）=首次抽奖（1次）+分享（2次）。</p>                           
+                                </li>
+                            </ul>
+                            <ul class="zqj">
+                                <li class="Gnmae">&nbsp;总参与次数：</li>
+                                <li class="Ginput">
+                                    <div class="switch">
+                                        <input type="radio" name="phone_total_part" value="<?php if(intval($cj_rule_arr['phone_total_part']) ==0){?>0<?php }else{ echo 1;} ?>" checked="checked">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0">不限</span>
+                                            <span class="vallast" data-val="1">限制</span>
+                                        </div>
+                                        <div class="newRadio-input">
+                                            <input id="zcj" type="text" maxlength="6" class="validate[required,custom[integer],funcCall[checkposen]]" value="<?php echo $cj_rule_arr['phone_total_part'] ? $cj_rule_arr['phone_total_part'] : '';?>" style="width:300px" ><span class="maxTips forInput">次</span>
+                                        </div>
+                                    </div>
+                                    <span class="txtTips">单个用户活动期间可参与抽奖次数</span>
+                                </li>
+                            </ul>
+                            <ul class="zqj">
+                                <li class="Gnmae">&nbsp;日参与次数：</li>
+                                <li class="Ginput">
+                                    <div class="switch">
+                                        <input type="radio" name="phone_day_part" value="<?php if(intval($cj_rule_arr['phone_day_part']) ==0){?>0<?php }else{ echo 1;} ?>" checked="checked">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0">不限</span>
+                                            <span class="vallast" data-val="1">限制</span>
+                                        </div>
+                                        <div class="newRadio-input">
+                                            <input id="rcj" type="text" maxlength="6" class="validate[required,custom[integer],funcCall[checkposen]]" value="<?php echo $cj_rule_arr['phone_day_part'] ? $cj_rule_arr['phone_day_part'] : '';?>" style="width:300px" ><span class="maxTips forInput">次</span>
+                                        </div>
+                                    </div>
+                                    <span class="txtTips">单个用户活动期间每日可参与抽奖次数</span>
+                                </li>
+                            </ul>
+                            <php>
+                                $disabled = ($query_arr['join_mode'] == '1') ? 'disabled="disabled"' : '';
+                                $disabled2 = ($query_arr['join_mode'] == '1') ? 'disabled' : '';
+                            </php>
+                            <ul>
+                                <li class="Gnmae">&nbsp;总中奖次数：</li>
+                                <li class="Ginput">
+                                    <div id="allprize" class="switch {$disabled2}">
+                                        <input type="radio" name="phone_total_count" value="<?php if(intval($cj_rule_arr['phone_total_count']) ==0){?>0<?php }else{ echo 1;} ?>" checked="checked">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0">不限</span>
+                                            <span class="vallast" data-val="1">限制</span>
+                                        </div>
+                                        <div class="newRadio-input">
+                                            <input id="zzj" type="text" maxlength="6" {$disabled} class="validate[required,custom[integer],funcCall[checkposen]]" value="<?php echo $cj_rule_arr['phone_total_count'] ? $cj_rule_arr['phone_total_count'] : '1';?>" style="width:300px" ><span class="maxTips forInput">次</span>
+                                        </div>
+                                    </div>
+                                    <span class="txtTips">单个用户活动期间总中奖次数<span class="red">&nbsp;参与方式为“微信号”只能为1</span></span>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gnmae">&nbsp;日中奖次数：</li>
+                                <li class="Ginput">
+                                    <div id="dayprize" class="switch {$disabled2}">
+                                        <input type="radio" name="phone_day_count" value="<?php echo $cj_rule_arr['phone_day_count']?1:0  ?>" checked="checked">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0">不限</span>
+                                            <span class="vallast" data-val="1">限制</span>
+                                        </div>
+                                        <div class="newRadio-input">
+                                            <input id="rzj" type="text" maxlength="6" {$disabled} class="validate[required,custom[integer],funcCall[checkposen]]" value="<?php echo $cj_rule_arr['phone_day_count'] ? $cj_rule_arr['phone_day_count'] : '1';?>" style="width:300px" ><span class="maxTips forInput">次</span>
+                                        </div>
+                                    </div>
+                                    <span class="txtTips">单个用户活动期间总中奖次数<span class="red">&nbsp;参与方式为“微信号”只能为1</span></span>
+                                </li>
+                            </ul>
+                            
+                            <?php if(C('GWYL_NODE') == $userInfo['node_id'] && $defined_one_name=='小票号') {?>
+                            <ul>
+                                <li class="Gnmae">&nbsp;流水号可参与次数：</li>
+                                <li class="Ginput">
+                                    <div class="switch">
+                                        <input type="radio" name="param1" value="<?php echo intval($cj_rule_arr['param1'])>0 ? 1 : 0 ?>" checked="checked">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0">不限</span>
+                                            <span class="vallast" data-val="1">限制</span>
+                                        </div>
+                                        <div class="newRadio-input">
+                                            <input id="ticket_seq" type="text" maxlength="6" class="validate[required,custom[integer],funcCall[checkposen]]" value="<?php echo $cj_rule_arr['param1'] ? $cj_rule_arr['param1'] : '';?>" style="width:300px" ><span class="maxTips forInput">次</span>
+                                        </div>
+                                    </div>
+                                    <span class="txtTips">每个小票流水号可参与总次数</span>
+                                </li>
+                            </ul>
+                            <?php }?>
+                        </div>
+                    </div>
+                    <ul>
+                        <li class="Gnmae">&nbsp;</li>
+                        <li class="Ginput">
+                            <php>
+                                $from = I('from', '');
+                                if($from == 'add'){
+                            </php>
+                            <a href="{:U('LabelAdmin/Public/edit', array('id'=>$batch_id))}" title="上一步" id="cancel" class="btn-all w110">上一步</a>
+                            <a href="javascript:void(0);" title="下一步" id="smb" fromadd="1" class="btn-all w110">下一步</a>
+                            <a href="{:U('LabelAdmin/Public/addSubmit', array('id'=>$batch_id))}" title="跳过抽奖设置" id="next" class="btn-all w110">跳过抽奖设置</a>
+                            <php>
+                                }else{
+                            </php>
+                            <a href="javascript:void(0);" title="保存" id="smb" class="btn-all w110">保存</a>
+                            <php>
+                                }
+                            </php>
+
+                        </li>
+                    </ul>
+                </div>
+                </form>
+                <div class="prizeIntroduce">
+                	<div class="prizeIntroduceNav">
+                    	<li class="hover lotteryPrize">配置说明</li>
+                        <li class="lotteryPrize">转盘</li>
+                        <li class="lotteryPrize">砸金蛋</li>
+                        <li class="lotteryPrize">老虎机</li>
+                        <li class="lotteryPrize">摇一摇</li> 
+                    </div>
+                    <div class="lotteryPrizeCon prizeIntroduceCon">
+                        <div class="prizeIntroduceList">
+                            <h4>设置抽奖:步骤说明</h4>
+                            <p><b>第一步:</b>设置用户参与抽奖的规则及中奖规则</p>
+                            <p><b>第二步:</b>设置中奖概率</p>
+                            <p><b>第三步:</b>设置奖品</p>
+                            <p class="t2"><b>（1）添加奖项</b>:设置奖项名称、专享粉丝群体；</p>
+                            <p class="t2"><b>（2）添加奖品</b>:设置奖品数量、使用时间以及短彩信内容；</p>
+                            <p><b>第四步:</b>点击页面上方“返回”回到营销活动列表。</p>
+                        </div>
+                        <div class="prizeIntroduceList">
+                            <h4>设置抽奖:规则说明</h4>
+                            <p>1、每个营销活动只可设置一个中奖概率；</p>
+                            <p>2、每个营销活动可设置多个奖项，每个奖项下可设置多个奖品；</p>
+                            <p>3、在有效期内的奖品可以被停用或启用，但无法替换；</p>
+                            <p>4、编辑奖品时，可变更每日奖品限量、奖品总数、使用时间（验证时间）以及短彩信内容；</p>
+                            <p>5、当某个奖项下有奖品时，该奖项无法被删除。</p>
+                        </div>
+                    </div>
+                    <div class="lotteryPrizeCon prizePreviewCon dn">
+                    	<div class="Preview-lottery">
+                        	<div id="iphonePreview">
+                            	<img src="__PUBLIC__/Image/ap-iphone-Lottery.png" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lotteryPrizeCon prizePreviewCon dn">
+                    	<div class="Preview-lottery">
+                        	<div id="iphonePreview">
+                            	<img src="__PUBLIC__/Image/ap-iphone-Lottery2.png" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lotteryPrizeCon prizePreviewCon dn">
+                    	<div class="Preview-lottery">
+                        	<div id="iphonePreview">
+                            	<img src="__PUBLIC__/Image/ap-iphone-Lottery3.png" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lotteryPrizeCon prizePreviewCon dn">
+                    	<div class="Preview-lottery">
+                        	<div id="iphonePreview">
+                            	<img src="__PUBLIC__/Image/ap-iphone-Lottery4.png" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+    <div class="service"></div>
+
+<script id="cate_item" type="text/html">
+    <%
+    for(d in data){
+        cate = data[d];
+    %>
+    <div class="EditGprize IngGprize" data-rel="+datarel+">
+    <div class="EditGprize-head">
+        <i class="icon-prizeDel r"><a href="javascript:void(0)" class="a-hide btn-DelEditGprize" onclick="delCate(<%=cate.id%>)">删除</a></i>
+        <p class="GprizeName"><span><%=cate.name%></span><i class="icon-prizeEdit dib vm"><a href="javascript:void(0)" class="a-hide btn-ChangeEditGprize" onclick="editcate(<%=cate.id%>)">修改</a></i>
+        <% if(cate.member_batch_id){ %>
+        <i class="icon-prizeMember dib vm"></i><span class="GprizeName-tip">会员专享</span>
+        <% } %>
+        </p>
+    </div>
+    <div class="EditGprize-con">
+        <%
+        for(k in cate.child){
+            jp = cate.child[k];
+            status_class = jp.status == '2' ? 'erro' : '';
+        %>
+        <div class="EditGprize-conItem  fn">
+            <div id="item_<%=jp.id%>" class="EditGprize-conItemList <%=status_class%> fn">
+                <div class="EditGprize-con-name"><%=jp.batch_short_name%></div>
+				<div class="EditGprize-con-all"><% if (jp.online_verify_flag == '1') {%>可线上提领<%}else{%>&nbsp;<%} %></div>
+                <div class="EditGprize-con-day">共<%=jp.total_count%>份</div>
+                <div class="EditGprize-con-all">每日限<%=jp.day_count%>份</div>
+                <div class="EditGprize-con-edit">
+                    <i class="icon-prizeEdit2 "><a href="javascript:void(0)" class="a-hide btn-EditGprizeAdd-edit" onclick="editjp(<%=jp.id%>)">修改</a></i>
+                    <i class="icon-prizeDel2 "><a href="javascript:void(0)" class="a-hide btn-EditGprizeAdd-del" onclick="jpStatus(<%=jp.id%>,<%=cate.status%>)">停用</a></i>
+                </div>
+            </div>
+        </div>
+        <%
+        }
+        %>
+    </div>
+    </div>
+    <%
+    }
+    %>
+
+</script>
+</body>
+</html>
+
+<script>
+//添加编辑奖品类型
+function editcate(cj_cate_id){
+	var prizetype = parseInt($("input[name='cj_phone_type']:checked").val());
+	if(prizetype>=2 && cj_cate_id == ''){
+			var prizelength = $(".EditGprize").length;
+			if(prizelength>=7){
+				art.dialog.msg({
+                    content:'特殊抽奖最多设置7个奖项',
+				    ok: function () {
+				        this.close();
+				        return false;
+				    }
+				});
+				return false;
+			}
+	}
+	var title = cj_cate_id!='' ? '编辑奖项' :'添加奖项';
+	art.dialog.open("{:U('LabelAdmin/CjSet/jpType','batch_id=')}"+_g.batch_id+"&cj_cate_id="+cj_cate_id,{
+			width:500,
+			title:title
+		});
+}
+
+//添加编辑奖品
+function editjp(cj_batch_id){
+	var title = cj_batch_id!='' ? '编辑奖品' :'添加奖品';
+	art.dialog.open("{:U('LabelAdmin/CjSet/selectJp','batch_id=')}"+_g.batch_id+"&cj_batch_id="+cj_batch_id,{
+			width:800,
+			title:title
+		});
+}
+
+	//删除奖项
+	function delCate(cj_cate_id){
+		art.dialog({
+			title:"确认",
+			width:400,
+			minHeigth:100,
+			content:'<div class="Diawarning"><p>您确定要删除该奖项吗？</p></div>',
+			ok: function () {
+				var data = {
+					cj_cate_id : cj_cate_id,
+					batch_id : _g.batch_id
+				}
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+				$.post('{:U('Common/SelectJp/jpCateDel')}', data, function(resp){
+
+                dialog.close();
+				art.dialog.msg({
+					content:resp.info,
+					ok: function () {
+						if(resp.status=='1'){
+                            this.close();
+						}
+					}
+				});
+				
+				}, 'json');
+			},
+			cancel: true
+		});
+	}
+	//奖品停用
+	function jpStatus(cj_batch_id,type){
+		var jpsetUrl = "";
+		var content = "";
+		if(type == '1'){
+			content ="您确定要停用该奖品吗？";
+			jpsetUrl ="{:U('Common/SelectJp/jpStop')}";
+		}else{
+			content ="您确定要启用该奖品吗？";
+			jpsetUrl ="{:U('Common/SelectJp/jpStart')}";
+		}
+		art.dialog({
+			title:"确认",
+			width:400,
+			content:'<div class="Diawarning"><p>'+content+'</p></div>',
+			minHeight:100,
+			ok: function () {
+				var data = {
+					cj_batch_id : cj_batch_id,
+					batch_id : _g.batch_id
+				}
+
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+				$.post(jpsetUrl, data, function(resp){
+                    dialog.close();
+                    if(resp.status == '1'){
+                        var obj = $('#item_'+cj_batch_id);
+                        var btn = obj.find('.btn-EditGprizeAdd-del');
+						obj.find(".icon-prizeRollback").removeClass("dn");
+                        btn.removeAttr('onclick').unbind('click');
+                        if(type == '1'){
+                            obj.addClass('erro');
+                            btn.click(function(){
+                                jpStatus(cj_batch_id,'2');
+                            });
+                        }
+                        else{
+							obj.find(".icon-prizeRollback").addClass("dn");
+                            obj.removeClass('erro');
+                            btn.click(function(){
+                                jpStatus(cj_batch_id,'1');
+                            });
+                        }
+                    }
+    				art.dialog.msg({
+						content:resp.info,
+    					ok: function () {
+    						if(resp.status=='1'){
+                                this.close();
+    						}
+    					}
+    				});
+				
+				}, 'json');
+			},
+			cancel: true
+		});
+	}
+	
+    function refresh_jp(data){
+    	//console.log(data);
+    	//增加的线上提领这里的显示不对了，data里面要加参数把goods_info里的online_verify_flag加上todo
+    	$('#all_jp').html(template('cate_item', data));
+    }
+    function prize_back(p_id){
+        art.dialog.confirm("您确定要将该卡券回退到库存？", function(){
+            var m_id = _g.batch_id;
+            $.post("{:U('LabelAdmin/CjSet/prizeBack')}",{"m_id":m_id,"p_id":p_id}, function(data) {
+                if (data.status == 1) {
+                    var data={"backNum":data.info};
+                    var html = template("rollbackResult",data);
+                    art.dialog({
+                        title: '卡券回退',
+                        width:"400px",
+                        content:html,
+                        cancel:function(){
+                            //art.dialog.list['PrizeBack'].close();
+                            var win = art.dialog.open.origin;
+                            win.location.reload();
+                        },
+                        cancelVal:"关闭"
+                    })
+                }else{
+                	Diaerror(data.info);
+                }
+            }, 'json');
+        })
+    }
+</script>
+<script type="text/html" id="rollbackResult">
+<div class='loadTip'>
+    <div class='loadStatus ok'>
+    <dl>
+    <dt>奖品回退成功！</dt>
+    <dd>您已成功回退<span class='redfont'><%=backNum%></span>份奖品！</dd>
+    </dl>
+    </div>
+</div>
+</script>

@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>门店管理-门店标签</title>
+    <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript">
+    $(document).ready(function(e) {
+        $("#add-label").click(function(event) {
+            art.dialog.open("{:U('CnpcGX/Store/add_label')}", {
+                id: 'uduf',
+                title: '添加标签',
+                width: 500,
+                height: 250,
+                lock: true,
+                close: function() {
+                    //location.reload();
+                }
+            })
+        });
+
+        $(".js_delete").click(function(e) {
+            var id = $(this).attr('c_id');
+            art.dialog({
+                id: 'art_deleted',
+                lock: true,
+                content: '是否确认删除该标签？',
+                ok: function() {
+                    dialog = art.dialog({
+                        title: false,
+                        content: "<div class='msg-all-succeed'>正在删除...</div>",
+                        fixed: true,
+                        padding: 0
+                    });
+                    othis = this;
+                    $.post("{:U('CnpcGX/Store/delete_label')}", {
+                        id: id
+                    }, function(resp) {
+                        if (resp.status == '1') {
+                            dialog.time(1).content("<div class='msg-all-succeed'>" + resp.info + "</div>");
+                            setTimeout(function() {
+                                othis.close();
+                                reload();
+                            }, 1000);
+                        } else {
+                            othis.close();
+                            dialog.time(2).content("<div class='msg-all-error'>" + resp.info + "</div>");
+                        }
+                    }, 'json');
+                    return false;
+                },
+                cancelVal: '关闭',
+                cancel: true //为true等价于function(){}
+            });
+        });
+        $(".js_edit").click(function(e) {
+            var id = $(this).attr('c_id');
+            //alert("{:U('Home/Store/edit')}?id="+storeId);return false;
+            art.dialog.open("{:U('CnpcGX/Store/edit_label')}&id=" + id, {
+                id: 'c_id',
+                title: '编辑标签',
+                width: '500px',
+                lock: true,
+                height: '250px',
+                close: function() {
+                    //location.reload();
+                }
+            });
+        });
+    });
+    </script>
+</head>
+
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="new_sidenav">
+                    <include file="./Home/Tpl/Home/Store_sidenav.html"  leftmenuid="mdbq" />
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>标签管理<a class="tbtn btn-add btn-red first" id="add-label" href="javascript:;"><i></i>新增标签</a></h4>
+                    </div>
+                    <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                            <tbody>
+                                <tr class="th">
+                                    <th>编号</th>
+                                    <th>标签名称</th>
+                                    <th>操作</th>
+                                </tr>
+                                <?php if($list){ foreach($list as $v){ ?>
+                                    <tr class="title">
+                                        <td>
+                                            <php> echo sprintf('%05s', $v['id']);</php>
+                                        </td>
+                                        <td>
+                                            <?php echo $v['label']; ?>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0)" class="js_edit" c_id="{$v['id']}">编辑</a>
+                                            <a href="javascript:void(0)" class="js_delete" c_id="{$v['id']}">删除</a>
+                                        </td>
+                                    </tr>
+                                    <?php } }else{ ?>
+                                        <tr>
+                                            <td colspan="3">
+                                                <div class="nonedata"></div>
+                                            </td>
+                                        </tr>
+                                        <?php } ?>
+                        </table>
+                        <div class="page">
+                            <?php echo $page;?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+</body>
+
+</html>

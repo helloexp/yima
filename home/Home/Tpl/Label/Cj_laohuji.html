@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>老虎机抽奖</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Lottery3.css">
+    <script>
+        function readyAction(){
+            $(".lotWindowBegin1").attr("class","lotWindow lotWindowBegin1 one");
+            $(".lotWindowBegin2").attr("class","lotWindow lotWindowBegin2 two");
+            $(".lotWindowBegin3").attr("class","lotWindow lotWindowBegin3 three");
+            $(".lotEggLight").attr("class","lotEggLight shiny1");
+            var arry=[{$cjCateId}];
+            var arryname=[{$cjCateName}];
+            var lotCon = "";
+            var lotShow = "";
+            for(var i=0;i<=arry.length-1;i++){
+                lotCon=lotCon+"<div data-rel='"+i+"' data-id='"+arry[i]+"'>"+arryname[i]+"</div>";
+                lotShow=lotShow+"<li><i class='icon-fruit"+i+"'></i><span>"+arryname[i]+"</span></li>";
+            }
+            $(".prize-arry").append(lotCon);
+            $(".prizeList ul").append(lotShow);
+            prizeList(0,Math.ceil(arry.length/2) );
+        }
+        function prizeList(len,maxlen){
+            setTimeout(function(){
+                if(len>=maxlen){
+                    $(".prizeList ul").animate({marginTop:0},200);
+                    prizeList(0,maxlen);
+                }else{
+                    $(".prizeList ul").animate({marginTop:-len*44},200);
+                    len++;
+                    prizeList(len,maxlen);
+                }
+            },2000)
+        }
+        function beforeAction(){
+            $(".lotWindowBegin1").attr("class","lotWindow lotWindowBegin1 one");
+            $(".lotWindowBegin2").attr("class","lotWindow lotWindowBegin2 two");
+            $(".lotWindowBegin3").attr("class","lotWindow lotWindowBegin3 three");
+            $(".lotEggLight").attr("class","lotEggLight shiny1");
+        }
+        function beginAction(id){
+            //初始化;
+            beforeAction();
+            $("#lotHammer").addClass("lotHammer-animation");
+            $("#lotHammerbtn").addClass("lotHammerbtn-animation");
+            $(".lotEggLight").removeClass("shiny1").addClass("shiny2");
+            setTimeout(function(){$("#lotHammerbtn").removeClass("lotHammerbtn-animation");},300);
+
+            setTimeout(function(){
+                var one = Math.floor(Math.random()*6);
+                var two = Math.floor(Math.random()*6);
+                var three = Math.floor(Math.random()*6);
+                if(one==two&&two==three&&one==three){
+                    two = two-1;
+                    if(two<0){
+                        two = 4;
+                    }
+                }
+                if($(".lotCenter").hasClass("lotCenter-market")){
+                    $(".lotCenter").attr("class","lotCenter lotCenter-market");
+                }else{
+                    $(".lotCenter").attr("class","lotCenter");
+                }
+                if(id!=10){
+                    //中奖
+                    var one = $("[data-id='"+id+"']").attr("data-rel");
+                    $(".lotWindowBegin1").addClass("lotWindow-animation"+one);
+                    $(".lotWindowBegin2").addClass("lotWindow-animation"+one);
+                    $(".lotWindowBegin3").addClass("lotWindow-animation"+one);
+                }else{
+                    //不中奖
+                    $(".lotWindowBegin1").addClass("lotWindow-animation"+one);
+                    $(".lotWindowBegin2").addClass("lotWindow-animation"+two);
+                    $(".lotWindowBegin3").addClass("lotWindow-animation"+three);
+                }
+            },500);
+
+            setTimeout(function(){
+                //初始化
+                $(".lotEggLight").attr("class","lotEggLight shiny1");
+                window._is_click = false;
+				window._is_sub = false;
+            },8000);
+        }
+
+    </script>
+<script>
+window.lot = 0 ;
+window._is_click = false;
+window._is_sub = false;
+$(document).ready(function(e){
+    readyAction();
+    $(".lotCenter").on("click",function(){
+        var lotCenterlogin = "{$islogin}"*1;
+		if(window._is_sub){return false;}
+		if(window._is_click){return false;}
+		window._is_click = true;
+		window.lot = $(this).attr("data-rel");
+    	if($(this).hasClass("lotCenter-market")){
+    		popForm('popForm',0);
+    		return false;
+    	}
+        if(lotCenterlogin){
+            popForm('popForm',0);
+            return false;
+        }
+        //$("#AjaxWrapper").fadeIn();
+        popForm('popForm',0);
+    });
+    
+    //抽奖
+    $('#subcj').click(function(){
+        if(window._is_sub) { //正在处理不可以再次提交
+            return false;
+        }
+        var needIgnore = $.cookie('{$needIgnoreKey}');
+        if (needIgnore == '1') { //不允许再抽奖
+
+            return false;
+        }
+        if (CountDowner.isCountdowning()) {//正在倒计时 不可以再次提交
+
+            return false;
+        }
+        CountDowner.notCountdowningAndInitAndStart();//开始倒计时
+        window._is_sub = true;
+       $.post(
+        "{:U('Label/Cj/submit')}",
+        $('#theform').serialize(),
+        function(data) {
+        	if($(".lotCenter").hasClass("lotCenter-market")){
+	    		$(".lotCenter").attr("class","lotCenter lotCenter-market");
+	    	}else{
+            	$(".lotCenter").attr("class","lotCenter");
+            }
+        	if(data.status==0){
+        		if(data.data==3){
+                    $("#AjaxWrapper").hide();
+                    $("#popForm").hide();
+        		    beginAction(10);
+                    //唐山非标
+                <php>if($node_id==C("tangshan.node_id")){</php>
+                        if(typeof(data.info.tangshan_url) === "string"){
+                            setTimeout(function(){tangshan_pingan(data.info.tangshan_url,4);},6000);
+                            return false;
+                        }else{
+                            setTimeout(function(){popForm('popMsg',data.info,data.status)},6000);
+                            return false;
+                        }
+                    <php>}else{</php>
+                    setTimeout(function(){popForm('popMsg',data.info,data.status)},6000);
+                        return false;
+                    <php>}</php>
+                }
+                popForm('popMsg',data.info,data.status);
+				window._is_sub = false;
+        		return false;
+        	}else if(data.status==3){
+                popForm('popMsg',data.info,data.status);
+				window._is_sub = false;
+                return false;
+           }
+        	$("#AjaxWrapper").hide();
+            $("#popForm").hide();
+            //中奖
+            //唐山平安非标
+            <php>if($node_id==C("tangshan.node_id")){</php>
+                if(typeof(data.tangshan_url) === "string"){
+                    beginAction(data.data);
+                    setTimeout(function(){tangshan_pingan(data.tangshan_url,3);},7000);
+                    return false;
+                }
+            <php>}</php>
+            var _endCj = handelCjResult(data);
+          setTimeout(_endCj,7000);
+          beginAction(data.data);
+        },
+        'json'
+       );        
+    });
+    
+	$(".close-specialCj").click(function(){
+		$(".specialCj").hide();
+		$(".specialCj").html("");
+	})
+	
+	$(".close-AjaxWrapper").click(function(){
+		window._is_click = false;
+	})
+	
+});
+</script>
+</head>
+<body>
+	<div class="specialCj-con">
+                <div id="lottery">
+    				<div class="close-specialCj">+</div>
+                    <div class="lotBg">
+                    	<div class="lotEgg">
+                        	<div class="lotEggLight shiny1"></div>
+                        	<div class="lotWindow lotWindowBegin1 one" style="left:62px;"><a></a></div>
+                        	<div class="lotWindow lotWindowBegin2 two" style="left:133px;"><a></a></div>
+                        	<div class="lotWindow lotWindowBegin3 three" style="left:201px;"><a></a></div>
+                            <div id="lotHammer" class="lotCenter"><a href="javascript:void(0)"></a></div>
+                            <div id="lotHammerbtn" class="lotCenter"><a href="javascript:void(0)"></a></div>
+                            <div class="prize-arry dn"></div>
+                        </div>
+                    </div>
+                    <div class="prizeList"><ul></ul></div>
+                </div>
+	</div>
+    
+</body>
+</html>

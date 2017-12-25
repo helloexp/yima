@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>操作平台_{:C('SITE_TITLE')}</title>
+    <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript">
+        $(function() {
+            $('#sub_button').click(function () {
+                $('input[name=export]').val('0');
+                $('#theform').submit();
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <div class="shopNav">
+        <div class="w1100">
+            <ul>
+                <li class="hover"><a href="{:U('Home/Index/marketingShow5')}">多宝电商</a></li>
+                <li><a href="{:U('Ecshop/Index/preview')}">旺财小店</a></li>
+                <li><a href="{:U('Ecshop/GoodsInfo/indexNew')}">商品管理</a></li>
+                <li><a href="{:U('Ecshop/SalePro/index')}">促销管理</a></li>
+                <li><a href="{:U('LabelAdmin/OrderList/index')}">订单中心</a></li>
+                <li><a href="{:U('Ecshop/BatchTrace/index')}">凭证中心</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+            <div class="shopCon">
+                <div class="shopSub">
+                    <!--有数据显示-->
+                    <div class="main-name fn">
+                        <h4>
+                            <i class="icon-shop-page"></i>
+                            <a href="{:U('Home/Index/parkYardIndex')}" class="bread">推广员管理</a>&nbsp;&gt;&nbsp;
+                            {$petname}&nbsp;&gt;&nbsp;客户信息
+                        </h4>
+                    </div>
+                    <div class="messageli">
+                        <ul>
+                            <?='0'==$_GET['status']?'<li class="hover">':'<li>'?><a href="{:U('clientList')}&status=0&id={$_GET['id']}">关联客户</a></li>
+                            <?='1'==$_GET['status']?'<li class="hover">':'<li>'?><a href="{:U('clientList')}&status=1&id={$_GET['id']}">历史客户</a></li>
+                            <li>&nbsp;</li>
+                        </ul>
+                    </div>
+                    <div class="Gsearch fn mt10">
+                        <form action="" method="post" name="theform" id="theform">
+                            <input type="hidden" name="export" value="0" />
+                            <p>客户手机</p>
+                            <p>
+                                <input type="text" name="phone" value="{$_REQUEST['phone']}"/>
+                            </p>
+                            <p class="ml20"><php>echo 0==$_GET['status']?'绑定时间':'解绑时间';</php></p>
+                            <p class="Gtime2">
+                                <input type="text" name="start_time" id="start_time" onClick="WdatePicker()" value="{$Think.request.start_time}" />
+                                <em>至</em>
+                                <input type="text" name="end_time" id="end_time" onClick="WdatePicker()" value="{$Think.request.end_time}" />
+                            </p>
+                            <a href="javascript:void(0);" class="btn-all  btn-down"><i></i>下载列表</a>
+                            <a href="javascript:void(0);" class="btn-all r s" id="sub_button">查询</a>
+                        </form>
+                    </div>
+                    <div class="fn pt20">
+                        <table cellpadding="0" cellspacing="0" class="B-table">
+                            <tr>
+                                <th>微信昵称</th>
+                                <th>手机号</th>
+                                <th><php>echo 0==$_GET['status']?'绑定时间':'解绑时间';</php></th>
+                                <th>购买商品量</th>
+                                <th>交易总额</th>
+                                <th width="300">操作</th>
+                            </tr>
+                            <empty name="list" >
+                                <tr class="info">
+                                    <td colspan="6" class="last">
+                                        <div class="nonedata"></div>
+                                    </td>
+                                </tr>
+                            </empty>
+                            <volist name="list" id="vo" empty="$empty">
+                            <tr>
+                                <td>{$vo.nickname}</td>
+                                <td>{$vo.phone_on}</td>
+                                <td><php>if($vo['subscribe_time']) echo dateformat($vo['subscribe_time'],'Y-m-d H:i:s');</php></td>
+                                <td>{$vo.buy_num|default=0}</td>
+                                <td>{$vo.order_amt|default=0}元</td>
+                                <td>
+                                    <if condition="$vo['phone_on'] neq '' " ><a href="{:U('LabelAdmin/OrderList/index',array('id'=>$vo['id'],'order_phone'=>$vo['phone_on']))}">查看订单</a><php>echo 0==$_GET['status']? '&nbsp;|&nbsp;' : '';</php></if>
+                                    <php>if(0==$vo['status']){</php><a href="javascript:void(0)" class="btn-change" rel={$vo.id}><i class="icon-change"></i>移交客户</a>&nbsp;|&nbsp;
+                                    <php>}</php>
+                                    <php>if(0==$vo['status']){</php><a href="javascript:void(0)" onclick="clientJ({$vo.id})">解除客户关系</a>
+                                    <php>}</php>
+                                </td>
+                            </tr>
+                            </volist>
+                        </table>
+                        <div class="page"><?php echo $page;?>&nbsp;&nbsp;</div>
+                    </div>
+                    <!--有数据显示-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+<div class="service"></div>
+</body>
+</html>
+<script>
+    $(document).ready(function (e) {
+        $("body").on("click", "[name='name']", function (e) {
+            e.stopPropagation();
+            var val = $(this).val();
+            if (val != "") {
+                var erro = 0;
+                $(".bankList").show();
+                $(".bankList li").each(function (index, element) {
+                    var text = $(this).text();
+                    if (text.indexOf(val) >= 0) {
+                        $(this).show();
+                        erro++;
+                    } else {
+                        $(this).show();
+                    }
+                });
+                erro == 0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+            } else {
+                $(".bankList").show();
+                $(".bankList li").each(function (index, element) {
+                    index <= 6 ? $(this).show() : $(this).hide();
+                });
+            }
+        });
+        $("body").on("keyup", "[name='name']", function (e) {
+            var val = $(this).val();
+            var erro = 0;
+            $(".bankList").show();
+            $(".bankList li").each(function (index, element) {
+                var text = $(this).text();
+                if (text.indexOf(val) >= 0) {
+                    $(this).show();
+                    erro++;
+                } else {
+                    $(this).hide();
+                }
+            });
+            erro == 0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+        })
+        $("body").on("click", ".bankList li:not('.erro')", function (e) {
+            e.stopPropagation();
+            var val = $(this).text();
+            $("#name").val(val);
+            var changeToID = $(this).attr('rel');
+            $('input[name=changeto]').val(changeToID);
+            $(".bankList").hide();
+        })
+        //点击以外区域隐藏分组
+        $("body").on("click", function () {
+            $(".bankList").hide();
+        });
+        
+        $('.btn-down').click(function(){
+            $('input[name=export]').val('1');
+            $('#theform').submit();
+        });
+
+    })
+</script>
+<script>
+    $(document).ready(function(e) {
+        $(".btn-change").click(function(){
+            var id = $(this).attr('rel');
+            var datalist = {
+                list:''
+            }
+            var html = template("temp-change",datalist);
+            art.dialog({
+                title: '移交客户',
+                content:html,
+                lock:true,
+                okVal:"确定",
+                height:300,
+                ok:function(){
+                    var changeToID = $('#employName option:selected').val();
+                    $.post("{:U('Home/Index/oneUpMember')}",{'id':id,'changeToID':changeToID},function(d){
+                        alert(d.info);
+                        location.reload();
+                    },'json');
+                },
+                cancelVal:'取消',
+                cancel: true
+            });
+
+            $('#department').change(function(){
+                var changePromotionID = $('input[name=promotionId]').val();
+                var option = $('#department option:selected').val();
+                $.post("{:U('Home/Index/getPromotion')}",{'department':option,'changeID':changePromotionID},function(data){
+                    console.log(data);
+                    data = eval("(" + data + ")");
+					var html = '<option value="">请选择</option>';
+					$.each(data,function(name,value){
+						html += '<option value="'+name+'">'+value+'</option>';
+					});
+					$('#employName').empty();
+					$('#employName').append(html);
+                });
+            });
+        })
+    });
+</script>
+<script id="temp-change" type="text/html">
+    <div class="Gform fn" style="height:300px;">
+        <ul>
+            <li class="Gname">*选择部门：</li>
+            <li class="Ginput">
+                <select name='option' id='department'>
+                    <option value="11" selected="selected">请选择</option>
+                    <volist name="promotionOption" id="item">
+                        <option value="{$item.department}">{$item.department}</option>
+                    </volist>
+                </select>
+            </li>
+        </ul>
+        <ul>
+            <li class="Gname">*选择员工：</li>
+            <li class="Ginput">
+                <input type='hidden' name='promotionId' value={$_GET['id']} />
+				<select name="changeto" id="employName">
+					<option value="">请选择</option>
+				</select>
+            </li>
+        </ul>
+    </div>
+</script>
+
+<style>
+    .bankList { position:absolute; z-index:2; top:40px; width:316px; border:solid 1px #ddd; background:#fff;}
+    .bankList ul { height:200px; overflow-y:auto;}
+    .bankList ul li { padding:5px 0 5px 10px; cursor:pointer;}
+    .bankList ul li.erro { color:#ff0000; background:none; cursor:text;}
+    .bankList ul li.erro:hover { background:none; }
+    .bankList ul li.hover,.bankList ul li.hover:hover { background:#EBEBE9;}
+    .bankList ul li:hover { background:#fffbea;}
+</style>
+<script>
+    function clientJ(id){
+        if(confirm("客户关系解除绑定后，该客户今后产生的交易将不计入该推广员绩效。请问是否解除绑定？")) {
+            $.get("{:U('Home/Index/clientRelation')}&id=" + id, function (d) {
+                if (1 == d.status) {
+                    alert(d.info);
+                }
+            }, 'json');
+        }
+    }
+</script>

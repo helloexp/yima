@@ -1,0 +1,815 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title><?php echo session('title')?></title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script>
+var _global_price = {
+		normalTotal:tonumber('<?php echo $normalTotal - $fullReduceBonus;?>'),//普通商品总价
+        fullReduceTotal:tonumber('<?php echo $fullReduceBonus;?>'),//满减金额
+		bonusTotal:tonumber('<?php echo $bonusTotal;?>'),//参与活动商品总价
+        integralTotal:tonumber('<?php echo $integralTotal;?>'),//参与积分商品总价
+        otherTotal:tonumber('<?php echo $otherTotal;?>'),//参与积分红包商品总价
+        canUseIntegral:0,      //初始为0
+		choosePaperHover:0,
+		shippingFee:tonumber({:$shipfee}) ? tonumber({:$shipfee}) : 0 ,//运费
+		totalAmount:tonumber({:$totalAmount}),//合计
+		ruleFeeLimit:tonumber({:$ruleFeeLimit}) ? tonumber({:$ruleFeeLimit}) : 0 ,//限制
+        userPoint:tonumber({:$userPoint}) ? tonumber({:$userPoint}) : 0 ,//用户已有积分
+        canUsePoint:tonumber({:$canUserIntegral}) ? tonumber({:$canUserIntegral}) : 0 ,//本次使用积分
+        pointRule:tonumber({:$exchangeInfo}) ? tonumber({:$exchangeInfo}) : 0 ,//本次使用积分
+		allprice:false,
+        discountPriceAmt:tonumber('<?php echo $vipDiscountPriceAmt;?>') || 0
+	};
+$(document).ready(function(e) {
+    $(".orderFormMsg").each(function(){
+        if($(this).html()==""){
+            $(this).remove();
+        }
+    })
+	if($(".orderFormAddressloading").length>0){
+	var cityInfo = "{:$curAddress['province_code'].$curAddress['city_code'].$curAddress['town_code']}";
+		CityCode({
+            province:$("#province_code"),//省
+            city:$("#city_code"),//市
+            selected:cityInfo,//默认选中的省市区代号
+            url:"{:U('LabelAdmin/AjaxCity/index')}",//数据查询页
+			callback:"adressPopclose",
+            isauto:true
+        });
+	}else{
+		$(".orderFormAddress").attr("onclick","");
+		$(".orderFormAddress").addClass("noaddress");
+	}
+        //获取积分
+    checkorderVal();
+	orderForm();//结算
+	$(".orderFormMsg").each(function(index, element) {
+		var istext = $(this).find("*").length;
+            if(istext==0){$(this).remove();}
+        });
+	$("#cart_check").click(function(){
+		
+		<?php
+			if($haveAddr>0){	
+		?>
+		if($("#receive_name").val()==""){
+			alert("收货人姓名不能为空！");
+			return false;
+		}
+		if($("#receive_phone").val()==""){
+			alert("收货人手机号码不能为空！");
+			return false;
+		}
+                if($("#province_code").val()==""){
+			alert("请选择所在省市信息！");
+			return false;
+		}
+                if($("#city_code").val()==""){
+			alert("请选择所在城市！");
+			return false;
+		}
+                if($("#town_code").val()==""){
+			alert("请选择所在区信息！");
+			return false;
+		}
+		if($("#receive_address").val()==""){
+			alert("配送地址不能为空！");
+			return false;
+		}
+                
+		<?php
+			}		
+		?>
+		if(!$("input[name='payment_type']:radio[checked]").val()){
+			alert("请选择支付方式！");
+			return false;
+		}
+		if($("input[name='payment_type']:radio[checked]").val() == '2'){
+			var order_amt = $("#orderVal").text();
+                        //0元红包除外
+		}
+        $("#cart_check").attr("disabled","disabled");
+		//校验销售员号是否存在
+		var saler_phone = $('#saler_phone').val();
+		if(saler_phone){
+			var dialog;
+			$("#cartform").ajaxSubmit({
+					beforeSubmit:function(){
+						dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在校验您的销售顾问...</div>",fixed: true,padding:0});
+					},
+					url:"{:U('Label/Store/checkSaler')}",
+					success:function(data){
+							 if(data.status == '1'){
+								dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+								setTimeout(function(){
+									$('#loadingBox').show();
+								},1);
+								$("#cartform").submit();
+							  }else{
+								dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+								$("#saler_phone").val('');
+								return false;
+							  }
+						  },
+					dataType:'json'
+				});
+				return false;
+		}
+		else{
+			setTimeout(function(){
+				$('#loadingBox').show();
+			},1);
+			$("#cartform").submit();
+		}
+	});
+
+
+
+	$(".btn-choosePaper").click(function(){
+		var html = '<div class="choosePaper">'+$("#choosePaper").html()+'</div>';
+		msgPop(html);
+	})
+	$("body").on("click",".choosePaper .btn-ok",function(){
+		var id="";
+		$(".choosePaperready").text($(".choosePaper .choosePaperHover").attr("data-val"));
+		$(this).closest("#choosePaper").find(".choosePaperList.hover").each(function(index, element) {
+			if(id!=""){
+				id+=",";
+			}
+			id=id+$(this).attr("data-id");
+                });
+		$("#bonus_use_id").val(id);
+		$(".choosePaperready").attr("data-id",id);
+		_global_price.choosePaperHover = tonumber($("#choosePaper .choosePaperHover").attr("data-val"));
+		checkorderVal();
+		msgPopclose();
+	})
+        $('#city_code').change(function(){
+            var cityTmpCode = $("#province_code").val() + $(this).val();
+            var shippingFee = _global_price.shippingFee;
+            var totalFee = _global_price.totalAmount;
+            var feeLimit = _global_price.ruleFeeLimit;
+            var vid = {:$id};
+            if($(this).val()){
+                $.post("{:U('Label/Store/getCityFee')}", {'city':cityTmpCode,'id':vid},function(resp){
+                        if(2 != feeLimit){
+                            if(resp){
+                                 var str = '<span>运费:</span><em>￥</em><b id="cityfee">' + resp + '</b>';
+                                    _global_price.shippingFee = resp
+                                    checkorderVal();
+                            }
+                            if('0.00' == resp){
+                                    _global_price.shippingFee = 0
+                                    checkorderVal();
+                            }
+                        }else{
+                            _global_price.shippingFee = 0
+                            checkorderVal();
+                        }      
+                }, 'json');
+            }   
+        })
+});
+var lastAddress = 99;//最近一次选择地址
+var phoneNo = '{$phoneNo}';
+function adressPop(msg){
+	$("#address").addClass("open");
+    $.get("{:U('Common/AjaxCommon/getAdressList')}", {'phone_num':phoneNo},function(data){
+        if(data.data){
+            var dataList = {list:data.data,lastAddress:lastAddress};
+        }else{
+            var dataList = {list:[],lastAddress:lastAddress};
+        }
+        var html = template("addressHtml",dataList);
+        $("#address").html(html);
+        $("[name='addressform']").validationEngine();
+        CityCode({
+            province:$("[name='privince']"),
+            city:$("[name='city']"),
+            town:$("[name='town']"),
+            url:"/index.php?g=LabelAdmin&m=AjaxCity&a=index"
+        });
+    }, 'json');
+}
+function adressPopclose(){
+	$("#address").removeClass("open");
+	$(".orderFormAddressloading").show();
+	$(".orderFormAddressloading").closest("p").find("span").hide();
+	if($("#user_name").text()==""){
+		$(".orderFormAddressNodata").show();
+		$("#orderFormAddress").hide();
+	}else{
+		$(".orderFormAddressNodata").hide();
+		$("#orderFormAddress").show();
+		$(".orderFormAddressloading").hide();
+		$(".province_code").text($("#province_code").find("option:selected").text());
+		$(".city_code").text($("#city_code").find("option:selected").text());
+		$(".town_code").text($("#town_code").find("option:selected").text());
+		$(".receive_address").text($("#receive_address").val());
+		$(".orderFormAddressloading").closest("p").find("span").show();
+	}
+    $("#address .sideConList").html("");
+}
+function adressaddPopclose(){
+    $(".js-addressPop").addClass("close");
+    setTimeout(function(){
+        $(".js-addressPop").removeClass("close");
+        $(".js-addressPop").removeClass("open");
+    },500)
+}
+function checkorderVal(id){
+	var feeLimit = _global_price.ruleFeeLimit;
+	if(2 == feeLimit){
+		_global_price.totalAmount = 0;
+	}
+    var choosebonus = 0;
+    var bonusFn = function (){
+        if(_global_price.choosePaperHover>0){
+            var bonusTotal = FloatSub(_global_price.bonusTotal,_global_price.choosePaperHover);
+            if(bonusTotal<0){
+                var otherbonusTotal = FloatAdd(_global_price.otherTotal,bonusTotal);
+                if(otherbonusTotal<0){
+                    //返回积分商品
+                    choosebonus = _global_price.bonusTotal+_global_price.otherTotal;
+                    return _global_price.integralTotal
+                }else{
+                    //返回积分和积分红包未抵扣完的商品
+                    choosebonus = _global_price.choosePaperHover;
+                    return _global_price.integralTotal+otherbonusTotal;
+                }
+            }else{
+                choosebonus = _global_price.choosePaperHover;
+            }
+        }
+        //返回积分和积分红包的商品
+        return _global_price.integralTotal+_global_price.otherTotal
+    }
+    bonusFn();
+    if(!$(".redIntegrationConChoose").hasClass("erro")){
+        $("#canUsePoint").val($("#canUsePoint").attr("data-maxintegration"));
+    }
+    var hasUsePoint = FloatMul(tonumber($("#canUsePoint").val()),_global_price.pointRule);
+    var canUsePoint = tonumber(Math.min(_global_price.userPoint,_global_price.canUsePoint,bonusFn(),hasUsePoint));
+        $("#canUsePoint").val(FloatDiv(canUsePoint,_global_price.pointRule));
+    //原始总价
+    _global_price.allprice = tonumber(FloatAdd(FloatAdd(FloatAdd(_global_price.normalTotal,_global_price.bonusTotal),_global_price.integralTotal),_global_price.otherTotal));
+    //扣除红包和积分总价
+    _global_price.allprice = tonumber(FloatSub(_global_price.allprice,FloatAdd(canUsePoint,choosebonus)));
+    //扣除会员优惠
+    _global_price.allprice = tonumber(FloatSub(_global_price.allprice,_global_price.discountPriceAmt));
+    if($("#cityfee").length==0){
+        _global_price.shippingFee = 0;
+    }
+    _global_price.allprice = tonumber(FloatSub(_global_price.allprice,_global_price.shippingFee));
+    $('#noShowPay').show();
+    $("#cityfee").text(toformat(_global_price.shippingFee));
+    $(".choosePaperready").text(toformat(tonumber(choosebonus)));
+    $(".chooseIntergral").text(toformat(tonumber(canUsePoint)));
+    $("#orderVal").attr("data-val",_global_price.allprice).text(toformat(tonumber(_global_price.allprice)));
+}
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="fn">
+            <div class="back"><i></i></div>
+            <div class="trolley"></div>
+            <div class="title">结算</div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="mainCon fn m0">
+                <div class="orderForm" style="padding-bottom:20px;">
+				 <form name="cartform" id="cartform" action="{:U('Label/Store/direct_order_save')}" method="post">
+				 <input type="hidden" name="id" value="{$batchChannelId}">
+				 <input type="hidden" name="haveAddr" id="haveAddr" value="<?php echo $haveAddr;?>">
+				 <input type="hidden" name="bonus_use_id" id="bonus_use_id" value="">
+                 <input type="hidden" name="skuInfo" id="skuInfo" value="{$skuInfo}">
+                 <input type='hidden' name='orderType' value='{$orderType}' />
+                 <input type='hidden' name='deliveryDate' value='{$deliveryDate}' />
+                 <input type='hidden' name='isCar' value='{$isCar}' />
+                 <input type="hidden" name="receive_name" id="receive_name" value="<?php echo $curAddress['user_name']?>"/>
+                 <input type="hidden" name="receive_phone" id="receive_phone" placeholder="收货人手机号码" maxlength="11" value="<?php echo $curAddress['phone_no']?>"/>
+                    <?php
+                        if($haveAddr>0){	
+                    ?>
+                    <div class="orderFormAddress" onClick="adressPop()">
+                    	<div class="orderFormAddressNodata dn"><img src="__PUBLIC__/Label/Image/icon_tan.png" class="l"><p>请先填写收货人信息</p></div>
+                    	<div id="orderFormAddress">
+                            <p><span id="user_name"><?php echo $curAddress['user_name']?></span><span id="user_tel"><?php echo $curAddress['phone_no']?></span></p>
+                            <?php
+                            if($haveCode>0){
+                            ?>
+                            <p class="orderFormAddressmsg">温馨提示：商品卡券短信会发送至您手机，可凭该短信在商家可验证门店提领商品。<br />如有商品需要商家寄送，请点击填写收货地址。</p>
+                            <?php }?>
+                            <p><i class="orderFormAddressloading"></i>
+                                <span class="province_code"></span><span class="city_code"></span><span class="town_code"></span><span class="receive_address"></span>
+                                <select id='province_code' name='province_code' class="dn">
+                                    <option>省</option>
+                                </select>
+                                <select id='city_code' name='city_code' class="dn">
+                                    <option>市</option>
+                                </select>
+                                <select id='town_code' name="town_code" class="dn">
+                                    <option>区</option>
+                                </select>
+                                <input type="hidden" name="receive_address" id="receive_address" class="input-address" value="<?php echo $curAddress['address']?>"/>
+                            </p>
+                        </div>
+                    </div>
+                    <?php }?>
+                    <div class="orderFormMsg">
+                        <dt>选择支付方式</dt>
+                        <dd>
+                            <ul class="fn">
+                                <eq name="hasPayChannel" value="0">
+                                    <li><label>无有效支付方式</label></li>
+                                <else />
+                                    <eq name="wx_flag" value="1">
+                                        <eq name="payChannelInfo.3" value="1"><li><label onclick="javascript:$('.bonus').show();$('#cart_check').text('马上支付');"><input type="radio"  name="payment_type" value="3" checked/><img src="__PUBLIC__/Label/Image/Shop/logo-wpay.png" class="paylogo" /></label></li></eq>
+                                    </eq>
+                                    <eq name="payChannelInfo.1" value="1"><li><label onclick="javascript:$('.bonus').show();$('#cart_check').text('马上支付');"><input type="radio"  name="payment_type" value="1" <if condition="($payChannelInfo[3] eq 2) or (($payChannelInfo[3] eq 1) and ($wx_flag neq 1))">checked</if> /><img src="__PUBLIC__/Label/Image/Shop/logo-alipay.png" class="paylogo"/></label></li></eq>
+                                    <eq name="payChannelInfo.2" value="1"><li><label onclick="javascript:$('.bonus').show();$('#cart_check').text('马上支付');"><input type="radio"  name="payment_type" value="2" <if condition="(($payChannelInfo[3] eq 2) and ($payChannelInfo[1] eq 2)) or (($payChannelInfo[1] eq 2) and ($wx_flag neq 1))">checked</if> /><img src="__PUBLIC__/Label/Image/Shop/logo-upay.png" class="paylogo" /></label></li></eq>
+                                </eq>
+                                <if condition="($haveAddr gt 0) and ($deli_pay_flag eq 1)">
+                                    <li><label onclick="javascript:$('.bonus').hide();$('#cart_check').text('马上下单');"><input type="radio"  name="payment_type" value="4" /><img src="__PUBLIC__/Label/Image/Shop/logo-logistics.png" class="paylogo" /></label></li>
+                                </if>
+                            </ul>
+                        </dd>
+                    </div>
+                    
+                    <div class="orderFormMsg">
+                        <dl>
+                            <?php if(empty($cartlist)){?>
+                             <ul class="orderPro">
+                                <li class="fn"><p>无数据！</p></li>
+                             </ul>
+                            <?php }else{?>
+                            <?php if(!empty($normalgoodslist)){?>
+                            <dt>普通商品</dt>
+                            <dd>
+                                <ul class="orderPro">
+                                    <?php foreach($normalgoodslist as $g=>$gal){?>
+                                    <li class="fn proInfo">
+                                        <div class="img" style="background-image:url(__UPLOAD__/<?php echo $gal['goods_image'];?>)"></div>
+                                        <div class="text">
+                                            <div class="textInfo">
+                                                <p><?php echo $gal['batch_name'];?></p>
+                                                <?php if($gal['sku_name'] !=  ''){ ?><p><em><?php echo "[" . $gal['sku_name'] . "]";?></em></p><?php } ?>
+                                                <p><span class="price">￥<?php echo $gal['price'];?></span><span class="num">X{$gal['total']}</span></p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <?php }?>
+                                    <div class="orderFormPrice">
+                                        <span>共<em>{$gal['total']}</em>件商品&nbsp;&nbsp;合计:</span><em>￥<?php echo number_format($normalTotal,2);?></em>
+                                    </div>
+                                </ul>
+                            </dd>
+                            <?php } ?>
+                            <?php if(!empty($bonusgoodslist)){?>
+                            <dt>参与红包活动商品</dt>
+                            <dd class="orderPro">
+                                <ul class="orderPro">
+                                    <?php foreach($bonusgoodslist as $kg=>$kgal){?>
+                                    <li class="fn proInfo">
+                                        <div class="img" style="background-image:url(__UPLOAD__/<?php echo $kgal['goods_image'];?>)"></div>
+                                        <div class="text">
+                                            <div class="textInfo">
+                                                <p><?php echo $kgal['batch_name'];?></p>
+                                                <?php if($kgal['sku_name'] !=  ''){ ?><p><em><?php echo "[" . $kgal['sku_name'] . "]";?></em></p><?php } ?>
+                                                <p><span class="price">￥<?php echo $kgal['price'];?></span><span class="num">X{$kgal['total']}</span></p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <?php } ?>
+                                    <div class="orderFormPrice">
+                                        <span>共<em>{$kgal['total']}</em>件商品&nbsp;&nbsp;合计:</span><em>￥<?php echo number_format($bonusTotal,2);?></em>
+                                    </div>
+                                </ul>
+                            </dd>
+                            <?php } ?> 
+
+                            <?php if(!empty($integralGoodsList)){?>
+                            <dt>参与<?php echo L('INTEGRAL_NAME')?>活动商品</dt>
+                            <dd>
+                                <ul class="orderPro">
+                                <?php foreach($integralGoodsList as $kg=>$kgal){?>
+                                <li class="fn proInfo">
+                                    <div class="img" style="background-image:url(__UPLOAD__/<?php echo $kgal['goods_image'];?>)"></div>
+                                    <div class="text">
+                                        <div class="textInfo">
+                                            <p><?php echo $kgal['batch_name'];?></p>
+                                            <?php if($kgal['sku_name'] !=  ''){ ?><p><em><?php echo "[" . $kgal['sku_name'] . "]";?></em></p><?php } ?>
+                                            <p><span class="price">￥<?php echo $kgal['price'];?></span><span class="num">X{$kgal['total']}</span></p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <?php } ?>
+                                <div class="orderFormPrice">
+                                    <span>共<em>{$kgal['total']}</em>件商品&nbsp;&nbsp;合计:</span><em>￥<?php echo number_format($integralTotal,2);?></em>
+                                </div>
+                            </ul>
+                            </dd>
+                            <?php } ?> 
+                                
+                            <?php if(!empty($otherGoodsList)){?>
+                            <dt>参与<?php echo L('INTEGRAL_NAME')?>并支持红包活动商品</dt>
+                            <dd>
+                                <ul class="orderPro">
+                                <?php foreach($otherGoodsList as $kg=>$kgal){?>
+                                <li class="fn proInfo">
+                                    <div class="img" style="background-image:url(__UPLOAD__/<?php echo $kgal['goods_image'];?>)"></div>
+                                    <div class="text">
+                                        <div class="textInfo">
+                                            <p><?php echo $kgal['batch_name'];?></p>
+                                            <?php if($kgal['sku_name'] !=  ''){ ?><p><em><?php echo "[" . $kgal['sku_name'] . "]";?></em></p><?php } ?>
+                                            <p><span class="price">￥<?php echo $kgal['price'];?></span><span class="num">X{$kgal['total']}</span></p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <?php } ?>
+                                <div class="orderFormPrice">
+                                    <span>共<em>{$kgal['total']}</em>件商品&nbsp;&nbsp;合计:</span><em>￥<?php echo number_format($otherTotal,2);?></em>
+                                </div>
+                            </ul>
+                            </dd>
+                            <?php } ?> 
+                            <!--dt>活动赠品信息</dt>
+                            <dd>
+                                <ul class="orderSend">
+                                    <li>
+                                        <p>10元现金抵用券</p>
+                                        <p><span>可前往个人中心-电商优惠券查收</span></p>
+                                    </li>
+                                    <li>
+                                        <p>2kg大米</p>
+                                        <p><span>随物流配送</span></p>
+                                    </li>
+                                </ul>
+                            </dd-->
+                            <?php } ?>
+                        </dl>
+                    </div>
+                    <div class="orderFormMsg">
+                        <?php
+                            if($haveAddr>0){    
+                        ?>
+                        <dd class="leaveMessage"><span>给商家留言</span><p><input type="text" name="memo" placeholder="可填写您和商家达成一致的要求"></p></dd>
+                        <?php
+                            }       
+                        ?>
+                        <eq name="errcode" value="0">
+                        <dd class="leaveMessage">
+                            <notempty name="salerInfo">
+                                <if condition="$salerInfo['showSalerName'] eq '1'"><span>您的销售顾问</span></if>
+                            <else />
+                                <span>您的销售顾问</span>
+                            </notempty>
+                            <empty name="salerInfo">
+                            <p><input type="text" name="saler_phone" id="saler_phone" placeholder="" maxlength="100"></p>
+                            <else />
+                            <if condition="$salerInfo['showSalerName'] eq '1'"><p><input type="text" value="{$salerInfo['custom_no']}{$salerInfo['name']}" maxlength="100" readonly ></p></if>
+                            </empty>
+                        </dd>
+                        </eq>
+                    </div>
+                    <div class="orderFormMsg">
+                        <?php
+                        if(($userBonus>0) && $userBounsList){                   
+                        ?>
+                        <if condition="$ruleType neq '0'">
+                    	<div class="redPaper">
+                        	<div class="redPaperCon">
+                            	<p>红包</p>
+                                <if condition="$ruleType neq '1'">
+                                	<span>可用<em><?php echo $userBonus;?></em>元</span>
+                                </if>
+                            </div>
+                            <div class="redPaperMsg"><p>已抵用<span class="choosePaperready">0.00</span>元</p></div>
+                        </div>
+                        </if>
+                        <?php }?>
+                        <if condition="$userIntegral gt 0">
+                            <if condition='$intergralType neq 0'>
+                                <div class="redIntegration">
+                                    <div class="redIntegrationCon"><p>共{$userPoint}{:L('INTEGRAL_NAME')}，可用{$canUserIntegral}{:L('INTEGRAL_NAME')}抵￥{$userIntegral}</p></div>
+                                    <div class="redIntegrationConChoose erro"><i></i></div>
+                                </div>
+                                <div class="redIntegrationInput">
+                                    <p><input type="tel" name="usePoint" id="canUsePoint" data-maxintegration="{$canUserIntegral}" value="0"></p>
+                                </div>
+                            </if>
+                        </if>
+                    </div>
+                    
+                    <div class="orderFormMsg">
+                        <div class="orderPrice"><p class="priceName">商品金额</p><p class="priceNum"><em>￥</em><span><?php echo number_format($normalTotal+$bonusTotal+$otherTotal+$integralTotal,2);?></span></p></div>
+
+                        <notempty name="vipDiscountPriceAmt">
+                        <div class="orderPrice"><p class="priceName">会员优惠</p><p class="priceNum">-<em>￥</em><span><?php echo number_format($vipDiscountPriceAmt, 2);?></span></p></div>
+                        </notempty>
+
+                        <neq name="ruleType" value="0"><if condition="$userBonus gt 0"><div class="orderPrice"><p class="priceName">红包抵用</p><p class="priceNum">-<em>￥</em><span class="choosePaperready">0.00</span></p></div></if></neq>
+                        <if condition="$userIntegral gt 0"><div class="orderPrice selectIntergral"><p class="priceName">{:L('INTEGRAL_NAME')}抵用</p><p class="priceNum">-<em>￥</em><span class="chooseIntergral">0.00</span></p></div></if>
+                        <!--<div class="orderPrice"><p class="priceName">满减优惠</p><p class="priceNum">-&nbsp;￥<span>5.00</span></p></div> -->
+                        <?php if($haveAddr>0) {?>
+                    	    <div class="orderPrice">
+                            <p class="priceName">运费</p>
+                        	<?php if($shippingFee>0){?>
+                            <p class="priceNum"><em>+&nbsp;￥</em><span id="cityfee"><?php echo $shippingFee; ?></span></p>
+                            <?php }else{?>
+                            <p class="priceNum">免运费</p>
+                        	<?php }?>
+                            </div>
+                        <?php }?>
+                    </div>
+                    <!-- 购物车信息-->
+                    <volist name="cartlist" id="vo">
+                        <input type="hidden" name="names[]" value="{$vo['batch_name']}">
+                        <input type="hidden" name="goods[]" value="{$vo['b_id']}">
+                        <input type="hidden" name="price[]" value="{$vo['price']}">
+                        <input type="hidden" name="total[]" value="{$vo['total']}">
+                        <input type="hidden" name="discountPrice[]" value="{$vo['vipDiscoiuntPrice']}">
+                        <input type="hidden" name="bonus_flag[]" value="{$vo['bonus_flag']}">
+                        <input type="hidden" name="integral_flag[]" value="{$vo['integral_flag']}">
+                        <input type="hidden" name="deli_pay_flag[]" value="{$vo['deli_pay_flag']}">
+                    </volist>
+				</form>
+            </div>
+        </div>
+    </div>
+	<div class="proNav fn headerTrolley">
+        <p class="l">订单结算</p>
+        <p class="r allPrice">实付款:<span id="orderVal" data-val="<?php echo $totalAmount;?>"><?php echo $totalAmount;?></span>元	
+        <eq name="hasPayChannel" value="1">			
+        <a href="javascript:void(0);" id="cart_check">马上支付</a>	
+        </eq>	
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+<div id="choosePaper" class="sideCon">
+    <div class="sideConHeader fn">
+        <div class="close"><i></i></div>
+        <div class="title">可使用的红包</div>
+    </div>
+    <div class="sideConMsg">
+        <if condition="$ruleType neq '1'">
+            <p>本次可抵用<span>￥<em class="choosePaperNum" data-val="<?php echo $userBonus;?>"><?php echo $userBonus;?></em></span></p>
+        </if>
+        <p>您已选择<span>￥<em class="choosePaperHover" data-val="0">0.00</em></span>，超出部分无效</p>
+    </div>
+    <div class="sideConList">
+        <?php 
+            if(!empty($userBounsList)){
+            foreach($userBounsList as $k=>$val){
+                $i=$k+1;
+        ?>
+        <div class="choosePaperList" data-val="<?php echo $val['amount'];?>" data-id="<?php echo $val['id'];?>">
+            <div class="choosePaperListCon">
+                <i></i>
+                <p class="choosePaperName"><em>￥</em><span><b><?php echo $val['amount'];?></b></span></p>
+                <p class="choosePaperRule">&nbsp;</p>
+                <p class="choosePaperTime">有效期至：<?php echo date('Y-m-d H:i:s', strtotime($val['bonus_end_time']));?></p>
+            </div>
+        </div>
+        <?php
+				}
+			}else{
+			?>
+        <div class="choosenodate">
+        	<img src="__PUBLIC__/Label/Image/Shop/noRecord.png">
+				<p>您还没有红包~</p>
+        </div>
+        <?php }?>
+    </div>
+    <div class="btn"><a href="javascript:void(0)" class="btn-choose js-okchoosePaper">确定</a></div>
+</div>
+<div id="address" class="sideCon">
+    <div class="sideConHeader fn">
+        <div class="close"><i></i></div>
+        <div class="title">更换地址</div>
+    </div>
+    <div class="sideConList"></div>
+</div>
+<!--爱蒂宝-->
+<include file="adb"/>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    $("body").on("click",".redPaper",function(){
+		$("#choosePaper").addClass("open");
+	});
+    $("body").on("click",".close:not('.msgPopCon .close')",function(){
+        if($(this).closest(".proPop").length==0){
+            $(".sideCon").removeClass("open");
+        };
+	});
+    $("body").on("click",".redIntegrationConChoose",function(){
+		$(this).toggleClass("erro");
+        if($(this).hasClass("erro")){
+            $("#canUsePoint").val(0);
+        }else{
+            $("#canUsePoint").val($("#canUsePoint").attr("data-maxintegration"));
+        }
+        checkorderVal();
+	});
+    $("body").on("click",".choosePaperList",function(){
+		var _this = $(this);
+		var _ismax = $(".choosePaperNum");
+		var maxval = _ismax.length>=1 ? tonumber(_ismax.attr("data-val")) : 100000;
+		_this.hasClass("hover") ? _this.removeClass("hover") : _this.addClass("hover");
+		var hasval=0;
+		var choval=0;
+		_this.closest(".sideConList").find(".choosePaperList.hover").each(function(index, element){
+			var val = tonumber($(this).attr("data-val"));
+			hasval+=val;
+			choval+=val;
+		});
+		hasval>maxval && (hasval = maxval);
+		$(".choosePaperHover").text(choval).attr("data-val",hasval);
+	});
+    $("body").on("click",".js-okchoosePaper",function(){
+		var id="";
+		$(".choosePaperready").text($("#choosePaper .choosePaperHover").attr("data-val"));
+		$(this).closest("#choosePaper").find(".choosePaperList.hover").each(function(index, element) {
+			if(id!=""){
+				id+=",";
+			}
+			id=id+$(this).attr("data-id");
+                });
+		$("#bonus_use_id").val(id);
+		$(".choosePaperready").attr("data-id",id);
+		_global_price.choosePaperHover = tonumber($("#choosePaper .choosePaperHover").attr("data-val"));
+		checkorderVal();
+		$("#choosePaper").removeClass("open");
+	});
+	
+    $("body").on("click",".chooseAddressList",function(){
+		var _this = $(this);
+        lastAddress = _this.index();
+        $("#receive_name").val(_this.attr("data-name"));
+        $("#receive_phone").val(_this.attr("data-tel"));
+        $("#receive_address").val(_this.attr("data-address"));
+		$("#user_name").text(_this.attr("data-name"));
+		$("#user_tel").text(_this.attr("data-tel"));
+        //省市区初始化
+        var province = _this.attr("data-province");
+        var city = _this.attr("data-city");
+        var town = _this.attr("data-town");
+        var cityInfo = province + city + town;  
+        CityCode({
+            province:$("#province_code"),//省
+            city:$("#city_code"),//市
+            selected:cityInfo,//默认选中的省市区代号
+            url:"{:U('LabelAdmin/AjaxCity/index')}",//数据查询页
+			callback:"adressPopclose",
+            isauto:true
+        });
+        adressPopclose();
+	});
+    
+    $("body").on("click",".js-addAddress",function(){
+        $(this).closest("#address").find(".proPop").addClass("open");
+    });
+    $("body").on("click",".js-saveAddress",function(){
+        if($("[name='addressform']").validationEngine('validate')){
+            var addrData = $("[name='addressform']").serialize();
+            $.post("{:U('Label/MyAddress/saveNewAddr')}", addrData, function(data){
+                data = eval('(' + data + ')');
+                if(data['error'] == '0'){
+                    $.get("{:U('Common/AjaxCommon/getAdressList')}", {'phone_num':phoneNo},function(data){
+                        var dataList = {list:data.data,lastAddress:lastAddress};
+                        var html = template("addressHtml",dataList);
+                        $("#address").html(html);
+                        $("#address .sideConList").find(".chooseAddressList:last").click();
+                    }, 'json');
+                }else{
+                    msgPop(data['msg'])
+                }
+            });
+        }
+    });
+});
+</script>
+
+<script id="addressHtml" type="text/html">
+<div class="sideConHeader fn">
+    <div class="close"><i></i></div>
+    <div class="title">更换地址</div>
+</div>
+<div class="sideConList">
+{{each list as value i}}
+    <div class="chooseAddressList {{if lastAddress==99}}{{if i==0}}hover{{/if}}{{else if lastAddress==i}}hover{{/if}}" data-id="{{value.id}}" data-tel="{{value.phone_no}}" data-name="{{value.user_name}}" data-province="{{value.province_code}}" data-city="{{value.city_code}}" data-town="{{value.town_code}}" data-address="{{value.address}}">
+        <i></i>
+        <p><em>地址{{i+1}}</em><span><b>手机号:</b><b>{{value.phone_no}}</b></span></p>
+        <p>姓名：{{value.user_name}}</p>
+        <p>地址：{{value.province}}-{{value.city}}-{{value.town}}-{{value.address}}</p>
+    </div>
+{{/each}}
+{{if list.length==0}}
+    <div class="Gform">
+        <form id="addressform" action="javascript:void(0);" method="post" name="addressform">
+            <ul>
+                <li class="Gname">所在区域</li>
+                <li class="Ginput fn">
+                    <select name='privince' id='province_code' class="validate[required]">
+                        <option value="">省</option>
+                    </select>
+                    <select name='city' id='city_code' class="validate[required]">
+                        <option value="">市</option>
+                    </select>
+                    <select name='town' id='town_code' class="validate[required]">
+                        <option value="">区</option>
+                    </select>
+                </li>
+            </ul>
+            <ul>
+                <li class="Gname">具体位置</li>
+                <li class="Ginput">
+                    <input name="address" type="text" id="" maxlength="50" class="validate[required]" value="{$address.address}" data-rel="">
+                </li>
+            </ul>
+            <ul>
+                <li class="Gname">收货人</li>
+                <li class="Ginput">
+                    <input name="receiver" type="text" id="" maxlength="4" class="validate[required]" value="{$address.user_name}" data-rel="">
+                </li>
+            </ul>
+            <ul>
+                <li class="Gname">联系方式</li>
+                <li class="Ginput">
+                    <input name="connect" id="phone" type="tel" class="validate[required,minSize[11]]" maxlength="11" value="{$address.phone_no}" data-rel=""  />
+                </li>
+            </ul>
+            <ul class="Gbtn-ul">
+                <li class="btn-li"><a href="javascript:void(0)" class="btn-upaddress btn-choose js-saveAddress">保存并使用</a></li>
+            </ul>
+        </form>
+    </div>
+{{/if}}
+</div>
+{{if list.length>0}}
+    <div class="btn"><a href="javascript:void(0)" class="btn-choose js-addAddress">新增地址</a></div>
+    <div class="js-addressPop proPop">
+        <div class="proPopbg"></div>
+        <div class="proPopCon" style="padding-top:30px;">
+            <a href="javascript:void(0)" class="close" style="top:-10px;" onclick="adressaddPopclose()">+</a>
+            <div class="Gform">
+                <form id="addressform" action="javascript:void(0);" method="post" name="addressform">
+                    <ul>
+                        <li class="Gname">所在区域</li>
+                        <li class="Ginput fn">
+                            <select name='privince' id='province_code' class="validate[required]">
+                                <option value="">省</option>
+                            </select>
+                            <select name='city' id='city_code' class="validate[required]">
+                                <option value="">市</option>
+                            </select>
+                            <select name='town' id='town_code' class="validate[required]">
+                                <option value="">区</option>
+                            </select>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="Gname">具体位置</li>
+                        <li class="Ginput">
+                            <input name="address" type="text" id="" maxlength="50" class="validate[required]" value="" data-rel="">
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="Gname">收货人</li>
+                        <li class="Ginput">
+                            <input name="receiver" type="text" id="" maxlength="4" class="validate[required]" value="" data-rel="">
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="Gname">联系方式</li>
+                        <li class="Ginput">
+                            <input name="connect" id="phone" type="tel" class="validate[required,minSize[11]]" maxlength="11" value="" data-rel=""  />
+                        </li>
+                    </ul>
+                    <ul class="Gbtn-ul">
+                        <li class="btn-li"><a href="javascript:void(0)" class="btn-upaddress btn-choose js-saveAddress">保存并使用</a></li>
+                    </ul>
+                </form>
+            </div>
+        </div>
+    </div>
+{{/if}}
+</script>

@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+<title>裁剪头像</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link href="__PUBLIC__/Css/jquery-ui-1.7.2.custom.css?v=__VR__" rel="Stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="Stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="Stylesheet" type="text/css" />
+<style type="text/css">
+*{margin:0px;font-size:12px}
+.crop{width:580px; margin:20px auto; border:1px solid #ffffff; padding:4px; background:#fff}
+#cropzoom_container{float:left; width:400px}
+#preview{float:left; width:66px; height:66px; border:1px solid #999; margin-left:10px; padding:4px; background:#f7f7f7;}
+.page_btn{float:left; width:150px;  margin-top:20px; line-height:30px; text-align:center}
+.clear{clear:both}
+.btn{cursor:pointer}
+.tl{text-align:left}
+.tc{text-align:center}
+.ml10 {margin-left:10px;}
+.mt10 {margin-top:10px;}
+.ml-180{margin-left:-180px;}
+</style>
+
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.8.custom.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cropzoom.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript">
+$(function() {
+     var cropzoom = $('#cropzoom_container').cropzoom({
+          width: 400,
+          height: 300,
+          bgColor: '#ffffff',
+          enableRotation: false,
+          enableZoom: false,
+          selector: {
+			   w:66,
+			   h:66,
+			   showPositionsOnDrag:false,//显示坐标
+			   showDimetionsOnDrag:false,
+               centered: true,
+			   bgInfoLayer:'#fff',
+               borderColor: 'blue',
+			   animated: true,
+			   maxWidth:66,
+			   maxHeight:66,
+               borderColorHover: 'yellow'
+           },
+           image: {
+               source: '{$picpath}',
+               width: {$picwidth},
+               height: {$picheight},
+               minZoom: 30,
+               maxZoom: 150
+            }
+      });
+	 $("#crop").click(function(){
+		  cropzoom.send('index.php?g=Home&m=Index&a=crop_head_submit', 'POST', {}, function(imgRet) {
+              $("#head_file").val(imgRet);
+			  $("#generated").attr("src", '');
+			   $("#generated").attr("src", imgRet);
+          });			   
+	 });
+	 $("#restore").click(function(){
+		  $("#generated").attr("src", "__PUBLIC__/Image/portrait.gif");
+		  cropzoom.restore();					  
+	 });
+	 $("#confirmOk").click(function(){
+		
+		var head_file=$("#head_file").val();
+		if(head_file==""){
+			alert("请先点击裁剪照片！");
+			return false;	
+		}
+
+		var _call_back="<?php echo $callback;?>";
+
+		var win = art.dialog.open.origin; 
+		if(_call_back && win[_call_back] && typeof(win[_call_back])=='function'){ 
+			try{ 
+				win[_call_back].call(this, head_file); 
+				art.dialog.close();
+			}catch(e){
+				alert('确认异常');			
+			}; 
+		} 
+		
+
+
+		  			  
+	 });
+});
+
+
+</script>
+
+</head>
+
+<body style="background:#fff;">
+<div id="main"> 
+<div class="crop">
+   <div id="cropzoom_container"></div>
+   <div id="preview"><img id="generated" src="__PUBLIC__/Image/portrait.gif"  /></div>
+   <div class="page_btn tl ml10">
+	  <input type="button" class="btn-all w90 mt10" id="crop" value="剪切照片" />
+      <input type="button" class="btn-all w90 mt10" id="restore" value="照片复位" />
+	  <input type="hidden" name="head_file" id="head_file" value=""/>
+   </div>
+   <div class="clear"></div>
+   <div class="fn pt20 tc">
+      <input type="button" class="btn-all w110 ml-180" id="confirmOk" value="确定" />
+	</div>
+</div>
+</div>
+</body>
+</html>

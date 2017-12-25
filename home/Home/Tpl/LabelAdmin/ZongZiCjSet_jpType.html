@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>抽奖设置_营销活动_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wprize.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+	$(function(){
+		var _one_sub = false;
+		$('#btn2').click(function(){
+				if($('#cj_cate_name').val() == ''){
+					art.dialog({width:"200px",title:"提示",lock:true,content:'奖品类别名称不能为空!',okVal: '确认'});
+					return false;
+				}
+			//粉丝id		
+			  var member_id=''; 
+			  $('input[name="mem_batch"]:checked').each(function(){ 
+			    member_id+=$(this).val()+'-'; 
+			  }); 
+			  if (member_id.length > 0) { 
+				    member_id = member_id.substring(0,member_id.length - 1); 
+			  } 
+			
+			 if(_one_sub)
+					return false;
+
+				 _one_sub = true;
+			//提交
+			
+			var data = {
+				cj_cate_id : $('#cj_cate_id', '#form2').val(),
+				cj_cate_name : $('#cj_cate_name', '#form2').val(),
+				member_id : member_id,
+				batch_id : $('#batch_id').val(),
+				score : $('#score').val()
+			}
+			$.post("{:U('Common/SelectJp/jpLevelSave')}", data, function(resp){
+				art.dialog({width:"200px",title:"提示",lock:true,content:resp.info,
+					okVal: '确认',
+					ok: function () {
+						_one_sub = false;
+						if(resp.status=='1'){
+							window.parent.location.reload()
+						}
+					}
+				});
+				
+			}, 'json');
+		});	
+		
+	})
+	
+
+</script>
+</head>
+<body>
+<div class="pl20 pt30 fn" id="one_div">
+	<form id="form2">
+	<input  type="hidden" id="batch_id" value="{$batch_id}"/>
+	<input  type="hidden" id="cj_cate_id" value="{$cj_cate_id}"/>
+		<div class="global-input6 Gform fn">
+			<ul>
+            	<li class="global-input6-name">*&nbsp;奖品类别名称：</li>
+            	<li class="global-input6-input"><input id="cj_cate_name" maxlength="6" type="text" class="validate[required,maxSize[6]] textbox w24" value="{$cate_arr['name']}"/></li>
+			</ul>
+
+			<ul>
+            	<li class="global-input6-name">*&nbsp;兑换金币数：</li>
+            	<li class="global-input6-input"><input id="score" maxlength="8" type="text" class="validate[required,maxSize[8]] textbox w24" value="{$cate_arr['score']}"/></li>
+			</ul>
+			
+            <ul>
+                <li class="global-input6-name">&nbsp;</li>
+                <li class="global-input6-input">
+                <a href="javascript:void(0);" title="确认" id="btn2" class="btn-all w110 ml10">确定</a>
+                </li>
+            </ul>
+		</div>
+	</form>
+</div>
+</body>
+</html>

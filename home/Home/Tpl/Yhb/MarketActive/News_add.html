@@ -1,0 +1,527 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>抽奖</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnewsadd.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wyhb.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Wnewsadd.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jsScroll.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jscolor/jscolor.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e){
+	PreviewnewsAdd();
+});
+$(function(){
+	    var ue = UE.getEditor('wap_info',{
+	    	imageUrl:"{:U('LabelAdmin/Upfile/editoImageSave')}",
+	    	imagePath:"__UPLOAD__",
+	    	catcherUrl:"{:U('LabelAdmin/Upfile/getRemoteImage')}",
+	    	catcherPath:"__UPLOAD__",
+	    	initialFrameWidth:340,
+	    	initialFrameHeight:280
+	    });
+	    ue.addListener("contentChange",function(){
+	    	$(".Preview-moreContenter").html(this.getContent());
+			jsScroll(document.getElementById('iphonePreview'),11, 27, 'divSrollBar');
+	    });
+        $('#sub_button').click(function(){
+    	if($("#page_1").is(":hidden")){$('#page_1').html('')};
+        if($("#page_2").is(":hidden")){ $('#page_2').html('');}
+        if($("#page_3").is(":hidden")){$('#page_3').html('');}
+        if(!ue.getContent()){
+        	$('#wap_tip').validationEngine('showPrompt', '不能为空','error','topRight',true);
+        }else{
+        	$('#wap_tip').validationEngine('hide');
+        }
+        
+        //手动提交需要手动同步编辑器数据
+        ue.sync();
+        
+        $("#theform").validationEngine().submit();
+    }) ;
+       
+})
+
+function checkCodeLogo(){
+	if($("#resp_code_img").val() == '')
+        {
+            return "请上传二维码Logo";
+        }
+}
+
+function checkActLogo(){
+    if($("#resp_log_img").val() == '')
+        {
+            return "请上传wap页面Logo";
+        }
+}
+function checkActContect(){
+	img = $("#resp_wap_page_img_one").val();
+    if (img == '') {
+        return "请上传图片";
+    }
+}
+function checkActContect2(){
+    img = $("#resp_wap_page_img_two").val();
+    if (img == '') {
+        return "请上传图片";
+    }
+}
+function checkActContect3(){
+    img = $("#resp_wap_page_img_three").val();
+    if (img == '') {
+        return "请上传图片";
+    }
+}
+function checkmusic(){
+	if($("#resp_music").val() == '')
+    {
+        return "请上传背景音乐";
+    }
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+         <div id="headerTwo" style="z-index: 999">
+                <include file="Login:loginHeader"/>
+            </div>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+      
+                <form action="{:U('Yhb/News/addSubmit')}" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+									<div class="global-input2 fn w2 pb30">
+                                    	<ul class="newsadd-title">活动基础信息</ul>
+                                      <ul>
+                                          <li class="global-input2-name">*&nbsp;活动名称：</li>
+                                          <li class="global-input2-input"><input name="name" id="name"  type="text"  class="validate[required,optional,maxSize[20]] textbox w300" value=""/></li>
+                                      </ul>
+                                      <ul>
+                                          <li class="global-input2-name">*&nbsp;活动时间：</li>
+                                          <li class="global-input2-input"><input name="start_time" id="start_time" type="text"  class="validate[required] textbox w130" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" /><span class="mlr10">-</span><input name="end_time" id="end_time" type="text"  class="validate[required] textbox w130"  onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" /></li>
+                                      </ul>
+                                    <ul class="newsadd-title">活动界面设计</ul>        
+                    					<include file="./Home/Tpl/LabelAdmin/Bg_add.html" />
+                                      <include file="./Home/Tpl/LabelAdmin/Name_add.html" />
+                                      
+                               <include file="./Home/Tpl/LabelAdmin/Logo_add.html" />
+                               
+                                      <ul>
+                                          <li class="global-input2-name">*&nbsp;活动页面标题：</li>
+                                          <li class="global-input2-input"><input name="wap_title" id="wap_title" type="text"  class="validate[required,optional,maxSize[20]]] textbox w300" id="wap_titile"/></li>
+                                      </ul>
+                                      <ul>
+                                          <li class="global-input2-name">*&nbsp;活动页面内容：</li>
+                                          <li class="global-input2-input" id="wap_tip"><textarea name="wap_info" id="wap_info" ></textarea></li>
+                                          
+                                      </ul>
+                                      <ul>
+                                          <li class="global-input2-name">背景音乐：</li>
+                                          <li class="global-input2-input">
+                                              <input name="is_music" id="no_music"  type="radio" value="0" checked="checked"/>
+                                              <label for="logo-true" class="ml5">否</label>
+                                              <input name="is_music" id="is_music"  type="radio" value="1" />
+                                              <label for="logo-false" class="ml5">是</label>
+                                              <div id="logo-upload3" class="dn">
+                                              <input id="music_show" type="text"  id="logo-text" class="validate[required,condRequired[is_music],funcCall[checkmusic]]] textbox w140 l"/>
+                                              <div class="rel l">
+                                              <input type="file" name="music" id="music" style="left:-152px;" class="upload-file" onChange="$('#music_show').val($(this).val())"/><a href="javascript:;" title="上传" class="btn_inner w60 ml10">浏览</a><a href="javascript:;" title="上传" class="btn_inner w60 ml10" onClick="return ajaxFileUpload('music','resp_music','show3','{:U('LabelAdmin/Upfile/index','act=news&type=audio')}');">上传</a>
+                                              <input type="hidden" name="resp_music" id="resp_music" value=""/>
+                                              </div>
+                                              <br /><p class="cl font-12-cc">音乐格式为mp3，小于等于1M</p>
+                                              </div>
+                                              
+                                          </li>
+                                      </ul>
+                                      <ul>
+                                          <li class="global-input2-name">视频链接地址：</li>
+                                          <li class="global-input2-input"><input name="video_url" type="text"  class="textbox w300" id="video_url"/></li>
+                                      </ul>
+                                      <ul>
+                                          <li class="global-input2-name">SNS分享：</li>
+                                          <li class="global-input2-input">
+                                          <?php 
+                                         // $sns_arr = C('SNS_ARR');
+                                          foreach($sns_arr as $sns_k=>$sns_v){
+                                          if($sns_k>4) continue;
+                                          ?>
+                                          <input name="sns_type[]" type="checkbox" value="<?php echo $sns_k?>"/><p class="ml5"><?php echo $sns_v?></p>
+                                          <?php }?>
+                                          <br /><p class="font-12-cc">勾选后，允许消费者将您的营销活动分享给他的社交网络好友</p>
+                                          </li>
+                                              
+                                      </ul>
+                					 
+                                      <ul>
+                                          <li class="global-input2-name"></li>
+                                          <li class="global-input2-input">
+                                          <a href="javascript:;" id="sub_button" title="下一步" class="btn-all w110">下一步</a>
+                                          <a href="javascript:history.go(-1)" title="取消" class="btn-all-del w110 ml10">取消</a>
+                                      </ul>
+                                  </div>
+                                  <div class="activityread_iphone tc mt70">
+                                      <div class="activityread_iphone_con">
+                                          <div id="iphonePreview">
+                                          <div id="iphonePreview-con">
+                                          <!-- ---------预览--------- -->
+                                          	<div id="iphonePreview-one">
+                                            	<div id="Preview-wrapper">
+                                                    <div id="Preview-container">
+                                                        <div id="Preview-main">
+                                                            <div class="Preview-mainTop">
+                                                                <div class="Preview-top-img">
+                                                                    <img src="__PUBLIC__/Label/Image/topbg-sOne.png"  class="Preview-vip-img" />
+                                                                </div>
+                                                            </div>
+                                                            <div id="Preview-mainCon" class="Preview-mainCon fn">
+                                                                <div class="Preview-top-title">{$node_name}</div>
+                                                                <div class="Preview-logo-bg">
+                                                                    <div class="Preview-logo-con"><img src="__PUBLIC__/Label/Image/defaultlogo-sOne.png"/></div>
+                                                                </div>                                                                
+                                                                <div class="Preview-multimedia">
+                                                                    <div class="Preview-voice_button" style="display:none;"><a href="javascript:void(0)" class="a-hide">音乐</a></div>
+                                                                    <div class="Preview-video_button" style="display:none;" ><a href="javascript:void(0)" class="a-hide" target="_blank">视频</a></div>
+                                                                </div>
+                                                                <div class="Preview-mainCon-contenter">
+                                                                    <div class="Preview-mainCon-title">活动页面标题</div>
+                                                                    <div class="Preview-mainCon-contenter-bg">
+                                                                        <div class="Preview-moreContenter">
+                                                                            <p class="tc">此处会显示您所添加的活动页面内容</p>
+                                                                            <br />
+                                                                            <p class="tc" style=" color:#999;">
+                                                                            您可以通过使用<br />极速模式/chrome/Firefox<br />查看实际效果
+                                                                            </p>
+                                                                            <br />
+                                                                        </div>
+                                                                        <div class="Preview-content_button fn">
+                                                                            <input type="button" value="点击抽奖" class="Preview-input_button"/>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="Preview-share dn">
+                                                              <ul class="Preview-share_list">
+                                                                  <li>分享到：</li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/sinaweibo.png"/></a></li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/tencentweibo.png"/></a></li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/qzone.png"/></a></li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/renren.png"/></a></li>
+                                                                </ul>
+                                                            </div>
+                                                            <div id="Preview-footer">
+                                                             <!--   <img src="__PUBLIC__/Label/Image/footer-logo.png" /> -->
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- -分隔两个预览- -->
+                                            <div id="iphonePreview-two">
+                                            	<div id="Preview-wrapper">
+                                                    <div id="Preview-container">
+                                                        <div id="Preview-main">
+                                                            <div class="Preview-mainTop">
+                                                                <div class="Preview-top-img">
+                                                                    <img src="__PUBLIC__/Label/Image/topbg-sOne.png" class="Preview-vip-img" />
+                                                                </div>
+                                                            </div>
+                                                            <div id="Preview-mainCon" class="Preview-mainCon fn">
+                                                                <div class="Preview-top-title">{$node_name}</div>
+                                                                <div class="Preview-logo-bg">
+                                                                    <div class="Preview-logo-con"><img src="__PUBLIC__/Label/Image/defaultlogo-sOne.png"/></div>
+                                                                </div>                                                                
+                                                                <div class="Preview-multimedia">
+                                                                    <div class="Preview-voice_button" style="display:none;"><a href="javascript:void(0)" class="a-hide">音乐</a></div>
+                                                                    <div class="Preview-video_button" style="display:none;" ><a href="javascript:void(0)" class="a-hide" target="_blank">视频</a></div>
+                                                                </div>
+                                                                <div class="Preview-mainCon-contenter">
+                                                                    <div class="Preview-mainCon-title">活动页面标题</div>
+                                                                    <div class="Preview-mainCon-contenter-bg">
+                                                                        <div class="Preview-moreContenter">
+                                                                            <p class="tc">此处会显示您所添加的活动页面内容</p>
+                                                                            <br />
+                                                                            <p class="tc" style=" color:#999;">
+                                                                            您可以通过使用<br />极速模式/chrome/Firefox<br />查看实际效果
+                                                                            </p>
+                                                                            <br />
+                                                                            <p class="tc" style=" color:#999;">
+                                                                            您可以通过使用<br />极速模式/chrome/Firefox<br />查看实际效果
+                                                                            </p>
+                                                                            <br />
+                                                                            <p class="tc">此处会显示您所添加的活动页面内容</p>
+                                                                            <br />
+                                                                            <p class="tc" style=" color:#999;">
+                                                                            您可以通过使用<br />极速模式/chrome/Firefox<br />查看实际效果
+                                                                            </p>
+                                                                            <br />
+                                                                            <p class="tc">此处会显示您所添加的活动页面内容</p>
+                                                                            <br />
+                                                                            <p class="tc" style=" color:#999;">
+                                                                            您可以通过使用<br />极速模式/chrome/Firefox<br />查看实际效果
+                                                                            </p>
+                                                                            <br />
+                                                                            <p class="tc">此处会显示您所添加的活动页面内容</p>
+                                                                            <br />
+                                                                            <p class="tc" style=" color:#999;">
+                                                                            您可以通过使用<br />极速模式/chrome/Firefox<br />查看实际效果
+                                                                            </p>
+                                                                            <br />
+                                                                        </div>
+                                                                        <div class="Preview-content_button fn">
+                                                                            <input type="button" value="点击抽奖" class="Preview-input_button"/>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="Preview-share dn">
+                                                              <ul class="Preview-share_list">
+                                                                  <li>分享到：</li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/sinaweibo.png"/></a></li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/tencentweibo.png"/></a></li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/qzone.png"/></a></li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/renren.png"/></a></li>
+                                                                </ul>
+                                                            </div>
+                                                            <div id="Preview-footer">
+                                                               <!-- <img src="__PUBLIC__/Label/Image/footer-logo.png" /> -->
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- ---------预览--------- -->
+                                          	<div id="iphonePreview-four">
+                                            	<div id="Preview-wrapper">
+                                                    <div id="Preview-container">
+                                                        <div id="Preview-main">
+                                                            <div class="Preview-mainTop">
+                                                                <div class="Preview-top-img">
+                                                                    <img src="__PUBLIC__/Label/Image/topbg-sOne.png"  class="Preview-vip-img" />
+                                                                </div>
+                                                            </div>
+                                                            <div id="Preview-mainCon" class="Preview-mainCon fn">
+                                                                <div class="Preview-top-title">{$node_name}</div>
+                                                                <div class="Preview-logo-bg">
+                                                                    <div class="Preview-logo-con"><img src="__PUBLIC__/Label/Image/defaultlogo-sOne.png"/></div>
+                                                                </div>                                                                
+                                                                <div class="Preview-multimedia">
+                                                                    <div class="Preview-voice_button" style="display:none;"><a href="javascript:void(0)" class="a-hide">音乐</a></div>
+                                                                    <div class="Preview-video_button" style="display:none;" ><a href="javascript:void(0)" class="a-hide" target="_blank">视频</a></div>
+                                                                </div>
+                                                                <div class="Preview-mainCon-contenter">
+                                                                    <div class="Preview-mainCon-title">活动页面标题</div>
+                                                                    <div class="Preview-mainCon-contenter-bg">
+                                                                        <div class="Preview-moreContenter">
+                                                                            <p class="tc">此处会显示您所添加的活动页面内容</p>
+                                                                            <br />
+                                                                            <p class="tc" style=" color:#999;">
+                                                                            您可以通过使用<br />极速模式/chrome/Firefox<br />查看实际效果
+                                                                            </p>
+                                                                            <br />
+                                                                        </div>
+                                                                        <div class="Preview-content_button fn">
+                                                                            <input type="button" value="点击抽奖" class="Preview-input_button"/>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="Preview-share dn">
+                                                              <ul class="Preview-share_list">
+                                                                  <li>分享到：</li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/sinaweibo.png"/></a></li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/tencentweibo.png"/></a></li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/qzone.png"/></a></li>
+                                                                  <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/renren.png"/></a></li>
+                                                                </ul>
+                                                            </div>
+                                                            <div id="Preview-footer">
+                                                             <!--   <img src="__PUBLIC__/Label/Image/footer-logo.png" /> -->
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                          <!-- ---------预览结束--------- -->
+                                          <div>
+                                          </div>
+                                          <script type="text/javascript">
+                                          	jsScroll(document.getElementById('iphonePreview'),11, 27, 'divSrollBar');
+                                          </script>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>
+<script>
+
+
+    $("input[name=is_music]").change(function(){
+		if($(this).val() == '1'){
+			$('#logo-upload3').show();
+		}else{
+			$('#resp_music').val('');
+			$('#logo-upload3').hide();
+		}
+	});
+    
+   
+
+
+    
+  //隐藏页面
+function hide_page(id){
+	if(id=='page_3'){
+		$('#close_id_2').show();
+	}
+	$('#'+id).hide();
+}
+//添加页面
+function add_page(){
+	if($("#page_1").is(":hidden")){
+		$('#page_1').show();
+		return ;
+	}
+	if($("#page_2").is(":hidden")){
+		$('#close_id_1').hide();
+		$('#page_2').show();
+		return ;
+	}
+	if($("#page_3").is(":hidden")){
+		$('#close_id_1').hide();
+		$('#close_id_2').hide();
+		$('#page_3').show();
+		return ;
+	}else{
+		alert('只能新增3个');
+		return;
+	}
+
+}
+  
+//文件上传
+function ajaxFileUpload(imgid,hiddenid,showid,url){
+var dialog = art.dialog({title:false,fixed: true,padding:0});
+$.ajaxFileUpload
+({
+	url:url,
+	secureuri:false,
+	fileElementId:imgid,
+	dataType: 'json',
+	data:{name:'logan', id:'id'},
+	success: function (data, status)
+	{
+		if(typeof(data.error) != 'undefined')
+		{
+			if(data.error != '')
+			{
+				dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+			}else{
+
+				var resp = data.msg;
+				if(resp != '0000'){
+					dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+					return false;
+				}else{
+					dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+				}
+				$('#'+hiddenid).val(data.imgurl);
+                previewuploadimg('<?php echo APP_PATH.'Upload/';?>'+data.imgurl,"logo");
+			}
+		}
+	},
+	error: function (data, status, e)
+	{
+		dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+	}
+})
+
+return false;
+}
+/*
+function get_scrolltop(){
+	var ns = (navigator.appName.indexOf("Netscape") != -1);
+	var diffY;
+	if (document.documentElement && document.documentElement.scrollTop)
+	{diffY = document.documentElement.scrollTop;}
+	else if (document.body){diffY = document.body.scrollTop;}
+	var Scrolltop = ns ? pageYOffset : diffY;			
+	if( Scrolltop > 260){
+		document.getElementById('new_content_fixright').className='new_content_fixright';
+	}
+	else if( Scrolltop < 260 ){
+		document.getElementById('new_content_fixright').className='';	
+	}
+	setTimeout("get_scrolltop()",30);
+}
+get_scrolltop();
+*/
+
+//文件上传带预览
+	function ajaxFileUploadview(imgid,hiddenid,showid,url){
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.ajaxFileUpload
+		({
+			url:url,
+			secureuri:false,
+			fileElementId:imgid,
+			dataType: 'json',
+			data:{name:'logan', id:'id'},
+			success: function (data, status)
+			{
+				if(typeof(data.error) != 'undefined')
+				{
+					if(data.error != '')
+					{
+						dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+					}else{
+
+						var resp = data.msg;
+						if(resp != '0000'){
+							dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+							return false;
+						}else{
+							dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+						}
+						$('#'+hiddenid).val(data.imgurl);
+                        $("#bg_style").val(3);
+						previewuploadimg('<?php echo APP_PATH.'Upload/wapBg/';?>'+data.imgurl,"background");
+						
+					}
+				}
+			},
+			error: function (data, status, e)
+			{
+
+				dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+			}
+		})
+
+		return false;
+	}
+
+</script>

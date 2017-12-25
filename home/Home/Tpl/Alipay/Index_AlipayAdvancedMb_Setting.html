@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+<title>翼码旺财_条码支付</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Walipay.css?v=__VR__" rel="stylesheet" type="text/css" /> 
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+</head>
+<script>
+    $(document).ready(function(){
+        $("#save").click(function() {
+            var data = {
+                "id" : $("input[name=templateId]").val(),
+                "start" : $("input[name=startMake]").val(),
+                "end" : $("#endMake").val(),
+                "url" : $("#urlText").val(),
+                "channel_name" : $("#channel_name").val(),
+            };
+            $.post("{:U(Alipay/Index/AlipayAdvancedMb_Setting)}", data, function(d){
+                if(1==d.status){
+                    art.dialog.msg({
+                        content:'恭喜您，您已成功新增模板消息！<br><span>如需立即应用该模板消息，请点击“立即应用”</span>',
+                        width:400,
+                        title:'提示',
+						okVal:"立即应用",
+						ok:function(){
+							window.location.href = "{:U('Alipay/Index/AlipayAdvancedMb_index')}";
+						},
+						cancelVal:"暂不应用",
+						cancel:function(){
+							$.post("{:U('Alipay/Index/AlipayClosedStatus')}", {'status':'1'}, function(data){
+								window.location.reload();
+							}, 'json');
+						}
+                    });
+                }else{
+                   art.dialog.msg({content:d.info});
+                }
+            },'json')
+        });
+    });
+</script>
+
+<script type="text/javascript">
+
+function select_activity(obj) {
+	var _this = $(obj);
+    var url = "{:U('LabelAdmin/SelectBatches/index')}";
+    var title = '选择互动模块';
+    art.dialog.data('_this', _this);
+    art.dialog.open(url, {
+        width: 800,
+        title: title,
+        id: 'selectjp'
+    });
+}
+function selectActivityCallback(d) {
+    $('[name="urlTitle"]').val(d.info);
+    $('[name="channel_name"]').val(d.info);
+    $('#urlTitle').html(d.info);
+    $('#channel_name').html(d.info);
+    $('#batch_type').val(d.batch_type);
+    $('#batch_id').val(d.batch_id);
+	var batchId = d.batch_id;
+	var batchType = d.batch_type;
+	$.ajax({
+	   type: "GET",
+        url:"{:U('MarketActive/NewPoster/ajaxGetLabelId')}&batchId="+batchId+"&batchType="+batchType,
+	   success: function(da){
+		 var url2 = "{:U('Label/Label/index')}&id="+ da.info;
+	     $('[name="url2"]').val(url2);
+	     $('#urlTitle').attr('href', url2);
+         $('#urlText').val(url2);
+	   },
+	   dataType: "json"
+	});
+
+}
+
+</script>
+<body>
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <div class="shopNav">
+    <include file="./Home/Tpl/Alipay/Alipay_public_header.html" topmenuid="zhifu"/>
+    </div>
+    <div id="container">
+        <div id="main" class="rel bgfff">
+         <div class="sidenav">
+         <include file="./Home/Tpl/Alipay/Index_left_menuNew2.html" leftmenuid="advanced"/>
+         </div>
+            <div class="subcon fn">
+                <div class="fn">
+                    <div class="main-name fn">
+                        <h4><a href="javascript:history.go(-1);" class="back"><i></i> 高级设置</a> / 微信模板消息设置</h4>
+                    </div>
+                    <div class="tipNormal">
+                        <h5>什么是模板消息？</h5>
+                        <p>模板消息是微信公众号推出的用于向用户发送服务通知的消息类型，用于符合要求的特定服务场景中，如信用卡刷卡通知，商品购买成功通知等。</p>
+                    </div>                   
+                    <div class="cl fn mt15"></div>
+                    <div class="SettingArea">
+                        <div id="phone">
+                            <div class="phonetop"></div>
+                            <div id="phoneCon" style="padding-top:0; border:0">
+                                <img src="__PUBLIC__/Image/Wfx/phonetop.png">
+                                <div class="pContent">
+                                	<div class="pContentInner">
+                                    	<h4>支付成功提醒</h4>
+                                        <span class="date">8月16日</span>
+                                        <p class="toshow Gshow-beginTitle">微信支付已成功！</p>
+                                        <ul>
+                                            <li><strong>订单号：</strong>154248-01-2254</li>
+                                            <li><strong>消费金额：</strong>10元</li>
+                                            <li><strong>消费门店：</strong>火车站门店</li>
+                                            <li><strong>时间：</strong>2015-8-26 18:05</li>
+                                        </ul>
+                                        <p class="toshow Gshow-msgTitle">多谢您的惠顾！更多优惠信息请点击详情查看。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="Gform l">
+
+                            <ul class="first">
+                                <li class="Gname"><span>*</span>模板ID</li>
+                                <li class="Ginput">
+                                    <input type="text" name='templateId' value="{$info['template_id']}"/>
+                                    <span class="txtTips">请填写您的模板ID&nbsp;&nbsp;<a href="{:U('Home/Help/helpArt',array('news_id'=>1460,'leftId'=>'wfx','type'=>11))}">如何查看模板ID？</a></span>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gname"><span>*</span>欢迎语</li>
+                                <li class="Ginput">
+                                    <input type="text" name='startMake' value="{$info['welInfo']['first']['value']}" class="Gview-beginTitle" placeholder="微信支付已成功"/>
+                                </li>
+                            </ul>
+                            <ul>
+                            <li class="Gname"><span>*</span>推广消息标题</li>
+                            <li class="Ginput">
+                                <textarea name='endMake' id="endMake" placeholder="多谢您的惠顾！更多优惠信息请点击详情查看。" class="Gview-msgTitle" />{$info['welInfo']['remark']['value']}</textarea>
+                            </li>
+                            </ul>
+                            
+                            <ul>
+                                <li class="Gname">推广消息链接</li>
+                                <li class="Ginput">
+                                    <div class="Gchoose">
+                                        <input name="url2" type="text" value="" />
+                                        <input name="urlTitle" id="urlText" type="hidden" value="{$info['url']}" />
+                                        <input name="channel_name" id="channel_name" type="hidden" value="{$info['channel_name']}" />
+                                        <a href="javascript:void(0)" id="urlTitle">{$info['channel_name']}</a>
+                                        <a href="javascript:void(0)" class="Gbtn-url" title="选择链接" onclick="select_activity(this)"><i></i></a>
+                                    </div>
+                                 </li>
+                            </ul>
+                            <ul>
+                            <li class="Ginput pt0">
+                                <a  href="javascript:void(0);" class="btn-all" id="save">保存</a><a href="javascript:void(0);" class="btn-all-del" id="del">取消</a>
+                            </li>
+                            </ul>
+                        </div>
+                        <div class="cl fn"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	<include file="./Home/Tpl/Public/Public_footer.html" />
+	<div class="service"></div>
+</div>
+</html>

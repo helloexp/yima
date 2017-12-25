@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>定额红包-促销管理</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/highcharts.js"></script>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script>
+$(document).ready(function(){
+
+	$('#add_batch').click(function(){
+		art.dialog.open(
+			"{:U('LabelAdmin/SelectBatches/index')}",{
+					width:800,
+					height:600,
+					lock:true,
+					fixed:true,
+					title:'选择互动模块'
+				});
+		
+	});
+
+	$('#smb').click(function(){
+		if($("#theform").validationEngine('validate')){
+			//$("#theform").submit();
+			var dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+			$.post(
+				"{:U('addFixBonus')}",
+				$("#theform").serialize(),
+				function(data){
+					if(data.status == 1){
+						dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+						location.href = "{:U('fixBonusList')}";
+					}else{
+						dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+					}
+				},
+				'json'
+			);
+		}
+		
+	});
+
+})
+
+//选择模块的回调函数
+function selectActivityCallback(d) {
+	$('#batch_show').text(d.info);
+	$('#batch_type').val(d.batch_type);
+	$('#batch_id').val(d.batch_id);
+}
+</script>
+</head>
+<body>
+<div id="wrapper"> 
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <include file="Shop/nav" navmenuid="Navsale"/>
+    <div id="container" class="bgfff"> 
+        <div id="main" class="rel"> 
+            <div class="sidenav">
+               <include file="Sale/menu" salemenu_id="dehb"/>
+            </div>
+            <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4>创建定额红包</h4>
+                    </div>
+                    <div class="Gform l">
+                        <form method="post" action="{:U('addFixBonus')}" id="theform">
+							<input type="hidden" name="batch_type" id="batch_type" value="" />
+							<input type="hidden" name="batch_id" id="batch_id" value="" />
+							<ul>
+								<li class="Gname">*&nbsp;红包名称</li>
+								<li class="Ginput">
+									<input type="text" maxlength="20" name="bonus_name" class="Gview-text,validate[required]"><span class="maxTips forInput" data-max="20">0/20</span>
+								</li>
+							</ul>
+							<ul>
+								<li class="Gname">*&nbsp;红包图片</li>
+								<li class="Ginput">
+									<div class="Gchoose">
+										<input type="text" value="" name="img_resp" id="img_resp" class="validate[required]">
+										<a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:640,height:400}"><i></i></a>
+									</div>
+								</li>
+							 </ul>
+							<ul>
+								<li class="Gname">*&nbsp;单个红包面额</li>
+								<li class="Ginput">
+									<input type="text" maxlength="20" name="bonus_amt" class="Gview-text,validate[required,min[0.01],custom[number]]"><span class="maxTips forInput">元</span></li>
+								</li>
+							</ul>
+							<ul>
+								<li class="Gname">*&nbsp;红包总份数</li>
+								<li class="Ginput">
+									<div class="switch">
+										<input type="radio" name="num_type" value="0" checked="checked" />
+										<div class="newRadio">
+											<span class="valfirst hover" data-val="0">不限</span>
+											<span class="vallast" data-val="1">限制</span>
+										</div>
+										<div class="newRadio-input">
+											<input type="text" name="bonus_num" class="validate[required,min[1],custom[integer]]" value="" style="width:152px;" maxlength="8"/><span class="maxTips forInput">份</span>
+										</div>
+									</div>
+								</li>
+							</ul>
+							<ul>
+								<li class="Gname">*&nbsp;红包有效期</li>
+								<li class="Ginput">
+									<div class="Gtime2 fn">
+										<input type="text" name="begin_date" id="begin_date" class="validate[required]" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_date\\')}'})">
+										<em>至</em>
+										<input type="text" name="end_date" id="end_date" class="validate[required]" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'begin_date\\')}'})">
+									</div>
+								</li>
+							</ul>
+							<ul class="Gtitle">使用红包的引导配置</ul>
+							<ul>
+								<li class="Gname">*&nbsp;是否提示使用</li>
+								<li class="Ginput">
+									<div class="switch">
+										<input type="radio" name="link_type" id="link_type" value="1" checked="checked" />
+										<div class="newRadio">
+											<span class="valfirst" data-val="0" onclick="javascript:$('#link_show').hide();">否</span>
+											<span class="vallast hover" data-val="1" onclick="javascript:$('#link_show').show();">是</span>
+										</div>
+									</div>
+								</li>
+							</ul>
+							<div id="link_show">
+							<ul>
+								<li class="Gname">*&nbsp; 提示按钮名称</li>
+								<li class="Ginput">
+									<input type="text" maxlength="20" name="button_name" class="validate[required]" value="去使用"><span class="maxTips forInput" data-max="20">0/20</span>
+								</li>
+							</ul>
+							<ul>
+								<li class="Gname">*&nbsp;链接地址</li>
+								<li class="Ginput">
+									<div class="switch">
+										<input type="radio" name="url_type" id="url_type" value="0" checked="checked">
+										<div class="newRadio">
+											<span class="valfirst" data-val="0">旺财小店</span>
+											<span class="vallast" data-val="1">自定义</span>
+										</div>
+										<div class="newRadio-input cl mt5">
+											<input name="link_url" id="link_url" type="text" class="textbox" maxlength="100" value="" data-view="1" placeholder="请输入带http://开头的链接地址" style="width:260px;"><span class="maxTips forInput" data-max="100" style="top:50px;">0/100</span>
+										</div>
+									</div>
+								</li>
+							</ul>
+							</div>
+							<!--
+							<ul>
+								<li class="Gname">&nbsp;红包领取介绍</li>
+								<li class="Ginput">
+								<textarea name="memo" id="memo" class="validate[maxSize[10000],required]"></textarea></li>
+							</ul>
+							-->
+							<ul>
+							<li class="Gname"></li>
+							<li class="Ginput">
+								<a href="javascript:void(0);" title="确认" id="smb" class="btn-all">确定</a>
+								<a href="javascript:history.back();" title="取消" class="btn-all-del">取消</a>
+							</li>
+							</ul>
+					</form>
+				</div>
+			</div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" /> 
+</div>
+<div class="service"></div>
+</body>
+</html>

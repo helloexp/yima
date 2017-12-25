@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>O2O活动信息评论_旺消息_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/Wonlineactivity.js?v=__VR__"/>
+<script type="text/javascript">
+
+function message_dialog(id){
+		art.dialog.open("?g=Home&m=AccountInfo&a=reply_view&id="+id,{
+			title: '留言回复信息',
+			width:'660px',
+			height:'500px'
+		});
+}
+function reply(id){
+	$.get("{:U('AccountInfo/replay_status')}",{"id":id},function(data){
+		if(data!='0'){
+			alert("系统错误，查看回复失败");
+		}
+	});	
+}
+function look(id){
+	$.get("{:U('AccountInfo/message_view')}",{"id":id},function(data){
+		if(data!='0'){
+			alert("系统错误，查看内容失败");
+		}
+	});	
+}
+</script> 
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container">
+			<div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始引入左菜单-->
+					<assign name="leftMenuId" value="8"/>
+                    <include file="Home/AccountCenter/menu2" leftmenuid="o2o-pl"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4>评论</h4>
+                    </div>
+                    <div class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover"><a href="<?php echo U('AccountInfo/batch_msg'); ?>">评论</a></p>
+                            <p><a href="<?php echo U('AccountInfo/node_msg'); ?>">私信</a></p>
+                        </div>
+                    </div>
+                    <div class="fn pt10">
+                    	<if condition="!empty($queryList)">
+                        <ul class="Ufont-List-four">
+                        	<volist name="queryList" id="val">
+                            <li class="<if condition="$val['ck_status'] eq 2" >new</if>">
+                                <span class="time">{$val.add_time|dateformat}</span>
+                                <p class="title">{$val.node_name}：<a class="link" href="{:U('Case/activityView',array('show_id'=>$val['label_id'],'istype'=>1,'hid'=>$val[id]))}">{$val.content}</a>
+                                </p>
+                                <div class="opr"><a target='_blank' class="answer-mes" href="{:U('Case/activityView',array('show_id'=>$val['label_id'],'istype'=>1,'hid'=>$val[id]))}"><i class="answer"></i>回复</a></div>
+                                <div class="news-description"><span>{$val[hcontent]}</span><b>
+
+							</b></div>
+                            </li>
+                            </volist>
+                        </ul>
+                        <else/>
+                        	<div class="nonedatb mt20 bgf4f4f4"><p>没有更多的数据了</p></div>	
+                        </if>
+						<div class="pageBase-sm pt20">
+                            <ul class="pageul">{$page}</ul>
+                        </div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<include file="./Home/Tpl/Public/Public_footer.html" />
+	</div>
+<div class="service"></div>
+</body>
+<script>
+$(function(){
+	//提交子级留言
+	$(".ptsub").on("click",function(){
+		var _this=$(this);
+		var thisform=$(this).closest("form");
+		var dialog;
+		//var thisform=$(this).find("form[name=replyform]");	
+        //if($("#".thisform).validationEngine('validate')){			
+			$(thisform).ajaxSubmit({				
+				beforeSubmit:function(){
+					
+					dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+				},
+				success:function(data){
+					 if(data.status == '1'){
+
+						   dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+
+						   if(!data.head_photo){
+								var head_photo_str='<img class="mes-head" src="__PUBLIC__/Image/portrait.gif" alt="" style="width:30px;height:30px;"/>';
+						   }else{
+								var head_photo_str='<img class="mes-head" src="'+data.head_photo+'" alt="" style="width:30px;height:30px;"/>';
+						   }
+						   /*
+						 var html=[
+						  		'<li class="fn">',
+									head_photo_str,
+									'<div class="r-mes">',
+										'<div class="mes-up uncheck">',
+											'<p><span class="tit">我 回复 '+data.node_name+'：</span>'+data.content+'</p>',
+										'</div>',
+										'<div class="mes-down fn">',
+											'<p>',
+												'<span class="date">'+data.add_time+'</span>',
+												'<span class="ctrl"><a class="del-mes" href="javascript:void(0)">删除</a></span>',
+											'</p>',
+										'</div>',
+									'</div>',
+								'</li>'].join('');
+								_this.closest("ul").find("li:eq(0)").before(html);
+
+								//_this.unbind("click");
+								*/
+								
+						 var html=[
+						  		'<div class="l-mes">',
+									head_photo_str,
+									'<div class="mes-dlg fn">',
+										'<div class="mes-up uncheck">',
+											'<p><span class="tit">我 回复 '+data.node_name+'：</span>'+data.content+'</p>',
+											'<p class="date">'+data.add_time+'</p>',
+										'</div>',
+									'</div>',
+								'</li>'].join('');
+								_this.closest("li").find(".mymes").append(html);
+
+								 //如果有任务信息
+								 var task_info = data.task_info || '';
+								 if(task_info){
+									 dialog.close = function(){
+										 this.hide();
+										 msgmoneym(task_info,false);
+									 };
+								 }
+
+					  }else{
+						   dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+						 
+					  }
+				},
+				dataType:'json'
+			});
+		//};
+    });
+	//提交子级留言
+});
+</script>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>创建优惠_平安_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/select2/css/select2.min.css?v=__VR__" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/select2/js/select2.min.js?v=__VR__"></script>
+<script>
+$(function(){
+    $("#sub_button").click(function(){
+		var mer_id = $('#merchant_id').val();
+		if(mer_id == ''){
+			alert('商户不能为空');
+			return false;
+		}
+    	var dialog;
+		//$("#theform").validationEngine().submit();
+		if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                 if(data.status == '1'){
+                       //all_art_close();
+                       //$('#div_content').hide();
+                       //$('#div_success').show();
+                       //windowheight();
+                       //return false;
+					   dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+					   setTimeout("window.location.href='{:U('goods_apply',array('apply_type'=>'0'))}';",500);
+                       return false;
+                  }else{
+                       dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                  }
+            },
+                dataType:'json'
+            });
+            return false;
+        }
+        
+    });
+    $(".message-show").click(function(){
+        var message=$("#mms_info").val();
+        var html=
+        ['<div class="aipai-iphone">',
+          '<div class="aipai-iphone-text">',
+              message,
+          '</div>',
+          '</div>'].join('');
+          art.dialog({
+            padding: 20,
+            title: '短信预览',
+            content: html,
+            lock: true
+        });
+    });
+    
+    //短信内容js
+    $('#batch_des').focusout(function(){
+    	var text = $(this).val();
+    	if(text == '') return false;
+    	$("#Amsg-con").html(text);
+    });
+    $('#ai_end_date').focusout(function(){
+        var text = $(this).val();
+        if(text == '') return false;
+        text = text.substr(0, 4) + "-" + text.substr(4, 2) + "-" + text.substr(6, 2);
+        $("#Amsg-date").html(text);
+    });
+    $('#node_phone').focusout(function(){
+        var text = $(this).val();
+        if(text == '') return false;
+        $("#Amsg-tel").html(text);
+    });
+    
+    $(".choosetext1").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").hide();
+    });
+    $(".choosetext2").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").show();
+    });
+    $(".nodename").select2({
+        placeholder: "请输入商户名称",
+        allowClear: true
+    });
+})
+function checkImg(){
+    if($("#resp_img").val() == '')
+        {
+            return "请上传营销图片";
+        }
+}
+function imgCheck(){
+	if($("#goods_img").val() == ''){
+        return "请上传营销图片";
+    }
+}
+
+/*获取图片路径中的图片名*/
+function base_name(url){
+    var urlList = url.split('/'); 
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+
+function uploadImg(url) {
+var win_width = 700;
+art.dialog.open(url+"&uploadUrl={:urlencode(U('ImgResize/Resize/uploadFile','','','',true))}&menuType=1", {
+    lock: true,
+    title: "上传图片",
+    width: win_width,
+    height: win_width / 1.6,
+    id: 'art_upload'
+});
+}
+
+//背景图片回调函数
+function bgCallback(d) {
+//填充缩略图
+$('#goods_img_show').attr('src', d.absolutepath).show();
+//上传用
+$('#goods_img').val(base_name(d.absolutepath));
+}
+
+function poslist(mer_id){
+	if(mer_id == '')
+	{
+		alert('商户不能为空');
+		$("#storelist").empty();
+		return false;
+	}
+	$.get("{:U('Fb/PinganGoods/pos_list')}",{"merchant_id":mer_id},function(data){
+			$("#storelist").empty();
+            if(data == ''){
+                $("#storelist").html('未查询到可用门店');
+            }else{
+                $("#storelist").append(data);
+            }
+        },'html');
+
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+
+                <div class="sidenav ">
+                    <!--开始载入左菜单--> 
+                    <include file="Beijing/menu" leftmenuid="invitation_setting"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="Wcanal-tab-title fn">
+                        <h4>邀请卡设置</h4>
+                    </div>
+                  
+               
+                                <!--旺财优惠表单1-->
+                                <div class="Gform w1">
+                                	<ul>
+                                    <li class="Gname"><span>*</span>邀请卡链接</li>
+                                    <li class="Ginput">
+                                    	<a href="http://101.231.188.78:81/iss2/wap/fnmEre2z" id="link_url" target="_blank" style="color: #666666; text-decoration: underline; font-weight: normal;line-height: 28px;">http://101.231.188.78:81/iss2/wap/fnmEre2z</a>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>页面标题：</li>
+                                    <li class="Ginput"><input name="name" id="name" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[24]] textbox w380"/><br /><p class="font-12-cc" id="name_text">还可以输入24个字</p></li>
+                                </ul>
+								
+						
+                                    <script>
+                                        $(document).ready(function(e) {
+                                            $("input[name='is_log_img']").change(function() {
+                                                var t = $(this).val();
+                                                showimg(t)
+                                            })
+
+                                            //初始化页面logo
+                                            function startaction(){
+                                                $('#img_logo_show').show();
+                                                //previewuploadimg('{:get_upload_url($node_logo)}', "logo");
+                                                //$('#goods_img').val('{$node_logo}');
+                                                $("#img_logo_show").hide();
+                                                $('#reset_logo').val(1);
+                                            }
+                                            //调用初始化页面logo
+                                            startaction();
+                                        });
+                                        function showimg(t) {
+                                            if (t == 0) {
+                                                $('#img_logo_show').hide('');
+                                                $('#logo-upload2').hide();
+                                                $(".Preview-mainCon").addClass("noLogo");
+                                                var i = $("[name='node_name_radio']:checked").val();
+                                                if (i == 0) {
+                                                    $(".Preview-mainCon").addClass("noTitle");
+                                                } else {
+                                                    $(".Preview-mainCon").removeClass("noTitle");
+                                                }
+                                            } else {
+                                                $('#logo-upload2').show();
+                                                $(".Preview-mainCon").removeClass("noLogo");
+                                                $(".Preview-mainCon").removeClass("noTitle");
+                                                $('#img_logo_show').show();
+                                                if ('{$node_logo}' != '' && $('input[name="previewimgis_logo"]').val() == 0) {
+                                                    previewuploadimg('{:get_upload_url($node_logo)}', "logo");
+                                                    $('#goods_img').val('{$node_logo}');
+                                                    $('#reset_logo').val(1);
+                                                }
+                                            }
+                                        }
+                                        function log_add() {
+                                            var opt = {
+                                                obj: $("#img_resp_show"),
+                                                height: 80,
+                                                width: 80,
+                                                cropPresets:false,
+                                                callback: function(data) {
+                                                    console.log(data);
+                                                    $('#img_logo_show').attr('src', data['src']);
+                                                    $('#img_logo_show').show();
+                                                    $('#goods_img').val(data['savename']);
+                                                    $('#reset_logo').val(1);
+                                                    $('input[name="previewimgis_logo"]').val(1);
+                                                }
+                                            };
+                                            open_img_uploader(opt);
+                                        }
+                                        function openUploaderMeitu_log(url) {
+                                            var win_width = 700;
+                                            art.dialog.open(url, {
+                                                lock: true,
+                                                title: "上传LOGO图片",
+                                                width: win_width,
+                                                height: win_width / 1.6,
+                                                id: 'art_upload'
+                                            });
+                                        }
+                                    </script>
+
+                                        <!--<li class="global-input6-input">-->
+                                            <!--<div class="rel l">-->
+                                            <!--<input type="hidden" value="" name="goods_img" id="goods_img"/>-->
+                                            <!--<a href="javascript:;" title="上传" onclick="return uploadImg('{:U('ImgResize/Meitu/index',array('cropPresets'=>'300x300','callback'=>'bgCallback'))}')" class="btn-all w60">上传</a>-->
+                                            <!--</div>-->
+                                            <!--<div class="cl"></div>-->
+                                            <!--<img src="" id="goods_img_show" width="150" class="mt10 dn"/>-->
+                                            <!--<div class="cl"></div>-->
+                                        <!--</li>-->
+                                </ul>
+								
+								<ul>
+									<li class="Gname"><span>*</span>页面内容：</li>
+									<li class="Ginput"><textarea name="mms_info" id="mms_info" onkeyup="check_lenght(100,'text',this);" class="validate[maxSize[100]] texttextarea w380 h50"></textarea>
+									<br />
+									<span class="font-12-cc" id="text">还可以输入100个字</span>
+									</li>
+								</ul>
+								  <ul>
+                                        <li class="Gname"></li>
+                                        <li class="Ginput">
+                                        <a href="javascript:void(0);" title="确认" id="sub_button" class="btn-all w110 ml10">确定</a>
+										<a href="javascript:history.go(-1);" title="取消" class="btn-all-del w110 ml10">取消</a>
+                                        </li>
+                                    </ul> 
+								
+    							</div>
+                                <!--旺财优惠表单1-->
+                                  
+              
+               
+            </div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+<div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

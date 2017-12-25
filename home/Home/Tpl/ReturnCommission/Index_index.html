@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>全民营销活动_营销活动中心_翼码旺财</title>
+    <load href="__PUBLIC__/Css/main.css?v=__VR__"/>
+    <load href="__PUBLIC__/Css/layout.css?v=__VR__"/>
+    <load href="__PUBLIC__/Css/module.css?v=__VR__"/>
+    <load href="__PUBLIC__/Css/Wactivities.css?v=__VR__"/>
+    <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+    <load href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+    <load href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+    <script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+    <script>
+        $(function () {
+            $('#sub_button').click(function () {
+                $('#a').val('index');
+                $("#theform").submit();
+            });
+            $("#down").click(function () {
+                $('#a').val('list_export');
+                $("#theform").submit();
+            });
+        })
+
+        function statusChange(batch_id, status, id) {
+            if (status == 0) {
+                var title = "您确认启用该活动？";
+            } else {
+                var title = "您确认停止该活动？";
+            }
+            art.dialog.confirm(title, function () {
+                $.post("{:U('editStatus')}", {"batch_id": batch_id, "status": status}, function (data) {
+                    if (data.status == 1) {
+                        art.dialog({title: false, content: "<div class='msg-all-succeed'>" + data.info + "</div>", fixed: true, padding: 0, time: 2});
+                        window.location.reload();
+                    } else {
+                        art.dialog({title: false, content: "<div class='msg-all-error'>" + data.info + "</div>", fixed: true, padding: 0, time: 2});
+                    }
+                }, "json");
+            });
+        }
+    </script>
+</head>
+<body>
+<div id="wrapper" class="bgeee">
+    <include file="./Home/Tpl/Public/Public_header.html"/>
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+            <div class="bread">
+                <div class="bread-con fn">
+                    <div class="bread-area">
+                        <i class="icon-bread"></i>
+                        <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                        <p>></p>
+                        <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+                        <p>></p>
+                        <p><a href="{:U('intro')}">全民营销</a></p>
+                    </div>
+                    <div class="bread-history">
+                        <i class="icon-history"></i>
+                        <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="sidenav">
+                <!--开始载入左菜单-->
+                <include file="LabelAdmin/Batch/leftMenu" leftmenuid="qmyxfyhd"/>
+            </div>
+            <div class="subcon fn">
+                <div class="main-name fn">
+                    <h4 class="bd-b-565656">
+                        <?php
+						//全民营销活动
+						$couponlink="&model=event&type=coupon&action=create&customer=".$node_type_name;			
+						?>
+                        <a href="{:U('add')}"
+                           class="btn-all w110 r">创建全民营销</a>
+                        全民营销活动
+                        <a href="javascript:void(0);" class="font-12-3d" id="down">下载列表</a>
+                    </h4>
+                </div>
+                <div class="form-search  fn">
+                    <form action="{:U()}" method="get" name="theform" id="theform">
+                        <input type="hidden" name="g" id="g" value="{$Think.const.GROUP_NAME}"/>
+                        <input type="hidden" name="m" id="m" value="{$Think.const.MODULE_NAME}"/>
+                        <input type="hidden" name="a" id="a" value="{$Think.const.ACTION_NAME}"/>
+
+                        <p>活动名称</p>
+
+                        <p><input type="text" name="key" class="textbox w100" value="{$Think.request.key}"/></p>
+
+                        <p class="ml20">创建日期</p>
+
+                        <p><input type="text" name="start_time" id="start_time"
+                                  onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})"
+                                  value="{$Think.request.start_time}" class="textbox w80"/>
+                            -
+                            <input type="text" name="end_time" id="end_time"
+                                   onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})"
+                                   value="{$Think.request.end_time}" class="textbox w80"/></p>
+
+                        <p class="ml50">活动状态</p>
+
+                        <p>
+                            <select class="selectbox w80" name="status" id="status">
+                                <option value=""
+                                <?php if($_REQUEST['status'] == ''){?> selected="selected" <?php }?> >请选择</option>
+                                <option value="1"
+                                <?php if($_REQUEST['status'] == '1'){?> selected="selected" <?php }?> >正常</option>
+                                <option value="2"
+                                <?php if($_REQUEST['status'] == '2'){?> selected="selected" <?php }?> >停用</option>
+                            </select>
+                        </p>
+                        <a href="javascript:void(0);" class="btn-all w110 r" id="sub_button">查询</a>
+                        <?php 
+                        $node_tree_cnt = count($nodeList);
+                        if($node_tree_cnt > 1){
+                        ?>
+                        <div class="cl mb5"></div>
+                        <p>所属商户</p>
+                        <p>
+                            <select name="node_id" id="select" class="selectbox" >
+                                <option value="" class="">全部</option>
+                                
+                                <volist name="nodeList" id="vo">
+                                <option value="{$vo['node_id']}"  <if condition="$vo['node_id'] eq $_REQUEST['node_id']">selected="selected"</if>>{$vo['node_name']}</option>
+                                </volist>
+                                
+                            </select>
+                        </p>
+                        <?php } ?>
+                    </form>
+                </div>
+                <if condition="$query_list neq '' ">
+                    <script>
+                        $(function () {
+//                            productIntroduce(2, "yhq", "index.php?g=LabelAdmin&m=Coupon&a=add");
+                        })
+                    </script>
+                    <volist name="query_list" id="v">
+                        <div class="activities-list">
+                            <div class="activities-list-wrapper fn">
+                                <div class="activities-list-wrapper-state"><?php echo $v['f_status'] == '0'?'<i class="icon-on"></i>
+                                    ':'<i class="icon-off"></i>';?>
+                                </div>
+                                <div class="activities-list-wrapper-con">
+                                    <div class="activities-list-wrapper-title fn">
+                                        <a href="{:U(C('BATCH_LIST_URL.'.$v['batch_type']), array('key'=>$v['ac_name']))}">
+                                            <?php echo $v['ac_name'];?>
+                                        </a>
+                                        <span style="font-weight:normal">
+                                        &nbsp;&nbsp;返&nbsp;&nbsp;
+                                        </span>
+                                        <span class="font-14-fe">
+                                        <?php 
+                                        $return_content = '';
+                                        if($v['commission_type'] == '0'){
+                                            $return_content = $v['goods_name'];
+                                        }else{
+                                            if($v['return_money_type'] == '0'){
+                                                $return_content = '现金'.$v['return_money'].'元';
+                                            }
+                                            else{
+                                                $return_content = '订单交易金额的'.$v['return_money'].'%';
+                                            }
+                                        }
+                                        echo $return_content;
+                                        ?>
+                                        </span>
+                                        <span class="ml30 font-14-fe">
+                                        <?php if($v['is_mem_batch'] == 'Y'){echo '粉丝专享';}?>
+                                        </span>
+                                        <?php if($v['is_halt'] == '1'){?>
+                                        <a style="color:#ff0000" href="javascript:void(0)"
+                                           onclick="art.dialog('您的活动内容不符合规范，已被强制停止，如有疑问，请联系客服400-882-7770！')">强制停止</a>
+                                        <?php }?>
+                                    </div>
+                                    <?php if($node_tree_cnt > 1){ ?>
+                                    <div class="activities-list-wrapper-meta fn">
+                                        所属商户：<span><?php echo D('node')->getNodeName($v['node_id']);?></span>
+                                    </div>
+                                    <?php } ?>
+                                    <div class="activities-list-wrapper-meta fn">
+                                        活动时间：<span><?php echo date('Y-m-d',strtotime($v['ac_start_time']));?>&nbsp;&nbsp;-&nbsp;&nbsp;<?php echo date('Y-m-d',strtotime($v['ac_end_time']));?></span>
+                                    </div>
+                                    <div class="activities-list-wrapper-data fn">
+                                        <p>推广页面访问量：<span>
+                                        <a href="{:U('statistics_click',array('id'=>$v['id'], 'charttype'=>'page_visit'))}">{$v['click_count']}</a></span>
+                                        </p>
+                                        
+                                        <p class="ml40">推广转发人数：<span>
+                                        <a href="{:U('statistics_click',array('id'=>$v['id'], 'charttype'=>'transmit_count'))}">{$v['fb_dzn']}</a></span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="activities-list-wrapper-opr">
+                                    <if condition="$userInfo['node_id'] eq $v['node_id'] ">
+                                    <a href="<?php echo U('LabelAdmin/BindChannel/index','batch_type='.$v['batch_type'].'&batch_id='.$v['marketing_info_id']);?>" class="r">
+                                    <p class="mr20">发布活动</p></a>
+                                    </if>
+                                </div>
+                            </div>
+                            <div class="activities-list-opr">
+                                <ul class="fn">
+                                    <if condition="$userInfo['node_id'] eq $v['node_id'] ">
+                                        <li class="opr-item">
+                                            <a href="<?php echo U('edit',array('id'=>$v['id']));?>"><i
+                                                    class="icon-edit"></i><span>编辑活动</span></a>
+                                        </li>
+                                    </if>
+                                    <li class="opr-item">
+                                        <?php if($v['f_status'] == '0'){?>
+                                        <a href="javascript:void(0);"
+                                           onclick="statusChange('<?php echo $v['id']?>','1','change_<?php echo $v['id']?>')"><i class="icon-stop"></i><span>停止返佣</span></a>
+                                        <?php }else if($v['f_status'] == '1' || $v['f_status'] == '2'){?>
+                                        <a href="javascript:void(0);"
+                                           onclick="statusChange('<?php echo $v['id']?>','0','change_<?php echo $v['id']?>')"><i
+                                                class="icon-begin"></i><span>启用返佣</span></a>
+                                        <?php }?>
+                                    </li>
+                                    <li class="opr-item">
+                                        <a href="{:U('channel_chart',array('id'=>$v['id']))}"><i class="icon-data"></i><span>渠道分析</span></a>
+                                    </li>
+                                    <li class="opr-item">
+                                        <a href="<?php echo U('export',array('batch_id'=>$v['id']));?>">
+                                            <i class="icon-prize"></i><span>下载返佣记录</span>
+                                        </a>
+                                    </li>
+                                    <li class="opr-item">
+                                        <a href="<?php echo U('export_generalize',array('batch_id'=>$v['id']));?>">
+                                            <i class="icon-prize"></i><span>下载推广数据</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </volist>
+                    <else/>
+
+                    <?php if($_POST){?>
+                    <div class="nonedata"></div>
+                    <?php }else{?>
+                    <div class="nonedatb mt20 bgf4f4f4"><p>您还没有全民营销活动，快来<a href="<?php echo U('add') ?>">&nbsp;&nbsp;&nbsp;创建&nbsp;&nbsp;&nbsp;</a>吧！</p></div>
+                    <script>
+                        $(function () {
+//                            productIntroduce(3, "yhq", "index.php?g=LabelAdmin&m=Coupon&a=add");
+                        })
+                    </script>
+                    <?php }?>
+                </if>
+
+                <div class="page"><?php echo $page;?></div>
+            </div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html"/>
+</div>
+<div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js?v=__VR__"></script>
+  -->
+</html>

@@ -1,0 +1,235 @@
+<!doctype html>
+<html>
+<head>
+    <title>上传音乐</title>
+    <meta charset="utf-8">
+    <meta name="language" content="en">
+    <script src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+    <script>
+		//Gform
+		_global = art.dialog.data('musicuploadData');
+    </script>
+
+    <style type="text/css">
+        html, body { height:100%;}
+        body { margin:0; }
+        * { padding:0; margin:0;list-style:none;}
+        .dn { display:none;}
+        .notice,.notice-bottom{height:30px;font-size:12px;line-height: 30px;background: #fff1f2;color:#ff0000; text-indent:20px;}
+        .notice-bottom { position:absolute; bottom:0; width:100%;background: #e6e6e6; color:#000;}
+        .tab{padding-left:20px;height:30px;line-height:30px;}
+        .tab a{display:block;float:left;font-size:14px;color:#e8632b;text-decoration:none;}
+        .tab a.hover{font-weight:bold;color:#e8632b;}
+        .tab span{display:block;float:left;margin:0 15px;}
+        .exist{padding-left:20px; height:auto; overflow:hidden;}
+        .exist ul{ padding:5px;margin:0; height:290px; overflow:hidden; text-align:center;}
+        .exist.loading {background:url(__PUBLIC__/Label/Image/Item/loading.gif) no-repeat center center;}
+        #uploadImg{background:url(__PUBLIC__/Label/Image/Item/loading.gif) no-repeat center center;}
+        .exist ul>img { margin:0 auto; margin-top:50px;}
+        .exist ul>p { font-size:12px; color:#999; padding:20px;}
+        .exist li{ position:relative; float:left;margin:15px 10px 0 0;width:80px;height:80px;overflow:hidden; border:solid 2px #fff;cursor:pointer; background-position:50% 50%; background-repeat:no-repeat;}
+        .exist li.hover{border-color:#ff8a00;}
+        .exist li i{position:absolute;top:0;right:0; width:20px;height:20px;background:#ff8a00 url(__PUBLIC__/Image/icon-form.png) no-repeat -400px 0px;display:none;}
+        .exist li.hover i { display:block;}
+        .exist li p{ position:absolute;bottom:0;left:0;width:100%;height:20px;background:#000; opacity:0.5;filter:alpha(opacity=50);}
+        .exist li span { position:absolute; z-index:3;bottom:0;left:0;width:100%;height:20px;font-size:12px;color:#fff;text-align:left;line-height:20px; text-indent:5px;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;}
+        .exist ul>p>a { display:inline-block; *display:inline; *zoom:1; width:80px; height:20px; border-radius:3px; border:solid 1px #ff8a00; font-size:12px; margin:0 10px; color:#ff8a00; line-height:20px; text-decoration:none;}
+        .exist .page { text-align:center; margin-top:10px;}
+        .exist .page a { font-size:12px; margin:0 10px; color:#ff8a00; text-decoration:none;}
+        .exist .page a.erro { color:#999;}
+        .button{ position:absolute; bottom:30px; width:100%;height:33px;padding-top:7px;background-color:#f0f0f0;}
+        .button a{margin-right:20px;float:right;display:block;width:70px;height:24px;font-size:12px;text-decoration:none;line-height:24px;text-align:center;}
+        .button .ok-btn{background-color:#8ad600;color:#fff;border:1px solid #65c418;}
+        .button .cancel-btn{background-color:#fbfbfb;color:#666;border:1px solid #d8d8d8;}
+        .msg-all-error { border:solid 1px #ff8080; background:#fff2f2; padding:10px 60px; text-align:center; font-size:12px; font-weight:bold; color:#444;}
+        .msg-all-succeed { border:solid 1px #4dbf00; background:#f0ffe5; padding:10px 60px; text-align:center; font-size:12px; font-weight:bold; color:#444;}
+        .msg-all-warning { border:solid 1px #40b3ff; background:#e5f5ff; padding:10px 60px; text-align:center; font-size:12px; font-weight:bold; color:#444;}
+		
+		.uploadmusic { position:relative; width:100%; height:420px; line-height:30px; text-align:center;}
+		.uploadmusic-btn { position:absolute; left:50%; margin-left:-60px; top:50%; margin-top:-15px; width:120px; height:30px;}
+		.uploadmusic a { position:absolute; left:0; top:0; width:120px; height:30px; line-height:30px;border:solid 1px #ec8000; border-radius:3px; background:#ff8a00; color:#fff; font-size:14px; text-decoration:none;}
+		.uploadmusic a:hover { background:#ff971c; text-decoration:none;}
+		.uploadmusic a:active { box-shadow:inset 2px 2px 6px rgba(0,0,0,.3);}
+		.uploadmusic input[type=file] { position:absolute; left:0; top:0; width:123px; height:33px; opacity:0;filter:alpha(opacity=0); cursor:pointer;}
+    </style>
+</head>
+<body>
+	<div class="tab">
+    	<a href="javascript:void(0);" class="hover" data-id="chooseImg">选择音乐</a>
+        <span>|</span>
+        <!--<a href="javascript:void(0);" data-id="recommendImg">推荐音乐</a>
+        <span>|</span>-->
+        <a href="javascript:void(0);" data-id="uploadImg">上传新音乐</a>
+    </div>
+    <div class="notice">音乐格式为MP3，大小为2M以内</div>
+    <div id="masonry" class="dn"></div>
+    <div id="chooseImg">
+    	<div class="exist">
+            <ul data-type="exist">
+            	<!--循环21个-->
+                <volist name="queryList" id="vo">
+                    <li class="existbox" data-src="{$vo['music_url']}" data-savename="{$vo['attachment_name']}" style="background-image:url(__PUBLIC__/Image/icon-music.png)"><i></i><span>{$vo['attachment_name']}</span><p></p></li>
+                </volist>
+            </ul>
+            <div style="clear:both;"></div>
+            <div class="page"><a href="javascript:void(0)" class="pre erro">上一页</a><a href="javascript:void(0)" class="next">下一页</a></div>
+        </div>
+        <div class="button">
+            <a class="cancel-btn" href="javascript:void(0);">取消</a><a class="ok-btn" href="javascript:void(0);">确定</a>
+        </div>
+    </div>
+    <div id="recommendImg" class="dn">
+    	<div class="exist">
+            <ul data-type="recommend">
+                <li class="recommendbox" data-src="__PUBLIC__/Label/Image/icon-error.png" style="background-image:url(__PUBLIC__/Label/Image/icon-error.png)"><i></i><span>推荐音乐</span><p></p></li>
+            </ul>
+            <div style="clear:both;"></div>
+            <div class="page"><a href="javascript:void(0)" class="pre erro">上一页</a><a href="javascript:void(0)" class="next">下一页</a></div>
+        </div>
+        <div class="button">
+            <a class="cancel-btn" href="javascript:void(0);">取消</a><a class="ok-btn" href="javascript:void(0);">确定</a>
+        </div>
+    </div>
+    <div id="uploadImg" class="dn">
+        <div class="uploadmusic">
+            <div class="uploadmusic-btn">
+                <a href="javascript:void(0);" data-loading-text="正在上传...">上传音乐</a>
+                <input type="file" name="upload_music" id="upload_music" onChange="return ajaxFileUpload('upload_music','{:U('ImgResize/Upload/uploadMusic')}');">
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+function doCallback(callback,data){
+	if(_global.Gform){
+		var GdataImg = {
+			obj:_global.obj,//对象
+			src:data.src,//图片路径data-src
+            savename:data.savename,
+            inputname:_global.inputname
+		};
+        if(typeof(callback) == 'string'){
+		    art.dialog.opener[callback].call(this,GdataImg);
+        }
+        else{
+            callback.call(this,GdataImg);
+        }
+	}else{
+		alert("非Gform")
+	}
+	art.dialog.close();
+}
+	$(document).ready(function(){
+		$(".button").hide();
+		if(_global.txtmsg!=""){$("#txtmsg").html(",注:"+_global.txtmsg);}
+		var epage = 1,rpage = 1;
+		$('.exist').on('click','li',function(){
+			var	data={
+				savename:$(this).attr("data-savename"),
+				src:$(this).attr("data-src")
+			};
+			if(_global.callback){
+				doCallback(_global.callback,data);
+			}else{
+				alert("未定义callback");
+			}
+		})
+		$('.page a').on("click",function(){
+			var t = $(this),
+				ul = t.closest(".exist").find("ul"),
+				type = ul.attr("data-type"),
+				page;
+			type=="exist" ? page = epage : page = rpage ;
+			if($(this).hasClass("pre")){page--};
+			if($(this).hasClass("next")){page++};
+            var url = window.location.href+"&p="+page;
+			if($(this).hasClass("erro")){return false;};
+			if(page<1){return false;}
+			if($(".exist").hasClass("loading")){return false;}
+			$(".exist").addClass("loading");
+			ul.html("");
+			$("#masonry").load(url + ' ' + "."+type+"box", null, function(data,status){
+				var l = $("#masonry ."+type+"box").length;
+				if (l == 0) {
+					ul.html("<img src='__PUBLIC__/Label/Image/icon-error.png' /><p>没有更多音乐了<br><br><a href='javascript:void(0);' class='btnuploadImg' data-id='uploadImg'>上传音乐</a></p>");
+					t.addClass("erro");
+				}else{
+                    t.closest(".exist").find("a.next").removeClass("erro");
+					ul.html($('#masonry').html());
+				}
+				$(".exist").removeClass("loading");
+				if(page==1){t.addClass("erro");}else{t.closest(".exist").find("a.pre").removeClass("erro");}
+				type=="exist" ? epage = page : rpage = page ;
+			});
+		});
+		$(".tab a").on("click",function(){
+			$(".tab a").removeClass("hover");
+			$(this).addClass("hover");
+			$("#chooseImg,#recommendImg,#uploadImg").hide();
+			$("#"+$(this).attr("data-id")).show();
+		});
+		$("body").on("click",".btnuploadImg",function(){
+			$(".tab a:eq(1)").click();
+		});
+		$(".cancel-btn").on("click",function(){
+			art.dialog.close();
+		});
+	})
+//文件上传
+function ajaxFileUpload(musicid,url){
+	$(".uploadmusic-btn a").text($(".uploadmusic-btn a").attr("data-loading-text"))
+	$("#"+musicid).hide();
+	var name = getFileName($("#upload_music").val());
+	var dialog = art.dialog({title:false,fixed: true,padding:0});
+	$.ajaxFileUpload
+	({
+		url:url,
+		secureuri:false,
+		fileElementId:musicid,
+		dataType: 'json',
+		data:{name:'logan', id:'id'},
+		success: function (data, status)
+		{
+			if(data.code == -1){
+				dialog.time(3).content("<div class='msg-all-error'>"+data.msg+"</div>");
+				$(".uploadmusic-btn a").text("上传音乐");
+				$("#"+musicid).show();
+				return false;
+			}else{
+				dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+				$(".uploadmusic-btn a").text("上传音乐");
+				$("#"+musicid).show();
+				var	data={
+					savename:name,
+					src:data.data.src
+				};
+				setTimeout(function(){
+					if(_global.callback){
+						doCallback(_global.callback,data);
+					}else{
+						alert("未定义callback");
+					}
+				},1000)
+			}
+		},
+		error: function (data, status, e)
+		{
+			dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+		}
+	})
+	return false;
+}
+function getFileName(path){
+	var pos1 = path.lastIndexOf('/');
+	var pos2 = path.lastIndexOf('\\');
+	var pos  = Math.max(pos1, pos2)
+	if( pos<0 )
+	return path;
+	else
+	return path.substring(pos+1);
+}
+</script>

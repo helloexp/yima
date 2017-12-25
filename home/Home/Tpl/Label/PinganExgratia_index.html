@@ -1,0 +1,391 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>优惠券详情_平安特惠</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_pa.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_pa.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.new.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js"></script>
+<script src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js"></script>
+<js href="__PUBLIC__/Js/artDialog6/dialog-min.js?v=__VR__"/>
+<load href="__PUBLIC__/Js/artDialog6/ui-dialog.css"/>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?type=quick&ak=WRzAu3DNewWB4oeOELaczjsM&v=1.0"></script>
+<js href="__PUBLIC__/Js/artDialog6/dialog-min.js?v=__VR__"/>
+<load href="__PUBLIC__/Js/artDialog6/ui-dialog.css"/>
+<style type="text/css">
+	#productCon,.box { background: #ffffff;}
+	.box { margin-left: 15px;}
+	.box img { margin-left: 0;}
+	.box .proItem-msg { margin-right: 15px;}
+	#infoCon .infoTitle { padding-left: 15px;}
+	.box .proItem-msg { margin-left: 92px;}
+	#infoCon .infoCon,#infoCon .address { margin: 0 0 0 15px; padding-right: 15px;}
+	#infoCon .infoCon p { color: #999999;}
+	.btnDiv { padding: 10px 15px; background: #ffffff;}
+	.btn { display: block; width: auto;}
+	.box .proItem-msg h1 p.l { width: 100%;}
+	.box .proItem-msg h1 p.r,.box .proItem-msg h3,.box .proItem-msg h2 a.l { font-size: 13px; color: #999999;}
+	.box .proItem-msg h3 { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+	.box .proItem-msg.proItem-msg2 h2 { margin-top: 5px; height: auto;}
+	.box .proItem-msg h2 a.l i { display: inline-block; width: 16px; height: 18px; margin-right: 5px; vertical-align: middle; background: url(__PUBLIC__/Label/Image/pingan4th/pa-icon1.png) no-repeat; background-size: 100%;}
+	.box .proItem-msg h2 a.r i { display: inline-block; width: 16px; height: 15px; margin-right: 5px; vertical-align: middle; background: url(__PUBLIC__/Label/Image/pingan4th/pa-icon2.png) no-repeat; background-size: 100%;}
+	.box .proItem-msg h2 a.r { font-size: 12px; color: #999999;}
+	.productCon .address .con,.productCon .address .title { border-right: 1px #dddddd solid;}
+	.productCon .address .con { color: #999999;}
+
+    #masonry .box img { display: none;}
+    #masonry .box .proItem-msg { margin-left: 0;}
+    #masonry .box .proItem-msg h1 p.l { width: 80%;}
+    #masonry .box .proItem-msg.proItem-msg2 h1 { height: auto;}
+    #masonry .box .proItem-msg.proItem-msg2 h3 { width: 100%; overflow: inherit; text-overflow: inherit; white-space: normal;}
+
+</style>
+<script type="text/javascript">
+//获取当前lbs信息
+function bmapGetLbs()
+{
+    var callback = arguments.length > 0 ? arguments[0] : null;
+
+    if (navigator.geolocation)
+    {
+        Util_tools.ui.loading('正在获取当前位置...');
+        navigator.geolocation.getCurrentPosition(function(r){
+            $.ajax({
+                url: "{:U('Fb/PinganWap/geoconv')}",
+                data: {x: r.coords.latitude, y: r.coords.longitude},
+                async: false,
+                dataType: 'json',
+                success: function(resp){
+                    Util_tools.ui.loading(false);
+                    if(resp.status == 0){
+                        Util_tools.ui.loading(resp.info);
+                        setTimeout(function(){
+                            Util_tools.ui.loading(false);
+                        }, 3000);
+                    }
+                    else{
+                        var a = new Date();
+                        a.setTime(a.getTime() + (60 * 60 * 1000));
+                        $.cookie("lon", resp.y, {expires: a});
+                        $.cookie("lat", resp.x, {expires: a});
+                        Util_tools.ui.loading(false);
+                        if(callback && typeof callback == 'function'){
+                            callback();
+                        }
+
+                        //判断是否有lbs信息
+                        if($.cookie("lat") != null) {
+                            storeGetJson(1);
+                        }
+                    }
+                }
+            });
+        }, function(error){
+            if(error.code == error.POSITION_UNAVAILABLE){
+                Util_tools.ui.loading('您的浏览器暂时无法为您所在的位置服务');
+                if($.cookie("lat") == null) {
+                    storeGetJson(0);
+                }
+                setTimeout(function(){
+                    Util_tools.ui.loading(false);
+                }, 3000);
+            }
+        });
+    } else {
+        alert('该浏览器不支持获取当前位置信息');
+    }
+    return ;
+}
+
+$(function() {
+    $(document).on('click', ".gps_url", function(){
+        endLng = $(this).attr('lng');
+        endLat = $(this).attr('lat');
+        address = $(this).attr("data-addr");
+        address = encodeURIComponent(address);
+        des_city = $(this).children('.des_city').val();
+
+        bmapGetLbs(function(){
+            location.href = "{:U('Fb/PinganWap/drivingRoute')}"+'&start='+$.cookie('lon')+','+$.cookie("lat")+'&end='+endLng+','+endLat;
+        });
+    });
+});
+
+$(document).ready(function(e){
+    $('.exchange_goods1').live("click",function(){
+        var addr_id = $(this).attr('data-id');
+        var id = {$id};
+        $.post(
+            "{:U('goods_exchange')}",
+            {"id":id,"type":"1","addr_id":addr_id},
+            function(data) {
+                var code = data['code'];
+                if(code == '0000'){
+                    dialog({
+                        title: '提示',
+                        content: '已下发至“我的电子劵”，点此查看',
+                        okValue: '确定',
+                        fixed: true,
+                        ok: function () {
+                            $('.msgPop').hide();
+                            //return true;
+                            window.location.href = "{:U('Fb/PinganWap/electronicLabel')}";
+                        },
+                        cancelValue: '取消',
+                        cancel: function () {
+                            $('.msgPop').hide();
+                            return true;
+                        }
+                    }).show();
+                }
+                else{
+                    var err_msg = data['err_msg'];
+                    dialog({
+                        title: '提示',
+                        content: err_msg,
+                        okValue: '确定',
+                        fixed: true,
+                        ok: function () {
+                            $('.msgPop').hide();
+                            return true;
+                        },
+                        cancelValue: '取消',
+                        cancel: function () {
+                            $('.msgPop').hide();
+                            return true;
+                        }
+                    }).show();
+                }
+            },
+            'json'
+        ); 
+    });
+
+    $('#sub_button').live("click",function(){
+        var rece_phone = $('#phone').val();
+        var id = {$id};
+        $.post(
+            "{:U('goods_exchange')}",
+            {"id":id,"type":"2","phone_no":rece_phone},
+            function(data) {
+                var code = data['code'];
+                if(code == '0000'){
+                    dialog({
+                        title: '提示',
+                        content: '已下发至“我的电子劵”，点此查看',
+                        okValue: '确定',
+                        fixed: true,
+                        ok: function () {
+                            $('.msgPop').hide();
+                            window.location.href = "{:U('Fb/PinganWap/electronicLabel')}";
+                            //return true;
+                        },
+                        cancelValue: '取消',
+                        cancel: function () {
+                            $('.msgPop').hide();
+                            return true;
+                        }
+                    }).show();
+                }
+                else{
+                    var err_msg = data['err_msg'];
+                    dialog({
+                        title: '提示',
+                        content: err_msg,
+                        okValue: '确定',
+                        fixed: true,
+                        ok: function () {
+                            $('.msgPop').hide();
+                            return true;
+                        },
+                        cancelValue: '取消',
+                        cancel: function () {
+                            $('.msgPop').hide();
+                            return true;
+                        }
+                    }).show();
+                }
+            },
+            'json'
+        ); 
+    });
+
+});
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="fn">
+        	<div class="goback"><i></i></div>
+            <div class="logo"><i>惠</i><span>优惠券详情</span></div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="bgf0efed fn">
+                <div id="productCon" class="productCon">
+                    <div class="box">
+                        <a href="javascript:void(0);">							
+                            <img src="{$goodsInfo['goods_image']|get_upload_url}" />
+                            <div class="proItem-msg proItem-msg2">
+                            	<h1>{$goodsInfo['goods_name']}</h1>
+                                <h3><p class="l">数量:<span>{$goodsInfo['remain_num']}</span></p><p class="r">已领取<span>{$goodsInfo['storage_num']-$goodsInfo['remain_num']}人</span></p></h3>
+                                <h2>有效期：{$goodsInfo['begin_time']|dateformat=###,'Y-m-d'}-{$goodsInfo.end_time|dateformat=###,'Y-m-d'}</h2>
+                            </div>
+                        </a>
+                    </div>
+                    <!-- <div class="address">
+                    	<a href="tel:{$goodsInfo['hotline']}"><i></i></a>
+                    	<p class="title"><span>[提供商家]</span>{$goodsInfo['merchant_name']}</p>
+                        <p class="con">{$goodsInfo['address']}</p>
+                    </div> -->
+                </div>
+                <div id="infoCon">
+                	<div class="infoTitle">商品详情</div>
+                	<div class="infoCon">
+                    	<p class="title">有效期</p>
+                        <p>{$goodsInfo['begin_time']|dateformat=###,'Y-m-d'}至{$goodsInfo.end_time|dateformat=###,'Y-m-d'}</p>
+                        <p class="title">预约信息</p>
+                        <p>请您提前一天预约</p>
+                        <p class="title">规则提醒</p>
+                        <p>每张团购券最多一辆车使用<p>
+                        <p>需您当日一次性体验完所有项目</p>
+                        <p>不再与店内其他优惠同享</p>
+                        <p>如需团购券发票，请您在消费时间向商户资讯</p>
+                    </div>
+                </div>
+                <div id="infoCon">
+                	<div class="infoTitle">可用门店</div>
+                    <input type="hidden" value="{$goodsInfo['pos_group']}" class="pos_group"/>
+                    <!-- 门店列表 -->
+                    <div id="masonry"></div>
+                </div>
+                <!-- 更多门店 -->
+                <div id="add_more"></div>
+                <eq name="goodsInfo.defined_one_name" value="2">
+                    <div class="btnDiv"><a href="javascript:void(0)" id="buy" class="btn">立即领取</a></div>
+                <else />
+                    <div class="btnDiv"><a href="javascript:void(0)" id="get" class="btn">立即领取</a></div>
+                </eq>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script type="text/javascript">
+//获取指定可用门店列表，显示到界面中
+function storeGetJson(type)
+{
+    var pos_group = $(".pos_group").val();
+
+    $.get(
+        "{:U('Fb/PinganWap/getStoreArr')}",
+        {"group_id":pos_group, "xq_type":'yh', "lbs_f":type},
+        function(data){
+            var nUrl = data['nextUrl'];
+            var hdata = data['str'];
+            if(nUrl != '') {
+                $("#add_more").append(nUrl);
+            }
+            $("#masonry").empty();
+            if(hdata == ''){
+                $("#masonry").html('未查询到上架商品');
+            }else{
+                $("#masonry").append(hdata);
+            }
+        },
+        'JSON'
+    );
+}
+$(document).ready(function(e) {
+	var loadhtml = '<div id="infscr-loading" style="text-align: center; display:none;"><img src="__PUBLIC__/Label/Image/Item/loading.gif"><div><em>加载中...</em></div></div>';
+	$("body").append(loadhtml);
+	$("body").append("<div id='masonry2' style='display:none;'></div>");
+    $(document).on("click", '.get-more', function(){
+		var url = $(this).attr("data-url");
+        window.location.href=url;
+	});
+
+    bmapGetLbs();
+});
+</script>
+
+<script>
+$(document).ready(function(e) {
+    $("#buy").click(function(){
+        var data = {
+            addurl : "{:U('Fb/PinganWap/addressNew')}",
+            editurl : "{:U('Fb/PinganWap/address')}",
+            list :{$ship_addr}
+        };
+        var html = template("dataAddress", data);
+        MsgPop({
+            title:"选择地址",
+            background : "#f0efed",
+            content : html
+        })
+    })
+    $("#get").click(function(){
+        var data = {
+            name : "名字",
+            phone : "15921217744"
+        };
+        var html = template("dataLogin", data);
+        MsgPop({
+            title:"立即兑换",
+            content : html
+        })
+    })
+});
+</script>
+
+<script id="dataAddress" type="text/html">
+{{if list.length <3 }}
+<div class="addMyaddress">
+    <a href="{{addurl}}"><i></i><p>添加</p></a>
+</div>
+{{else}}
+<div class="addMyaddress erro">
+    <a href="{{editurl}}"><i></i><p>地址不能用?前去修改</p></a>
+</div>
+{{/if}}
+<div class="Myaddress">
+    {{each list}}
+    <div class="MyaddressList " >
+        <a href="javascript:void(0)" class="exchange_goods1" data-id={{value.id}}>
+        <div class="chooseMyaddress "><i></i></div>
+            <ul><li class="FormN">收件人：</li><li class="FormI"><p>{{value.name}}</p></li></ul>
+            <ul><li class="FormN">手机号：</li><li class="FormI"><p>{{value.phone_no}}</p></li></ul>
+            <ul><li class="FormN">收件地址：</li><li class="FormI"><p>{{value.address}}</p></li></ul>
+        </a>
+    </div>
+    {{/each}}
+</div>
+</script>
+
+<script id="dataLogin" type="text/html">
+<div class="Gform">
+    <form id="form" action="" method="post" name="form">
+    <ul>
+        <li class="name">手机号码：</li>
+        <li class="input">
+            <input name="phone" id="phone" type="tel" value="{$rece_phone}" class="textbox validate[required,minSize[11]]" maxlength="11" placeholder="&nbsp;请填写手机号码" data-rel="">
+        </li>
+    </ul>
+    <ul class="btn-ul" style="background:#fff;padding-bottom:10px;">
+        <li class="btn-li"><a href="javascript:void(0)" class="btn-up" id="sub_button">提交</a></li>
+    </ul>
+    </form>
+</div>
+</script>

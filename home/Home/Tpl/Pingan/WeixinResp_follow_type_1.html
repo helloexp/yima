@@ -1,0 +1,191 @@
+<?php 
+//本模板同时被 respType=0 以及 respType=1 以及respType=2 使用，所以，根据不同的respClass进行文字替换
+if($respType == '0'){
+	$title = "被添加自动回复";
+}
+elseif($respType == '1'){
+	$title = "消息自动回复";
+}
+elseif($respType == '2'){
+	$title = "关键词自动回复";
+}
+else{
+	$title = "自动回复";
+}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信{$title}-图文</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+
+<script type="text/javascript">
+//选择后的回调函数
+var selectcallback = function(mid){
+	if(!mid) return false;
+	var dialog = art.dialog({title:false,lock:true});
+	var data = {material_id:mid};
+	$("#material_id_selected").val(mid);
+	$.post("{:U('Pingan/WeixinResp/showMaterialById')}",data,function(d){
+		dialog.close();
+		$(".editArea").html(d);
+		windowheight();
+	});
+}
+
+$(document).ready(function(e){
+	editArea();
+
+	//确定按钮事件
+	$("#btn_submit").click(function(){
+		var mid = $("#material_id_selected").val();
+		if(!mid){
+			alert("请选择素材");
+			return false;
+		}
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		var data = {
+			response_info:mid,
+			respType:$("#input_i-respType").val(),
+			respClass:1
+		};
+		$.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+			dialog.close = function(){
+					window.location.reload();
+			};
+			dialog.time(1).content("<div class='msg-all-error'>"+d.info+"</div>");
+		},'json');
+	});
+
+	//初始化被选中的素材
+	selectcallback($("#material_id_selected").val());
+});
+
+
+</script>
+</head>
+<body>
+    <div id="wrapper" >
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu_pingan.html" topmenuid="gongzhonghao"/>
+        <div id="container" >
+            <div id="main" class="rel">
+            	<!--<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>&gt;</p>
+                            <p>微信助手</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+					<php>
+					if($respType == '0'){
+						$leftmenuid = 'btjzdhh';
+					}
+					else{
+						$leftmenuid = 'xxzdhh';
+					}
+					</php>
+					<include file="LabelAdmin/Batch/WleftMenu_pingan" leftmenuid="wxzs"/>
+                </div>
+                <div class="subcon">
+                	<div class="main-name fn">
+                    <h4>{$title}</h4>
+                    </div>
+                    <div class="highlight_box icon_wrap icon_small border">
+                    <div class="opr"><a href="javascript:;" class="btn btn_warn">停用</a></div>        
+                    <span class="icon unlock"></span>
+                    <h4 class="title">已开启自动回复设置</h4>
+                    <p class="desc">通过编辑内容或关键词规则，快速进行自动回复设置。如具备开发能力，可更灵活地使用该功能。<a href="javascript:;" class="detail_desc">查看详情</a></p>    
+                    </div>
+                    <div class="msg-libs">
+                        <p class="p-title hover"><a href="{:U('PinganResp/follow/',array('respType'=>$respType,'respClass'=>0))}">被添加自动回复</a></p>
+                        <p class="p-title noborde"><a href="{:U('PinganResp/follow/',array('respType'=>$respType,'respClass'=>1))}">消息自动回复</a></p>
+                        <p class="p-titler"><a href="{:U('PinganResp/follow/',array('respType'=>$respType,'respClass'=>2))}">关键词自动回复</a></p>
+                        
+                        <div id="global-libs-content">
+                            <div id="globallibscontent" class="hover">
+                                <div class="txtImg">
+                                    <div class="functionBar">
+                                        <div class="opt">请选择您需要的图文信息</div>
+                                        <div class="r libraryArea">
+                                            <a href="javascript:void(0)" class="libraryArea-add" data-url="{:U('Pingan/WeixinResp/selectImgTxt')}">从素材库中添加</a>
+                                        </div>
+                                        <div class="cl"></div>
+                                    </div>
+                                    <div class="editArea" style="min-height:80px"><!--初试隐藏  class="hide"
+                                        
+                                        <div class="msg-item-wrapper" style="margin:0 auto;">
+                                            <div class="msg-item multi-msg">
+                                                <div id="appmsgItem1" class="appmsgItem">
+                                                    <p class="msg-meta"><span class="msg-date">2013-07-09</span></p>
+                                                    <div class="cl"></div>
+                                                    <div class="cover">
+                                                        <h5 class="msg-t"><a href="" class="i-title align-left" target="_blank">团购</a></h5>
+                                                        <img src="Image/z_msg2.jpg" class="i-img">
+                                                    </div>
+                                                </div>
+                                                <div class="rel sub-msg-item appmsgItem" id="appmsgItem2">
+                                                    <span class="thumb"><img src="Image/z_msg1.jpg" class="i-img"></span>
+                                                    <h5 class="msg-t align-left"><a href="" target="_blank" class="i-title">原价50元肥牛仅售25元</a></h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        单图文信息<div class="msg-item-wrapper">
+                                            <div id="appmsgItem1" class="msg-item appmsgItem">
+                                                <h5 class="msg-t cl align-left"><a href="" class="i-title" target="_blank">订座</a></h5>
+                                                <div class="cl"></div>
+                                                <p class="msg-meta cl"><span class="msg-date">2013-07-09</span></p>
+                                                <div class="cover cl"><img src="Image/z_msg2.jpg" class="i-img" style=""></div>
+                                                <p class="msg-text cl">点击详情，现在就开始订座吧！</p>
+                                                <div class="cl"></div>
+                                            </div>
+                                         </div>
+                                         -->
+                                    </div>
+                                    <div class="msg-libs-update">
+                                        <input type="hidden" id="material_id_selected" value="{$respInfo['response_info']}"/>
+                                        <input type="hidden" id="input_i-respType" value="{$respType}"/>
+                                        <a href="javascript:void(0);" title="确认" class="btn-all w110" id="btn_submit">保存</a>
+                                        <a href="javascript:void(0);" title="取消" class="btn-all-del w110 ml10" id="btn_cancel" onclick="javascript:window.location.reload();">取消</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer_pingan.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

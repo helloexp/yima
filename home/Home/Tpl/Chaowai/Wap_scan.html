@@ -1,0 +1,290 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>扫一扫后</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_nc.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<style type="text/css">
+	#wrapper button.aui_state_highlight { background: #ed3f41;}
+	.msgPop .msgBg .tipsText a.btn-close {
+	display: block;
+	text-align: center;
+	line-height: 43px;
+	font-size: 17px;
+	color: #ffffff;
+	background: #aaaaaa;
+	border-radius: 5px;}
+	.msgPop .msgBg { min-width: 70%;}
+</style>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+        	<div class="goback"><i></i></div>
+            <div class="logo"><span>社区挪车服务</span></div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="bgf0efed">
+            	<div class="Gform confirmation">
+                	<form id="form" action="{:U('Chaowai/Wap/scan_handle')}" method="post" name="form">
+                		<div class="item">
+                			<input type="hidden" name="carinfo_id" value="{$userMsg['id']}" />
+                			<input type="hidden" name="carinfo_mobile" value="{$userMsg['mobile']}" />
+	                		<ul>
+		                        <li class="name">车主车牌号</li>
+		                        <li class="input"><span>{$userMsg["plate_number"]}</span></li>
+		                    </ul>
+	                		<ul>
+		                        <li class="name">车主手机号</li>
+		                        <li class="input"><span>{$car_mobile}</span></li>
+		                    </ul>
+	                		<ul>
+		                        <li class="name">挪车原因</li>
+		                        <li class="input">
+		                           	<i></i>
+		                        	<select name="mc_reason" class="">
+		                                <option value="1">占道停车</option>
+		                                <option value="2">车辆碰擦</option>
+		                                <option value="3">人道出行</option>
+		                            </select>
+		                        </li>
+		                    </ul>
+	                		<ul>
+		                        <li class="name">申请人手机号</li>
+		                        <input type="hidden" name="cus_id" value="{$cus_id}" />
+		                        <input type="hidden" name="cus_mobile" value="{$mobile}" />
+		                        <li class="input"><span>{$mobile}</span></li>
+		                    </ul>
+                		</div>
+	                    <ul class="btn-ul">
+	                        <li class="btn-li"><a href="javascript:void(0)" class="btn-up">确认通知</a></li>
+	                    </ul>
+                	</form>
+	            </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    $('#form').validationEngine();
+    
+    $(".btn-up").click(function(){
+    	if($("#form").validationEngine('validate')){
+            $("#form").ajaxSubmit({
+                beforeSubmit:function(){
+                	tips.content({
+						html:"<p>正在提交申请...</p>",
+						icon:true,
+						btn:false
+					});
+                },
+                success:function(data){
+                	tips.close();
+                    if(data.status == '0'){
+                        tips.content({
+							html:"<p>"+data.info+"</p><a href='javascript:;' class='btn-close'>返回</a>",
+							icon:true,
+							btn:false
+						});
+						$(".btn-close").click(function(){
+							tips.close();
+						});
+                    } else if(data.status == '1') {
+                    	tips.content({
+							html:"<p>您的通知已发出，车主会收到您 的挪车请求！</p><ul><li>若五分钟后，车主仍未联系您，可再次申请！</li></ul>",
+							icon:true,
+							btn:[{
+								text:"确定",
+								url:"javascript:;",
+								callback:function(){
+									tips.close();
+								}
+							}]
+						});
+                    }
+                },
+                dataType:'json'
+            });
+        }    	
+    });
+});
+
+</script>
+
+<script>
+var iphone = true;
+var browser = {
+	versions: function () {
+			var u = navigator.userAgent, app = navigator.appVersion;
+			return {
+				ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/),
+				android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1,
+				iPhone: u.indexOf('iPhone') > -1,
+				iPad: u.indexOf('iPad') > -1
+			};
+		}
+	}
+if (browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {iphone = true;}
+if (browser.versions.android) {iphone = false;}
+$(document).ready(function(e) {
+	$("body").on("touchmove",function(e){
+		e.preventDefault();
+	});
+	var isSupportTouch = "ontouchend" in document ? true : false;
+	var cantouch = "click";
+	if(isSupportTouch){cantouch = "touchstart";}else{cantouch = "click";};
+	setTimeout(function(){
+//		beginAction();
+	},3000);
+});
+
+var tips = {
+	basic:function(msg){
+		tips.close();
+		if(!msg.title){var notitle="notitle";msg.title="";}
+		if(!msg.title){var border="border";}
+		if(msg.isclose){var closehtml = '<a href="javascript:void(0)" class="close-msgPop"><i></i></a>'}else{var closehtml = "";}
+		var html = ['<div class="msgPop bg" id="'+msg.id+'">',
+			'<div class="msgBg">',
+			'<div class="msgTitle '+notitle+'">'+msg.title+closehtml+'</div>',
+			'<div class="msgCon">'+msg.html+'</div>',
+			'</div>',
+			'</div>'].join('');
+		$("body").append(html);
+		if(typeof(msg.start) == 'string'){
+			window[msg.start].call(this,$(this));
+		}else if(typeof(msg.start) == 'function'){
+			msg.start.call(this,$(this));
+		}
+		$("body").find(".msgBg",html).on("click",".tipsBtn-back",function(){
+			var index = $(this).index();
+			if(typeof(msg.btn[index].callback) == 'string'){
+				window[msg.btn[index].callback].call(this,$(this));
+			}else if(typeof(msg.btn[index].callback) == 'function'){
+				msg.btn[index].callback.call(this,$(this));
+			}else{
+				msg.repeat ? (tips.close(),tips.login({repeat:msg.repeat})) : tips.close();
+				if($(this).attr("href")!="javascript:void(0)"){
+					window.location.href = $(this).attr("href");
+				}
+			}
+		});
+		$("body").find(".msgBg",html).on("click",".close-msgPop",function(){
+			if(typeof(msg.after) == 'string'){
+				window[msg.after].call(this,$(this));
+			}else if(typeof(msg.after) == 'function'){
+				msg.after.call(this,$(this));
+			}
+			msg.repeat ? (tips.remove(),tips.login({repeat:msg.repeat})) : tips.remove();
+		});
+		$("body").on("click","input",msg.html,function(){
+			$(this).removeClass("erro");
+		});
+	},
+	tip:function(msg){
+		$(".tipsTip").remove();
+		var txt = [""];
+		var codeRandom = Math.floor(Math.random()*txt.length);
+		if(!msg){msg = txt[codeRandom]};
+		if(msg==1){return false;}
+		var html = '<div class="tipsTip"><div class="tipsTipTxt"><i></i><p>'+msg+'</p></div><div class="tipsTipbg"></div></div>';
+		$("body").append(html);
+	},
+	content:function(msg){
+		msg = $.extend(true, {}, tips.msg,msg);
+		msg.html = template("js-tmpl-msg",msg);
+		tips.basic(msg);
+	},
+	remove:function(msg){
+		$(".msgPop").remove();
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	close:function(msg){
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		$(".msgPop").not("[id!='']").remove();
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	msg:{
+		id:"",
+		title:false,//标题
+		html:false,//内容
+		refurbish:false,//是否刷新
+		msg:"未知错误",//内容
+		icon:false,//图标
+		repeat:false,//重新填出登陆框
+		btn:[
+			{
+				text:"返回",//按钮文字
+				url:"javascript:void(0)",//按钮链接
+				callback:function(){
+					tips.close();
+				}
+			}
+		],
+		isclose:true,
+		start:false,//弹出之后callback
+		after:false//关闭之后callback
+	}
+}
+</script>
+
+
+<script type="text/html" id="js-tmpl-msg">
+<div class="tipsText">
+	{{if !html}}
+	<div class="tipsText-con">
+		{{if !icon}}
+			<div class="tipsText-text noicon">{{#msg}}</div>
+		{{else}}
+			<div class="tipsText-text">{{#msg}}</div>
+			<div class="tipsText-img">
+				{{if icon==1}}
+				<img src="__PUBLIC__/Label/Image/lottery/element_17.png" width="">
+                {{else if icon==0}}
+				<img src="__PUBLIC__/Label/Image/lottery/element_34.png" width="">
+                {{else}}
+				<img src="__PUBLIC__/Label/Image/lottery/element_34.png" width="">
+				{{/if}}
+			</div>
+		{{/if}}
+	</div>
+	{{else}}
+	{{#html}}
+	{{/if}}
+</div>
+<div class="tipsBtn">
+{{each btn as value i}}
+	<a href="{{value.url}}" class="tipsBtn-back {{if btn.length>1}}{{if i==0}}sm{{/if}}{{/if}}">{{value.text}}</a>
+{{/each}}
+</div>
+</script>

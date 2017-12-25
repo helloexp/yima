@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>员工添加</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/UI.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshopconfig.css" rel="stylesheet" type="text/css" />
+    <!--<link href="__PUBLIC__/Css/Wjfyx.css" rel="stylesheet" type="text/css" />-->
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/json2.js?v=__VR__"></script>
+    <script type="text/javascript">
+    $(function() {
+        $("#smb").click(function() {
+            var dialog;
+            if($("#technician_id").val()==''&&$("#user_role").val()=={$store_user_role_id})
+            {
+                alert("请选择技师");
+                return false;
+            }
+            if ($("#theform").validationEngine('validate')) {
+                $.post("{:U('GpEye/Merchant/add_user_save')}", {
+                    "merchant_id": $("#merchant_id").val(),
+                    "user_role": $("#user_role").val(),
+                    "technician_id": $("#technician_id").val(),
+                    "user_name": $("#user_name").val(),
+                    "name": $("#name").val(),
+                    "user_password1": $("#user_password1").val(),
+                    "user_password2": $("#user_password2").val()
+                }, function(data) {
+                    if (data.status == 1) {
+                        art.dialog({
+                            title: false,
+                            content: "<div class='msg-all-succeed'>添加成功</div>",
+                            fixed: true,
+                            padding: 0,
+                            time: 2
+                        });
+                        setTimeout("top.location.href='{:U('GpEye/Merchant/user')}';", 500);
+                    } else {
+                        art.dialog({
+                            title: false,
+                            content: "<div class='msg-all-error'>" + data.info + "</div>",
+                            fixed: true,
+                            padding: 0,
+                            time: 2
+                        });
+                    }
+                }, "json");
+            }
+            return false;
+        });
+        $(document).on("click",".op",function(){op_name();});
+    });
+    function getData()  
+    {  
+        var merchant_id = $("#merchant_id").val();  
+        $.ajax({          
+             url:"{:U('GpEye/Merchant/getuser')}&merchant_id="+merchant_id, 
+             type : "get",   
+             dataType : "json",   
+             error:function(){  
+                alert("error occured!!!");  
+             },  
+             success:function(data){  
+             if(data!="null"){
+                //data=$.parseJSON(data);
+                //console.log(data);
+                //清空数组
+                $("#technician_id").find("option").remove();
+                $("#technician_id").append("<option value=''>请选择</option>");
+                for(var i=0;i<data.length;i++){
+                    //console.log(data[i]);
+                     var xValue=data[i].id;
+                     var xText=data[i].name;
+                     $("#technician_id").append("<option value='"+xValue+"'>"+xText+"</option>"); 
+                }
+              }else{
+                 $("#technician_id").find("option").remove();
+              }  
+           }  
+       });
+    }
+    function op_name()
+    {
+        var user_role = $("#user_role").val();
+        if(user_role=={$store_user_role_id})
+        {
+            $('#name').attr("readonly",true);//将input元素设置为readonly
+            $('#name').val($("#technician_id").find("option:selected").text());
+
+        }
+        if(user_role=={$store_admin_role_id})
+        {
+            $('#name').attr("readonly",false);
+            $('#name').val("");
+        }
+
+    }
+    </script>
+</head>
+
+<body>
+    <div class="popupWin">
+        <div class="Wcanal-tab db" id="Wcanal-tabon">
+            <div class="Gform">
+                <form id="theform" action="{:U('GpEye/Merchant/add_user_save')}" method="post" name="form">
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;所属门店</li>
+                        <li class="Ginput">
+                            <select name="merchant_id" id="merchant_id" onchange="getData()" class="validate[required]">
+                            <option value="">请选择</option>
+                                {:show_arr_opt($list)}
+                            </select>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;用户角色</li>
+                        <li class="Ginput">
+                            <div class="switch" data-callback="swith">
+                                <input type="radio" value="{$store_admin_role_id}" checked="checked" name="user_role" id="user_role">
+                                <div class="newRadio">
+                                    <!--span class="valfirst" data-val="0">门店技师</span>
+                                    <span class="vallast hover" data-val="1">门店管理员</span-->
+                                    <php>foreach($role_list as $key=>$v){</php>
+                                    <span class="<php>if($key==$store_admin_role_id) {echo "hover";}</php> op" data-val="{$key}">{$v}</span>
+                                    <php>}</php>
+                                </div>
+                                <div class="newRadio-input">
+                                    <select name="technician_id" id="technician_id" onchange="op_name();">
+                                        <option value="">请选择</option>
+                                        {:show_arr_opt($technician_list)}
+                                    </select>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;用户名</li>
+                        <li class="Ginput">
+                            <input name="user_name" id="user_name" type="text" value="" class="textbox validate[maxSize[30],custom[email]]" maxlength="30" placeholder="&nbsp;请输入邮箱" />
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;操作人姓名</li>
+                        <li class="Ginput">
+                            <input type="text" name="name" id="name" maxlength="10" class="validate[required,maxSize[10]] textbox w120" value=""/>
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;输入密码</li>
+                        <li class="Ginput">
+                            <input name="user_password1" type="password" maxlength="20" id="user_password1" value="" class="validate[required,minSize[6],maxSize[20]]">
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;确认密码</li>
+                        <li class="Ginput">
+                            <input name="user_password2" type="password" maxlength="20" id="user_password2" value="" class="validate[required,minSize[6],maxSize[20]]">
+                        </li>
+                    </ul>
+                    <div class="DiabtnCon">
+                        <a href="javascript:void(0)" class="Diabtn-all" id="smb">提交</a>
+                        <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券分销助手-收到的订单</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js"></script>
+<script>
+$(function(){
+	$(".details").click(function(){
+		var goods_id=$(this).attr('content');
+		art.dialog.open('{:U('Hall/Distri/otherdetails')}&goodsid='+goods_id,{
+			id:'detail',
+			title:'详情',
+			width:500
+		});
+	});
+	$("#search").click(function(){
+		$("form").submit();
+	});
+})
+</script>
+</head>
+<body>
+	<div id="wrapper">
+		<include file="./Home/Tpl/Public/Public_header.html" />
+        <div class="shopNav">
+            <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="fxzs"/>
+        </div>
+		<div id="container">
+			<div id="main" class="rel">
+				<div class="sidenav"> 
+					<include file="Hall/Mypartner/leftMenu" leftmenuid="fxdzq"/>
+				</div>
+				<div class="subcon fn">
+					<div class="main-name fn">
+                            <h4>我的发货记录</h4>
+                        </div>
+                    <div class="SearchArea fn">
+							<form action="{:U('Hall/Distri/index')}" method="post">
+                            		<div class="SearchAreaLeft">
+                                    <label>
+                                    <span>卡券名称</span>
+                                    <input name="name" type="text" value="{$post.name}"/>
+                                    </label>
+                                    <label>
+                                    <span>发货时间</span>
+                                    <input name="begintime" type="text" value="{$post.begintime}"  onClick="WdatePicker()"/>-<input name="endtime" type="text"  onClick="WdatePicker()" value="{$post.endtime}" />
+                                    </label>
+                                    
+                                    <label>
+                                    <span>采购方</span>
+                                    <input name="nodename" type="text" value="{$post.nodename}" />
+                                    </label>
+                                    </div>
+                                    <div class="SearchAreaRight">
+                                    <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                                    </div>
+                            </form>
+						</div>
+                    <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                                <tr class="shopCon">
+                                    <th>发货时间</th><th>卡券名称</th><th>数量</th><th>结算价格</th><th>结算方式</th><th>使用期限</th><th>采购方</th><th>操作</th>
+                                </tr>
+                                <if condition="$ind">
+                                <volist name="ind" id="vo">
+                                <tr>
+                                <td>{$vo.add_time|dateformat=###,'Y-m-d'}</td>
+                                <td>{$vo.goods_name}</td>
+                                <td><?php if($vo['storage_num']==-1){ echo "不限";}else{ echo $vo['storage_num'];} ?></td>
+                                <td>{$vo.settle_price}</td>
+                                <td><?php if($vo['control_flag']==1){ ?>{$vo['control_type']==1?"按采购方使用量":"按供货方验证量"}<?php }else{ echo "--";}?></td>
+                                <td><?php echo date('Y-m-d',strtotime($vo['begin_time']))."<br/>".date('Y-m-d',strtotime($vo['end_time'])); ?></td>
+                                 <td>{$vo.node_name}</td>
+                                 <!--<td><?php if($vo['end_time']>=date('YmdHis',time())){ echo "正常";}else{ echo "过期";} ?></td> -->
+                                <td>
+                                    <!-- <a class="edit" href="{:U('Hall/Distri/otheredit',array('goodsid'=>$vo['goods_id']))}" title="<?php echo $vo['goods_id'];?>">编辑</a><br/> -->
+                                    <a class="details" content="{$vo['goods_id']}" href="javascript:void(0);">详情</a></td>
+                                </tr>
+                                </volist>
+                                <else/>
+                                    <tr>
+                                        <td colspan="10">
+                                            <div class="nonedata"><p></p></div>
+                                        </td>
+                                    </tr> 
+                                </if>
+                            </table>
+                            <div class="page">{$page}</div>
+                    </div>
+				</div>
+			</div>
+		</div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+	</div>
+	<div class="service"></div>
+</body>
+</html>

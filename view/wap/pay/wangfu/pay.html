@@ -1,0 +1,101 @@
+<!doctype html>
+<html ng-app="huifuPay" ng-controller="pay">
+<head>
+    <meta  charset="utf-8" />
+    <title ng-bind="title"></title>
+    <meta name="viewport" content="width=device-width, maximum-scale=1, user-scalable=no">   
+    <meta content="telephone=no" name="format-detection" />
+    <meta name="screen-orientation" content="portrait">
+	<meta content="email=no" name="format-detection" />
+	<link href="/view/assets/wap/css/pay/wangfu.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="/view/assets/wap/js/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript"  src="/view/assets/wap/js/ionic/js/ionic.bundle.min.js"></script>
+    <script type="text/javascript"  src="/view/assets/js/angularjs/angular-cookies.min.js"></script> 
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script type="text/javascript" src="/view/assets/wap/js/pay/wangfu.js"></script> 
+</head>
+<body ng-cloak class="bgeee">
+<div class="mask" ng-show="mask"></div>
+<div class="huifuPay" ng-show="bodyShow">
+   <div class="pay"> 
+		<header>	
+			<img ng-src="{{ logo }}" class="logo" /><span ng-bind="name"></span>
+		</header>
+		<main>
+		   <div class="formInfo">
+		   	  	<ul class="Ginput">
+			   	  	<li on-touch="input('totle')">
+			   	  		<label>消费总额：</label><i class="line" ng-show="totleI" ng-class="{'focus':totleI}"></i>
+			   	  		<div class="input"  ng-show="totleP" >请询问服务员后输入</div>
+						<div class="inputP" ><b ng-hide="totleP">￥</b><span ng-bind="totle"></span></div>
+			   	  		<input type="text" name="totleMoney" value="totle"/>		   	  		
+			   	  	</li>
+			   	  	<p class="Gtips" ng-show="iSuse_amount"><input type="checkbox" name="discount" ng-model="discount"/>
+			   	  		<i class="change" ng-class="{'bg':discount}"></i><span>输入不可打折金额</span>
+			   	  	</p>		   	  	
+			   	  	<li ng-show="discount" on-touch="input('paid')">
+			   	  		<label>不参与优惠金额：</label><i class="line" ng-show="paidI"></i>
+			   	  		<div class="input"  ng-show="paidP" >请询问服务员后输入</div>
+						<div class="inputP"><b ng-hide="paidP">￥</b><span ng-bind="paid"></span></div>
+			   	  		<input type="text"  name="paid" value="paid"/>
+			   	  	</li>
+		   	  	</ul>
+		   	  	<ul class="Gname">
+				   	<li class="hui" ng-if="sales">
+				   	  <p ng-show="sale_type==1 || sale_type==2">
+				   	  	<span><i>惠</i><span ng-show="sale_type==1">每</span>满{{ full }}减{{ reduce }}元</span>
+				   	  </p>
+				   	  <p ng-show="sale_type==3 || sale_type==4">
+				   	  	<span><i>惠</i>满{{ full }}打{{ reduce }}折</span> 
+				   	  </p>				   	 
+				   	  <div class="salesNum"><span class="fr" ng-show="salesNum>0">-￥{{ salesNum }}</span></div>
+				   	  <p ng-show="max"><i class="vb" style="margin-right:10px;">惠</i><span> 最高优惠{{ max }}元</span></p> 	 
+				   	</li>
+				   	<li class="hui" ng-if="follows" >
+				   		<p>
+				   	  	<span><i>惠</i><span>关注公众号即享优惠，<a class="fr" ng-href="http://{{ attention_url }}">去关注</a></span></span>
+				   	  </p>
+				   	<li>
+				   	    <input type="text" ng-value="money" /><em>实付金额：</em><b class="red fr"><span>￥</span> <strong ng-bind="money"></strong></b>
+				   	</li>
+			   	 </ul>
+			   	 <ul class="Gok">
+			   	  	<li ng-class="{'mbkey':numberKey}">
+			   	  		<input type="button" ng-disabled="submitOk" class="btn" on-touch="payMoney()"  ng-class="{'hover':totle}" value="{{ submit_text }}">
+			   	  	</li>
+		   	  </ul>
+		   </div>
+		</main> 
+	</div>
+</div>
+<div class="numberKey" ng-show="numberKey">
+	<table ng-class="{'android':isAndroid}">
+		<tbody>
+			<tr>
+				<td data-type="number" class="blf" on-touch="Key('number','1')" >1</td>
+				<td data-type="number" on-touch="Key('number','2')" >2</td>
+				<td data-type="number" on-touch="Key('number','3')" >3</td>
+				<td  rowspan="2" class="brf delete"><p on-touch="Key('delete')"></p><div><span class="tran" ></span ><span class="de"><i class="l"></i><i class="r"></i></span></div></td>
+			</tr>
+			<tr>
+				<td data-type="number" on-touch="Key('number','4')" class="blf">4</td>
+				<td data-type="number" on-touch="Key('number','5')" >5</td>
+				<td data-type="number" on-touch="Key('number','6')" >6</td>
+				
+			</tr>
+			<tr>
+				<td data-type="number"  on-touch="Key('number','7')" class="blf">7</td>
+				<td  data-type="number"on-touch="Key('number','8')">8</td>
+				<td data-type="number" on-touch="Key('number','9')">9</td>
+				<td rowspan="2" class="ok brf" on-touch="Key('ok')" >完成</td>
+			</tr>
+			<tr>
+				<td class="blf" on-touch="Key('empty')">清空</td>
+				<td data-type="number" on-touch="Key('number','0')">0</td>
+				<td data-type="number" on-touch="Key('number','.')">.</td>				
+			</tr>
+		</tbody>
+	</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>编辑车辆信息</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine-zh_CN.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+$(function(){
+	$(".icon_checkbox").click(function(){
+		if ($(this).closest(".frm_checkbox_label").hasClass("selected")){
+			$(".frm_checkbox_label").removeClass("selected");
+			$(".frm_checkbox_label").find(".frm_checkbox").attr("checked",false);
+			$(".firstlay li").removeClass("selected");
+            $(".notCheck").children(":checkbox").attr("checked",false);
+		}else{
+			$(".frm_checkbox_label").removeClass("selected").addClass("selected");
+			$(".frm_checkbox_label").find(".frm_checkbox").attr("checked",true);
+			$(".firstlay li").addClass("selected");
+            $(".notCheck").children(":checkbox").attr("checked",'checked');
+		}
+	});
+	//取消
+	$("#cancel").click(function(){
+		art.dialog.close();
+	});
+//\u
+    $('#sub').click(function() {
+            var car = $('#car_number_name').val();
+            var re = /^[\\u4e00-\\u9fa5]{1}[A-Za-z]{1}[\dA-Za-z]{5}$/.test(car);
+            if(re == false) {
+                     art.dialog({title:false,time:3,content:"<div class='msg-all-succeed'>车牌号不符合规范..</div>",fixed: true,padding:0});
+
+                return false;
+            }
+            var dialog;
+            if($("#form").validationEngine('validate')){
+                $("#form").ajaxSubmit({
+                    beforeSubmit:function(){
+                        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                    },
+                        success:function(data){
+                            if(data.status == '0'){
+                                dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+
+                            } else {
+                                dialog.time(3).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                                art.dialog.close();
+                                var win = art.dialog.open.origin;
+                                win.location.reload();
+                                praent
+                            }
+                        },
+                        dataType:'json'
+                    });
+                return false;
+            }
+        });
+
+})
+</script>
+</head>
+<body>
+    	<form id="form" action="{:U('Chaowai/MovingCar/doeditcomsq')}" method="post" name="form">
+    		<div class="Gform">
+        		<ul>
+                    <li class="Gname"><span>*</span>车牌号：</li>
+                    <li class="Ginput">
+                        <input type="text" id="car_number_name" class="textbox validate[required,minSize[1]]" maxlength="7" placeholder="&nbsp;必填" name="plate_number" value="{$carinfo['plate_number']}" data-rel=""  />
+                        <span class="maxTips forInput" data-max="7">0/7</span>
+                    </li>
+                </ul>
+        		<ul>
+                    <li class="Gname"><span>*</span>车主：</li>
+                    <li class="Ginput">
+                        <input type="text" class="textbox validate[required,minSize[2]]" maxlength="10" placeholder="&nbsp;必填" data-rel="" name="driver_name" value="{$carinfo['driver_name']}"  /><span class="maxTips forInput" data-max="10">0/10</span>
+                    </li>
+                </ul>
+        		<ul>
+                    <li class="Gname"><span>*</span>车主手机号：</li>
+                    <li class="Ginput">
+                        <input id="phone" type="text" class="textbox validate[required,minSize[11]]" maxlength="11" name="mobile" value="{$carinfo['mobile']}" placeholder="&nbsp;请输入你的手机号码" data-rel=""  />
+                    </li>
+                </ul>
+                <div class="DiabtnCon">
+                	<input type="hidden" name="id" value="{$carinfo['id']}"/>
+                    <a href="javascript:void(0)" class="Diabtn-all" id="sub">确定</a>
+                    <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+                </div>
+        	</div>
+        </form>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信菜单排序</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script type="text/javascript">
+$(document).ready(function(e){
+	//初始化
+	msgNavList();
+
+	//获取排序信息
+	$("#btn_submit").click(function(){
+		var $form = $(this).closest('form');
+		var act = $form.attr('action');
+		var menuData = [];
+		//组包
+		$("div.msg-number").each(function(){
+			//计算下级菜单
+			var subMenuData = [];
+			$("ul.msg-order-two li",this).each(function(){
+				subMenuData[subMenuData.length] = {id:$(this).attr("data-id")};
+			});
+			menuData[menuData.length] = {id:$("ul.msg-order-one li",this).attr("data-id"),children:subMenuData};
+		});
+		menuData = JsonToStr(menuData);
+		var data = {menuData:menuData};
+		var loading = art.dialog.through({
+				title: false,
+				lock: true
+			});
+		$.post(act,data,function(d){
+			if(d.status == 1){
+				loading.close = function(){
+					parent.window.location.reload();
+				};
+			}
+			loading.time(1).content(d.info);
+		},'json');
+	});
+
+}); 
+</script>
+</head>
+<body class="bgfff">
+
+        <div class="msg-nav-con-title bd-b-565656">菜单排序</div>
+		<php>$empty = '<p style="color:red;margin:20px">请先添加菜单</p>';</php>
+		<volist name="menuArr" id="v" empty="$empty">
+        <div class="msg-number">
+            <ul class="msg-order-one">
+                <li data-id="{$v.id}"><div class="msg-order-edit"><i class="icon-order-up" title="上移"></i><i class="icon-order-down" title="下移"></i></div>{$v.title}</li>
+            </ul>
+            <ul class="msg-order-two">
+			 <volist name="v['sub_menu']" id="v2">
+                <li data-id="{$v2.id}"><div class="msg-order-edit"><i class="icon-order-up" title="上移"></i><i class="icon-order-down" title="下移"></i></div>{$v2.title}</li>
+			 </volist>
+            </ul>
+        </div>
+        </volist>
+       <notempty name="menuArr">
+        <div class="msg-libs-update">
+         <form method="post" action="{:U('WeixinMenu/menuSort')}" onSubmit="return false;">
+            <a href="javascript:void(0);" title="确认" class="btn-all w110" id="btn_submit">保存</a>
+            <a href="javascript:void(0);" title="取消" class="btn-all-del w110 ml10" id="btn_cancel" onClick="javascript:window.location.reload();">取消</a>
+		 </form>
+        </div>
+	   </notempty>
+</body>
+</html>

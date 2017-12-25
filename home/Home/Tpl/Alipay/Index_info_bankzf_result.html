@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>QQ支付_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Walipay.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/My97DatePicker/WdatePicker.js?v=20150603"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+</head>
+<body>
+<div id="wrapper">
+<include file="./Home/Tpl/Public/Public_header.html" />
+<div class="shopNav">
+<include file="./Home/Tpl/Alipay/Alipay_public_header.html" topmenuid="zhifu"/>
+</div>
+<div id="container">
+    <div id="main" class="rel bgfff">
+        <div class="sidenav">
+        <include file="./Home/Tpl/Alipay/Index_left_menuNew2.html" leftmenuid="alipay"/>
+        </div>
+        <div class="subcon fn">
+            <div class="main-name fn">
+                <h4>银行卡支付</h4>
+            </div>
+            <div class="edit-area">
+                 <div class="alipay"> 
+                  <div class="alipay" style="padding-bottom: 10px;">
+                    <div class="tip">
+                    <p>开通QQ支付，需完成如下三个步骤，请根据提示完成操作：</p>
+                    </div>
+                    <div class="s-tips1 mt10 mb20"> 
+                    <dl>
+                    <dd <if condition="$qqInfo['check_status'] neq '1'"> class="active"</if>><span  >1</span>提交申请信息</dd>
+                    <dd <if condition="$qqInfo['check_status'] eq '1' and $qqInfo['sign_status'] eq '0' "> class="active"</if>><span >2</span>签约QQ钱包支付</dd>
+                    <dd <if condition="$qqInfo['check_status'] eq '1' and $qqInfo['sign_status'] eq '1' "> class="active"</if>><span >3</span>在线完成开通</dd>
+                    </dl>
+                    </div>
+                    <!--根据审核状态显示 未审核提示-->
+                       <if condition="$qqInfo['check_status'] eq '0'">
+                    <div class='loadTip pt30'>
+                        <div class='loadStatus tip'>
+                        <dl>
+                        <dt>我们已经收到您提交的QQ支付申请！</dt>
+                        <dd>旺小二将在两个工作日内完成信息的审核；审核完成后，我们会以短信通知您。</dd>
+                        <dd><a href="{:U('Alipay/Index/info_qqzf',array('act'=>'show'))}">查看信息</a>
+                        </dd>
+                        </dl>
+                        </div>
+                    </div>
+                     </if>
+                    <!--根据审核状态显示 审核未通过提示-->
+                         <if condition='$qqInfo["check_status"] eq 2'>
+                    <div class='loadTip pt30'>
+                        <div class='loadStatus fail'>
+                        <dl>
+                        <dt>亲，您提交的审核未通过！</dt>
+                        <dd>未通过原因：{$qqInfo['check_memo']}</dd>
+                        <dd><a href="{:U('Alipay/Index/info_qqzf',array('act'=>'show'))}">重新提交</a></dd>
+                        </dl>
+                        </div>
+                    </div>
+                        </if>
+                    
+                    <!--根据审核状态显示 审核通过提示-->
+                   <if condition="($qqInfo['check_status'] eq 1) && ($qqInfo['sign_status'] eq '0')">
+                    <div class='loadTip pt30'>
+                        <div class='loadStatus ok'>
+                        <dl>
+                        <dt>您提交的信息已审核通过！</dt>
+                        <dd>您的QQ支付账户以及初始密码已发至您的邮箱中！</dd>
+                        <dd>现需您登录<a target="_blank" href="https://qpay.qq.com">QQ支付平台</a>，完成“账户验证”及“协议签署”。</dd>
+                        <dd>请尽快完成上述操作。</dd>
+                        <dd><a target="_blank" href="">点此查看</a>，如何完成“账户验证”及“协议签署”。</dd>
+                        </dl>
+                        </div>
+                    </div>
+                  </if>
+                    <if condition='($qqInfo["check_status"] eq 1) && ($qqInfo["sign_status"] eq 1 ) && ($qqInfo["status"] eq "0")'>
+                    <form action="<?php echo U('Alipay/Index/qqzfepos'); ?>" method="post" id="thisoneform"> 
+                    <div class="s-tips-ok">
+                     <div class="Gform w1">
+                        <ul class="Gtitle">开通终端列表</ul>
+                        <ul>
+                           <li class="Gname">已开通终端数</li>
+                           <li class="Ginput">
+                             <span class="txtTips-info" >{$eposcnt}
+                             <a target="_blank" href="{:U('Home/Store/Wapply_terminal')}">去申请终端</a></span>
+                             <span class="txtTips">注：后续申请的终端，都将自动开启条码支付权限</span>
+                           </li>
+                        </ul>
+
+
+
+                        <ul class="Gtitle">开通参数</ul>
+                        <ul>
+                                        <li class="Gname">APPID</li>
+                                       <li class="Ginput">
+                                         <input type="text" name='appid' value="{$wxInfo['account_pid']}" maxlength="64" class="Gview-text validate[required] validate[custom[onlyLetterNumber]]" />
+                                         <span class="maxTips forInput" data-max="64">0/64</span> 
+                                       </li>
+                                    </ul>
+                        <ul class="Gtitle">开通方式</ul>
+                         <ul>
+                             <li class="Gname"><span>*</span>开通方式</li>
+                             <li class="Ginput">
+                                 <div class="switch">
+                                     <input type="radio" name="type" value="0" checked="checked"/>
+                                     <div class="newRadio">
+                                         <span  class="valfirst hover" data-val="0">普通接入</span>
+                                         <span class="vallast" data-val="1">收银接入</span>
+                                     </div>
+                                     <div class="cl fn"></div>
+                                     <div class="newRadio-input l">
+                                         <div style="margin-left:-155px;">
+                                             <ul >
+                                                 <li class="Gname"><span>*</span>联系人姓名</li>
+                                                 <li class="Ginput">
+                                                     <input type="text" name='contact_name' value="{$qqInfo['contact_name']}" maxlength="64" class="Gview-text validate[required] validate[custom[onlyLetterNumber]]" />
+                                                 </li>
+                                             </ul>
+                                             <ul>
+                                                 <li class="Gname"><span>*</span>联系电话</li>
+                                                 <li class="Ginput">
+                                                     <input type="text" name='contact_phone' value="{$qqInfo['contact_phone']}" maxlength="64" class="Gview-text validate[required] validate[custom[onlyLetterNumber]]" />
+                                                 </li>
+                                             </ul>
+                                         </div>
+                                         <input type="hidden" name="for_mail_type" value="1">
+                                         <span class='txtTips'>请提供开发对接人信息及联系方式，我们会将接口文档发送至您的邮箱，并提供旺财联调技术人员联系信息</span>
+                                     </div>
+                                 </div>
+
+                             </li>
+
+                         </ul>
+
+                         <ul class="pt20">
+                         <li class="Gname"> </li>
+                        <li class="Ginput">
+                            <a href="javascript:void(0)" onclick="sub()" class="btn-all btn_primary mt45 mb90">确认</a>
+                            <a href="javascript:void(0)" style="width:100px;" onclick="history.back(-1)" class="btn-all btn-all-del mt45 mb90">取消</a>
+                        </li>
+                         </ul>
+                     
+                    </div>
+                    </div> 
+                    </form>
+                </if>
+                    
+                    <!--根据开通状态显示 未开通提示-->
+                       <if condition='($qqInfo["check_status"] eq 1) && ($qqInfo["sign_status"] eq 1 ) && ($qqInfo["status"] eq 3)'>
+                    <div class='loadTip pt30'>
+                        <div class='loadStatus tip'>
+                        <dl>
+                        <dt>我们已经收到您提交的开通申请</dt>
+                        <dd>旺小二将在一个工作日内处理；开通完成后，我们会以短信通知您审核结果。</dd>
+                        <dd>点击<a   href="{:U('Alipay/Index/info_qqzf',array('act'=>'show'))}"  >查看提交信息</a></dd>
+<!--                         <dd>如需申请核销终端，点击<a  target="_blank" href="{:U('Home/Store/Wapply_terminal')}">前往申请</a></dd> -->
+                        </dl>
+                        </div>
+                    </div>
+                </if>
+ 
+                  </div>
+                  </div> 
+            </div>     
+        </div>
+    </div>
+</div>
+<include file="./Home/Tpl/Public/Public_footer.html" />
+<div class="service"></div>
+</div> 
+
+<script>
+function sub(){ 
+    $.ajax({
+            type:'post',
+            url:$('form').attr('action'),
+            data:$('form').serialize(),
+            dataType:'json',
+            success:function(data){
+             if(data.status==0){ 
+                     alert(data.info);
+             }
+             else {
+                     window.location.reload();
+        
+             }
+        
+        
+            }
+        
+        })  
+}
+</script>
+</body>
+</html>

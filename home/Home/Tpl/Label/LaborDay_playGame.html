@@ -1,0 +1,289 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>劳动最光荣</title>
+	<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+	<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+	<meta content="telephone=no" name="format-detection" />
+	<meta content="email=no" name="format-detection" />
+	<meta name="apple-touch-fullscreen" content="NO">
+	<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20150501.css">
+	<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+	<script>
+		$(document).ready(function(e) {
+			var loadImg = 0 ;
+			var imgNum = 11 ;
+			$(".loadimg").one('load', function() {
+				loadImg++;
+				if(loadImg==imgNum){
+					init();
+					$("#loading").fadeOut();
+				}
+			}).each(function() {
+				if(this.complete) $(this).load();
+			});
+		});
+	</script>
+</head>
+<body>
+<div id="loading">
+    <div class="loadingbox">
+        <h4>商户名称</h4>
+        <div><i></i>
+            <?php if($marketInfo['log_img']){?>
+            <img src="__UPLOAD__/<?php echo $marketInfo['log_img']?>" />
+            <?php }else{?>
+            <img src="__PUBLIC__/Label/Image/defaultlogo-sOne.png" />
+            <?php }?>
+        </div>
+        <h5>Loading...</h5>
+        <h6>活动名称</h6>
+    </div>
+    <img src="__PUBLIC__/Label/Image/20150501/man.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150501/road.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150501/rift1.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150501/rift2.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150501/rift3.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150501/smog.png" class="loadimg" />
+	<img src="__PUBLIC__/Label/Image/20150501/code100.png" class="loadimg" />
+	<img src="__PUBLIC__/Label/Image/20150501/code50.png" class="loadimg" />
+	<img src="__PUBLIC__/Label/Image/20150501/code20.png" class="loadimg" />
+	<img src="__PUBLIC__/Label/Image/20150501/code10.png" class="loadimg" />
+	<img src="__PUBLIC__/Label/Image/20150501/code0.png" class="loadimg" />
+</div>
+<div id="gamewrapper">
+	<div class="gamewrapperbg"></div>
+	<div id="gamecontainer">
+		<div class="shakeTip show">
+			<img class="wobble" src="__PUBLIC__/Label/Image/20150501/hands.png" alt="摇一摇">
+			<p class="shakeTip1"><span>猛烈摇动</span>你的手机开始游戏</p>
+			<p class="shakeTip2"><span>次数不够</span>继续摇</p>
+			<a href="javascript:void(0);" id="startGame">马上开始游戏</a>
+		</div>
+		<div class="gameCon">
+			<div class="codeNum l"><i class="icon-times"></i><span>{$info.game_number}</span></div>
+			<div class="codeNum r"><i class="icon-coin"></i><span>{$info.score}</span></div>
+			<div class="codelink l"><a href="{:U('index', array('id'=>$id))}">返回首页</a></div>
+			<div class="codelink r"><i class="icon-prize"></i><a href="{:U('getPrize', array('id'=>$id))}">去兑换奖品</a></div>
+			<div class="road">
+				<img src="__PUBLIC__/Label/Image/20150501/road.png">
+				<img src="__PUBLIC__/Label/Image/20150501/rift1.png" class="rift rift1">
+				<img src="__PUBLIC__/Label/Image/20150501/rift2.png" class="rift rift2">
+				<img src="__PUBLIC__/Label/Image/20150501/rift3.png" class="rift rift3">
+			</div>
+			<div class="Man begin">
+				<img src="__PUBLIC__/Label/Image/20150501/smog.png" class="smog smog1">
+				<img src="__PUBLIC__/Label/Image/20150501/man.png">
+				<div class="code">
+					<img src="__PUBLIC__/Label/Image/20150501/code100.png" class="dn codeimg100" />
+					<img src="__PUBLIC__/Label/Image/20150501/code50.png" class="dn codeimg50" />
+					<img src="__PUBLIC__/Label/Image/20150501/code20.png" class="dn codeimg20" />
+					<img src="__PUBLIC__/Label/Image/20150501/code10.png" class="dn codeimg10" />
+					<img src="__PUBLIC__/Label/Image/20150501/code0.png" class="dn codeimg0" />
+					<div class="codebg"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<audio src="__PUBLIC__/Label/Image/20150501/win.mp3" id="audio" preload="auto" style="display:none; width:0; height:0; overflow:hidden;"></audio>
+</body>
+</html>
+<script>
+	//载入全局配置变量
+	var _global =  {
+		'nowcode':0, //分数
+		'game_number':0//局数
+	};
+	var nowcode = _global.nowcode ||0;//分值
+	var nowball = _global.game_number ||0;//炮数
+	//初始化页面
+	var initData = function(){
+		$.post("{:U('getInfo',array('id'=>$id))}",{
+		},function(res){
+			_global.nowcode = res.info.score;
+			_global.game_number = res.info.game_number;
+			nowball = _global.game_number,
+					nowcode = _global.nowcode;
+			gameTip(1);
+			begin();
+		},'json');
+	};
+	initData();
+	var windowwidth=$("#gamewrapper").width();
+	var windowheight=$("#gamewrapper").height();
+	var bodywidth = $("body").width();
+	var thiscode = [100,50,20,10,0];
+	var count = 0; //摇动次数
+	var g = true;
+	$(document).ready(function(e) {
+		init();
+		var isSupportTouch = "ontouchend" in document ? true : false;
+		var cantouch = "click";
+		if(isSupportTouch){cantouch = "touchstart";}else{cantouch = "click";};
+
+		nowclode(nowball,nowcode);
+		$("#gamewrapper").on("touchmove",function(){
+			event.preventDefault();
+		});
+		$("#startGame").on(cantouch,function(){
+            if(_global.game_number == 0){
+                end();
+                return false;
+            }
+			$(".shakeTip").removeClass("show");
+			$(".shakeTip").addClass("hide");
+			$(".gameCon").addClass("ready");
+			shake();
+		});
+	$("body").on(cantouch,"#btn-begin,.close-msgPop",function(){
+        if(_global.game_number == 0){
+            end();
+            return false;
+        }
+		$(".code img").hide();
+		$(".road").removeClass("rift");
+		$(".road").removeClass("end");
+		$(".Man").removeClass("begin");
+		$(".Man").removeClass("end");
+		closeMsgPop();
+    	g = true ;
+		count = 0 ;
+	});
+	});
+
+	function shake(){
+		if(window.DeviceMotionEvent) {
+			var speed = 5; //摇动的幅度
+			var x = y = lastX = lastY = 0; //起始点和终止点坐标
+			var time = 0;
+			window.addEventListener('devicemotion',function(){
+				if(g){
+					var acceleration = event.accelerationIncludingGravity,
+							x = acceleration.x;
+					y = acceleration.y;
+					if(Math.abs(x-lastX) > speed || Math.abs(y-lastY) > speed ){
+						$(".shakeTip").removeClass("show2");
+						count>1 ? ($(".Man").addClass("begin"),update(),g = false) : (count++);
+					}else{
+						if(count<=1){
+							$(".Man").removeClass("begin");
+							$(".shakeTip").removeClass("hide");
+							$(".shakeTip").addClass("show2");
+						}
+					}
+					lastX = x;
+					lastY = y;
+				}
+			},false);
+		}
+	}
+	function nowclode(){
+		$(".codeNum.l span").text("X"+_global.game_number);
+		$(".codeNum.r span").text(_global.nowcode);
+		$(".codeNum.r span").addClass("add");
+		setTimeout(function(){
+			$(".codeNum.r span").removeClass("add");
+		},900);
+	}
+	//弹窗基础
+	function closeMsgPop(){
+		$(".msgPop").remove();
+	}
+	function MsgPop(msg){
+		if(!msg.title){msg.title="消息"};
+		if(!msg.icon){msg.icon=""}else{msg.icon="<i class='"+msg.icon+"'></i>"};
+	if(!msg.cancel){msg.cancel=""}else{msg.cancel='<a href="javascript:void(0)" class="close-msgPop" onClick="closeMsgPop()"><i><span>+</span></i></a>'};
+		var html = ['<div class="msgPop bg">',
+			'<div class="msgBg">',
+						'<div class="msgTitle">'+msg.title+msg.cancel+'</div>',
+			'<div class="msgCon">'+msg.icon+msg.html+'</div>',
+			'</div>',
+			'</div>'].join('');
+		$("body").append(html)
+	}
+
+	function init(){
+		var windowwidth=$("#gamewrapper").width();
+		var scale=windowwidth/640;
+		var x = windowwidth-200*scale;
+		var y = windowheight;
+	}
+	function begin(){
+        nowclode();
+	}
+function end(msg){
+	f = false;
+
+	var html = ['<div class="fn getcode">',
+				'<img src="__PUBLIC__/Label/Image/20150501/erro.png" />',
+				'<p>今天次数已经用完，收藏活动每日登陆都可获得3次游戏机会！</p>',
+				'</div>',
+				'<a href="{:U('getPrize', array('id'=>$id))}" class="btn-all other">兑换奖品</a></div>'].join('');
+	MsgPop({
+		title:"对不起",
+		html : html,
+		cancel : false
+	})
+
+
+}
+
+	function update(){
+		gameTip();
+		$.post("{:U('gameScore',array('id'=>$id))}",{
+			'score':thiscode
+		},function(res){
+			if(+res.code != 0){
+				alert(res.msg);
+				return;
+			}
+			gameTip(1);
+            var score = res.data.score;
+            var prech = res.data.prech;
+            var cate_name = res.data.cate_name;
+            var tag = res.data.tag;
+            $(".road").addClass("rift");
+			document.getElementById('audio').load();
+			document.getElementById('audio').play();
+            setTimeout(function(){
+                $(".code img").hide();
+                $(".code img.codeimg"+score).show();
+                $(".road").removeClass("rift");
+                $(".road").addClass("end");
+                $(".Man").removeClass("begin");
+                $(".Man").addClass("end");
+            },4000)
+            setTimeout(function(){
+                var html = ['<div class="fn getcode">',
+                    '<img src="__PUBLIC__/Label/Image/20150501/code'+score+'.png" />',
+                    '<p><span>+'+score+'</span>积分</p>',
+                    '<p>还差<em>'+prech+'</em>分就可兑换<em>'+cate_name+'</em></p>',
+                    '</div>',
+                    '<div class="fn"><a href="javascript:void(0)" class="btn-all w120" id="btn-begin">继续游戏</a><a href="{:U('getPrize', array('id'=>$id))}" class="btn-all other w120">兑换奖品</a></div>'];
+                if(tag == 2){
+                    html[3] = '';
+                }
+                html = html.join('');
+                MsgPop({
+                    title:"恭喜获得",
+                    html : html,
+                    cancel : false
+                })
+                initData();
+            },7000)
+		},'json');
+	}
+	function gameTip(tip){
+		if(tip){$(".gameTip").remove();return false;}
+		var codeRandom = Math.floor(Math.random()*5);
+		var txt = ["金条值100金币","工人会偷懒，一定要持续摇~","当心破鞋，一文不值哦~","戒指价值50金币，如果摇到运气爆棚~","紧握双手，当心手机飞出去","未成年人请在家长陪同下玩耍~"]
+		var html = '<div class="gameTip"><div class="gameTipTxt"><i></i><p>'+txt[codeRandom]+'</p></div><div class="gameTipbg"></div></div>';
+		$(".gameCon").append(html);
+	}
+</script>
+<script>
+    var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/LaborDay/_share"/>

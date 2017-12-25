@@ -1,0 +1,286 @@
+<include file="Public:header"/>
+<style>
+.piecleft{
+	margin:0 auto; padding:0 15px; display:inline-block;*display:inline;
+}
+</style>
+<js href="__PUBLIC__/Js/highcharts.js?v=__VR__"/>
+<script type="text/javascript" charset="utf-8">
+//数据源
+var charData = {:json_encode($query_list)};
+//计算访问量饼图数据
+var charDataClick = [];
+//计算中奖数饼图数据
+var charDataSend = [];
+//计算访问量柱状图 X 坐标名
+var charDataColumnName = [];
+//计算访问量柱状图 X 坐标值
+var charDataClickColumnValue = [];
+
+//计算中奖数柱状图 X 坐标值
+var charDataSendColumnValue = [];
+
+for(var i in charData){
+	charDataColumnName.push(charData[i]['name']);
+	charDataClick.push([charData[i]['name'],charData[i]['click_count']*1]);
+	charDataClickColumnValue.push(charData[i]['click_count']*1);
+
+	charDataSend.push([charData[i]['name'],charData[i]['send_count']*1]);
+	charDataSendColumnValue.push(charData[i]['send_count']*1);
+}
+var chart;
+$(document).ready(function() {
+   chart = new Highcharts.Chart({
+      chart: {
+         renderTo: 'chart_1'
+      },
+      title: {
+         text: '访问量占比分析'
+      },
+      plotArea: {
+         shadow: null,
+         borderWidth: null,
+         backgroundColor: null
+      },
+      tooltip: {
+         formatter: function() {
+            return '<b>'+ this.point.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 1) +'% ('+
+                         Highcharts.numberFormat(this.y, 0, ',') +' 个)';
+         }
+      },
+      plotOptions: {
+         pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+               enabled: true,
+               formatter: function() {
+                  if (this.percentage > 4) return this.point.name;
+               },
+               color: '',
+               style: {
+                  font: '13px Trebuchet MS, Verdana, sans-serif'
+               }
+            }
+         }
+      },
+      legend: {
+         backgroundColor: '#FFFFFF',
+         x: 0,
+         y: -30
+      },
+      credits: {
+          enabled: false
+      },
+       series: [{
+         type: 'pie',
+         name: 'Browser share',
+         data: 
+            charDataClick
+
+		}]
+   });
+
+   chart = new Highcharts.Chart({
+      chart: {
+         renderTo: 'chart_2'
+      },
+      title: {
+         text: '中奖数占比分析'
+      },
+      plotArea: {
+         shadow: null,
+         borderWidth: null,
+         backgroundColor: null
+      },
+      tooltip: {
+         formatter: function() {
+            return '<b>'+ this.point.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 1) +'% ('+
+                         Highcharts.numberFormat(this.y, 0, ',') +' 个)';
+         }
+      },
+      plotOptions: {
+         pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+               enabled: true,
+               formatter: function() {
+                  if (this.percentage > 4) return this.point.name;
+               },
+               color: '',
+               style: {
+                  font: '13px Trebuchet MS, Verdana, sans-serif'
+               }
+            }
+         }
+      },
+      legend: {
+         backgroundColor: '#FFFFFF',
+         x: 0,
+         y: -30
+      },
+      credits: {
+          enabled: false
+      },
+       series: [{
+         type: 'pie',
+         name: 'Browser share',
+         data: charDataSend
+		}]
+   });
+});
+
+
+var chart; 
+$(function() { 
+    chart = new Highcharts.Chart({ 
+        chart: { 
+            renderTo: 'chart_column', //图表放置的容器，关联DIV#id 
+            zoomType: 'xy'   //X、Y轴均可放大 
+            //因为是柱状图和曲线图共存在一个图表中，所以默认图表类型不在这里设置。 
+        }, 
+        title: { 
+            text: '访问量占比分析' //图表标题 
+        }, 
+        subtitle: { 
+            text: ''   //图表副标题 
+        }, 
+        credits: { 
+            enabled: false   //不显示LOGO 
+        }, 
+        xAxis: [{ //X轴标签 
+            categories: charDataColumnName, 
+            labels: { 
+                rotation: -45,  //逆时针旋转45°，标签名称太长。 
+                align: 'right'  //设置右对齐 
+            } 
+        }], 
+        yAxis: [{ //设置Y轴-第一个（增幅） 
+            labels: { 
+                formatter: function() { //格式化标签名称 
+                    return this.value + ''; 
+                }, 
+                style: { 
+                    color: '#89A54E' //设置标签颜色 
+                } 
+            }, 
+            title: {text: ''}, //Y轴标题设为空 
+            opposite: true  //显示在Y轴右侧，通常为false时，左边显示Y轴，下边显示X轴 
+ 
+        }, 
+        { //设置Y轴-第二个（金额） 
+            gridLineWidth: 0,  //设置网格宽度为0，因为第一个Y轴默认了网格宽度为1 
+            title: {text: ''},//Y轴标题设为空 
+            labels: { 
+                formatter: function() { //格式化标签名称 
+                    return this.value + ' '; 
+                }, 
+                style: { 
+                    color: '#4572A7' //设置标签颜色 
+                } 
+            } 
+ 
+        }], 
+        tooltip: { //鼠标滑向数据区显示的提示框 
+            formatter: function() {  //格式化提示框信息 
+                var unit = { 
+                    '访问量': '个', 
+                    '中奖数': '个' 
+                } [this.series.name]; 
+                return '' + this.x + ': ' + this.y + ' ' + unit; 
+            } 
+        }, 
+        legend: { //设置图例 
+            layout: 'vertical', //水平排列图例 
+            shadow: true,  //设置阴影 
+        }, 
+        series: [{  //数据列 
+            name: '访问量', 
+            color: '#4572A7', 
+            type: 'column', //类型：纵向柱状图 
+            yAxis: 1, //数据列关联到Y轴，默认是0，设置为1表示关联上述第二个Y轴即金额 
+            data: charDataClickColumnValue //金额数据 
+        }, 
+        { 
+            name: '中奖数', 
+            color: '#89A54E', 
+            type: 'column', //类型：曲线图 
+            data: charDataSendColumnValue //增幅数据 
+        }] 
+    }); 
+}); 
+</script>
+<div id="global-main">
+ <div id="global-bg" class="bgf3f3f3">
+           <div id="ui-game" class="fn-clear">
+             <ul>
+              <li class="fn-clear">
+               <div class="ui-game-bg ui-game-bg1"><p>用户可以自定义中奖奖品与中奖概率</p>
+               <a href="{:U('LabelAdmin/Game/prizeSet/')}" class="btn-110">游戏活动配置</a></div>
+               </li>
+               <li class="fn-clear">
+              <div class="ui-game-bg ui-game-bg2"><p>客户可以把营销奖品发布到自己创建的渠道去</p>
+              <a href="<?php echo U('LabelAdmin/BindChannel/index','batch_type=1&batch_id='.$batch_id);?>" class="btn-90">一键发布</a>
+              </div>
+               </li>
+              </ul>
+            </div>
+      </div>
+                <div id="global-bg">
+                	<div class="global-content">
+                    	<h2>玩游戏赢大奖-渠道分析</h2>
+                        <div id="global-libs" class="index-libs">
+                        	<p class="hover">饼状图</p>
+                            <p>柱状图</p>
+                            <div id="global-libs-content">
+                                <div id="globallibscontent" class="hover fn-clear">
+                                    <div class="piecleft" id="chart_1" style="height:350px; width: 350px;"><!-- 访问量饼图--></div>
+                                    <div class="piecleft" id="chart_2" style="height:350px; width: 350px;"><!-- 中奖饼图--></div>
+                                </div>
+                                <div id="globallibscontent" class="hide fn-clear">
+                                    <div class="piecleft" id="chart_column"></div>
+                                </div>
+                            </div>
+                        </div>
+						<div class="clear"></div>
+                        <div class="fn-clear mt20">
+                            <table cellpadding="0" cellspacing="0" class="W-table">
+                                <tr>
+                                    <th>渠道名称</th>
+									<th>创建时间</th>
+									<th>访问二维码</th>
+									<th>访问量</th>
+									<th>中奖数</th>
+                                    <th>操作</th>
+                                </tr>
+                               <php>
+									$empty = ' <td colspan="6">无数据 '.$errorMsg.'</td>';
+								</php>
+                                <volist name="query_list" id="v" empty="$empty">
+                                <tr>
+                                    <td><?php echo $v['name'];?></td>
+                                    <td><?php echo date('Y-m-d',strtotime($v['add_time']));?></td>
+                                    <td><a href="<?php echo U('Label/Label/index',array('id'=>$v['id']),'','',true);?>" target="_blank">访问</a></td>
+                                    <td>
+                                    <a href="{:U('LabelAdmin/Chart/clickChart',array('batch_id'=>$batch_id,'batch_type'=>1,'channel_id'=>$v['channel_id']))}">
+										 {$v['click_count']}
+										 </a>
+                                    </td>
+                                    <td><a href="{:U('LabelAdmin/Chart/clickChart',array('batch_id'=>$batch_id,'batch_type'=>1,'channel_id'=>$v['channel_id']))}">
+										 {$v['send_count']}
+										 </a></td>
+                                    <td><a href="<?php echo U('LabelAdmin/ShowCode/index','isdown=1&id='.$v['id']);?>">下载二维码</a></td>
+                                </tr>
+                               </volist>
+                            </table>
+                            <div class="page"><?php echo $page;?></div>
+                        </div>
+                    </div>
+                <div id="global-bg"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<include file="Public:footer"/>

@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>付满送</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_fms_activity.css">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_card.css">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js"></script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+     <if condition="empty($sharedid)">
+    	<div id="main">
+          <div id="header">
+            	<div class="logo"><div class="logoimg"><img src="<php> 
+			    if($row['log_img']!=''&&$row['log_img']!=NULL ){
+			   		echo get_upload_url($row['log_img']);
+			   }
+			   	 else  echo $defaultimg	;
+
+			   </php>"></div><p>{$row['node_name']}</p></div>
+            	<img src="__PUBLIC__/Label/Image/Item/fms-3.png" class="img1" />
+            	<img src="__PUBLIC__/Label/Image/Item/fms-1.png" class="img2" />
+            	<div class="an"><img src="__PUBLIC__/Label/Image/Item/fms-2.png" class="img3" /></div>
+                <div class="bg1"></div>
+                <div class="bg2"></div>
+            </div>
+            <div class="con">
+            	<h2>活动说明</h2>
+                <p>{$row['wap_info']}</p>
+                 	 <a  style='display:none;' href="javascript:void(0)" class="btns-all wybox">{$cj_text}</a>
+                   	 <a href="javascript:void(0)" id="btn">{$cj_text}</a>
+            </div>
+        </div>
+         <!--fenxiang-->
+ 		<div class="now_lq" style="display:none">
+	     <div class="now_top">
+		  <p class="wybox tc_title">恭喜你，中奖了！</p>
+		  <eq name="goodsinfo['goods_type']" value="15">
+		  <p class="wybox card_ts">{$goodsinfo['batch_short_name']}将在三日内充值到您的手机号</p>
+		  <else />
+		  <p class="wybox card_ts">奖品已下发至您填入的手机号</p>
+		  </eq>
+          <p class="wybox mymobile">{:session('input_mobile')}</p>
+		 </div>
+		  <ul>
+		  	<php>
+		  	if(!empty($shareData))
+		    echo  '<li class="wybox"><a href="javascript:void(0)" class="sqfriend">送券给好友</a></li>';
+		    </php>
+		     <li class="wybox myvcard" style='display:none;'><a href="#">我的卡包</a></li>
+		     <li class="back wybox"><a>返回</a></li>
+		  </ul>
+	   </div> 
+	  <div class="cover" style="display:none"></div>
+	  <div style="position:absolute;top:0px;display:none;" class="tisi">
+	      <img src="__PUBLIC__/Label/Image/tip-share.png" width="100%" usemap="#Map1">
+           <map name="Map1"> 
+              <area shape="rect" coords="50,50,100,100" style="cursor:hand;border:1px solid red" href="login.jsp" />
+              <area shape="rect" coords="0,0,50,50" style="cursor:hand;border:1px solid red" href="main.jsp"/>  
+          </map>   
+	 </div>
+<!--fenxiang-->
+	<elseif	 condition='!empty($sharedid)'/>
+     	<include file="Paysend:list"/>
+	</if>
+	 <include file="Public:pop"/>
+	 <if condition='!empty($shareData)'>
+			<script type='text/javascript'>   
+				var wxShareData = {:json_encode($shareData)};
+				wxShareData.ShareTimelineSuccess=function(d){
+						window.location.href=wxShareData.link
+
+				}
+				wxShareData.ShareAppMessageSuccess=function(d){
+							window.location.href=wxShareData.link;
+				}
+			</script>
+			<include file="Label/Public/_shareWx"/>
+	 </if>  
+ </div>
+</div>
+<style type="text/css">
+ #mcover {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0, 0, 0, 0.7);display:none;z-index:20000;}
+ #mcover .img1{position:fixed;right:18px;top:5px;width:100%;z-index:20001;}
+ .sOne-cjInput-half,.sOne-cjInput{font-size:14px}
+ #copy_url{position:fixed;top:35%;left:20%;font-size:16px;line-height:24px;
+ z-index:110;color:#fff}
+.mbback{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0, 0, 0, 0.7);display:none;z-index:99;}
+</style>
+<div id="mcover" onclick="weChat()">
+     <img class="img1" src="__PUBLIC__/Label/Image/tip-share.png" width="100%"/>
+</div>
+<div class="mbback" style="display:none"></div>
+<div id="copy_url" class="copy_url" style="display:none">
+	 <p>长按复制链接，发送给好友即可</p>
+     <input type="text" value="" id="cpurl" style="width:200px;height:30px;line-height:30px;border:none;color:#0066cc;text-overflow:ellipsis;font-size:16px;text-align:center;margin-top:5px">
+</div>
+</body>
+</html>
+<script>
+
+ function weChat(){
+             $("#mcover").css("display","none");
+			 //$(".cover").css("display","none");
+         }
+var _is_sub = false;
+$(document).ready(function(e) {
+	 $(".btns-all").click(function(){
+		     	$('.now_lq').css('display','block');
+		     	$('.cover').css('display','block');
+		   });
+		   $('.back').click(function(){
+		        $('.now_lq').css('display','none');
+				$('.cover').css('display','none');
+		   })
+		   
+		   $('.sqfriend').click(function(){
+		       var uas= window.navigator.userAgent.toLowerCase();
+			   var url=wxShareData.link;
+			   if(uas.match(/MicroMessenger/i) == 'micromessenger'){
+		       $('.now_lq').css('display','none');
+			   $('.cover').css('display','none');
+			    setTimeout(function (){
+				$("#mcover").show();},0);
+				setTimeout(function (){
+				$("#mcover").hide();},10000); 
+				}else{
+				    $('.now_lq').css('display','none');
+			        $('.cover').css('display','none');
+			        $('#cpurl').val(url);
+				    $(".mbback").css('display','block');
+				    $('.copy_url').css('display','block');
+				}
+		    })
+			$('.mbback').click(function(){
+			  $('.copy_url').css("display","none");
+		      $(this).css("display","none");
+		   })
+
+$(".close-AjaxWrapper").click(function(){
+            window.location.reload();
+	});
+	//普通抽奖,特殊抽奖在单独页面中
+	var _is_sub = false;
+	$('#subcj').click(function(){
+		if(_is_sub)
+			return false;
+		_is_sub = true;
+		$.post(
+				"{:U('Label/Cj/submit',array('sharedid'=>I('sharedid')))}",
+				$('#theform').serialize(),
+				function(data) {
+					var _endCj = handelCjResult(data);
+					_endCj();
+					_is_sub = false;
+
+				},
+				'json'
+		);
+	});
+	$(".an img,#btn").click(function(){
+		popForm('popForm',0);
+	})
+});
+</script>

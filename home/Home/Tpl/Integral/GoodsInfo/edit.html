@@ -1,0 +1,1232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>编辑商品</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<style type="text/css">
+    .img {
+        display: block;
+        height: 100px;
+        margin: 5px;
+        width: 160px;
+    }
+    .edit-area .pic .img {
+        display: block;
+        margin: 5px;
+        width: 160px;
+        height: 90px;
+    }
+    .edit-area .pic {
+        position: relative;
+        width: 170px;
+        height: 135px;
+        border: 1px solid #E0E0E0;
+        text-align: center;
+        overflow: hidden;
+    }
+    .create-good li .strong {
+        display: block;
+        width: 120px;
+        text-align: right;
+        line-height: 28px;
+    }
+    .ml20 {
+        margin-left: 20px;
+    }
+    .l {
+        float: left;
+    }
+    .create-good li .strong {
+        display: block;
+        width: 120px;
+        text-align: right;
+        line-height: 28px;
+    }
+    /*.btn {*/
+        /*background: #ed1c24 none repeat scroll 0 0;*/
+        /*border-radius: 3px;*/
+        /*color: #fff;*/
+        /*cursor: pointer;*/
+        /*display: block;*/
+        /*font-size: 14px;*/
+        /*height: 30px;*/
+        /*line-height: 30px;*/
+        /*margin: 0 auto;*/
+        /*text-align: center;*/
+        /*width: 74px;*/
+    /*}*/
+     .new-btn {
+        margin-left: 15px;
+        margin-top: -2px;
+    }
+    .Gform li .img { margin: 0;}
+    .Gform .pic {
+	    position: relative;
+	    width: 160px;
+	    height: 100px;
+	    text-align: center;
+	    border: 1px solid #e0e0e0;
+	    /*overflow: hidden;*/
+		margin-right:10px; margin-bottom:10px; float:left;
+	}
+	.Gform .pic .btn {
+	    display: none;
+	    margin: 0 auto;
+	    width: 158px;
+	    height: 98px;
+	    background: #ffffff;
+	    text-align: center;
+	    line-height: 100px;
+	    font-size: 14px;
+	    color: #ff8b04;
+	    position: absolute;
+    	top: 0;
+    	left: 0;
+    	border: 1px #e0e0e0 dashed;
+	    /*border-radius: 3px;*/
+	    cursor: pointer;
+	}
+	.Gform .pic:hover { border: 1px solid #ffffff;}
+	.Gform .pic:hover .btn { display: block;}
+	.judgeCon-time { width: 510px;}
+	.Gform .judgeCon-time p { display: inline-block; line-height: 28px;}
+	.Gform .judgeCon-time input { width: 90px;}
+	.Gform .btn-all { color: #ffffff;}
+	.Gform .Ginput .sku-table i, .sku-table i { top: 11px; margin-left: 11px;}
+</style>
+<script>
+var isopencusMsg = "{$startUp}"; //1：设置了短信内容自定义 0：未设置自定义
+var displaySms = "{$goodsinfo['delivery_flag']}";    // 0:显示自定义短信内容     1：不显示自定义短信
+
+$(function(){
+    if(isopencusMsg==1){
+        $(".nocusMsg").hide();
+        $(".cusMsg").show();
+    }else{
+        $(".nocusMsg").show();
+        $(".cusMsg").hide();
+    }
+    $("#selectShop").click(function(e){
+        art.dialog.open("{:U('WangcaiPc/NumGoods/shopList')}",{
+            title: '选择门店',
+            width:'800px'
+        });
+        //$(".newRadio-default").show();
+    });
+
+    $("#editStore").click(function(){
+        art.dialog.open("{:U('WangcaiPc/NumGoods/shopList')}",{
+            title: '选择门店',
+            width:'800px'
+        });
+    });
+	$("#theform").validationEngine();
+    $("#sub_button").click(function(){
+    	var dialog;
+		var price = [];
+		$(".skuTable [name='price']").each(function(index, element) {
+            var p = $(this).val();
+			var nid = $(this).attr("data-newid").split(",");
+			var id = $(this).attr("data-id");
+			var sid = new Array();
+            var n = $(this).closest("tr").find("[name='num']").val();
+			if(n==""){n="-1"};
+			for(var i=0;i<=nid.length;i++){
+				sid.push(nid[i]);
+			}
+			var arr = {
+                id:id,
+				newid:sid,
+				price:p,
+				num:n
+			};
+			price.push(arr);
+        });
+		data["price"] = price;
+                $('#data_price_info').val(JSON.stringify( data.price ));
+                $('#data_name_info').val(JSON.stringify( data.namelist ));
+		if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                 if(data.status == '1'){
+                       all_art_close();
+                       $('#div_content').hide();
+                       $('#div_success').show();
+                       windowheight();
+                       return false;
+                  }else{
+                       dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                  }
+            },
+                dataType:'json'
+            });
+            return false;
+        }
+        
+    });
+    $(".message-show").click(function(){
+        var message=$("#mms_text").val();
+        var html=
+        ['<div class="aipai-iphone">',
+          '<div class="aipai-iphone-text">',
+              message,
+          '</div>',
+          '</div>'].join('');
+          art.dialog({
+            padding: 20,
+            title: '短信预览',
+            content: html,
+            lock: true
+        });
+    });
+    $(".print-show").click(function(){
+        var message=$("#mms_text").val();
+        var html=['<img src="__PUBLIC__/Image/iphone_bg2_print.png" />'].join('');
+          art.dialog({
+            padding: 0,
+            title: '什么是小票内容？',
+            content: html,
+			width:690,
+			height:450,
+            lock: true
+        });
+    });
+    
+    $("input[name='shop']").change(function(){
+        if($(this).val()==1){
+            $("#chooseShop").css("display","none");
+        }else{
+            $("#chooseShop").css("display","block");
+        }
+    });
+    $("a[name='choose_shop']").click(function(){
+        var type = '&type=0';
+        if($(this).attr("name") == "choose_shop"){
+            type = "&type=1";
+        }
+        art.dialog.open("{:U('WangcaiPc/NumGoods/shopList')}"+type,{
+            lock: true,
+            title:"选择门店",
+            width:720,
+            height:'80%'
+        });
+    });
+    $(".new-btn").click(function(){
+        var html=[
+            '<form method="post" action="">',
+            '<div class="addlist-con">',
+            '<div class="fn">',
+            '<p class="l">*分类名称:</p><div><input type="text" name="new_classifyName" id="new_classifyName" class="shoplist-input" /></div>',
+            '</div>',
+            '<div class="fn mt20">',
+            // '<p class="l">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*排序:</p><div><input type="text" name="new_classifySort" id="new_classifySort" class="shoplist-input w50" value="'+length+'" /></div>',
+            '</div>',
+            '</div>',
+            '</form>'].join('');
+        art.dialog({
+            title: '添加分类',
+            id: 'new_classify',
+            content: html,
+            fixed:true,
+            lock:true,
+            width:240,
+            okVal: '确认',
+            ok: function () {
+                var dialog;
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                var req_data = {
+                    name: $('#new_classifyName').val()
+                }
+                $.post("{:U('Integral/FenLei/classAdd')}", req_data, function(data){
+                    if(data.status == '1'){
+                        dialog.time(1).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                        $('#classify').append('<option value="'+data.id+'">'+$('#new_classifyName').val()+'</option>').val(data.id);
+                        setTimeout(function(){
+                            art.dialog.list['new_classify'].close();
+                        }, 1000);
+                    }
+                    else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                }, 'json');
+                return false;
+            },
+            cancel: true
+        });
+    })
+})
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="new_sidenav">
+                    <include file="./Home/Tpl/Integral/Integral/Store_sidenav.html" leftmenuid="mdqd"/>
+                </div>
+				<div id="div_content" class="subcon fn">
+                <div class="shopCon">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">编辑商品</h4>
+                    </div>
+                    <div id="store_check">
+                    <form method="post" action="<?php echo U('Integral/GoodsInfo/edit');?>" id="theform">
+                        <input type="hidden" id="id" name ="id" value="{$goodsinfo['id']}">
+                        <div class="Gform l fn <eq name='addStore' value='1'>dn</eq> fistForm" style="width: 100%;">
+                            <div id="Wform">
+                                <ul class="Gtitle">商品基本内容</ul>
+                                <ul>
+                                    <li class="Gname"><span class="red">*</span>&nbsp;商品名称</li>
+                                    <li class="Ginput"><input name="name" disabled="disabled" id="name" type="text" class="validate[required,maxSize[24]]" value="{$goodsinfo['goods_name']}" /><span class="maxTips forInput" data-max="24">0/24</span></li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span class="red">*</span>&nbsp;商品图片库</li>
+                                    <li class="Ginput">
+                                        <div class="pic">
+                                            <php>if($goodsinfo['show_picture1']){</php>
+                                            <img src="{$goodsinfo['show_picture1']|get_upload_url}" class="img" id="show1" data-view="src,img1,previewData" />
+                                            <php>}else{</php>
+                                            <img src="__PUBLIC__/Image/shop/no-head.png" class="img" id="show1" data-view="src,img1,previewData" />
+                                            <php>}</php>
+                                            <input type="hidden" name="resp_img1" id="resp_img1" value="{$goodsinfo['show_picture1']}" />
+                                            <a class="btn" onclick="return uploadImg('640x320','cb_img_1');" href="javascript:void(0);">+上传</a>
+                                        </div>
+                                        <div class="pic">
+                                            <php>if($goodsinfo['show_picture2']){</php>
+                                            <img src="{$goodsinfo['show_picture2']|get_upload_url}" class="img" id="show2" data-view="src,img2,previewData" />
+                                            <php>}else{</php>
+                                            <img src="__PUBLIC__/Image/shop/no-head.png" class="img" id="show2" data-view="src,img2,previewData" />
+                                            <php>}</php>
+                                            <input type="hidden" name="resp_img2" id="resp_img2" value="{$goodsinfo['show_picture2']}" />
+                                            <a class="btn" onclick="return uploadImg('640x320','cb_img_2');" href="javascript:void(0);">+上传</a>
+                                        </div>
+                                        <div class="pic">
+                                            <php>if($goodsinfo['show_picture3']){</php>
+                                            <img src="{$goodsinfo['show_picture3']|get_upload_url}" class="img" id="show3" data-view="src,img3,previewData" />
+                                            <php>}else{</php>
+                                            <img src="__PUBLIC__/Image/shop/no-head.png" class="img" id="show3" data-view="src,img3,previewData" />
+                                            <php>}</php>
+                                            <input type="hidden" name="resp_img3" id="resp_img3" value="{$goodsinfo['show_picture3']}" />
+                                            <a class="btn" onclick="return uploadImg('640x320','cb_img_3')" href="javascript:void(0);">+上传</a>
+                                        </div>
+                                        <div class="pic">
+                                            <php>if($goodsinfo['show_picture4']){</php>
+                                            <img src="{$goodsinfo['show_picture4']|get_upload_url}" class="img" id="show4" data-view="src,img4,previewData" />
+                                            <php>}else{</php>
+                                            <img src="__PUBLIC__/Image/shop/no-head.png" class="img" id="show4" data-view="src,img4,previewData" />
+                                            <php>}</php>
+                                            <input type="hidden" name="resp_img4" id="resp_img4" value="{$goodsinfo['show_picture4']}" />
+                                            <a class="btn" onclick="return uploadImg('640x320','cb_img_4')" href="javascript:void(0);">+上传</a>
+                                        </div>
+                                        <div class="pic">
+                                            <php>if($goodsinfo['show_picture5']){</php>
+                                            <img src="{$goodsinfo['show_picture5']|get_upload_url}" class="img" id="show5" data-view="src,img5,previewData" />
+                                            <php>}else{</php>
+                                            <img src="__PUBLIC__/Image/shop/no-head.png" class="img" id="show5" data-view="src,img5,previewData" />
+                                            <php>}</php>
+                                            <input type="hidden" name="resp_img5" id="resp_img5" value="{$goodsinfo['show_picture5']}" />
+                                            <a class="btn" onclick="return uploadImg('640x320','cb_img_5')" href="javascript:void(0);">+上传</a>
+                                        </div>
+                                    </li>
+                                    <li class="Ginput"><p class="tips">最多上传5张图片</p></li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span class="red">*</span>&nbsp;商品描述</li>
+                                    <li class="Ginput"><textarea name="goods_desc" id="goods_desc" class="validate[required,maxSize[200]]">{$goodsinfo['goods_desc']|htmlspecialchars_decode}</textarea><span class="maxTips forArea" data-max="200">0/200</span></li>
+                                </ul>
+                                <ul class="fn">
+                                    <li class="Gname"><span class="red">*</span>&nbsp;所属分类</li>
+                                    <li class="Ginput">
+                                        <select class="selectbox l w120 ml20  validate[required]" name="classify" id="classify" style="width:120px;text-align:center;margin-left: 0px;" disabled="disabled">
+                                            {:show_arr_opt($classify_arr,$goodsinfo['ecshop_classify'])}
+                                        </select>
+                                    </li>
+                                </ul>
+                                <ul class="Gtitle">数量及价格</ul>
+                                <ul>
+                                    <li class="Gname">商品类型</li>
+                                    <li class="Ginput">
+                                        <div class="switch disabled">
+                                            <input type="radio" name="issku" value="{$skuFlag}" checked="checked" />
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0" id="oneGoods">单一商品</span>
+                                                <span class="vallast" data-val="1" id="twoGoods">多规格商品</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul id="integralShop" class="<php>if($skuFlag!=1){ echo 'dn';}</php>">
+                                    <li class="Gname"><span class="red">*</span>&nbsp;商品规格</li>
+                                    <li class="Ginput">
+                                        <div class="skuForm">
+                                        </div>
+                                        <span class="txtTips">商品规格最多添加3个</span>
+                                    </li>
+                                </ul>
+                                <ul class="sku1">
+                                    <li class="Gname"><span class="red">*</span>&nbsp;价格与库存</li>
+                                    <li class="Ginput">
+                                        <div class="fn skuTable"></div>
+                                        <span class="txtTips"></span>
+                                    </li>
+                                </ul>
+                                <ul class="sku2">
+                                    <li class="Gname"><span class="red">*</span>&nbsp;{:L('INTEGRAL_NAME')}</li>
+                                    <li class="Ginput">
+                                        <input name="market_price" type="text" value="<php>echo str_replace('.00', '', $goodsinfo['market_price']);</php>" class="validate[required,custom[number],min[0]]" maxlength="10"/><span class="maxTips forInput">{:L('INTEGRAL_NAME')}</span>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span class="red">*</span>&nbsp;商品实际价格</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="tape_price_type" value="{$goodsinfo['tape_price_type']}" checked="checked" />
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">不显</span>
+                                                <span class="vallast" data-val="1">显示</span>
+                                            </div>
+                                            <div class="newRadio-input" style="width:150px;">
+                                                <input name="tape_price" type="text" value="{$goodsinfo['tape_price']}" class="validate[required,min[1],custom[integer]]" style="width:150px;"/><span class="maxTips forInput">元</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="sku2">
+                                    <li class="Gname"><span class="red">*</span>&nbsp;商品数量</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="num_type"  value="<if condition="$goodsinfo['storage_type'] eq 0">0<else />1</if>" checked="checked" />
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="0">不限</span>
+                                                <span class="vallast" data-val="1">限制</span>
+                                            </div>
+                                            <div class="newRadio-input">
+                                                <input name="goods_num" type="text" class="validate[required,min[1]]" value=" <php>if($goodsinfo['storage_num']!='-1'){echo $goodsinfo['storage_num'];}</php>" style="width:150px;"/><span class="maxTips forInput">份</span>
+                                            </div>
+                                        </div>
+                                        <if condition="$goodsinfo['storage_type'] neq 0"><span class="txtTips">商品数量最多可减少{$goodsinfo['remain_num']}</span></if>
+                                    </li>
+                                </ul>
+                                <ul class="sku2">
+                                    <li class="Gname"><span class="red">*</span>&nbsp;剩余数量</li>
+                                    <li class="Ginput">
+                                        <p class="Gtext"><if condition="$goodsinfo['storage_type'] eq 0">不限<else />{$goodsinfo['remain_num']}份</if></p>
+                                    </li>
+                                </ul>
+                                <ul class="Gtitle">配送方式</ul>
+                                <ul>
+                                    <li class="Gname">配送方式</li>
+                                    <li class="Ginput">
+                                        <div class="switch disabled" checked="checked">
+                                            <input type="radio" name="delivery_flag" value="{$goodsinfo['delivery_flag']}"/>
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="1" id="delivery_flag1">物流</span>
+                                                <span class="vallast" data-val="0" id="delivery_flag2">自提</span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                    <php>if($goodsinfo['delivery_flag']=='1'){</php>
+                                    <div class="GmoreForm" style="display: none;">
+                                    <php>}else{</php>
+                                    <div class="GmoreForm" style="display: block;">
+                                    <php>}</php>
+                                            <ul>
+                                                <li class="Gnmae"><span class="red">*</span>&nbsp;可验证门店</li>
+                                                <li class="Ginput">
+                                                    <div class="switch">
+                                                        <input type="radio" name="shop" id="shop" value="<if condition="$goodsinfo['pos_group_type'] eq '2'">2<else />1</if>" checked="checked" />
+                                                        <div class="newRadio">
+                                                            <span class="valfirst" data-val="1">所有门店</span>
+                                                            <span class="vallast" data-val="2" id="selectShop">指定门店</span>
+                                                        </div>
+                                                        <div class="cl fn"></div>
+                                                        <div class="newRadio-input">
+                                                                <div class="sweet_tips2" id="htmlss">您总共选择了<span id="number">{:count($storeArr)}</span>家门店&nbsp;&nbsp;
+                                                                    <a href="javascript:void(0);" id="editStore"  name="choose_shop">点击查看</a>
+                                                                </div>
+                                                                <input type="hidden" id="openStores" name="openStores" value="{:implode(',',$storeArr)}"/>
+                                                        </div>
+                                                    </div>
+                                                    <p class="txtTips">注：仅限已安装核验终端的门店</p>
+                                                </li>
+                                            </ul>
+                                            
+                                            <ul class="showSendtype cusMsg dn">
+                                    <li class="Gname"><span>*</span>&nbsp;短信内容</li>
+                                    <li class="Ginput">
+                                        <textarea maxlength="40" name="cusMsg" id="cusMsg"  class="validate[required,maxSize[40]] Gview-cusMsg" placeholder="您收到哈根达斯100元代金券">{$goodsinfo['sms_text']}</textarea>
+                                        <span class="maxTips forArea" data-max="40">0/40</span>
+                                    </li>
+                                </ul>
+                                <ul class="moren sendType">
+                                            <li class="Gname"><span>*</span>&nbsp;商品使用说明</li>
+                                            <li class="Ginput">
+                                                <textarea maxlength="100" name="mms_text"  id="mms_text" class="validate[required,maxSize[100]]" >{$goodsinfo['use_rule']}</textarea>
+                                                <img src="__PUBLIC__/Image/prizeConfig_usage.png" class="dn" style="position:absolute; right:160px; bottom:0;"><br />使用说明将显示在短信详情页面
+
+                                            </li>
+                                        </ul>
+                                            <ul>
+                                                <li class="Gname"><span class="red">*</span>&nbsp;打印小票内容</li>
+                                                <li class="Ginput">
+                                                    <textarea name="print_text" id="print_text" class="validate[required,maxSize[100]]">{$goodsinfo['print_text']}</textarea>
+                                                    <span class="maxTips forArea" data-max="100">0/100</span>
+                                                    <span class="txtTips">编辑以上内容，可在消费者自提商品时，在打印小票上添加个性信息。<a href="javascript:void(0)" class="print-show" style="color:#ff971c;">什么是小票内容?</a></span>
+                                                </li>
+                                            </ul>
+                                            <ul id="codeInfo">
+                                                <li class="Gname"><span class="red">*</span>&nbsp;商品可兑换时间</li>
+                                                <li class="Ginput">
+                                                    <div class="switch">
+                                                        <input type="radio" name="verify_time_type" id="verify_time_type1" value="{$goodsinfo['verify_begin_type']}" checked="checked" />
+                                                        <div class="newRadio">
+                                                            <span class="valfirst" data-val="0" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();$('#verify_end_date').val('');$('#verify_begin_date').val('');">按日期设置</span>
+                                                            <span class="vallast" data-val="1" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();$('#verify_end_days').val('');$('#verify_begin_days').val('');">按天数设置</span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="Ginput">
+                                                    <div class="judgeCon-time judgeCon1 <php>if($goodsinfo['verify_begin_type']=='1'){echo 'dn';}</php>">
+                                                        <p>使用开始时间</p>
+                                                        <input name="verify_begin_date" style="width: 90px;" id="verify_begin_date" type="text" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'});" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="{$goodsinfo['verify_begin_date']|dateformat=###,'Ymd'}">
+                                                        <p class="ml20">使用结束时间</p>
+                                                        <input name="verify_end_date" style="width: 90px;" id="verify_end_date" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')||\\'%y-%M-%d\\'}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="{$goodsinfo['verify_end_date']|dateformat=###,'Ymd'}">
+                                                        <div class="cl pt5"></div>
+                                                        <p class="font-12-cc">商户可以自定义验码开始的日期如："4月1号,6月1号";</p>
+                                                    </div>
+                                                    <div class="judgeCon-time judgeCon2 <php>if($goodsinfo['verify_begin_type']=='0'){echo 'dn';}</php>" style="width:auto;">
+                                                        <p>发送商品后</p>
+                                                        <input name="verify_begin_days" style="width: 90px;" id="verify_begin_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$goodsinfo['verify_begin_date']}">&nbsp;天开始使用
+                                                        <p class="ml20">发送商品后</p>
+                                                        <input name="verify_end_days" style="width: 90px;" id="verify_end_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$goodsinfo['verify_end_date']}">&nbsp;天结束使用
+                                                        <div class="cl pt5"></div>
+                                                        <p class="font-12-cc">商户可以自定义验码时间，如：“发送商品后3天开始使用-发送商品后5天结束使用”</p>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <input type="hidden" value="" name="data_price_info" id="data_price_info" />
+                                        <input type="hidden" value="" name="data_name_info" id="data_name_info" />
+                                        <input type="hidden" value="" name="count_num" id="count_num" />
+                            <ul class="Gtitle">更多设置</ul>
+                            <ul>
+                                <li class="Gname">商品详情</li>
+                                <li class="Ginput">
+                                    <textarea name="wap_info"  id="wap_info" data-view="val,info,previewData" >{$goodsinfo['wap_info']}</textarea>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gname">&nbsp;</li>
+                                <li class="Ginput">
+                                    <a href="javascript:void(0);" id="sub_button" title="确认" class="btn-all w110">确认</a>
+                                    <a href="javascript:history.go(-1)" title="取消" class="btn-all-del w110 ml10">取消</a>
+                                </li>
+                            </ul>
+                            </div>
+                            </div>
+                    </form>
+                </div>
+				</div>
+			</div>
+            <div class="edit-area dn" id="div_success">
+                <div class="fn">
+                    <div class="pop-up fn mt40">
+                        <dd class="pop-img tc pt40"><img src="__PUBLIC__/Image/ok_img.png" width="46" height="46" class="mr30" style="vertical-align:middle;">添加成功！</dd>
+                        <dd class="pop-hint"></dd>
+                        <dd class="pop-btn tc mt40">
+                        	<a href="{:U('index')}" class="btn-all w110 mr10">返回列表</a>
+                            <a class="btn-all w110 mr10" href="{:U('edit',array('id'=>$goodsinfo['id']))}">继续编辑</a>
+                        </dd>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+</div>
+<include file="./Home/Tpl/Public/Public_footer.html" />
+<div class="integralService"></div>
+</body>
+</html>
+<script>
+var newid = 1;
+var selectStore = "{:$goodsinfo['pos_group_type']}";
+//编辑的展示数据实例，添加不用
+var data = {
+	cookiename:"",
+	cookielist:"",
+	length:function(){
+		var l = 0;
+		for(var i=0;i<data.namelist.length;i++){
+			if(data.namelist[i].list!=""){
+				l++;
+			}
+		}
+		if(l==0){l="";}
+		return l;
+	},
+	length2:function(){
+		var l = 0;
+		for(var i=0;i<data.namelist.length;i++){
+			if(data.namelist[i].list!=""){
+				l++;
+			}
+		}
+		return l+2;
+	},
+	length3:function(){
+		var l = 0;
+		if(data.namelist.length==1){
+			l = 0;
+		}else if (data.namelist.length==2){
+			l = data.namelist[1].list.length;
+		}else if (data.namelist.length==3){
+			if(data.namelist[2].list.length!=0){
+				l = data.namelist[1].list.length*data.namelist[2].list.length;
+			}else{
+				l = data.namelist[1].list.length;
+			}
+		}
+		if(l==0){l="";}
+		return l;
+	},
+	length4:function(){
+		var l = 0;
+		if (data.namelist.length==2){
+			l = 0;
+		}else if (data.namelist.length==3){
+			l = data.namelist[2].list.length;
+		}
+		if(l==0){l="";}
+		return l;
+	},
+	namelist:[{$skutype}],
+	price : [{$skudetail}]
+};
+//大部分修改预览
+$(document).ready(function(e){
+	cookie();
+	begin(data);
+        //选择子门店
+        if(selectStore == 2){
+            $('.shopSelect').click();
+        }
+	//输入规则
+	$("body").on("change keyup click",".searchInput-edit input[type='text'],.skuRuleAdd input[type='text']",function(e){
+		var t = $(this),
+			i = t.closest(".input").find(".icon-skuOk"),
+			v = t.val(),
+			l = t.closest(".input").next("dl"),
+			erro = 1;
+		v=="" ? i.addClass("erro") : i.removeClass("erro");
+		if(e.keyCode != 13){
+			l.find("dd:not('.nodata')").each(function(index, element) {
+				var text = $(this).text();
+				text.indexOf(v)>=0 ? ($(this).removeClass("dn"),erro++) : $(this).addClass("dn");
+			});
+			erro>=7 ? l.height(200) : l.height(erro*26-26);
+			erro==1 ? (l.height(erro*26),l.find(".nodata").removeClass("dn")) : l.find(".nodata").addClass("dn");
+		}
+		if(e.keyCode == 13){
+			i.click();
+			return false;
+		}
+	});
+	//设置总库存:检测数值
+	$("body").on("change keyup click","input[name='allprice'],input[name='allnum']",function(e){
+		var t = $(this),
+			i = t.closest("td").find(".icon-skuOk"),
+			v = t.val();
+		v=="" ? i.addClass("erro") : i.removeClass("erro");
+	});
+	//设置总库存:确认
+	$("body").on("click",".skuOk-allprice:not('.erro'),.skuOk-allnum:not('.erro')",function(e){
+		var t = $(this),
+			h = t.hasClass("skuOk-allprice"),
+			i = t.closest("td").find("input"),
+			v = i.val();
+		if(h){
+			var r = /^[\-\+]?((([0-9]{1,3})([,][0-9]{3})*)|([0-9]+))?([\.]([0-9]+))?$/;
+			r = r.test(v);
+			if(r){
+				$("input[name='price']").val(v);
+			}else{
+				i.addClass("shopFormBannerAn");
+				setTimeout(function(){
+					i.removeClass('shopFormBannerAn')
+				},1000);
+			}
+		}else{
+			var r = /^[\-\+]?\d+$/;
+			r = r.test(v);
+			if(r){
+				$("input[name='num']").val(v);
+                                $('#count_num').val($("input[name='num']").length*v);
+				$("#all").text("已设置的总库存为："+$("input[name='num']").length*v+"，不填写库存，则商品库存为不限,总共0处为不限");
+			}else{
+				i.addClass("shopFormBannerAn");
+				setTimeout(function(){
+					i.removeClass('shopFormBannerAn')
+				},1000);
+			}
+		}
+		t.addClass("erro");
+		i.val("");
+	});
+	//设置总库存:库存总数预览
+	$("body").on("change keyup","input[name='num']",function(e){
+		var l = 0;
+		var t = 0;
+		for(var i=0;i<$("input[name='num']").length;i++){
+			if($("input[name='num']:eq("+i+")").val()=="" || $("input[name='num']:eq("+i+")").val()=="不限" || $("input[name='num']:eq("+i+")").val()=="-1"){
+				t++;
+			}else{
+				l += parseInt($("input[name='num']:eq("+i+")").val());
+			}
+		}
+                if(t > 0)
+                    $('#count_num').val('-1');
+                else
+                    $('#count_num').val(l);
+		$("#all").text("已设置的总库存为："+l+"，不填写库存，则商品库存为不限,总共"+t+"处为不限");
+	});
+	//下拉菜单:点击dd
+	$("body").on("click",".valLsit dd:not('.nodata')",function(e){
+		$(".searchInput-edit").hide();
+		var t = $(this),
+			v = t.text(),
+			i = t.closest(".valLsit").prev(".input").find("input"),
+			ok = t.closest(".valLsit").prev(".input").find(".icon-skuOk");
+			i.val(v);
+			ok.removeClass("erro").click();
+	});
+	//下拉菜单:关闭
+	$("body").on("click",".valLsitclose",function(e){
+		$(this).closest(".searchInput-edit").hide();
+		$(this).closest(".skuRuleAdd").removeClass("edit");
+	});
+	//修改规则
+	$("body").on("click",".searchInput .icon-skuEdit,.searchInput>span",function(e){
+		$(".searchInput-edit").hide();
+		var t = $(this),
+			s = t.closest(".searchInput").find(".searchInput-edit"),
+			i = t.closest(".searchInput").find(".searchInput-edit input[type='text']");
+			s.show();
+			i.focus();
+	});
+	//规则删除
+	$("body").on("click",".icon-skuDel",function(e){
+		var t = $(this),
+			c = $(this).closest(".skuList"),
+			cid = parseInt(c.attr("data-newid"));
+		for(var i=0;i<data.namelist.length;i++){
+			if(data.namelist[i].newid == cid ){
+				data.namelist = data.namelist.slice(0,i).concat(data.namelist.slice(i+1,data.namelist.length))
+			}
+		}
+		begin(data);
+	});
+	//规则类别删除
+	$("body").on("click",".skuRuleItem i",function(e){
+		var t = $(this),
+			c = $(this).closest(".skuList"),
+			s = $(this).closest(".skuRuleItem"),
+			cid = parseInt(c.attr("data-newid")),
+			sid = parseInt(s.attr("data-newid"));
+		for(var i=0;i<data.namelist.length;i++){
+			if(data.namelist[i].newid == cid ){
+				for(var j=0;j<data.namelist[i].list.length;j++){
+					if(data.namelist[i].list[j].newid == sid ){
+						data.namelist[i].list = data.namelist[i].list.slice(0,j).concat(data.namelist[i].list.slice(j+1,data.namelist[i].list.length))
+					}
+				}
+			}
+		}
+		begin(data);
+	});
+	//规则类别添加
+	$("body").on("click",".skuRuleAdd .skuRuleBtn",function(e){
+		$(".skuRuleAdd").removeClass("edit");
+		$(this).closest(".skuRuleAdd").addClass("edit");
+		$(this).closest(".skuRuleAdd").find("input").focus();
+	});
+	//规则确定
+	$("body").on("click",".searchInput-edit .icon-skuOk:not('.erro')",function(e){
+		var t = $(this),
+			e = t.closest(".searchInput-edit")
+			s = t.closest(".searchInput").find("span"),
+			i = t.closest(".input").find("input"),
+			v = i.val().replace(/\s/,""),
+			cid = parseInt($(this).closest(".skuList").attr("data-newid"));
+		if(v!=""){
+			s.text(v);
+			t.addClass("erro");
+			i.val("");
+			e.find("dl,dd").attr("style","");
+		};
+		e.hide();
+		for(var i=0;i<data.namelist.length;i++){
+			if(data.namelist[i].newid == cid ){
+				data.namelist[i].name = v
+			}
+		}
+		cookie(v,1);
+		begin(data);
+	});
+	//类别确定
+	$("body").on("click",".skuRuleAdd .icon-skuOk:not('.erro')",function(e){
+		var t = $(this),
+			c = $(this).closest(".skuRuleAdd"),
+			i = c.find("input"),
+			v = i.val().replace(/\s/,""),
+			cid = parseInt($(this).closest(".skuList").attr("data-newid"));
+			t.addClass("erro");
+			c.removeClass("edit");
+			i.val("");
+			var pushList = {
+				id:"0",
+				val:v
+			}
+			for(var i=0;i<data.namelist.length;i++){
+				if(data.namelist[i].newid == cid ){
+					data.namelist[i].list.push(pushList)
+				}
+			}
+			cookie(v,2);
+			begin(data);
+	});
+	//添加规则
+	$("body").on("click",".addsku",function(e){
+		if(data.namelist.length>=3){
+			return false;
+		}else{
+			var pushList = {
+				id:"0",
+				name:"",
+				list:[]
+			}
+			data.namelist.push(pushList);
+			begin(data);
+			$(".skuList:last").find(".searchInput .icon-skuEdit").click();
+			$(".skuList").each(function(index, element) {
+				var z = 10-index;
+				$(this).css("z-index",z);
+			});
+		}
+	});
+	$("body").on("focus","input[name='price']",function(){
+		$("input[name='price']").prev(".formError").remove();
+	});
+});
+function cookie(v,type){
+	if(v){var v=v}else{var v="";};
+	var cookiename = "颜色,尺寸,尺码,规格,款式,净含量,种类,内存";
+	var cookielist = "";
+	if(!$.cookie('shopsku')){
+		$.cookie('shopsku',cookiename+"||"+cookielist, { expires: 365 });
+		cookiename = $.cookie('shopsku').split("||")[0].split(",");
+		cookielist = $.cookie('shopsku').split("||")[1].split(",");
+		data.cookiename = cookiename;
+		data.cookielist = cookielist;
+	}else{
+		cookiename = $.cookie('shopsku').split("||")[0];
+		cookielist = $.cookie('shopsku').split("||")[1];
+		if(v){
+			if(type==1){
+				if(cookiename.indexOf(v)<0){
+					cookiename = cookiename + "," + v
+				};
+			}else{
+				if(cookielist.indexOf(v)<0){
+					if(cookielist!=""){
+						cookielist = cookielist + "," + v;
+					}else{
+						cookielist = v;
+					}
+				}
+			}
+			$.cookie('shopsku',cookiename+"||"+cookielist, { expires: 365 });
+		};
+		cookiename = $.cookie('shopsku').split("||")[0].split(",");
+		cookielist = $.cookie('shopsku').split("||")[1].split(",");
+		data.cookiename = cookiename;
+		data.cookielist = cookielist;
+	};
+}
+function begin(data){
+	if(data.namelist!=""){
+		$(".sku1").show();
+		$(".sku2").hide();
+		for(var i=0;i<data.namelist.length;i++){
+			var namelist = data.namelist[i];
+			namelist["newid"] = newid;
+			newid++;
+			if(namelist.list!=""){
+				for(var j=0;j<namelist.list.length;j++){
+					var list = namelist.list[j];
+					list["newid"] = newid;
+					newid++;
+				}
+			}
+		}
+	}else{
+		$(".sku1").hide();
+		$(".sku2").show();
+	}
+	var html = template("skuList",data);
+	var html2 = template("skuTable",data);
+	$(".skuForm").html(html);
+	$(".skuTable").html(html2);
+	$(".skuList").each(function(index, element) {
+		var z = 10-index;
+        $(this).css("z-index",z);
+    });
+	$("input[name='price']").each(function(index, element) {
+		var t = $(this),
+			id = t.attr("data-id");
+		for(var i=0;i<data.price.length;i++){
+			if(data.price[i].id.toString()==id){
+				t.val(data.price[i].price);
+				data.price[i]["newid"]=t.attr("data-newid");
+			}
+		}
+
+    });
+	$("input[name='num']").each(function(index, element) {
+		var t = $(this),
+			id = t.attr("data-id");
+		for(var i=0;i<data.price.length;i++){
+			if(data.price[i].id.toString()==id){
+				if(Number(data.price[i].remain_num)>=0){
+					t.val(data.price[i].remain_num);
+					t.next("span").text(t.val());
+					t.attr("class","validate[custom[number],max[99999]]");
+				}else if(Number(data.price[i].remain_num)==-1){
+					t.val("不限");
+					t.next("span").text(t.val());
+				}
+			}
+		}
+    });
+	var l = 0;
+	var t = 0;
+	for(var i=0;i<$("input[name='num']").length;i++){
+		if($("input[name='num']:eq("+i+")").val()=="" || $("input[name='num']:eq("+i+")").val()=="不限" || $("input[name='num']:eq("+i+")").val()=="-1"){
+			t++;
+		}else{
+			l += parseInt($("input[name='num']:eq("+i+")").val());
+		}
+	}
+        if(t > 0)
+            $('#count_num').val('-1');
+        else
+            $('#count_num').val(l);
+	$("#all").text("已设置的总库存为："+l+"，不填写库存，则商品库存为不限,总共"+t+"处为不限");
+	if(data.namelist.length>=3){
+		$(".addsku").addClass("hide");
+	}else{
+		$(".addsku").removeClass("hide");
+	}
+}
+</script>
+
+<script id="skuList" type="text/html">
+{{each namelist}}
+<div class="skuList" data-id="{{value.id}}" data-newid="{{value.newid}}">
+	<div class="skuListHead fn">
+		<i class="icon-skuDel r"><a href="javascript:void(0)" class="a-hide">删除</a></i>
+		<div class="searchInput">
+			<span data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.name}}</span>
+			<i class="icon-skuEdit">
+				<a href="javascript:void(0)" class="a-hide">修改</a>
+			</i>
+			<div class="searchInput-edit dn">
+				<div class="input">
+				<input type="text" maxlength="6">
+					<i class="icon-skuOk erro">
+						<a href="javascript:void(0)" class="a-hide">修改</a>
+					</i>
+				</div>
+				<dl class="valLsit">
+					{{each cookiename}}
+					<dd>{{value}}</dd>
+					{{/each}}
+					<dd class="nodata dn">"回车"创建临时规格</dd>
+				</dl>
+				<div class="valLsitclose"></div>
+			</div>
+		</div>
+	</div>
+	<div class="skuCon fn">
+		<div class="skuRule">
+			{{each value.list}}
+			<div class="skuRuleItem" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}<i></i></div>
+			{{/each}}
+			<div class="skuRuleAdd">
+				<div class="input">
+					<input type="text" maxlength="8">
+					<i class="icon-skuOk erro">
+						<a href="javascript:void(0)" class="a-hide">修改</a>
+					</i>
+				</div>
+				<dl class="valLsit">
+					{{each cookielist}}
+					<dd>{{value}}</dd>
+					{{/each}}
+					<dd class="nodata dn">"回车"创建临时类别</dd>
+				</dl>
+				<div class="valLsitclose"></div>
+				<div class="skuRuleBtn">
+					<i></i>添加类型
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{{/each}}
+<div class="addsku">
+	<i></i>
+	<span>添加规格</span>
+</div>
+</script>
+
+<script id="skuRuleItem" type="text/html">
+<div class="skuRuleItem">{{name}}<i></i></div>
+</script>
+
+<script id="skuTable" type="text/html">
+{{if namelist.length >= 1 && namelist[0].list!="" }}
+<table cellpadding="0" cellspacing="0" class="sku-table">
+	<tr>
+	{{each namelist}}
+		{{if value.list!=""}}<th data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.name}}</th>{{/if}}
+	{{/each}}
+		<th width="123" >{:L('INTEGRAL_NAME')}</th>
+		<th width="123" >库存</th>
+	</tr>
+	<tr>
+		<td colspan="{{length}}" class="top">批量设置</td>
+		<td class="top"><input type="text" name="allprice" /><i class="icon-skuOk skuOk-allprice erro"><a href="javascript:void(0)" class="a-hide">确定</a></i></td>
+		<td class="top"><input type="text" name="allnum" placeholder="请输入数字" /><i class="icon-skuOk skuOk-allnum erro"><a href="javascript:void(0)" class="a-hide">确定</a></i></td>
+	</tr>
+	
+	{{if namelist.length == 1}}
+	{{if namelist[0].list!=""}}
+		{{each namelist[0].list as value j}}
+		<tr>
+			<td rowspan="{{length3}}" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}</td>
+			<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /></td>
+			<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /></td>
+		</tr>
+		{{/each}}
+	{{/if}}
+	{{/if}}
+	
+	{{if namelist.length == 2}}
+	{{if namelist[0].list!=""}}
+		{{each namelist[0].list as value j}}
+		<tr>
+			<td rowspan="{{length3}}" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}</td>
+			{{if namelist[1].list!=""}}
+				{{each namelist[1].list as value1 j}}
+					<td rowspan="{{length4}}" data-id="{{value1.id}}" data-newid="{{value1.newid}}">{{value1.val}}</td>
+					<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}},{{value1.id}}"  data-newid="{{value.newid}},{{value1.newid}}" /></td>
+					<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value.id}},{{value1.id}}"  data-newid="{{value.newid}},{{value1.newid}}" /></td>
+					</tr>
+				{{/each}}
+			{{else}}
+				<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /></td>
+				<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /></td>
+				</tr>
+			{{/if}}
+		{{/each}}
+	{{else if namelist[1].list!=""}}
+		{{each namelist[1].list as value1 j}}
+			<td rowspan="{{length4}}" data-id="{{value1.id}}" data-newid="{{value1.newid}}">{{value1.val}}</td>
+			<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value1.id}}"  data-newid="{{value1.newid}}" /></td>
+			<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value1.id}}"  data-newid="{{value1.newid}}" /></td>
+			</tr>
+		{{/each}}
+	{{/if}}
+	{{/if}}
+	
+	{{if namelist.length == 3}}
+	{{if namelist[0].list!=""}}
+		{{each namelist[0].list as value j}}
+		<tr>
+			<td rowspan="{{length3}}" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}</td>
+			{{if namelist[1].list!=""}}
+				{{each namelist[1].list as value1 j}}
+					<td rowspan="{{length4}}" data-id="{{value1.id}}" data-newid="{{value1.newid}}">{{value1.val}}</td>
+					{{if namelist[2].list!=""}}
+						{{each namelist[2].list as value2 j}}
+							<td data-id="{{value2.id}}" data-newid="{{value2.newid}}">{{value2.val}}</td>
+							<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}},{{value1.id}},{{value2.id}}"  data-newid="{{value.newid}},{{value1.newid}},{{value2.newid}}" /></td>
+							<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value.id}},{{value1.id}},{{value2.id}}"  data-newid="{{value.newid}},{{value1.newid}},{{value2.newid}}" /></td>
+							</tr>
+						{{/each}}
+					{{else}}
+						<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}},{{value1.id}}"  data-newid="{{value.newid}},{{value1.newid}}" /></td>
+						<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value.id}},{{value1.id}}"  data-newid="{{value.newid}},{{value1.newid}}" /></td>
+						</tr>
+					{{/if}}
+				{{/each}}
+			{{else if namelist[2].list!=""}}
+				{{each namelist[2].list as value2 j}}
+					<td rowspan="{{length4}}" data-id="{{value2.id}}" data-newid="{{value2.newid}}">{{value2.val}}</td>
+					<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}},{{value2.id}}"  data-newid="{{value.newid}},{{value2.newid}}" /></td>
+					<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value.id}},{{value2.id}}"  data-newid="{{value.newid}},{{value2.newid}}" /></td>
+					</tr>
+				{{/each}}
+			{{else}}
+				<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /></td>
+				<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /></td>
+				</tr>
+			{{/if}}
+		{{/each}}
+	{{else if namelist[1].list!=""}}
+		{{each namelist[1].list as value1 j}}
+			<td rowspan="{{length4}}" data-id="{{value1.id}}" data-newid="{{value1.newid}}">{{value1.val}}</td>
+			{{if namelist[2].list!=""}}
+				{{each namelist[2].list as value2 j}}
+					<td data-id="{{value2.id}}" data-newid="{{value2.newid}}">{{value2.val}}</td>
+					<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value1.id}},{{value2.id}}"  data-newid="{{value1.newid}},{{value2.newid}}" /></td>
+					<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value1.id}},{{value2.id}}"  data-newid="{{value1.newid}},{{value2.newid}}" /></td>
+					</tr>
+				{{/each}}
+			{{else}}
+				<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value1.id}}"  data-newid="{{value1.newid}}" /></td>
+				<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value1.id}}"  data-newid="{{value1.newid}}" /></td>
+				</tr>
+			{{/if}}
+		{{/each}}
+	{{else if namelist[2].list!=""}}
+		{{each namelist[2].list as value2 j}}
+			<td data-id="{{value2.id}}" data-newid="{{value2.newid}}">{{value2.val}}</td>
+			<td><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value2.id}}"  data-newid="{{value2.newid}}" /></td>
+			<td><input type="text" name="num" class="validate[custom[number],max[99999]]" data-id="{{value2.id}}"  data-newid="{{value2.newid}}" /></td>
+			</tr>
+		{{/each}}
+	{{else}}
+		3
+	{{/if}}
+	{{/if}}
+	<tr>
+		<td colspan="{{length2}}" id="all">{{allnum}}</span></td>
+	</tr>
+</table>
+{{/if}}
+</script>
+<script>
+    function uploadImg(cropPresets,callback) {
+        var opt = {
+            cropPresets:cropPresets,
+            callback:callback
+        };
+        open_img_uploader(opt);
+
+    }
+    /*获取图片路径中的图片名*/
+    function base_name(url){
+        var urlList = url.split('/');
+        var a = urlList[urlList.length-1];
+        return a;
+    }
+
+    function cb_img_1(data){cb_img(1, data); }
+    function cb_img_2(data){cb_img(2, data); }
+    function cb_img_3(data){cb_img(3, data); }
+    function cb_img_4(data){cb_img(4, data); }
+    function cb_img_5(data){cb_img(5, data); }
+    function cb_img(n, data){
+        //填充缩略图
+        $('#show'+n).attr('src', data.src).show();
+        //上传用
+        $('#resp_img'+n).val(data.savename);
+    }
+    $(document).ready(function(e) {
+        var delivery_flag="{$goodsinfo['delivery_flag']}";
+        if(delivery_flag =='1'){
+            $(".GmoreForm").css('display','none');
+        }
+//        _setformcheck();
+        var ue = UE.getEditor('wap_info', {
+            imageUrl: "{:U('LabelAdmin/Upfile/editoImageSave')}",
+            imagePath: "__UPLOAD__",
+            catcherUrl: "{:U('LabelAdmin/Upfile/getRemoteImage')}",
+            catcherPath: "__UPLOAD__",
+            initialFrameWidth: 340,
+            initialFrameHeight: 280,
+            autoFloatEnabled: false
+        });
+
+
+        //预览用
+        $("#btn_preview").click(function () {
+
+            if (!$("#theform").validationEngine('validate'))
+                return false;
+
+            ue.sync();
+            if (!ue.getContent()) {
+                $('#wap_tip').validationEngine('showPrompt', '不能为空', 'error', 'topRight', true);
+                return false;
+            } else {
+                $('#wap_tip').validationEngine('hide');
+            }
+
+            art.dialog.open("{:U('putOnPreview')}", {
+                title: false,
+                lock: true,
+                padding: "0 0 0 2px",
+                fixed: true,
+                width: "350px",
+                height: "625px",
+                cancel: true,
+                ok: function () {
+                    //手动提交需要手动同步编辑器数据
+                    ue.sync();
+                    subform(ue);
+                    return false;
+                }
+            });
+        })
+
+        $('#smb').click(function () {
+            //手动提交需要手动同步编辑器数据
+            ue.sync();
+            subform(ue);
+        });
+    });
+</script>
+<script>
+    $("#delivery_flag1_label").click(function(){
+        $(".GmoreForm").css('display','block');
+    });
+    $("#delivery_flag2_label").click(function(){
+        $(".GmoreForm").css('display','none');
+    });
+</script>

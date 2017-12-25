@@ -1,0 +1,727 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>添加模块_业务中心_翼码旺财</title>
+        <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <css href="__PUBLIC__/Css/Wwebsite.css?v=__VR__"/>
+        <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+        <js href="__PUBLIC__/Js/jquery.easing.min.js?v=__VR__"/>
+        <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+        <js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+        <js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+        <js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+        <js href="__PUBLIC__/Js/Common.js?v=__VR__"/>
+        <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+        <script type="text/javascript" src="__PUBLIC__/Js/jsScroll.js?v=__VR__"></script>
+        <js href="__PUBLIC__/Js/Wwebsite.js?v=__VR__"/>
+        <script type="text/javascript">
+                    var kIsSubmiting = false;
+                    function sumitingStart() {
+                    kIsSubmiting = true;
+                    }
+            function submitComplete() {
+            kIsSubmiting = false;
+            }
+            function isSubmiting() {
+            return kIsSubmiting;
+            }
+            var doSub = function (flag) {
+            if (isSubmiting()) {
+            return;
+            }
+            sumitingStart();
+                    if (isBlank($('#name').val())) {
+            art.dialog('商户名称不能为空！');
+                    submitComplete();
+                    return false;
+            }
+            var petnamelen = $("#name").val().length;
+                    if (petnamelen < 2)
+            {
+            alert("名称不能小于2个字！！！");
+                    submitComplete();
+                    return false;
+            }
+            if (petnamelen > 15)
+            {
+            alert("名称不能大于15个字！！！");
+                    submitComplete();
+                    return false;
+            }
+
+            var desclen = $("#appdesc").val().length;
+            if (desclen > 200)
+            {
+            alert("简介必须小于200个字符！！！");
+                    submitComplete();
+                    return false;
+            }
+
+            //				var loading = art.dialog({title:false,content:''});
+            $.post(
+                    "{:U('Df/StoreWeb/Submit');}",
+                    $('#theform').serialize(),
+                    function (data) {
+                    //						loading.close();
+                    if (data.status == '1') {
+                    if (flag){
+                    window.parent.location.href = data.info.url; }
+                    else{
+                    window.parent.location.reload(); }
+                    } else {
+                    submitComplete();
+                            art.dialog('保存失败！' + data.info);
+                    }
+                    },
+                    'json'
+                    );
+            };
+                    $(document).ready(function (e) {
+            //是否上传logo
+            $("input[name=is_log_img]").change(function(){
+            if ($(this).val() == '1'){
+					$('#logo-upload2').show();
+                    $('#hidden_img_tag_view').show();
+            } else{
+				$('#logo-upload2').hide();
+                $('#hidden_img_tag_view').hide();
+            }
+            });
+                    //保存按钮
+                    $('#sub_button').click(function(){
+            doSub(true);
+            });
+                    //设置默认模版按钮
+                    $('#tpl_sub_button').click(function () {
+            if (isSubmiting()) {
+            return;
+            }
+            sumitingStart();
+                    var NodeLevel = $("#node_level").val();
+                    var TplId = $("#tpl_id").val();
+                    if (NodeLevel == 'C0' && TplId > 3){
+            $('.sns_type').attr("checked", false);
+                    $('#phone').val('');
+                    art.dialog.open("{:U('Df/Identify/tpl')}", {
+                    title: '认证提示',
+                            width:540,
+                            height:350,
+                            id:'win-verify',
+                            lock:true
+                    });
+                    kIsSubmiting = false;
+                    return;
+            }
+            $.post(
+                    "{:U('Df/StoreWeb/UpdateTplId');}",
+            {tpl_id:$("#tpl_id").val(), mw_batch_id:$("#mw_batch_id").val()},
+                    function (data) {
+                    if (data.status == '1') {
+                    window.parent.location.reload();
+                    } else {
+                    submitComplete();
+                            art.dialog('保存失败！' + data.info);
+                    }
+                    },
+                    'json'
+                    );
+            });
+                    //设置全景背景图
+                    $('#bg_sub_button').click(function () {
+            if (isSubmiting()) {
+            return;
+            }
+            sumitingStart();
+                    var NodeLevel = $("#node_level").val();
+                    var TplId = $("#tpl_id").val();
+                    if (NodeLevel == 'C0' && TplId > 3){
+            $('.sns_type').attr("checked", false);
+                    $('#phone').val('');
+                    art.dialog.open("{:U('Df/Identify/tpl')}", {
+                    title: '认证提示',
+                            width:540,
+                            height:350,
+                            id:'win-verify',
+                            lock:true
+                    });
+                    kIsSubmiting = false;
+                    return;
+            }
+            $.post(
+                    "{:U('Df/StoreWeb/UpdateBgType');}",
+            {tpl_id:$("#tpl_id").val(), mw_batch_id:$("#mw_batch_id").val(), bg_type:$("#bg_style").val(), bg_url:$('#resp_bg_img').val()},
+                    function (data) {
+                    if (data.status == '1') {
+                    window.parent.location.reload();
+                    } else {
+                    submitComplete();
+                            art.dialog('保存失败！' + data.info);
+                    }
+                    },
+                    'json'
+                    );
+            });
+                    //校验C0权限使用分享
+                    $(".sns_type").bind("click", function () {
+            var NodeLevel = $("#node_level").val();
+                    if (NodeLevel == 'C0'){
+            $('.sns_type').attr("checked", false);
+                    $('#phone').val('');
+                    art.dialog.open("{:U('Df/Identify/sns')}", {
+                    title: '认证提示',
+                            width:540,
+                            height:350,
+                            id:'win-verify',
+                            lock:true
+                    });
+            }
+            });
+                    //校验C0权限使用联系号码
+                    $("#phone").bind("click", function () {
+            var NodeLevel = $("#node_level").val();
+                    if (NodeLevel == 'C0'){
+            $('.sns_type').attr("checked", false);
+                    $('#phone').val('');
+                    art.dialog.open("{:U('Df/Identify/sns')}", {
+                    title: '认证提示',
+                            width:540,
+                            height:350,
+                            id:'win-verify',
+                            lock:true
+                    });
+            }
+            });
+                    /*
+                     //校验C0权限使用联系号码
+                     $("#phone").bind("blur", function () {
+                     var NodeLevel =  $("#node_level").val();
+                     if(NodeLevel == 'C0'){
+                     $('.sns_type').attr("checked",false);
+                     $('#phone').val('');
+                     art.dialog.open("{:U('Df/Identify/sns')}",{
+                     title: '认证提示',
+                     width:540,
+                     height:350,
+                     id:'win-verify',
+                     lock:true
+                     });
+                     }
+                     });*/
+
+                    $(".iconEdit").live("click", function () {
+            var openUrl = $(this).attr("data-url") || 'about:blank';
+                    openUrl += '&tpl_id=' + $('#tpl_id').val();
+                    var dialogHeight;
+                    art.dialog.open(openUrl, {
+                    id: "addAppMsg",
+                            lock: true,
+                            title: "编辑模块",
+                            width: "80%",
+                            height: "560px"
+                    });
+            });
+                    $(".iconDel").live("click", function () {
+
+            var openUrl = $(this).attr("data-url") || 'about:blank';
+                    //  alert(openUrl);
+
+                    art.dialog({
+                    title: '删除',
+                            content: "是否删除该页面？",
+                            icon: 'succeed',
+                            follow: document.getElementById('btn2'),
+                            lock: true,
+                            ok: function () {
+                            this.close();
+                                    var loading = art.dialog();
+                                    $.get(openUrl, function (obj) {
+                                    loading.close();
+                                            var ret = JSON.parse(obj);
+                                            if (ret['status'] == '1') {
+                                    //删除成功
+                                    window.parent.location.reload();
+                                    } else {
+                                    alert("删除失败，请稍后再试");
+                                    }
+                                    });
+                                    //    this.title('警告').content('请注意artDialog两秒后将关闭！').lock().time(2);
+                                    return false;
+                            },
+                            cancel: function () {
+
+                            }
+                    });
+            });
+            });
+                    function previewshow(id) {
+                    var moveleft = - id * 250 + 250;
+                            $(".websitePreview-img ul").animate({marginLeft: moveleft}, 300);
+                    }
+            /*获取图片路径中的图片名*/
+            function base_name(url){
+            var urlList = url.split('/');
+                    var a = urlList[urlList.length - 1];
+                    return a;
+            }
+            function show(name, url){
+            art.dialog({
+            title: name,
+                    content: "<img src='" + url + "' border='0'>"
+            });
+            }
+            /**
+             * 调整
+             * @param width
+             * @param height
+             * @param targetWidth 显示的宽度
+             * @param identify 元素id
+             */
+            function scaleImage(width, height, targetWidth, identify) {
+            var scale = width / height;
+                    var w = targetWidth;
+                    var h = w / scale;
+                    $(identify).css('width', w + "px");
+                    $(identify).css('height', h + "px");
+            }
+
+            function isBlank(str) {
+            return (!str || /^\s*$/.test(str));
+            }
+            function uploadImg_bg(cropPresets,callback) {
+                var opt = {
+                    cropPresets:cropPresets,
+                    callback:callback
+                };
+                open_img_uploader(opt);
+            }
+            //背景图片回调函数
+            function bgCallback(d) {
+                //填充缩略图
+                $('#resp_bg_img').attr('src', d.src);
+                //上传用
+                $('#resp_bg_img').val(d.savename);
+                $("#bg_style").val(4);
+                //显示预览
+                //previewuploadimg('<?php echo APP_PATH.$tmp_path;?>'+$('#resp_bg_img').val(),"background");
+                $('#bg_sub_button').click();
+            }
+            function set_bg_style(type)
+            {
+                $("#bg_style").val(type);
+            }
+        </script>
+        <style type="text/css">
+		i.tip_icon{width: auto;
+		line-height: 24px;
+		display: inline-block;
+		background: url(__PUBLIC__/Image/eTicket/tip_icon.gif) left center no-repeat;
+		color: #666;
+		font-size: 12px;
+		padding-left: 25px;
+		font-style: normal;
+		text-decoration: none;
+		float:right;					
+		}
+		i.tip_icon a{ color:#666}
+		</style>
+    </head>
+    <body class="bgfff">
+
+        <div id="wrapper" class="bgfff">
+            <include file="./Home/Tpl/Public/Public_header.html"/>
+
+            <div id="container" class="bgfff">
+                <div id="main" class="rel">
+                    <div class="bread">
+                        <div class="bread-con fn">
+                            <div class="bread-area" style="width:100%">
+                                <i class="icon-bread"></i>
+                                <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                                <p>></p>
+                                <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+                                <p>></p>
+                                <p>店铺首页</p>
+                                
+								<i class="tip_icon r"><a href="/index.php?g=Home&m=Wservice&a=windex&wserver_id=4">点此拥有个性化的店铺首页</a></i>
+                            </div>
+                            <div class="bread-history">
+                                <i class="icon-history"></i>
+                                <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="global-input2 fn w65 pb30">
+                        <form method="post" id="theform">
+                            <input type="hidden" name="id" id="id" value="{$list[0][0]['id']}"/>
+                            <input type="hidden" name="bg_style" id="bg_style" value="{$bg_style}"/>
+                            <input type="hidden" name="sns_cfg_id" id="sns_cfg_id" value="{$list['sns_cfg_id']}"/>
+                            <input type="hidden" name="sns_cfg_flag" id="sns_cfg_flag" value="true"/>
+                            <input type="hidden" name="tpl_id" id="tpl_id" value="{$tpl_id}"/>
+                            <input type="hidden" name="field_id" id="field_id" value="0"/>
+                            <input type="hidden" name="field_type" id="field_type" value="0"/>
+                            <input type="hidden" name="mw_batch_id" id="mw_batch_id" value="{$mw_batch_id}"/>
+                            <input type="hidden" name="node_level" id="node_level" value="{$node_level}"/>
+
+                            <ul class="newsadd-title">店铺首页基础信息</ul>
+                            <ul>
+                                <li class="global-input2-name">*&nbsp;商户名称：</li>
+                                <li class="global-input2-input"><input name="name" id="name"  type="text"  class="validate[optional,maxSize[20]] textbox w300" value="{$batch_name}"/><p id="ai_name_msg" class="font-12-cc">名称设置为2到15字</p></li>
+
+                            </ul>
+                            <ul>
+                                <li class="global-input2-name">店铺首页Logo上传：</li>
+                                <li class="global-input2-input">
+                                    <label class="ml5"><input name="is_log_img" id="is_log_img"  type="radio" value="0" {:($list[0][0]['image_url']==null?'checked="checked"':'')} />否</label>
+                                    <label class="ml5"><input name="is_log_img" id="is_log_img"  type="radio" value="1" {:($list[0][0]['image_url']==null?'':'checked="checked"')} />是</label>
+
+                                    <div id="logo-upload2" class="vm dib ml10" {:($list[0][0]['image_name']==null?' style="display:none;" ':'style="display:inline-block;*display:inline;*zoom:1;"')} >
+                                        <input id="log_img_show" type="hidden"  id="logo-text" class="validate[required,condRequired[logo-false],funcCall[checkActLogo]]] textbox w140 l" value="{$list[0][0]['image_name']}"/>
+                                        <div class="rel l">
+                                            <if condition="$tpl_id eq 10">
+                                                <a href="javascript:void(0);" title="上传" class="btn-all w60"
+                                                   onclick="log_add()">上传</a>
+                                                <else />
+                                                <a href="javascript:void(0);" title="上传" class="btn-all w60"
+                                                   onclick="log_add()">上传</a>
+                                            </if>
+                                            <input type="hidden" value="" name="image_name" id="resp_log_img" value=""/>
+                                            <input type="hidden"  name="hidden_img_tag" id="hidden_img_tag" <if condition="$list[0][0]['image_url'] neq ''">value="{$list[0][0]['image_url']}" </if>/>
+                                        </div>
+                                    </div>
+                                    <div class="cl"></div>
+                                    <img id="hidden_img_tag_view"
+                                         <if condition="$list[0][0]['image_url'] neq ''"> src="{$list[0][0][image_url]}" 
+                                            <elseif condition="$head_photo neq ''"/>src="{$head_photo}"
+                                        </if>
+                                        width="80px;" height="60px;" 
+                                        <if condition="$list[0][0]['image_url'] eq ''">style="display:none" </if> />
+                                </li>
+                            </ul>
+
+
+
+                            <ul class="newsadd-title">店铺首页界面设计</ul>
+                            <ul>
+                                <li class="global-input2-name">*&nbsp;店铺首页页面风格：</li>
+                                <li class="global-input2-input" style="width:550px;">
+                                    <div class="MicroWeb-style">
+                                        <div class="MicroWeb-style-ul">
+                                            <input  type="text" id="page_style"  name="page_style" class="dn" value="{$tpl_id}"/>
+                                            <dl class="set_main {:$tpl_id=='10'?'set_main_hover':''}" data-rel="10"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-Ten.jpg"/></dd><dt>全景店铺首页</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='9'?'set_main_hover':''}" data-rel="9"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-Nine.jpg"/></dd><dt>夏日小清新</dt></dl>
+                                            <!--<dl class="set_main {:$tpl_id=='8'?'set_main_hover':''}" data-rel="8"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-Eight.jpg"/></dd><dt>世界杯模板</dt></dl>-->
+                                            <dl class="set_main {:$tpl_id=='1'?'set_main_hover':''}" data-rel="1"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-One.jpg"/></dd><dt>模板一</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='2'?'set_main_hover':''}" data-rel="2"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-Two.jpg"/></dd><dt>模板二</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='3'?'set_main_hover':''}" data-rel="3"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-Three.jpg"/></dd><dt>模板三</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='4'?'set_main_hover':''}" data-rel="4"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-Four.jpg"/></dd><dt>模板四</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='5'?'set_main_hover':''}" data-rel="5"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-Five.jpg"/></dd><dt>模板五</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='6'?'set_main_hover':''}" data-rel="6"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-Six.jpg"/></dd><dt>模板六</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='7'?'set_main_hover':''}" data-rel="7"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-Seven.jpg"/></dd><dt>模板七</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='11'?'set_main_hover':''}" data-rel="11"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-eleven.jpg"/></dd><dt>模板八</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='12'?'set_main_hover':''}" data-rel="12"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-twelve.jpg"/></dd><dt>模板九</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='13'?'set_main_hover':''}" data-rel="13"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-thirteen.jpg"/></dd><dt>模板十</dt></dl>
+                                            <dl class="set_main {:$tpl_id=='14'?'set_main_hover':''}" data-rel="14"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-fourteen.jpg"/></dd><dt>模板十一</dt></dl>
+                                            <php>if($is_df){</php>
+                                            <dl class="set_main {:$tpl_id=='15'?'set_main_hover':''}" data-rel="15"><dd><img src="__PUBLIC__/Image/wapimg/MicroWeb-fifteen.jpg"/></dd><dt>模板十二</dt></dl>
+                                            <php>}</php>
+                                            <input  type="text" id="page_color"  name="page_color" class="dn" value="#e44b58"/>
+                                        </div>
+                                        <div class="pre"><i class="icon-pre"></i></div>
+                                        <div class="next"><i class="icon-next"></i></div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul class="dn">
+
+                                <li class="global-input2-name"></li>
+                                <li class="global-input2-input">
+                                    <a href="javascript:void(0)" id="tpl_sub_button" title="设为默认模版" class="btn-all w110 " style="display:none" >设为默认模版</a></li>
+                            </ul>
+                            <div class="batch-navigate-model {:$tpl_id=='8'||$tpl_id=='10'?'dn ':''}" >
+                                <ul>
+                                    <li class="global-input2-name">*&nbsp;活动模块编辑：</li>
+                                    <li class="global-input2-input">
+                                                <div class="add_bg">
+                                            <volist name="list[1]" id="v">
+                                                    <div class="add_bg_item">
+                                                        <div class="add_bg_item_preview">
+                                                            <img src="{$v['image_url']}"/>
+                                                        </div>
+                                                        <div class="add_bg_item_opr">
+                                                            <php>if($is_df){</php>
+                                                            <a href="javascript:void(0)" data-url="{:U('Df/StoreWeb/edit',array('mw_batch_id'=>$mw_batch_id,'id'=>$v[id],'field_id'=>$v[field_id],'field_type'=>$v[field_type],'is_max_img'=>1))}" class="iconEdit">编辑</a>
+                                                            <php>}else{</php>
+                                                            <a href="javascript:void(0)" data-url="{:U('Df/StoreWeb/edit',array('mw_batch_id'=>$mw_batch_id,'id'=>$v[id],'field_id'=>$v[field_id],'field_type'=>$v[field_type]))}" class="iconEdit">编辑</a>
+                                                            <php>}</php>
+                                                            <a href="javascript:void(0);" data-url="{:U('Df/StoreWeb/delete',array('id'=>$v[id],'field_id'=>$v[field_id],'field_type'=>$v[field_type]))}" class="iconDel">删除</a>
+                                                        </div>
+                                                    </div>
+                                            </volist>
+                                        </div>
+                                        <php>if(count($list[1]) < 3){</php>
+                                        <div class="add_set_bg">
+                                            <php>if($is_df){</php>
+                                            <a href="javascript:void(0)" class="a-hide iconEdit"  data-url="{:U('Df/StoreWeb/edit',array('mw_batch_id'=>$mw_batch_id,'id'=>'','field_id'=>'1','field_type'=>'1','is_max_img'=>1))}" >新增模块</a>
+                                            <php>}else{</php>
+                                            <a href="javascript:void(0)" class="a-hide iconEdit"  data-url="{:U('Df/StoreWeb/edit',array('mw_batch_id'=>$mw_batch_id,'id'=>'','field_id'=>'1','field_type'=>'1'))}" >新增模块</a>
+                                            <php>}</php>
+                                        </div>
+                                        <php>}</php>
+                                        <div class="cl"></div>
+                                        <p id="ai_name_msg" class="font-12-cc">最多上传3张背景图</p>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="batch-navigate-model {:$tpl_id=='10'?'':'dn '}" >
+                                <ul>
+                                    <li class="global-input2-name">*&nbsp;全景图：</li>
+                                    <li class="global-input2-input">
+                                        <input value="__PUBLIC__/Image/wapimg/overallView2.jpg" type="text" id="set_bg" name="set_bg" class="dn">
+                                            <img src="__PUBLIC__/Image/wapimg/overallView2.jpg" class="set_bg_img set_bg_update {:$bg_type=='1'?'set_main_hover':''}" data-src="__PUBLIC__/Label/Image/overallView2.jpg" data-id="1" onclick="set_bg_style(1)"/>
+                                            <img src="__PUBLIC__/Image/wapimg/overallView4.jpg" class="set_bg_img set_bg_update ml10 {:$bg_type=='2'?'set_main_hover':''}" data-src="__PUBLIC__/Label/Image/overallView4.jpg" data-id="2" onclick="set_bg_style(2)"/>
+                                            <img src="__PUBLIC__/Image/wapimg/overallView5.jpg" class="set_bg_img set_bg_update ml10 {:$bg_type=='3'?'set_main_hover':''}" data-src="__PUBLIC__/Label/Image/overallView5.jpg" data-id="3" onclick="set_bg_style(3)"/>
+                                            <div class="cl"></div>
+                                            <img src="{:get_upload_url($list[4][0]['image_url'])}" id="add_set_bg_img" class="set_bg_img mt10 mr10 {:$bg_type=='4'?'set_main_hover':'dn'}" data-src="{$list[4][0]['image_url']}" data-id="4" onclick="set_bg_style(4)">
+                                                <div class="add_set_bg mt10" onclick="return uploadImg_bg('4000x900','bgCallback');">
+                                                    <input type="hidden" name="resp_bg_img" id="resp_bg_img" value=""> <input type="hidden" id="reset_bg" name="reset_bg" value="0">
+                                                            </div>
+                                                            <input type="hidden" id="picsrc" value="__PUBLIC__/Label/Image/overallView2.jpg" />
+                                                            </li>
+                                                            </ul>
+                                                            <ul class="dn">
+
+                                                                <li class="global-input2-name"></li>
+                                                                <li class="global-input2-input">
+                                                                    <a href="javascript:void(0)" id="bg_sub_button" title="设为全景背景图" class="btn-all w110 " style="display:none" >设为全景背景图</a></li>
+                                                            </ul>
+                                                            </div>
+                                                            <ul>
+                                                                <li class="global-input2-name">导航模块编辑：</li>
+
+                                                                <li class="global-input2-input">
+                                                                            <div class="add_module">
+                                                                        <volist name="list[2]" id="v">
+
+                                                                            <notempty name="v['title']">
+                                                                                <div class="add_module_item" id="tpl{$key}" data-id="{$key}">
+                                                                                    <input type="hidden" name="gps[]" value="{$v[id]}"/>
+                                                                                    <div class="add_module_item_preview {$v['field_img_color']}">
+                                                                                        <neq name="tpl_id" value="10">
+                                                                                            <img src="{$v['image_url']}" />
+                                                                                            <else/>
+                                                                                            <img src="" />
+                                                                                        </neq>
+                                                                                    </div>
+                                                                                    <div class="add_module_item_title">{$v[title]}</div>
+                                                                                    <div class="add_module_item_opr">
+                                                                                        <php>if($v[is_fixed]==0){</php>
+                                                                                        <a href="javascript:left_com({$key})" class="iconLeft" title="左移动"></a>
+                                                                                        <a href="javascript:right_com({$key})" class="iconRight" title="右移动"></a>
+                                                                                        <php>}</php>
+                                                                                        <php>if($v[is_fixed]!=2){</php>
+                                                                                        <a href="javascript:void(0)" data-url="{:U('Df/StoreWeb/edit',array('mw_batch_id'=>$mw_batch_id,'id'=>$v[id],'field_id'=>$v[field_id],'field_type'=>$v[field_type]))}" class="iconEdit" title="编辑"></a>
+                                                                                        <php>}</php>
+                                                                                        <php>if($v[is_fixed]==0){</php>
+                                                                                        <a href="javascript:void(0);" data-url="{:U('Df/StoreWeb/delete',array('id'=>$v[id],'field_id'=>$v[field_id],'field_type'=>$v[field_type]))}" class="iconDel" title="删除"></a>
+                                                                                        <php>}</php>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </notempty>
+                                                                        </volist>
+                                                                    </div>
+                                                                    <php>if(count($list[2]) < 11){</php>
+                                                                    <div class="add_set_module"><a href="javascript:void(0)" class="a-hide iconEdit"  data-url="{:U('Df/StoreWeb/edit',array('mw_batch_id'=>$mw_batch_id,'id'=>'','field_id'=>'2','field_type'=>'2'))}">新增模块</a></div>
+                                                                    <php>}</php>
+                                                                    <div class="cl"></div>
+                                                                    <p id="ai_name_msg" class="font-12-cc">最多可以创建11个模块</p>
+                                                                </li>
+                                                            </ul>
+                                                            <ul>
+                                                                <li class="global-input2-name">店铺首页简介：</li>
+
+                                                                <li class="global-input2-input">
+                                                                    <textarea name="appdesc" id="appdesc" style="width:360px; height:180px;"><?php echo $appdesc; ?></textarea>
+                                                                    <p id="ai_name_msg" class="font-12-cc">简介不能超过200字</p>
+                                                                </li>
+                                                            </ul>
+                                                            <ul class="newsadd-title">店铺首页悬浮菜单配置</ul>
+                                                            <ul>
+                                                                <li class="global-input2-name">&nbsp;联系电话：</li>
+                                                                <li class="global-input2-input"><input name="phone" id="phone"  type="text"  class="validate[optional,maxSize[20]] textbox w300" value="{$list['phone']}"/></li>
+                                                            </ul>
+                                                            <ul>
+                                                                <li class="global-input2-name">&nbsp;SNS分享：</li>
+                                                                <li class="global-input2-input" style="width:550px;">
+                                                                    <?php 
+                                                                    $sns_arr = C('SNS_ARR');
+                                                                    foreach($sns_arr as $sns_k=>$sns_v){
+                                                                    if($sns_k>4) continue;
+                                                                    ?>
+                                                                    <input name="sns_{$sns_k}" id="sns_type_arr" type="checkbox" value="1" {:$list['sns_'.$sns_k]=='1'?"checked=true":""} class="sns_type"/><p class="ml5"><?php echo $sns_v?></p>
+                                                                    <?php }?>
+                                                                    <input name="sns_5" id="sns_type_arr" type="checkbox" value="1" class="sns_type" <?php if($sns5==true){?>checked<?php } ?>/>微信朋友圈 （仅百度直达号有效）
+                                                                           <br /><p class="font-12-cc">勾选后，允许消费者将您的营销活动分享给他的社交网络好友</p>
+                                                                </li>
+                                                            </ul>
+                                                            <input name="store_id" value="<php>echo I('store_id');</php>" type="hidden"/>
+
+                                                            <ul>
+                                                                <li class="global-input2-name"></li>
+                                                                <li class="global-input2-input">
+                                                                    <a href="javascript:void(0)" id="sub_button" title="确认" class="btn-all w110">确认</a>
+                                                                    <a href="javascript:history.go(-1)" title="取消" class="btn-all-del w110 ml10">取消</a></li>
+                                                            </ul>
+                                                            </div>
+                                                            </form>           
+                                                            <!--预览-->
+                                                            <div class="activityread_iphone tc mt20">
+                                                                <div class="activityread_iphone_con rel">
+                                                                    <div id="iphonePreview">
+                                                                        <div id="iphonePreview-loading">加载中...</div>
+                                                                        <div id="iphonePreview-con">
+                                                                       <!-----------第一个预览----------->
+                                                                            <div class="iphonePreview-qr"><a href="javascript:void(0);" onclick="show('扫码预览', '<php>echo U('LabelAdmin/ShowCode/index',array('id'=>$label_id));</php>');">预览与实际效果有偏差，您可以<span>扫码预览</span></a></div>
+                                                                            <div class="iphonePreview-1">
+                                                                                <div id="Preview-wrapper">
+                                                                                    <div id="Preview-container">
+                                                                                        <div id="Preview-main">
+                                                                                            <div class="Preview-mainTop">
+                                                                                                <div class="Preview-first-view">
+                                                                                                    <ul>
+                                                                                                        <li><img src="__PUBLIC__/Label/Image/topbg-sOne.png" /></li>
+                                                                                                        <li><img src="__PUBLIC__/Label/Image/topbg-sOne.png" /></li>
+                                                                                                        <li><img src="__PUBLIC__/Label/Image/topbg-sOne.png" /></li>
+                                                                                                    </ul>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div id="Preview-mainCon" class="Preview-mainCon fn">
+                                                                                                <div class="Preview-mainCon-header">
+                                                                                                    <div class="Preview-logo-bg">
+                                                                                                        <div class="Preview-logo-con"><img src="__PUBLIC__/Label/Image/defaultlogo-sOne.png"/></div>
+                                                                                                    </div>
+                                                                                                    <div class="Preview-top-title">商户名称</div>
+                                                                                                </div>
+                                                                                                <div class="cl"></div>
+                                                                                                <div class="Preview-mainCon-contenter">
+                                                                                                    <div class="Preview-mainCon-contenter-bg">
+                                                                                                        <div class="Preview-nav">
+                                                                                                            <ul class="fn">
+                                                                                                                <li><div class="nav-img nav-color" style=" background-image: url(__PUBLIC__/Label/Image/microweb_aipai_dot.jpg);"></div><div class="nav-con"><p>导航1</p></div></li>
+                                                                                                                <li><div class="nav-img nav-color" style=" background-image: url(__PUBLIC__/Label/Image/microweb_aipai_dot.jpg);"></div><div class="nav-con"><p>导航2</p></div></li>
+                                                                                                                <li><div class="nav-img nav-color" style=" background-image: url(__PUBLIC__/Label/Image/microweb_aipai_dot.jpg);"></div><div class="nav-con"><p>导航3</p></div></li>
+                                                                                                                <li><div class="nav-img nav-color" style=" background-image: url(__PUBLIC__/Label/Image/microweb_aipai_dot.jpg);"></div><div class="nav-con"><p>导航4</p></div></li>
+                                                                                                                <li><div class="nav-img nav-color" style=" background-image: url(__PUBLIC__/Label/Image/microweb_aipai_dot.jpg);"></div><div class="nav-con"><p>导航5</p></div></li>
+                                                                                                                <li><div class="nav-img nav-color" style=" background-image: url(__PUBLIC__/Label/Image/microweb_aipai_dot.jpg);"></div><div class="nav-con"><p>导航6</p></div></li>
+                                                                                                            </ul>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            <div id="Preview-footer">
+                                                                                                <div class="myMicweb"><a></a></div>
+                                                                                                <div class="myMicRight">
+                                                                                                    <p>Copyright © 2016 公司名称</p><p><span>翼码旺财出品</span></p>
+                                                                                                </div>
+
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <!-----------预览结束----------->
+                                                                            <div>
+                                                                            </div>
+
+                                                                            <script type="text/javascript">
+                                                                                        jsScroll(document.getElementById('iphonePreview'), 11, 27, 'divSrollBar');                                                                            </script>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="Preview-subnav"></div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!--预览结束-->
+                                                            </div>
+                                                            </div>
+                                                            </div>
+                                                            <include file="./Home/Tpl/Public/Public_footer.html"/>
+                                                            <div class="service"></div>
+
+
+
+                                                            </body>
+                                                            </html>
+                                                            <script>
+
+                                                                        function left_com(x){
+                                                                        $("#tpl" + x).after($("#tpl" + x).prev());
+                                                                                $("#Previe" + x).after($("#Previe" + x).prev());
+                                                                        }
+
+                                                                function right_com(x){
+                                                                $("#tpl" + x).before($("#tpl" + x).next());
+                                                                        $("#Previe" + x).before($("#Previe" + x).next());
+                                                                }
+
+                                                                $(".open").click(function () {
+                                                                var openUrl = $(this).attr("data-url") || 'about:blank';
+                                                                        art.dialog.open(openUrl, {
+                                                                        id: "addAppMsg",
+                                                                                lock: true,
+                                                                                fixed: true,
+                                                                                title: "设置",
+                                                                                width: 500,
+                                                                                height: '430px'
+                                                                        });
+                                                                });
+                                                                        /**
+                                                                         * 网页加载完毕，隐藏图片改变大小
+                                                                         */
+                                                                        $('#hidden_img_tag_view').bind('load', function () {
+                                                                var width = this.width;
+                                                                        var height = this.height;
+                                                                        scaleImage(width, height, 150, '#hidden_img_tag_view');
+                                                                        //console.log(this.width);
+                                                                        //console.log(this.height);
+                                                                });
+                                                                        /**
+                                                                         * 网页加载完毕，缩略图改变大小
+                                                                         */
+                                                                        $('#thumb_nail').bind('load', function () {
+                                                                //console.log("hello hidden img");
+                                                                var width = this.width;
+                                                                        var height = this.height;
+                                                                        scaleImage(width, height, 50, '#thumb_nail');
+                                                                        //console.log(this.width);
+                                                                        //console.log(this.height);
+                                                                });
+                                                                        function log_add(){
+                                                                        var opt = {
+                                                                        obj:$("#img_resp_show"),
+                                                                                height:160,
+                                                                                width:160,
+                                                                                callback:function(data){
+                                                                                $('#hidden_img_tag_view').attr('src', data['src']);
+                                                                                        $('#hidden_img_tag').val(data['savename']);
+                                                                                        $('#resp_log_img').val(data['savename']);
+                                                                                        $('#log_img_show').val(data['savename']);
+                                                                                        $('#thumb_nail').attr('src', data['savename']);
+                                                                                        $().val();
+                                                                                        doSub(false);
+                                                                                }
+                                                                        };
+                                                                                open_img_uploader(opt);
+                                                                        }
+                                                                function startaction(){
+                                                                if ('{$list[0][0][image_url]}' == ''){
+                                                                $('input[name="image_name"]').val('{$node_logo}');
+                                                                } else{
+                                                                $('input[name="image_name"]').val('{$list[0][0][image_name]}');
+                                                                }
+                                                                }
+                                                                startaction();
+                                                            </script>

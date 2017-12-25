@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>设置报表权限</title>
+	<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css"/>
+	<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css"/>
+	<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css"/>
+	<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css"/>
+	<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css"/>
+	<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css"/>
+	<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+	<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+	<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+	<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"/>
+	<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"/>
+	<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<style>
+	.Ginput input[type=checkbox] {
+		margin-top: 0;
+		display: inline-block}
+	.Ginput  p {
+		display: inline-block;
+		line-height: 28px;}
+	.Gform .Ginput select.n3{
+		width: 159px;
+	}
+	.Gform .pl15{
+		padding-left: 15px;
+
+	}
+	.Gform .pl15 .box-title {
+		font-size: 16px;
+		padding-top: 15px;
+	}
+	.Gform .pl15 tr td {
+		padding-right:35px;
+	}
+	.Gform .pl15 tr .absolute{
+		position: absolute;
+	}
+	.Gform .Gtable td{
+		padding-top: 12px ;
+	}
+	.Gform .Gtable input{
+		width: 159px;
+		margin-right: 30px;
+	}
+	.Gform .Gtable p{
+		margin-right: 5px;
+	}
+	.Gform .Gtable select{
+		width: 159px;
+	}
+	#ffkh{margin-left: 5px;}
+	.Gform .Ginput select {
+		width: 275px}
+	.Gform .Ginput select.n3 {
+		width: 136px;
+	}
+	.Gform .Ginput input[type=text], .Gform .Ginput input[type=password] {
+		width: 215px;
+	}
+</style>
+<body>
+<div class="rel" style="max-width: 800px;width: 100%;margin: 0 auto;">
+	<div class="Gform w1">
+		<ul>
+			<li class="pl15"><p class="box-title"><span class="red">*</span>数据范围</p></li>
+			<li class="pl15 Ginput " >
+				<volist name="companyList" id="vo" empty="$empty">
+					<php>
+						$check='';
+						if (in_array($vo['code'], $dataCompanyList)){
+						   $check="checked='checked'";
+						}
+					</php>
+					<p ><label><input name="sns_type" type="checkbox" value="{$vo['code']}" {$check} class="mr5" />{$vo['company_name']}</label></p>
+				</volist>
+			</li>
+		</ul>
+		<ul>
+			<li class="pl15"><p class="box-title"><span class="red">*</span>报表范围</p></li>
+			<li class="pl15 Ginput " >
+				<table>
+					<tr>
+						<td>
+							<volist name="getReportType" id="vo" empty="$empty">
+							<p ><input name="report_id" id="report_id" type="checkbox" value="{$vo.id}" checked="checked" disabled="disabled" class="mr5">销售报表</p>
+							</volist>
+						</td>
+					</tr>
+				</table>
+			</li>
+		</ul>
+	</div>
+	<input type="hidden" name="member_id" value="{$id}" id="member_id"/>
+	<div class="DiabtnCon">
+		<a class="Diabtn-all btn-next" id="next_step" onclick="jqchk();">保存</a>
+		<a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+	</div>
+</div>
+</body>
+</html>
+<script>
+	function jqchk(){ //jquery获取复选框值
+		var checkCompany =[];
+		$('input[name="sns_type"]:checked').each(function(){
+			checkCompany.push($(this).val());
+		});
+		var checkReport =[];
+		$('input[name="report_id"]:checked').each(function(){
+			checkReport.push($(this).val());
+		});
+		if($("#member_id").val()==''){
+			art.dialog.alert("会员ID不能为空！");
+			return false;
+		}
+		if( $("#report_id").val()==''){
+			art.dialog.alert("报表返回必须选择一个！");
+			return false;
+		}
+		var data = {
+			company_id:checkCompany,
+			report_id:checkReport,
+			member_id:$("#member_id").val()
+		}
+		$.ajax({
+			type: "POST",
+			url: "{:U('memberSetSave')}",
+			data: data,
+			dataType: 'json',
+			success: function(msg){
+				if(msg.status==0){
+					art.dialog({title:false,content:"<div class='msg-all-error'>"+msg.info+"</div>",fixed: true,padding:0,time:1});
+				}else{
+					art.dialog({title:false,content:"<div class='msg-all-succeed'>"+msg.info+"</div>",fixed: true,padding:0,time:1});
+					setTimeout(function(){
+						top.location.reload();
+						art.dialog.close();
+					},2000);
+				}
+			}
+		});
+		return false;
+	}
+</script>

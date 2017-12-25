@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>礼品派发_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnewsadd.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Wnewsadd.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+    $("#sub_button").click(function(){
+        var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                           var jump = "var win = art.dialog.open.origin;win.location.href='{:U('MarketActive/Activity/MarketList')}';";
+                           setTimeout(jump,1000);
+                           return false;
+                      }else{
+                           dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                },
+                dataType:'json'
+            });
+            return false;
+        }
+        
+    });
+});
+function goodsCheck(){
+    if($("#goods_id").val() == ''){
+        return "请选择卡券";
+    }
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                       <include file="./Home/Tpl/LabelAdmin/Path_index.html" />
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <form action="{:U('LabelAdmin/Feedback/edit')}" method="post">
+                    <div class="global-input6 fn w2 pb30">
+                        <ul class="newsadd-title">活动基础信息</ul>
+                        <ul>
+                            <li class="global-input6-name">*&nbsp;活动名称：</li>
+                            <li class="global-input6-input"><input name="name" id="name"  type="text"  class="validate[required,optional,maxSize[20]] textbox w380"  value="{$feedbackInfo['name']}"/></li>
+                        </ul>
+                        <ul>
+                            <li class="global-input6-name">*&nbsp;活动时间：</li>
+                            <li class="global-input6-input"><input name="start_time" id="start_time" type="text" value="{$feedbackInfo.start_time|dateformat=###,'Ymd'}"  class="validate[required] textbox w172" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" /><span class="mlr10">-</span><input name="end_time" id="end_time" value="{$feedbackInfo.end_time|dateformat=###,'Ymd'}" type="text"  class="validate[required] textbox w172"  onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" /></li>
+                        </ul>
+                        <ul class="newsadd-title">选择卡券</ul>
+                        <ul>
+                            <li class="global-input6-name">*&nbsp;卡券名称：</li>
+                            <li class="global-input6-input"><p>{$batchInfo['batch_short_name']}</p></li>
+                        </ul>
+                        <ul>
+                            <li class="global-input6-name">&nbsp;卡券有效期：</li>
+                            <li class="global-input6-input"><p>{$batchInfo['begin_time']|dateformat=###,'Y-m-d'}&nbsp;到&nbsp;{$batchInfo['end_time']|dateformat=###,'Y-m-d'}</p></li>
+                        </ul>
+                        <?php if($goodsInfo['goods_type'] != '9'){ ?>
+                        <ul>
+                            <li class="global-input6-name">*&nbsp;使用卡券时间：</li>
+                            <li class="global-input6-input">
+                                <div class="judgeDiv">
+                                    <label class="ml5" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();">
+                                    <input type="radio" <?php if($batchInfo['verify_begin_type']=='0'){echo 'checked="checked"';}?> disabled="disabled" name="verify_time_type" value="0" id="verify_begin_type1"/><span class="ml5">按日期设置</span></label>
+                                    <label class="ml10" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();">
+                                    <input type="radio" <?php if($batchInfo['verify_begin_type']=='1'){echo 'checked="checked"';}?> disabled="disabled" name="verify_time_type" value="1" id="verify_begin_type2"/><span class="ml5">按天数设置</span></label>
+                                </div>
+                                <div class="judgeCon-time judgeCon1 <?php if($batchInfo['verify_begin_type']=='1'){echo 'dn';}?>">
+                                    <p class="ml5">使用开始时间</p>
+                                    <input name="verify_begin_date" id="verify_begin_date" disabled="disabled" type="text" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" value="<?php if($batchInfo['verify_begin_type']==0){echo dateformat($batchInfo['verify_begin_date'],'Ymd');}?>"/>
+                                    <p class="ml20">使用结束时间</p>
+                                    <input name="verify_end_date" id="verify_end_date" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')||\\'%y-%M-%d\\'}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="<?php if($batchInfo['verify_end_type']==0){echo dateformat($batchInfo['verify_end_date'],'Ymd');}?>" />
+                                    <div class="cl"></div>
+                                    <p class="font-12-cc">商户可以自定义验码开始的日期如："4月1号,6月1号";</p>
+                                </div>
+                                <div class="judgeCon-time judgeCon2 <?php if($batchInfo['verify_begin_type']=='0'){echo 'dn';}?>">
+                                    <p class="ml5">发送卡券后</p>
+                                    <input name="verify_begin_days" disabled="disabled" id="verify_begin_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="<?php if($batchInfo['verify_begin_type']==1){echo dateformat($batchInfo['verify_begin_date'],'Ymd');}?>" />&nbsp;天开始使用
+                                    <p class="ml20">发送卡券后</p>
+                                    <input name="verify_end_days" id="verify_end_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="<?php if($batchInfo['verify_end_type']==1){echo dateformat($batchInfo['verify_end_date'],'Ymd');}?>" />&nbsp;天结束使用
+                                    <div class="cl"></div>
+                                    <p class="font-12-cc">商户可以自定义验码时间，如：“发送卡券后3天开始使用-发送卡券后5天结束使用”</p>
+                                </div>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="global-input6-name">*&nbsp;彩信标题：</li>
+                            <li class="global-input6-input"><input id="mms_title" name="mms_title" value="{$batchInfo['info_title']}" type="text" onkeyup="check_lenght(10,'title_text',this);"  class="validate[required,maxSize[10]] textbox w380"/>
+                            <br />
+                            <p class="font-12-cc" id="title_text">还可以输入10个字</p>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="global-input6-name">*&nbsp;彩信内容：</li>
+                            <li class="global-input6-input"><textarea name="using_rules" id="using_rules" onkeyup="check_lenght(100,'text',this);" class="validate[required,maxSize[100]] texttextarea w380 h50">{$batchInfo['use_rule']}</textarea>
+                            <br />
+                            <span class="font-12-cc" id="text">还可以输入100个字</span><p class="font-12-cc">,请短彩信内容按照以下格式：xxx时间到xxxx地点享受xxxx服务</p>
+                            </li>
+                        </ul>
+                        <?php } else { ?>
+                        <ul>
+                            <li class="global-input6-name">&nbsp;短信内容：</li>
+                            <li class="global-input6-input">
+                                <div id="sms_text" class="mt5">{$batchInfo['sms_text']}</div>
+                            </li>
+                        </ul>
+                        <?php } ?>
+                        <ul>
+                            <li class="global-input6-name"><input type="hidden" name="id" value="{$feedbackInfo['id']}" /></li>
+                            <li class="global-input6-input">
+                            <a href="javascript:;" id="sub_button" title="确认" class="btn-all">确认</a>
+                            <a href="javascript:history.go(-1)" title="取消" class="btn-all-del">取消</a></li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

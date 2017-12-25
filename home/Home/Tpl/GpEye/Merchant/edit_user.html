@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>编辑用户</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/UI.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshopconfig.css" rel="stylesheet" type="text/css" />
+    <!--<link href="__PUBLIC__/Css/Wjfyx.css" rel="stylesheet" type="text/css" />-->
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <script type="text/javascript">
+    $(function() {
+        $("#smb").click(function() {
+            var dialog;
+            if ($("#theform").validationEngine('validate')) {
+                $.post("{:U('GpEye/Merchant/edit_user_save')}", {
+                    "name": $("#name").val(),
+                    "user_password1": $("#user_password1").val(),
+                    "user_password2": $("#user_password2").val(),
+                    "id": "{$info.id}"
+                }, function(data) {
+                    if (data.status == 1) {
+                        art.dialog({
+                            title: false,
+                            content: "<div class='msg-all-succeed'>" + data.info + "</div>",
+                            fixed: true,
+                            padding: 0,
+                            time: 2
+                        });
+                        setTimeout("top.location.href='{:U('GpEye/Merchant/user')}';", 500);
+                    } else {
+                        art.dialog({
+                            title: false,
+                            content: "<div class='msg-all-error'>" + data.info + "</div>",
+                            fixed: true,
+                            padding: 0,
+                            time: 2
+                        });
+                    }
+                }, "json");
+            }
+            return false;
+        });
+    });
+    </script>
+</head>
+
+<body>
+    <div class="popupWin">
+        <div class="Wcanal-tab db" id="Wcanal-tabon">
+            <div class="Gform">
+                <form id="theform" action="{:U('GpEye/Merchant/edit_user_save')}" method="post" name="form">
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;所属门店</li>
+                        <li class="Ginput">{$list[$info['merchant_id']]}</li>
+                    </ul>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;用户角色</li>
+                        <li class="Ginput">{$role_list[$info['new_role_id']]}</li>
+                    </ul>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;用户名</li>
+                        <li class="Ginput">{$info['user_name']}</li>
+                    </ul>
+                    <php>if($info['new_role_id']==$store_admin_role_id){</php>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;操作人姓名</li>
+                        <li class="Ginput">
+                            <input type="text" name="name" id="name" maxlength="10" class="validate[required,maxlength[10]] textbox w120" value="{$info['true_name']}" />
+                        </li>
+                    </ul>
+                    <php>}else{</php>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;操作人姓名</li>
+                        <li class="Ginput">{$info['true_name']}</li>
+                        <input type="hidden" name="name" id="name" maxlength="10" class="validate[required,maxlength[10]] textbox w120" value="{$info['true_name']}" />
+                    </ul>
+                    <php>}</php>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;输入密码</li>
+                        <li class="Ginput">
+                            <input name="user_password1" type="password" id="user_password1" value="">
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;确认密码</li>
+                        <li class="Ginput">
+                            <input name="user_password2" type="password" id="user_password2" value="">
+                        </li>
+                    </ul>
+                    <div class="DiabtnCon">
+                        <a href="javascript:void(0)" class="Diabtn-all" id="smb">提交</a>
+                        <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

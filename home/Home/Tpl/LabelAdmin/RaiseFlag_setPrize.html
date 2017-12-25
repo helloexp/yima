@@ -1,0 +1,674 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>国庆升旗-奖项设定</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivity2015.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script>
+function editPrize(cateId, b_id){
+	//有b_id参数表示编辑奖品，没有的是增加
+	art.dialog.open("{:U('Common/SelectJp/addToPrizeItem', array('m_id' => $m_id))}&prizeCateId=" + cateId + '&b_id=' + b_id,{
+		title: '编辑奖品',
+		width:800
+	});
+}
+
+function remindDel(batch_id, cj_batch_id, status) {
+	art.dialog.msg({
+		content: '确认删除这个奖品吗?',
+		ok: function () {
+			setPrizeStatus(batch_id, cj_batch_id, status);
+		},
+		cancel:true
+	});
+}
+
+//启用和停用奖品
+function setPrizeStatus(batch_id, cj_batch_id, status , remain_num) {
+	if (status == '2') {
+		var restQuantity = 0;
+		var data={"remain_num":remain_num};
+		var noremainTip = template("noremainTip",data);
+		if(restQuantity==0){
+			var data = {m_id:batch_id, cj_batch_id:cj_batch_id}
+			if(remain_num == 0){
+				art.dialog({
+					title: '提示',
+					width:"400px",
+					content: noremainTip,
+					ok:function(){
+						$.post('{:U('Common/SelectJp/canStart')}', data, function(resp){
+							if (resp.status != 1) {
+								var tips = art.dialog({width:"200px",title:"提示",lock:true,content:resp.info});
+							} else {
+								postPrizeStatus(batch_id, cj_batch_id, status);
+							}
+						}, 'json');
+					},
+					okVal:"我知道了"
+				})
+			}else{
+				$.post('{:U('Common/SelectJp/canStart')}', data, function(resp){
+					if (resp.status != 1) {
+						var tips = art.dialog({width:"200px",title:"提示",lock:true,content:resp.info});
+					} else {
+						postPrizeStatus(batch_id, cj_batch_id, status);
+					}
+				}, 'json');
+			}
+			
+		}	
+	} else {
+		//停用限制
+		var isAllStop = true;
+		$('[name^="prizeStatus"]').each(function(){
+			var prizeId = $(this).attr('name');
+			var len = prizeId.length - 13;
+			prizeId = prizeId.substr(12, len);
+			if (cj_batch_id != prizeId) {
+				if ($(this).val() == 1) {
+					isAllStop = false;
+				}
+			}
+		});
+		if (isAllStop == true) {
+			var tips = art.dialog({width:"200px",title:"提示",lock:true,content:'至少有一个开启的奖品'});
+			return false;
+		}
+		postPrizeStatus(batch_id, cj_batch_id, status);
+	}
+}
+
+function postPrizeStatus(batch_id, cj_batch_id, status) {
+	var postUrl  = "{:U('Common/SelectJp/jpStop')}";
+	//2表示停用
+	if (status == '2') {
+		postUrl = "{:U('Common/SelectJp/jpStart')}";
+	}
+	if (status == '1') {
+		var releaseUrl = "{:U('LabelAdmin/RaiseFlag/releasePrize')}";
+		var thisPrize = $('[name="prizeStatus['+cj_batch_id+']"]');
+		var thisPrize = thisPrize.parentsUntil('.each_prize').parent();
+		var b_id = thisPrize.attr('data-bid');
+		var thisCate = thisPrize.parentsUntil('.each_cate').parent();
+		var prizeCateId = thisCate.attr('data-cateId');
+		var releaseData = {
+				m_id:batch_id,
+				prizeCateId:prizeCateId, 
+				b_id:b_id
+		};
+		$.post(releaseUrl, releaseData, function(resp){
+			if (resp.status == '1') {
+				if (status == '1') {
+					$.post('{:U('Common/SelectJp/jpEdit')}', resp.info, function(re){
+						if(re.status!='1'){
+							var dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+re.info+"</div>",fixed: true,padding:0,lock:true,time:2});
+						} else {
+							var data = {cj_batch_id : cj_batch_id,batch_id : batch_id};
+							$.post(postUrl, data, function(resp){
+								if (resp.status == '1') {
+									if (status == '1') {
+										setTotalChance(cj_batch_id);
+									}
+								} else {
+									//dialog.close();
+									dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+								}
+							}, 'json');
+						}
+					}, 'json');
+				}
+			} else {
+				dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+			}
+		}, 'json');
+	}
+	//dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+}
+
+function checkCanStart(cj_batch_id) {
+	var thisPrize = $('[name="prizeStatus['+cj_batch_id+']"]');
+	var each_prize = thisPrize.parentsUntil('dd.each_prize').parent();
+	each_prize = $(each_prize[0]);
+	var else_prize = each_prize.siblings(':not(.blank)');
+	var canStart = true;
+	else_prize.each(function(){
+		var prizeStatus = $(this).find('[name^="prizeStatus"]');
+		if (prizeStatus.val() == '1') {
+			canStart = false;
+		}
+	});
+	return canStart;
+}
+
+//删除奖项
+function delCate(cj_cate_id){
+	var batch_id = $('#m_id').val();
+	art.dialog.msg({
+		content:'您确定要删除该奖项吗？',
+		ok: function () {
+			var data = {
+				cj_cate_id : cj_cate_id,
+				batch_id : batch_id
+			}
+			$.post('{:U('Common/SelectJp/jpCateDel')}', data, function(resp){
+			var tips = art.dialog.msg({
+				content:resp.info,
+				ok: function () {
+					if(resp.status=='1'){
+						setTotalChance();
+					} else {
+						tips.close();
+						dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+					}
+				}
+			});
+			
+			}, 'json');
+		},
+		cancel: true
+	});
+}
+
+function initialSkip() {
+	if ($('#skip.hover') && $('#skip.hover').length > 0) {
+		$('#switch2').hide();
+	}
+	$('.each_cate').each(function(){
+		var eachPrize = $(this).find('.each_prize');
+		var hiddenLen = 0;
+		eachPrize.each(function(){
+			if ($(this).hasClass('dn')) {
+				hiddenLen++;
+			}
+		});
+		if (hiddenLen == eachPrize.length) {
+			$(this).find('.blank').find('.addtxt').html('添加奖品');
+			addErrorClass($(this).attr('data-cateid'));
+		} else {
+			$(this).find('.blank').find('.addtxt').html('更换奖品');
+			removeErrorClass($(this).attr('data-cateid'));
+		}
+	});
+}
+
+function addErrorClass(cateId) {
+	var key = getPrizeKey(cateId);
+	var prizeChance = $('.rule_chance').find('li.Ginput:eq('+key+')');
+	var thisInput = prizeChance.find('input');
+	var postUrl = "{:U('LabelAdmin/RaiseFlag/clearChance')}";
+	var m_id = $('#m_id').val();
+	var data = {key:key,m_id:m_id};
+	$.post(postUrl, data, function(resp){
+		if (resp.status == '1') {
+			thisInput.val('');
+			thisInput.attr('class','prizeErro');
+		} else {
+			dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+			result = false;
+		}
+	}, 'json');
+}
+
+function getPrizeKey(cateId) {
+	var cateArr = new Array();
+	$('.each_cate').each(function(){
+		var cateId = $(this).attr('data-cateid');
+		cateArr.push(cateId);
+	});
+	cateArr = cateArr.sort();
+	var key = 0;
+	$.each(cateArr, function(k, v){
+		if (v == cateId) {
+			key = k;
+		}
+	});
+	return key;
+}
+
+function removeErrorClass(cateId) {
+	var key = getPrizeKey(cateId);
+	var prizeChance = $('.rule_chance').find('li.Ginput:eq('+key+')');
+	var thisInput = prizeChance.find('input');
+	thisInput.removeClass('prizeErro');
+	if (thisInput.val() == '') {
+		thisInput.val(0);
+	}
+}
+
+$(function(){
+	Gform();
+	$(".prizeErro").css("background","#f7f7f7");
+    $("body").on("click",".prizeErro",function(){
+		art.dialog.msg({
+			content: '添加奖品后才可填写集齐材料概率！'
+		});
+	});
+    initialSkip();
+	showAddBtn();
+	
+	$(".addAward_btn").click(function(e) {
+		var btnTxt = $(this).find('.addtxt').text();
+		var prizeCateId = $(this).next('[name="prizeCateId"]').val();
+		if (btnTxt == '更换奖品') {
+			var mId = '{$m_id}';
+			var data = {m_id:mId}
+			$.post('{:U('LabelAdmin/RaiseFlag/requestActivityStatus')}', data, function(resp){
+				if (resp.status != 1) {
+					var tips = art.dialog({width:"200px",title:"提示",lock:true,content:"若要更换奖品，请先停用本活动"});
+				} else {
+					art.dialog.open("{:U('LabelAdmin/RaiseFlag/addAward', array('m_id' => $m_id))}&prizeCateId=" + prizeCateId,{
+						title:'添加奖品',
+						width:800
+					});
+				}
+			}, 'json');
+		} else {
+	        art.dialog.open("{:U('LabelAdmin/RaiseFlag/addAward', array('m_id' => $m_id))}&prizeCateId=" + prizeCateId,{
+				title:'添加奖品',
+				width:800
+			});
+		}
+    });
+	
+	$(".js_edit").click(function(e) {
+		var cj_cate_id = $(this).attr('data-cate');
+        var dialog = art.dialog({
+			content: '<ul class="Gform"><form id="jx">'
+					+ '<li class="Gname">奖项名称</li>'
+					+ '<li class="Ginput"><input type="text" class="validate[required,maxSize[6]]" id="demo-labs-input" name="cj_cate_name"/></li>'
+					+ '</form></ul>',
+			width:500,
+			padding:0,
+			id: 'Fm7',
+			title:"添加奖项",
+			ok: function () {
+				if (!$("#jx").validationEngine('validate')) {
+					return false;
+				}
+				var input = document.getElementById('demo-labs-input');
+				dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+				var data = {
+						cj_cate_id : cj_cate_id,
+						cj_cate_name : $('[name="cj_cate_name"]').val(),
+						//member_id : member_id,
+						batch_id : $('#m_id').val()
+					}
+				$.post("{:U('Common/SelectJp/jpLevelSave')}", data, function(resp){
+					if (resp.status == '1') {
+						dialog.close();
+						setTotalChance();
+					} else {
+						dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+					}
+				}, 'json');
+			},
+			cancel: true
+		});
+    });
+})
+function getCjRespTextAndNoAwardNotice() {
+	var cj_resp_text = '';
+	$('[name^="cj_resp_text"]').each(function(){
+		cj_resp_text += $(this).val() + '|';
+	});
+	cj_resp_text = cj_resp_text.substr(0, (cj_resp_text.length - 1));
+	
+	var no_award_notice = '';
+	$('[name^="no_award_notice"]').each(function(){
+		no_award_notice += $(this).val() + '|';
+	});
+	no_award_notice = no_award_notice.substr(0, (no_award_notice.length - 1));
+	var result = {no_award_notice : no_award_notice, cj_resp_text : cj_resp_text};
+	return result;
+}
+
+function postPrize() {
+	var m_id = $('#m_id').val();
+	var result = getCjRespTextAndNoAwardNotice();
+	var prizeChanceArr = getPrizeChance();
+	//提交保存数据
+	var readyData = {
+	        "m_id":m_id,
+	        "isReEdit":$('#isReEdit').val(),
+	        "first_prize_chance" : prizeChanceArr[0],
+	        "second_prize_chance" : prizeChanceArr[1],
+	        "third_prize_chance" : prizeChanceArr[2],
+	        "cj_resp_text" : result.cj_resp_text,
+	        'no_award_notice' : result.no_award_notice
+	    };
+	var sort = $('[name^=cj_cate_to_sort]').serialize();
+	var totalChance = prizeChanceArr[0] + prizeChanceArr[1] + prizeChanceArr[2];
+	if (totalChance == 0) {
+		art.dialog.msg({
+			content: '至少要设置一个奖品的概率'
+		});
+	}
+	var validate = $("#cj_rule").validationEngine('validate');
+	if(totalChance && validate){
+		$.post("{:U('LabelAdmin/RaiseFlag/setPrize')}&"+sort, readyData,
+			    function(data) {
+			        if (data.status) {
+			        	if ($('#isReEdit').val() == 1) {
+			        		window.location.href="{:U('MarketActive/Activity/MarketList')}";
+			        	} else {
+			        		window.location.href="{:U('LabelAdmin/BindChannel/checkSuccess', array('batch_type' => 56, 'batch_id' => $m_id, 'isReEdit' => 0))}";
+			        	}
+			        } else {
+			            alert(data.info);
+			        }
+			    },
+			    "json");
+	}
+}
+
+function reEditSort(obj) {
+	var selectedDl = $(obj).parentsUntil('dl').parent().clone();
+	var selectedSort = $(obj).val();
+	//比自己小的插前面，比自己大的插后面
+	var originPosition = $(obj).attr('data-origin');
+	if (selectedSort > originPosition) {
+		//$('.sort_for:eq('+(selectedSort-1)+')').after(selectedDl);
+		$('.sort_for').each(function(){
+			var s = $(this).find('[name^=cj_cate_to_sort]');
+			var origin_data = $(s[0]).attr('data-origin');
+			if (origin_data == selectedSort) {
+				$(this).after(selectedDl);
+			}
+		});
+	} else {
+		//selectedDl.prependTo('.sort_for:eq('+(selectedSort-1)+')');
+		$('.sort_for').each(function(){
+			var s = $(this).find('[name^=cj_cate_to_sort]');
+			var origin_data = $(s[0]).attr('data-origin');
+			if (origin_data == selectedSort) {
+				$(this).before(selectedDl);
+			}
+		});
+	}
+	$(obj).parentsUntil('dl').parent().replaceWith('');
+	$('[name^=cj_cate_to_sort]').off('change', '', 'reEditSort');
+	var sort = 1;
+	$('[name^=cj_cate_to_sort]').each(function(){
+		$(this).val(sort);
+		$(this).attr('data-origin', sort);
+		sort++;
+	});
+	$('[name^=cj_cate_to_sort]').each(function(){
+		var temp = $(this).val();
+		//$(this).children().removeAttr('selected');
+		$(this).children().each(function(){
+			if ($(this).val() == temp) {
+				$(this).attr('selected', 'selected');
+			} else {
+				$(this).removeAttr('selected');
+			}
+		});
+	});
+	$('[name^=cj_cate_to_sort]').on('change', '', 'reEditSort');
+}
+
+function setTotalChance(prizeId) {
+	var prizeStopped = $('[name="prizeStatus['+prizeId+']"]');
+	prizeStopped.val('2');
+	var prize = prizeStopped.parentsUntil('.each_prize').parent();
+	prize.addClass('dn');
+	var eachCate = prizeStopped.parentsUntil('.each_cate').parent();
+	var dnLen = 0;
+	var prizeArr = eachCate.find('.each_prize');
+	prizeArr.each(function(){
+		if ($(this).hasClass('dn')) {
+			dnLen++;
+		}
+	});
+	if (dnLen == prizeArr.length) {
+		eachCate.find('.blank').find('.addtxt').html('添加奖品');
+		addErrorClass(eachCate.attr('data-cateid'));
+	} else {
+		eachCate.find('.blank').find('.addtxt').html('更换奖品');
+		removeErrorClass(eachCate.attr('data-cateid'));
+	}
+}
+
+function getPrizeChance() {
+	var first_prize_chance = parseInt($.trim($('[name="first_prize_chance"]').val()));
+	var second_prize_chance = parseInt($.trim($('[name="second_prize_chance"]').val()));
+	var third_prize_chance = parseInt($.trim($('[name="third_prize_chance"]').val()));
+	first_prize_chance = first_prize_chance ? first_prize_chance : 0;
+	second_prize_chance = second_prize_chance ? second_prize_chance : 0;
+	third_prize_chance = third_prize_chance ? third_prize_chance : 0;
+	return new Array(first_prize_chance, second_prize_chance, third_prize_chance);
+}
+
+function checkPrizeChance(field, rules, i, options) {
+	var thisInput = $(field[0]);
+	var eq = thisInput.index();
+	var prizeChanceArr = getPrizeChance();
+	var first_prize_chance = prizeChanceArr[0];
+	var second_prize_chance = prizeChanceArr[1];
+	var third_prize_chance = prizeChanceArr[2];
+	var judge = first_prize_chance + second_prize_chance + third_prize_chance;
+	if (judge > 1000) {
+		return '兑奖概率总和不得大于1000';
+	}
+	if (judge == 0) {
+		return '兑奖概率至少有一个大于0';
+	}
+	var prizeSetNotForbidArr = [];
+	var i = 0;
+	$('.rule_chance input').each(function(index){
+		if (!$(this).hasClass('prizeErro')) {
+			prizeSetNotForbidArr[i] = prizeChanceArr[index];
+			i++;
+		}
+	});
+	var error = false;
+	$.each(prizeSetNotForbidArr, function(k,v){
+		$.each(prizeSetNotForbidArr, function(j,n){
+			if (k < j && v > n) {
+				error = true;
+				return false;
+			}
+		});
+	});
+	if (error == true) {
+		return '低等奖项的集齐人数必须大于高等奖项的集齐人数';
+	}
+	var error2 = false;
+	$('.each_cate').each(function(){
+		var thisPrize = $(this).find('.each_prize:not(.dn)');
+		if (thisPrize) {
+			var key = getPrizeKey(thisPrize.attr('data-cateid'));
+			//var thisInput = $('.rule_chance input:eq('+key+')');
+			if ($.trim(thisInput.val()) == '' && key == eq) {
+				error2 = true;
+			}
+		}
+	});
+	if (error2 == true) {
+		return '有奖品必须设置概率';
+	}
+}
+
+function showAddBtn() {
+	$('.each_cate').each(function(){
+		var prizeArr = $(this).find('.each_prize');
+		if (prizeArr.length > 0) {
+			var startNum = 0;
+			var startPrizeId = 0;
+			prizeArr.each(function(){
+				var prizeStatus = $(this).find('[name^="prizeStatus"]');
+				if (prizeStatus.val() == '1') {
+					$(this).removeClass('dn');
+					startNum++;
+				}
+				var prizeId = prizeStatus.attr('name');
+				var len = prizeId.length - 13;
+				prizeId = prizeId.substr(12, len);
+				if (startPrizeId < prizeId) {
+					startPrizeId = prizeId;
+				}
+			});
+			if (startNum > 1) {
+				var prizeNum = 0;
+				var m_id = $('#m_id').val();
+				prizeArr.each(function(){
+					var prizeStatus = $(this).find('[name^="prizeStatus"]');
+					if (prizeStatus.val() === '1') {
+						var prizeId = prizeStatus.attr('name');
+						var len = prizeId.length - 13;
+						prizeId = prizeId.substr(12, len);
+						if (prizeId != startPrizeId) {
+							setPrizeStatus(m_id, prizeId, '1');
+						}
+					}
+					prizeNum++;
+				});
+			} else {
+				$(this).removeClass('dn');
+			}
+			//$(this).find('.blank').find('.addtxt').html('更换奖品');
+		} else {
+			$(this).find('.blank').removeClass('dn');
+		}
+	});
+}
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+    	<include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+            	<div class="member_con">
+                	{$stepBar}
+                	<div class="Gform w100p">
+                	<input name="m_id" id="m_id" value="{$m_id}" type="hidden"/>
+                    <div id="switch2">
+                    	<div class="shadow"></div>
+                        <h3 style="border-bottom: 1px solid #ededed;font-size: 14px;line-height: 40px;">奖项设定</h3>
+                        <form name="cj_rule" id="cj_rule" method="post">
+                        <input type="hidden" id="isReEdit" value="{$isReEdit}" name="isReEdit"/>
+                        <ul class="rule_chance rel" style="height:220px;">
+                            <li class="Gname"><span>*</span> 兑换规则</li>
+                            <li class="Ginput">
+                                <input type="text"  name="first_prize_chance" value="{:($prizeChance[0] ? $prizeChance[0] : '')}" class="validate[required,groupRequired[payments],custom[integer],min[0],max[1000],maxSize[4],funcCall[checkPrizeChance]]" maxlength="20" class="Gview-text" style="width:70px;">
+                               	 ‰人可集齐材料20151001<span class="ml50">兑换{$cj_cate_arr_by_id_sort[0]['name']}</span>
+                            </li>
+                            <li class="Ginput">
+                                <input type="text"  name="second_prize_chance" value="{:($prizeChance[1] ? $prizeChance[1] : '')}" class="validate[required,groupRequired[payments],custom[integer],min[0],max[1000],maxSize[4],funcCall[checkPrizeChance]]" maxlength="20" class="Gview-text" style="width:70px;">
+                               	 ‰人可集齐材料151001&nbsp;&nbsp;&nbsp;&nbsp;<span class="ml50">兑换{$cj_cate_arr_by_id_sort[1]['name']}</span>
+                            </li>
+                            <li class="Ginput">
+                                <input type="text"  name="third_prize_chance" value="{:($prizeChance[2] ? $prizeChance[2] : '')}" class="validate[required,groupRequired[payments],custom[integer],min[0],max[1000],maxSize[4],funcCall[checkPrizeChance]]" maxlength="20" class="Gview-text" style="width:70px;">
+                               	 ‰人可集齐材料1001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="ml50">兑换{$cj_cate_arr_by_id_sort[2]['name']}</span>
+                            </li>
+                            <li class="r abs" style="position:absolute; top:10px; right:10px;"><img src="__PUBLIC__/Image/prize-msg.png" /></li>
+                        </ul>
+                        </form>
+                        <div class="award_list">
+                        	<volist name="cj_cate_arr" id="cate_list">
+                        	<dl class="sort_for each_cate" data-cateId="{$cate_list['id']}" >
+                            	<dt>
+                                <strong>{$cate_list['name']}</strong>
+                                <!-- <span>
+                                	<a href="javascript:void(0)" class="pl20 js_edit" data-cate="{$cate_list['id']}">编辑</a>
+                                </span> -->
+                                <select name="cj_cate_to_sort[{$cate_list['id']}]" onchange="reEditSort(this);" data-origin="{$cate_list['sort']}">
+                                	<volist name="cj_cate_arr" id="cate_list_sort">
+                                	<option value="{$cate_list_sort['sort']}"  <if condition="$cate_list_sort['id'] eq $cate_list['id']">selected="selected"</if> >序列{$cate_list_sort['sort']}</option>
+                                	</volist>
+                                </select>
+                                </dt>
+                                <notempty name="jp_arr[$cate_list['id']]">
+                                <volist name="jp_arr[$cate_list['id']]" id="prize">
+                                <dd class="each_prize <neq name="prize['status']" value="1">dn</neq> " data-bid="{$prize['b_id']}">
+                                	<p class="adward_title">
+                                        <strong>{$prize['batch_name']}</strong>
+                                        <span>
+                                        <a href="javascript:void(0)" onclick="editPrize({$cate_list['id']}, {$prize['b_id']})">编辑</a>
+                                        <a href="javascript:void(0)" class="ml10" onclick="remindDel({$m_id}, {$prize['id']}, {$prize['status']})">
+                                        	<eq name="prize['status']" value="1">停用<else />启用</eq>
+                                        </a>
+                                        <input name="prizeStatus[{$prize['id']}]" value="{$prize['status']}" type="hidden" />
+                                        </span>
+                                        <if condition="$prize['goods_type'] eq 14">
+							            <em class="type2" title="积分会自动添加到会员账户中">积分</em>
+							            <elseif condition="$prize['goods_type'] eq 12" />
+							            <em class="type3" title="红包用于抵扣消费者在线购物<br>金额，可在个人中心查看">定额红包</em>
+							            <else />
+							            <em class="type1" title="<eq name="prize['send_type']" value="1">卡券领取后可在微信卡包中查看<else />卡券通过短信形式下发</eq>">卡券</em>
+							            </if>
+							            <!--type1==卡券,type2==积分,type3==定额红包,-->
+                                    </p>
+                                    <div class="adShow">
+                                    	<div class="adShow_l">
+                                            <img src="{:get_upload_url($prize['batch_img'])}">
+                                        </div>
+                                        <div class="adShow_r">
+                                            <span class="Astatic">总投入数量<em>{$prize['storage_num']}</em></span>
+                                            <span class="Astatic">剩余数量<em>{$prize['remain_num']}</em></span>
+                                        </div>
+                                        <div class="cl pt5"></div>
+                                        <if condition="$prize['goods_type'] neq 14 and $prize['goods_type'] neq 12">
+							            <p class="AstaticDate tip"><span>发送形式:</span>
+							            <eq name="prize['send_type']" value="1">
+							            <i title="支持微信卡券形式发送" class="icon-eticket3"></i>
+							            <else />
+							            <i title="支持短信形式发送" class="icon-eticket4"></i>
+							            </eq>
+							            </p>
+							            </if>
+							            <notempty name="prize['available_time_txt']">
+							            <p class="AstaticDate tip">有效期：{$prize['available_time_txt']}</p>
+							            </notempty>
+                                    </div>
+                                </dd>
+                                </volist>
+                                </notempty>
+                                <dd class="blank" >
+                                	<p class="btn_area">
+                                    <a href="javascript:void(0)" class="addAward_btn"><i>✚</i> <span class="addtxt">添加奖品</span></a>
+                                    <input name="prizeCateId" value="{$cate_list['id']}" type="hidden"/>
+                                    </p>
+                                </dd>
+                            </dl>
+                            </volist>
+                            <div class="cl"></div>
+                            <eq name="canShowAddBtn" value="1">
+                            <a href="javascript:void(0)"  class="btn_add_list js_edit" data-cate=""><i>✚</i> 新增奖项</a>
+                            </eq>
+                        </div>
+                    </div>
+                    	<div class="fn tc">
+                            <a href="{:U('MarketActive/Activity/MarketList')}" class="btn-all-del ml10">取消</a>
+                            <eq name="isReEdit" value="0">
+                            <a href="{:U('LabelAdmin/RaiseFlag/setActConfig',array('m_id' => $m_id, 'isReEdit' => 0))}" class="btn-all ml10">上一步</a>
+                            <a href="javascript:postPrize()" class="btn-all ml10">下一步</a>
+                            <else />
+                            <a href="javascript:postPrize()" class="btn-all ml10">保存</a>
+                            </eq>
+						</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<div class="main-name fn">
+    <h4 ng-show="edit=='0'">电商优惠券</h4>
+    <h4 ng-show="edit=='1'"><a href="javascript:history.back();" class="back"><i></i>电商优惠券</a>/ 编辑</h4>
+</div>
+<div class="NewBuild">
+    <div class="NewBuild-view">
+        <img src="/view/assets/image/prom/phone_top.png" />
+        <div class="prtscn">
+            <div class="head">
+                <dl>
+                    <h5>{{ node_name }}</h5>
+                    <h3>{{ cashData.name }}</h3>
+                    <p>可在支付订单时直接抵扣金额</p>
+                </dl>
+            </div>
+            <div class="content">
+                <dl>
+                    <dt>面额：<b class="red">{{ cashData.price }}</b>元</dt>
+                    <dt>使用规则：</dt>
+                    <dd>订单满<span class="red">{{ cashData.use_num }}</span>元可以使用</dd>
+                </dl>
+                 <dl>
+                    <dt>使用须知：</dt>
+                    <dd ng-bind="notice"></dd>
+                </dl>               
+            </div>
+            <div class="footer">
+              <p>可用商品</p>               
+            </div>
+        </div>       
+        <img src="/view/assets/image/prom/phone_bottom.png" alt="" />
+    </div>
+    <div class="NewBuild-info l">
+    <form method="post" action="" name="CashVoucherEdit">
+      <input type="hidden" value="{{ cashData.id }}">
+        <div class="Gform NewVoucher">
+            <h3 class="h3">基本信息</h3>
+            <ul>
+                <li class="Gname"><span>*</span> 电商优惠券名称</li>
+                <li class="Ginput">
+                    <input type="text" maxlength="20" name="bonus_name" ng-model="cashData.bonus_name"  class="validate[required,maxSize[20]]">
+                    <span class="maxTips forInput" data-max="20">0/20</span>
+                </li>
+                
+            </ul>
+            <ul>
+                <li class="Gname"><span>*</span> 发放总量</li>
+                <li class="Ginput">
+                    <input type="text" name="bonus_num" ng-model="cashData.bonus_num" class="validate[custom[number],min[1],required]">
+                    <span class="maxTips forInput">张</span>
+                </li>
+                
+            </ul>
+            <ul>
+                <li class="Gname"><span>*</span> 面额</li>
+                <li class="Ginput">
+                    <input type="text" name="bonus_amt" ng-model="cashData.bonus_amt" class="validate[required,min[1],custom[number]]">
+                    <span class="maxTips forInput">元</span>
+                </li>
+            </ul>
+            
+            <h3 class="h3">使用规则</h3>
+            <ul>
+                <li class="Gname"><span>*</span> 订单金额</li>
+                <li class="Ginput">
+                    满 <input type="text" name="use_amt" ng-model="cashData.use_amt" style="width:98px;padding-right:0;" class="validate[required,custom[number]]"><span class="maxTips forInput" style="left:256px;width:16px;">元</span> 可以使用
+                </li>
+                
+            </ul>
+                         <ul>
+                <li class="Gname"><span>*</span> 优惠券有效期</li>
+                <li class="Ginput">
+                <div class="switch" ng-class="{'hover':cashData.datetype=='1'}">
+                    <input type="hidden" name="datetype" value="{{ cashData.datetype || 0}}" >
+                    <div class="newRadio">
+                        <span class="valfirst" ng-class="{'hover':cashData.datetype=='0' || !cashData.datetype }" ng-click="cashData.datetype='0'">按日期设置</span>
+                        <span class="vallast" ng-class="{'hover':cashData.datetype=='1'}" ng-click="cashData.datetype='1'">按天数设置</span>
+                    </div>
+                    <div class="newRadio-default" ng-show="cashData.datetype=='0' || !cashData.datetype">
+     
+                       <div class="Gtime2 fn mt10">
+                        <input type="text" class="validate[required]" ng-model="cashData.start_time" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\'goods_end_date\')}',dateFmt:'yyyy-MM-dd'})" id="goods_begin_date" style="width: 99px; padding-right: 30px;" name="begin_time" >
+                        <em>至</em>
+                        <input type="text" class="validate[required]" ng-model="cashData.end_time" style="width: 99px; padding-right: 30px;" onclick="WdatePicker({minDate:'#F{$dp.$D(\'goods_begin_date\')||\'%y-%M-%d\'}',dateFmt:'yyyy-MM-dd'})" id="goods_end_date" name="end_time">
+                        </div>
+           
+                        <span class="txtTips cl fn">商户可以自定义验码开始的日期如："4月1号至6月1号";</span>
+                    </div>
+                    <div class="newRadio-input" ng-show="cashData.datetype=='1'">
+                         <div class="Gtime1 fn special mt10">
+                                <em class="em1">发送卡券后</em>
+                                <input type="text" class="validate[required]"  name="dataAmountStart" ng-model="later_start_time" style="padding-right: 45px;"/>
+                                <em class="em2">天开始使用</em>
+                            </div>
+                            <div class="Gtime1 fn special mt10">
+                                <em class="em1">发送卡券后</em>
+                                <input type="text" class="validate[required]"  name="dataAmountEnd" ng-model="later_end_time" style="padding-right: 45px;">
+                                <em class="em2">天结束使用</em>
+                            </div>
+                        <span class="txtTips">商户可以自定义验码时间，如：“发送卡券后3天开始使用-<br />发送卡券后5天结束使用”</span>
+                    </div>
+                </div>
+                </li>
+            </ul>
+            <ul>
+                <li class="Gname"><span>*</span> 可用商品</li>
+                <li class="Ginput">
+                     <div class="switch" >
+                        <input type="hidden" value="{{ cashData.type  || 0 }}" name="cashData.type" >
+                        <div class="newRadio" style="float:none">
+                            <span ng-class="{'hover':cashData.type==0 || !cashData.type}" class="valfirst" ng-click="cashData.type='0'">所有商品参与</span>
+                            <span ng-class="{'hover':cashData.type==1}" class="vallast partShop" ng-click="cashData.type='1'">部分商品参与</span>
+                        </div>
+                        <div class="newRadio-input mt15" ng-show="cashData.type==1" >
+                            <table class="W-table shoplist" ng-show="goods_list.length>0" >
+                                <thead>
+                                   <tr>
+                                        <th class="left">商品名称</th>
+                                        <th class="right">操作</th>
+                                    </tr> 
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="key in goods_list"><input type="hidden" name="{{ key.id }}" value='{{ key.goods_name }}' />
+                                        <td class="left" ng-bind="key.goods_name"> </td>
+                                        <td class="right"><a href="javascript:void(0)" ng-click="deleteShop(key)">删除</a></td>
+                                    </tr>
+                                </tbody>   
+                                </table>
+                                <div class="addPrise mr10" ng-class="{'mt15':goods_list.length>0}" ng-click="addCommodity()"><a  href="javascript:void(0);" class="addPriseBtn"><i></i>添加商品</a></div>
+                        </div>
+                    </div>
+                </li>
+            </ul>  
+            <ul>
+                <li class="Gname"><span>*</span>&nbsp;使用须知</li>
+                <li class="Ginput">
+                    <textarea maxlength="500" name="notice" ng-model="cashData.notice" class="validate[required,maxSize[100]]"></textarea><span class="maxTips forArea" data-max="500">0/500</span>
+                   
+                </li>
+                
+            </ul>
+            
+            <ul>
+                <li class="Ginput">
+                    <a href="javascript:void(0);" class="btn-all" ng-click="submit()">确定</a><a href="javascript:history.back();" class="btn-all-del" ng-click="cancel()">取消</a>
+                </li>
+                
+            </ul>
+        </div>
+
+    </form>
+    </div>
+</div>

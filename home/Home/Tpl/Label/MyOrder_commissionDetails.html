@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+        <meta content="telephone=no" name="format-detection" />
+        <meta content="email=no" name="format-detection" />
+        <meta name="apple-touch-fullscreen" content="NO">
+        <title>提成明细</title>
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_wfx.css?v=__VR__">
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+        <include file="Public:Public:wechatAllShareJsdk" />
+        <script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.new.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+        <style>
+            .m-commission{ padding:0}
+            .m-commission .detail{ padding:8px 0}
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                wx.ready(function () {
+                    wx.hideOptionMenu();
+                })
+            })
+        </script>
+    </head>
+    <body>
+        <div id="wrapper">
+            <div id="container">
+                <div id="main">
+                <include file="Wfx:top"/>
+                    <div class="m-commission" style='padding-bottom:5px;'>
+                        <if condition="$commissionArray eq NULL ">
+                                <div class="nodata">
+                                    <p style='margin-top: 115px;font-size: 16px;font-weight: bold;color: #C0C0C0;text-align:center;'>
+                                        <if condition="$type eq 'got' ">您还没有已发放提成<elseif condition="$type eq 'thisMonth'" />您本月还未获得提成<else />您还未获得提成</if>
+                                    </p>
+                                </div>
+                        <else />
+                        <volist name="commissionArray" id="item" key="k">
+                            <div class="box">
+                                <div class="tit" style="font-weight:bold;">{$key}</div>
+                                <volist name="item" id='itemTwo' key="ktwo">
+                                    <div class="detail content" <if condition="$ktwo eq $itemTwo['count']">style='border-bottom:none'</if>>
+                                        <div class="name">
+                                            <p>{$itemTwo.name}   {$itemTwo.phone_no}</p>
+                                            <p class="time">{:dateformat($itemTwo['add_time'],'Y-m-d H:i:s')}</p>
+                                        </div>
+                                        <if condition="$itemTwo['deal_flag'] eq '0' ">
+                                            <div class="status unget">
+                                                <p>￥{$itemTwo.bonus_amount}</p>
+                                                <p class="m-f12"><if condition="$itemTwo['settle_type'] eq '1' ">未发放<else />未提现</if></p>
+                                            </div>
+                                        <elseif condition="$itemTwo['deal_flag'] eq '3' " />
+                                            <div class="status <if condition="$itemTwo['settle_type'] eq '1' ">used<else />get</if> "  style="color:#C0C0C0;">
+                                                <p>￥{$itemTwo.bonus_amount}</p>
+                                                <p class="m-f12"><if condition="$itemTwo['settle_type'] eq '1' ">已发放<else />已发放</if></p>
+                                            </div>
+                                        <elseif condition="($itemTwo['deal_flag'] eq '1' OR $itemTwo['deal_flag'] eq '2') AND  $itemTwo['settle_type'] eq '2' " />
+                                            <div class="status get">
+                                                <p>￥{$itemTwo.bonus_amount}</p>
+                                                <p class="m-f12">已提现</p>
+                                            </div>
+                                        <else />
+                                            <div class="status unget">
+                                                <p>￥{$itemTwo.bonus_amount}</p>
+                                                <p class="m-f12">未发放</p>
+                                            </div>
+                                        </if>
+                                    </div>
+                                </volist>
+                                <if condition="$count neq $k">
+                                    <div class="m-gap"></div>
+                                <elseif condition="$count eq $k AND $count neq 10"/>
+                                    <div class="m-gap last-gap"></div>
+                                </if>
+                            </div>
+                        </volist>
+						</if>
+                    </div>
+                </div>
+                <nav id="page-nav">
+                    <a href="<?php echo $nextUrl;?>"></a>
+                </nav>
+            </div>
+            <if condition="$count eq 10 ">
+                <include file="Wfx:showMore"/>
+            </if>
+        </div>
+	<include file="Store:nav"/>
+        <script type="text/javascript">
+            $(function(){
+                $('.m-commission').infinitescroll();
+            });
+        </script>
+    </body>
+</html>

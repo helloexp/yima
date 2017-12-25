@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="format-detection"  content="telephone=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<title>电商送礼-微信支付</title>
+<link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/wap_gift_201503.css?v=__VR__" />
+<script src="__PUBLIC__/Label/Js/jquery-1.7.2.min.js?v=__VR__" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) {
+	$(".btn-choosePaper").click(function(){
+		var html = '<div class="choosePaper">'+$("#choosePaper").html()+'</div>';
+		msgPop(html);
+	})
+
+	$("body").on("click",".choosePaper .btn-ok",function(){
+		var id="";
+		$(".choosePaperready").text($(".choosePaper .choosePaperHover").attr("data-val"));
+		$(this).closest(".choosePaper").find(".choosePaperList li.hover").each(function(index, element) {
+			if(id!=""){
+				id+=",";
+			}
+			id=id+$(this).attr("data-id");
+        });
+		$("#bonus_use_id").val(id);
+		$(".choosePaperready").attr("data-id",id);
+		$("#choosePaperready").show();
+		var orderVal = $("#orderVal").attr("data-val")-$(".choosePaper .choosePaperHover").attr("data-val");
+		if(orderVal < 0)
+			orderVal = 0.00;
+                if(orderVal <= 1)
+                    $('#noShowPay').hide();
+                else
+                    $('#noShowPay').show();    
+		$("#orderVal").text(orderVal.toFixed(2));
+		msgPopclose();
+	})
+	//提交订单
+	$('#pay_gift').click(function(){
+		if(!$("input[name='payment_type']:radio[checked]").val()){
+			alert("请选择支付方式！");
+			return false;
+		}
+		$('#theform').submit();
+	})
+
+
+
+});
+function choosePaperli(t){
+	if(t.hasClass("hover")){
+		t.removeClass("hover");
+	}else{
+		t.addClass("hover");
+	}
+	$(".choosePaper .choosePaper-msg").hide();
+	var hasval=0;
+	var choval=0;
+	var maxval = $(".choosePaper .choosePaperNum").attr("data-val")*1;
+	t.closest(".choosePaperList").find("li.hover").each(function(index, element) {
+		var val = $(this).attr("data-val")*1;
+		hasval+=val;
+		choval+=val;
+	});
+	if(hasval>maxval){
+		$(".choosePaper .choosePaper-msg").show();
+		hasval = maxval;
+	}
+	$(".choosePaper .choosePaperHover").text(choval.toFixed(2)).attr("data-val",hasval.toFixed(2));
+}
+</script>
+<style>
+.message_area {
+  margin: 10px 0 10px;
+  box-sizing: border-box;
+  background-color: #fff;
+  padding: 0px;
+  color: #666666;
+}
+.message_area p{ padding:10px; border:1px #ddd solid}
+.for{ 
+display:block; 
+font-size:14px; 
+color: #666666;
+line-height: 30px;}
+</style>
+</head>
+<body>
+<div class="wrapper">
+<div class="header">
+    <span class="headline">送礼清单</span>
+</div>
+
+<div class="content">
+
+	<p class="top_tips">您将送出以下礼品</p>
+	<div class="order_area gift_list">
+    	<img src="__UPLOAD__/{$goodsInfo['batch_img']}">
+        <p>
+        	<span class="l">{$goodsInfo['batch_name']}<if condition="$goodsInfo['sku_name'] neq ''"><em>[{$goodsInfo['sku_name']}]</em></if></span><span class="r"><i class="redfont">{$gift_num}</i>份</span>
+        </p>
+    </div>
+
+    <div class="tabs">
+    <div class="product-wrap">
+		<if condition="($userBonus gt 0) and ($userBounsList neq null)">
+		<div class="orderFormPrice">
+                    <if condition="$ruleType neq '1'"><span>本次可用红包</span><em>￥</em><em><?php echo $userBonus;?></em><span>元</span></if> <a href="javascript:void(0)" class="btn-choosePaper">选择红包</a>
+		</div>
+		</if>
+			<div id="choosePaperready" class="orderFormPrice dn">
+				<span>您已选择:</span><em>￥</em><em class="choosePaperready"></em>红包
+			</div>
+			<div id="choosePaper" class="dn">
+                            <if condition="$ruleType neq '1'"><p class="title no">本次可用红包:<em>￥</em><span class="choosePaperNum" data-val="<?php echo $userBonus;?>"><?php echo $userBonus;?></span>元</p></if>
+				<p class="title">您已选择:<em>￥</em><span class="choosePaperHover" data-val="0">0.00</span>元</p>
+				<div class="choosePaperList">
+					<ul>
+						<?php 
+							foreach($userBounsList as $k=>$val){
+								$i=$k+1;
+						?>
+						<li data-val="<?php echo $val['amount'];?>" data-id="<?php echo $val['id'];?>" onclick="choosePaperli($(this))"><p>红包<?php echo $i;?>:<em>￥<?php echo $val['amount'];?></em></p></li>
+						
+						<?php
+							}								
+						?>                            
+					</ul>
+				</div>
+				<span class="choosePaper-msg">您已选择足够多的红包了!超出部分无效哦</span>
+				<a href="javascript:void(0)" class="btn-ok">确认</a>
+			</div>
+        <div class="colgroup tr">订单合计：<span class="price_new" id="orderVal" data-val="{$gift_num*$goodsInfo['batch_amt']}"><sub>￥</sub>{$gift_num*$goodsInfo['batch_amt']}</span></div>
+    </div>
+    <div class="divbar"></div>
+    </div>
+    
+    <p class="top_tips">选择支付方式</p>
+    <form name="theform" id="theform"  method="post" action="{:U('Label/Present/pay_gift')}">
+	<input type="hidden" name="bless_msg" value="{$bless_msg}">
+	<input type="hidden" name="bless_name" value="{$bless_name}">
+	<input type="hidden" name="gift_type" value="{$gift_type}">
+	<input type="hidden" name="gift_num" value="{$gift_num}">
+	<input type="hidden" name="rece_phone" value="{$rece_phone_list}">
+	<input type="hidden" name="id" value="{$id}">
+	<input type="hidden" name="bonus_use_id" id="bonus_use_id" value="">
+        <input type="hidden" name="skuInfo" id="skuInfo" value="{$skuInfo}">
+	<input type="hidden" name="saler_id" id="saler_id" value="{$saler_id}">
+	<input type="hidden" name="saler_phone" id="saler_phone" value="{$saler_phone}">
+    <div class="colgroup m4">
+		<eq name="hasPayChannel" value="0">
+			<div class="outbox" style="border-bottom:0">
+			<p>无有效支付方式</p>
+			</div>
+		<else />
+			<eq name="wx_flag" value="1">
+				<eq name="payChannelInfo.3" value="1">
+				<div class="outbox" style="border-bottom:0">
+				<input type="radio" name="payment_type" value="3" checked><img src="__PUBLIC__/Label/Image/Shop/logo-wpay.png">
+				</div>
+				</eq>
+			</eq>
+			<eq name="payChannelInfo.1" value="1">
+			<div class="outbox" style="border-bottom:0">
+			<input type="radio" name="payment_type" value="1" <if condition="($payChannelInfo[3] eq 2) or (($payChannelInfo[3] eq 1) and ($wx_flag neq 1))">checked</if> ><img src="__PUBLIC__/Label/Image/Shop/logo-alipay.png">
+			</div>
+			</eq>
+			<eq name="payChannelInfo.2" value="1">
+			<div id="noShowPay" class="outbox" style="border-bottom:0">
+			<input type="radio" name="payment_type" value="2" <if condition="(($payChannelInfo[3] eq 2) and ($payChannelInfo[1] eq 2)) or (($payChannelInfo[1] eq 2) and ($wx_flag neq 1))">checked</if> ><img src="__PUBLIC__/Label/Image/Shop/logo-upay.png">
+			</div>
+			</eq>
+		</eq>
+		<eq name="hasPayChannel" value="1">
+        <a href="javascript:void(0);" class="btn_one" id="pay_gift">确认付款</a>
+		<div class="divbar"></div>
+		</eq>
+		<div class="message_area">
+    		<span class="for">对ta/ta们说：</span>
+			<p>{$bless_msg}</p>
+		</div>
+		<eq name="gift_type" value="2">
+		<p class="top_tips">送予</p>
+			<div class="outbox">
+			<ul>
+				<volist name="rece_phone" id="vo">
+					<li>{$vo}</li>
+				</volist>
+			</ul>
+			</div>
+		</eq>
+        <p class="sweep_tips">1. 支付完成后，您可以将这份礼品分享给您的好友或群里，好友领取后，只需携带生成的凭证到店验证，即可获得您的送礼。</p>
+        <p class="sweep_tips">2. 个人中心可以看到您的送礼信息。</p>
+    </div>
+    
+    </form>
+    </div>
+</div>
+</div>
+<script>
+function popWin(){
+	var html = ['<div class="popwin">',
+				'支付宝支付界面',
+				'<a href="gift_weixin_share.html">确认支付</a>',
+			'</div>'].join('');
+	MsgPop({
+		html:html
+	});
+}
+//弹窗基础
+function closeMsgPop(){
+	$(".msgPop").remove();
+}
+function MsgPop(msg){
+	if(!msg.title){msg.title=""};
+	if(!msg.icon){msg.icon=""}else{msg.icon="<i class='"+msg.icon+"'></i>"};
+	var html = ['<div class="msgPop bg">',
+					'<div class="msgBg">',
+						'<div class="msgTitle">'+msg.title+'<a href="javascript:void(0)" class="close-msgPop" onClick="closeMsgPop()"><i><span>+</span></i></a></div>',
+						'<div class="msgCon">'+msg.icon+msg.html+'</div>',
+					'</div>',
+				'</div>'].join('');
+	$("body").append(html)
+}
+</script>
+</body>
+</html>

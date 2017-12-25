@@ -1,0 +1,922 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>市场调研_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnewsadd.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Wnewsadd_hagen_dazs.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jsScroll.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jscolor/jscolor.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e){
+	PreviewbmAdd();
+});
+$(function(){
+      var ue = UE.getEditor('wap_info',{
+	    	imageUrl:"{:U('LabelAdmin/Upfile/editoImageSave')}",
+	    	imagePath:"__UPLOAD__",
+	    	catcherUrl:"{:U('LabelAdmin/Upfile/getRemoteImage')}",
+	    	catcherPath:"__UPLOAD__",
+	    	initialFrameWidth:340,
+	    	initialFrameHeight:280
+	    });
+	    ue.addListener("contentChange",function(){
+	    	$(".Preview-mainCon-text").html(this.getContent());
+			jsScroll(document.getElementById('iphonePreview'),11, 27, 'divSrollBar');
+	    });
+	$('#sub_button').click(function(){
+	
+        var i = 0;
+        $(".global-input2-choose").each(function(){
+            i++;
+           $(this).find('.qx').val(i);
+        });
+        if($("input[name='is_cj']:checked").val() == '1'){
+             if($("input[name='jp_set_type']:checked").val() == '1'){
+                if(parseInt($('#day_goods_count').val()) > parseInt($('#goods_count').val()) ){
+                    alert('每日奖品限量不能大于总奖品数！');
+                    $('#goods_count').focus();
+                    return false;
+                }
+                
+             }else if($("input[name='jp_set_type']:checked").val() == '2'){
+                
+                if(parseInt($('#day_goods_count_1').val()) > parseInt($('#goods_count_1').val()) ){
+                    alert('每日奖品限量不能大于总奖品数！');
+                    $('#goods_count_1').focus();
+                    return false;
+                }
+                if(parseInt($('#day_goods_count_2').val()) > parseInt($('#goods_count_2').val()) ){
+                    alert('每日奖品限量不能大于总奖品数！');
+                    $('#goods_count_2').focus();
+                    return false;
+                }
+               
+               if(parseInt($('#day_goods_count_3').val()) > parseInt($('#goods_count_3').val()) ){
+                    alert('每日奖品限量不能大于总奖品数！');
+                    $('#goods_count_3').focus();
+                    return false;
+                   
+                }
+                
+             }
+            
+        }
+        
+        if(!ue.getContent()){
+        	$('#wap_tip').validationEngine('showPrompt', '不能为空','error','topRight',true);
+        }else{
+        	$('#wap_tip').validationEngine('hide');
+        }
+        
+	    
+		var arr_i = 0;
+		var arr_s = new Array();
+		$('input[name^=q_]').each(function(){
+				var str = $(this).attr('name');
+				var num = str.substr(2,str.length-2);
+				arr_s[arr_i] = num;
+				arr_i++;
+		  });
+		
+		var s = Math.max.apply(null, arr_s);
+		$("#pro_num").val(s);
+        //手动提交需要手动同步编辑器数据
+        ue.sync();
+		$("#theform").validationEngine().submit();
+    }) ;
+    $('#aaaa').click(function(){autoSave()})  //测试保存
+    
+    var sns_type = '';
+    $("input[name='sns_type[]']:checkbox").each(function () {
+        if ($(this).attr("checked")) {
+            sns_type=$(this).val();
+            $("#iphonePreview-one .Preview-share").show();
+			$("#iphonePreview-one .Preview-share li:eq("+sns_type+")").show();
+			$("#iphonePreview-two .Preview-share").show();
+			$("#iphonePreview-two .Preview-share li:eq("+sns_type+")").show();
+			$("#iphonePreview-three .Preview-share").show();
+			$("#iphonePreview-three .Preview-share li:eq("+sns_type+")").show();
+        }
+    })
+    
+    $('#cancel').click(function(){
+        var id = '{$org_id}';
+        var url = "{:U('del_tdraft')}";
+        art.dialog({width:"200px",title:"提示",lock:true,content:'是否放弃本次编辑',
+			okVal: '确认',
+			ok: function () {
+				$.ajax({
+					   type: "POST",
+					   url: url,
+                       data: "id="+id
+				});
+                window.location.href = "{:U('MarketActive/Activity/MarketList')}";
+			},
+			cancel: true
+        })
+    })
+})
+function checkCodeLogo(){
+    if($("#resp_code_img").val() == '')
+        {
+            return "请上传二维码Logo";
+        }
+}
+function checkActLogo(){
+    if($("#resp_log_img").val() == '')
+        {
+            return "请上传wap页面Logo";
+        }
+}
+function checkProblem(){
+	var sum = $(".global-input2-choose").length; //问题
+    if(sum <=0)
+    return '必需设置问题';
+}
+//每隔5分钟自动保存
+setInterval(autoSave,1000*60*5);
+var autoSave = function(){
+    var data = $("#theform").serialize();
+    $.ajax({
+       type: "POST",
+       url: "{:U('LabelAdmin/Bm/autoSave')}",
+       data: data,
+       success: function(result){
+           if (result) {
+               dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>已自动保存到草稿</div>",fixed: true,padding:0,lock:true,time:2});
+           }
+       },
+       dataType: "json"
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            	<div class="bread">
+                    <div class="bread-con fn">
+                        <include file="./Home/Tpl/LabelAdmin/Path_index.html" />
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <!-- 测试保存 -->
+                <button id="aaaa">测试保存</button>
+                <!-- 测试保存 -->
+                <eq name="org_id" value='0'>
+                <form action="{:U('LabelAdmin/Bm/addSubmit')}" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+                <else />
+                <form action="{:U('LabelAdmin/Bm/editSubmit')}" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+                </eq>
+				<input type='hidden' name='pro_num' id='pro_num' val='0'>
+                <input type="hidden" name="id" value="{$org_id}" />
+                <div class="global-input2 fn w2 pb30">
+                <ul class="newsadd-title">活动基础信息</ul>
+                    <ul>
+                        <li class="global-input2-name">*&nbsp;活动名称：</li>
+                        <li class="global-input2-input"><input name="name" id="name"  type="text"  class="validate[required,optional,maxSize[20]] textbox w300"  value="{$info.name}"/></li>
+                    </ul>
+                    <ul>
+                        <li class="global-input2-name">*&nbsp;活动时间：</li>
+                        <li class="global-input2-input"><input name="start_time" id="start_time" type="text"  class="validate[required] textbox w130" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})"  value='{$info.start_time}'/><span class="mlr10">-</span><input name="end_time" id="end_time" type="text"  class="validate[required] textbox w130"  onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})"  value='{$info.end_time}'/></li>
+                    </ul>
+                    <ul class="newsadd-title">活动界面设计</ul>
+                     <include file="./Home/Tpl/LabelAdmin/Bg_add.html" />
+                    <include file="./Home/Tpl/LabelAdmin/Name_add.html" />
+
+                    <include file="./Home/Tpl/LabelAdmin/Logo_add.html" />
+                    <ul>
+                        <li class="global-input2-name">*&nbsp;活动页面标题：</li>
+                        <li class="global-input2-input"><input name="wap_title" id="wap_title" maxlength="20" type="text"  class="validate[required,optional,maxSize[20]]] textbox w300" id="wap_titile" value='{$info.wap_title}' /></li>
+                    </ul>
+                     <ul>
+                        <li class="global-input2-name">*&nbsp;活动页面内容：</li>
+                        <li class="global-input2-input" id="wap_tip">
+                        <textarea name="wap_info" id="wap_info">{$info.wap_info}</textarea>
+                        </li>
+                    </ul>
+                    
+                    <ul>
+                        <li class="global-input2-name">*&nbsp;信息采集字段：</li>
+                        <li class="global-input2-input fn">
+                        <?php $i=0; foreach($bm_type_arr as  $key=>$v) { $i++; if($key=='13' && !$can_use_picupload) continue; ?>
+                            <input name="select_type[]" type="checkbox" value="<?php echo $key;?>" class="validate[minCheckbox[1]] wap_check" <?php if(in_array($key,$info['select_type'])) echo checked?>/>
+                            <?php if(in_array($key, array('10','11','12','18','19','20'))){
+                                $gwyl_flag = ($key==10 && C('GWYL_NODE') ==$userInfo['node_id']);
+                                $value =$gwyl_flag ? '小票号': $v;
+                                if(!in_array($key,$info['select_type'])) $others = 'onfocus="$(this).val(\'\')"';
+                                if($gwyl_flag) 'readonly';
+                                ?>
+                                <input name="defined<?php echo $key;?>" type="text" class="wap_check_title textbox w50 ml5" value="<?php echo $value;?>" <?php echo $others;?> />
+                            <?php }else{ ?>
+                                <p class="wap_check_title ml5"><?php echo $v;?></p>
+                            <?php }?>
+                            <?php  if($i%3 ==0)echo '&nbsp;&nbsp;&nbsp;<br />'; 
+                        }?>
+                        
+             
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="global-input2-name">&nbsp;设置问题：</li>
+                        <li class="global-input2-input">
+                            <input type="button" id="addmul1" value="单选题" class="btn_inner" />
+                            <input type="button" value="多选题" id="addmul2" class="btn_inner ml5" />
+                            <input type="button" value="问答题" id="addmul3" class="btn_inner ml5" />
+                            <input type="button" value="地图调研" id="addmul4_1" class="btn_inner ml5" />
+                            <p id="addmulad">选择题目类型</p>
+                            
+                            <?php $sort = $info['question_count'];?>
+                            <foreach name="info.question" item="val">
+                            <switch name="val.type" >
+                                <case value="1" >
+                                    <div id="addmulada{$sort}" class="global-input2-choose addmulad1" style="display: block;"><div class="title"><p>单<br />选<br />题</p></div><div class="input">
+                                    <p><input name="q_{$sort+1}" type="text" id="page_title1" class="validate[required] previewbmtext textbox w280 mt10 fruit" value="{$val.questions}"/></p>
+                                    <for start='0' end="$val['count']">
+                                    <p class="mul1 mt5"><input value="<?php echo $val['answer'][$i];?>" id="a_{$i+1}_{$sort+1}" name="a_{$sort+1}[]" type="text" class="validate[required] previewbmtext textbox w260 fruit"/></p>
+                                    </for>
+                                    <a href="javascript:void(0)" class="input-addone fn" id="addone_{$key}" data-type="addmu11" data-num="{$i}" data-rel="{$key}"><i></i>增加1条答案（最多50条）</a>
+                                    </div>
+                                    <div class="del">
+                                    <a onclick="upchoose({$sort})" class='btn-up a-hide'>上移</a>
+                                    <a onclick="delchoose(addmulada{$sort},{$sort})" class="btn-del a-hide" title="删除"></a>
+                                    <a onclick="upchoose($('#addmuladb{$sort}'),{$sort})" class='btn-down a-hide'>下移</a>
+                                    <input type="hidden" name="t_{$sort+1}" value="1"/>
+                                    <input type="hidden" class="qx" name="sort_{$sort+1}"/>
+                                    </div></div>
+                                </case>
+                                <case value="2">
+                                    <div id="addmuladb{$sort}" class="global-input2-choose addmulad2" style="display: block;"><div class="title"><p>多<br />选<br />题</p></div><div class="input">
+                                    <p><input name="q_{$sort+1}" type="text" id="page_title1" class="validate[required] previewbmtext textbox w280 mt10 fruit" value="{$val.questions}"/></p>  
+                                    <for start='0' end="$val['count']">
+                                    <p class="mul2 mt5"><input name="a_{$sort+1}[]" type="text" id="a_{$i+1}_{$sort+1}" class="validate[required] previewbmtext textbox w260 fruit" value="<?php echo $val['answer'][$i];?>"/></p>            
+                                    </for>
+                                    <a href="javascript:void(0)" class="input-addone fn" id="addone_{$key}" data-type="addmu12" data-num="{$i}" data-rel="{$key}"><i></i>增加1条答案（最多50条）</a>
+                                    </div><div class="del">
+                                    <a onclick="upchoose({$sort})" class='btn-up a-hide'>上移</a>
+                                    <a onclick="delchoose(addmuladb{$sort},{$sort})" class="btn-del a-hide" title="删除"></a>
+                                     <a onclick="upchoose($('#addmuladb{$sort}'),{$sort})" class='btn-down a-hide'>下移</a>
+                                    <input type="hidden" name="t_{$sort+1}" value="2"/> <input type="hidden" class="qx" name="sort_{$sort+1}"/>
+                                    </div></div>
+                                </case>
+                                <case value="3">
+                                    <div id="addmuladc{$sort}" class="global-input2-choose addmulad3" style="display: block;"><div class="title"><p>问<br />答<br />题</p></div><div class="input">
+                                    <p><input name="q_{$sort+1}" type="text" id="page_title1" class="validate[required] previewbmtext textbox w225 mt10 fruit" value="{$val.questions}"/></p>
+                                    <p class="mul3 mt5"><textarea readonly="" class="texttextarea w200 h126 fruit"></textarea></p></div><div class="del">
+                                    <a onclick="upchoose({$sort})" class='btn-up a-hide'>上移</a>
+                                    <a onclick="delchoose(addmuladc{$sort},{$sort})" class="btn-del a-hide" title="删除"></a>
+                                     <a onclick="upchoose($('#addmuladb{$sort}'),{$sort})" class='btn-down a-hide'>下移</a>
+                                    <input type="hidden" name="t_{$sort+1}" value="3"/>
+                                     <input type="hidden" class="qx" name="sort_{$sort+1}"/>
+                                    </div></div>
+                                </case>
+                                <case value="4">
+                                    <div id="addmuladd{$sort}" class="global-input2-choose addmulad4" style="display: block;"><div class="title"><p>地<br />图<br />调<br />研</p></div><div class="input">
+                                    <p><input name="q_{$sort+1}" type="text" id="page_title1" class="validate[required] textbox w225 mt10 fruit" value="{$val.questions}"/></p>
+                                    <p class="mul3 mt5 mb5"><img class="w260" src="./Home/Public/Image/dm_map_thumb.png"></p></div><div class="del">
+                                    <a onclick="upchoose({$sort})" class='btn-up a-hide'>上移</a>
+                                    <a onclick="delchoose(addmuladd{$sort},{$sort})" class="btn-del a-hide" title="删除"></a>
+                                    <a onclick="upchoose($('#addmuladb{$sort}'),{$sort})" class='btn-down a-hide'>下移</a>
+                                    <input type="hidden" name="t_{$sort+1}" value="4"/>
+                                     <input type="hidden" class="qx" name="sort_{$sort+1}" value="{$sort}"/>
+                                    </div></div>
+                                </case>
+                            </switch>
+                            <?php $sort--;?>
+                            </foreach>
+                            
+                        </li>
+                    </ul>
+                    
+                    <ul>
+                        <li class="global-input2-name">SNS分享：</li>
+                        <li class="global-input2-input">
+                        <?php 
+                        $sns_arr = C('SNS_ARR');
+                        foreach($sns_arr as $sns_k=>$sns_v){
+                            if($sns_k>4) continue;
+                        ?>
+                        <input name="sns_type[]" type="checkbox" value="<?php echo $sns_k?>" <?php if(in_array($sns_k,$info['sns_type'])) echo checked?> /><p class="ml5"><?php echo $sns_v?></p>
+                        <?php }?>
+                        <br /><p class="font-12-cc">勾选后，允许消费者将您的营销活动分享给他的社交网络好友</p>
+                        </li>
+                            
+                    </ul>
+                   
+                    <ul>
+                        <li class="global-input2-name"></li>
+                        <li class="global-input2-input">
+                            <a href="javascript:;" id="sub_button" title="下一步" class="btn-all w110">下一步</a>
+                            <a href="javascript:history.go(-1)" title="取消" class="btn-all-del w110 ml10">取消</a>
+                    </ul>
+                </div>
+                <div  class="activityread_iphone tc mt70">
+                    <div class="activityread_iphone_con">
+                        <div id="iphonePreview">
+                            <div id="iphonePreview-con">
+                                <!-- ---------预览--------- -->
+                                <div id="iphonePreview-one">
+                                    <div id="Preview-wrapper">
+                                        <div id="Preview-container">
+                                            <div id="Preview-main">
+                                                <div class="Preview-mainTop">
+                                                    <div class="Preview-top-img">
+                                                        <eq name="info.bg_style" value='1'>
+                                                        <img src="__PUBLIC__/Label/Image/topbg-sOne.png" class="Preview-vip-img" />
+                                                        </eq>
+                                                        <eq name="info.bg_style" value='2'>
+                                                        <img src="__PUBLIC__/Label/Image/topbg-sTwo.png" class="Preview-vip-img" />
+                                                        </eq>
+                                                        <eq name="info.bg_style" value='5'>
+                                                        <img src="__PUBLIC__/Label/Image/topbg-sFour.png" class="Preview-vip-img" />
+                                                        </eq>
+                                                        <eq name="info.bg_style" value='3'>
+                                                        <img src="{:get_upload_url($info['resp_bg_img'])}" class="Preview-vip-img" />
+                                                        </eq>
+                                                    </div>
+                                                </div>
+                                                <div id="Preview-mainCon" class="Preview-mainCon fn">
+                                                    <div class="Preview-top-title">{$node_name}</div>
+                                                    <div class="Preview-logo-bg">
+                                                    <div class="Preview-logo-con"><img src="<?php echo APP_PATH.'Upload/'.$node_logo;?>"/></div>
+                                                    </div>
+                                                    <div class="Preview-multimedia">
+                                                        <div class="Preview-voice_button" style="display:none;"><a href="javascript:void(0)" class="a-hide">音乐</a></div>
+                                                        <div class="Preview-video_button" style="display:none;" ><a href="javascript:void(0)" class="a-hide" target="_blank">视频</a></div>
+                                                    </div>
+                                                    <div class="Preview-mainCon-contenter">
+                                                        <div class="Preview-mainCon-title">{$info.wap_title}</div>
+                                                        <div class="Preview-mainCon-text">欢迎使用旺财市场调研</div>
+                                                        <div class="Preview-mainCon-contenter-bg">
+                                                            <div class="PreviewBm-mainForm">
+                                                                <div class="PreviewBm-baseForm">
+                                                                    <foreach name="bm_type_arr" item="val">
+                                                                        <li class="Preview-base-{$key} <notin name='key' value="$info['select_type']">dn</notin>">
+                                                                        <p>{$val}：</p>
+                                                                        <switch name="key" >
+                                                                        <case value="3">
+                                                                            <input type="radio" checked="checked" class="PreviewBm-sOne-Radio" id="sex-boy">
+                                                                            <label for="sex-boy">&nbsp;男</label>
+                                                                            <input type="radio" class="PreviewBm-sOne-Radio" id="sex-girl">
+                                                                            <label for="sex-girl">&nbsp;女</label>
+                                                                        </case>
+                                                                        <case value="5">
+                                                                            <select class="PreviewBm-sOne-select">
+                                                                                <option value="">请选择</option>
+                                                                                <option value="小学">小学</option>
+                                                                                <option value="初中">初中</option>
+                                                                                <option value="高中">高中</option>
+                                                                                <option value="专科">专科</option>
+                                                                                <option value="本科">本科</option>
+                                                                                <option value="硕士">硕士</option>
+                                                                                <option value="博士">博士</option>
+                                                                                <option value="其他">其他</option>
+                                                                            </select>
+                                                                        </case>
+                                                                        <case value="15">
+                                                                            <select class="PreviewBm-sOne-select">
+                                                                                <option value="">请选择</option>
+                                                                                <option value="石家庄">石家庄</option>
+                                                                                <option value="...">...</option>
+                                                                            </select>
+                                                                        </case>
+                                                                        <case value="13">
+                                                                            <img src="__PUBLIC__/Label/Image/bm_upload.gif" height="80%" />
+                                                                        </case>
+                                                                        <default /><input type="text" class="PreviewBm-sOne-Input">
+                                                                        </switch>
+                                                                        </li>
+                                                                    </foreach>
+                                                                </div>
+                                                                
+                                                                <div class="PreviewBm-bmForm">
+                                                                    <foreach name="info.question2" item="val">
+                                                                    <switch name="val.type" >
+                                                                    <case value="1" >
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>单选题:</b><span>{$val.questions}</span></h3></li>
+                                                                            <for start='0' end="$val['count']">
+                                                                            <li><input type="radio" class="PreviewBm-sOne-Radio" ><label>{$val['answer'][$i]}<?php if(!$val['answer'][$i]) echo '为空则不显示'?></label></li>
+                                                                            </for>
+                                                                        </div>
+                                                                    </case>
+                                                                    <case value="2">
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>多选题:</b><span>{$val.questions}</span></h3></li>
+                                                                            <for start='0' end="$val['count']">
+                                                                            <li><input type="checkbox" class="PreviewBm-sOne-checkbox" ><label>{$val['answer'][$i]}<?php if(!$val['answer'][$i]) echo '为空则不显示'?></label></li>
+                                                                            </for>
+                                                                        </div>
+                                                                    </case>
+                                                                    <case value="3">
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>问答题:</b><span>{$val.questions}</span></h3></li>
+                                                                            <li><textarea class="PreviewBm-sOne-Textarea"></textarea></li>
+                                                                        </div>
+                                                                    </case>
+                                                                    <case value="4">
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>地图调研:</b><span>{$val.questions}</span></h3></li>
+                                                                            <li><img class="w260" src="./Home/Public/Image/dm_map_thumb.png"></li>
+                                                                        </div>
+                                                                    </case>
+                                                                    </switch>
+                                                                    </foreach>
+                                                                    <div id="PreviewBm-bmForm-bigin" style="display:none;"></div>
+                                                                </div>
+                                                                <div class="PreviewBm-content_button">
+                                                                    <input type="button" value="{$info['sub_name']}" class="Preview-input_button">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="Preview-share dn">
+                                                  <ul class="Preview-share_list">
+                                                      <li>分享到：</li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/sinaweibo.png"/></a></li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/tencentweibo.png"/></a></li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/qzone.png"/></a></li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/renren.png"/></a></li>
+                                                    </ul>
+                                                </div>
+                                                <div id="Preview-footer">
+                                                    <img src="__PUBLIC__/Label/Image/footer-logo.png" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 分隔两个预览- -->
+                                <div id="iphonePreview-two">
+                                    <div id="Preview-wrapper">
+                                        <div id="Preview-container">
+                                            <div id="Preview-main">
+                                                <div class="Preview-mainTop">
+                                                    <div class="Preview-top-img">
+                                                        <eq name="info.bg_style" value='1'>
+                                                        <img src="__PUBLIC__/Label/Image/topbg-sOne.png" class="Preview-vip-img" />
+                                                        </eq>
+                                                        <eq name="info.bg_style" value='2'>
+                                                        <img src="__PUBLIC__/Label/Image/topbg-sTwo.png" class="Preview-vip-img" />
+                                                        </eq>
+                                                        <eq name="info.bg_style" value='5'>
+                                                        <img src="__PUBLIC__/Label/Image/topbg-sFour.png" class="Preview-vip-img" />
+                                                        </eq>
+                                                        <eq name="info.bg_style" value='3'>
+                                                        <img src="{:get_upload_url($info['resp_bg_img'])}" class="Preview-vip-img" />
+                                                        </eq>
+                                                    </div>
+                                                </div>
+                                                <div id="Preview-mainCon" class="Preview-mainCon fn">
+                                                    <div class="Preview-top-title">{$node_name}</div>
+                                                    <div class="Preview-logo-bg">
+                                                    <div class="Preview-logo-con"><img src="<?php echo APP_PATH.'Upload/'.$node_logo;?>"/></div>
+                                                    </div>
+                                                    <div class="Preview-multimedia">
+                                                        <div class="Preview-voice_button" style="display:none;"><a href="javascript:void(0)" class="a-hide">音乐</a></div>
+                                                        <div class="Preview-video_button" style="display:none;" ><a href="javascript:void(0)" class="a-hide" target="_blank">视频</a></div>
+                                                    </div>
+                                                    <div class="Preview-mainCon-contenter">
+                                                        <div class="Preview-mainCon-title">{$info.wap_title}</div>
+                                                        <div class="Preview-mainCon-text">欢迎使用旺财市场调研</div>
+                                                        <div class="Preview-mainCon-contenter-bg">
+                                                            <div class="PreviewBm-mainForm">
+                                                                <div class="PreviewBm-baseForm">
+                                                                    <foreach name="bm_type_arr" item="val">
+                                                                        <li class="Preview-base-{$key} <notin name='key' value="$info['select_type']">dn</notin>">
+                                                                        <p>{$val}：</p>
+                                                                        <switch name="key" >
+                                                                        <case value="3">
+                                                                            <input type="radio" checked="checked" class="PreviewBm-sOne-Radio" id="sex-boy">
+                                                                            <label for="sex-boy">&nbsp;男</label>
+                                                                            <input type="radio" class="PreviewBm-sOne-Radio" id="sex-girl">
+                                                                            <label for="sex-girl">&nbsp;女</label>
+                                                                        </case>
+                                                                        <case value="5">
+                                                                            <select class="PreviewBm-sOne-select">
+                                                                                <option value="">请选择</option>
+                                                                                <option value="小学">小学</option>
+                                                                                <option value="初中">初中</option>
+                                                                                <option value="高中">高中</option>
+                                                                                <option value="专科">专科</option>
+                                                                                <option value="本科">本科</option>
+                                                                                <option value="硕士">硕士</option>
+                                                                                <option value="博士">博士</option>
+                                                                                <option value="其他">其他</option>
+                                                                            </select>
+                                                                        </case>
+                                                                        <case value="15">
+                                                                            <select class="PreviewBm-sOne-select">
+                                                                                <option value="">请选择</option>
+                                                                                <option value="石家庄">石家庄</option>
+                                                                                <option value="...">...</option>
+                                                                            </select>
+                                                                        </case>
+                                                                        <case value="13">
+                                                                            <img src="__PUBLIC__/Label/Image/bm_upload.gif" height="80%" />
+                                                                        </case>
+                                                                        <default /><input type="text" class="PreviewBm-sOne-Input">
+                                                                        </switch>
+                                                                        </li>
+                                                                    </foreach>
+                                                                </div>
+                                                                
+                                                                <div class="PreviewBm-bmForm">
+                                                                    <foreach name="info.question2" item="val">
+                                                                    <switch name="val.type" >
+                                                                    <case value="1" >
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>单选题:</b><span>{$val.questions}</span></h3></li>
+                                                                            <for start='0' end="$val['count']">
+                                                                            <li><input type="radio" class="PreviewBm-sOne-Radio" ><label>{$val['answer'][$i]}<?php if(!$val['answer'][$i]) echo '为空则不显示'?></label></li>
+                                                                            </for>
+                                                                        </div>
+                                                                    </case>
+                                                                    <case value="2">
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>多选题:</b><span>{$val.questions}</span></h3></li>
+                                                                            <for start='0' end="$val['count']">
+                                                                            <li><input type="checkbox" class="PreviewBm-sOne-checkbox" ><label>{$val['answer'][$i]}<?php if(!$val['answer'][$i]) echo '为空则不显示'?></label></li>
+                                                                            </for>
+                                                                        </div>
+                                                                    </case>
+                                                                    <case value="3">
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>问答题:</b><span>{$val.questions}</span></h3></li>
+                                                                            <li><textarea class="PreviewBm-sOne-Textarea"></textarea></li>
+                                                                        </div>
+                                                                    </case>
+                                                                    <case value="4">
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>地图调研:</b><span>{$val.questions}</span></h3></li>
+                                                                            <li><img class="w260" src="./Home/Public/Image/dm_map_thumb.png"></li>
+                                                                        </div>
+                                                                    </case>
+                                                                    </switch>
+                                                                    </foreach>
+                                                                    <div id="PreviewBm-bmForm-bigin" style="display:none;"></div>
+                                                                </div>
+                                                                <div class="PreviewBm-content_button">
+                                                                    <input type="button" value="{$info['sub_name']}" class="Preview-input_button">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="Preview-share dn">
+                                                  <ul class="Preview-share_list">
+                                                      <li>分享到：</li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/sinaweibo.png"/></a></li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/tencentweibo.png"/></a></li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/qzone.png"/></a></li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/renren.png"/></a></li>
+                                                    </ul>
+                                                </div>
+                                                <div id="Preview-footer">
+                                                    <img src="__PUBLIC__/Label/Image/footer-logo.png" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ---------预览--------- -->
+                                <div id="iphonePreview-three">
+                                    <div id="Preview-wrapper">
+                                        <div id="Preview-container">
+                                            <div id="Preview-main">
+                                                <div class="Preview-mainTop">
+                                                    <div class="Preview-top-img">
+                                                        <eq name="info.bg_style" value='1'>
+                                                        <img src="__PUBLIC__/Label/Image/topbg-sOne.png" class="Preview-vip-img" />
+                                                        </eq>
+                                                        <eq name="info.bg_style" value='2'>
+                                                        <img src="__PUBLIC__/Label/Image/topbg-sTwo.png" class="Preview-vip-img" />
+                                                        </eq>
+                                                        <eq name="info.bg_style" value='5'>
+                                                        <img src="__PUBLIC__/Label/Image/topbg-sFour.png" class="Preview-vip-img" />
+                                                        </eq>
+                                                        <eq name="info.bg_style" value='3'>
+                                                        <img src="{:get_upload_url($info['resp_bg_img'])}" class="Preview-vip-img" />
+                                                        </eq>
+                                                    </div>
+                                                </div>
+                                                <div id="Preview-mainCon" class="Preview-mainCon fn">
+                                                    <div class="Preview-top-title">{$node_name}</div>
+                                                    <div class="Preview-logo-bg">
+                                                    <div class="Preview-logo-con"><img src="<?php echo APP_PATH.'Upload/'.$node_logo;?>"/></div>
+                                                    </div>
+                                                    <div class="Preview-multimedia">
+                                                        <div class="Preview-voice_button" style="display:none;"><a href="javascript:void(0)" class="a-hide">音乐</a></div>
+                                                        <div class="Preview-video_button" style="display:none;" ><a href="javascript:void(0)" class="a-hide" target="_blank">视频</a></div>
+                                                    </div>
+                                                    <div class="Preview-mainCon-contenter">
+                                                        <div class="Preview-mainCon-title">{$info.wap_title}</div>
+                                                        <div class="Preview-mainCon-text">欢迎使用旺财市场调研</div>
+                                                        <div class="Preview-mainCon-contenter-bg">
+                                                            <div class="PreviewBm-mainForm">
+                                                                <div class="PreviewBm-baseForm">
+                                                                    <foreach name="bm_type_arr" item="val">
+                                                                        <li class="Preview-base-{$key} <notin name='key' value="$info['select_type']">dn</notin>">
+                                                                        <p>{$val}：</p>
+                                                                        <switch name="key" >
+                                                                        <case value="3">
+                                                                            <input type="radio" checked="checked" class="PreviewBm-sOne-Radio" id="sex-boy">
+                                                                            <label for="sex-boy">&nbsp;男</label>
+                                                                            <input type="radio" class="PreviewBm-sOne-Radio" id="sex-girl">
+                                                                            <label for="sex-girl">&nbsp;女</label>
+                                                                        </case>
+                                                                        <case value="5">
+                                                                            <select class="PreviewBm-sOne-select">
+                                                                                <option value="">请选择</option>
+                                                                                <option value="小学">小学</option>
+                                                                                <option value="初中">初中</option>
+                                                                                <option value="高中">高中</option>
+                                                                                <option value="专科">专科</option>
+                                                                                <option value="本科">本科</option>
+                                                                                <option value="硕士">硕士</option>
+                                                                                <option value="博士">博士</option>
+                                                                                <option value="其他">其他</option>
+                                                                            </select>
+                                                                        </case>
+                                                                        <case value="15">
+                                                                            <select class="PreviewBm-sOne-select">
+                                                                                <option value="">请选择</option>
+                                                                                <option value="石家庄">石家庄</option>
+                                                                                <option value="...">...</option>
+                                                                            </select>
+                                                                        </case>
+                                                                        <case value="13">
+                                                                            <img src="__PUBLIC__/Label/Image/bm_upload.gif" height="80%" />
+                                                                        </case>
+                                                                        <default /><input type="text" class="PreviewBm-sOne-Input">
+                                                                        </switch>
+                                                                        </li>
+                                                                    </foreach>
+                                                                </div>
+                                                                
+                                                                <div class="PreviewBm-bmForm">
+                                                                    <foreach name="info.question2" item="val">
+                                                                    <switch name="val.type" >
+                                                                    <case value="1" >
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>单选题:</b><span>{$val.questions}</span></h3></li>
+                                                                            <for start='0' end="$val['count']">
+                                                                            <li><input type="radio" class="PreviewBm-sOne-Radio" ><label>{$val['answer'][$i]}<?php if(!$val['answer'][$i]) echo '为空则不显示'?></label></li>
+                                                                            </for>
+                                                                        </div>
+                                                                    </case>
+                                                                    <case value="2">
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>多选题:</b><span>{$val.questions}</span></h3></li>
+                                                                            <for start='0' end="$val['count']">
+                                                                            <li><input type="checkbox" class="PreviewBm-sOne-checkbox" ><label>{$val['answer'][$i]}<?php if(!$val['answer'][$i]) echo '为空则不显示'?></label></li>
+                                                                            </for>
+                                                                        </div>
+                                                                    </case>
+                                                                    <case value="3">
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>问答题:</b><span>{$val.questions}</span></h3></li>
+                                                                            <li><textarea class="PreviewBm-sOne-Textarea"></textarea></li>
+                                                                        </div>
+                                                                    </case>
+                                                                    <case value="4">
+                                                                        <div id="choseq_{$key+2}" class="PreviewBm-question">
+                                                                            <li><hr><h3><b>地图调研:</b><span>{$val.questions}</span></h3></li>
+                                                                            <li><img class="w260" src="./Home/Public/Image/dm_map_thumb.png"></li>
+                                                                        </div>
+                                                                    </case>
+                                                                    </switch>
+                                                                    </foreach>
+                                                                    <div id="PreviewBm-bmForm-bigin" style="display:none;"></div>
+                                                                </div>
+                                                                <div class="PreviewBm-content_button">
+                                                                    <input type="button" value="{$info['sub_name']}" class="Preview-input_button">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="Preview-share dn">
+                                                  <ul class="Preview-share_list">
+                                                      <li>分享到：</li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/sinaweibo.png"/></a></li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/tencentweibo.png"/></a></li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/qzone.png"/></a></li>
+                                                      <li class="dn"><a href=""><img src="__PUBLIC__/Label/Image/renren.png"/></a></li>
+                                                    </ul>
+                                                </div>
+                                                <div id="Preview-footer">
+                                                    <img src="__PUBLIC__/Label/Image/footer-logo.png" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <!-- ---------预览结束--------- -->
+                                <div>
+                                </div>
+                                <script type="text/javascript">
+                                    jsScroll(document.getElementById('iphonePreview'),11, 27, 'divSrollBar');
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>
+<script>
+
+
+    $("input[name=is_music]").change(function(){
+		if($(this).val() == '1'){
+			$('#logo-upload3').show();
+		}else{
+            $('#resp_music').val('');
+			$('#logo-upload3').hide();
+		}
+	});
+     
+   
+//文件上传
+function ajaxFileUpload(imgid,hiddenid,showid,url){
+var dialog = art.dialog({title:false,fixed: true,padding:0});
+$.ajaxFileUpload
+({
+	url:url,
+	secureuri:false,
+	fileElementId:imgid,
+	dataType: 'json',
+	data:{name:'logan', id:'id'},
+	success: function (data, status)
+	{
+		if(typeof(data.error) != 'undefined')
+		{
+			if(data.error != '')
+			{
+				dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+			}else{
+
+				var resp = data.msg;
+				if(resp != '0000'){
+					dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+					return false;
+				}else{
+					dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+				}
+				$('#'+hiddenid).val(data.imgurl);
+				if(showid == 'showpage1'){
+					$('#showpic1').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+                    $('#show_jpg').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+                }
+				else if(showid == 'showpage2'){
+					$('#showpic2').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+				}
+				else if(showid == 'showpage3'){
+					$('#showpic3').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+				}
+			}
+		}
+	},
+	error: function (data, status, e)
+	{
+
+		dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+	}
+})
+
+return false;
+}
+
+//function get_scrolltop(){
+//	var ns = (navigator.appName.indexOf("Netscape") != -1);
+//	var diffY;
+//	if (document.documentElement && document.documentElement.scrollTop)
+//	{diffY = document.documentElement.scrollTop;}
+//	else if (document.body){diffY = document.body.scrollTop;}
+//	var Scrolltop = ns ? pageYOffset : diffY;			
+//	if( Scrolltop > 260){
+//		document.getElementById('new_content_fixright').className='new_content_fixright';
+//	}
+//	else if( Scrolltop < 260 ){
+//		document.getElementById('new_content_fixright').className='';	
+//	}
+//	setTimeout("get_scrolltop()",30);
+//}
+//get_scrolltop();
+
+
+	
+	function close_(){
+		var resp = true ;
+		var i = 0;
+		$("#list_ul li").each(function(){
+		  i++;
+		  //问题赋值
+		  $(this).find('.q_class').attr('name','q_'+i);
+		  $(this).find('.a_class').attr('name','a_'+i+'[]');
+		  $(this).find('.t_class').attr('name','t_'+i);
+
+		  //校验数据
+		  if($("input[name='q_"+i+"']").val() == '' || $("input[name='q_"+i+"']").val().length>150){
+			  alert('问题为空或超长！');
+			  $("input[name='q_"+i+"']").focus();
+			  resp = false;
+			  return false;
+		  }
+		  var j = 0;
+		  $("input[name='a_"+i+"[]']").each(function(){
+			j++;
+			if(($(this).val() == '' && j<3) || $(this).val().length>50){
+				alert('选项为空或超长！');
+				$(this).focus();
+				resp = false;
+				return false;
+			}
+		  });
+		  if(resp===false)
+			  return false;
+
+
+		});
+		if(resp)
+			 return true;
+		else
+			return false;
+	}
+	function delete_(){
+		$('#list_ul li').remove();
+	}
+    
+    
+    //文件上传带预览
+	function ajaxFileUploadview(imgid,hiddenid,showid,url){
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.ajaxFileUpload
+		({
+			url:url,
+			secureuri:false,
+			fileElementId:imgid,
+			dataType: 'json',
+			data:{name:'logan', id:'id'},
+			success: function (data, status)
+			{
+				if(typeof(data.error) != 'undefined')
+				{
+					if(data.error != '')
+					{
+						dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+					}else{
+
+						var resp = data.msg;
+						if(resp != '0000'){
+							dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+							return false;
+						}else{
+							dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+						}
+						$('#'+hiddenid).val(data.imgurl);
+                        $("#bg_style").val(3);
+						previewuploadimg('<?php echo APP_PATH.'Upload/wapBg/';?>'+data.imgurl,"background");
+						
+					}
+				}
+			},
+			error: function (data, status, e)
+			{
+
+				dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+			}
+		})
+
+		return false;
+	}
+</script>

@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加本层机构</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wfx.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<style>
+.shopTable tr td{ font-size:14px;word-break: break-all; line-height:24px; padding:7px 15px; text-align:left; word-break:break-all;}
+.shopTable tr:first-child td{ border-top: solid 1px #e3e3e3; }
+.shopTable tr td a{ color:#2e7dc6; line-height:24px;}
+.shopTable tr td a img{ width:104px; height:104px;}
+.shopTable tr td a.licences img{ width:80px; height:58px;}
+.shopTable tr td a span{ padding-left:10px;}
+.shopTable tr td em{ font-size:12px; color:#666}
+.shopTable td:nth-of-type(odd){ background:#fcfcfc; text-align:left; color:#666;width: 20%}
+.shopTable td:nth-of-type(even){ background:#fff; text-align:left; color:#666;width: 30%}
+.shopTable tr.gap td{ border-left:0;border-right:0; background:#FFF}
+.shopTable.editHistory tr td{ text-align:center; background:#FFF}
+.shopTable.editHistory th{border:0; border-top: solid 1px #e3e3e3; font-size:14px}
+.shopTable.editHistory th.first{border-left: solid 1px #e3e3e3;}
+.shopTable.editHistory th.last{border-right: solid 1px #e3e3e3;}
+.errorTip {margin-left: 105px; text-align: left; color: red; }
+</style>
+<script>
+    $(document).ready(function(){
+         $("#sub").click(function() {
+            if($("#staff").val() == '')
+            {
+                $(".errorTip").html("请先上传文件！");
+                return false;
+            }
+            $("#theFrom").ajaxSubmit({
+                    beforeSubmit:function(){
+                        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                    },
+                    success:function(data){
+                        if(data.status == '1'){
+                            dialog.time(2).content("<div class='msg-all-succeed'>提交成功</div>");
+                            art.dialog.opener.reload();
+                            return false;
+                        }else{
+                            dialog.close();
+                            $(".errorTip").html("错误信息：<br/>"+data.info);
+                        }
+                    },
+                    dataType:'json',
+                });
+        });
+         $("#mudle").next().click(function(){
+            $(".errorTip").html("");
+         });
+    })
+</script>
+</head>
+<body>
+<div class="popupWin">
+	<div class="importantTip">
+    	<dl class="tipList" style="font-size:14px;">
+            <dd>如消费者手机号码已被绑定，则导入失败。</dd>
+            <dd>已停用或未审核状态的经销商及销售员，不可绑定。</dd>
+        </dl>
+    </div>
+	<div class="Gform" style="margin-left:-50px;">
+    <form action="{:U('Wfx/KeepCustom/bindAjax')}" method="post" id="theFrom" enctype="multipart/form-data">
+    	<ul>
+        	<li class="Gname">批量导入</li>
+            <li class="Ginput">
+                <div class="Gchoose">
+                    <input type="text" value="">
+                    <a id="mudle" href="javascript:void(0)">模板文件.csv</a><a href="javascript:void(0)" class="Gbtn-papers" title="选择模板"><i><input type="file" id="staff" name="staff"></i></a>
+                </div>
+            </li>
+        </ul>
+        <ul>
+        	<li class="Ginput"><div class="importLink"><a href="{:U('Wfx/KeepCustom/loadTemplate')}">【批量导入模板下载】</a></div>
+            </li>
+        </ul>
+    </form>
+    </div>
+    <p class="errorTip"></p>
+    <div class="tc"><a href="javascript:void(0);" id="sub" class="btn-all btn_primary  mt30 mb30">完成</a></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>翼码旺财添加已创建活动</title>
+<css href="__PUBLIC__/Css/main.css?v=__VR__"/>
+<css href="__PUBLIC__/Css/layout.css?v=__VR__" />
+<css href="__PUBLIC__/Css/module.css?v=__VR__" />
+<css href="__PUBLIC__/Css/Wcanal.css?v=__VR__" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<css href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/jquery.form.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+<script>
+$(function(){
+	$(".btn-updata").click(function(){
+		
+		var dialog;
+        if($("form").validationEngine('validate')){			
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    
+					var picfile=$('#batch_pic').val();					
+					if(picfile==""){
+						$('#batch_pic').validationEngine('showPrompt', '请选择图片！', 'error', true);
+						return false;
+					
+					}
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                       	$('.formcl').hide();
+                        $('.showsaloonmsg').show();
+                        return false;
+                    }else{
+                        art.dialog({content:"<div class='msg-all-error'>"+data.info+"</div>", time:2, lock:true});
+                        //dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                        //$('#msg').html(data.info);
+                    }
+                },
+                dataType:'json'
+            });
+        }
+		
+	})
+	$(".btn-pre").click(function(){
+		$(".global-input4").find("input").val("");
+		$(".global-input4").find("textarea").val("");
+		$("#choose-activity").show();
+		$("#edit-activity").hide();
+	})
+});
+
+  /**
+     * 打开图片上传地址
+     * 格式如下：
+     * {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+     * rationX 图片宽度
+     * rationY 图片长度
+     * 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+     *     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+     * */
+	
+    function uploadImg(url) {
+        console.log(url);
+        var win_width = 600;
+        art.dialog.open(url, {
+            lock: true,
+            title: "选择上传图片",
+            width: win_width,
+            height: win_width / 1.6,
+            id: 'art_upload'
+        });
+    }
+
+
+	/**
+     * 图片上传后回调
+     * 参数：json
+     * d.msg  0000 代表成功
+     * d.error true / false
+     * d.image_name  裁剪后图片名称
+     * d.origin   裁剪*前*图片完整路径
+     * d.absolutepath 裁剪*后*图片完整路径
+     * d.width  图片宽度
+     * d.height 图片高度
+     */
+    function imageInfoCallback(d) {
+        console.log("call back called" + JSON.stringify(d));
+
+        //alert(d.absolutepath);
+		//填充图片
+        $('#hidden_img_tag').attr('src', d.absolutepath);
+		$('#batch_pic').val(d.absolutepath);
+       
+
+        scaleImage(d.width, d.height, 150, '#hidden_img_tag');
+
+        $('#msg-input-imgfile').val(d.absolutepath);
+        $('#thumb_nail').attr('src', d.absolutepath);
+
+    }
+    /**
+     * 调整
+     * @param width
+     * @param height
+     * @param targetWidth 显示的宽度
+     * @param identify 元素id
+     */
+    function scaleImage(width, height, targetWidth, identify) {
+        var scale = width / height;
+        var w = targetWidth;
+        var h = w / scale;
+        $(identify).css('width', w + "px");
+        $(identify).css('height', h + "px");
+    }
+
+</script>
+</head>
+<body class="bgfff" style="overflow:hidden;">
+	<form action="{:U('Home/BaiduMap/submitBatchEdit')}" method="post" name="theform" id="theform">
+   <input type="hidden" name="batch_id" id="batch_id" value="<?php echo $batch_id;?>">
+   <input type="hidden" name="id" id="id" value="<?php echo $id;?>">
+    <input type="hidden" name="batch_type" id="batch_type" value="<?php echo $batch_type;?>">    
+    <div id="edit-activity" class="pt40 formcl">
+    	<div class="global-input4 fn mlr50 plr50">
+        	<ul>
+                <li class="global-input4-name">*&nbsp;活动名称：</li>
+                <li class="global-input4-input"><input name="batch_name" id="batch_name" type="text" class="validate[required,maxSize[32]] textbox w160 mr5" value="<?php echo $BaiduInfo['batch_name']?>"></li>
+            </ul>
+            <ul style="overflow: visible;">
+                <li class="global-input4-name">*&nbsp;展示图片：</li>
+                <li class="global-input4-input" style="overflow: visible;">
+                    <div class="rel l">
+                    <input type="hidden" value="<?php echo $BaiduInfo['batch_pic'];?>" name="batch_pic" id="batch_pic" />
+					<input type="hidden" value="<?php echo $BaiduInfo['batch_pic'];?>" name="batch_pic_old" id="batch_pic_old" />
+
+					<a onclick="return uploadImg('{:U('ImgResize/Resize/index',array('ratioX'=>250,'ratioY'=>250))}')" title="浏览" class="btn-all w60 ">选择</a>
+                    </div>
+                    <div class="cl"></div>
+                    <p class="font-12-cc"> 图片尺寸250px*250px，请上传1M以内的gif,jpg,jpeg,bmp,png图片</p>
+                    <div class="cl"></div>
+					<?php
+					if(!empty($BaiduInfo['batch_pic'])){
+					?>
+                    <img src="__UPLOAD__/Baidu/<?php echo $node_id;?>/<?php echo $BaiduInfo['batch_pic'];?>"  id="hidden_img_tag"  width="230"/>
+					<?php
+					}else{
+					?>
+					<img src=""  id="hidden_img_tag"  width="230"/>
+					<?php
+						}
+					?>
+                </li>
+            </ul>
+        	<ul>
+                <li class="global-input4-name">*&nbsp;活动描述：</li>
+                <li class="global-input4-input"><textarea name="batch_desc" id="batch_desc" class="validate[required] texttextarea w380" style="height:100px;" ><?php echo $BaiduInfo['batch_desc']?></textarea></li>
+            </ul>
+        </div>
+        <div class="cl"></div>
+        <div class="fn tc pb20 pt20">           
+            <a href="javascript:void(0)" class="btn-all w120 btn-updata ml20">确定</a>
+        </div>
+    </div>
+    </form>
+	<div class="dn showsaloonmsg mt70 tc">
+        <p class="font-18-99 pt50">活动编辑成功，次日生效</p>
+        <div class="fn tc mt50">
+            <a href="javascript:art.dialog.close();var win = art.dialog.open.origin;win.location.reload();" class="btn-all w120 btn-ok ml20">确定</a>
+        </div>
+    </div>
+</body>
+</html>

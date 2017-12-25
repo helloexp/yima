@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-我的核验机具</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script>
+$(function(){
+  CityCode({
+    province:$("#province"),//省
+    city:$("#city"),//市
+    town:$("#town"),//区
+    selected:"{:$_POST['province'].$_POST['city'].$_POST['town']}",
+    url:"{:U('LabelAdmin/AjaxCity/index')}"
+  });
+  
+  $("#search").click(function(){
+    $("#theform").submit();
+  });
+  
+  $(".apply_").click(function(){
+         if(!confirm('确认申请撤回“门店名称”的终端设备吗？'))
+          return false;
+         var sId=$(this).attr('storeId');
+     var sStatus=$(this).attr('statusId');
+     var posId=$(this).attr('posId');
+     $.get("{:U('Home/Store/storePosApply')}&sId="+sId+"&sStatus="+sStatus+"&posId="+posId,'',function(d){
+           if(d.codeId == '0000')
+         {
+           result(d.codeText);
+         }else{
+             result_(d.codeText);
+         }
+     },'json');
+  });
+    $(".raisePos").click(function(){
+        var sId=$(this).attr('storeId');
+        var posId=$(this).attr('posId');
+        art.dialog({
+            id:'thisdialog',
+            title:'提示',
+            content:"<div style='width:500px;font-size:14px;'><p class='pb10'>升级后，您的验证终端将具备凭证核销、受理条码支付等全部功能。</p><div class='pb5'>终端资费如下：</div><table class='W-table w1'><tr><th>终端类型</th><th>功能类型</th><th>收费项</th><th>资费</th></tr><td>ER6800</td><td>全部功能</td><td>受理服务费</td><td>{$price}元</td></th></table><p class='pb10 pt10'>确认后，终端资费将从账户余额中扣除。</p></div>",
+            width:500,
+            ok:function(){
+                $.get("{:U('Home/Store/raisePos')}&sId="+sId+"&posId="+posId,'',function(d){
+                    if(d.status == '1')
+                    {
+                        result(d.info);
+                    }else{
+                        result_(d.info);
+                    }
+                },'json');
+            },
+            cancel:function(){
+                art.dialog.list['thisdialog'].close();
+            }
+        });
+        return false;
+        
+    });
+
+  // $('.lookUp').click(function(){
+  //     var sId=$(this).attr('storeId');
+  //     $.get("{:U('Home/Store/storePosApply')}&sId="+sId+"&sStatus="+sStatus+"&posId="+posId,'',function(d){
+  //              if(d.codeId == '0000')
+  //              {
+  //                result(d.codeText);
+  //              }else{
+  //                result_(d.codeText);
+  //              }
+  //        },'json');
+  //     //result_('申请中，请耐心等待。');
+  // });
+  //下载导出数据
+  $("#down").click(function(){
+      var down=$("#theform").serialize();
+      window.location.href="index.php?"+down+"&downtype=1";
+  });
+})
+
+function result_(contents){
+      art.dialog({
+                title:"提示",
+                height:100,
+                content:contents,
+                icon: 'error',
+                lock:true,
+                ok:function(){
+                   //art.dialog.close();
+                   //location.reload();
+                }
+            })
+   }
+   function result(contents){
+      art.dialog({
+        title:"提示",
+        height:100,
+        content:contents,
+        icon: 'succeed',
+        lock:true,
+        ok:function(){
+           art.dialog.close();
+           location.reload();
+        }
+      })
+   }
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+      <include file="./Home/Tpl/Public/Public_header.html" /> 
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav">
+                    <include file="Store:sidenav" leftmenuid="hyjj"/>        
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>我的核验机具 <a class="btn-export" href="javascript:void(0);" id="down"><i></i>导出查询数据</a></h4>
+                    </div>
+                    
+                    <div class="SearchArea fn">
+                    <form id="theform" action="{:U('Home/Store/myTool')}" method="post">
+                      <input type="hidden" name="g" value="{$Think.GROUP_NAME}"/>
+                      <input type="hidden" name="m" value="{$Think.MODULE_NAME}"/>
+                      <input type="hidden" name="a" value="{$Think.ACTION_NAME}"/>
+                        <div class="SearchAreaLeft">
+                            <label>
+                                <span>门店简称</span>
+                                <input type="text" name="jg_name" value="{$_POST['jg_name']}">
+                            </label>
+                            <label>
+                                <span>终端号</span>
+                                <input type="text" name="pos_id"  value="{$_POST['pos_id']}">
+                            </label>
+                            <label>
+                                <span>负责人</span>
+                                <input type="text" name="principal_name"  value="{$_POST['principal_name']}">
+                            </label>
+                            <label>
+                                <select name="pay_status" class="selectbox">
+                                    <option value="">状态</option>
+                                    {:show_arr_opt($pay_status,$post['pay_status'])}
+                                </select>
+                            </label>
+                            <label>
+                                <span>地址</span>
+
+                                <select id='province' name="province" style="width:88px;">
+                                    <option value="">省</option>
+
+                                </select>
+                                <select id='city' name="city_code" style="width:88px;">
+                                    <option value="">市</option>
+                                </select>
+                                <select id='town' name="town_code" style="width:88px;">
+                                    <option value="">区</option>
+
+                                </select>
+
+                                <label>
+                        </div>
+                      <div class="SearchAreaRight">
+                                          <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                                         <!-- <a href="javascript:void(0);" class="more-filter ml10 l">更多筛选</a>-->
+                      </div>
+                    </form>
+                    </div>
+                    <div class="shopCon">
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                    <tbody>
+                    <tr class="th">
+                    <th>门店简称</th>
+                    <th>所在省市区</th>
+                    <th>终端号</th>
+                    <th>开通日期</th>
+                    <th>状态</th>
+                    <th>终端功能</th>
+                    <th>操作</th>
+                    </tr>
+          <?php if($list){ foreach($list as $v){ ?>
+                    <tr class="title">
+                    <td class="hover">{$v.store_short_name}</td>
+                    <td>{$v.province}{$v.city}{$v.town}</td>
+                    <td>{$v.pos_id}</td>
+                    <td><?php echo date('Y-m-d',strtotime($v['add_time'])); ?></td>
+                    <td><?php echo $posStatus[$v['pos_status']]; ?></td>
+          <td><eq name="v['func_type']" value="1">仅可受理条码支付<else />可验证凭证、受理条码支付</eq></td>
+                    <td>
+                    <eq name="v['func_type']" value="1">
+                        <a href="javascript:void(0);" class="raisePos" storeId="{$v.store_id}" posId="{$v.pos_id}">升级</a><br/>
+                    </eq>
+          </td>
+                    </tr>
+                     <?php } }else{ ?>
+           <tr><td colspan="7"><div class="nonedata"></div></td></tr>
+           <?php } ?>         
+                    </table>
+                    <div class="page"><?php echo $page;?></div>
+                    </div>
+                    
+                    
+                
+                </div>
+            </div>
+        </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

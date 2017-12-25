@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>TOP卡券_数据中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/DataCenter.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/highcharts.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/DataCenter.js?v=__VR__"></script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="DataCenter/Data/leftMenu" leftmenuid="topdzj"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn"> 
+                        <h4>TOP卡券</h4>
+                    </div>
+                    <div class="fn">
+                        <div class="WcanalNew-tab mb15">
+                            <input type="hidden" value="1">
+                            <div class="Wcanal-tab-title">
+                                <p <eq name="tab" value="0">class="active"</eq>>
+                                    <a href="{:U('DataCenter/TopData/goodsData',['tab'=>0])}" data-val='0'>到店率TOP10</a>
+                                </p>
+                                <p <eq name="tab" value="1">class="active"</eq>>
+                                    <a href="{:U('DataCenter/TopData/goodsData',['tab'=>1])}" data-val='1'>发送量TOP10</a>
+                                </p>
+                                <p <eq name="tab" value="2">class="active"</eq>>
+                                    <a href="{:U('DataCenter/TopData/goodsData',['tab'=>2])}" data-val='2'>最好的10个卡券</a>
+                                </p>
+                            </div>
+                           
+                        </div>
+                        <div class="SearchArea fn">
+                            <form action="" method="POST" id="theForm">
+                            <div class="SearchAreaLeft">
+                            <label>
+                            <span>统计周期</span>
+                                <select name="year" id="year" >
+                                    <option value="">全部</option>
+                                    <option value="2016" <eq name="year" value="2016">selected="selected"</eq>>2016年</option>
+                                    <option value="2015" <eq name="year" value="2015">selected="selected"</eq>>2015年</option>
+                                    <option value="2014" <eq name="year" value="2014">selected="selected"</eq>>2014年</option>
+                                    <option value="2013" <eq name="year" value="2013">selected="selected"</eq>>2013年</option>
+                                </select>
+                            </label>
+                            </div>
+                            <div class="SearchAreaRight">
+                                <a href="javascript:void(0);" id="search" class="searchBtn">查询</a>
+                            </div>
+                            </form>
+                        </div>
+                        <div class="chart mt50">
+                            <input type="hidden" name="chartChange" value="0" />
+                            <ul class="chart-change">
+                                <li class="active">
+                                    <a href="javascript:void(0)" data-val = "0">饼状图</a>
+                                </li>
+                                <li>
+                                <a href="javascript:void(0)" data-val = "1">柱状图</a>
+                                </li>
+                            </ul>
+                            <div class="chartBox" id="click_sum" >
+                                
+                            </div>
+                            <div class="chartBox dn" id="histogram">
+                                
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+    $('#click_sum').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: '<b>饼状图</b>'
+        },
+        tooltip: {
+            formatter:function(){
+                return '<b>'+ this.point.name +'</b>: '+ this.y +' 个';
+            },
+            percentageDecimals: 1
+        },
+        plotOptions: {
+            pie: {
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    formatter: function() {
+                        
+                        return'<b>'+this.point.name+'</b>: '+Highcharts.numberFormat(this.percentage, 1)+' %';
+                    }
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            data: {$clickSum['pie']}
+        }]
+    });
+    /*
+     * 柱状图数据载入
+     */
+    var colors = Highcharts.getOptions().colors;
+    var categories = {$clickSum['column']['categories']};
+    var data = {$clickSum['column']['y']};
+    var data_column_tl=0;
+    for(var i=0;i<data.length;i++){
+         data_column_tl += data[i].y;
+    };
+    var chart = $('#histogram').highcharts({
+        chart: {type: 'column'},
+        title: {text: '<b>柱状图</b>'},
+        xAxis: {categories: categories},
+        plotOptions: {
+            column: {
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    formatter: function() {
+                        return Highcharts.numberFormat((this.y/data_column_tl)*100,1) +'%';
+                    }
+                }
+            }
+        },
+        series: [{
+            name: ' ',
+            data: data,
+            color: '#fff'
+        }]
+    })
+    $("#search").click(function(){
+        var url = "{:U('DataCenter/TopData/goodsData',array('tab'=>$tab))}";
+        $("#theForm").attr('action',url).submit();
+    });
+    // 图形切换
+    WcanalTabonNew('.WcanalNew-tab','.Wcanal-tab-title');
+    WcanalTabonNew('.chart','.chart-change','.chartBox');
+
+})
+
+</script>

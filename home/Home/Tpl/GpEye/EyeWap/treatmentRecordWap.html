@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>我的恢复记录</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_bjgp.css">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn dn">
+        	<div class="goback"><i></i></div>
+        	<!--<div class="headerorder" onclick="login_to('')"></div>-->
+            <div class="logo"><!--<i>惠</i>--><span>我的恢复记录</span></div>
+        </div>
+        <div id="main">
+            <div class="mainTop">
+            </div>
+            <div id="mainCon">
+                <div id="masonry" class="item jilu">
+                    <!--循环-->
+                    <volist name="info" id="data">
+                    <div class="box">
+                        <a href="<if condition="$data['feed_status'] eq 0">{:U('GpEye/EyeWap/customerFeedback',array('id'=>$data['id'],'k'=>$count-$a+1))}<else />{:U('GpEye/EyeWap/feedbackSuc',array('id'=>$data['id'],'k'=>$count-$a+1))}</if>" class="drop" data-status="{$data.feed_status}" data-record="{$data.id}" data-key={$count-$key+1}>
+                            <div class="proItem-msg">
+                            	<h1>NO.{$count-$a+1}恢复技师：{$data.name}</h1>
+                                <h2><!--<span class="red">1030人</span>-->{$data['treatment_time']|dateformat=###,'Y-m-d H:i:s'}</h2>
+                            	<a href="<if condition="$data['feed_status'] eq 0">{:U('GpEye/EyeWap/customerFeedback',array('id'=>$data['id'],'k'=>$count-$a+1))}<else />{:U('GpEye/EyeWap/feedbackSuc',array('id'=>$data['id'],'k'=>$count-$a+1))}</if>" class="vote" data-status="{$data.feed_status}" data-record="{$data.id}">{$arr_f[$data['feed_status']]}</a>
+                            </div>
+                        </a>
+                    </div>
+                     <?php $a++;?>
+                    </volist>
+                    <!--循环-->
+                </div>
+        </div>
+        <div class="get-more" data-url="{$nexUrl}"><i></i><a href="">往上拉查看更多</a></div>
+    </div>
+</div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+
+</body>
+<script type="text/javascript">
+	$(document).ready(function() {
+		var loadhtml = '<div id="infscr-loading" style="text-align: center; display:none;"><img src="__PUBLIC__/Label/Image/Item/loading.gif"><div><em>加载中...</em></div></div>';
+		$("#masonry").append(loadhtml);
+		$("body").append("<div id='masonry2' style='display:none;'></div>");
+		var flag = true;
+		$(window).scroll(function () {
+		    if(flag) {
+			    if ($(document).scrollTop() + $(window).height() >= $(document).height()) {
+		    		flag = false;
+		    		if($("masonry2").hasClass("erro")) {
+		    			flag = true;
+		    			return false;
+		    		}
+					$("masonry2").addClass("erro");
+					var url = $('.get-more').attr("data-url");
+					$("#infscr-loading").show();
+					$('#masonry2').load(url + ' ' + ".box", null, function(data){
+						var l = $("#masonry2 .box").length;
+						if (l == 0) {
+							$("#infscr-loading em").text("没有更多数据了");
+							$("#infscr-loading img").hide();
+							setTimeout(function(){
+								$("#infscr-loading").hide();
+							},2000);
+							$('.get-more').hide();
+						} else {
+							$('#masonry').append($('#masonry2').html());
+							$("#infscr-loading").fadeOut(500);
+						}
+						var newpath = newPath(url);
+						$(".get-more").attr("data-url",newpath);
+						$("masonry2").removeClass("erro");
+						flag = true;
+					});
+			   }
+			}
+		});
+		$('.drop,.vote').click(function(){
+			var status=$(this).data('status');
+			var record=$(this).data('record');
+			var key=$(this).data('key');
+			if(status==0){
+				var url="{:U('GpEye/EyeWap/customerFeedback')}&id="+record+"&k="+key;
+			}else{
+				var url="{:U('GpEye/EyeWap/feedbackSuc')}&id="+record+"&k="+key;
+			}
+			$(this).href=url;
+		})
+
+	});
+	function newPath(path){
+		path = path.split("p=");
+		var p = path[1]*1+1;
+		newpath = path[0]+"p="+p;
+		return newpath;
+	};
+</script>
+</html>
+<eq name="$wx_flag" value="1">
+	<script>
+    var wxShareData = {:json_encode($shareData)};
+	wxShareData = $.extend(wxShareData,{
+		title:"<?php echo '我的恢复记录'?>",
+		desc:"<?php echo '我的恢复记录'?>",
+		imgUrl:
+	});
+</script>
+<include file="Label/Public/_shareWx"/>
+</eq>

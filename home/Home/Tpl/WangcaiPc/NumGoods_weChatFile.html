@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>卡券中心</title>
+		<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+		<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+		<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+		<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+		<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+		<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+		<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+		<script type="text/javascript" src="__PUBLIC__/Js/highcharts.js"></script>
+        <js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+        <js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+        <script>
+        $(function(){
+            $("#smb").click(function(){
+                var dialog;
+                if($("#the_from").validationEngine('validate')){
+                    $("#the_from").ajaxSubmit({
+                        beforeSubmit:function(){
+                            dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                        },
+                        success:function(data){
+                             if(data.status == '1'){
+                                   dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                                   setTimeout("window.location.href = '{:U('WangcaiPc/NumGoods/weChatIndex')}';",200);
+                                   return false;
+                              }else{
+                                   dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                              }
+                        },
+                        dataType:'json'
+                    });
+                    return false;
+                }
+                
+            });
+        });
+        </script>
+	</head>
+
+	<body>
+		<div id="wrapper">
+			<include file="./Home/Tpl/Public/Public_header.html" />
+			<!--开始引入头部菜单-->
+			<div class="shopNav">
+				<!--开始引入顶部菜单-->
+				<include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="wxhb" />
+			</div>
+
+			<div id="container" class="bgfff">
+				<div id="main" class="rel">
+
+					<div class="sidenav">
+						<!--开始引入左菜单-->
+						<include file="WangcaiPc/NumGoods/weChatMenu" leftmenuid="zjwxhb" />
+					</div>
+
+					<div class="subcon fn">
+						<div class="main-name fn">
+							<h4>红包配置
+                        	<a href="{:U('Home/Help/helpDetails',array('newsId'=>1521,'classId'=>71))}" target="_blank"><span class="r" style="font-size:14px ;" ><i class="allAsk mr5" style="vertical-align: -5px;" ></i>操作说明</span></a>
+                        </h4>
+						</div>
+						<!--上传文件弹窗-->
+						<div class="tipNormal">
+                                <p>使用微信红包业务，请确认：</p>
+                                <p>1、您与旺财账户绑定的微信公众号已开通微信支付商户功能。<a target="_blank" href="https://pay.weixin.qq.com/index.php/home/login?return_url=%2F">前去开通</a></p>
+                                <p>2、发放现金红包将扣除商户微信商户账号的可用余额(可用余额并不是微信支付交易额,需要预先充值),请确保可用余额充足,否则红包将发放失败。</p>
+                                <p>3、首次创建微信红包前需要您自主进行红包配置，配置完成后方可创建微信红包。<a href="{:U('Home/Help/helpDetails',array('newsId'=>1519,'classId'=>71))}" target="_blank">如何操作？</a></p>
+                        </div>
+                        <neq name="showFlag" value="1">
+						<div class="Gform w1 file-up">
+                            <form method="post" action="{:U('WangcaiPc/NumGoods/weChatFile')}" id="the_from">
+                                <h3 class="Gtitle">选择微信支付账户</h3>
+                                <ul>
+                                    <li class="Gname"><span>*&nbsp;</span>选择微信支付账户</li>
+                                    <li class="Ginput">
+                                        <select name="wxAccountId" style="width:180px;">
+                                            <option value="">----请选择----</option>
+                                            <volist name="list" id="vo">
+                                                <option <eq name="vo['bonus_flag']" value="1">selected="selected"</eq> value="{$vo.id}" >{$vo.name}</option>
+                                            </volist>
+                                        </select>
+                                        <span>　</span><a href="">刷新</a>
+                                        <span>　</span><a href="{:U('Home/AccountInfo/accountList')}" target="_blank">新建帐号</a>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Ginput">
+                                        <a class="btn-all file-ok" href="javascript:void(0)" id="smb"> 确定</a><a class="btn-all-del" href="javascript:void(0)"> 取消</a>
+                                    </li>
+                                </ul>
+                            </form>
+						</div>
+                        <else />
+                        <div class="Gform w1 file-up">
+                            <h3 class="Gtitle">选择微信支付账户</h3>
+                            <ul>
+                                <li style="margin:30px;font-size: 16px;">
+                                    <span style="color:#00CC66;">正在使用（{$selectInfo['name']}）</span>
+                                    <a href="{:U('WangcaiPc/NumGoods/weChatFile')}">更换帐号</a>
+                                </li>
+                            </ul>
+                        </div>
+                        </neq>
+						
+						<div class="loadTip pt30" style="width: 51%;display: none;">
+							<div class="loadStatus ok">
+								<dl>
+									<dt>您的证书已经上传成功，现在可以创建微信红包</dt>
+									<dd class="pt10"><a href="{:U('WangcaiPc/NumGoods/creatWeChat')}" >马上创建红包</a></dd>
+								</dl>
+							</div>
+						</div>
+                        
+					</div>
+
+				</div>
+			</div>
+			<include file="./Home/Tpl/Public/Public_footer.html" />
+		</div>
+		<div class="service"></div>
+
+	</body>
+
+</html>
+
+
+
+
+
+
+
+
+

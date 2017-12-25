@@ -1,0 +1,286 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>批量发送粉丝权益_粉丝筐_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<link href="__PUBLIC__/Css/member.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/member.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript">
+$(function(){
+	$("#send_submit").click(function(){
+        var dialog;
+        $("#send_code").val('1');
+        $("#ajax").val('1');
+        $("#myform").ajaxSubmit({
+            beforeSubmit:function(){
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+                 if(data.status == '1'){
+                	   var datas = data.data;
+                       $("#m_count").html(datas.count);
+                       $(":radio[name='batch_no']").each(function(){
+                    	   if($(this).val() == datas.batch_no){
+                    		   $(this).attr("checked","checked");
+                    	   }
+                       });
+                       art.dialog({
+                            title:"确定发卡",
+                            id:"ok_send",
+                            content:document.getElementById("ok_send"),
+                            width:600,
+                            lock:true
+                       });
+                       dialog.close();
+                       return false;
+                  }else{
+                        dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                          }
+                  },
+            dataType:'json'
+        });
+        return false;
+    });
+	
+	$("#level_submit").click(function(){
+        var dialog;
+        if($("#level_form").validationEngine('validate')){
+        	$("#level_form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           art.dialog.list['ok_send'].close();
+                           var datas = data.data;
+                           var url = $("#batch_url").attr("href")+"&batch_id="+datas.batch_id;
+                           //$("#batch_url").attr("href",url);
+                           art.dialog({
+                                title:"消息",
+                                id:"send_result",
+                                content:document.getElementById("send_result"),
+                                width:600,
+                                lock:true
+                           });
+                           dialog.close();
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                              }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    });    
+	$("#sub_search").click(function(){
+		$("#send_code").val('');
+		$("#myform").submit();
+	});
+}); 
+
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="index.php?g=Member&m=Member&a=index">粉丝筐</a></p>
+							<p>></p>
+                            <p>批量发送粉丝权益</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="Member/Member/leftMenu" leftmenuid="plfsfsqyk"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="Wcanal-tab mt10">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover"><a href="{:U('Member/Member/batchSendCode')}">批量发送粉丝权益</a></p>
+                            <p><a href="{:U('Member/Member/membeSendBatch')}">批量发送权益记录</a></p>
+                            
+                        </div>
+                        <div class="Wcanal-tab-list" style="display:block; margin-top:15px;">
+                            <div class="SearchArea fn">
+                                         <form action="{:U('Member/Member/batchSendCode')}" method="post" name="myform" id="myform">
+                                            <div class="SearchAreaLeft">
+                                            <label>
+                                            <span>粉丝权益</span>
+                                                <select name="batch_no" id="batch_no" class="selectbox">
+                                                    <option value=''>全部</option>
+                                                    <volist name='batch_list' id='list' key='k'>
+                                                        <option <if condition="$post['batch_no'] eq $list['batch_no'] ">selected="selected"</if> value="{$list.batch_no}" >{$list.level_name}</option>
+                                                    </volist>
+                                                </select>
+                                            </label>
+                                            <label>
+                                            <span>下发状态</span>
+                                                <select name="send_status" id="send_status" class="selectbox">
+                                                    <option value="" >全部</option>
+                                                    <option <if condition="$post['send_status'] eq 1 ">selected="selected"</if> value="1" >已下发</option>
+                                                    <option <if condition="$post['send_status'] eq 2 ">selected="selected"</if> value="2" >未下发</option>
+                                                </select>
+                                            </label>
+                                            <label>
+                                            <span>登记日期</span>
+                                            <input name="begin_date" id="begin_date" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_date\\')}'})" type="text" value="{$post.begin_date}" />-<input name="end_date" id="end_date" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'begin_date\\')}'})" type="text" class="textbox w90" value="{$post.end_date}" />
+                                            </label>
+                                            <label>
+                                            <span>粉丝分组</span>
+                                            <select name="group_id" id="group_id" class="selectbox" >
+                                                    <option value="">全部</option>
+                                                    <volist name="groupList" id="vo">
+                                                    <option value="{$vo['id']}" <if condition="$vo['id'] eq $post['group_id']">selected="selected"</if>>{$vo['name']}</option>
+                                                    </volist>                                            
+                                                </select>
+                                            </label>
+                                            <input type="hidden" name="send_code" id="send_code" value="" />
+                                            <input type="hidden" value='' name="ajax" id="ajax" />
+                                            </div>
+                                            <div class="SearchAreaRight">
+                                            <a href="javascript:void(0);"  id="sub_search" class="searchBtn">查找</a>
+                                            <a href="javascript:void(0);" id='tg' class="more-filter">更多筛选</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="fn">
+                                        <table cellpadding="0" cellspacing="0" class="W-table">
+                                            <tr>
+                                                <th>粉丝姓名</th><th>手机号码</th><th>性别</th><th>年龄</th><th>生日</th><th>登记日期</th><th>粉丝类别</th><th>粉丝分组</th><th>下发状态</th>
+                                            </tr>
+                                            <notempty name='query_list'>
+                                                <?php
+                                                
+                                                foreach($query_list as $k=>$v)
+                                                {
+                                                ?>
+                   
+                                                <tr>
+                                                    <td><?php echo  $v['name'];?></td>
+                                                    <td><?php echo $v['phone_no'];?></td>
+                                                    <td><?php echo $sex_arr[$v['sex']];?></td>
+                                                    <td><?php echo $v['age'];?></td>
+                                                    <td><?php echo dateformat($v['birthday'],'Y-m-d');?></td>
+                                                    <td><?php echo dateformat($v['add_time'],'Y-m-d');?></td>
+                                                    <td><?php echo $batch_arr[$v['batch_no']];?></td>
+                                                    <td><?php echo $v['group_name'];?></td>
+                                                    <td><?php if(empty($v['request_id'])){echo '未下发';}else{echo '已下发';}?></td>
+                                                </tr>
+                                                <?php
+                                                }
+                                                ?>
+                                                <else />
+                                                <?php if($_POST){?>
+                                                        <tr>
+                                                            <td colspan="9">
+                                                                <div class="nonedata"></div>
+                                                            </td>
+                                                        </tr> 
+                                                <?php }else{?>
+                                                        <tr>
+                                                        <td colspan="9">
+                                                            <div class="nonedata"><p>您还未<a href="<?php echo U('Member/Member/index');?>">添加粉丝</a>，请先去添加粉丝然后操作业务。</p></div>
+                                                        </td>
+                                                        </tr>
+                                                <?php }?>
+                                            </notempty>
+                                        </table>
+                                        <div class="page">{$page}</div>
+                                    </div>
+                                    <if condition="$mapcount gt 0">
+                                    <div class="fn mt20 tc">
+                                        <a href="javascript:void(0);" id="send_submit" class="mem-send btn-all w110">确定发送权益</a>
+                                    </div>
+                                    </if>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+    <!-- 确定发卡 -->
+    <div class="dn" id="ok_send">
+    <div class="mem-send-check-con">根据您的查询条件共筛选出了<span id="m_count"></span>个粉丝，点击确定将以短彩信的方式发送粉丝权益至粉丝手机</div>
+    <div class="global-input4 pt10">
+    <form method="post" id="level_form" action="{:U('Member/Member/batchSendCodeStarts')}">
+        <ul>
+            <li class="global-input4-name">粉丝权益名称：</li>
+            <li class="global-input4-input w416">
+                <volist name='batch_list' id='list' key='k'>
+                    <input type="radio" name="batch_no" class="validate[required] mr5" value="{$list.batch_no}"/>{$list.level_name}&nbsp;&nbsp;&nbsp;&nbsp;
+                </volist>
+            </li>
+            <input type="hidden" value='1' name="ajax" />
+        </ul>
+        <ul>
+            <li class="global-input4-name">彩信标题：</li>
+            <li class="global-input4-input">
+                <input type="text" name="mms_title" id="mms_title" onkeyup="check_lenght(10,'title_text',this);" class="validate[required,maxSize[10]] textbox w240" value=""/>
+                <br />
+                <p id="title_text">还可以输入10个字</p>
+            </li>
+        </ul>
+        <ul>
+            <li class="global-input4-name">彩信内容：</li>
+            <li class="global-input4-input">
+                <textarea name="mms_info" id="mms_info" onkeyup="check_lenght(100,'text',this);" class="validate[required,maxSize[100]] texttextarea w240 h126"></textarea>
+                <br />
+                <p id="text">还可以输入100个字</p>
+            </li>
+       </ul>
+    </form>
+    </div>
+    <div class="cl"></div>
+    <div class="fn tc pt20">
+        <a href="javascript:void(0)" id="level_submit"  class="btn-all w80">确认</a>
+        <a href="javascript:art_close('ok_send');" class="btn-all-del ml10 w80">取消</a>
+    </div>
+</div>
+    <!-- 发卡结果 -->
+    <div class="mem-send-check dn" id="send_result">
+    <h3 class="tc">
+        <eq name="is_12580" value="1">
+        已提交审核，审核通过之后会自动下发。
+        <else/>
+        正在发送中，接下来您可以
+        </eq>
+    </h3>
+    <div class="cl"></div>
+    <div class="fn tc pt10">
+        <a href="javascript:art_close('send_result');" id="level_submit"  class="btn-all w80">确认</a>
+        <a href="{:U('Member/Member/membeSendBatch')}" id="batch_url"  class="btn-all w120">查看发送信息</a>
+    </div>
+    </div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

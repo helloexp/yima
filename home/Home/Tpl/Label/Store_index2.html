@@ -1,0 +1,694 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title><?php echo $marketInfo['name'];?></title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop2.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+</head>
+<?php if($number != ""){ ?> 
+<script type="text/javascript" name="baidu-tc-cerfication" data-appid="<?php echo $number; ?>" src="http://apps.bdimg.com/cloudaapi/lightapp.js"></script>
+
+<script type="text/javascript">
+(function(){
+		var script = document.createElement("script");
+		script.type = "text/javascript";
+		script.charset = "utf-8";
+		var date = new Date();
+		var version = date.getFullYear()+""+date.getMonth()+""+date.getDate()+""+date.getHours();
+		script.src = "http://m.baidu.com/static/search/siteapp/lego/seed.js?t="+version;
+		script.setAttribute("data-appid","<?php echo $number; ?>");
+		document.head.appendChild(script);
+	})();
+</script>
+<?php } ?> 
+<body style="opacity:0;">
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+        	<div class="shopBoxView"></div>
+        </div>
+    </div>
+    <div class="sideNav">
+        <div class="sideNavCon">
+            <dl>
+                <dt><i class="icon-navHome"></i><p>主页</p></dt>
+                <?php 
+                if(!empty($categoryInfo)){
+                    foreach($categoryInfo as $c=>$cal){
+                ?>
+                	<dd><a href="index.php?g=Label&m=Store&a=index&keyword=<?php echo $keyword;?>&id=<?php echo $id;?>&cat_id=<?php echo $cal['id']?>"><p><?php echo $cal['class_name']?></p></a></dd>
+                <?php
+                    }
+                }
+                ?>
+            </dl>
+        </div>
+    </div>
+</div>
+<div class="loginForm dn">
+    <div class="loginFormwap">
+        <form action="{:U('Label/Store/loginPhone')}" method="post" name="loginform" id="loginform">
+            <ul class="sOne-loginForm">
+                <li class="loginFormTop">
+                    <div class="loginFormTopLogo">
+                        <p><a><span>
+                            <?php
+                            if(session('login_logo')!=""){
+                            ?>
+                            <img src="__UPLOAD__/<?php echo session('login_logo');?>" />
+                            <?php
+                            }
+                            ?>
+                        </span></a></p>
+                    </div>
+                    <p><?php if(session('login_title')!=""){?><?php echo session('login_title');?><?php }?></p>
+                </li>
+                <li>
+                    <input type="tel" class="sOne-loginInput-half" name="phone" id="phone" placeholder="&nbsp;&nbsp;请输入您的手机号" >
+                    <input type="button" class="sOne-getpasscode" value="获取验证码" id="getpasscode" name='getpasscode' data-href="" >
+                    <span style="display: none;" id="phone_err">手机号错误</span>
+                </li>
+                <li>
+                    <input type="password" class="sOne-loginInput" name="check_code" placeholder="&nbsp;&nbsp;验证码">
+                    <span style="display: none;" id="pass_err">验证码错误</span>
+                </li>
+                <li class="p0">
+                    <input type="hidden" value="<?php echo session('id');?>" name="id" id="id">
+                    <input type="hidden" name="ajax" value="1"/>
+                    <input type="hidden" id="jump_url" value="index.php?g=Label&m=Store&a=cart&id=<?php echo session('id');?>"/>
+                    <input type="button" id="login_button" class="sOne-loginInput-btn" value="快速登录" />
+                </li>
+                <li class="loginFormMsg">
+                    <h4>亲，请输入您的有效手机号码以便查询您的订单及商品凭证</h4>
+                </li>
+            </ul>
+            <div class="fn"><a href="javascript:void(0)" class="close-loginForm" onClick="close_to()">+</a></div>
+        </form>
+    </div>
+    <php>if($node_id!=C('df.node_id')){</php>
+    <div id="footer2">
+        <div class="myMicRight">
+            <p>Copyright © 2016 {$node_short_name}</p>
+            <p><span>翼码旺财出品</span></p>
+        </div>
+    </div>
+    <php>}</php>
+</div>
+<php>if($node_id==C('df.node_id')){</php>
+<include file="nav"/>
+<php>}</php>
+<img src="{$share_pic}" class="js-wx-sharepic dn">
+</body>
+</html>
+
+<script>
+$(document).ready(function(e) {
+	var phoneNo = '{$phoneNo}';
+	var nodeId = '{$nodeId}';
+	if(phoneNo && nodeId){
+		$.get("index.php?g=Common&m=AjaxCommon&a=getCartList&phone_num="+phoneNo+"&node_id="+nodeId,function(data){
+			if(data.status==1){
+				var addTrolleyNum = 0;
+				$.each(data.data,function(i,n){
+					addTrolleyNum+=n*1
+				})
+				addTrolley(addTrolleyNum);
+			}
+		},'json');
+	}
+	$("body").on("click",".fixTrolley",function(){
+		link_to('<?php echo U('Label/Store/cart','id='.session('id'));?>');
+	});
+	var data = {$pageInfo['page_content']};
+	 begin(data);
+
+	$("body").on("click",".btn-search",function(){
+		$(this).closest("#searchform").submit();
+	});
+	 var bgnum = Math.floor(Math.random()*4);
+	$(".loginFormwap").addClass("bg"+bgnum);
+	$('#login_button').click(function(){
+		$("#phone_err,#pass_err").hide();
+	    $("#loginform").ajaxSubmit({
+	        success:function(data){
+	             if(data.status == '1'){
+	            	   $(".dn-bg,.loginForm").hide();
+	            	   var url = $("#jump_url").val();					  
+	            	   link_to(url);
+	                   return false;
+	              }else{
+					
+	                 var datas = data.data;					
+	                 if(datas.type == 'phone'){
+	                	 $("#phone_err").html(data.info).show();
+	                 }else if(datas.type == 'pass'){   	 
+						
+						 $("#pass_err").html(data.info).show();
+	                 }
+	              }
+	        },
+	        dataType:'json'
+	    });
+	    return false;
+	});
+	var Int;
+	$("#getpasscode").click(function(){
+		$("#phone_err").html("").hide();
+		$("#phone_err,#pass_err").hide();
+        $(this).val("正在发送..");
+        var phone = $("#phone").val();
+        var id = $("#id").val();
+		var verify =$("#verify").val();
+        $.post("{:U('Label/Store/sendCheckCode')}",{"id":id,"phone":phone,"verify":verify},function(data){
+            if(data.status=='1'){
+                $("#getpasscode").attr("id","noSend");
+                Int = setInterval(checkTime,1000)
+            }else{
+            	$("#phone_err").html(data.info).show();
+                setTimeout("$('#loadingBox').hide()",2000);
+                $("#getpasscode").val("获取验证码");
+            }
+        },"json");
+    });
+    var time = {$expiresTime};
+    var checkTime = function(){
+        $("input[name='getpasscode']").val("已发送,"+time+"秒");
+        if(time==0){
+            $("input[name='getpasscode']").val("获取验证码");
+            $("input[name='getpasscode']").attr("id","getpasscode");
+            time = {$expiresTime};
+            clearInterval(Int);
+            return false;
+        }
+        time--;
+    }
+    $("body").on("click",".getMore",function(){
+    	$(this).closest(".shopMod").find("li.dn:lt(6)").fadeIn().removeClass("dn");
+    	if($(this).closest(".shopMod").find("li.dn").length==0){
+    		$(this).remove();
+    	}
+    })
+});
+function login_to(url){
+	var id="<?php echo session('id');?>";
+	$.post("{:U('Label/Store/checkPhoneLogin')}",{'id':id},function(data){
+		if(data.status==1){
+			link_to(url);
+		}else{
+			/*setTimeout(function(){
+	            $('#loadingBox').show();
+	        },1);
+	        setTimeout(function(){$('#loadingBox').hide();},1000);
+	        setTimeout(function(){$(".loginForm").show();$(".loginForm").animate({top:"0%"},500);},1000);
+	        setTimeout(function(){$(".dn-bg").show();},1000);
+	        $("#jump_url").val(url);
+			*/
+			var surl = urlencode(url);
+			location.href = "{:U('O2OLogin/index')}"+"&id="+{$id}+"&surl="+surl;
+		}
+	},'json');
+}
+function fleshVerify(){ 
+    //重载验证码
+    var time = new Date().getTime();
+        document.getElementById('verifyImg').src= '{:U("Home/Verifycode/verify")}&time='+time;
+ } 
+ function close_to(){
+    $('.loginForm').animate({top:"-120%"},500,function(){
+    	$('.loginForm').hide();
+	});
+    $('.dn-bg').hide();
+}
+function link_to(url,fun){
+    setTimeout(function(){
+		if(typeof url == 'string'){
+			location.href=url;
+		}
+		if(typeof url == 'function'){
+			url();
+		}
+    },500);
+    if(typeof fun == 'string'){
+    var jscode = new Function('return function(){'+fun+'}')();
+        jscode();
+    }else if(typeof fun == 'function'){
+        fun();
+    }
+}
+function begin(data){
+	for(var i=0;i<data.module.length;i++){
+		var dataPro = data.module[i];
+			data.module[i].id = i+1 ;
+		var addHtml = "data"+dataPro.name;
+		var Modhtml = template(addHtml, dataPro);
+		$(".shopBoxView").append(Modhtml);
+	}
+}
+function init(){
+	var windowheight=$("body").height();
+	var windowwidth=$("#wrapper").width();
+	var scale=windowwidth/640;
+	var smallconWidth = windowwidth-50;
+	var smallimgHeight = smallconWidth*5/16 ;
+	var bigconWidth = windowwidth-30;
+	var bigimgHeight = bigconWidth*5/8 ;
+	var listconWidth = windowwidth-50;
+	var listimgHeight = listconWidth*5/16 ;
+	$(".shopModBox-12").height(windowheight);
+	$(".shopModBox-1 .small ").width(smallconWidth/2);
+	$(".shopModBox-1 .big ").width(bigconWidth);
+	$(".shopModBox-1 .small .img").width(smallconWidth/2);
+	$(".shopModBox-1 .small .img").height(smallimgHeight);
+	$(".shopModBox-1 .big .img").width(bigconWidth);
+	$(".shopModBox-1 .big .img").height(bigimgHeight);
+	$(".shopModBox-2 .small ").width(smallconWidth/2);
+	$(".shopModBox-2 .big ").width(bigconWidth);
+	$(".shopModBox-2 .small .img").width(smallconWidth/2);
+	$(".shopModBox-2 .small .img").height(smallimgHeight);
+	$(".shopModBox-2 .big .img").width(bigconWidth);
+	$(".shopModBox-2 .big .img").height(bigimgHeight);
+	$(".shopModBox-4 .shopModSmall li").width(bigconWidth/2);
+	$(".shopModBox-5").each(function() {
+		var length = $(this).find("li:not('.dn')").length;
+		var width = windowwidth-10*length-10;
+		var maxheight =0;
+        $(this).find("li").width(width/length);
+    });
+	$("a[href=''],a[href='http://']").attr("href","javascript:void(0)");
+	if($(".fix").length==0){
+		$("#wrapper").css("padding-bottom","0");
+	}
+	$(".ProNav").each(function(index, element) {
+		$("#wrapper").css("padding-top",44);
+    });
+}
+</script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/idangerous.swiper.min.js?v=__VR__"></script>
+<script>
+    var wxShareData = {:json_encode($shareData)};
+	wxShareData = $.extend(wxShareData,{
+		title:"{$descInfo['memo']}",
+		desc:"{$descInfo['memo']}",
+		imgUrl:$('.js-wx-sharepic').get(0).src
+	});
+</script>
+<include file="Label/Public/_shareWx"/>
+<script>
+function gxsy(){
+    location.href = "{:U('CnpcGX/WapStore/index')}"+"&id="+{$id};
+}
+function shareTimeline() {
+	WeixinJSBridge.invoke('shareTimeline', wxShareData, function(res) {
+		validateShare(res);
+		_report('timeline', res.err_msg);
+	});
+}
+
+function shareFriend() {
+	WeixinJSBridge.invoke('sendAppMessage', wxShareData, function(res) {
+		validateShare(res);
+		_report('send_msg', res.err_msg);
+	});
+}
+
+$(document).ready(function(e) {
+	init();
+	$("body").animate({opacity:1},500);
+	if($(".shopModBox-12").length>0){
+		var navSwiper = new Swiper('.shopModOrd-1',{
+			slidesPerView:4,
+			autoResize:false,
+			autoplay:5000,
+			autoplayDisableOnInteraction : false
+		})
+		$('.prevDiv').on('click', function(e){
+			e.preventDefault();
+			navSwiper.swipePrev();
+		})
+		$('.nextDiv').on('click', function(e){
+			e.preventDefault();
+			navSwiper.swipeNext();
+		})
+	}
+	if($(".shopModFlash").length>0){
+		for(var i=0;i<$(".shopModFlash").length;i++){
+			var _this = $(".shopModFlash:eq("+i+")");
+			if(_this.find(".swiper-slide").length==1){
+				_this.find("ul").width("100%");
+				_this.find(".swiper-slide").width("100%");
+				$(shopModFlashdl).find("span").hide();
+			}else{
+				var shopModFlash = "shopModFlash"+_this.attr("data-rel");
+				var shopModFlashdl = ".shopModFlashdl"+_this.attr("data-rel")
+				var	flashSwiper = new Swiper('.'+shopModFlash,{
+					pagination: shopModFlashdl,
+					slidesPerView:1,
+					loop:true,
+					calculateHeight:true,
+					autoResize:false,
+					autoplay:5000,
+					autoplayDisableOnInteraction : false
+				});
+			}
+		}
+	}
+	$("body").on("click",".ProNavmenu",function(){
+		$("#wrapper").toggleClass("showNav");
+	});
+	$(".sideNav").click(function(){
+		$("#wrapper").toggleClass("showNav");
+	});
+});
+</script>
+<!--artTemplate-->
+<!--商品-->
+<script id="dataPro" type="text/html">
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit="{{id}}" data-special="1">
+		<div class="shopModBox-1">
+			<ul class="shopModOrd-1">
+				{{each list}}
+				{{if value.size == "big"}} <div class="cl"></div> {{/if}}
+				<li class="{{value.size}}">
+					<a href="{{value.url}}">
+						<div class="img">
+							<img src="{{value.img}}" />
+						</div>
+						<div class="info">
+							<h3 class="{{if checkproName=="false"}}dn{{/if}}">{{value.title}}</h3>
+							<h4 class="{{if checkproPrice=="false"}}dn{{/if}}">￥{{value.price}}</h4>
+							<h6 class="{{if checkproBtn=="false"}}dn{{/if}}"><i class="icon-shopModOrd-1"></i></h6>
+						</div>
+					</a>
+				</li>
+				{{/each}}
+			</ul>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--商品分组-->
+<script id="dataProList" type="text/html">
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="2">
+		<div class="shopModBox-2">
+			<ul class="shopModOrd-1">
+				{{each list as value i }}
+					{{if i<checkProListNum }}
+					{{if value.size == "big"}} <div class="cl"></div> {{/if}}
+					<li class="{{value.size}}">
+						<a href="{{value.url}}">
+							<div class="img">
+								<img src="{{value.img}}" />
+							</div>
+							<div class="info">
+								<h3 class="{{if checkproName=="false"}}dn{{/if}}">{{value.title}}</h3>
+								<h4 class="{{if checkproPrice=="false"}}dn{{/if}}">￥{{value.price}}</h4>
+								<h6 class="{{if checkproBtn=="false"}}dn{{/if}}"><i class="icon-shopModOrd-1"></i></h6>
+							</div>
+						</a>
+					</li>
+					{{ else }}
+					{{if value.size == "big"}} <div class="cl"></div> {{/if}}
+					<li class="{{value.size}} dn">
+						<a href="javascript:void(0)">
+							<div class="img">
+								<img src="{{value.img}}" />
+							</div>
+							<div class="info">
+								<h3 class="{{if checkproName=="false"}}dn{{/if}}">{{value.title}}</h3>
+								<h4 class="{{if checkproPrice=="false"}}dn{{/if}}">￥{{value.price}}</h4>
+								<h6 class="{{if checkproBtn=="false"}}dn{{/if}}"><i class="icon-shopModOrd-1"></i></h6>
+							</div>
+						</a>
+					</li>
+					{{/if}}
+				{{/each}}
+				{{if list.length>checkProListNum }}<div class="cl"></div><div class="getMore"><a href="javascript:void(0)">查看更多</a></div></li>{{/if}}
+			</ul>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--多乐互动-->
+<script id="dataAct" type="text/html">
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="3">
+		<div class="shopModBox-3">
+			<ul>
+				<li>
+					<a href="{{url}}">
+						<img src="{{img}}" />
+						<h2 class="{{if checkActTitle=="false"}}dn{{/if}}{{if checkActTime=="false"}} no{{/if}}">{{title}}</h2>
+						<h3 class="{{if checkActTime=="false"}}dn{{/if}}">{{time}}</h3>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--图片广告-->
+<script id="dataPic" type="text/html">
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="4">
+		<div class="shopModBox-4">
+			<div class="shopModFlashDiv {{if checkPicType==1}}shopModFlash{{ else if checkPicType==3}}shopModSmall{{/if}} shopModFlash{{id}}" data-rel="{{id}}">
+				<ul class="{{if checkPicType==1}}swiper-wrapper{{/if}}">
+				{{each list}}
+					<li class="{{if checkPicType==1}}swiper-slide{{/if}}"><a href="{{value.url}}" {{if value.url=="javascript:void(1)"}}onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"{{/if}}><img src="{{value.img}}" /><h2>{{value.title}}</h2></a></li>
+				{{/each}}
+				</ul>
+				<dl class="shopModFlashdl{{id}}"></dl>
+			</div>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--爱蒂宝-->
+<include file="adb"/>
+
+<!--图片导航-->
+<script id="dataNavPic" type="text/html">
+    <php>if($node_id!=C('df.node_id')){</php>
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="5">
+        <div class="shopModBox-5">
+			<ul class="shopMod-{{checkNavPicNum}}">
+				{{each list as value i }}
+					{{if i<checkNavPicNum }}
+					<li class="{{if bgcolor}}{{bgcolor}}{{/if}}"><a href="{{value.url}}" {{if value.url=="javascript:void(1)"}}onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"{{/if}}><div class="img"><img src="{{value.img}}" /></div><h2>{{value.title}}</h2></a></li>
+					{{else}}
+					<li class="dn {{if bgcolor}}{{bgcolor}}{{/if}}"><a href="{{value.url}}" {{if value.url=="javascript:void(1)"}}onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"{{/if}}><div class="img"><img src="{{value.img}}" /></div><h2>{{value.title}}</h2></a></li>
+					{{/if}}
+				{{/each}}
+			</ul>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+    <php>}</php>
+</script>
+
+<!--文字导航-->
+<script id="dataNavTxt" type="text/html">
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="6">
+		<div class="shopModBox-6">
+			<ul class="{{if bgcolor}}{{bgcolor}}{{/if}}">
+				{{each list}}
+					<li><a href="{{value.url}}" {{if value.url=="javascript:void(1)"}}onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"{{/if}}><h2>{{value.title}}</h2><i></i></a></li>
+				{{/each}}
+			</ul>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--标题-->
+<script id="dataTitle" type="text/html">
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="7">
+		<div class="shopModBox-7">
+			<ul>
+				<li class="{{if checkTextLine==1}}  {{ else if checkTextLine==2}} ln1 {{ else if checkTextLine==3}} ln2 {{ else if checkTextLine==4}} ln3 {{ else }} {{/if}}">
+				<a href="{{url}}" {{if url=="javascript:void(1)"}}onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"{{/if}}  class="{{if checkTextalign==1}} tl {{ else if checkTextalign==2}} tc {{ else if checkTextalign==3}} tr {{ else }} tl {{/if}}"><h2>{{title}}</h2><h3>{{description}}</h3></a>
+				</li>
+			</ul>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--富文本-->
+<script id="dataUeditor" type="text/html">
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="8">
+		<div class="shopModBox-8">
+			<div class="shopModText wap_info{{id}}">
+				{{Ueditor}}
+			</div>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--搜索框-->
+<script id="dataSearch" type="text/html">
+	{{if initialise }}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="9">
+		<div class="shopModBox-9">
+			<div class="search">
+				<div class="searchForm">
+					<form action="" name="searchform" method="get" id="searchform">
+                    	<input type="hidden" name="g" value="Label" />
+                        <input type="hidden" name="m" value="Store" />
+                        <input type="hidden" name="a" value="catview" />
+                        <input type="hidden" name="id" value="<?php echo session('id');?>" />
+                        <input type="input" name="keyword"  id="keyword" class="search-input" placeholder="搜索您喜欢的商品" value="{$keyword}" />
+                        <a href="javascript:void(0)" class="btn-search"></a>						
+                    </form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--辅助线-->
+<script id="dataLine" type="text/html">
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="10">
+		<div class="shopModBox-10">
+			<ul class="{{if checkLine==1}} shopModBorder-1 {{ else if checkLine==2}} shopModBorder-2 {{ else if checkLine==3}} shopModBorder-3 {{ else }} shopModBorder-1 {{/if}}">
+				<hr />
+			</ul>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--空白-->
+<script id="dataMargin" type="text/html">
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="11">
+		<div class="shopModBox-11">
+			<ul class="{{if checkMargin==1}} shopModNone-1 {{ else if checkMargin==2}} shopModNone-2 {{ else if checkMargin==3}} shopModNone-3 {{ else if checkMargin==4}} shopModNone-4 {{ else }} shopModNone-1 {{/if}}">
+			</ul>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--电商导航-->
+<script id="dataShopNav" type="text/html">
+	{{if initialise}}
+	<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="16">
+		<div class="shopModBox-16">
+			<div id="nav" class="{{if checkShopNav=="true"}}fix{{/if}}">
+				<ul>
+					<li><a href="javascript:void(0)" onClick="link_to('<?php echo U('Label/Store/index','id='.session('id'));?>')"><i class="icon-navHome"></i><p>首页</p></a></li>
+					<li class="bd"><a href="javascript:void(0)" onClick="link_to('<?php echo U('Label/Store/cart','id='.session('id'));?>')"><i class="icon-navTrolley"><?php if($cartCount>0){?><span><?php echo $cartCount;?></span><?php }?></i><p>购物车</p></a>
+					</li>
+					<li class="bd">
+						<a href="javascript:void(0)" onClick="login_to('{:U('Label/Member/index',array('node_id'=>$node_id))}')"><i class="icon-navOeder"></i><p>个人中心</p></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="cl"></div>
+	{{/if}}
+</script>
+
+<!--模板1-->
+<script id="dataModule1" type="text/html">
+{{if initialise}}
+<div class="shopMod disabled" id="shopMod_{{id}}" data-edit="{{id}}">
+	<div class="shopModBox-12">
+		<div class="bg" style="background-image:url({{bgimg}});"><a href="{{url}}" {{if url=="javascript:void(1)"}}onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"{{/if}} class="a-hide"></a></div>
+		<div class="nav" {{if checkModuleNav==0}} style=" top:85%; margin-top:-80px;" {{ else if checkModuleNav==1}}  style="bottom: 0px;" {{ else if checkModuleNav==2}}  style="top: 0px; margin-top: 0px;" {{ else if checkModuleNav==3}}  style="top: 50%; margin-top: -40px;" {{ else }} style=" top:85%; margin-top:-80px;" {{/if}} >
+			<ul class="shopModOrd-1">
+				<div class="swiper-wrapper">
+				{{each list}}
+					<li class="swiper-slide"><a href="{{value.url}}" {{if value.url=="javascript:void(1)"}}onClick="login_to('{:U('Label/MyOrder/index',array('node_id'=>$node_id))}')"{{/if}}><img src="{{value.img}}" /><h2>{{value.title}}</h2></a></li>
+				{{/each}}
+				</div>
+			</ul>
+			<div class="prevDiv"><i class="prev"></i></div>
+			<div class="nextDiv"><i class="next on"></i></div>
+		</div>
+	</div>
+</div>
+	<div class="cl"></div>
+{{/if}}
+</script>
+<!--商品菜单1-->
+<script id="dataProNav" type="text/html">
+{{if initialise}}
+<div class="shopMod disabled" id="shopMod_{{id}}" data-edit="{{id}}">
+	<div class="shopModBox-17">
+		<div class="ProNav Modbgdiv {{if bgcolor}}{{bgcolor}}{{else}}ModbgColor12{{/if}}">
+			<div class="ProNavmenu"><i class="icon-menu"><em></em></i></div>
+			<div class="ProNavlogo"><img src="{{if bgimg}}{{bgimg}}{{/if}}" class="{{if !bgimg}}dn{{/if}}"></div>
+		</div>
+	</div>
+</div>
+{{/if}}
+</script>
+<!--和包商品列表-->
+<script id="dataProAnd" type="text/html">
+<div class="andboxand">
+{{if initialise}}
+<div class="shopMod" id="shopMod_{{id}}" data-edit='{{id}}' data-special="18">
+	<div class="module-control"><span class="module-move"></span><span class="module-del"></span>
+	</div>
+	<div class="shopModBox-3 andbox">
+	  <header>
+    	<i></i> <h3>商品列表</h3>
+    </header>
+		<div class="title">
+			<ul>
+				<li class=""><img class="img" src="{{ img }}"/></li>
+				<li>
+					<h2>{{ title }}</h2>
+					<h3>{{ description }}</h3>
+				</li>
+			</ul>
+		</div>
+		<div class="list">
+			 {{ each list as value}}
+				<dl>
+					<a href="{{ value.url }}"><dt>{{ value.title }}</dt>
+					<dd><span class="red">{{ value.price }}</span>元</dd></a>
+				</dl>
+			  {{/each}}		 
+		</div>
+	</div>
+</div>
+{{ /if}}
+</div>
+</script>

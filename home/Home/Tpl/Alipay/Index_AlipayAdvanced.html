@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+<title>翼码旺财_条码支付_查询权限</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Walipay.css?v=__VR__" rel="stylesheet" type="text/css" /> 
+
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+</head>
+<body>
+<div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div class="shopNav">
+          <include file="./Home/Tpl/Alipay/Alipay_public_header.html" topmenuid="zhifu"/>
+          </div>
+        <div id="container">
+            <div id="main" class="rel bgfff">
+             <div class="sidenav">
+             <include file="./Home/Tpl/Alipay/Index_left_menuNew2.html" leftmenuid="advanced"/>
+        	</div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                       <h4>高级设置</h4>   	
+                    </div>
+                    
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                    <div class="Wcanal-tab-title fn">
+                        <p class="Wcanal-tab-hover"><a href="{:U('Index/AlipayAdvanced')}">查询权限</a></p>
+                        <p><a href="{$templateUrl}">微信模板消息</a></p>
+                        <p><a href="{:U('Index/outline')}">分账设置</a></p>
+                    </div>
+                    <div class="Wcanal-tab-list mt15">
+                        <div class="SearchArea fn">
+                            <form method="post" action="" id="theform">
+                                <div class="SearchAreaLeft">
+                                  <label><span>用户名</span><input name="name" type="text" value="{$name}" /></label>
+                                  </div>
+                                <div class="SearchAreaRight">   
+                                <a class="searchBtn"  id="search" onclick="$(this).parents('form')[0].submit()">查询</a>
+                                </div>
+                            </form>
+                        </div> 
+                        
+                        <table cellpadding="0" cellspacing="0" class="W-table">
+                            <tbody>
+                            <tr class="th">
+                                <th>姓名</th>
+                                <th>用户名</th>
+                                <th>可查询门店数</th>
+                                <th>操作</th>
+                            </tr>
+                            <volist name='list' id='v' > 
+                            <tr>
+                                <td>{$v['true_name']}</td>
+                                <td>{$v['user_name']}</td>
+                                <td>{$v['num_store']}</td>
+                                <td><a href="javascript:void(0);" data-userid='{$v['tiuser_id']}' data-powlist='{$v['power_list']}' class="js_setGroup">设置可查询门店</a></td>
+                            </tr>
+    
+                            </volist>
+                            </tbody>
+                        </table>
+                        <div>{$page}</div>
+                    </div>
+                    </div>
+        		</div>
+    		</div>
+		</div>
+	<include file="./Home/Tpl/Public/Public_footer.html" />
+	<div class="service"></div>
+	</div>
+</html>
+
+<script>
+$(function(){ 
+	var groupNum = {$groupNum};
+	$(".js_setGroup").click(function(e) {
+        if(groupNum == 1)
+		{
+			art.dialog.msg({
+				content: "<b>亲，您还未设置门店分组！</b><br><span>门店分组需至门店管理模块进行设置。</span>",
+				width:500,
+				okVal: '去设置',
+				ok: function () {
+					window.location="{:U('Home/Store/group')}";
+				},
+				cancelVal: '取消',
+				cancel: true
+			});
+		}
+		else if(groupNum == 2)
+		{
+            var _this=this;
+            var _powlist= $(this).data('powlist')  +'';  
+            var _powerarr=_powlist.split(",");
+			var _thisdata;
+			art.dialog({
+                id:'set1111',
+				content: '<div class="Gform pb20"><ul><li class="Gname">请选择分组：</li><li id="checkbox" class="Ginput checkbox"></li></ul></div>',
+				padding:0,
+				width:500,
+                init:function(){ 
+                       $.post('{:U("listgroup")}',{},function(datas){
+                                var _html=''; 
+                                for(var i in datas){
+                                    var _data=datas[i]; 
+                                    if(_powlist=='' || _powerarr.length<1){  
+                                    	_html+='<label><input name="ids[]" checked value="'+_data['id']+'" type="checkbox"/>'+_data['group_name']+'</label><div class="cl"></div>'; 
+                                     }else {  
+										   if($.inArray(_data['id'], _powerarr)  ==-1)    { 
+											  _html+='<label><input name="ids[]"  value="'+_data['id']+'" type="checkbox"/>'+_data['group_name']+'</label><div class="cl"></div>';
+										   }else{
+											   _html+='<label><input name="ids[]" checked value="'+_data['id']+'" type="checkbox"/>'+_data['group_name']+'</label><div class="cl"></div>'; 
+										}
+                                      }
+                                     }
+                                       $('#checkbox').append(_html);  
+                                      _thisdata = $(_this).data('userid'); 
+                              
+                       },'json')  
+                },
+				ok:function(){
+					var inputlist=$('#checkbox').find('input[type=checkbox]:checked');
+					if(inputlist.length<1){
+						alert('请选择分组');
+					}else{ 
+						var _ids=[];
+						for(var i in inputlist){
+							 var _id= inputlist[i].value;
+							 _ids.push(_id);
+						};
+						Dialoading("正在提交...");
+						$.post('{:U("powerset")}',{userid:_thisdata,'ids':_ids},function(data){
+							Dialoading();
+							Diasucceed(data.info);
+							if(data.status==1){
+								   window.location.reload();
+							}
+						},'json');
+					}
+				},
+				cancel:true,
+				title:'设置可查询门店',
+			});
+		}
+    });
+})
+</script>

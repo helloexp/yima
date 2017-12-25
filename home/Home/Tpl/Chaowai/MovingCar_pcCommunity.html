@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>PC申请社区卡</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnc.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine-zh_CN.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+	$(document).ready(function(e) {
+	    $('#form').validationEngine({
+	    	'allrules': {
+				"carname":{
+					"alertText":""
+				}
+			},
+	    });
+	    
+		$("#byself").click(function(){
+			$(".address").hide();
+			$("#ziqu").show();
+			$("#wuliu").hide();
+		});
+		$("#distribution").click(function(){
+			$(".address").show();
+			$("#ziqu").hide();
+			$("#wuliu").show();
+		});
+		// $('#sub').click(function(){
+		// 	$.ajax({
+  //            type: "POST",
+  //            url: "{:U('Chaowai/MovingCar/doeditcom')}",
+  //            data: $("#form").serialize(),
+  //           dataType: "html",
+  //            success: function(data){
+  //                       alert(data);
+  //                       // var win = art.dialog.open.origin;
+  //                       // win.location.reload();
+  //                     }
+  //        });
+
+
+$('#sub').click(function() {     	
+			var dialog;         
+			if($("#form").validationEngine('validate')){             
+				$("#form").ajaxSubmit({                 
+					beforeSubmit:function(){                     
+						dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});                 
+					}, 
+						success:function(data){                     
+							if(data.status == '0'){                         
+								dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+						
+							} else {                     	
+								dialog.time(3).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+								window.location.reload();
+							} 
+						}, 
+						dataType:'json' 
+					}); 
+				return false; 
+			} 
+		});
+
+		CityCode({
+			province:$("#province_code"),//省
+			city:$("#city_code"),//市
+			town:$("#town_code"),//区
+			business:$("#business_code"),//商圈
+			selected:"{:$info['province_code'].$info['city_code'].$info['town_code'].$info['business_code']}",//默认选中的省市区代号
+			url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+		});
+	});
+
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <div id="header">
+        	<h2>北京朝外15社区服务卡申请</h2>
+        </div>
+        <div id="container"> 
+            <div id="main" class="rel">
+                <form id="form" action="{:U('Chaowai/MovingCar/dopcCommunity')}" method="post" name="form" enctype="multipart/form-data">
+            		<div class="Gform">
+                		<div class="steps">企业信息</div>
+                		<ul>
+	                        <li class="Gname">企业全称：</li>
+	                        <li class="Ginput">
+	                            <input type="text" name="company_name" class="textbox validate[required,minSize[1]]" maxlength="25" placeholder="&nbsp;必填" data-rel="" /><span class="maxTips forInput" data-max="25">0/25</span>
+								<p>只支持中国大陆工商局或市场监督管理局登记的企业，请填写工商营业执照上的企业全称</p>
+	                        </li>
+	                    </ul>
+                		<ul>
+	                        <li class="Gname">单位备案信息表：</li>
+	                        <li class="Ginput">
+								<p>未审批过的企业，请下载<a href="__UPLOAD__/MovingCar/单位备案信息表.docx">单位备案信息表</a>填写完成后上传。文件大小不超过2M</p>
+	                            <!--<span class="tips">上传失败，请重新上传</span>
+	                            <span class="tips">上传文件过大，请压缩后重新上传</span>
+	                            <span class="tips">上传成功</span>-->
+	                            <!-- 三种提示信息 -->
+	                            
+                                <a href="javascript:void(0)" name="staff" type="text" id="staff" class="btn btn_primary" title="选择上传">
+                                	<span id="send">选择上传</span>
+                                	<input type="file" name="staff" class="upload_file" onchange="document.getElementById('staff').value=this.value;
+                                	document.getElementById('send').innerHTML='上传成功';"/>
+                                </a>
+
+	                        </li>
+	                    </ul>
+                	</div>
+                	<!-- 企业信息结束 -->
+                	<div class="Gform">
+                		<div class="steps">联系人信息</div>
+                		<ul>
+	                        <li class="Gname">联系人姓名：</li>
+	                        <li class="Ginput">
+	                            <input type="text" name="proposer" class="textbox validate[required,minSize[1]]" maxlength="20" placeholder="&nbsp;必填" data-rel=""  /><span class="maxTips forInput" data-max="20">0/20</span>
+								<p>请填写贵司社区服务卡申请的联系人</p>
+	                        </li>
+	                    </ul>
+                		<ul>
+	                        <li class="Gname">联系方式：</li>
+	                        <li class="Ginput">
+	                            <input name="mobile" id="phone" type="tel" class="textbox validate[required,minSize[11]]" maxlength="11" placeholder="&nbsp;请输入你的手机号码" data-rel=""  />
+								<p>该号码非常重要，请正确填写，认证审核过程将与该联系人联系</p>
+	                        </li>
+	                    </ul>
+                	</div>
+                	<!-- 联系人信息结束 -->
+                	<div class="Gform">
+                		<div class="steps">车辆相关信息</div>
+                		<ul>
+	                        <li class="Gname">车辆相关信息：</li>
+	                        <li class="Ginput">
+								<p>请下载<a href="__UPLOAD__/MovingCar/3种采集表及填写样式.doc">车辆备案信息采集表，驾驶人备案信息采集表</a><br />每辆车（以车牌号唯一）需要完成上述两个表格的填写<br />若企业拥有多辆车需要申请，可完成对应表格填写后，将所有表格压缩打包为一个文件包，选择此文件包进行上传<br />文件大小不超过10M</p>
+                                <a href="javascript:void(0)" name="staff1" type="text" id="staff1" class="btn btn_primary" title="选择上传">
+									<span id="send1">选择上传</span>
+									<input type="file" name="staff1" class="upload_file" onchange="document.getElementById('staff1').value=this.value;
+                                	document.getElementById('send1').innerHTML='上传成功';"/>
+                                </a>
+	                        </li>
+	                    </ul>
+                	</div>
+                	<!-- 车辆相关信息结束 -->
+                	<div class="Gform">
+                		<div class="steps">签定安全协议书</div>
+                		<ul>
+	                        <li class="Gname">安全协议书：</li>
+	                        <li class="Ginput">
+								<p>请下载<a href="__UPLOAD__/MovingCar/安全责任制协议书.doc">企业安全协议书</a>完成签署并企业盖章<br />上传可选择原件清晰扫描件或数码拍摄照片<br />文件大小不超过2M，文件格式为bmp、png、jpeg、jpg或gif</p>
+	                         
+                                <a href="javascript:void(0)" name="staff2" type="text" id="staff2" class="btn btn_primary" title="选择上传">
+									<span id="send2">选择上传</span>
+									<input type="file" name="staff2" class="upload_file" onchange="document.getElementById('staff2').value=this.value;
+                                	document.getElementById('send2').innerHTML='上传成功';"/>
+                                </a>
+	                        </li>
+	                    </ul>
+                	</div>
+                	<!-- 签定安全协议书结束  -->
+                	<div class="Gform">
+                		<div class="steps">领卡方式</div>
+                		<ul>
+	                        <li class="Gname">领卡方式：</li>
+	                        <li class="Ginput">
+								<label><input type="radio" name="shipping" value="0" checked id="byself" />自取</label>
+								<label><input type="radio" name="shipping" value="1" id="distribution" />物流配送</label>
+								<p><span id="ziqu">用户自取，工作人员会在审核通过后，联系您通知领取地点以及可领取的时间<br />您携带身份证明证件前往指定地点，工作人员核实后领取。</span>
+								<span id="wuliu" style="display: none;">物流配送，工作人员会在审核通过后，将社区服务卡通过物流快递配送到您填写的接收地址。</span></p>
+	                        </li>
+
+	                    </ul>
+                		<ul class="address" style="display: none;">
+	                        <li class="Gname">配送地址：</li>
+	                        <li class="Ginput">
+	                            <select class=" validate[required] selectbox ml10 n3" name="province_code" id="province_code">
+	                                <option value="">选择省</option>
+	                            </select>
+	                            <select class="validate[required] selectbox ml10 n3" name="city_code" id="city_code">
+	                                <option value="">选择市</option>
+	                            </select>
+	                            <select class="validate[required] selectbox ml10 n3" style="width:101px;"name="town_code" id="town_code">
+	                                <option value="">选择区</option>
+	                            </select>
+	                        </li>
+	                        <li class="Ginput">
+	                            <input type="text" name="address" class="textbox validate[required,minSize[1]]" maxlength="30" placeholder="&nbsp;必填" data-rel=""  /><span class="maxTips forInput" data-max="30">0/30</span>
+	                        </li>
+	                    </ul>
+                	</div>
+                	<!-- 领卡方式结束  -->
+                	<div class="Gform">
+                		<ul>
+	                        <li class="Ginput" style="margin: 0 auto; padding: 0; width: 280px;">
+	                			<a href="javascript:void(0);" class="btn btn_primary" id="sub">确认提交</a>
+	                			<input type="reset" value="重置" class="btn btn_del ml15" />
+	                        </li>
+                		</ul>
+                	</div>
+                </form>
+            </div>
+        </div>
+        <include file="./Chaowai/Tpl/Public/Public_footer.html" />
+    </div>
+</body>
+</html>

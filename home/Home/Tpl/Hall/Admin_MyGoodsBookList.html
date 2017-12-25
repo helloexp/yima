@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>已预约的卡券_卡券_翼码旺财</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+
+function GoodsBookCheck(id){
+    art.dialog.open('{:U('Hall/Admin/GoodsBookView')}'+'&id='+id, {
+        title : '卡券预订'
+        ,width : '800px'
+        ,height :'400px'
+        ,lock: true
+    });
+}
+
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="{:U('WangcaiPc/NumGoods/numGoodsList')}">卡券</a></p>
+                            <p>></p>
+                            <p>发出的合作意向</p>                            
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="WangcaiPc/NumGoods/leftMenu" leftmenuid="cyhzgl"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="Wcanal-tab">
+                            <div class="Wcanal-tab-title fn">
+                           <!-- <?php
+                            $tabs = array(
+                                'MyGoodsBookList'=>'我的卡券预订意向',
+                                'GoodsBookList'=>'收到的卡券预订',
+                                'MyGoodsSupplyList'=>'我的供货意向',
+                                'GoodsSupplyList'=>'收到的供货意向',
+                            );
+                            foreach($tabs as $acn=>$tab){
+                                $cls = $acn == ACTION_NAME ? 'Wcanal-tab-hover' : '';
+                            ?>
+                                <p class="<?php echo $cls;?>"><a href="<?php echo U($acn);?>"><?php echo $tab;?></a></p>
+                            <?php
+                            }
+                            ?>-->
+							<p class="Wcanal-tab-hover"><a href="{:U('Hall/Admin/MyGoodsBookList')}">卡券预定申请</a></p>
+                            <p><a href="{:U('Hall/Admin/MyGoodsSupplyList')}">供货申请</a></p>
+                            <p><a href="{:U('Hall/Admin/joinOtherBloc')}"> 旺财联盟加入申请</a></p>
+                            <p><a href="{:U('Hall/Admin/invite')}"> 旺财联盟加入邀约</a></p>
+                            </div>
+                            <div class="Wcanal-tab-list">
+                                <div class="form-search fn">
+                                    <form method="post" id="sform" action="{:U('Hall/Admin/MyGoodsBookList')}">
+                                        <p>卡券名称</p>
+                                        <p><input name="batch_name" type="text" value="{:I('batch_name')}"  maxlength="11" class="textbox w100"/></p>
+                                        <p class="ml20">审核状态</p>
+                                        <p>
+                                            <select name="check_status" id="select" class="selectbox" >
+                                                <option value="" class="">全部</option>
+                                                {:show_arr_opt($book_cks_arr, I('check_status'))}
+                                            </select>
+                                        </p>
+                                        <a href="javascript:void(0);" class="btn-all w110 r" id="search" onclick="$('#sform').submit();">查询</a>
+                                    </form>
+                                </div>
+                                <table cellpadding="0" cellspacing="0" class="W-table">
+                                    <tr>
+                                        <th>卡券名称</th>
+                                        <th>价格</th>
+                                        <th>现有库存</th>
+                                        <th>采购方</th>
+                                        <th>采购数量</th>
+                                        <th>提交时间</th>
+                                        <th>审核状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    
+                                    <if condition="$queryList"> 
+                                    <volist name="queryList" id="vo">
+                                    <tr>
+                                        <td>{$vo.batch_short_name}</td>
+                                        <td>{$vo.batch_amt}</td>
+                                        <td>
+                                            <if condition="($vo.storage_type eq 0)">
+                                                不限
+                                            <else />
+                                                {$vo.remain_num}
+                                            </if>
+
+                                        </td>
+                                        <td>{$vo.book_node_name}</td>
+                                        <td>{$vo.book_num}</td>
+                                        <td>{$vo.add_time|dateformat=###,'y-m-d H:i'}</td>
+                                        <td>{$book_cks_arr[$vo['check_status']]}</td>
+                                        <td>
+                                        <a href="javascript:;" onclick="GoodsBookCheck('{$vo.id}')">更多</a>
+                                        </td>
+                                    </tr>
+                                    </volist>
+                                    <else/>
+                                        <tr>
+                                            <td colspan="8">
+                                                <div class="nonedata"></div>
+                                            </td>
+                                        </tr> 
+                                   </if>
+                                    
+                                </table>
+                                <div class="page">{$page}</div>
+                            </div>
+                        </div>
+                </div>
+                <div id="globallibscontent" class="hide">
+                    
+                </div>
+                </div>
+             </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

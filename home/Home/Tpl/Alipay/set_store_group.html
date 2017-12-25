@@ -1,0 +1,90 @@
+<script type="text/javascript">
+    function showGroupList(_this, _powlist, _powerarr) {
+        var _thisdata = $(_this).data('userid');
+        var _node_id = $(_this).data('node_id');
+        var _pay_type= $(_this).data('pay_type');
+        console.log("_node_id:" + _node_id);
+        $.getJSON('{:U("groupGet")}', {"userid": _thisdata, "node_id": _node_id, "pay_type": _pay_type}, function (datas) {
+            var _html = '';
+            for (var i in datas) {
+                var _data = datas[i];
+                var _selected = _data.selected == 1 ? "checked" : "";
+                if (_powlist == '' || _powerarr.length < 1) {
+                    _html += '<label><input name="ids[]"  value="' + _data['id'] + '" type="checkbox" ' + _selected + '/>' + _data['group_name'] + '</label><div class="cl"></div>';
+                } else {
+                    if ($.inArray(_data['id'], _powerarr) == -1) {
+                        _html += '<label><input name="ids[]"  value="' + _data['id'] + '" type="checkbox"  ' + _selected + '/>' + _data['group_name'] + '</label><div class="cl"></div>';
+                    } else {
+                        _html += '<label><input name="ids[]"  value="' + _data['id'] + '" type="checkbox" ' + _selected + '/>' + _data['group_name'] + '</label><div class="cl"></div>';
+                    }
+                }
+            }
+            $('#checkbox').append(_html);
+            _thisdata = $(_this).data('userid');
+        });
+    }
+
+    function updateGroupList(inputlist,_thisdata) {
+            var _ids=[];
+            for(var i in inputlist){
+                var _id= inputlist[i].value;
+                _ids.push(_id);
+            }
+            Dialoading("正在提交...");
+            $.post('{:U("groupSet")}',{"userid":_thisdata,'ids':_ids},function(data){
+                Dialoading();
+                Diasucceed(data.info);
+                if(data.status==1){
+                    window.location.reload();
+                }
+            },'json');
+    }
+
+    function resultShow(url){
+        var searchName=$("#accountName").val();
+        searchName = $.trim(searchName);
+        if (searchName == '') {
+            alert("请输入帐号信息");
+            return false;
+        }
+        document.location.href = url + "&name=" + searchName;
+    }
+
+    $(function(){
+        var groupNum = "2";
+        $("body").on("click",".js_setGroup",function(e) {
+            if(groupNum == 1) {
+                art.dialog.msg({
+                    content: "<b>亲，您还未设置门店分组！</b><br><span>门店分组需至门店管理模块进行设置。</span>",
+                    width:500,
+                    okVal: '去设置',
+                    ok: function () {
+                        window.location="{:U('Home/Store/group')}";
+                    },
+                    cancelVal: '取消',
+                    cancel: true
+                });
+            } else if(groupNum == 2) {
+                var _this=$(this);
+                var _powlist= _this.data('powlist')  +'';
+                var _powerarr=_powlist.split(",");
+                var _thisdata = _this.data('userid');
+                art.dialog({
+                    id:'set1111',
+                    content: '<div class="Gform pb20"><ul><li class="Gname">请选择分组：</li><li id="checkbox" class="Ginput checkbox"></li></ul></div>',
+                    padding:0,
+                    width:500,
+                    init:function(){
+                        showGroupList(_this, _powlist, _powerarr);
+                    },
+                    ok:function(){
+                        var inputlist=$('#checkbox').find('input[type=checkbox]:checked');
+                        updateGroupList(inputlist,_thisdata);
+                    },
+                    cancel:true,
+                    title:'设置可查询门店'
+                });
+            }
+        });
+    });
+</script>

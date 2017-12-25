@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>挂机旺财</title>
+     <link rel="shortcut icon" href="__PUBLIC__/Image/Onhook/favicon.ico">
+	<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+	<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" /> 
+	<link href="__PUBLIC__/Css/Onhook.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<body>
+<include file="Fj114/Public/header"/> 
+
+        <div class="container fn">
+            <include file="Fj114/Public/leftmenu" leftmenuid="wdkq"/>  
+            <div class="container-right">
+                <div class="main-name">
+                    <h4 >我的卡券</h4>
+                </div>
+                <div class="SearchArea fn">
+                    <div class="SearchAreaLeft">
+                        <label>
+                            <span>券名</span>
+                            <input type="text" name="cardName" value="{$keyWord}">
+                        </label>
+                    </div>
+                    <div class="SearchAreaRight">
+                        <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                    </div>
+                </div>
+                <table class="W-table cardTable">
+                    <tr>
+                        <th>卡券信息</th>
+                        <th>已发送数量</th>
+                        <th>本月发送数量</th>
+                        <th>操作</th>
+                    </tr>
+                    <volist name='cardInfo' id='cardItem' key='k'>
+                        <tr>
+                            <td>
+                                <a href="{:U('Fj114/UserCode/myCardInfo', array('id'=>$cardItem['goods_id']))}">
+                                    <div class="cardInfo">
+                                        <img src="{:get_upload_url($cardItem['goods_image'])}"/>
+                                        <span>{$cardItem.goods_name}</span>
+                                    </div>
+                                </a>
+                            </td>
+                            <td>{$cardItem.total_send}</td>
+                            <td>{$cardItem.monthSend}</td>
+                            <if condition="$k eq '1'">
+                                <td>默认卡券不可编辑</td>
+                            <else />
+
+                                 <td><a href="./index.php?g=Fj114&m=UserCode&a=createCode&id={$cardItem['goods_id']}" class="edit">编辑</a>
+								&nbsp;&nbsp;&nbsp;&nbsp;<a class="del" href="javascript:void(0)" goodsid="{$cardItem['goods_id']}"   >删除</a></td>
+
+
+
+                               
+
+                            </if>
+                        </tr>
+                    </volist>
+                </table>
+            </div>
+        </div>
+        <div class="haobai-footer">
+            <include file="Fj114/Public/Footer"/>    
+        </div>
+        <script type='text/javascript'>
+			$('.del').click(function(){
+					var goodsid = $(this).attr('goodsid');
+					Diamsg({
+						content:"删除后不可恢复，确认删除？",
+						ok:function(){
+							$.post("{:U('Fj114/UserCode/deleteCode')}", {'goodsid':goodsid}, function(data){
+								if(data['error'] == '0'){
+									window.location.reload();
+								}else if(data.resultCode=="1001"){
+                                    Diaerror(data.resultTxt);
+                                }
+							},'json');
+                        },
+						okVal:"确定",
+						cancelVal:"取消",
+						cancel:function(){}
+						});
+					
+				});	
+            $(function(){
+                $('#search').click(function(){
+                    var keyWords = $('input[name=cardName]').val();
+                    if(keyWords == ''){
+                        Diaerror("请填写卡券名称");
+                    }else{
+                        window.location.href = "{:U('Fj114/UserCode/codeList')}"+'&keyWord='+keyWords;
+                    }
+                    
+                });
+            });
+        </script>
+    </body>
+</html>

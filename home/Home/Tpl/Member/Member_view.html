@@ -1,0 +1,369 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>粉丝筐粉丝详情</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<link href="__PUBLIC__/Css/member.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/member.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript">
+$(document).ready(function(e){
+	memeditdata();	//编辑信息
+        //var id = {$info.id};
+    $("#submit").click(function(){
+        var dialog;
+        var old_batch_no = $('#old_batch_no').val();
+        var batch_no = $('#batch_no').val();
+        var is_send = '{$info['request_id']}';
+        if(old_batch_no != batch_no && is_send != ''){
+        	art.dialog.confirm("您更改了粉丝权益,需要重新下发粉丝权益,确定修改？",function(){
+        		if($("#myform").validationEngine('validate')){
+                    $("#myform").ajaxSubmit({
+                        beforeSubmit:function(){
+                            dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                        },
+                        success:function(data){
+                             if(data.status == '1'){
+                                   dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                                   setTimeout("window.location.reload();",500);
+                                   return false;
+                              }else{
+                                    dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                                      }
+                              },
+                        dataType:'json'
+                    });
+                    return false;
+                }
+        	});
+        }else{
+        	if($("#myform").validationEngine('validate')){
+                $("#myform").ajaxSubmit({
+                    beforeSubmit:function(){
+                        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                    },
+                    success:function(data){
+                         if(data.status == '1'){
+                               dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                               setTimeout("window.location.reload();",500);
+                               return false;
+                          }else{
+                                dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                                  }
+                          },
+                    dataType:'json'
+                });
+                return false;
+            }
+        }
+    });
+    $("#cards_submit").click(function(){
+        var dialog;
+        if($("#cards_form").validationEngine('validate')){
+            $("#cards_form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                           setTimeout("window.location.reload();",500);
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                              }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+        
+}); 
+// 粉丝卡发送，撤销，重发。
+function code_handle(DOM,info)
+{
+    var id = DOM.id;
+    var rev = DOM.rev;
+    var data = {
+            rev:rev,
+            member_id:id
+        };
+    if(rev=='send'){
+    	$("#member_id").val(id);
+    	art.dialog({
+            title:"发送粉丝权益",
+            id:"member_cards",
+            content:document.getElementById("member_cards"),
+            width:600,
+            lock:true
+        });
+    	return false;
+    }        
+    art.dialog.confirm("确认"+info+"?",function(){
+    	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在"+info+"...</div>",fixed: true,padding:0});
+    	$.ajax({
+            error:function(e){
+                alert(e);
+            },
+            type:'POST',
+            data:data,
+            url:"{:U('Member/Member/code_handle')}",
+            success:function(data){
+               if( data.status == '1')
+                {
+            	   dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+            	   setTimeout("window.location.reload();",500);
+                   return false;
+                }else{
+                	dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },
+            dataType:"json"
+        });
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            	<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="javascript:void(0)">粉丝权益</a></p>
+                            
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="Member/Member/leftMenu" leftmenuid="fszx"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4 class="bd-b-565656">粉丝详细信息</h4>
+                    </div>
+                    <div class="mem-repay-prize fn bgf3f3f3 p20 tc">
+                        <span>{$info.name}</span><span class="ml20">粉丝详细信息</span>
+                    </div>
+            
+                    <div class="mem-member-data">
+                        <div class="mem-member-data-con">
+                            <!-- <ul class="mem-info-form fn">
+                                <li class="mem-info-title">粉丝ID：</li>
+                                <li class="mem-info-input">{$info.member_id}</li>
+                            </ul>-->
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">粉丝姓名：</li>
+                                <li class="mem-info-input">{$info.name}</li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">手机号码：</li>
+                                <li class="mem-info-input">{$info.phone_no}</li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">发码量：</li>
+                                <li class="mem-info-input">{$send_count}</li>
+                            </ul><ul class="mem-info-form fn">
+                                <li class="mem-info-title">验码量：</li>
+                                <li class="mem-info-input">{$verify_count}</li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">登记日期：</li>
+                                <li class="mem-info-input"><?php echo dateformat($info['add_time'],'Y-m-d');?></li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">粉丝类别：</li>
+                                <li class="mem-info-input">
+                                        <assign name="b_no" value="$info.batch_no" />
+                                        {$batch_arr.$b_no}
+                                </li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">性别：</li>
+                                <li class="mem-info-input">
+                                    <assign name="var" value="$info.sex" />
+                                    {$sex_arr.$var}
+                                    </li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">生日：</li>
+                                <li class="mem-info-input"><?php echo dateformat($info['birthday'],'Y-m-d');?></li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">首次来源渠道：</li>
+                                <li class="mem-info-input">{$channelName}</li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">参与活动次数：</li>
+                                <li class="mem-info-input">{$info.join_num}</li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">当前分组：</li>
+                                <li class="mem-info-input">{$groupInfo['name']}</li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">区域：</li>
+                                <li class="mem-info-input">{$info['address']}</li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">&nbsp;</li>
+                                <li class="mem-info-input"><a href="javascript:void(0)" class="mem-member-data-editgo">编辑</a></li>
+                            </ul>
+                        </div>
+                        <div class="mem-member-data-form">
+                            <form action="{:U('Member/Member/save')}" method="POST" name="myform" id="myform" >  
+                                <input type='hidden' name='id' id='id' value='{$info.id}'>
+                            <!--
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">粉丝ID：</li>
+                                <li class="mem-info-input"><input type="text" name='member_id' id='member_id' class="textbox w120" value="{$info.member_id}"/></li>
+                            </ul>
+                            -->
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">粉丝姓名：</li>
+                                <li class="mem-info-input"><input type="text" name='name'  id='name' class="textbox w120" value="{$info.name}"/></li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">手机号码：</li>
+                                <li class="mem-info-input"><input type="text" name='phone_no'  id='phone_no' class="validate[required,minSize[11],custom[onlyNumberSp]] textbox w120" value="{$info.phone_no}" maxlength="11"/></li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">粉丝类别：</li>
+                                <li class="mem-info-input">
+                                    <input type="hidden" name="old_batch_no" id="old_batch_no" value="{$info.batch_no}" />
+                                    <select name="batch_no" id="batch_no" class="selectbox">
+                                    <option value="">请选择</option>
+                                    <volist name='batch_list' id='list'>
+                                        <eq  name="list.batch_no" value="$info.batch_no">
+                                            <option value="{$list.batch_no}" selected='selected'>{$list.level_name}</option>
+                                        <else/>
+                                            <option value="{$list.batch_no}">{$list.level_name}</option>
+                                        </eq>
+                                    </volist>
+                                    </select>
+                                </li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">粉丝分组：</li>
+                                <li class="mem-info-input">
+                                    <select name="group_id" id="group_id" class="selectbox">
+                                    <volist name='groupList' id='list'>
+                                        <eq  name="list.id" value="$info.group_id">
+                                            <option value="{$list.id}" selected='selected'>{$list.name}</option>
+                                        <else/>
+                                            <option value="{$list.id}">{$list.name}</option>
+                                        </eq>
+                                    </volist>
+                                    </select>
+                                </li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">性别：</li>
+                                <li class="mem-info-input">
+                                   <input type="radio"   name="sex" <eq name="info.sex" value="1">checked="checked"</eq> value="1"/>&nbsp;男
+                                   <input type="radio"   name="sex" <eq name="info.sex" value="2">checked="checked"</eq>value="2"/>&nbsp;女
+                                </li>
+                            </ul>
+                            
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">生日：</li>
+                                <li class="mem-info-input"><input type="text" id="birthday" name='birthday' onclick='WdatePicker()' class="textbox w120" value="{$info.birthday|dateformat=###,'Ymd'}"/></li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <li class="mem-info-title">区域：</li>
+                                <li class="mem-info-input"><input type="text" id="address" name='address' class="textbox w120" value="{$info.address}"/></li>
+                            </ul>
+                            <ul class="mem-info-form fn">
+                                <input type="hidden" value='1' name="ajax" />
+                                <li class="mem-info-title">&nbsp;</li>
+                                <li class="mem-info-input"><a href="javascript:void(0)" id='submit' class="btn-all w110">确定</a></li>
+                            </ul>
+                            </form>
+                        </div>
+                        <div class="mem-member-data-card">
+                            <div class="mem-member-data-card-icon"></div>
+                            <div class="mem-member-data-card-edit tc">
+                            <?php if(!empty($info['batch_no'])){?>
+                                <?php if(empty($info['request_id'])){ ?>
+                                    <a href="javascript:void(0)" id="<?php echo $info['id'];?>" rev="send" onclick="code_handle(this,'发送粉丝卡');">发送粉丝权益</a>
+                                    <br/>
+                                    最近一次发卡时间：未发卡
+                            <?php }else{?>
+                                                                                               该粉丝还没有绑定粉丝权益
+                            <?php } ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+    <!-- 权益发送 -->
+    <div id="member_cards" class="mem-form dn">
+        <form method="post" id="cards_form" action="{:U('Member/Member/code_handle')}">
+            <div class="global-input5">
+                <ul>
+                    <li class="global-input5-name">粉丝权益特权：</li>
+                    <li class="global-input5-input">
+                        <textarea disabled='disabled'  class="texttextarea w240 h126">{$printInfo}</textarea>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="global-input5-name">彩信标题：</li>
+                    <li class="global-input5-input">
+                        <input type="text" name="mms_title" id="mms_title" onkeyup="check_lenght(10,'title_text',this);" class="validate[required,maxSize[10]] textbox w240" value=""/>
+                        <br />
+                        <p id="title_text">还可以输入10个字</p>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="global-input5-name">彩信内容：</li>
+                    <li class="global-input5-input">
+                        <textarea name="mms_info" id="mms_info" onkeyup="check_lenght(100,'text',this);" class="validate[required,maxSize[100]] texttextarea w240 h126"></textarea>
+                        <br />
+                        <p id="text">还可以输入100个字</p>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="global-input5-name">&nbsp;</li>
+                    <li class="global-input5-input">
+                        <input type="hidden" value='1' name="ajax" />
+                        <input type="hidden" value='' name="member_id" id="member_id"/>
+                        <input type="hidden" value='send' name="rev"/>
+                        <a href="javascript:void(0)" id="cards_submit"  class="btn-all w90">确认</a>
+                        <a href="javascript:void(0)" onclick="art_close('member_cards');"  class="btn-all-del w90">取消</a>
+                    </li>
+                </ul>
+            </div>
+        </form>
+    </div>
+<!--  权益发送 -->
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-门店信息编辑</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=WRzAu3DNewWB4oeOELaczjsM"></script>
+
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script>
+$(function(){
+
+	//省市区初始化
+	CityCode({
+		province:$("#province_code"),//省
+		city:$("#city_code"),//市
+		town:$("#town_code"),//区
+		business:$("#business_code"),//商圈
+		selected:"{:$info['province_code'].$info['city_code'].$info['town_code'].$info['business_code']}",//默认选中的省市区代号
+		url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+	});
+	 function subclick(){
+         if($("#storeFromEdit").validationEngine('validate')){
+      	   $("#smbmit").unbind('click',subclick);
+  	      $.post("{:U('Home/Store/edit')}",$("#storeFromEdit").serialize(),function(d){
+  		       // alert(d.status+d.info);
+  			   if(d.status =='0'){
+    			   art.dialog.msg({
+     					content:d.info
+     				})
+  			   }else if(d.status =='1'){
+  			     success(d.info);
+  			   }
+    		$("#smbmit").bind('click',subclick);
+  		  },'json');
+  	  }
+
+  	}
+
+	$("#smbmit").click(subclick);
+})
+
+function result_(contents){
+      art.dialog.msg({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				   //art.dialog.close();
+				}
+			})
+   }
+   
+function success(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				    art.dialog.close();
+				    parent.art.dialog.list['storeID'].close();
+					
+				}
+			})
+   }
+</script>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab" id="Wcanal-tabon">
+    <div class="steps">基本信息</div>
+    <div class="eTicket_form">
+        <form method="" action="" id="storeFromEdit">
+		 <input type="hidden" name="id" value="{$Think.get.id}" />
+            <div id="Wform" class="Gform" style="margin-left:-30px">
+             <!--   <ul>
+                    <li class="Gname">*&nbsp;门店名称</li>
+                    <li class="Ginput"><input name="store_name" id="store_name" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[50]]" value="{$info.store_name}"/>
+                    <p class="font-12-cc" style="font-size:12px;">最多50个字，连锁门店可以用()标识，如金汉斯（国展店）</p>
+                    </li>
+                </ul>-->
+                <ul>
+                    <li class="Gname"><span>*</span>&nbsp;门店简称</li>
+                    <li class="Ginput"><input name="store_short_name" id="store_short_name" type="text" onkeyup="check_lenght(10,'name_text',this);" class="validate[required,maxSize[12]]" value="{$info.store_short_name}"/>
+                    <span class="txtTips">最多10个字，会显示在核验终端验证卡券的打印小票中</span>
+                    </li>
+                </ul>
+                <if condition="$fjcbcFlag">
+                    <ul>
+                        <li class="Gname"><span>*</span>&nbsp;门店详称</li>
+                        <li class="Ginput"><input name="store_name" id="store_name" type="text" onkeyup="check_lenght(30,'name_text',this);" class="validate[required,maxSize[30]] textbox w380" placeholder="" value="{$info.store_desc}"/>
+                            <span class="txtTips">最多30个字，会在建行定制导航页面中展现</span>
+                        </li>
+                    </ul>
+                </if>
+                <ul>
+                    <li class="Gname"><span>*</span>&nbsp;所属区域</li>
+                    <li class="Ginput">
+                         <select class="validate[required] n3" name="province_code" id="province_code">
+                                            <option value="">选择省</option>
+                                        </select>
+                                        <select class="validate[required] n3" name="city_code" id="city_code">
+                                            <option value="">选择市</option>
+                                        </select>
+                                        <select class="validate[required] n3" name="town_code" id="town_code">
+                                            <option value="">选择区</option>
+                                        </select>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gname"><span>*</span>&nbsp;详细地址</li>
+                    <li class="Ginput"><input name="address" id="address" type="text" onkeyup="check_lenght(50,'name_text',this);" class="validate[required,maxSize[50]]" value="{$info.address}"/>
+                    <span class="txtTips">指引消费者到店，如“昌平路653号”</span>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gnmae">&nbsp;门店联系电话：</li>
+                    <li class="Ginput"><input name="store_phone" id="store_phone" type="text" value="{$info.store_phone}"/>
+                    <span class="txtTips">便于消费者联系门店咨询，如“021-51970599”</span>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gname">&nbsp;所属商圈</li>
+                    <li class="Ginput">
+                        <select id="business_code" class="selectbox" name="business_code">
+                            <option value="">选择</option>
+                        </select>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gname">&nbsp;门店分组</li>
+                    <li class="Ginput">
+                        <select id="business_code" class="selectbox" name="groupId">
+                        <option value="">请选择</option>
+                        <?php foreach($storeGroup as $key => $value):?>
+                            <option value="{$value['id']}"
+                                <?php if(strpos($value['storeid'],$info['store_id']) !== false):?>
+                                    selected="selected"
+                                <?php endif;?>
+                            >
+                                {$value['group_name']}（{$value['num']}）
+                            </option>
+                        <?php endforeach;?>
+                        </select>
+                    </li>
+                </ul>
+                <php>if($nodeInfo['node_id']==C('df.node_id')){</php>
+                <ul>
+                    <li class="Gname">门店介绍</li>
+                    <li class="Ginput"><textarea name="store_introduce" id="store_desc" onkeyup="check_lenght(500,'name_text',this);" class="validate[maxSize[500]]" style="height: 120px;">{$info['store_introduce']}</textarea>
+                        <!--<span class="txtTips">用于指引消费者到店,需填写门店详细地址，精确到门牌号，如“昌平路653号”</span>-->
+                    </li>
+                </ul>
+                <php>}</php>
+                <ul>
+                    <li class="global-input6-name Gname"><span>*</span>&nbsp;门店图片</li>
+                    <li>
+                        <div id="logo-upload2" class="vm dib ml10 Ginput">
+                            <div class="rel l">
+                                <a href="javascript:void(0);" title="上传" class="btn_inner w60 " onclick="log_add()">上传</a>
+                                <input type="text" value="" name="store_pic" id="goods_img" class="" style="width:1px;height: 1px;border-style:none" />
+                            </div>
+                        </div>
+                        <div class="cl"></div>
+                        <img id="img_logo_show" class="mt5 w80 dn Ginput" src="{:get_upload_url($info['store_pic'])}" style="margin-left: 10px;"/>
+                        <input type="hidden" name="previewimgis_logo" vale="0" />
+                    </li>
+                    <script>
+                        $(document).ready(function(e) {
+                            $("input[name='is_log_img']").change(function() {
+                                var t = $(this).val();
+                                showimg(t)
+                            })
+                            //初始化页面logo
+                            function startaction(){
+                                $('#img_logo_show').show();
+                                //previewuploadimg('{:get_upload_url($info['store_pic'])}', "logo");
+                                $('#goods_img').val("{$info['store_pic']}");
+                                $('#reset_logo').val(1);
+                            }
+                            //调用初始化页面logo
+                            startaction();
+                        });
+                        function showimg(t) {
+                            if (t == 0) {
+                                $('#img_logo_show').hide('');
+                                $('#logo-upload2').hide();
+                                $(".Preview-mainCon").addClass("noLogo");
+                                var i = $("[name='node_name_radio']:checked").val();
+                                if (i == 0) {
+                                    $(".Preview-mainCon").addClass("noTitle");
+                                } else {
+                                    $(".Preview-mainCon").removeClass("noTitle");
+                                }
+                            } else {
+                                $('#logo-upload2').show();
+                                $(".Preview-mainCon").removeClass("noLogo");
+                                $(".Preview-mainCon").removeClass("noTitle");
+                                $('#img_logo_show').show();
+                                if ("{$info['store_pic']}" != '' && $('input[name="previewimgis_logo"]').val() == 0) {
+                                    previewuploadimg("{:get_upload_url($info['store_pic'])}", "logo");
+                                    $('#goods_img').val("{$info['store_pic']}");
+                                    $('#reset_logo').val(1);
+                                }
+                            }
+                        }
+                        function log_add() {
+                            var opt = {
+                                obj: $("#img_resp_show"),
+                                height: 80,
+                                width: 80,
+                                cropPresets:false,
+                                callback: function(data) {
+                                    console.log(data);
+                                    $('#img_logo_show').attr('src', data['src']);
+                                    $('#img_logo_show').show();
+                                    $('#goods_img').val(data['savename']);
+                                    $('#reset_logo').val(1);
+                                    $('input[name="previewimgis_logo"]').val(1);
+                                }
+                            };
+                            open_img_uploader(opt);
+                        }
+                        function openUploaderMeitu_log(url) {
+                            var win_width = 700;
+                            art.dialog.open(url, {
+                                lock: true,
+                                title: "上传LOGO图片",
+                                width: win_width,
+                                height: win_width / 1.6,
+                                id: 'art_upload'
+                            });
+                        }
+                    </script>
+                </ul>
+                </div>
+                <div class="steps mt40">负责人信息</div>
+                <div class="Gform" style="margin-left:-30px">
+                <ul>
+                    <li class="Gname"><span>*</span>&nbsp;姓名</li>
+                    <li class="Ginput"><input name="principal_name" id="principal_name" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[24]]" value="{$info.principal_name}"/>
+                    </li>
+                </ul>
+                
+                <ul>
+                    <li class="Gname"><span>*</span>&nbsp;手机</li>
+                    <li class="Ginput"><input name="principal_phone" id="principal_tel" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,minSize[11],maxSize[11]]" value="{$info.principal_phone}"/>
+                    </li>
+                </ul>
+                
+                <ul>
+                    <li class="Gname"><span>*</span>&nbsp;邮箱</li>
+                    <li class="Ginput"><input name="principal_email" id="principal_email" type="text" onkeyup="check_lenght(50,'name_text',this);" class="validate[required,minSize[4],maxSize[50]]" value="{$info.principal_email}"/>
+                    <span class="txtTips">修改后，将重置该门店下EPOS的登录密码并发送至新邮箱</span>
+                    </li>
+                </ul>
+                <div class="DiabtnCon">
+                    <a href="javascript:void(0)" class="Diabtn-all" id="smbmit">确定</a>
+                    <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="smb">取消</a>
+                </div>
+                </div>
+        </form>
+    </div>
+    </div>
+</div>
+</body>
+</html>

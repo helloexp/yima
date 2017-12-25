@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>翼惠宝商家编辑</title>
+        <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+        <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wyhb.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+        <style type="text/css">
+            .link a { color: #666666;}
+            .main-name h5 { line-height: 22px; margin-bottom: 15px; font-size: 16px; color: #595959;}
+            .main-name h5 i { width: 22px; height: 22px; margin-right: 8px; vertical-align: bottom; background: url(__PUBLIC__/Image/Whdm/icon-hdm.png) -14px -14px no-repeat;}
+            .subcon .limitBox p { width: 100%; float: left; font-size: 14px; line-height: 20px; color: #a3a3a3; padding: 0; margin: 4px 0 15px 0;}
+            .subcon .tbtn.btn-red { margin: 2px 15px 0 15px; border: 1px #ed3f41 solid; background: #ed3f41;}
+            .subcon .limitBox .tabs { line-height: 26px; border: 1px #cccccc solid; float: left;}
+            .subcon .tabs .tabList { padding: 5px 11px; margin: 0; line-height: 18px; background: #ffffff; color: #6e6e6e; cursor: pointer;}
+            .subcon .tabs .tabList.active { background: #ff8a00; color: #ffffff;}
+            .subcon .tabList.active:after { display: none;}
+            .subcon .classify { border: solid 1px #e3e2e2; border-top: solid 0px #e3e2e2;}
+            .subcon .classify li { text-align: center; background: #eeeeee; border-top: solid 1px #e3e2e2;}
+            .subcon .classify li .list { height: 40px;}
+            .subcon .classify li .list span { display: inline-block; width: 30%; font-size: 14px; line-height: 38px;}
+            .subcon .classify li .last a { margin-right: 10px;}
+            .subcon .classify li .list i.downArrow { cursor: pointer; font-size: 16px; width: 0; height: 0; margin-left: 10px; border-left: 6px transparent solid; border-right: 6px transparent solid; border-top: 6px transparent solid; border-top-color: #afafaf;}	
+            .subcon .classify li .list.level-1 { background: #f7f7f7;}
+            .subcon .classify li .list.level-1 .js_orderdetail { color: #b2b2b2; pointer-events: none; cursor: no-drop;}
+            .subcon .classify li .list.level-2 {/* display: none;*/ background: #ffffff;}
+            .subcon .classify li .list.level-2 .tbtn.btn-add { background: #c8cace; pointer-events: none; border-color: #c8cace;}
+            .subcon .classify li .list.level-2 .js_orderdetail { color: #3d86ba; pointer-events: auto; cursor: pointer;}
+            .subcon .classify li i.downArrow.active { -webkit-transform: rotate(180deg); -ms-transform: rotate(180deg); -o-transform: rotate(180deg); transform: rotate(180deg);}
+            .subcon .classify li .active.level-2 { display: none;}
+
+            .subcon .Gname span { color: #ed3f41;}
+        </style>
+        <style>
+            .correct{visibility:hidden;margin-right:20px;color:#51dc14;font-size:20px;font-weight:bold;}
+        </style>
+        <script type="text/javascript">
+            String.prototype.getBytes = function () {
+                var cArr = this.match(/[^\x00-\xff]/ig);
+                return this.length + (cArr == null ? 0 : cArr.length);
+            }
+        </script>
+        <script type="text/javascript">   
+        $(function(){
+             $("#parent_id").change(function() {  
+                loadCatalog($("#parent_id option:selected").val());  
+            });
+            if($("#parent_id option:selected").val()!='')
+            {
+                loadCatalog($("#parent_id option:selected").val());
+            }
+              
+            function loadCatalog(parentid) {
+                var selected_id={$merchant['catalog_id']};
+                $.ajax({  
+                    url: '{:U('Yhb/Merchant/AjaxCatalog')}&parent_id='+ parentid,  
+                    type: 'POST',  
+                    dataType: 'JSON',  
+                    timeout: 5000,  
+                    error: function() { alert('Error loading data!'); },  
+                    success: function(msg) {  
+                        $("#catalog_id").empty();  
+                        $("<option value=''>请选择</option>").appendTo($("#catalog_id"));  
+                        $.each(eval(msg), function(i, item) {  
+                            if(selected_id==item.id){
+                                $("<option value='" + item.id + "' selected='selected'>" + item.catalog_name + "</option>").appendTo($("#catalog_id"));
+                            }else{
+                                $("<option value='" + item.id + "'>" + item.catalog_name + "</option>").appendTo($("#catalog_id"));
+                            }  
+                        });  
+                    }  
+                });
+            }  
+        })  
+    </script>
+    </head>
+    <body>
+
+        <div id="wrapper" class="login-bg">
+            <div id="headerTwo" style="z-index: 999">
+                <include file="Login:loginHeader"/>
+            </div>
+            <div id="container"  class="bgfff">
+                <div id="main">
+                    <include file="Store:Yhb_menu" leftmenuid="merchant_list"/>
+                    <div class="subcon fn">
+                        <div class="main-name fn">
+                            <h4>商户编辑</h4>
+                            <form id="regform" action="{:U('Yhb/Merchant/nodeeditme')}" method="POST" name="regform" onkeydown="if(event.keyCode==13){return false;}">
+                                <input type="hidden" name="nodeok" id="nodeok" value="" />
+                                <div class="Gform">
+                                    <div class="steps">商户信息</div>
+                                    <ul>
+                                        <li class="Gname"><span>*&nbsp;</span>商户名称</li>
+                                        <li class="Ginput reg-item-tip">
+                                            <input type="text" class="textbox validate[required,ajax[ajaxCheckCompanyName]]" maxlength="15" placeholder="请填写营业执照上的名称" name="merchant_name" id="merchant_name" value="{$merchant['merchant_name']}" disabled='disabled'/><span class="maxTips forInput" data-max="30">0/30</span><span class="correct">√</span>
+                                            <p>商户认证信息</p>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*&nbsp;</span>商户简称</li>
+                                        <li class="Ginput reg-item-tip">
+                                            <input type="text" class="textbox validate[required]" maxlength="20" placeholder="请填写商户简称" name="merchant_short_name" data-rel="" id="merchant_short_name" value="{$merchant['merchant_short_name']}" disabled='disabled'/><span class="maxTips forInput" data-max="20">0/20</span><span class="correct">√</span>
+                                            <p>商户简称为显示在翼惠宝前端信息</p>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname">人均消费</li>
+                                        <li class="Ginput reg-item-tip">
+                                            <input type="text" class="textbox" maxlength="8" name="spending_av_per" data-rel="" id="spending_av_per" value="<php>echo ($merchant['spending_av_per']=='')?'0.00':$merchant['spending_av_per']</php>" disabled='disabled'/><span class="maxTips forInput" data-max="8" disabled='disabled'>0/8</span><span class="correct">√</span>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*&nbsp;</span>所属分类</li>
+                                        <li class="Ginput reg-item-tip">
+                                           <select name="parent_id" id="parent_id"  class="validate[required]" disabled='disabled'>
+                                                <option value="">请选择</option>
+                                                <php>
+                                                    $parentArr = array_valtokey($parentInfo,'id','catalog_name');
+                                                </php>
+                                                {:show_arr_opt($parentArr,$merchant['parent_id'])}
+                                            </select>
+                                            
+                                            <select name="catalog_id" id="catalog_id" class="catalog_id validate[required]" disabled='disabled'>
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*&nbsp;</span>服务热线</li>
+                                        <li class="Ginput reg-item-tip">
+                                            <input type="text" class="textbox validate[required,custom[phone]]" maxlength="12" placeholder="请填写正确的号码" name="hot_line_tel" id="hot_line_tel" data-rel="" value="{$merchant['hot_line_tel']}"/>
+                                            <p>格式：13945698521   座机：021-45216352</p>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*&nbsp;</span>负责人</li>
+                                        <li class="Ginput reg-item-tip">
+                                            <input name="contact_name" id="contact_name" class="textbox validate[required]" type="text"  maxlength="20"placeholder="请填写负责人的姓名" value="{$merchant['contact_name']}" data-rel="" disabled='disabled'/><span class="correct">√</span>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*&nbsp;</span>手机号码</li>
+                                        <li class="Ginput reg-item-tip">
+                                            <input name="contact_phone" id="contact_phone" type="tel" maxlength="11" placeholder="请填写正确的手机号码" class="textbox validate[required,custom[phone]]" value="{$merchant['mobile']}" data-rel="" disabled='disabled'/>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*&nbsp;</span>商户简介</li>
+                                        <li class="Ginput reg-item-tip">
+                                            <textarea class="textbox validate[required,minSize[1]]" maxlength="200" placeholder="&nbsp;字数限制200字" name="description" data-rel="">{$merchant['description']}</textarea><!--<span class="maxTips forInput" data-max="200">0/200</span>-->
+                                        </li>
+                                    </ul>
+                                </div>
+                                <input name="id" id="id" type="hidden" value="{$merchant['id']}"/>
+                                <input name="user_id" id="user_id" type="hidden" value="{$merchant['user_info_id']}"/>
+                                <div class="Gform">
+                                    <ul>
+                                        <li class="Ginput" style="padding: 0 0 0 150px; width: 280px;">
+                                            <input type="button" value="更新" id="sub_button" class="btn btn_primary" />
+                                        </li>
+                                    </ul>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html" />
+            <include file="Public:login"/>
+        </div>
+    </body>
+</html>
+<script>
+    $(document).ready(function () {
+        $.validationEngineLanguage.allRules['ajaxUserCallPhp'] = {
+            "url": "{:U('Yhb/Merchant/ajaxValidEmail')}",
+            "alertText": "用户名已被注册"
+        }
+        $.validationEngineLanguage.allRules['ajaxCheckCompanyName'] = {
+            "url": "{:U('Yhb/Merchant/queryName')}",
+            "alertText": "此商户名称已在翼惠宝平台注册，如有疑问请致电400-882-7770咨询！"
+        };
+        $.validationEngineLanguage.allRules['email'] = {
+            "regex": /^([a-zA-Z0-9]+[_|\_|\-|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\-|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/,
+            "alertText": "用户名无效"
+        }
+        $('#regform').validationEngine({
+            promptPosition: "topLeft:30,0",
+        });
+
+        $('input,select').bind('jqv.field.result', function (event, field, isError, promptText) {
+            if (!isError) {
+                $(this).parent().parent().find('.reg-item-tip .correct').css('visibility', 'visible');
+                if ($(field).attr('id') == 'parent_id') {
+                    if (!$('#catalog_id').val()) {
+                        $(this).parent().parent().find('.reg-item-tip .correct').css('visibility', 'hidden');
+                    }
+                }
+                if ($(field).attr('id') == 'catalog_id') {
+                    if (!$('#parent_id').val()) {
+                        $(this).parent().parent().find('.reg-item-tip .correct').css('visibility', 'hidden');
+                    }
+                }
+            } else {
+                $(this).parent().parent().find('.reg-item-tip .correct').css('visibility', 'hidden');
+            }
+        });
+    });
+</script>
+<script>
+    $(function () {
+        $form = $("#regform");
+        $('#sub_button').click(function () {
+            var user_name = $("input[name=user_name]").val();
+            var pw1 = $("input[name=user_password]").val();
+            var pw2 = $("input[name=re_password]").val();
+            var nodeisok = $('#nodeok').val();
+            var node_name = $("#merchant_name").val();
+            var contact_name = $("#contact_name").val();
+            var contact_phone = $("#contact_phone").val();
+            var province_code = $("#province_code").val();
+            var city_code = $("#city_code").val();
+
+            if (node_name == "")
+            {
+                alert("商户名称不能为空！");
+                return false;
+            }
+            if (contact_name == "")
+            {
+                alert("负责人不能为空！");
+                return false;
+            }
+            if (contact_phone == "")
+            {
+                alert("手机不能为空！");
+                return false;
+            }
+            var text = /^1\d{10}$/;
+            if (!text.test(contact_phone)) {
+                alert("手机号只能输入11位数字");
+                return false;
+            }
+            if (province_code == "")
+            {
+                alert("所在城市不能为空！");
+                return false;
+            }
+            if (city_code == "")
+            {
+                alert("所在城市不能为空！");
+                return false;
+            }
+        
+            if (node_name.getBytes() < 6) {
+                alert("商户名称不能小于6字节或三个汉字");
+                return false;
+            }
+            if (contact_name.getBytes() < 2) {
+                alert("负责人姓名不能小于2字节或一个汉字");
+                return false;
+            }
+            if (nodeisok == '2')
+            {
+                alert('“' + node_name + '”（商户名称）已在翼惠宝平台注册，请拨打400-882-7770联系客服取回账号！');
+                return false;
+            }
+            $(".btn-regForm").css("background", "#ddd").css("color", "#666").attr("disabled", true);
+            var dialog, btn = $(this);
+            if ($form.validationEngine('validate')) {
+                btn.attr('disabled', 'disabled');
+                $form.ajaxSubmit({
+                    beforeSubmit: function () {
+                        dialog = art.dialog({title: false, content: "<div class='msg-all-succeed'>正在提交...</div>", fixed: true, padding: 0});
+                    },
+                    success: function (data) {
+                        btn.removeAttr('disabled');
+                        if (data.status == '1') {
+                            dialog.time(2).content("<div class='msg-all-succeed'>" + data.info + "</div>");
+                            setTimeout("window.parent.location.reload();art.dialog.close();", 500);
+                            return false;
+                        } else {
+                            dialog.time(5).content("<div class='msg-all-error'>" + data.info + "</div>");
+                        }
+                    },
+                    dataType: 'json'
+                });
+                return false;
+            }
+        });
+    });
+</script>

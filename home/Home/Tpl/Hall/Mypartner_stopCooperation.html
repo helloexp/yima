@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券分销助手-我的采购方</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/Wnumgoods.css"/>
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js?v=__VR__"></script>
+
+<style>
+.Gnmae{width:140px !important;}
+</style>
+</head>
+<script>
+$(function(){
+	$('#submit_1').click(function(){
+		var dialog; 
+		$msg = ['你确认终止合作吗？','请谨慎操作，终止合作后无法恢复!'];
+		art.dialog.confirm($msg.join('<br/>'),function(){
+			this.close();
+			$("form").ajaxSubmit({
+				beforeSubmit:function(){
+					dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed:true,padding:0});
+				},
+				success:function(data){
+					if(data.status=='1'){
+						dialog.close();
+						dialog=art.dialog ({title:false,content:"<div class='msg-all-succeed'>"+data.info+"</div>",fixed: true,padding:0,time:3});
+						window.top.location.reload();
+					}else{
+						dialog.close();
+						dialog=art.dialog ({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:5});
+					}
+				},
+				dataType:'json'
+			});
+			return false;
+		},function(){
+			this.close();
+			window.location.href="{:U('Mypartner/index')}";
+		})
+	});
+})
+</script>
+<body>
+	<div id="wrapper">
+		<include file="./Home/Tpl/Public/Public_header.html" />
+        <div class="shopNav">
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="fxzs"/>
+        </div>
+		<div id="container">
+			<div id="main" class="rel">
+				<div class="sidenav"> 
+					<include file="Hall/Mypartner/leftMenu" leftmenuid="wdfxs"/>    
+				</div>
+				<div class="subcon fn">
+					<div class="eticket-d-sales">
+						<p class="d-sales-tit icon-my-purchase">我的采购方>>终止合作</p>
+						<div class="eTicket_form mt30">
+							<form action="{:U('Mypartner/stopCooperation')}" method="post">
+								<div class="Gform eTicket">
+									<ul>
+                                        <li class="Gnmae">采购方：</li>
+                                        <li class="Ginput"><p>{$list.node_name}</p></li>
+                                        <input type="hidden" name="relaid" value="{$list.relation_node_id}" />
+                                    </ul>
+                                    <ul>
+                                        <li class="Gnmae">合作期限：</li>
+                                        <li class="Ginput"> 
+                                        <p>
+                                        <?php echo date("Y-m-d",strtotime($list['begin_time']))." — ".date("Y-m-d",strtotime($list['end_time'])) ?>
+                                        </p>
+                                        </li>
+                                    </ul>
+                                     <ul>
+                                        <li class="Gnmae">&nbsp;终止合作原因：</li>
+                                        <li class="Ginput">
+                                            <p>
+                                                <textarea name="stop_reason" id="stop_reason" placeholder="最多输入50个字符" maxlength="50" style="width:220px;height:120px;" value=""></textarea>
+                                            </p>
+                                        </li>
+                                    </ul>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="fn mt30" style="margin-left:100px;">
+                <ul class="mb40">
+                    <li class="global-input1-name"></li>
+                    <li class="global-input1-input mt40">
+                    <a href="javascript:void(0)" title="确认" class="btn-all w110" id="submit_1">确认</a>
+                    <a href="javascript:history.go(-1)" title="取消" class="btn-all-del w110 ml20">取消</a>
+                   </li>
+                </ul>
+                </div>
+				</div>
+			</div>
+		</div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+	</div>
+	<div class="service"></div>
+</body>
+</html>

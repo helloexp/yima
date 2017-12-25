@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>图文编辑_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wposter.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/jquery.lazyload.min.js?v=__VR__"/>
+<script>
+$(function(){
+    $('#sub_button').click(function(){
+        $('#theform').submit();
+    });
+    $("#down").click(function(){
+        $("form").attr("action","{:U('Poster/export')}").submit();
+    });
+})
+function viewChannel(batch_id,batch_type,batch_name){
+    var transUrl = "index.php?g=LabelAdmin&m=Chart&a=channelChart&batch_id="+batch_id+"&batch_type="+batch_type;
+    art.dialog.open(transUrl,{
+        width:800, 
+		lock:true,
+        title:batch_name+'-渠道分析',
+		cancel:true,
+		cancelVal:"关闭"
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+        	<div id="main" class="rel">
+              <div class="sidenav"><include file="./Home/Tpl/MarketActive/LeftMenu.html" leftmenuid="pictext" /></div>
+              <div class="subcon">
+				<if condition="!empty($PicText)">
+                <div class="main-name fn">
+                    <h4>图文编辑
+                        <a href="{:U('LabelAdmin/Med/add')}" target="_blank" class="btn-add first"><i></i>新建图文编辑</a>
+                    </h4>
+                </div>
+				<div class="SearchArea fn">
+					 <form action="{:U('MarketActive/Tool/pictext')}" method="POST" name="theform" id="theform">
+                        <div class="SearchAreaLeft">
+                            <label>
+                                <span>图文编辑标题</span>
+                                <input name="pic_name" type="text" class="w90" value="">
+                            </label>
+							<label>
+                                <span>日期</span>
+                                <input type="text" name="start_time" id="start_time" onClick="WdatePicker({dateFmt:'yyyyMMdd',maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$Think.request.start_time|dateformat='Ymd'}" />
+                                -
+                                <input type="text" name="end_time" id="end_time" onClick="WdatePicker({dateFmt:'yyyyMMdd',minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time|dateformat='Ymd'}" />
+                            </label>
+                            <label>
+								<select class="w100" name="status" id="status">
+                                    <option value="" <?php if($_REQUEST['status'] == ''){?> selected="selected" <?php }?> >请选择</option>
+                                    <option value="1" <?php if($_REQUEST['status'] == '1'){?> selected="selected" <?php }?> >正常</option>
+                                    <option value="2" <?php if($_REQUEST['status'] == '2'){?> selected="selected" <?php }?> >停用</option>
+								</select>
+                            </label>
+                        </div>
+                        <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" id="sub_button" class="searchBtn">查找</a>
+                        </div>
+					</form>
+				</div>
+				
+				<div class="Wcanal-tab-list pt15 Rich_media" style="display: block;">
+					<table class="W-table">
+						<tbody>
+						<tr class="media_title">
+		                   <th width="320">图文名称</th>
+						   <th>访问量</th>
+						   <th width="200">创建日期</th>
+						   <th width="110">操作</th>
+						</tr> 
+						<volist name="PicText" id="row">
+                        <tr class="media_info">
+							<td>
+							   <div class="proInfoName hasqr fn">
+                                        <div class="infoName-qr">
+                                            <i class="icon-qrcode"></i>
+                                            <div class="infoName-qrimg"><img src="index.php?g=LabelAdmin&m=ShowCode&a=index&id={$row['bc_id']}"></div>
+                                        </div>
+                                        <div class="infoName-img" style="background-image:url(__PUBLIC__/Image/dlhdyx/txtpic_ico.png)">
+										       <if condition="$row['status'] eq '2'">
+												<p class="status open_status_{$row['id']}">未开启</p>
+												<else />
+												<p class="status on_status open_status_{$row['id']}">进行中</p>
+												</if>
+										</div>
+                                        <div class="infoName-text pt10">
+                                            <p>{$row['name']}</p>
+                                            <p><span>所属商户：{$userInfo['node_name']}</span></p>
+                                        </div>
+                               </div>
+							</td>
+							<td>{$row['click_count']}</td>
+							<td>{$row['add_time']|strtotime|date='Y-m-d',###}</td>
+							<td>
+								 <div class="tableOpr">
+                                        <div class="OprItem"><a href="javascript:void(0)" m_id="{$row['id']}" class="EditActivity">编辑</a></div>
+                                        <div class="OprMore">
+                                            <div class="OprMoreAll"><a href="javascript:void(0)">更多<i class="icon-angle-down"></i></a></div>
+                                            <div class="OprMoreList">
+                                                <ul>
+													<li><a href="javascript:void(0)" batch_type="{$row['batch_type']}" m_id="{$row['id']}" class="publishMore">发布更多渠道</a></li>
+													<li><a href="javascript:void(0);" onclick="viewChannel({$row['id']},{$row['batch_type']},'{$row['name']}')">渠道分析</a></li>
+                                                    <li><a href="javascript:void(0)" class="changeBS" m_id="{$row['id']}"  status="{$row['status']}">{$show_status_arr[$row['status']]}</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                 </div>
+							</td>
+						</tr>
+						</volist>
+					 </tbody>
+					</table>
+		            <div class="page">{$page}</div>
+                </div>
+				<else/>
+                <!--图文编辑无数据-->
+                <div class="nodata_info" style="max-width:1006px;">
+				    <div class="pictxt_nodata">
+				      <div style="width:100%;height:100%;background:url(__PUBLIC__/Image/dlhdyx/pictxtbj.png) no-repeat">
+                        <div class="pictxt_r rel">
+                            <h1>图文编辑</h1>
+                            <h2 class="c666">快速创建图文以及多媒体共存的手机WAP页面</h2>
+                            <ul class="fn">
+                               <li><i></i>支持动画、视频、音乐等多媒体的参加编辑</li>
+                               <li><i></i>支持超链接的添加编辑</li>
+                               <li><i></i>多样式风格模板可供选择</li>
+                            </ul>
+                            <a href="{:U('LabelAdmin/Med/add')}" target="_blank" class="btn-add w130 h40 reg">马上体验</a>
+                        </div>
+					  </div>
+					</div>
+					<h4 class="mt15">优秀图文编辑样例</h4>
+					<div class="proIntCase fn pb20 pt5">
+						<div class="proIntCaseCon">
+						<div class="case">
+							<div class="shade-wrapper">
+								<div class="shade-box"></div>
+								<div class="shade">
+									<p class="info-tit">建行携手永达别克与日产中升福瑞周末大型特卖会</p>
+									<p class="info-type"></p>
+									<div class="code-pic">
+										<img src="__PUBLIC__/Image/dlhdyx/imgco01.jpg">
+									</div>
+								</div>
+							</div>
+							<img src="__PUBLIC__/Image/dlhdyx/case01.jpg">
+						</div>
+						
+						<div class="case">
+							<div class="shade-wrapper">
+								<div class="shade-box"></div>
+								<div class="shade">
+									<p class="info-tit">让我们来聊一聊最新的网红</p>
+									<p class="info-type" style="height:14px"></p>
+									<div class="code-pic">
+										<img src="__PUBLIC__/Image/dlhdyx/imgco04.jpg">
+									</div>
+								</div>
+							</div>
+							<img src="__PUBLIC__/Image/dlhdyx/case04.jpg">
+						 </div>
+						 
+						<div class="case">
+							<div class="shade-wrapper">
+								<div class="shade-box"></div>
+								<div class="shade">
+									<p class="info-tit">持龙卡欢乐游日本</p>
+									<p class="info-type">2016樱花季</p>
+									<div class="code-pic">
+										<img src="__PUBLIC__/Image/dlhdyx/imgco02.jpg">
+									</div>
+								</div>
+							</div>
+							<img src="__PUBLIC__/Image/dlhdyx/case02.png">
+						</div>
+						
+						<div class="case">
+							<div class="shade-wrapper">
+								<div class="shade-box"></div>
+								<div class="shade">
+									<p class="info-tit">98#高清洁汽油在兰州上市了</p>
+									<p class="info-type">高档轿车的福音</p>
+									<div class="code-pic">
+										<img src="__PUBLIC__/Image/dlhdyx/imgco03.jpg">
+									</div>
+								</div>
+							</div>
+							<img src="__PUBLIC__/Image/dlhdyx/case03.png">
+						</div>
+						</div>
+					</div>		 
+                 </div>
+                <!--//图文编辑无数据-->
+                </if>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+	$("img.lazy").lazyload();
+	/*$(".opr-other i").click(function(){
+		var o = $(this).next(".opr-list");
+		o.addClass("show").show();
+		o.animate({opacity:1,top:30},200);
+	})
+	$(".opr-listbg").click(function(){
+		var o = $(this).closest(".opr-list");
+		o.animate({opacity:0,top:20},200,function(){
+			o.removeClass("show").hide();
+		});
+	});
+	$(".see_more").mouseenter(function(){
+       var o = $(this).next();
+        o.css('display','inline-block');
+        $(this).hide();
+    });
+    $(".opr-list").mouseleave(function(){
+         $(this).hide();
+         $(this).prev().show();
+    });*/
+    $(".EditActivity").click(function(){
+        var m_id = $(this).attr('m_id');
+        var goUrl = "{:U('MarketActive/Activity/edit')}&m_id="+m_id;
+        window.open(goUrl);
+    });
+    $(".publishMore").click(function(){
+        var m_id = $(this).attr('m_id');
+        var batch_type = $(this).attr('batch_type');
+        var goUrl = "{:U('LabelAdmin/BindChannel/index')}"+"&batch_type="+batch_type+"&batch_id="+m_id;
+        window.open(goUrl);
+    });
+    $(".changeBS").click(function(){
+        var cur = $(this);
+        var m_id = cur.attr('m_id');
+        var status = cur.attr('status');
+        var dialog;
+        $.ajax({
+            url:"{:U('MarketActive/Activity/changeBatchStatus')}",
+            type:"POST",
+            data:{m_id:m_id,status:status},
+            dataType:"JSON",
+            beforeSend:function(){
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(d){
+                if(d.status == '1'){
+                    cur.attr('status',3-status);
+                    cur.html(status == 2 ? '停用' : '开启');
+                    $(".open_status_"+m_id).html(status == 2 ? '进行中' : '未开启');
+					var status_txt=$(".open_status_"+m_id).text();
+					if(status_txt=="进行中"){
+					  $(".open_status_"+m_id).addClass("on_status");
+					}else{
+					  $(".open_status_"+m_id).removeClass("on_status");
+					}
+                    dialog.time(1).content("<div class='msg-all-success'>"+d.info+"</div>");
+                }else{
+                    dialog.time(1).content("<div class='msg-all-error'>"+d.info+"</div>");
+                }
+            }
+        });
+    });
+    /*$(".code_ico").mouseenter(function(){
+       var o = $(this).next();
+        o.css('display','block');
+    });
+    $(".image_code").mouseleave(function(){
+       $(this).css('display','none');
+    });*/
+});
+</script>

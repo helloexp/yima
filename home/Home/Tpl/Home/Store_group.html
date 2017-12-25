@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-门店分组</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+
+</head>
+<body>
+    <div id="wrapper"> 
+    	<include file="./Home/Tpl/Public/Public_header.html" /> 
+          
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav"> 
+                    <include file="Store:sidenav" leftmenuid="mdfz"/>               
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>门店分组<a class="btn-add first js_addgroup" href="{:U('Home/Store/initializeEditGroup',array('newAdd'=>'false'))}"><i></i>新增门店分组</a></h4>
+                    </div>
+                    <div class="SearchArea fn">
+                    <form id="theform" action="" method="get">
+					<!--提交地址-->
+                    <input type="hidden" name="g" value="{$Think.GROUP_NAME}"/>
+                    <input type="hidden" name="m" value="{$Think.MODULE_NAME}"/>
+                    <input type="hidden" name="a" value="{$Think.ACTION_NAME}"/>                    
+					
+                    <div class="SearchAreaLeft">
+                    <label>
+                    <span>分组名称</span>
+                    <input type="text" name="groupName" id="jg_name" value="{$groupName}" maxlength = "8" >
+                    </label>
+                    </div>
+                    <div class="SearchAreaRight">
+                    <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                    </div>
+                    </form>
+                    </div>
+                    <div class="fn">
+                    <table cellpadding="0" cellspacing="0" class="W-table">
+                    <tbody>
+                    <tr class="th">
+                    <th>分组名称</th>
+                    <th>分店数</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                    </tr>
+					<?php foreach($allGroups as $key => $value):?>
+                    <tr class="title" id="{$value['id']}">
+                    <td>{$value['group_name']}</td>
+                    <td>{$value['num']}</td>
+                    <td>{$value['add_time']}</td>
+                    <td>
+                    <a href="{:U('Home/Store/initializeEditGroup',array('id'=>$value['id'], 'newAdd'=>'true'))}" class="group_edit" id="{$value['id']}">编辑门店分组</a> 
+                    <a href="javascript:void(0);" class="js_del" id="{$value['id']}">删除</a></td>
+                    </tr>
+					<?php endforeach;?>
+                    </table>
+                    </div>
+                    <div class="page"><?php echo $page; ?></div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+<script>
+$(".Diabtn-all").click(function(){
+	
+});
+ </script>
+</div>
+</body>
+</html>
+<script>
+$(function(){
+	//query
+	$("#sub_button").click(function(){
+		$("#theform").submit();
+	});
+	
+    //del
+    $(".js_del").click(function(){
+        var id=$(this).attr('id');
+		Dialoading("正在提交...");
+        $.getJSON("{:U('Home/Store/delGroup')}&groupId="+id,function(data){
+			Dialoading();
+            if ((typeof data) == 'boolean') {
+                location.reload();
+            }else{
+                art.dialog.msg({
+                    content:data
+                });
+            }
+        });
+    })
+})
+</script>

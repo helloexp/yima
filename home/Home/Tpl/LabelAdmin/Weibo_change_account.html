@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>切换账号</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+    $("#sub_ok").click(function(){	
+		
+		var pid=$('input[name="pid"]:checked').val();
+		//alert(pid);
+		parent.location.href="index.php?g=LabelAdmin&m=Weibo&a=index&pid="+pid;		
+		
+    });
+
+});
+
+function del_pid(node_id,pid){
+	
+		if(confirm("确定删除吗？")){
+			
+			$.post("{:U('LabelAdmin/Weibo/del_pid')}", {node_id:node_id,pid: pid}, function(data){
+				
+				if(data.status == 1){
+					//that.closest('li').remove();
+					alert("删除成功！");
+					window.location.reload();
+				}
+			}, 'JSON');
+		
+		
+		}
+	
+	}
+</script>
+</head>
+
+<body>
+    <form method="post" action="">	
+    <div class="showsaloonForm1">
+        <table cellpadding="0" cellspacing="0" class="W-table">
+            <tr>
+                <th>微博昵称</th>
+                <th>绑定到期时间</th>
+                <th>操作</th>
+            </tr>
+			<?php
+			if(!empty($weibo_list)){
+				foreach($weibo_list as $k=>$val){		
+			
+			?>
+            <tr>
+                <td style="text-align:left;"><input style="margin:10px;" type="radio"  value="<?php echo $val['openid'];?>" name="pid" id="pid" <?php if($val['openid']==$pid){?>checked<?php }?>/><?php echo $val['name']?></td>
+                <td><?php
+				$expireday=floor($val['expires_in'] / (24*3600));
+				if($val['update_time']!=""){
+					$start_time=$val['update_time'];				
+				}else{
+					$start_time=$val['add_time'];
+				}
+				//过期日期
+				$expire=date('Y-m-d',strtotime("+$expireday day",strtotime(substr($start_time,0,8))));
+				echo $expire;				
+				?></td>
+                <td><a href="index.php?g=LabelAdmin&amp;m=Weibo&amp;a=authorize" target="_parent">授权</a> <a href="javascript:del_pid('<?php echo $val['node_id'];?>','<?php echo $val['openid']?>')">删除</td>
+            </tr>
+			<?php
+				}
+			}			
+			?>            
+        </table>
+        <div class="DiabtnCon">
+            <a href="javascript:void(0)" class="Diabtn-all" id="sub_ok">确定</a>
+            <a href="index.php?g=LabelAdmin&amp;m=Weibo&amp;a=authorize" target="_parent" class="Diabtn-all">添加账号</a>
+            <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+        </div>
+    </div>
+    </form>
+</body>

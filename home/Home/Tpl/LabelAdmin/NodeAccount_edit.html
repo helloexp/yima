@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>收款账户信息_账户中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Common.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+
+<script type="text/javascript">
+    $(document).ready(function (e) {
+		Gform();
+		$("body").on("click",".Gform .switch .newRadio span",function(){
+			var t = $(this),
+				s = t.closest(".switch");
+			if(s.attr("data-show")!=""){
+				var id = s.attr("data-show");
+				if($("[data-show='"+id+"']").length>1){
+					var show = false ;
+					$("[data-show='"+id+"']").each(function(){
+                        var val = $(this).find(">[type='radio']").val();
+						if(val == 1){show = true}
+                    });
+					show ? $("#"+id).show() : $("#"+id).hide();
+				}else{
+					s.hasClass("hover") ? $("#"+id).show() : $("#"+id).hide();
+				}
+			}
+		});
+
+        function parseURL(url) {
+            var a = document.createElement('a');
+            a.href = url;
+            return {
+                source: url,
+                protocol: a.protocol.replace(':', ''),
+                host: a.hostname,
+                port: a.port,
+                query: a.search,
+                params: (function () {
+                    var ret = {},
+                            seg = a.search.replace(/^\?/, '').split('&'),
+                            len = seg.length, i = 0, s;
+                    for (; i < len; i++) {
+                        if (!seg[i]) {
+                            continue;
+                        }
+                        s = seg[i].split('=');
+                        ret[s[0]] = s[1];
+                    }
+                    return ret;
+                })(),
+                file: (a.pathname.match(/\/([^\/?#]+)$/i) || [, ''])[1],
+                hash: a.hash.replace('#', ''),
+                path: a.pathname.replace(/^([^\/])/, '/$1'),
+                relative: (a.href.match(/tps?:\/\/[^\/]+(.+)/) || [, ''])[1],
+                segments: a.pathname.replace(/^\//, '').split('/')
+            };
+        }
+
+        //保存
+        $('#save').click(function () {
+			if($("#theform").validationEngine('validate')){
+				$.post(
+						"{:U('LabelAdmin/NodeAccount/edit');}",
+						$('#theform').serialize(),
+						function (data) {
+							if (data.status == '1') {
+                                // window.parent.location.reload();
+								var win = art.dialog.open.origin;//来源页面
+                                var originHref = win.location.href;
+                                var parsedHref = parseURL(originHref);
+                                if (typeof parsedHref.params.popupMark == 'undefined') {
+                                    originHref = originHref +'&popupMark=false';
+                                } else if (parsedHref.params.popupMark == 'true'){
+                                    originHref = originHref.replace('popupMark=true', 'popupMark=false');
+                                }
+								win.location.href= originHref;
+							} else {
+								art.dialog('保存失败！' + data.info);
+							}
+						},
+						'json'
+				);
+			}
+        });
+	});
+</script>
+</head>
+<body>
+    	<div class="fn">
+        	<form action="{:U('LabelAdmin/NodeAccount/edit')}" method="post" id="theform">
+            <div class="Gform fn">
+                <ul class="Gtitle">支付方式设置</ul>
+                <ul>
+                    <li class="Gname">*手机支付宝：</li>
+                    <li class="Ginput">
+                        <div <eq name="nodeAccountInfo['wctype']" value="1">data-show="alipay-form"</eq><eq name="nodeAccountInfo['wctype']" value="2">data-show="bank-form"</eq> <eq name="nodeAccountInfo[1]['status']" value="1"> class="switch hover"<else /> class="switch"</eq> >
+                            <input type="radio" name="zfb_pay_flag" <eq name="nodeAccountInfo[1]['status']" value="1">value="1"<else />value="2"</eq> checked="checked">
+                            <div class="newRadio">
+                                <span <eq name="nodeAccountInfo[1]['status']" value="1">class="valfirst "<else />class="valfirst hover"</eq> data-val="2">关闭</span>
+                                <span <eq name="nodeAccountInfo[1]['status']" value="1">class="vallast hover"<else />class="vallast "</eq> data-val="1">开启</span>
+                            </div>
+                        </div>
+                        <if condition="$nodeAccountInfo['wctype'] eq 1"><span class="txtTips">使用人群最广,建议配置。注意:微信暂时拦截支付宝支付</span><else /><span class="txtTips">您无需申请支付宝支付账号,只需要绑定银行卡号即可开启。</span></if>
+                    </li>
+                </ul>
+                <eq name="nodeAccountInfo['wctype']" value="1">
+                <div id="alipay-form" <neq name="nodeAccountInfo[1]['status']" value="1">class="dn"</neq>>
+                	<ul>
+                        <li class="Gname">*支付宝帐号：</li>
+                        <li class="Ginput">
+                            <input name="account_no" id="account_no" type="text" maxlength="50" class="validate[required]" value="{$nodeAccountInfo[1]['account_no']}">
+                        </li>
+                    </ul>
+                	<ul>
+                        <li class="Gname">*确认支付宝帐号：</li>
+                        <li class="Ginput">
+                            <input name="account_no2" id="account_no2" type="text" maxlength="50" class="validate[required,equals[account_no]]" >
+                        </li>
+                    </ul>
+                	<ul>
+                        <li class="Gname">*帐号姓名：</li>
+                        <li class="Ginput">
+                            <input name="account_name" id="account_name" type="text" maxlength="50" class="validate[required]"
+							 value="{$nodeAccountInfo[1]['account_name']}">
+                        </li>
+                    </ul>
+                </div>
+                </eq>    
+                <ul>
+                    <li class="Gname">*微信支付：</li>
+                    <li class="Ginput">
+                        <div data-show="bank-form" class="switch">
+                            <input type="radio" name="wx_pay_flag" <eq name="nodeAccountInfo[3]['status']" value="1">value="1"<else />value="2"</eq> checked="checked">
+                            <div class="newRadio">
+                                <span <eq name="nodeAccountInfo[3]['status']" value="1">class="valfirst "<else />class="valfirst hover"</eq> data-val="2">关闭</span>
+                                <span <eq name="nodeAccountInfo[3]['status']" value="1">class="vallast hover"<else />class="vallast "</eq> data-val="1">开启</span>
+                            </div>
+                        </div>
+                        <if condition="$nodeAccountInfo['wctype'] eq 1"><span class="txtTips">您无需申请微信支付账号,只需要绑定银行卡号即可开启。</span><else /><span class="txtTips">您无需申请微信支付账号,只需要绑定银行卡号即可开启。</span></if>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gname">*银联手机支付：</li>
+                    <li class="Ginput">
+                        <div data-show="bank-form" class="switch">
+                            <input type="radio" name="union_pay_flag" <eq name="nodeAccountInfo[2]['status']" value="1">value="1"<else />value="2"</eq> checked="checked">
+                            <div class="newRadio">
+                                <span <eq name="nodeAccountInfo[2]['status']" value="1">class="valfirst "<else />class="valfirst hover"</eq> data-val="2">关闭</span>
+                                <span <eq name="nodeAccountInfo[2]['status']" value="1">class="vallast hover"<else />class="vallast "</eq> data-val="1">开启</span>
+                            </div>
+                        </div>
+                        <if condition="$nodeAccountInfo['wctype'] eq 1"><span class="txtTips">开启后需要绑定提现账号。</span><else /><span class="txtTips">您无需申请银联手机支付账号,只需要绑定银行卡号即可开启。</span></if>
+                    </li>
+                </ul>
+                <div id="bank-form" <if condition="$nodeAccountInfo['wctype'] eq 1"><if condition="($nodeAccountInfo[2]['status'] neq 1) and ($nodeAccountInfo[3]['status'] neq 1)">class="dn"</if><else /><if condition="($nodeAccountInfo[2]['status'] neq 1) and ($nodeAccountInfo[3]['status'] neq 1) and ($nodeAccountInfo[1]['status'] neq 1)">class="dn"</if></if>>
+                	<ul class="Gtitle">提现账户设置</ul> 
+                    <ul>
+                        <li class="Gname">*收款账号：</li>
+                        <li class="Ginput">
+                            <input name="cash_no" id="cash_no" type="text" maxlength="50" class="validate[required,custom[number]]" value="{$cashInfo['account_no']}">
+                            <if condition="$nodeAccountInfo['wctype'] eq 2"><span class="txtTips">提供一个与商家或商家的公司名称相符的有效的中华人民共和国境内（不含港澳台）银行账户</span></if>    
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="Gname">*确认账号：</li>
+                        <li class="Ginput">
+                            <input name="cash_no2" id="cash_no2" type="text" maxlength="50" class="validate[required,custom[number],equals[cash_no]]">
+                        </li>
+                    </ul>   
+                   <ul>
+                        <li class="Gname">*账户姓名：</li>
+                        <li class="Ginput">
+                            <input name="cash_name" id="cash_name" type="text" maxlength="50" class="validate[required]" value="{$cashInfo['account_name']}">
+                            <if condition="$nodeAccountInfo['wctype'] eq 2"><span class="txtTips">为确保能够追溯到客户真实信息，请保持开户人姓名和企业名称保持一致。</span></if>
+                        </li>
+                    </ul>
+                	<ul>
+                        <li class="Gname">*收款银行：</li>
+                        <li class="Ginput">
+                            <input name="cash_bank" id="cash_bank" type="text" maxlength="50" class="validate[required]" value="{$cashInfo['account_bank']}">
+                            <div class="bankList dn">
+                            	<ul>
+                                    <li class="hover">中国工商银行</li>
+                                    <li>中国工商银行</li>
+                                    <li>中国工商银行</li>
+                                    <li class="erro">抱歉，没有找到该银行</li>
+                                </ul>
+                            </div>
+                            <span class="txtTips important" style="display:none;" id="txtTips">暂不支持该类银行，请从列表中选择。</span>
+                        </li>
+                    </ul>
+                        <div>
+                	<ul>
+                        <li class="Gname">*银行支行：</li>
+                        <li class="Ginput">
+                            <input name="cash_bank_ex" id="cash_bank_ex" type="text" maxlength="50" class="validate[required]" value="{$cashInfo['account_bank_ex']}">
+                                <span class="txtTips">请正确填写支行信息，以避免信息有误而导致提现失败。</span>
+                        </li>
+                    </ul>
+                    </div>
+                	
+                	
+                </div>
+               <!-- <ul class="Gtitle">账户安全设置</ul>
+                <ul>
+                    <li class="Gname">设置新保护密码：</li>
+                    <li class="Ginput">
+                        <input name="account_pwd" id="account_pwd" type="password" maxlength="24" class="validate[]">
+                        <span class="txtTips important">保护密码用于提现时验证，为您的账户安全，请谨慎设置。</span>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gname">确认保护密码：</li>
+                    <li class="Ginput">
+                        <input name="account_pwd2" id="account_pwd2" type="password" maxlength="24" class="validate[equals[account_pwd]]">
+                    </li>
+                </ul>-->
+                 <ul>
+                        <li class="Gname">*账户类型：</li>
+                        <li class="Ginput">
+                            <div data-show="bank-branch" <eq name="cashInfo.bank_type" value="1">class="switch hover"<else />class="switch"</eq>>
+                                <input type="radio" name="cash_account_flag" <eq name="cashInfo.bank_type" value="1">value="1"<else />value="0"</eq> checked="checked">
+                                <div class="newRadio">
+                                    <span <eq name="cashInfo.bank_type" value="1">class="vallast"<else />class="valfirst hover"</eq> data-val="0">私人账户</span>
+                                    <span <eq name="cashInfo.bank_type" value="1">class="vallast hover"<else />class="vallast"</eq> data-val="1">企业对公账户</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                <ul>
+                    <li class="Gname">*预留手机：</li>
+                    <li class="Ginput">
+                        <input name="receive_phone" id="receive_phone" type="text" maxlength="50" class="validate[required]" value="{$nodeInfo['receive_phone']}">
+                        <span class="txtTips">有小店订单成功时，会发送短信至该手机号</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="DiabtnCon">
+                <a href="javascript:void(0)" class="Diabtn-all" id="save">确定</a>
+                <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+            </div>
+    	</form>
+	</div>
+</body>
+</html>
+<style>
+.bankList { position:absolute; z-index:2; top:40px; width:316px; border:solid 1px #ddd; background:#fff;}
+.bankList ul { height:200px; overflow-y:auto;}
+.bankList ul li { padding:5px 0 5px 10px; cursor:pointer;}
+.bankList ul li.erro { color:#ff0000; background:none; cursor:text;}
+.bankList ul li.erro:hover { background:none; }
+.bankList ul li.hover,.bankList ul li.hover:hover { background:#EBEBE9;}
+.bankList ul li:hover { background:#fffbea;}
+</style>
+<script type="text/javascript">
+    $(document).ready(function (e) {
+		var dataBank = {
+			list:["中国工商银行","中国农业银行","中国建设银行","招商银行","中国银行","中国邮政储蓄银行","交通银行","中信银行","浦东发展银行","兴业银行","深圳发展银行","广发银行","华夏银行","中国光大银行","中信银行","中国民生银行","渤海银行","浙商银行","日照市商业银行","临沂商业银行","潍坊银行","烟台商业银行","齐鲁银行","恒丰银行","河北银行","北京银行","平安银行","上海银行","天津农村商业银行","湖北银行","宁波银行","南京银行","江苏银行","重庆银行","杭州银行","晋商银行","包商银行","深圳宝安融兴村镇银行","北京农商行","天津滨海农村商业银行","常熟农村商业银行","朝阳银行","朝阳市商业银行","成都农村商业银行","成都市商业银行","浙江稠州商业银行","达州市商业银行","大连银行","大同市商业银行","丹东银行","德阳市商业银行","东莞农村商业银行","东莞市商业银行","鄂尔多斯银行","福建海峡银行","福建省农村信用社","遵义市商业银行","自贡市商业银行","驻马店市商业银行","珠海农村信用社","周口市商业银行","重庆农村商业银行","重庆三峡银行","郑州银行","新疆汇和银行","新疆农村信用社","新乡市商业银行","信阳银行","许昌市商业银行","雅安市商业银行","阳泉市商业银行","鄞州银行","营口银行","营口沿海银行","营口市商业银行","玉溪市商业银行","云南省农村信用社","张家港农村商业银行","深圳福田银座村镇银行","抚顺银行","阜新银行","富滇银行","甘肃省农村信用社","赣州银行","广东省农村信用社","广西农村信用社","广州农村商业银行","广州银行","贵阳银行","贵州省农村信用社","桂林银行","哈尔滨银行","哈尔滨银行","海南省农村信用社","汉口银行","河北省农村信用社","河南省农村信用社","黑龙江省农村信用社","葫芦岛市商业银行","湖北农村信用社","湖南省农村信用社","湖州市商业银行","华融湘江银行","珠海华润银行","广东华兴银行","黄河农村商业银行","浙江省农村信用社","长治市商业银行","浙江长兴联合村镇银行","长沙银行","江苏长江商业银行","长安银行","中山小榄村镇银行","西安银行","武汉农村商业银行","武汉农信","吴江农商行","无锡农村商业银行","无锡农村商业银行","乌海银行","温州银行","宁波通商银行","铁岭市商业银行","天津银行","天津市商业银行","浙江泰隆商业银行","泰隆城市信用社","台州银行","台州银行","遂宁市商业银行","四川省农村信用社联合社","四川省农村信用社","佛山顺德农村商业银行","石嘴山银行","深圳农村信用社","绍兴银行","上饶银行","上海农商银行","上海农村商业银行","上海市商业银行","上海农村信用社","商丘商行","陕西省农村信用社联合社","陕西省农村信用社","山东省农村信用社联合社","山东省农村信用社","厦门银行","三门峡市商业银行","泉州银行","泉州市商业银行","曲靖市商业银行","青海省农村信用社联合社","青海省农村信用社","青海银行","青岛农信","青岛银行","青岛商行","濮阳银行","平顶山银行","盘锦市商业银行","攀枝花市商业银行","宁夏银行","内蒙古农村信用社","内蒙古银行","广东南粤银行","南阳村镇银行","南充市商业银行","南昌银行","浙江民泰商业银行","绵阳市商业银行","漯河银行","漯河商行","洛阳银行","泸州市商业银行","龙江银行","深圳龙岗鼎业村镇银行","六盘水商行","柳州银行","辽阳银行","辽宁省农村信用社联合社","辽宁省农村信用社","凉山州商业银行","乐山市商业银行","廊坊银行","兰州银行股份有限公司","兰州银行","安徽省农村信用社","安顺市商业银行","安阳市商业银行","北京农村商业银行","山西省农村信用社","鞍山市商业银行","保定市商业银行","沧州银行","承德银行","德州银行","东营市商业银行","福建省农村信用社联合社","甘肃银行","广西北部湾银行","广州农村信用合作社","贵州省农村信用社联合社","桂林市商业银行","海南省农村信用社联合社","邯郸市商业银行","杭州银行股份有限公司","杭州市商业银行","河北银行股份有限公司","鹤壁银行","衡水市商业银行","湖南农信","湖南省农村信用社联合社","徽商银行","吉林省农村信用社联合社","吉林银行","吉林农信联合社","吉林市商业银行","济宁银行","嘉兴市商业银行","江南农村商业银行","江苏省农村信用社联合社","江苏省农村信用社","江西省农村信用社联合社","江西农信联合社","江阴农村商业银行","焦作市商业银行","金华银行","锦州银行","晋城银行","晋中市商业银行","景德镇商业银行","九江银行","库尔勒市商业银行","昆仑银行股份有限公司","昆仑银行","昆山农信社","莱商银行","临商银行","齐商银行","秦皇岛市商业银行","青岛即墨北农商村镇银行","日照银行","深圳市农村商业银行","盛京银行","苏州银行","苏州市商业银行","太仓农村商业银行","泰安市商业银行","唐山市商业银行","威海市商业银行","乌鲁木齐市商业银行","无锡市商业银行","邢台银行","宜宾市商业银行","枣庄银行"]
+		}
+		var dataBankList = template("dataBankList", dataBank);
+		$(".bankList").html(dataBankList);
+		$("[name='cash_bank']").click(function(){
+			event.stopPropagation();
+			var val = $(this).val();
+			if(val != ""){
+				var erro = 0 ;
+				$(".bankList").show();
+				$(".bankList li").each(function(index, element) {
+					var text = $(this).text();
+					if(text.indexOf(val)>=0){
+						$(this).show();
+						erro++;
+					}else{
+						$(this).hide();
+					}
+				});
+				erro==0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+			}else{
+				$(".bankList").show();
+				$(".bankList li").each(function(index, element) {
+					index<=6 ? $(this).show() : $(this).hide() ;
+				});
+			}
+		});
+		$("[name='cash_bank']").change(function(){
+			event.stopPropagation();
+			var val = $(this).val();
+			var isin = false;
+			for(var i=0;i<dataBank.list.length;i++){
+				if(val == dataBank.list[i]){
+					isin = true;
+					break;
+				}
+			}
+			if(isin){
+				$("#txtTips").hide();
+			}else{
+				$("#txtTips").show();
+				$(this).val("");
+			}
+		});
+		$("[name='cash_bank']").keyup(function(){
+			var val = $(this).val();
+			var erro = 0 ;
+			$(".bankList").show();
+			$(".bankList li").each(function(index, element) {
+                var text = $(this).text();
+				if(text.indexOf(val)>=0){
+					$(this).show();
+					erro++;
+				}else{
+					$(this).hide();
+				}
+            });
+			erro==0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+		})
+		$(".bankList li:not('.erro')").on("click",function(){
+			event.stopPropagation();
+			var val = $(this).text();
+			$("[name='cash_bank']").val(val);
+			$(".bankList").hide();
+			$("#txtTips").hide();
+		})
+		//点击以外区域隐藏分组
+		$("body").on("click",function(){
+			$(".bankList").hide();
+		});
+	});
+</script>
+<script id="dataBankList" type="text/html">
+<ul>
+	{{each list}}
+	<li class="dn">{{value}}</li>
+	{{/each}}
+	<li class="erro dn">抱歉，没有找到该银行</li>
+</ul>
+</script>

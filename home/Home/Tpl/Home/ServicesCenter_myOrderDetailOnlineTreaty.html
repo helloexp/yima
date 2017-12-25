@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>我的订单_账户中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Wcanal.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("#js_repayTip").click(function(e) {
+			var orderId = $(this).attr('data-orderid');
+	        $.ajax({
+	            type:'POST',
+	            data:{orderId:orderId},
+	            url:"{:U('Home/ServicesCenter/checkOrderExpiry')}",
+	            dataType:'json',
+	            success:function(data){
+	                if(data.status == '0')
+	                {
+	                    art.dialog.alert(data.info);
+	                    return false;
+	                }else{
+	                    window.location.href=("{:U('Home/ServicesCenter/goCashier')}"+"&orderId="+orderId);
+	                }
+	            }
+	        });
+	        return false;
+	    });
+	    $("#closeBtn").click(function(){
+	    	window.history.back();
+	    });
+	});
+	
+</script>
+<style>
+#Succeed {
+    width: 100%;
+    padding-left: 0;
+    box-sizing: border-box;
+    margin: 0;
+}
+#orderKeywords{
+	width:150px;
+}
+</style>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                 <div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <include file="Home/AccountCenter/menu" leftmenuid="myOrder"/>
+                </div>
+                <div class="subcon">
+                    <div class="main-name fn">
+                        <h4><a href="javascript:history.go(-1);" class="back"><i></i> 我的订单</a> / 详情</h4>
+                    </div>
+                    <div class="setting">
+                    <div class="steps">基本信息</div>
+                    <div class="w1 receiveInfo">
+                        <dl>
+                        	<dd><label>订单编号</label><span>{$data['orderInfo']['order_number']}</span></dd>
+                        	<dd><label>创建时间</label><span>{$data['add_time']}</span></dd>
+                        	<dd><label>订单金额</label><span class="redfont">{$data['orderInfo']['amount']}</span> 元</span></dd>
+                        	<dd><label>支付时间</label><span>{$data['payTime']}</span></dd>
+                        	<dd><label>订单类型</label><span class="redfont">{$data['orderTypeName']}</span></dd>
+                        	<dd><label>订单状态</label>
+                        	<span><switch name="data['orderInfo']['pay_status']">
+		                        <case value="0">待支付</case>
+		                        <case value="1">已支付</case>
+		                        <case value="2">已取消</case>
+		                        </switch>
+                      		</span></dd>
+                        	<dd><label>签约内容</label>
+                        		<switch name="data['orderDetail']['version']">
+						        <case value="2">营销工具礼包</case>
+						        <case value="3">多宝电商</case>
+						        </switch>
+						    </dd>
+                        	<dd><label>&nbsp;操 作 员</label><span>{$data['orderDetail']['setOrderUserName']}</span></dd>
+                        	<dd><label>使用时间</label>{$data['orderDetail']['expiryDate']}</dd>
+                        </dl>
+                    </div>
+                    
+                    <div class="steps">确认资费</div>
+                    	<div class="apply mt15" >
+                            <table class="W-table blue">
+                            	<tbody>
+							    <tr>
+							    	<th colspan="2">收费项</th>
+							        <th>标准资费</th>
+							        <th>数量</th>
+							    </tr>
+							    <eq name="data['orderDetail']['hasBuy']" value="0">
+							    <tr class="title">
+							        <td>平台服务费</td>
+							        <td>旺财基础平台</td>
+							        <td><span class="redfont">29800</span> 元/年</td>
+							        <td>1</td>
+							    </tr>
+							    </eq>
+							    <eq name="data['orderDetail']['version']" value="2">
+							    <tr class="title">
+							        <td>模块服务费</td>
+							        <td>营销工具礼包</td>
+							        <td><span class="redfont">4880</span> 元/年</td>
+							        <td>1</td>
+							    </tr>
+							    </eq>
+							    <eq name="data['orderDetail']['version']" value="3">
+							    <tr class="title">
+							        <td>模块服务费</td>
+							        <td>多宝电商</td>
+							        <td><span class="redfont">6880</span> 元/年</td>
+							        <td>1</td>
+							    </tr>
+							    </eq>
+							    </tbody>
+                            </table>
+                            <if condition="$data['orderInfo']['pay_status'] neq 2">
+                            <notempty name="data['ret_detail']">
+                            <div class="toPay" style=" padding:15px 20px; clear:both; display:block; background:#f8f8f8">
+                            <ul>
+                              	<li><span>余额&nbsp;&nbsp;</span>-￥{$data['ret_detail']['account_002']|default='0.00'|number_format='2'}</li>
+                              	<li><span>旺币&nbsp;&nbsp;</span>-￥{$data['ret_detail']['account_003']|default='0.00'|number_format='2'}</li>
+                              	<li><span>应付金额&nbsp;&nbsp;</span><i>￥<strong id="shouldPay">{$data['ret_detail']['tp_price']|default='0.00'|number_format='2'}</strong></i></li>
+                              	<li><span style="color:red">
+                              		<switch name="data['ret_detail']['pay_channel']">
+		                        	<case value="1">支付宝支付</case>
+		                        	<case value="2">银联支付</case>
+		                        	</switch>
+		                        	</span>
+		                        </li>
+                            </ul>
+                            <div class="cl rel"></div>
+                            </div>
+                            <div class="tc"><a href="javascript:closeDialog();" class="btn-all-del" id="closeBtn">关闭</a></div>
+                            <else/>
+                            <br/>
+                            <div class="toPay" style=" padding:15px 20px; clear:both; display:block; background:#f8f8f8">
+                            <ul>
+                                <li><span>应付金额&nbsp;&nbsp;</span><i>￥<strong id="shouldPay">{$data['orderInfo']['amount']}</strong></i></li>
+                            </ul>
+                            </div>
+                            <div class="tc w1"><a href="javascript:void(0)" data-orderid="{$data['orderInfo']['id']}" class="btn-all" id="js_repayTip">确认支付</a></div>
+                            </notempty>
+                            <else/>
+                            <div class="tc"><a href="javascript:closeDialog();" class="btn-all-del" id="closeBtn">关闭</a></div>
+                            </if>
+                        </div>
+                    </div>
+                </div>   
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

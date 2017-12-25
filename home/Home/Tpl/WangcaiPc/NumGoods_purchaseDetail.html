@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券详情-卡券中心</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+$(document).ready(function(e) {
+    $("#shop_more").click(function(e) {
+        art.dialog.open("{:U('WangcaiPc/NumGoods/getPosgroupShop',array('group_id'=>$goodsInfo['pos_group']))}",{
+            title: '可验门店',
+            width:'500px',
+            lock:true,
+            height:'450px'
+        });
+    });
+});
+function more(id){
+    art.dialog.open('{:U('WangcaiPc/NumGoods/storageTraceView')}'+'&id='+id, {
+        title : '库存流水详情'
+        ,width : '800px'
+        ,height :'400px'
+        ,lock: true
+    });
+}
+function num_charge(id){
+    var number = $("#num_"+id).val();
+    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+	if(!number){
+		dialog.time(3).content("<div class='msg-all-error'>请填写手机号或QQ号</div>");
+		return false;
+	}
+	$.post("{:U('WangcaiPc/NumGoods/numCharge')}",{"id":id,"number":number},function(data){
+		if(data.status == 1){
+			dialog.time(3).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+			window.location.reload();
+		}else{
+			dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+		}
+	},'json');
+}
+</script>
+<style>
+.content_view ul{ background-color:transparent;}
+.eTicket_form .edit_area_form {  float: left;  padding-left: 0px;  width: 100%;}
+.opr_btn{ color:#666; position:absolute; right:0; padding-top:15px; z-index:800}
+.opr_btn a{ font-size:14px; color:#666; background: url(__PUBLIC__/Image/eTicket/line.png) center right no-repeat; padding:0 10px;}
+.opr_btn a:hover{ color:#ffa100 }
+.eTicket_form .edit_area_img{ width:220px; overflow:hidden; position:absolute; right:0;}
+.eTicket_form .edit_area_img .bigbox img{ width:214px;}
+li.top-{$top_type} {border-bottom:solid 2px #ed1c24;}
+.messageli li.top-{$top_type} a{color: #ed1c24;}
+</style>
+</head>
+<body>
+
+<div id="wrapper" style="width:880px;min-width:880px;"> 
+        <div id="container" class="bgfff" style="width:880px;"> 
+            <div id="main" class="rel" style="width:800px;"> 
+                <div class="fn">
+                	<h2 style="padding-left:0; padding-bottom:10px">{$goodsInfo['goods_name']}</h2>
+                    <div class="messageli">
+                    <ul>
+                        <li class="top-1"><a href="{:U('WangcaiPc/NumGoods/purchaseDetail',array('goods_id'=>$goods_id,'chongzhi'=>$chongzhi))}">基本信息</a></li>
+                        <li class="top-2"><a href="{:U('WangcaiPc/NumGoods/storageTrace',array('goods_id'=>$goods_id,'detail_type'=>'purchase','chongzhi'=>$chongzhi))}">库存变动</a></li>
+                        <li class="top-3"><a href="{:U('WangcaiPc/NumGoods/priPublishLog',array('goods_id'=>$goods_id,'detail_type'=>'purchase','chongzhi'=>$chongzhi))}">发布到个人记录</a></li>
+                        <if condition="$chongzhi eq 1">
+                        <li class="top-4"><a href="{:U('WangcaiPc/NumGoods/topUpTrace',array('goods_id'=>$goods_id))}">充值记录</a></li>
+                        </if>
+                    </ul>
+                    </div>
+                    <div class="eTicket_form" style="text-align:center;">
+                        <div class="global-input6 edit_area_form">
+                            <div id="Wform" class="content_view mt20" <if condition="$top_type eq 1">style="display: block;"<else/>style="display: none;"</if>>
+                                <ul>
+                                    <li class="global-input6-name">类型</li>
+                                    <li class="global-input6-input">{$goodsType[$goodsInfo['goods_type']]}</li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">有效期</li>
+                                    <li class="global-input6-input">{$goodsInfo.begin_time|dateformat=###,'Y-m-d'}至{$goodsInfo.end_time|dateformat=###,'Y-m-d'}</li>
+                                </ul>
+                                
+                                <ul>
+                                    <li class="global-input6-name">数量</li>
+                                    <li class="global-input6-input"><?php if($goodsInfo['storage_type'] == '0'){echo '不限';}else{echo $goodsInfo['storage_num'];}?></li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">剩余库存</li>
+                                    <li class="global-input6-input"><?php if($goodsInfo['storage_type'] == '0'){echo '不限';}else{echo $goodsInfo['remain_num'];}?></li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">市场价</li>
+                                    <li class="global-input6-input">{$goodsInfo['market_price']}</li>
+                                </ul>
+                                <if condition="$goodsInfo['goods_type'] eq '1'">
+                                <ul>
+                                    <li class="global-input6-name">核销限制</li>
+                                    <li class="global-input6-input"><eq name="goodsInfo.validate_type" value="1">按金额核销<else/>限一次核销</eq></li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">代金券面额</li>
+                                    <li class="global-input6-input">{$goodsInfo['goods_amt']}</li>
+                                </ul>
+                                </if>
+                                <if condition="$goodsInfo['goods_type'] eq '3'">
+                                <ul>
+                                    <li class="global-input6-name">折扣额度</li>
+                                    <li class="global-input6-input">{$goodsInfo['goods_discount']}%</li>
+                                </ul>
+                                </if>
+                                <ul>
+                                    <li class="global-input6-name"><if condition="$goodsInfo['goods_type'] eq '0'">优惠详情<else/>小票内容</if></li>
+                                    <li class="global-input6-input">{$goodsInfo['print_text']}</li>
+                                </ul>
+                                
+                                <ul>
+                                    <li class="global-input6-name">可验门店</li>
+                                    <eq name="shopList" value="1">
+                                    <li class="global-input6-input">所有门店</li>
+                                    <else />
+                                    <li class="global-input6-input">
+                                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                                        <tbody>
+                                        <tr class="th">
+                                        <th>名称</th>
+                                        <th>地址</th>
+                                        </tr>
+                                        <volist name="shopList" id="vo" offset="0" length='5'>
+                                        <tr>
+                                        <td>{$vo['store_name']}</td>
+                                        <td>{$vo['province']}&nbsp;{$vo['city']}&nbsp;{$vo['town']}</td>
+                                        </tr>
+                                        </volist>
+                                        <if condition="count($shopList) gt 5">
+                                        <td colspan='2'><a href="javascript:void(0);" id="shop_more">更多</a></td>
+                                        </if>
+                                        </tbody>
+                                        </table>
+                                    </li>
+                                    </eq>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">使用须知</li>
+                                    <li class="global-input6-input">{$goodsInfo['goods_desc']|nl2br}</li>
+                                </ul>
+                                <div class="edit_area_img r" style=" clear:right; float:right;"><div class="bigbox jqzoom" id="spec-n1"><img src="__UPLOAD__/{$goodsInfo['goods_image']}" width="216" height="156" /></div>
+                                </div>
+                        </div>
+                        </div>
+                        
+                    </div>
+
+                    <div <if condition="$top_type eq 2">style="display: block;"<else/>style="display: none;"</if>>
+                        <table cellpadding="0" cellspacing="0" class="shopTable pt20">
+                    <tbody>
+                    <tr>
+                        <th>变动时间</th>
+                        <th>变动类型</th>
+                        <th>变动前数量</th>
+                        <th>变动数量</th>
+                        <th>变动后数量</th>
+                        <th>更多</th>
+                    </tr>
+                    <?php
+                    if(!empty($queryList)){
+                    foreach($queryList as $v){
+                        $flag = $v['current_num'] - $v['pre_num'] > 0;
+                        $color = $flag ? 'red' : 'green';
+                        $flag ? $v['change_num'] = '+' . $v['change_num'] : $v['change_num'] = '-' . $v['change_num'];
+                        // $flag ? $v['pre_num'] = '+' . $v['pre_num'];
+                    ?>
+                    <tr>
+                        <td><?php echo dateformat($v['add_time'],'y-m-d H:i')?></td>
+                        <td><?php echo $opt_type_arr[$v['opt_type']];?></td>
+                        <td><?php echo $v['pre_num'];?></td>
+                        <td style="color:<?php echo $color;?>"><?php echo $v['change_num'];?></td>
+                        <td><?php echo $v['current_num'];?></td>
+                        <td>
+                            <in name="v.opt_type" value="0,4,5,6,7,8,9">
+                            <a href="javascript:;" onclick="more({$v.id})">更多</a>
+                            </in>
+                        </td>
+                    </tr>
+                    <?php }}else{?>
+                    <td colspan="6"><div class="nonedata"></td>
+                    <?php }?>
+                    </table>
+                        <div class="page">{$page}</div>
+                    </div>
+
+                    <div <if condition="$top_type eq 3">style="display: block;"<else/>style="display: none;"</if>>
+                    <table cellpadding="0" cellspacing="0" class="shopTable pt20">
+                        <tbody>
+                        <tr>
+                        <th width="40%">发送时间</th>
+                        <th width="40%">接收手机号</th>
+                        <th width="20%">发送状态</th>
+                        </tr>
+                        <if condition="!empty($list)">
+                        <volist name="list" id="vb">
+                        <tr>
+                            <td>{$vb['trans_time']|strtotime|date='Y-m-d H:i:s',###}</td>
+                            <td>{$vb['phone_no']}</td>
+                            <td><if condition="$vb['status'] eq '0'">成功<elseif condition="$vb['status'] eq '1'" />已撤销<else/>失败</if></td>
+                        </tr>
+                        </volist>
+                        <else />
+                        <td colspan="3"><div class="nonedata"></td>
+                        </if>
+                    </table>
+                        <div class="page">{$page}</div>
+                    </div>
+
+                    <div <if condition="($top_type eq 4) and ($chongzhi eq 1)">style="display: block;"<else/>style="display: none;"</if>>
+                    <div class="SearchArea" style="margin-top:15px">
+                    	<div class="SearchAreaLeft">
+                        	<label>
+                            	<span>手机号/QQ号</span>
+                                <input type="text" name="" />
+                            </label>
+                            <label>
+                                <span>充值时间</span>
+                                <input type="text" name="badd_time" id="badd_time" onclick="WdatePicker()" value="">
+                                -
+                                <input type="text" name="eadd_time" id="eadd_time" onclick="WdatePicker()" value="">
+                            </label>
+                            <label>
+                            	<span>充值状态</span>
+                                <select>
+                                	<option value="">全部</option>
+                                    <option value="">充值成功</option>
+                                    <option value="">充值失败</option>
+                                    <option value="">待充值</option>
+                                    <option value="">已关闭</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="SearchAreaRight">
+                        	<a href="javascript:void(0);" class="searchBtn">查询</a>
+                        </div>
+                    </div>
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                        <tr>
+                            <th width="10%">充值时间</th>
+                            <th width="10%">手机号/QQ号</th>
+                            <th width="10%">充值状态</th>
+                            <th width="10%">备注</th>
+                            <th width="10%">操作</th>
+                        </tr>
+                        
+                        <volist name="list" id="vo">
+                        <tr>
+                            <td>{$vo.recharge_time|dateformat=###,'Y-m-d'}</td>
+                            <td>{$vo['recharge_number']}</td>
+                            <td>{$status[$vo['status']]}</td>
+                            <td>{$vo['fail_memo']}</td>
+                            <td style="position:relative">
+                                <if condition="$vo['status'] eq 3">
+                                <a href="javascript:void()" class="js_charge">重新充值</a>
+                                <div class="chargEdit dn">
+                                    <label><span>手机号/QQ号：</span><input type="text" id="num_{$vo['id_str']}" /></label>
+                                    <label><a href="javascript:void()" onclick="num_charge('{$vo['id_str']}');" class="Diabtn-all">确定</a><a href="javascript:void()" class="Diabtn-all-del close_btn">返回</a></label>
+                                </div>
+                                <else />
+                                --
+                                </if>
+                            </td>
+                        </tr>
+                        </volist>
+                        <empty name="list" >
+                            <tr>
+                                <td colspan="6"><div class="nonedata"></div></td>
+                            </tr>
+                        </empty>
+                    </table>
+                    <div class="tr page mini pt5 pb5"><?php echo $page;?>&nbsp;&nbsp;</div>
+                </div>
+                <a href="javascript:art.dialog.close();art.dialog.opener.reload();" title="返回" class="btn-all w110 mt30" style="margin-left:350px;">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+	$(function(){
+		$(".js_charge").click(function(e) {
+			$(this).parent().children(".chargEdit").fadeIn();
+        });	
+		
+		$(".chargEdit .Diabtn-all-del").click(function(e) {
+            $(".chargEdit").hide();
+        });
+	})
+</script>

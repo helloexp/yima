@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title><?php echo $row['wap_title']; ?></title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_pars.css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js"></script>
+<script src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js"></script>
+
+
+
+<script>
+$(document).ready(function(e) {
+	$('#form').validationEngine({
+		'allrules': {
+			"carname":{
+				"alertText":"请输入有效的信息"
+			},
+		}
+	});
+    $("li.name").click(function(){
+        $(this).find("input,select").focus();
+    });
+
+    $('#hb_submit').click(function(){ 
+        var form=$('#form');
+        var url=form.attr('action');
+        var data=form.serialize();
+        $.post(url,data,function(data){ 
+            if(data.status == 1){ 
+                var url='/index.php?g=Label&m=Bm&a=hbreckon'+'&bmseq='+data.data.bmseq+'&id='+data.data.id;
+                alert(data.info);
+                location.replace(url);
+            }else{ 
+                 alert(data.info);
+            }
+          
+        },'json');
+        return false;
+    });
+});
+</script>
+</head>
+<body>
+<div id="wrapper" class="bgEfeff4">
+    <div id="container">
+        <div id="main">
+        	<div class="mainTop">
+                <div class="banner">
+                	<img src="__PUBLIC__/Label/Image/pinganRs/Item/banner.jpg" width="100%" height="auto" />
+                </div>
+            </div>
+            <div id="mainCon" class="Gform collection">
+            	<div class="title"><h2>请填写您的资料</h2></div>
+            	<form id="form" action="/index.php?g=Label&m=Bm&a=hbinfo" method="post" name="form">
+                <input type="hidden" value="<?php echo $_GET['id']?>" name="id" id="id" />
+                <input type="hidden" value="<?php echo $row['select_type']?>" name="select_type" />
+                    
+                <ul>
+
+                <?php $_resp_config=C('hebei_pars.resp_arr');
+                $_resp_config=$_resp_config[$batch_id];
+                 $resp_config=array_flip($_resp_config);
+                $yield_data=range(0.5,5,0.5);$years_data=range(10,40);?>
+
+                <?php foreach ($resp_arr as $row): ?>
+                    <?php if(!strcasecmp($resp_config[$row['info']['id']],'yield')):?>
+                    <li class="name fn">
+                    	<label><?php echo $row['info']['questions']?></label>
+                    	<p>
+                            <select name="<?php echo $resp_config[$row['info']['id']]?>" class="textbox validate[required,maxSize[5]]"  >
+                            <option value="">请选择</option>
+                            <?php foreach($yield_data as $val):?>
+                                <option value="<?php echo $val;?>"><?php echo $val;?></option>
+                            <?php endforeach;?>
+                            </select>
+                    	   
+                    	</p>
+                    </li>
+                 <?php elseif(!strcasecmp($resp_config[$row['info']['id']],'years')):?>
+                    <li class="name fn">
+                        <label><?php echo $row['info']['questions']?></label>
+                        <p>
+                            <select name="<?php echo $resp_config[$row['info']['id']]?>" class="textbox validate[required,maxSize[5]]" >
+                            <option value="">请选择</option>
+                            <?php foreach($years_data as $val):?>
+                                <option value="<?php echo $val;?>"><?php echo $val;?></option>
+                            <?php endforeach;?>
+                            </select>
+                            
+                        </p>
+                    </li>
+                <?php else:?>
+
+                        <li class="name fn">
+                        <label><?php echo $row['info']['questions']?></label>
+                        <p>
+                            <input name="<?php echo $resp_config[$row['info']['id']]?>" type="text" class="<?php if(strcasecmp($resp_config[$row['info']['id']],'mortgage_and_debt')){echo 'textbox validate[required,maxSize[5]]';}else{echo '';}?>"  placeholder="" data-rel="">
+                           
+                        </p>
+                    </li>
+                <?php endif;?>
+                <?php endforeach;?>
+               <!--     <li class="name fn">
+                    	<label>家庭需要您照顾的年期至少:</label>
+                    	<p>
+                    		<input name="name" type="text" class="textbox validate[required,maxSize[5]]" maxlength="5" placeholder="" data-rel="">
+                    	    <span>年</span>
+                    	</p>
+                    </li>
+                    <li class="name fn">
+                    	<label>您认为目前保守投资的收益率:</label>
+                    	<p>
+                    		<input name="name" type="text" class="textbox validate[required,maxSize[5]]" maxlength="5" placeholder="" data-rel="">
+                    	    <span>%</span>
+                    	</p>
+                    </li>
+                    <li class="name fn">
+                    	<label>您目前的按揭及债务:</label>
+                    	<p>
+                    		<input name="name" type="text" class="textbox validate[required,maxSize[5]]" maxlength="5" placeholder="" data-rel="">
+                    	    <span>万元</span>
+                    	</p>
+                    </li>
+                    <li class="name fn">
+                    	<label>您已拥有的寿险保额:</label>
+                    	<p>
+                    		<input name="name" type="text" class="textbox validate[required,maxSize[5]]" maxlength="5" placeholder="" data-rel="">
+                    	    <span>万元</span>
+                    	</p>
+                    </li>
+                    -->
+                </ul>
+                <ul class="btn-ul">
+                    <li class="btn-li"><input id='hb_submit' type="submit" value="提&nbsp;&nbsp;&nbsp;交" class="btn-up" /></li>
+                </ul>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>

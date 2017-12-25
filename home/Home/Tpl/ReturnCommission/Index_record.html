@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>全民营销活动_营销活动中心_翼码旺财</title>
+    <load href="__PUBLIC__/Css/main.css?v=__VR__"/>
+    <load href="__PUBLIC__/Css/layout.css?v=__VR__"/>
+    <load href="__PUBLIC__/Css/module.css?v=__VR__"/>
+    <load href="__PUBLIC__/Css/Wactivities.css?v=__VR__"/>
+    <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+    <load href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+    <load href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+    <script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+    <script>
+        $(function () {
+            $('#sub_button').click(function () {
+                $('#theform').submit();
+            });
+            $("#down").click(function () {
+                $("form").attr("action", "{:U('Coupon/export')}").submit();
+            });
+        })
+
+        function statusChange(batch_id, status, id) {
+            if (status == 0) {
+                var title = "您确认启用该活动？";
+            } else {
+                var title = "您确认停止该活动？";
+            }
+            art.dialog.confirm(title, function () {
+                $.post("{:U('editStatus')}", {"batch_id": batch_id, "status": status}, function (data) {
+                    if (data.status == 1) {
+                        art.dialog({title: false, content: "<div class='msg-all-succeed'>" + data.info + "</div>", fixed: true, padding: 0, time: 2});
+                        window.location.reload();
+                    } else {
+                        art.dialog({title: false, content: "<div class='msg-all-error'>" + data.info + "</div>", fixed: true, padding: 0, time: 2});
+                    }
+                }, "json");
+            });
+        }
+    </script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html"/>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area"> <i class="icon-bread"></i>
+                            <p>
+                                <a href="{:U('Home/Index/index')}">首页</a>
+                            </p>
+                            <p>></p>
+                            <p>
+                                <a href="{:U('Home/Index/marketingShow')}">业务中心</a>
+                            </p>
+                            <p>></p>
+                            <p>
+                                <a href="{:U('intro')}">全民营销</a>
+                            </p>
+                            <p>></p>
+                            <p>
+                                <a href="javascript:;">返佣发放</a>
+                            </p>
+                        </div>
+                        <div class="bread-history"> <i class="icon-history"></i>
+
+                            <p>
+                                <a href="javascript:void(0)" class="ind-bread">返回</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+                    <include file="LabelAdmin/Batch/leftMenu" leftmenuid="qmyxfyff"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">返佣发放</h4>
+                    </div>
+                    <div class="form-search  fn">
+                        <form action="{:U('record')}" method="post" name="theform" id="theform">
+                            <input type="hidden" name="sub_type" id="sub_type" value="1"/>
+                            <p>返佣类型</p>
+                            <p>
+                                <select class="selectbox w80" name="commission_type" id="commission_type">
+                                    <option value="">请选择</option>
+                                    {:show_arr_opt($commission_type_arr, $_REQUEST['commission_type'])}
+                                </select>
+                            </p>
+
+                            <p class="ml20">返佣日期</p>
+
+                            <p>
+                                <input type="text" name="start_time" id="start_time"
+                                  onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})"
+                                  value="{$Think.request.start_time}" class="textbox w80"/>
+                                -
+                                <input type="text" name="end_time" id="end_time"
+                                   onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})"
+                                   value="{$Think.request.end_time}" class="textbox w80"/>
+                            </p>
+
+                            <p class="ml50">返佣状态</p>
+
+                            <p>
+                                <select class="selectbox w80" name="return_status" id="return_status">
+                                    <option value="">请选择</option>
+                                    {:show_arr_opt($return_status_arr, $_REQUEST['return_status'])}
+                                </select>
+                            </p>
+                            <a href="javascript:void(0);" onclick="$('#sub_type').val('2');return $('#theform').submit();" id="sub_button" class="btn-all r w70">下载</a>
+
+                            <a href="javascript:void(0);" onclick="$('#sub_type').val('1');return $('#theform').submit();" id="sub_button" class="btn-all r w70 mr10">查询</a>
+
+                            <div class="cl mb5"></div>
+                            <p>返佣活动</p>
+
+                            <p>
+                                <select name="return_id" id="return_id" class="selectbox">
+                                    <option value="" class="">全部</option>
+                                    {:show_arr_opt($batch_list, $_REQUEST['return_id'])}
+                                </select>
+                            </p>
+                        </form>
+                    </div>
+                    <div class="fn">
+                        <table cellpadding="0" cellspacing="0" class="W-table">
+                            <tr>
+                                <th>手机号码</th>
+                                <th>返佣活动</th>
+                                <th>返佣达成时间</th>
+                                <th>返佣发放时间</th>
+                                <th>返佣类型</th>
+                                <th>返佣内容</th>
+                                <th>返佣账号</th>
+                                <th>状态</th>
+                            </tr>
+                            <?php 
+                        if($list){
+                            foreach($list as $row){
+                        ?>
+                            <tr>
+                                <td>
+                                    <?php echo $row['phone_no'];?></td>
+                                <td>
+                                    <?php echo $row['commission_name'];?></td>
+                                <td>
+                                    <?php echo dateformat($row['return_add_time'], 'y-m-d H:i');?></td>
+                                <td>
+                                    <?php echo dateformat($row['return_charge_time'], 'y-m-d H:i');?></td>
+                                <td>
+                                    <?php echo $commission_type_arr[$row['commission_type']];?></td>
+                                <td>
+                                    <?php echo $row['return_content'];?></td>
+                                <td>
+                                    <?php echo $row['return_acount'];?></td>
+                                <td>
+                                    <?php echo $row['return_status'];?></td>
+                            </tr>
+                            <?php } }else{ ?>
+                            <tr>
+                                <td colspan="7">暂无数据</td>
+                            </tr>
+                            <?php }?></table>
+                        <div class="page">{$page}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html"/>
+    </div>
+    <div class="service"></div>
+</body>
+    <!--
+<script type="text/javascript" src="js/Service.js?v=__VR__"></script>
+-->
+</html>

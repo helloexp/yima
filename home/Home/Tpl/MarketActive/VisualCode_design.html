@@ -1,0 +1,646 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="Keywords" content="二维码,O2O平台,微信网站,手机二维码,O2O模式,微商城,电子凭证,线上线下,微信商城,二维码营销,电子优惠劵,微团购,二维码防伪,旺财,微信推广,二维码扫描,企业营销,微营销,二维码制作,企业推广,微信营销,二维码名片,网络营销,微信开发,二维码生成器,防伪标签,移动互联网,O2O,O2O营销,微网站"/>
+<title>炫码_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css"/>
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css"/>
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css"/>
+<link href="__PUBLIC__/Css/VisualCode.css?v=__VR__" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.easing.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script src="__PUBLIC__/Js/jquery.Jcrop_new.js?v=__VR__" type="text/javascript"></script>
+<link href="__PUBLIC__/Js/jscolor/colorpicker.css" rel="stylesheet" type="text/css"/>
+<script src="__PUBLIC__/Js/jscolor/colorpicker.js?v=__VR__" type="text/javascript"></script>
+<script src="__PUBLIC__/Js/jquery.rotate.min.js?v=__VR__" type="text/javascript"></script>
+<script>
+   $(document).ready(function(e) {
+            	// 默认弹窗上传图片
+            	setimg_file_up();
+                //浏览器
+                var ua = navigator.userAgent;
+                ua = ua.toLowerCase();
+                var match = /(webkit)[ \/]([\w.]+)/.exec(ua)
+                        || /(opera)(?:.*version)?[ \/]([\w.]+)/
+                        .exec(ua) || /(msie) ([\w.]+)/.exec(ua)
+                        || !/compatible/.test(ua)
+                        && /(mozilla)(?:.*? rv:([\w.]+))?/.exec(ua)
+                        || [];
+                switch (match[1]) {
+                    case "msie": //ie
+                        if (parseInt(match[2]) === 7) {
+                            $(".ie-msg").show();
+                        }
+                        ;
+                        if (parseInt(match[2]) === 8) {
+                            $(".ie-msg").show();
+                        }
+                        break;
+                }
+
+                //下拉菜单
+                $(".navList").hoverDelay(function() {
+                    var $this = $(this).find(".wqrAdd-nav-list");
+                    var nowheight = $this.height();
+                    $this.height("auto");
+                    var endheight = $this.height();
+                    $this.height(nowheight);
+                    $this.show();
+                    $this.animate({
+                        height: endheight
+                    }, 300);
+                }, function() {
+                    $(this).find(".wqrAdd-nav-list").animate({
+                        height: "0"
+                    }, 300, function() {
+                        $(this).find(".wqrAdd-nav-list").hide();
+                    });
+                });
+
+                //选择颜色
+                $('.color_select').ColorPicker({
+                    flat: false,
+                    color: '#ffffff',
+                    onBeforeShow: function(colpkr) {
+                        e.stopPropagation ? e.stopPropagation()
+                                : (e.cancelBubble = true);
+                    },
+                    onShow: function(colpkr) {
+                        $(colpkr).show();
+                        $('.color_select').attr('stat', true);
+                        return false;
+                    },
+                    onHide: function(colpkr) {
+                        $(colpkr).hide();
+                        $('.color_select').attr('stat', false);
+                        return false;
+                    },
+                    onChange: function(hsb, hex, rgb) {
+                        $('.color_select').attr('rel', hex);
+                        $('.imgBg').css('backgroundColor',
+                                '#' + hex);
+                        $('#color_pick').val(hex);
+                    }
+                });
+                $(".colorpicker").live("click", function(e) {
+                    e.stopPropagation();
+                });
+                $("body").live("click", function(e) {
+                    $(".colorpicker").fadeOut(200);
+                });
+
+                //旋转
+                $(".wqrAdd-nav-rotate").click(function() {
+                    var rotate_val = parseInt($(this).find("i").attr("rel"));
+                    var animationrotate = rotate_val;
+                    rotate_val = rotate_val + 90;
+                    var animation = function() {
+                        if (animationrotate == rotate_val) {
+                            clearInterval(Int);
+                        } else {
+                            animationrotate += 3;
+                            $("#qrImg").rotate(
+                                    animationrotate);
+                        }
+                    }
+                    var Int = setInterval(animation, 17);
+                    $(this).find("i").attr("rel", rotate_val);
+                });
+                $("#nextstop").click(
+                        function() {
+                            if ($("#result_pic").val() == "") {
+                                alert("请先预览炫码效果");
+                                return false;
+                            }
+                            var tempUser = "{$isTempUser}";
+                            if(tempUser == '1')
+                            {
+                                var dialog;
+                                $("#theform").ajaxSubmit({
+                                    url:'index.php?g=MarketActive&m=VisualCode&a=cookiedone',
+                                    type:'POST',
+                                    data:$("#theform").serialize(),
+                                    dataType:'JSON',
+                                    beforeSubmit:function(){
+                                        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                                    },
+                                    success:function(data){
+                                        if(data.status == 1){
+                                            dialog.time(1).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                                            if(data.islogin == '1')
+                                            {
+                                                window.location.href="{:U('MarketActive/VisualCode/done',['istmp'=>1])}";
+                                                return false;
+                                            }
+                                            art.dialog.open('./index.php?g=Home&m=Land&a=regwfx&landname=xuanmaredirect&from_user_id=9000&only_request_reg=1',{
+                                                id : "EnterpriseNo",
+                                                title : false,
+                                                width : "500px",
+                                                height : "596px"
+                                            });
+                                            return false;
+                                        }else{
+                                            dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                                        }
+                                    }
+                                });
+                                return false;
+                            }
+                            $("#theform").attr("action", "index.php?g=MarketActive&m=VisualCode&a=done");
+                            document.theform.submit();
+                        });
+            });
+
+            //图片放大缩小
+            function imgSize(type) {
+                var imgCoordinate = $(".imgCoordinate").text().split(",");
+                var $changeimg = $(".imgBg").children("img");
+                var beginwidth = $changeimg.width();
+                var beginheight = $changeimg.height();
+                if (beginwidth > $(".jcrop-holder").width()) {
+                    return false
+                } else if (beginheight > $(".jcrop-holder").height()) {
+                    return false
+                }
+                ;
+                var beginleft = parseInt($changeimg.css("left"));
+                var begintop = parseInt($changeimg.css("top"));
+                if (type == 1) {
+                    type = 1
+                } else {
+                    type = -1
+                }
+                ;
+                var endwidth = beginwidth + type * 0.2 * beginwidth;
+                var endleft = beginleft - type * 0.1 * beginwidth;
+                var endheight = beginheight + type * 0.2 * beginheight;
+                var endtop = begintop - type * 0.1 * beginheight;
+                if (endwidth > $(".jcrop-holder").width()) {
+                    endwidth = $(".jcrop-holder").width();
+                    endheight = $(".jcrop-holder").height();
+                    $(".jcrop-holder img:eq(0)").animate({
+                        width: endwidth,
+                        left: 0,
+                        height: endheight,
+                        top: 0
+                    }, 300, "jswing");
+                    $(".imgBg").children("img").animate({
+                        width: endwidth,
+                        left: 0,
+                        height: endheight,
+                        top: 0
+                    }, 300, "jswing");
+                    return false;
+                }
+                $(".jcrop-holder img:eq(0)").animate({
+                    width: endwidth,
+                    left: endleft - imgCoordinate[0],
+                    height: endheight,
+                    top: endtop - imgCoordinate[1]
+                }, 300, "jswing");
+                $(".imgBg").children("img").animate({
+                    width: endwidth,
+                    left: endleft,
+                    height: endheight,
+                    top: endtop
+                }, 300, "jswing");
+            }
+            //其他数值，无预览
+            function wqrAddNavRadio(id, type) {
+                var $this = $(id).html();
+                $(id).closest(".navList").find(".wqrAdd-nav-title").html($this);
+                if ($(id).closest(".navList").hasClass("wqrAdd-nav-radio")) {
+                    if (type == 1) {
+                        $(".jcrop-tracker img").attr("src",
+                                "__PUBLIC__/Image/VisualCode/qr_demo_no_timelines.png");
+                    } else {
+                        $(".jcrop-tracker img").attr("src",
+                                "__PUBLIC__/Image/VisualCode/qr_demo_rounded.png");
+                    }
+                }
+            }
+
+            //简单的事件处理程序，响应自onChange,onSelect事件，按照上面的Jcrop调用
+            function showPreview(coords) {
+                $(".imgCoordinate").text(
+                        coords.x + "," + coords.y + "," + coords.w + "," + coords.h);
+                var Imgtop = parseInt($(".imgBg").children("img").css("top"))
+                        - coords.y;
+                var Imgleft = parseInt($(".imgBg").children("img").css("left"))
+                        - coords.x;
+                $(".jcrop-holder img:eq(0)").css({
+                    top: Imgtop,
+                    left: Imgleft
+                })
+            }
+            ;
+            var jcrop_api = null;
+            function initJcrop() {
+                var Imgwidth = $("#xuwanting").width();
+                var Imgheight = $("#xuwanting").height();
+                //$(".jcrop-tracker:eq(0)").append('<img src="__PUBLIC__/Image/VisualCode/qr_demo_no_timelines.png" id="qrImg" />').css({"opacity":1,"background":"none"});
+                //$(".jcrop-holder").children("img").wrapAll("<div class='imgBg'></div>");
+
+                $("#xuwanting")
+                        .Jcrop(
+                                {
+                                    onChange: showPreview,
+                                    allowSelect: false,
+                                    setSelect: [0, 0, Imgwidth, Imgheight],
+                                    bgOpacity: "0.7",
+                                    bgColor: '#fff',
+                                    aspectRatio: 1,
+                                    minSize: [60, 60]
+                                },
+                        function() {
+                            jcrop_api = this
+                            $(".jcrop-tracker:eq(0)")
+                                    .append('<img src="__PUBLIC__/Image/VisualCode/qr_demo_no_timelines.png" id="qrImg" />')
+                                    .css({
+                                        "opacity": 1,
+                                        "background": "none"
+                                    });
+                            $(".jcrop-holder").children("img").wrapAll(
+                                    "<div class='imgBg'></div>");
+                        });
+            }
+          
+     </script>
+</head>
+    <body>
+        <div id="wrapper">
+            <eq name="isTempUser" value="1">
+            <include file="./Home/Tpl/Public/Public_temp_node_header.html" />
+            <else />
+            <include file="./Home/Tpl/Public/Public_header.html" />
+            </eq><!--引入头部-->
+            <div id="container">
+                <div id="main" class="rel">
+                    <div class="wqr-head-step rel wqr-head-steps">
+                        <neq name="isTempUser" value="1">
+                    	<a href="index.php?g=MarketActive&m=VisualCode&a=index" class="btn-all">返回列表</a>
+                        </neq>
+                        <ul>
+                            <li><i class="icon-ok"></i><span>选择炫码类型</span></li>
+                            <li><i class="icon-ok"></i><span>设置炫码内容</span></li>
+                            <li class="hover"><i class="icon-num3"></i><span>设计炫码样式</span></li>
+                            <li><i class="icon-num4"></i><span>完成并下载</span></li>
+                        </ul>   
+                    </div>
+
+                    <div class="wqr-type-area fn rel">
+                        <h2 class="step-sub">上传炫码背景图，并设计炫码样式</h2>
+
+                        <div class="back-next fn" style="width: 220px;">
+                            <div class="back">
+                                <a href="javascript:history.go(-1);">上一步</a>
+                            </div>
+                            <div class="next-disable" style="float: right;">
+                                <a href="javascript:void(0);" id="nextstop">生成炫码</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wqrAdd">
+                        <form action="{:U('VisualCode/submit_design')}" name="theform" id="theform" method="post">
+                            <input type="hidden" name="content" id="content" value="<?php echo $content;?>" />
+                            <input type="hidden" name="content_pic" id="content_pic" value="<?php echo $content_pic;?>" />
+                            <input type="hidden" name="short_pic" id="short_pic" value="<?php echo $short_pic;?>" />
+                            <input type="hidden" name="wechat_pic" id="wechat_pic" value="<?php echo $wechat_pic;?>" />
+                            <input type="hidden" name="content_type" id="content_type" value="<?php echo $content_type;?>" />
+                            <input type="hidden" name="qrName" id="qrName" value="<?php echo $qrName;?>" />
+                            <input type="hidden" name="remarkContent" id="remarkContent" value="<?php echo $remarkContent;?>" />
+                            <input type="hidden" name="result_pic" id="result_pic" value="" />
+                            <input type="hidden" name="code_id" id="code_id" value="" />
+                            <input type="hidden" name="channelid" id="channelid" value="<?php echo $channelid;?>" />
+                            <input type="hidden" name="qr_size" id="qr_size" value="" />
+                            <input type="hidden" name="qr_x" id="qr_x" value="" />
+                            <input type="hidden" name="qr_y" id="qr_y" value="" />
+                            <input type="hidden" name="qr_rotation" id="qr_rotation" value="" />
+                            <input type="hidden" name="cells_type" id="cells_type" value="" />
+                            <input type="hidden" name="markers_type" id="markers_type" value="" />
+                            <input type="hidden" name="gen_type" id="gen_type" value="" />
+                            <input type="hidden" name="effects" id="effects" value="" />
+
+                            <div class="wqrAdd-nav fn">
+                                <div class="wqrAdd-nav-changePic navList" onclick="setimg_file_up()">
+                                    <input type="hidden" class="upfile" name="upload-file" id="upload-file333"  />
+                                    <div class="wqrAdd-nav-title">
+                                        <i class="icon-wqr19"></i>
+                                        <span>上传图片</span>
+                                    </div>
+                                </div>
+                            	<!--
+                                <div class="wqrAdd-nav-color navList">
+                                    <div class="wqrAdd-nav-title color_select">
+                                        <i class="icon-wqr4"></i>颜色
+                                    </div>
+                                    <input type="hidden" id="color_pick"/>
+                                </div>
+                                -->
+                                <div class="wqrAdd-nav-rotate navList">
+                                    <div class="wqrAdd-nav-title">
+                                        <i class="icon-wqr5" rel="0"></i>旋转
+                                    </div>
+                                </div>
+
+                                <div class="wqrAdd-nav-radio navList">
+                                    <div class="wqrAdd-nav-title">
+                                        <i class="icon-wqr8" rel="1"></i>方形
+                                    </div>
+                                    <div class="wqrAdd-nav-list">
+                                        <dl>
+                                            <dd onclick="wqrAddNavRadio(this, 1)">
+                                                <i class="icon-wqr8" rel="1"></i>方形
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this, 2)">
+                                                <i class="icon-wqr9" rel="2"></i>圆形
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                                <div class="wqrAdd-nav-square navList">
+                                    <div class="wqrAdd-nav-title">
+                                        <i class="icon-wqr10" rel="1"></i>方块
+                                    </div>
+                                    <div class="wqrAdd-nav-list">
+                                        <dl>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr10" rel="1"></i>方块
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr11" rel="2"></i>圆圈
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr12" rel="3"></i>星形
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                                <div class="wqrAdd-nav-effect navList">
+                                    <div class="wqrAdd-nav-title">
+                                        <i class="icon-wqr13" rel="70"></i>无
+                                    </div>
+                                    <div class="wqrAdd-nav-list">
+                                        <dl>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr14" rel="2"></i>黑白
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr15" rel="1"></i> 素描
+                                            </dd>
+                                            <!-- <dd onclick="wqrAddNavRadio(this)"><i class="icon-wqr16" rel=""></i>曲线</dd> -->
+                                            <!-- <dd onclick="wqrAddNavRadio(this)"><i class="icon-wqr17" rel="17"></i>卡通</dd> -->
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr18" rel="11"></i>水波纹
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr13" rel="3"></i>模拟油画
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr13" rel="4"></i>怀旧
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr13" rel="5"></i>毛玻璃
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr13" rel="6"></i>曝光
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr13" rel="7"></i>浮雕
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr13" rel="8"></i>运动模糊
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr13" rel="9"></i>漩涡
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr13" rel="10"></i>内曝
+                                            </dd>
+                                            <dd onclick="wqrAddNavRadio(this)">
+                                                <i class="icon-wqr13" rel="-"></i>无
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                                <div class="wqrAdd-nav-btn">
+                                    <a href="javascript:void(0)" class="btn-wqrupdata">合成并预览</a>
+                                </div>
+                        </form>
+                    </div>
+                    <!--[if IE]><div class="IEmsgerro mt20">IE7/IE8用户请将“旋转”作为最后一步设置</div><![endif]-->
+                    <div class="wqrAdd-preview">
+                    	<div class="tc"><img src="__PUBLIC__/Image/VisualCode/bg.png" /></div>
+                        <div class="wqrPreview-img fn">
+                            <!--请给img一个默认值，否则JS中 setImage 报空值错误-->
+                        	<img id="xuwanting" src="__PUBLIC__/Image/msgsucceed.png
+" />
+                         <!--    <img id="xuwanting" src="<?php echo $content_pic;?>"/> -->
+                        </div>
+                        <div class="imgCoordinate dn"></div>
+                    </div>
+                </div>
+           </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html"/>
+        <!--引入底部-->
+        </div>
+    <neq name="isTempUser" value="1">
+    <div class="service"></div>
+    </neq>
+    </body>
+</html>
+
+<script>
+    $(document).ready(function(e) {
+        $(".btn-wqrupdata").on("click", function() {
+            $(this).removeClass("btn-wqrupdata").addClass("disable");
+            var allwidth = parseInt($(".jcrop-holder").width());
+            var allheight = parseInt($(".jcrop-holder").height());
+            var qr_left = parseInt($(".jcrop-holder div:eq(0)").css("left"));
+            var qr_top = parseInt($(".jcrop-holder div:eq(0)").css("top"));
+            var qr_right = parseInt(allwidth - $(".jcrop-holder div:eq(0)").width());
+            var qr_bottom = parseInt(allheight - $(".jcrop-holder div:eq(0)").height());
+            var qr_width = parseInt($(".jcrop-holder div:eq(0)").width());
+            var qr_height = parseInt($(".jcrop-holder div:eq(0)").height());
+            var image_left = parseInt($(".imgBg img").css("left"));
+            var image_top = parseInt($(".imgBg img").css("top"));
+            var image_right = parseInt(allwidth - $(".imgBg img").width());
+            var image_bottom = parseInt(allheight - $(".imgBg img").height());
+            var img_width = parseInt($(".imgBg img").width());
+            var img_height = parseInt($(".imgBg img").height());
+            var left_x = Math.min(image_left, qr_left);
+            var right_x = Math.max(image_right, qr_right);
+            var top_y = Math.min(image_top, qr_top);
+            var bottom_y = Math.max(image_bottom, qr_bottom);
+            var canvas_width = allwidth - left_x - right_x;
+            var canvas_height = allheight - top_y - bottom_y;
+            var img_x1 = image_top - top_y;
+            var img_y1 = image_left - left_x;
+            var qr_x1 = qr_left;
+            var qr_y1 = qr_top;
+            var hex_color = $("#color_pick").val();
+            var rotation = $(".wqrAdd-nav-rotate .wqrAdd-nav-title i").attr("rel");
+            if (rotation == 360) {
+                rotation = 0
+            }
+            var marker = $(".wqrAdd-nav-radio .wqrAdd-nav-title i").attr("rel");
+            var dots = $(".wqrAdd-nav-square .wqrAdd-nav-title i").attr("rel");
+            var type = $(".wqrAdd-nav-gen .wqrAdd-nav-title i").attr("rel");
+            var effects = $(".wqrAdd-nav-effect .wqrAdd-nav-title i").attr("rel");
+            var v_switch = $(".wqrAdd-nav-effect .wqrAdd-nav-title i").attr("rel");
+            setTimeout("$('.wqrAdd-nav-btn .disable').removeClass('disable').addClass('btn-wqrupdata');", 10000)
+            //开始赋值
+            $("#qr_size").val(qr_width);
+            $("#qr_x").val(qr_x1);
+            $("#qr_y").val(qr_y1);
+            $("#qr_rotation").val(rotation);
+            $("#cells_type").val(dots);
+            $("#markers_type").val(marker);
+            $("#gen_type").val(type);
+            $("#effects").val(effects);
+
+            $("form").ajaxSubmit(
+                    {beforeSubmit: function() {
+                            dialog = art.dialog({
+                                title: false,
+                                content: "<div class='msg-all-succeed'>正在提交...</div>",
+								time:1,
+                                fixed: true,
+                                padding: 0
+                            });
+                        },
+                        timeout: 60000,
+                        success: function(data) {
+                            if (data.status == '1') {
+                                dialog
+                                $("#result_pic").val(data.imgurl);
+                                $("#code_id").val(data.code_id);
+                                art.dialog({
+                                    lock: true,
+                                    title: "炫码生成成功！",
+                                    id:"msg",
+                                    padding:10,
+                                    width: "440px",
+                                    top: "30%",
+                                    content: "<div class='tc'><img src='" + data.imgurl + "' class='art-img' style='margin:0 auto; width:100%'/></div><div class='cl'></div><div class='wqrbtn tc'><a href='javascript:void(0)' class='btn-all w120 erro' onClick='closeart()'>返回重新设计</a><a href='javascript:void(0)' class='btn-all w120 ml10' onClick='update()'>确认并保存</a></div>"
+                                });
+                                $("#nextstop").css("background", "#f38e81");
+                                dialog.close();
+                            } else {
+                                $("#result_pic").val("");
+                                $("#code_id").val("");
+                                art.dialog({
+                                    title: false,
+                                    content: "<div class='msg-all-error'>"
+                                            + data.error
+                                            + "</div>",
+                                    time: 4,
+                                    lock: true,
+                                    padding: 0
+                                });
+                            }
+                        },
+                        dataType: 'json'
+                    });
+        });
+        $("#xuwanting").one('load', function() {
+            initJcrop();
+        }).each(function() {
+            if (this.complete)
+                $(this).load();
+        });
+    });
+    
+    //上传图片载入
+    function setimg_file_up(){
+        var isTempUser = "{$isTempUser}";
+        var nodeId = "{$userInfo['node_id']}";
+        var opt = {
+            cropPresets:'800x800',
+            callback:uploadCallback_setimg_up,
+            userid:isTempUser == '2'?false:nodeId
+        };
+        open_img_uploader(opt);
+    }
+    
+    function uploadCallback_setimg_up(data) {
+        jcrop_api.setImage(data.src);
+        jcrop_api.setOptions(
+                {
+                    onChange: showPreview,
+                    allowSelect: false,
+                    setSelect: [
+                        0,
+                        0,
+                        data.width,
+                        data.height],
+                    bgOpacity: "0.7",
+                    bgColor: '#fff',
+                    aspectRatio: 1,
+                    minSize: [60, 60]
+                },
+                function() {
+                    jcrop_api = this
+                    $(".jcrop-tracker:eq(0)")
+                            .append('<img src="__PUBLIC__/Image/VisualCode/qr_demo_no_timelines.png" id="qrImg" />')
+                            .css({"opacity": 1,"background": "none"});
+                    $(".jcrop-holder")
+                            .children("img")
+                            .wrapAll("<div class='imgBg'></div>");
+                });
+        $("#content_pic").val(data.savename);
+        $("#short_pic").val(data.savename);
+    }
+	function closeart(){
+		art.dialog({id:"msg"}).close();
+	}
+	function update(){
+		$("#nextstop").click();
+	}
+    $(document).ready(function(){
+        $("#reg_clk").click(function(){
+            urltiyan = "./index.php?g=Home&m=Land&a=regwfx&landname=xuanmaregdirect&from_user_id=9000";
+            art.dialog({
+                title:"提示",
+                content:"<div class='loadTip'><div class='loadStatus tip'><dl><dd>如果您现在注册，会导致前面已设置的信息丢失。</dd><dd>我们建议您先完成体验流程！</dd></dl></div></div>",
+                okVal:"执意注册",
+                cancelVal:"完成体验",
+                ok:function(){
+                    art.dialog.open(urltiyan, {
+                        id : "EnterpriseNo",
+                        title : false,
+                        width : "500px",
+                        height : "596px"
+                    });
+                },
+                cancel:function(){}
+            });
+        });
+        $("#login_clk").click(function(){
+            urltiyan = "./index.php?g=Home&m=Land&a=regwfx&landname=xuanmaregdirect&from_user_id=9000&reg_login=1";
+            art.dialog({
+                title:"提示",
+                content:"<div class='loadTip'><div class='loadStatus tip'><dl><dd>如果您现在登录，会导致前面已设置的信息丢失。</dd><dd>我们建议您先完成体验流程！</dd></dl></div></div>",
+                okVal:"执意登录",
+                cancelVal:"完成体验",
+                ok:function(){
+                    art.dialog.open(urltiyan, {
+                        id : "EnterpriseNo",
+                        title : false,
+                        width : "500px",
+                        height : "596px"
+                    });
+                },
+                cancel:function(){}
+            });
+        });
+    });
+</script>

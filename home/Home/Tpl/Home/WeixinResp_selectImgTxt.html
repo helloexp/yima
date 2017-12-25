@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信图文配置</title>
+<css href="__PUBLIC__/Css/style.css?v=__VR__"/>
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script type="text/javascript">
+$(document).ready(function(e){
+	addAppmsg();    //添加
+	msglistchoose(); //选择
+	$("#btn_confirm").click(function(){
+		//获取来源页面
+		var win = art.dialog.open.origin;
+		var material_id = $("#material_id_selected").val();
+		var selectcallback = "{:I('selectcallback','selectcallback')}";
+		var material_data = {};
+		try{
+			material_data = eval("("+$("#data-json-"+material_id).html()+")");
+		}catch(e){}
+		//调用来源页面的回调函数
+		win[selectcallback](material_id,material_data);
+		art.dialog.close();
+	});
+	$("#btn_cancel").click(function(){
+		art.dialog.close();
+	});
+}); 
+</script>
+</head>
+
+<body>
+<div class="msg-list mt20 plr20 fn-clear fn">
+    
+    <!--左边列表 判断ID为单数的列表-->
+    <div id="first_col" class="msg-col">
+        <div id="addAppmsg" class="add-access">
+            <span class="add-tip">新建消息入口</span>
+            <a href="{:U('Weixin/MaterialAdd/',array('type'=>1))}" class="add-btn" target="_parent">单图文消息</a>
+            <a href="{:U('Weixin/MaterialAdd/',array('type'=>2))}" class="add-btn multi-access"  target="_parent">多图文消息</a>
+        </div>
+        <assign name="materialInfo" value="$materialGroupArr[0]"/>
+		<include file="selectImgTxtTag"/>
+     </div>
+     <!--左边列表结束-->
+     <!--右边列表 判断ID为双数的列表-->
+     <div id="second_col" class="msg-col">
+        <assign name="materialInfo" value="$materialGroupArr[1]"/>
+		<include file="selectImgTxtTag"/>
+     </div>
+     <!--右边列表结束-->
+    </div>
+    <div class="msg_page" style="text-align:left;clear:both;margin-left:10px">
+		{$pageShow}
+    </div>
+	<div style="height:80px;">
+	&nbsp;
+	</div>
+    <div class="msg-choose-up"> 
+		<input type="hidden" id="material_id_selected" value=""/>
+        <a href="javascript:void(0)" class="btn-120" id="btn_confirm">确定</a>
+        <a href="javascript:void(0)" class="btn-e3 ml10" id="btn_cancel">取消</a>
+    </div>
+</body>
+</html>

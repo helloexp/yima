@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>操作平台_{:C('SITE_TITLE')}</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+</head>
+<style type="text/css">
+    .page{padding-bottom: 70px;}
+</style>
+<body>
+    <div id="wrapper">
+    	<include file="./Home/Tpl/Public/Public_header.html" />
+        <!--开始引入头部菜单-->
+        <include file="./Home/Tpl/Ecshop/Shop_nav.html" navmenuid="Navindex"/>
+
+        <div id="container" class="bgfff">
+        	
+            <div id="main" class="rel">
+                <div class="sidenav">
+                <!--开始引入左菜单-->                   
+                <include file="./Home/Tpl/Ecshop/O2O_menu.html" leftmenuid="salelist"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                    	<h4><eq name="err_flag" value="1">错误</eq>日销售报表<neq name="err_flag" value="1"><a href="javascript:void(0);" class="btn-down first" id="down"><i></i>下载日报表</neq></a><if condition="$err_count gt 0"><a href="{:U('LabelAdmin/OrderList/index',array('err_flag'=>'1'))}"><font color="red">你有电子凭证下发失败的订单，请及时处理！点击处理</font></a></if></h4>
+                    </div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+						<div class="Wcanal-tab-title fn">
+                       	 	<p class="Wcanal-tab-hover"><a href="javascript:void(0);">销售日报表</a></p>
+                       	 	<p><a href="javascript:void(0);">提现记录</a></p>
+						</div>
+                        <div class="Wcanal-tab-list">
+                        	<div class="mt15"></div>
+                        	<div class="SearchArea fn">
+                            <form action="{:U('LabelAdmin/OrderList/saleList')}" method="post" name="theform" id="theform">
+                                <div class="SearchAreaLeft">
+                                <label>
+                                <span>活动时间</span>
+                                <input type="text" name="start_time" id="start_time" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$Think.request.start_time}"  />
+                                   -
+                                <input type="text" name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time}"  />
+                                </label>
+                                    
+                                <label>
+                                <select class="selectbox w100" name="pay_channel" id="batch_status">
+                                    <option value="" >支付通道</option>
+                                    {:show_arr_opt($payChannelArray,$pay_channel)}
+                                </select>
+                                </label>    
+                                    
+                                <label>    
+                                <if condition="$tongbaozhai_flag eq 1">
+                                    <span>销售员</span>
+                                    <input name="saler_id" type="text" class="textbox w100" value="{$post.saler_id}">
+                                </if>    
+                                </label>
+                                </div>
+                                
+                                <div class="SearchAreaRight">
+                                <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                                </div>
+                            </form>
+                            </div>
+                            <table cellpadding="0" cellspacing="0" class="W-table">
+                                <tr>
+                                    <th>日期</th>
+                                    <th>订单金额</th>
+                                    <th>运费</th>
+                                    <th>优惠金额(红包)</th>
+                                    <th>支付扣费</th>
+                                    <th>实收金额</th>
+                                    <th>支付通道</th>
+                                </tr>
+                                <volist name="saleList" id="vo">
+                                <tr class="info" >
+                                    <td class="first">{$vo['trans_time']}</td>
+                                    <td>{$vo['order_amt']}</td>
+                                    <td>{$vo['frieght']}</td>
+                                    <td>{$vo['bonus_amt']}</td>
+                                    <td>{$vo['rate_amt']}</td>
+                                    <td>{$vo['act_amt']}</td>
+                                    <td>{$vo['pay_channel']}</td>
+                                </tr>
+                                </volist>                       
+                            </table>
+                            <div class="page">
+                                <?php echo $page;?>
+                             </div>
+                        </div>
+                        <div class="Wcanal-tab-list dn">
+                            <table cellpadding="0" cellspacing="0" class="W-table mt15">
+                            <tr>
+                            <th>提现时间</th>
+                            <th>可提现金额</th>
+                            <th>手续费</th>
+                            <th>预计到账金额</th>
+                            <th>收款账号</th>
+                            <th>操作员</th>
+                            <th>提现状态</th>
+                            </tr>
+                            <volist name="traceInfo" id="vo">
+                            <tr>
+                            <td>{$vo['add_time']|dateformat=###,'Y-m-d H:i:s'}</td>
+                            <td>{$vo['cash_money'] + $vo['fee']}</td>
+                            <td>{$vo['fee']}</td>
+                            <td>{$vo['cash_money']}</td>
+                            <td>{$vo['account_no']}</td>
+                            <td>{$vo['user_name']}</td>
+                            <td><php>if('5' == $vo['trans_status']){echo "<a href='javascript:void(0)' onclick=verify({$vo['id']})>确认到账</a>";}else if('3' == $vo['trans_status']){echo "<span class='red'>已完成</span>";}else if('1' == $vo['trans_status']){echo "<span class='red'>提现失败</span>";}else{echo "<span class='red'>审核中</span>";}</php></td>
+                            </tr>
+                            </volist>
+                            </table>
+                            <div class="page">
+                            <?php echo $cahsPage;?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<script>
+$(document).ready(function(e){
+    var cashChange = '{$cashDeliy}';
+    if(cashChange=='true'){
+        $(".Wcanal-tab-title p:eq(1)").click();
+    }
+	$("#down").click(function(){
+		$("#theform").attr("action","{:U('LabelAdmin/OrderList/saleExport')}").submit();
+	});
+	$("#sub_button").click(function(){
+		$("#theform").attr("action","{:U('LabelAdmin/OrderList/saleList')}").submit();
+	});
+});
+</script>      
+</html>

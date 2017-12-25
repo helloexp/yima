@@ -1,0 +1,293 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$row.wap_title}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,进球有礼" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link href="__PUBLIC__/Label/Css/activity/wap_worldcup_goalin.css" rel="stylesheet" type="text/css" />
+<style>
+.loadingBox{position:fixed;z-index:1000;top:50%;left:50%;width:180px;height:100px; overflow:hidden;margin:-60px auto auto -120px;padding:30px 30px;border: 1px solid #2A2A2A;color:#fff;text-align:center;border-radius:10px;background:rgba(0,0,0,.66);}
+.loadingBox p{}
+.loadingBox span { font-size:16px;}
+.loadingBox i{position:absolute;z-index:999;top:60%;left:50%;margin:-16px 0 0 -16px;display:inline-block;width:20px;height:20px;border:4px dotted #000;border-color:rgba(255,255,255,.1) rgba(255,255,255,.2) rgba(255,255,255,.4) rgba(255,255,255,.5);border-radius:300px;-webkit-animation:loadforever 20s infinite linear;} 
+@-webkit-keyframes loadforever{0%{ -webkit-transform:rotate(0deg); }100%{ -webkit-transform:rotate(5000deg); }}
+</style>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script>
+var _id = '{$id}';
+var _is_sub = false;
+var _goal_flag = false;
+$(document).ready(function(e) {
+    //抽奖
+    $('.cj-input-button').click(function(){
+        if(!_goal_flag){
+            popForm('popMsg','还没进球，请稍等~');
+            return false;
+        }
+
+    	var mobile = $.trim($('#mobile').val());
+        if(mobile == ''){
+            popForm('popMsg','请输入手机号');
+            return false;
+        }
+            
+        if(!/^1\d{10}$/.test(mobile)){
+            popForm('popMsg','手机号不正确'+mobile);
+            return false;
+        }
+
+        var verify = $.trim($('#verify').val());
+    	if(verify == ''){
+    		popForm('popMsg','请输入验证码');
+    		return false;
+    	}
+    		
+    	if(!/^\d{4}$/.test(verify)){
+            popForm('popMsg','验证码不正确'+verify);
+    		return false;
+    	}
+
+		if(_is_sub)
+            return false;
+        _is_sub = true;
+
+        $(".loadingBox").show();
+		$.post(
+			"{:U('ZtWorldcup/LabelGoalHasGift/submit')}",
+			{id:_id, mobile:mobile, verify:verify},
+			function(data) {
+                $(".loadingBox").hide();
+                fleshVerify();
+				popForm('popMsg',data.info,data.status);
+				_is_sub = false;
+			},
+			'json'
+		); 
+    });
+
+    do_query = function(){
+        // $(".loadingBox").show();
+    	$.post("{:U('ZtWorldcup/LabelGoalHasGift/query')}", {id:_id}, function(data){
+            // $(".loadingBox").hide();
+    		// console.log(data);
+    		if(data.status){
+    			switch(data.info.events_status){
+    				//未开始
+    				case 1:
+    					$('.mainCon-sign-phone').hide();
+    					$('.mainCon-sign-notice').show().find('p').html('比赛还未开始');
+    					setTimeout(do_query, data.info.flash_time);
+    					break;
+    				//已开始
+    				case 2:
+    					// $('.mainCon-sign-phone').show();
+    					$('.mainCon-sign-notice').hide();
+
+    					$('#score_div p:eq(0)').html(data.info.team1_goal);
+    					$('#score_div p:eq(1)').html(data.info.team2_goal);
+                        _goal_flag = data.info.goal_flag;
+    					if(data.info.goal_flag){
+                            // fleshVerify();
+                            $('#verify_li, .mainCon-sign-phone').show();
+    						$('#score_div').removeClass('mainCon-score2').addClass('mainCon-score1');
+    					}
+                        else{
+                            $('#verify_li, .mainCon-sign-phone').hide();
+                            $('#verify').val('');
+    						$('#score_div').removeClass('mainCon-score1').addClass('mainCon-score2');
+    						// $('.mainCon-sign-phone').hide();
+    					}
+
+    					setTimeout(do_query, data.info.flash_time);
+    					break;
+    				//已结束
+    				case 3:
+    					$('.mainCon-sign-phone').hide();
+    					$('.mainCon-sign-notice').show().find('p').html('比赛已结束');
+    					break;
+    			}
+    		}
+    		else{
+				popForm('popMsg',data.info,data.status);
+    		}
+    	}, 'json');
+    }
+
+    do_query();
+
+	//页面大小
+	initialise();
+
+    var prizeNum=$(".sign-prize li").length;
+    if(prizeNum<=3){
+        $(".sign-prize li").css("width",100/$(".sign-prize li").length+"%");
+        $(".sign-prize li img").css("width",30*$(".sign-prize li").length+"%");
+    }else{
+        $(".sign-prizeopr").fadeIn();
+        $(".signPrize").css({"margin":"0 20px"});
+        $(".sign-prize li").css("width",100/3+"%");
+        $(".sign-prize li img").css("width","90%");
+        var prizeWidth=	$(".sign-prize li").width();
+        $(".sign-prize li").css("width",prizeWidth);
+        $(".signPrize h1").show();
+        $(".sign-prize").width(prizeWidth*prizeNum);
+    }
+});
+    
+$(window).resize(function(e) {
+	initialise();
+});
+
+function initialise(){
+	var windowwidth = $(window).width();
+    if (windowwidth > 640) {
+        windowwidth = 640;
+    }
+    var scale = windowwidth / 320;
+    $(".logo-bg").css({
+        "width": scale * 320,
+        "height": scale * 91
+    });
+    $(".logo-con").css({
+        "width": scale * 70,
+        "height": scale * 70,
+		"margin-left":-scale*35
+    });
+	$(".mainCon-contenter-bg").css({
+		"padding-top":scale*50
+	});
+	$(".mainCon-Team li").css({
+		"width":scale*115
+	});
+    $("#mainCon .mainCon-contenter").css("padding-top", scale * 190);
+}
+
+function fleshVerify(){ 
+    //重载验证码 
+    var obj = document.getElementById('verifyImg'); 
+    var captcha_img = obj.src; 
+    var i = captcha_img.indexOf('#'); 
+    if(i != -1){ 
+    captcha_img = captcha_img.substr(0,i); 
+    } 
+    obj.src = captcha_img+"#"+Math.random(); 
+}
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div id="mainCon" class="mainCon fn">
+            	<div class="logo-bg">
+                	<img src="__PUBLIC__/Label/Image/worldcup/goalin-top.jpg" id="bg-img"/>
+                    <?php
+                if($row['log_img']!= ''){?>
+                <div class="logo-con"><img src="__UPLOAD__/<?php echo $row['log_img']?>"/></div>
+                <?php }?>
+                </div>
+                <div class="mainCon-contenter">
+                	<div class="mainCon-contenter-bg">
+                        <div class="mainCon-sign-title">活动介绍</div>
+                        <div class="mainCon-sign-text">{$row.wap_info|nl2br}<br/><b>每次进球后，有10分钟的抽奖时间。</b></div>
+                        <div class="fn rel">
+                        	<div class="signPrize">
+                                <ul class="sign-prize">
+                                    <php>$count = sizeof($prizeData);</php>
+                                    <volist name="prizeData" id="vo">
+                                        <li class="l">
+                                            <h1>
+                                                <php>if($count > 1){</php>{$vo.level}<php>}else{echo '&nbsp;';}</php><span></span></h1>
+                                            <img src="{$vo['batch_img']|get_upload_url}" /><p>{$vo['batch_name']}</p>
+                                        </li>
+                                    </volist>
+                                </ul>
+                            </div>
+                            <div class="sign-prizeopr dn"><a class="pre">&lt;</a><a class="next">&gt;</a></div>
+                        </div>
+                        <div class="mainCon-cut"></div>
+                        <div class="mainCon-Team">
+                        	<ul class="fn">
+                            	<li class="l"><p><img src="__PUBLIC__/Label/Image/worldcup/world-cup-team{$events_info.team1_id}.png" /></p><p>{$events_info.team1_name}</p></li>
+                                <li class="r"><p><img src="__PUBLIC__/Label/Image/worldcup/world-cup-team{$events_info.team2_id}.png" /></p><p>{$events_info.team2_name}</p></li>
+                            </ul>
+                        </div>
+                        <div id="score_div" class="mainCon-score mainCon-score2">
+                        	<ul class="fn">
+                            	<li class="l"><p class="goalinadd">{$events_info.team1_goal}</p></li>
+                            	<li class="r"><p>{$events_info.team2_goal}</p></li>
+                            </ul>
+                        </div>
+                        <div class="mainCon-cut"></div>
+                        <div class="mainCon-sign-notice dn">
+                        	<p class="pt20 pb30"></p>
+                        </div>
+                        <div class="mainCon-sign-phone">
+                            <li class="pt20"><input type="tel" id="mobile" class="sOne-cjInput" maxlength="11"  placeholder="请输入您的手机号码"/></li>
+                            <li class="pt20 " id="verify_li">
+                                <input type="tel" class="sOne-cjInput-half" name="verify" id="verify" maxlength="4" placeholder="验证码" >
+                                <a href="javascript:void(0);"><img src="<?php echo U('Label/VerifyCode/index/')?>" class="sOne-cjpasscode-img" id="verifyImg"  onclick="fleshVerify()"></a></li>
+                            <li class="pt20 pb30"><a href="javascript:void(0)" class="dib cj-input-button go-input-button" />确定</a></li>
+                        </div>
+                    </div>
+                </div>
+                <include file="./Home/Tpl/Label/Public_share.html"/>
+            </div>
+
+            <include file="./Home/Tpl/Label/Public_footer.html"/>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function(e) {
+	$(".close-AjaxWrapper").click(function(){
+		$("#AjaxWrapper").fadeOut(300);
+	});
+});
+function popForm(type,msg,isTrue) {
+    $("#AjaxWrapper").fadeIn(300);
+    if(type=="popForm"){
+        $("#popMsg").hide();
+        $("#popForm").show();
+        $("#popForm .cjText-text").html(msg);
+        $("#nocj_resp_id").hide();
+        $("#cj_resp_id").show();
+        // fleshVerify();
+    }else if(type == 'popMsg'){
+        $("#popForm").hide();
+        $("#popMsg").show();
+        $("#popMsg .cjText-text").html(msg);
+        if(isTrue == '1'){
+            $("#cj_resp_id").hide();
+            $("#nocj_resp_id").show();
+        }
+    }
+}
+</script>
+<div id="AjaxWrapper" class="dn">
+	<div class="cjWrapper">
+    	<div class="cjWrapper-close"><a href="javascript:void(0)" class="close-AjaxWrapper">+</a></div>
+    	<div class="cjCon pb10 dn" id="popMsg">
+            <div class="cjText">
+            	<div class="cjText-con">
+                    <div class="cjText-text">选择成功，我们会在世界杯结束之后进行抽奖，如果您中奖了，我们会以短信的形式通知您中奖信息! </div>
+                </div>
+            </div>
+            <div class="cjBtn">
+                <a href="javascript:void(0)" class="cjBtn-back close-AjaxWrapper" id="nocj_resp_id">返回</a>
+                <a href="javascript:void(0)" class="cjBtn-back" style="display: none;" id="cj_resp_id" onclick="popForm('popForm')">返回</a>
+            </div>
+        </div>
+        
+    	<div class="cjCon dn" id="popForm">
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+
+</body>
+</html>

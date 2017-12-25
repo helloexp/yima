@@ -1,0 +1,322 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>自建卡券列表_卡券_翼码旺财</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<style type="text/css">
+.format ul li{padding:10px 5px 0px 5px;}
+.added_info{clear:both;padding-left:15px;float:left}
+span.statusSet:hover{cursor:pointer;color:#234BC0;}
+.trans_help:hover{
+    cursor: pointer;
+}
+.Wcanal-tab table td a {
+    text-decoration: none;
+    color: #4487CA;
+    cursor: pointer;
+    padding-right: 0;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(e) {
+	$(".quest").hover(function(){
+		$(".help-tip p").css("display","block");
+		}
+	,function(){
+		$(".help-tip p").css("display","none");
+		});
+	
+    $("#search").click(function() {
+        $("form").attr("action", "{:U('NumGoods/agentNumgoods')}").submit();
+    });
+    $(".viewDetail").click(function() {
+        var goodsid = $(this).parent().parent().attr('goodsid');
+        art.dialog.open("{:U('NumGoods/numGoodsDetail')}&goods_id=" + goodsid, {
+            title: '查看详情',
+            width: '900px',
+            lock: true,
+            height: '650px'
+        });
+    });
+    $(".trans_help").click(function() {
+        window.open("{:U('Home/Help/helpArt',array('type'=>7,'leftId'=>'dzq','news_id'=>1382,'class_name'=>'卡券'))}");
+    });
+
+});
+function addStorageNum(id, name, obj) {
+    art.dialog({
+        follow: obj,
+        title: '补充库存',
+        content: '请输入翼码卡券增加的库存量<br/> <input id="addNum" type="text" class="textbox" style="width:100px;" value="1" />',
+        id: 'art_addnum',
+        ok: function() {
+            var addNum = $('#addNum').val();
+            if (!/^[1-9]{1}[0-9]{0,7}$/.test(addNum)) {
+                alert('数量格式错误！区间为1至99999999');
+                return false;
+            }
+            $.post('/index.php?g=WangcaiPc&m=NumGoods&a=addStorageNum', {
+                id: id,
+                addNum: addNum
+            }, function(resp) {
+                alert(resp.info);
+                //库存添加成功
+                if (resp.status == 1) {
+                    reload();
+                }
+            }, 'json');
+
+            return false;
+        },
+        cancel: true,
+        lock: true
+    });
+}
+function viewStorage(goods_id){
+    art.dialog.open("{:U('NumGoods/storageTrace')}&goods_id=" + goods_id, {
+        title: '查看详情',
+        width: '900px',
+        lock: true,
+        height: '650px'
+    });
+}
+function editApp(id,obj){
+    art.dialog({
+        follow: obj,
+        title:'补充APP卡券',
+        content: '请输入APP增加的库存量<br/> <input id="addNum" type="text" class="textbox" style="width:100px;" value="1" />',
+        id: 'art_addnum',
+        ok:function(){
+            var addNum = $('#addNum').val();
+            if(!/^[1-9]{1}[0-9]{0,7}$/.test(addNum)){
+                alert('数量格式错误！区间为1至99999999');
+                return false;
+            }
+            $.post('/index.php?g=WangcaiPc&m=NumGoods&a=addAppStorageNum', {id:id, addNum:addNum}, function(resp){
+                alert(resp.info);
+                //库存添加成功
+                if(resp.status == 1){
+                    reload();
+                }
+            }, 'json');
+
+            return false;
+        },
+        cancel: true,
+        lock:true
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="wddzq"/>  
+        </div>
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                    <ul class="shop-Menu"> 
+                        <include file="WangcaiPc/NumGoods/tabMenu" leftmenuid="agentdzq"/>
+                    </ul>
+                <script>
+                //设置当前菜单
+                $(function(){
+                    var menu_id = "Eticket-"+("info"||"ewmbqqd");
+                    var _currentMenu = $("#"+menu_id,".alinav");
+                    _currentMenu.addClass('hover');
+                });
+                </script>                    
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>自建卡券<a class="btn-add first" href="{:U('WangcaiPc/NumGoods/addNumGoods')}"><i></i>创建卡券</a></h4>
+                    </div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-title fn">
+                        <p class="<?php if(empty($_REQUEST['goods_type'])&&$_REQUEST['goods_type']!='0'){echo 'Wcanal-tab-hover';}?>"><a href="{:U('WangcaiPc/NumGoods/agentNumgoods')}">全部(<span class="redfont">{$goodsTypeNum['1']+$goodsTypeNum['3']+$goodsTypeNum['2']+$goodsTypeNum['0']}</span>)</a></p>
+                        <p class="<?php if($_REQUEST['goods_type']=='1'){echo 'Wcanal-tab-hover';}?>"><a href="{:U('WangcaiPc/NumGoods/agentNumgoods',array('goods_type'=>'1'))}">代金券(<span class="redfont">{$goodsTypeNum['1']}</span>)</a></p>
+                        <p class="<?php if($_REQUEST['goods_type']=='3'){echo 'Wcanal-tab-hover';}?>"><a href="{:U('WangcaiPc/NumGoods/agentNumgoods',array('goods_type'=>'3'))}">折扣券(<span class="redfont">{$goodsTypeNum['3']}</span>)</a></p>
+                        <p class="<?php if($_REQUEST['goods_type']=='2'){echo 'Wcanal-tab-hover';}?>"><a href="{:U('WangcaiPc/NumGoods/agentNumgoods',array('goods_type'=>'2'))}">提领券(<span class="redfont">{$goodsTypeNum['2']}</span>)</a></p>
+                        <p class="<?php if($_REQUEST['goods_type']=='0'){echo 'Wcanal-tab-hover';}?>"><a href="{:U('WangcaiPc/NumGoods/agentNumgoods',array('goods_type'=>'0'))}">优惠券(<span class="redfont">{$goodsTypeNum['0']}</span>)</a></p>
+                        </div>
+                        <div class="Wcanal-tab-list" style=" display:block; float:none; width:100%; margin-top:15px;">
+                        <div class="SearchArea fn">
+                        <form id="theform" action="{:U('WangcaiPc/NumGoods/agentNumgoods')}" method="post">
+                            <input type="hidden" name="goods_type" value="{$Think.request.goods_type}"/>
+                            <div class="SearchAreaLeft">
+                            <label>
+                            <span>券名</span>
+                            <input type="text" name="name" value="{$Think.request.name}" />
+                            </label>
+                            
+                            <label>
+                            <span>卡券状态</span>
+                                <select name="status">
+                                    <option value="">全部</option>
+                                    <volist name="status" id="vo">
+                                    <option value="{$key}" class="" <if condition="strval($key) eq I('status')">selected="selected"</if> >{$vo}</option>
+                                    </volist>
+                                </select>
+                            </label>
+                            <label>
+                            <span>所属商户</span>
+                                <select name="node_id">
+                                    <option value="" class="">全部</option>
+                                    <volist name="nodeList" id="vo">
+                                    <option value="{$vo['node_id']}"  <if condition="$vo['node_id'] eq $post['node_id']">selected="selected"</if>>{$vo['node_name']}</option>
+                                    </volist>
+                                </select>
+                            </label>
+                            <if condition="$_REQUEST['goods_type'] eq '1'">
+                            <label>
+                            <span>面值</span>
+                            <input type="text" name="bgoods_amt" value="{$post['bgoods_amt']}" /> - <input type="text" name="egoods_amt" value="{$post['egoods_amt']}" />
+                            </label>
+                            <label>
+                            <span>核销限制</span>
+                                <select name="validate_type">
+                                    <option value="">全部</option>
+                                    <option value="0" <if condition="$post['validate_type'] eq '0'">selected="selected"</if>>限一次核销</option>
+                                    <option value="1" <if condition="$post['validate_type'] eq '1'">selected="selected"</if>>按金额核销</option>
+                                </select>
+                            </label>
+                            </if>
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                            <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+                            </div>
+                        </form>
+                        </div>
+                        <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                        <tr class="th">
+                        <th>卡券信息</th>
+                        <th>操作 <i class="quest trans_help" title="点击查看什么是发布？" style="background: url(__PUBLIC__/Image/eTicket/icon_quest_red.png) center center no-repeat;"></i><!-- <div class="pay_opr fr" style="position:relative">
+                        <div class="help-tip">
+                        	<p>点击查看什么是发布？</p>
+                        </div> --></th>
+                        </tr>
+                        <empty name="list" >
+                                <tr class="info">
+                                    <td colspan="10" class="last">
+                                        <div class="nonedata"></div>
+                                    </td>
+                                </tr>
+                        </empty>
+                        <volist name="list" id="vo" >
+                        <tr class="title hover">
+                        <td class="hover">
+                        
+                        <div class="format">
+                            <ul goodsid="{$vo.goods_id}">
+                                <li><img class="viewDetail" src="__UPLOAD__/{$vo['goods_image']}" class="img" /></li>
+                                <li>
+                                    <span class="viewDetail">【{$goods_trans_type[$vo['goods_type']]}】<a href="javascript:void(0)">{$vo.goods_name}</a></span>
+                                    <!-- 
+                                    <span class="grayfont statusSet">&nbsp;有效期至：{$vo.end_time|dateformat=###,'Y.m.d'}<if condition="$vo['status'] eq '0'"><span class="hot-point-title"> {$statusArr[$vo['status']]}</span><else/><span class="gray"> {$statusArr[$vo['status']]}</span></if></span>
+                                     -->
+                                    <span class="grayfont">&nbsp库存：<a href="javascript:void(0)" onclick="viewStorage('{$vo.goods_id}')"><?php if($vo['storage_type'] == '0'){echo '不限';}else{echo $vo['remain_num'];}?></a></span>
+                                    <span class="tb">&nbsp;
+                                        <notempty name="vo.hall_is_exist">
+                                            <i class="pubicon ic1" title="卡券商城"></i>
+                                        </notempty>
+                                        <notempty name="vo.pri_is_exist">
+                                            <i class="pubicon ic2" title="个人"></i>
+                                        </notempty>
+                                        <notempty name="vo.app_is_exist">
+                                            <i class="pubicon ic3" title="APP"></i>
+                                        </notempty>
+                                        <notempty name="vo.weixin_is_exist">
+                                            <i class="pubicon ic4" title="微信卡券"></i>
+                                        </notempty>
+                                        <notempty name="vo.weibo_is_exist">
+                                            <i class="pubicon ic5" title="微博卡券"></i>
+                                        </notempty>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                        </td>
+                        <td>
+                        <div class="my_left_category">
+                            <div class="my_left_cat_list tb">
+                                <if condition="$vo['status'] eq '2'">
+                                <div class="h2_cat">
+                                    <h3><a href="javascript:void(0)" class="pub_channel" style="color:#ccc">发布到</a></h3>
+                                </div>
+                                <else/>
+                                <div class="h2_cat" onmouseover="this.className='h2_cat active_cat'" onmouseout="this.className='h2_cat'">
+                                    <h3><a href="javascript:void(0)" class="pub_channel">发布到</a></h3>
+                                    <div class="h3_cat">
+                                        <div class="shadow">
+                                            <div class="shadow_border">
+                                                <ul>
+                                                    <empty name="vo.hall_is_exist">
+                                                    <li><a href="{:U('WangcaiPc/NumGoods/numGoodsPublish',array('goods_id'=>$vo['goods_id']))}"><i class="pubicon ic1"></i>交易大厅</a></li>
+                                                    </empty>
+                                                    <if condition="!in_array($wc_version,array('v0','v0.5'))">
+                                                    <li><a href="{:U('WangcaiPc/NumGoods/numGoodsPrivatePublish',array('goods_id'=>$vo['goods_id']))}"><i class="pubicon ic2"></i>个人</a></li>
+                                                    </if>
+                                                    <if condition="$vo['app_is_exist'] neq '1'">
+                                                    <li><a href="{:U('WangcaiPc/NumGoods/numGoodsAppPublish',array('goods_id'=>$vo['goods_id']))}"><i class="pubicon ic3"></i>旺财APP</a></li>
+                                                    <else/>
+                                                    <li><a href="javascript:void(0)" onclick="editApp('{$vo['id']}',this)"><i class="pubicon ic3"></i>补充库存</a></li>
+                                                    </if>
+                                                    <li><a href="{:U('Weixin/WeixinCard/add',array('r_goods_id'=>$vo['goods_id']))}"><i class="pubicon ic4"></i>微信卡券</a></li>
+                                                    <if condition="in_array($vo['goods_type'],array(0,1))">
+                                                    <li><a href="{:U('Weibo/WeiboCard/add',array('r_goods_id'=>$vo['goods_id']))}"><i class="pubicon ic5"></i>微博卡券</a></li>
+                                                    </if>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                </if>
+                                <div class="h2_cat" onmouseover="this.className='h2_cat active_cat'" onmouseout="this.className='h2_cat'">
+                                    <ul>
+                                        <li><a href="{:U('WangcaiPc/NumGoods/numGoodsEdit',array('goods_id'=>$vo['goods_id']))}">编辑</a></li>
+                                        <if condition="$vo['storage_num'] neq '-1'">
+                                        <li><a href="javascript:void(0)"  onclick="addStorageNum('{$vo.id}', '{$vo.goods_name}', this)">补充库存</a></li>
+                                        </if>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        </td>
+                        </tr>
+                        </volist>
+                        </table>
+                        <div class="page">{$page}</div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

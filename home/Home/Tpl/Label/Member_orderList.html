@@ -1,0 +1,176 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>我的订单</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) {
+	$(".showrece").click(function(){
+		var msg=$(this).find("div").html();
+		msgPop(msg);
+	})
+});
+</script>
+</head>
+<body>
+<div id="wrapper" class="bgf5f5f5">
+    <div id="container" >
+        <div id="header" class="fn">
+        <div class="goback"><a href="{:U('Label/Member/index',array('node_id'=>$node_id))}"><i></i></a></div>
+			<neq name="wx_flag" value="1">
+            <!-- <div class="loginout"></div> -->
+            </neq>
+            <div class="title">我的订单</div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="mainCon fn m0">
+                <div class="myOrderList">
+
+                    <?php
+					if(!empty($orderList)){
+						foreach($orderList as $k=>$val){
+							//判断订单是否有下架商品
+							$downcount=0;
+					?>
+					<dl>
+                    	<dt>订单号：<?php echo $val['order_id'];?><span <?php if(($val['pay_status']==1) && ($val['order_status']==0)){?>class="erro"<?php }?>><?php if($val['order_status']==1){?>已过期<?php }else{ ?><?php echo $status[$val['pay_status']]; }?></span><p>订单时间：<?php echo dateformat($val['add_time']);?></p></dt>
+						<?php
+							//查询子商品
+							if($val['order_type']=='2' && $val['table_type'] == '1'){
+								$where = array(
+									'g.order_id' => $val['order_id'],
+									't.node_id'=>$node_id,
+								);
+								$goodsList = M()->table('ttg_order_info_ex g')
+										->join("ttg_order_info t ON t.order_id=g.order_id")
+										->join("tbatch_info b ON b.id=g.b_id") 
+										->join("tgoods_info i ON i.goods_id=b.goods_id") 
+										->field("g.*,b.batch_img AS goods_image,b.batch_amt,g.goods_num,b.batch_name AS b_name") 
+										->where($where)
+										->select();
+							}elseif($val['order_type']=='0' && $val['table_type'] == '1'){
+								$goodsList = M()->table('ttg_order_info t')		                                      
+													->join("tbatch_info b ON b.m_id=t.batch_no") 
+													->join("ttg_order_info_ex x ON x.order_id=t.order_id")
+													->field("b.batch_img AS goods_image,b.batch_amt,b.batch_name AS b_name, x.ecshop_sku_desc, x.price, x.goods_num")
+													->where(array('t.order_id'=>$val['order_id']))
+													->select();
+							}elseif ($val['table_type'] == '0') {
+								$goodsList = M()->table('tintegral_order_info_ex g')
+										->join("tintegral_order_info t ON t.order_id=g.order_id")
+										->join("tbatch_info b ON b.id=g.b_id") 
+										->join("tgoods_info i ON i.goods_id=b.goods_id") 
+										->field("g.*,i.goods_image AS goods_image,b.batch_amt,g.goods_num,b.batch_name AS b_name") 
+										->where(array('t.order_id'=>$val['order_id'],'t.node_id'=>$node_id)) 
+										->select();
+							}
+						?>
+						<?php
+						if(!empty($goodsList)){
+							foreach($goodsList as $t=>$tal){
+								//如果是小店订单判断batch_info status是否正常
+								if($val['order_type']=='2'){
+									$downinfo=M('tbatch_info')->where("id='".$tal['b_id']."'")->find();
+									if($downinfo['status']=='1'){
+										$downcount++;
+									}
+								}
+						?>
+						<dd>
+                        	<img src="__UPLOAD__/{$tal['goods_image']}" />
+                        	<p><span class="price">
+                        	<b><?php if($val['table_type']!='0'){  echo '￥'; }else{ echo L('INTEGRAL_NAME').'：'; }  if(isset( $tal['price'] )){ 
+                        		echo $tal['price'];
+                        		}else{ 
+                        			echo $tal['batch_amt'];
+                        			}?></b><br /><i>+</i><?php echo $tal['goods_num'];?></span>
+                                <?php echo $tal['b_name'];?><br><?php if($tal['ecshop_sku_desc'] !=  ''){ ?><em><?php echo "[" . $tal['ecshop_sku_desc'] . "]";?></em><?php } ?>
+							<?php if($val['is_gift'] == '1'){ ?>
+							<i class="gift_icon"></i>
+							<?php } ?>
+							</p>
+                        </dd>
+						<?php
+							}
+						}
+						?>
+                        <dd>
+                        	<h4>共<?php echo $val['buy_num'];?>件商品&nbsp;&nbsp;&nbsp;&nbsp;合计：
+                        	<?php if($val['table_type']!='0'){  echo '￥'.$val['order_amt']; }else{ echo $val['order_amt'].L('INTEGRAL_NAME'); } ?></h4>
+                        </dd>
+                        <dd>
+                        	<?php
+							$downcount_two=0;
+							//判断如果非小店商品判断tmarketing_info status
+							if($val['order_type']!='2'){
+								$downinfo=M('tmarketing_info')->where("id='".$tal['batch_no']."'")->find();
+									if($downinfo['status']=='2'){
+										$downcount_two++;
+									}							
+							}							
+
+							if($val['pay_status']=='1'&&$val['order_status']=='0'&&$downcount==0&&$downcount_two==0 && $val['pay_channel']!='4'){
+							?>
+							<a href="index.php?g=Label&m=MyOrder&a=gotoPay&id=<?php echo session('id');?>&order_id=<?php echo $val['order_id'];?>" class="btn-pay">去付款</a>
+							<?php
+							}
+							?>
+							<if condition="($val['pay_status'] eq '1') and ($val['order_status'] eq '0') and ($val['pay_channel'] neq '4')">
+							<a href="index.php?g=Label&m=MyOrder&a=ordercancel&id=<?php echo session('id');?>&order_id=<?php echo $val['order_id'];?>" class="btn-msg mr5">取消订单</a>
+							</if>
+							<?php if ($val['receiver_type'] == '1') { ?>
+                        	<a href="javascript:void(0)" class="btn-msg mr5 showrece">
+                            	收货信息
+                            	<div class="dn">
+                                	<p class="tl">收货人姓名：<?php echo $val['receiver_name']?></p>
+                                	<p class="tl">收货人电话：<?php echo $val['receiver_phone']?></p>
+                                	<p class="tl">收货人地址：<?php echo $val['province'] . $val['city'] . $val['town'] . $val['receiver_addr']?></p>
+                                </div>
+                            </a>
+							<?php } ?>
+                            
+							<a href="javascript:void(0)" table_type="{$val.table_type}" rel="<?php echo $val['order_id'];?>" class="btn-msg mr5 orderDetail">订单详情</a>
+                        </dd>
+                    </dl>
+					<?php
+						}
+					}else{
+					?>
+					<div class="nodata">
+                    	<img src="__PUBLIC__/Label/Image/Shop/icon-nodata2.png">
+                        <h3>你还未购买过商品T.T</h3><h4>主人快给我挑点宝贝吧</h4>
+                        <a href="javascript:void(0)" onClick="link_to('<?php echo U('Label/Store/index','id='.session('id'));?>')"><i class="icon-navHome"></i><span>去逛逛</span></a>
+                    </div>
+					<?php } ?>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+	
+    $(function(){
+        $('.orderDetail').click(function(){
+        	var orderID = $(this).attr('rel');
+        	var node_id = "<?php echo session('cc_node_id'); ?>";
+        	var table_type = $(this).attr('table_type');
+			var url = "{:U('Label/Member/orderInfo')}&order_id="+orderID+"&table_type="+table_type+"&node_id="+node_id;
+            $.post("{:U('Label/MyOrder/expressInfo')}", {'order':orderID,'node_id':node_id}, function(result){
+                result = eval("("+result+")");
+                if(result['error']=='0'){
+                    window.location.href = url;
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

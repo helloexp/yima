@@ -1,0 +1,335 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>致美丽的妈妈</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,致美丽的妈妈" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<load href="__PUBLIC__/Label/Css/activity/wap_20140511.css"/>
+<script>
+$(document).ready(function(e) {
+    //抽奖
+    var _is_sub = false;
+    $('#subcj').click(function() {
+    	var mobile = $.trim($('#mobile').val());
+    	var verify = $.trim($('#verify').val());
+
+    	if(mobile.length != 11){
+    		alert('您的手机号不正确');
+    		return false;
+    	}
+
+    	if(verify.length != 4){
+    		alert('验证码不正确');
+    		return false;
+    	}
+
+        if (_is_sub) return false;
+        _is_sub = true;
+        $('#mama_mobile').val($('#mamamobile').val());
+        $('#son_name').val($('#sonname').val());
+        $.post("{:U('Label/Mama/submit')}", $('#theform').serialize(), function(data) {
+            //领奖成功
+            if(data.status == 1){
+                $('#btn_li').hide();
+            }
+            popForm('popMsg', data.info, data.status);
+            _is_sub = false;
+        }, 'json');
+    })
+    //页面大小
+    initialise();
+    $(".close-AjaxWrapper").click(function() {
+        $("#AjaxWrapper").fadeOut(300);
+    });
+    $(".sOne-Checkbox").change(function() {
+        var $label = $(this).closest("li").find(".label");
+        if ($label.height() == 18) {
+            $(".chooseWrapper-li").hide();
+            $(this).closest("li").show();
+            $label.css({
+                "white-space": "normal",
+                "text-overflow": "ellipsis"
+            });
+            $label.animate({
+                height: '98px'
+            }, 500);
+        } else {
+            $(".chooseWrapper-li").show();
+            $(".sOne-Checkbox").attr("checked", false);
+            $label.css({
+                "white-space": "nowrap",
+                "text-overflow": "ellipsis"
+            });
+            $label.animate({
+                height: '18px'
+            }, 500);
+        }
+    });
+    $(".choose-updata").click(function() {
+        if (!$(".sOne-Checkbox:checked").val()) {
+            alert("请选择一个留言");
+        } else {
+        	var id = $(".sOne-Checkbox:checked").data('rel');
+            $(".checkbox-val").val(id);
+            $(".msgText").hide();
+            $(".msgText"+(id+1)).show();
+            $('#blessings_id').val(id);
+            $("#chooseWrapper").fadeOut(300);
+            $(".choose-choose-text").text($(".sOne-Checkbox:checked").val())
+        }
+    });
+
+    $(".choose-choose").click(function() {
+        $("#chooseWrapper").fadeIn(300);
+    });
+    $(".go-input-back").click(function() {
+        $(".mainCon").fadeIn(300);
+        $(".wrapperView").hide();
+    });
+});
+$(window).resize(function(e) {
+    initialise();
+});
+
+function initialise() {
+    var windowwidth = $(window).width();
+    if (windowwidth > 640) {
+        windowwidth = 640;
+    }
+    var scale = windowwidth / 320;
+    $(".logo-bg").css({
+        "width": scale * 320,
+        height: scale * 91
+    });
+    $(".logo-con").css({
+        "width": scale * 60,
+        height: scale * 56,
+        "top": scale * 30
+    });
+    $("#mainCon .mainCon-contenter").css("padding-top", scale * 300);
+    $("#mainCon .mainCon-form .title").css("padding-bottom", scale * 5);
+    $("#mainCon .mainConFormup").css("padding-bottom", scale * 23);
+    $("#mainCon .top-title").css("margin-top", scale * 25);
+    $(".wrapperView .top-title").css("margin-top", scale * 30);
+    $(".wrapperView .mainCon-contenter").css("padding-top", scale * 75);
+    $(".mainConFormup li.tc").css("margin-top", scale * 20);
+    $(".cjWrapper").css("padding-bottom", scale * 13);
+    $(".AjaxWrapper-bg").css({
+        "margin-left": scale * 15,
+        "margin-right": scale * 15
+    });
+    $(".chooseWrapper").css({
+        "width": scale * 260,
+        height: scale * 273,
+        "padding": scale * 5
+    });
+    $(".flow-1").css({
+        "width": scale * 80,
+        height: scale * 74
+    });
+}
+
+function wrapperView() {
+    var mobile = $.trim($('#mamamobile').val());
+    var sonname = $.trim($('#sonname').val());
+
+
+    if (mobile.length != 11) {
+        alert("请输入正确的妈妈的手机号");
+        return false;
+    };
+    if (sonname == '') {
+        alert("请输入妈妈对我的称呼");
+        return false;
+    };
+
+    $('.sp_sonname').html($("#sonname").val());
+
+    $('body,html').animate({
+        scrollTop: 0
+    }, 1000, function() {
+        $(".mainCon").hide();
+        $(".wrapperView").fadeIn(300);
+    });
+}
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div id="mainCon" class="mainCon fn ">
+                <img src="__PUBLIC__/Label/Image/20140511/bg.jpg" id="bg-img"/>
+                <img src="__PUBLIC__/Label/Image/20140511/bg2.png" id="bg-img2"/>
+                <div class="top-title">{$row['node_name']}</div>
+                <?php
+                if($row['log_img']!= ''){?>
+                <div class="logo-con"><img src="__UPLOAD__/<?php echo $row['log_img']?>"/></div>
+                <?php }?>
+                <div class="logo-bg"></div>
+                <div class="mainCon-contenter">
+                    <div class="mainCon-form">
+                        <div class="mainCon-introduce">
+                            <li class="title">活动规则</li>
+                            <li class="con"><?php echo $row['wap_info'];?></li>
+                        </div>
+                        <div class="mainConForm">
+                            <ul>
+                                <li class="title">贺卡内容编辑</li>
+                                <li><input type="tel" class="sTwo-cjInput" maxlength="11" id="mamamobile" placeholder="输入妈妈手机号"/></li>
+                                <li class="mt10"><input type="text" class="sTwo-cjInput" id="sonname" maxlength="4"  placeholder="输入妈妈对我的称呼(4个字以内)"/></li>
+                                <li class="mt10"><div class="sTwo-cjTextarea fn"><a href="javascript:void(0)" class="choose-choose">选择<br/>留言</a><p class="choose-choose-text">{$blessings_arr[2]}</p></div></li>
+                            </ul>
+                        </div>
+                        <div class="mainConFormup">
+                            <ul>
+                            <li class="mt30"><input type="button" value="生成贺卡" class="go-input-button" onClick="wrapperView()" /></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <include file="Public:share"/>
+            </div>
+            <div class="wrapperView dn">
+                <img src="__PUBLIC__/Label/Image/20140511/bg3.jpg" id="bg-img3"/>
+                <img src="__PUBLIC__/Label/Image/20140511/flow-1.png" class="flow-1" />
+                <img src="__PUBLIC__/Label/Image/20140511/flow-2.png" class="flow-2" />
+                <div class="top-title">{$row['node_name']}</div>
+                <?php
+                if($row['log_img']!= ''){?>
+                <div class="logo-con"><img src="__UPLOAD__/<?php echo $row['log_img']?>"/></div>
+                <?php }?>
+                <div class="logo-bg"></div>
+                <div class="mainCon-contenter">
+                    <img src="__PUBLIC__/Label/Image/20140511/msgText1.png" class="msgText msgText1" />
+                    <img src="__PUBLIC__/Label/Image/20140511/msgText2.png" class="msgText msgText2 dn" />
+                    <img src="__PUBLIC__/Label/Image/20140511/msgText3.png" class="msgText msgText3 dn" />
+                    <img src="__PUBLIC__/Label/Image/20140511/msgText4.png" class="msgText msgText4 dn" />
+                    <img src="__PUBLIC__/Label/Image/20140511/msgText5.png" class="msgText msgText5 dn" />
+                    <img src="__PUBLIC__/Label/Image/20140511/msgText6.png" class="msgText msgText6 dn" />
+                    <div class="mainConFormup">
+                        <ul>
+                        <li class="tr">您的<span class="sp_sonname"></span></li>
+                        <li class="tc" id="btn_li"><a href="javascript:void(0)" class="go-input-button" onClick="popForm('popForm',0,'defult')">发送并抽奖</a><a href="javascript:void(0)" class="go-input-back ml10">返回修改</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+</div>
+
+
+<script>
+function popForm(type,msg,isTrue) {
+    if(isTrue=="defult"){
+        $(".AjaxWrapper-top p").text("妈妈将收到短信如下");
+    }else{
+        $(".AjaxWrapper-top p").text("抽奖结果");
+    };
+    if(isTrue=="defult"){
+        $(".cjCon").css("padding-top","10px");
+    }else{
+        $(".cjCon").css("padding-top","40px");
+    };
+    $("#AjaxWrapper").fadeIn(300);
+    if(type=="popForm"){
+        $("#popMsg").hide();
+        $("#popForm").show();
+        $("#popForm .cjText-text").html(msg);
+        $("#nocj_resp_id").hide();
+        $("#cj_resp_id").show();
+    }else if(type == 'popMsg'){
+        $("#popForm").hide();
+        $("#popMsg").show();
+        $("#popMsg .cjText-text").html(msg);
+        if(isTrue == '1'){
+            $("#cj_resp_id").hide();
+            $("#nocj_resp_id").show();
+        }else{
+        }
+    }
+}
+</script>
+<div id="AjaxWrapper" class="dn">
+    <div class="cjWrapper">
+        <div class="AjaxWrapper-top"><img src="__PUBLIC__/Label/Image/20140511/pop-bg2.png"><p>抽奖结果</p></div>
+        <div class="AjaxWrapper-bg">
+            <div class="AjaxWrapper-con">
+                <div class="cjWrapper-close"><a href="javascript:void(0)" class="close-AjaxWrapper">+</a></div>
+                <div class="cjCon pb10 dn" id="popMsg">
+                    <div class="cjText">
+                        <div class="cjText-con">
+                            <div class="cjText-text">您填写的信息有误，<br />请重新输入！</div>
+                        </div>
+                    </div>
+                    <div class="cjBtn">
+                        <a href="javascript:void(0)" class="cjBtn-back close-AjaxWrapper" id="nocj_resp_id">返回</a>
+                        <a href="javascript:void(0)" class="cjBtn-back" style="display: none;" id="cj_resp_id" onclick="popForm('popForm',0,'defult')">返回</a>
+                    </div>
+                </div>
+                
+                <div class="cjCon dn" id="popForm">
+                    <div class="cjurl">
+                        <p class="tl">妈妈您辛苦了,我想对你说:"妈妈，我爱你"!<span class="sp_sonname"></span>做了张贺卡给您哦!点这里查看,还可以参与抽奖的哦>>http://t.cn/abc</p>
+                    </div>
+                    <form id="theform" action="<?php echo U('Label/Mama/Submit');?>" method="post" name="theform">
+                        <input type="hidden" id="id" name="id" value="<?php echo $id;?>" />
+                        <input type="hidden" id="blessings_id" name="blessings_id" value="0" class="checkbox-val"/>
+                        <input type="hidden" id="mama_mobile" name="mama_mobile" value=""/>
+                        <input type="hidden" id="son_name" name="son_name" value=""/>
+                        <div class="cjForm">
+                            <ul class="sOne-cjForm">
+                                <li><input type="text" name="mobile" id="mobile" class="sOne-cjInput" placeholder="请输入手您的机号" maxlength="11" /></li>
+                                <li>
+                                    <input type="text" class="sOne-cjInput-half" name="verify" id="verify" maxlength="4" placeholder="验证码" >
+                                    <a href="javascript:void(0);"><img src="<?php echo U('Label/VerifyCode/index/')?>" class="sOne-cjpasscode-img" id="verifyImg"  onclick="fleshVerify()"></a>
+                                </li>
+                                <li class="pt20">
+                                    <input type="button" id="subcj" value="发送并抽奖" class="cj-input-button" />
+                                    <input type="button" value="再次预览" class="cj-input-button2 close-AjaxWrapper" />
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                        <script language="JavaScript">
+                        function fleshVerify(){ 
+                            //重载验证码 
+                            var obj = document.getElementById('verifyImg'); 
+                            var captcha_img = obj.src; 
+                            var i = captcha_img.indexOf('#'); 
+                            if(i != -1){ 
+                            captcha_img = captcha_img.substr(0,i); 
+                            } 
+                            obj.src = captcha_img+"#"+Math.random(); 
+                        
+                        }
+                        </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="chooseWrapper" class="dn">
+    <div class="chooseWrapper">
+        <div class="chooseWrapper-con">
+            <ul>
+            <volist name="blessings_arr" id="vo" >
+                <li class="chooseWrapper-li"><input type="checkbox" value="{$vo}" class="sOne-Checkbox" id="choose-{$key}" data-rel="{$key}"><div class="label"><label for="choose-{$key}">{$vo}</label></div></li>
+            </volist>
+                <li class="tc"><a href="javascript:void(0)" class="choose-updata"/>确认</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

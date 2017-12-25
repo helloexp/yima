@@ -1,0 +1,85 @@
+<div class="loginBg dn login1">
+    <div class="loginBg2">
+        <div class="loginDiv">
+            <php>
+                $class = isset($class)?$class:'';
+            </php>
+            <div class="Loginheader {$class}"><i class="loginFormclose"></i></div>
+            <div class="loginForm">
+                <form action="{:U('Home/Login/ssologin')}" method="post" id="loginform" name="loginform" onsubmit="return false">
+                    <input type="hidden" name="fromurl" id="fromurl">
+                    <p>用户名：</p>
+                    <p><input type="text" class="logintextbox w1-b" name="email" id="email" value="<?php if(!empty($_COOKIE['emailCookie'])){?><?php echo $_COOKIE['emailCookie']; ?><?php }?>" placeholder="请输入注册邮箱" style="font-size:12px;"/></p> 	
+                    <p class="mt10"><a href="{:U('Home/ForgetPwd/index')}" class="r">忘记登录密码</a>登录密码：</p>
+                    <p><input type="password" class="logintextbox w1-b" name="password" id="password" value=""/></p>
+                    <p class="mt10">验证码：</p>
+                    <p><input type="text" class="logintextbox w2-b" name="verify" id="verify" value="" maxlength="4"/><img id="verifyImg" src="{:U('Home/Verifycode/verify',array('_t'=>time()))}" onclick="fleshVerify()" class="ml10" style="vertical-align:bottom; height:32px;cursor:pointer;" />
+                        <span onclick="fleshVerify()" style="vertical-align:bottom;font-size:12px;cursor:pointer;">换一张</span></p>
+                    <p class="mt10"><input type="checkbox" class="vm" name="rememberMe" id="rememberMe" value="1" checked/> 记住用户名</p>
+                    <p class="mt10"><input type="submit" class="loginsubmit" id="loginsub" value="登录" /></p>
+                    <neq name="is_12580" value="1">
+                    <p class="mt10"><span class="l">还没账号？</span><a href="index.php?g=Home&m=Reg&a=index" class="l">立即注册</a><a href="index.php?g=Home&m=Weibo&a=intro" class="r red">自媒体人登录专区</a></p>
+                    </neq>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        $(".gologin").click(function() {
+            $("#verifyImg").attr('src', "{:U('Home/Verifycode/verify',array('_t'=>time()))}");
+        });
+
+        $('#loginsub').click(function(){
+            var email = $("#email").val();
+            var password = $("#password").val();
+            var verify = $("#verify").val();
+            if (email == ""){
+                alert("登录名不能为空！");
+                return false;
+            }
+            if (password == ""){
+                alert("登录密码不能为空！");
+                return false;
+            }
+            if (verify == ""){
+                alert("验证码不能为空！");
+                return false;
+            }
+            if ($("#loginsub").hasClass("erro")) {
+                return false;
+            } else {
+                $.ajax({
+                    type: "POST",
+                    data:$('#loginform').serialize(),
+                    url: "{:U('Home/Login/ssologin')}",
+                    success: callbackLogin,
+                    dataType:"json"
+                 });
+                $("#loginsub").addClass("erro");
+                setTimeout(function() {
+                    $("#loginsub").removeClass("erro");
+                }, 2000);
+            }
+        });
+        
+        var callbackLogin = function(data) {
+	if (data['success'] == 0) {
+            $('#error_msg').html(data['error_msg']);
+            var verifyImgSrc = "{:U('Home/Verifycode/verify',array('_t'=>time()))}";
+            $('#verify_div').html('<input type="text" class="verify mt10 validate[required]" placeholder="验证码" name="verify" id="verify" value="" maxlength="4" /><img id="verifyImg" src="'+verifyImgSrc+'" onclick="fleshVerify()" class="ml10" style="vertical-align:middle; height:32px;cursor:pointer;" />');
+            $('#verifyImg').click();
+	} else {
+            window.location.href = data['redirectUrl'];
+	}
+}
+    });
+</script>
+<script language="JavaScript">
+    function fleshVerify() {
+        //重载验证码
+        var time = new Date().getTime();
+        document.getElementById('verifyImg').src = '{:U("Home/Verifycode/verify")}&time=' + time;
+    }
+</script>

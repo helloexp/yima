@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>会员管理-添加奖品</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wmember.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wselect_hd.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+    $(document).ready(function(e) {
+        Gform();
+	})
+
+</script>
+<script>
+$(function(){
+	$(".et_list ul li").click(function(e) {
+	var is_exit = $(this).children("p.date").children("mark").text();
+	var is_selected=$(this).hasClass("selected")
+	if(is_exit!="无库存"){
+		if(is_selected == true)
+		{
+			$(this).removeClass("selected");
+		}
+		else
+		{
+			$(".et_list ul li").removeClass("selected");
+			$(this).addClass("selected");
+		}
+	
+	}
+	else
+	{
+		$(this).removeClass("selected");
+	}
+	});
+	
+	$(".et_list ul li").mouseover(function(e) {
+        $(this).children("div.details").show();
+		getAbsTop($(".details"));
+    });
+	
+	$(".et_list ul li").mouseout(function(e) {
+        $(this).children("div.details").hide();
+    });
+	
+	$('#smb').click(function(){
+		var data = $('#prizeSetForm').serialize();
+		if($("#prizeSetForm").validationEngine('validate')){
+			dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+			$.post('{:U('Common/SelectJp/jpAdd')}', data, function(resp){
+				if(resp.status=='1'){
+					window.parent.location.reload()
+				} else {
+					dialog.close();
+					dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true,time:2});
+				}
+			}, 'json');
+		}
+		
+	});
+})
+</script>
+<style>
+.Gform.eTicket{ width:520px; padding:30px}
+.Gform.eTicket .Ginput{  padding: 12px 0 0 150px;}
+.js_show_layer{ display:none}
+.hd_area .goodwin .select_area .et_list div.details{ width:49%;}
+.btn-all {
+  background: #ed3f41;
+  line-height: 28px;
+  width: 122px;
+  box-sizing: border-box;
+  margin-left: 50px;
+}
+.btn-all-del {
+  line-height: 28px;
+  padding: 0 40px;
+  width: 122px;
+  box-sizing: border-box;
+}
+</style>
+</head>
+<body>
+
+<div id="Wform" class="Gform" style="padding:20px;">
+<form name="prizeSetForm" id="prizeSetForm" action="" method="post">
+<input type="hidden" id="prizeId" name="goods_id" value="{$prizeId}"/>
+<input type="hidden" id="m_id" name="batch_id" value="{$m_id}"/>
+<input type="hidden" id="prizeCateId" name="js_cate_id" value="{$prizeCateId}"/>
+<input type="hidden" id="begin_date" name="begin_date" value="{$verify_begin_date}"/>
+<input type="hidden" id="end_date" name="end_date" value="{$verify_end_date}"/>
+<input type="hidden" id="b_id" name="b_id" value="{$b_id}"/>
+<ul>
+    <li class="Gnmae">*&nbsp;每日奖品限量：</li>
+    <li class="Ginput"><input type="text" class="validate[required]" value='<present name="day_count">{$day_count}</present>' name="day_count"></li>
+</ul>
+<notempty name="b_id">
+<ul>
+    <li class="Gnmae">*&nbsp;奖品数量：</li>
+    <li class="Ginput"><input type="text" class="validate[required]" value="" name="goods_count"></li>
+</ul>
+<else />
+<ul>
+    <li class="Gnmae">*&nbsp;奖品剩余数量：</li>
+    <li class="Ginput"><input type="text" class="validate[required]" value='<present name="day_count">{$remain_num}</present>' name="remian_count"></li>
+</ul>
+</notempty>
+<ul>
+    <li class="Gnmae">*&nbsp;使用时间：</li>
+    <li class="Ginput">
+        <div class='switch <eq name="verify_begin_type" value="1">hover</eq>'>
+            <input type="radio" value='<notempty name="verify_begin_type">1<else />0</notempty>' checked="checked" name="verify_time_type">
+            <div class="newRadio fn db w100p">
+                <span class='valfirst <empty name="verify_begin_type">hover</empty>' data-val="0">按日期设置</span>
+                <span class='vallast <notempty name="verify_begin_type">hover</notempty>' data-val="1">按天数设置</span>
+            </div>
+            <div class="newRadio-default fl db mt10">
+                <div class="Gtime2 fn db">
+                    <input type="text" class="validate[required]" id="verify_begin_date" name="verify_begin_date" style="width:88px;" value='<eq name="verify_begin_type" value="0">{$verify_begin_date}</eq>' onclick="var min_date=$('#begin_date').val();var max_date=$('#end_date').val();WdatePicker({maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'})" />
+                    <em>至</em>
+                    <input type="text" class="validate[required]" id="verify_end_date" name="verify_end_date" style="width:88px;" value='<eq name="verify_begin_type" value="0">{$verify_end_date}</eq>' onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'verify_begin_date\\')}'})">
+                </div>
+            </div>
+            <div class="cl"></div>
+            <div class="newRadio-input fn db">
+                <div class="Gtime1 fn special mt10">
+                    <em class="em1">发送营销品后</em>
+                    <input type="text" class="validate[required]" name="verify_begin_days" style="padding-right:50px;" value='<eq name="verify_begin_type" value="1">{$verify_begin_date}</eq>'/>
+                    <em class="em2">天开始使用</em>
+                </div>
+                <div class="Gtime1 fn special mt10">
+                    <em class="em1">发送营销品后</em>
+                    <input type="text" class="validate[required]" name="verify_end_days" style="padding-right:50px;" value='<eq name="verify_begin_type" value="1">{$verify_end_date}</eq>'>
+                    <em class="em2">天结束使用</em>
+                </div>
+            </div>
+        </div>
+    </li>
+</ul>
+
+<ul>
+    <li class="Gnmae">*&nbsp;彩信标题：</li>
+    <li class="Ginput"><input type="text" name="mms_title" class="validate[required,maxSize[10]]" value='<present name="info_title">{$info_title}</present>'></li>
+</ul>
+
+
+<ul>
+    <li class="Gnmae">*&nbsp;彩信内容：</li>
+    <li class="Ginput">
+        <textarea maxlength="200" class="Gview-textarea validate[required,maxSize[100]]" name="mms_text"><present name="use_rule">{$use_rule}</present></textarea><span class="maxTips forArea" data-max="200">0/200</span>
+    </li>
+</ul>
+<empty name="b_id">
+<ul>
+    <li class="Gnmae"></li>
+    <li class="Ginput mt10" style="color:red">
+    	请注意：添加奖品后不可以删除
+    </li>                            
+</ul>
+</empty>
+<ul>
+    <li class="Gnmae"></li>
+    <li class="Ginput mt10">
+    <empty name="b_id"><a href="javascript:history.go(-1);" title="返回" class="btn-all js_back" style="margin-left:0;">上一步</a></empty>
+    <a href="javascript:void(0);" title="提交" id="smb" class="btn-all">提交</a>
+    </li>                            
+</ul>
+</form>
+</div>
+    
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>异业联盟中心_翼码旺财</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Windex.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+
+    <script>
+        $(document).ready(function(e){
+		//alert(charData['1']['industry_name']);
+            <php>if($first_hall){</php>
+            var activaty =['欢迎进入异业联盟中心！在这里，为您的营销活动找到最合适的卡券！将您的卡券发布到这里，它会被无数的营销活动所调用!您还等什么，快来加入我们吧！'].join('');
+            art.dialog({
+                title:"欢迎进入异业联盟中心",
+                content: activaty,
+                lock: true
+            });
+            <php>}</php>
+
+            $('.artD').click(function(){
+                var obj = $(this);
+                var title = obj.attr('title');
+                var href = obj.attr('href');
+                art.dialog.open(href, {
+					lock:true,
+					fixed:true,
+                    title:title,
+                    width:'600px',
+                    height:'538px'
+                });
+                return false;
+            });
+
+            //城市选择框
+            $('.saloonSearch-more').click(function(){
+				art.dialog.open("index.php?g=Hall&m=Index&a=city_dialog&call_back=city_call_back",{
+					lock:true,
+					fixed:true,
+					title: '选择城市',
+					width:'422px',
+					height:'473px'
+
+				});
+            });
+
+            //取消单价选择
+            $('.Price i').live('click', function(){
+                $(this).closest("dd").remove();
+                $('#amount').val('-');
+            });
+
+			//关闭城市
+			$('.City i').live("click",function(){
+				
+				//获取原有城市名称
+				var city_name=$("#city_name").val();
+				var cityarr=city_name.split(",");
+
+				//获取原有城市编码
+				var city_str=$("#city_str").val();
+				var citycodearr=city_str.split(",");
+
+				var closecity=$(this).closest("dd").not("i").text();
+				var cityzhname=closecity.substring(-1,closecity.length-1);				
+			
+				//循环判断
+				for(var i=0;i<cityarr.length;i++){
+					
+					if(cityarr[i]==cityzhname){						
+						cityarr.splice(i,1);
+						citycodearr.splice(i,1);					
+					}
+				}			
+
+				var city_name_str="";
+				var city_code_str="";
+
+				//重新拼装
+				for(var j=0;j<citycodearr.length;j++)
+				{
+					if(city_code_str!=""){
+						city_code_str=city_code_str+",";
+					}
+					city_code_str=city_code_str+citycodearr[j];
+
+					if(city_name_str!=""){
+						city_name_str=city_name_str+",";					
+					}
+					city_name_str=city_name_str+cityarr[j];				
+				}
+				
+				$("#city_str").val(city_code_str);
+				$("#city_name").val(city_name_str);
+
+				//alert($("#city_name").val());
+				
+				$(this).closest("dd").remove();				
+            });		
+
+        });	
+
+    </script>
+	<script type="text/javascript">
+
+
+	//选择城市行为
+	function selectCity(city){
+			//分割字符
+			var cityArr=city.split("_");
+			var city_str=$("#city_str").val();
+			var city_name=$("#city_name").val();		
+
+			//删除默认
+			$(".default").closest("dd").remove();
+
+			//判断是否已经选择
+			if(city_str.indexOf(cityArr[0])==-1){
+				$(".dnCity").before(" <dd class='City'>"+cityArr[1]+"<i>x</i></dd>");				
+				if(city_str!=""){
+					city_str=city_str+",";
+				}
+				city_str=city_str+cityArr[0];
+				
+				$("#city_str").val(city_str);
+
+				if(city_name!=""){
+					city_name=city_name+",";
+				}
+				city_name=city_name+cityArr[1];
+				
+				$("#city_name").val(city_name);
+
+				//alert($("#city_name").val());
+				//alert($("#city_str").val());
+
+			}		
+
+			
+		}
+
+
+	//选择行业
+	function selectPr(price){
+	 var charData = {:json_encode($mk_price_arr)};
+
+		//alert(charData);
+		$(".Price").closest("dd").remove();
+       //alert('123');		
+         if(price!=''){
+		    //alert(1);
+		    //alert(charData[price]["industry_name"]);
+			//alert(charData[price]);
+				$(".dnPrice").after(' <dd class="Price">'+charData[price]["industry_name"]+'<i>x</i></dd>');
+				$("#amount").val(charData[price]["industry_id"]);
+				//$('#iii').val(price);
+			}else{
+                $("#amount").val('-');
+				$(".dnPrice").after(" <dd class='Price'>行业不限<i>x</i></dd>");
+			}
+	
+	}
+
+	function city_call_back(cityList){	
+		
+		//alert(cityList);
+		//获取当前已选择城市
+		var city_str=$("#city_str").val();	
+		var city_name=$("#city_name").val();
+		$(".default").closest("dd").remove();		
+		
+		for(var j=0;j<cityList.length;j++){
+			for(var i=0;i<cityList[j].length;i++){
+				
+				var newcity=cityList[j][i].split("-");
+
+				//没找到已经选择的城市
+				if(city_str.indexOf(newcity[1])==-1){
+					$(".dnCity").before(" <dd class='City'>"+newcity[0]+"<i>x</i></dd>");
+					//赋值
+					if(city_str!=""){				
+						city_str=city_str+",";
+					}
+					city_str=city_str+newcity[1];
+					if(city_name!=""){				
+						city_name=city_name+",";
+					}
+					city_name=city_name+newcity[0];
+				}
+			
+			}
+		
+		}
+
+		$("#city_str").val(city_str);
+		$("#city_name").val(city_name);		
+
+		//alert(city_str+"=="+city_name);		
+	}
+	
+	</script>
+</head>
+<body>
+<div id="wrapper">
+<include file="./Home/Tpl/Public/Public_header.html" />
+<div id="container" class="bgf4f4f4 fn">
+    <div id="main">
+        <div class="saloonBread">
+            <div class="saloonBread-con fn">
+                <div class="saloonBread-area">
+                    <i class="icon-bread"></i>
+                    <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                    <p>></p>
+                    <p><a href="{:U('Hall/Index/index')}">异业联盟中心</a></p>
+                    <p>></p>
+                    <p>展示商家</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="salMain">
+            <div class="salCon fn salConSkin-2">
+                <div class="saloonBar">
+                	<div class="saloonBar-opr">
+                    	<a href="{:U('Hall/Index/zs_shop')}" class="btn-sal-2 artD">我要展示商家信息</a>
+                    </div>
+                </div>
+                <div class="salSub">
+                    <div class="salCon-con">
+                        <form action="<?php U('Hall/Index/shop'); ?>" method="POST">						
+                        <input type="hidden" name="amount" id="amount" value="">
+                        <input type="hidden" name="city_str" id="city_str" value="">
+                        <input type="hidden" name="city_name" id="city_name" value="<?php echo $city_name;?>">
+                        <div class="saloonSearch">
+                        	<div class="salSearch-skin">
+                                <dl class="fn">
+                                    <dt>行业</dt>
+                                    <foreach name="mk_price_arr" item="vo">
+                                    <dd><a href="javascript:void(0);"  onclick="selectPr('{$key}')">{$vo["industry_name"]}</a></dd>
+                                    </foreach>
+                          		</dl>
+                                <dl class="fn">
+                                    <dt>地区</dt>
+                                    <foreach name="city_arr" item="vo">
+                                	<dd><a href="javascript:void(0);"  onclick="selectCity('{$key}_{$vo}')">{$vo}</a></dd>                              
+									</foreach>
+                                    <dd><a href="javascript:void(0);" class="saloonSearch-more">更多</a></dd>
+                                </dl>
+                                <dl class="saloonSearched fn last">                                
+                                    <button type="submit" class="r btn-all w60">查找</button>
+                                    <dt>您选择的是</dt>
+                                    <dd class="dnPrice" style="display:none"></dd>
+                                    <dd class="Price"><?php echo $amount == '' ? '行业不限' : $mk_price_arr[$k]["industry_name"]?><i>x</i></dd>
+                                    <?php 
+                                    if($city_name==""){
+                                    ?>
+                                    <dd class="City default">城市不限<i>x</i></dd>
+                                    <?php
+                                    }else{
+    
+                                        $citylist=explode(",",$city_name);								
+                                        if(!empty($citylist)){
+                                            foreach($citylist as $ck=>$cal){
+                                            
+                                    ?>
+                                    <dd class='City'><?php echo $cal;?><i>x</i></dd>
+                                    <?php
+                                            }
+                                        }
+                                    }
+                                    ?>
+                                    <dd class="dnCity" style="display:none"></dd>
+                                </dl>
+                            </div>
+                        </div>
+                        </form>
+    
+                        <div class="saloonList fn">
+                            <ul class="saloonList-ul">
+                                <!--卡券列表 12个-->
+                                <?php
+                                if(!empty($list)){
+                                    foreach($list as $lk=>$bal){
+                                ?>
+                                <li>
+                                	<div class="salItem-img">
+                                        <a href="{:U('Hall/Index/shop_mes','nid='.$bal['id'])}" target="_blank">
+                                            <img src="__UPLOAD__/<?php echo $bal['node_id'];?>/<?php echo $bal['head_photo']?>" onerror="this.onerror='';this.src='__PUBLIC__/Image/wapimg/defaultlogo-sOne.png'" />
+                                        </a>
+                                    </div>
+                                    <div class="salItem-msg">
+                                    	<h3><?php echo $bal["node_name"]; ?></h3>
+                                          <div class="fn">
+                                            <div class="salItem-hot">所属行业:<span><?php echo $bal["industry_name"]; ?></span>
+											<br/> 地区:<span><?php echo $bal["city"]; ?>
+											</div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <?php
+                                    }
+                                    
+                                }
+                                ?>
+                                <!--卡券列表end-->
+                            </ul>
+                        </div>
+                        <!--分页-->
+                        <div class="pageBase-sm mt20">
+                            <ul class="pageul">{$page}</ul>
+                        </div>
+                        <!--分页end-->
+                    </div>
+                </div>
+            </div>
+        </div>
+      
+    </div>
+</div>
+<include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微渠道统计_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/highcharts.js?v=__VR__"/>
+<script type="text/javascript" charset="utf-8">
+//数据源
+var charData = {:json_encode($query_list)};
+//计算访问量饼图数据
+var charDataClick = [];
+//计算中奖数饼图数据
+var charDataSend = [];
+//计算访问量柱状图 X 坐标名
+var charDataColumnName = [];
+//计算访问量柱状图 X 坐标值
+var charDataClickColumnValue = [];
+
+//计算中奖数柱状图 X 坐标值
+var charDataSendColumnValue = [];
+
+for(var i in charData){
+	charDataColumnName.push(charData[i]['name']);
+	charDataClick.push([charData[i]['name'],charData[i]['click_count']*1]);
+	charDataClickColumnValue.push(charData[i]['click_count']*1);
+
+	charDataSend.push([charData[i]['name'],charData[i]['send_count']*1]);
+	charDataSendColumnValue.push(charData[i]['send_count']*1);
+}
+var chart;
+$(document).ready(function() {
+   chart = new Highcharts.Chart({
+      chart: {
+         renderTo: 'chart_1'
+      },
+      title: {
+         text: '访问量占比分析'
+      },
+      plotArea: {
+         shadow: null,
+         borderWidth: null,
+         backgroundColor: null
+      },
+      tooltip: {
+         formatter: function() {
+            return '<b>'+ this.point.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 1) +'% ('+
+                         Highcharts.numberFormat(this.y, 0, ',') +' 个)';
+         }
+      },
+      plotOptions: {
+         pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+               enabled: true,
+               formatter: function() {
+                  if (this.percentage > 4) return this.point.name;
+               },
+               color: '',
+               style: {
+                  font: '13px Trebuchet MS, Verdana, sans-serif'
+               }
+            }
+         }
+      },
+      legend: {
+         backgroundColor: '#FFFFFF',
+         x: 0,
+         y: -30
+      },
+      credits: {
+          enabled: false
+      },
+       series: [{
+         type: 'pie',
+         name: 'Browser share',
+         data: 
+            charDataClick
+
+		}]
+   });
+
+   chart = new Highcharts.Chart({
+      chart: {
+         renderTo: 'chart_2'
+      },
+      title: {
+         text: '中奖数占比分析'
+      },
+      plotArea: {
+         shadow: null,
+         borderWidth: null,
+         backgroundColor: null
+      },
+      tooltip: {
+         formatter: function() {
+            return '<b>'+ this.point.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 1) +'% ('+
+                         Highcharts.numberFormat(this.y, 0, ',') +' 个)';
+         }
+      },
+      plotOptions: {
+         pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+               enabled: true,
+               formatter: function() {
+                  if (this.percentage > 4) return this.point.name;
+               },
+               color: '',
+               style: {
+                  font: '13px Trebuchet MS, Verdana, sans-serif'
+               }
+            }
+         }
+      },
+      legend: {
+         backgroundColor: '#FFFFFF',
+         x: 0,
+         y: -30
+      },
+      credits: {
+          enabled: false
+      },
+       series: [{
+         type: 'pie',
+         name: 'Browser share',
+         data: charDataSend
+		}]
+   });
+   
+   //柱状图
+   $('#chart_column').highcharts({
+       chart: {
+           type: 'column'
+       },
+       title: {
+           text: '访问量占比分析'
+       },
+       subtitle: {
+           text: ''
+       },
+       xAxis: {
+    	   categories: charDataColumnName
+       },
+       yAxis: {
+           min: 0,
+           title: {
+               text: ''
+           }
+       },
+       tooltip: {
+    	   valueSuffix: ' 个'
+       },
+       plotOptions: {
+           column: {
+               pointPadding: 0.2,
+               borderWidth: 0
+           }
+       },
+       series: [{
+           name: '访问量',
+           data: charDataClickColumnValue
+
+       }, {
+           name: '中奖数',
+           data: charDataSendColumnValue
+
+       }]
+   });
+});
+
+function show(name,url){
+	art.dialog({
+	    title: name,
+	    content: "<img src='"+url+"' border='0'>"
+	});
+}
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu_pingan.html" topmenuid="gongzhonghao"/>
+    	<div id="container" >
+            <div id="main" class="rel">
+                <!--<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>&gt;</p>
+                            <p>微信助手</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="sidenav">
+                   <!--开始引入左菜单-->
+					<include file="LabelAdmin/Batch/WleftMenu_pingan" leftmenuid="qdfx"/>
+                </div>
+
+				<div class="subcon">
+                    <div class="main-name fn">
+                        <h4>
+                            <p class="dib">微信渠道分析</p>
+                        </h4>
+                    </div>
+                    <div id="Wcanal-tabon" class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover"><a href="javascript:void(0)">数据列表</a></p>
+                            <p><a href="javascript:void(0)">饼状图</a></p>
+                            <p><a href="javascript:void(0)">柱状图</a></p>
+                        </div>
+                        <div class="Wcanal-tab-list db fn">
+                            <table cellpadding="0" cellspacing="0" class="W-table mt20">
+                              <tr>
+                                  <th>活动名称</th><th>活动类型</th><th>绑定及解绑时间</th><th>访问量</th><th>中奖数</th><th>状态</th>
+                              </tr>
+                              <?php if($query_list){foreach($query_list as $v){?>
+                              <tr>
+                                  <td><?php echo $v['name'];?></td>
+                                  <td><?php echo $arr[$v['batch_type']];?></td>
+                                  <td><?php echo date('Y-m-d',strtotime($v['add_time']))."--";echo $v['change_time'] == ''?'至今未解绑':date('Y-m-d',strtotime($v['change_time']));?></td>
+                                  <td><?php echo $v['click_count']."/";echo round($v['click_count']/$v['ck_count'],2)*100;echo '%';?></td>
+                                  <td><?php echo $v['send_count']."/";echo round($v['send_count']/$v['sd_count'],2)*100;echo '%';?></td>
+                                  <td><?php echo $v['status']== '1'?'启用':'停用';?></td>
+                              </tr>
+                              <?php }}else{?>
+                              <tr><td colspan="6">无数据</td></tr>
+                              <?php }?>
+                            </table>
+                            <div class="page"><?php echo $page;?></div>
+                            <input type="hidden" value="<?php echo $query_list; ?>" id="listcontent" />
+                            <input type="hidden" value="<?php echo $channel_id; ?>" id="channel_id" />
+                            <p class="btn-all w120 ml20" align="right" id="download">下载</p>
+                        </div>
+                        <div class="Wcanal-tab-list dn fn">
+                            <div class="l" id="chart_1" style="height:350px; width: 400px;"><!-- 访问量饼图--></div>
+                            <div class="r" id="chart_2" style="height:350px; width: 400px;"><!-- 中奖饼图--></div>
+                        </div>
+                        <div class="Wcanal-tab-list dn fn">
+                            <div class="l" id="chart_column" style=" width:830px;"></div>
+                        </div>
+                    </div>
+                    <div class="cl"></div>
+                    <div class="fn-clear fn mt20"></div>
+                    
+                    
+                    
+				</div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer_pingan.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+$(function(){
+ $('#download').click(function(){
+   var content=$('#listcontent').val();
+   var channel_id=$('#channel_id').val();
+   if(content==''){
+    alert('暂无可下载数据');return false;
+   }else{
+    window.location.href='index.php?g=LabelAdmin&m=ChannelBatchList&a=download&id='+channel_id;
+   }
+ });
+})
+</script>

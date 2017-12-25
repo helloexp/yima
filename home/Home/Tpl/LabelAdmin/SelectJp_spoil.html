@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>选择卡券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+var min_date = '';
+var max_date = '';
+$(document).ready(function(e){
+	var top_goods_name = '{$Think.request.name}';
+	var iframe_batch_no = '{$Think.request.batch_no}';
+	var memberFeed = '{$Think.request.memberFeed}';//粉丝回馈
+	$("#smb").click(function(){
+       $("#this3").submit();
+    });
+    $(".btn-next").click(function(){
+    	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+    	var checked_obj = $("input[name='goods_id']:checked");
+        if(!checked_obj.length){
+        	dialog.time(2).content("<div class='msg-all-error'>请选择卡券</div>");
+            return false;
+        }else{
+        	var goods_id = checked_obj.val();
+        	$.post("{:U('LabelAdmin/SelectJp/getGoodsInfo')}",{"goods_id":goods_id},function(data){
+                if(data.status=='1'){
+                	dialog.close();
+                	var datas = data.data;
+                	$("#show_name").html(datas.goods_name);
+                	$("#show_date").html(datas.begin_time+'&nbsp;到&nbsp;'+datas.end_time);
+                	min_date = datas.begin_time;
+                	max_date = datas.end_time;
+                	if(datas.verify_begin_type == '1'){
+                		$("#verify_begin_type2").attr("checked","checked");
+                		$("#verify_end_days").val(datas.verify_end_date);
+                		$("#verify_begin_days").val(datas.verify_begin_date);
+                		$(".judgeCon2").show();
+                		$(".judgeCon1").hide();
+                	}else{
+                		$("#verify_begin_type1").attr("checked","checked");
+                        $("#verify_begin_date").val(datas.verify_begin_date.substr(0,8));
+                        $("#verify_end_date").val(datas.verify_end_date.substr(0,8));
+                        $(".judgeCon1").show();
+                        $(".judgeCon2").hide();
+                	}
+                	
+                	$("#mms_title").val(datas.mms_title);
+                	$("#using_rules").val(datas.mms_text);
+                	$(".showsaloonForm1").hide();
+                    $(".showsaloonForm2").show();   
+                }else{
+                	dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },"json");
+        }
+    });
+    $(".btn-pre").click(function(){
+        $(".showsaloonForm1").show();
+        $(".showsaloonForm2").hide();
+    });
+        
+    $("#verify_begin_date").click(function(){
+        $("input[name='verify_begin_type'][value='0']").attr("checked",true);
+    });
+    $("#verify_begin_days").click(function(){
+        $("input[name='verify_begin_type'][value='1']").attr("checked",true);
+    });
+    $("#verify_end_date").click(function(){
+        $("input[name='verify_end_type'][value='0']").attr("checked",true);
+    });
+    $("#verify_end_days").click(function(){
+        $("input[name='verify_end_type'][value='1']").attr("checked",true);
+    });
+    $("input[name='discount']").click(function(){
+        $("input[name='prt_type'][value='1']").attr("checked",true);
+    });
+    $("input[name='prt_price']").click(function(){
+        $("input[name='prt_type'][value='2']").attr("checked",true);
+    });
+});
+function get_min_date(){
+	return min_date;
+}
+function get_max_date(){
+    return max_date;
+}
+</script>
+</head>
+
+<body class="bgfff">
+    <form method="post" action="<?php echo U('LabelAdmin/SelectJp/addspoil');?>" id="this3">
+    <div class="showsaloonForm1">
+        <table cellpadding="0" cellspacing="0" class="W-table">
+            <tr>
+                <th width="120">选--择</th>
+                <th><eq name="type" value="0">优惠券名称<else/>卡券名称</eq></th>
+                <th>有效期</th>
+            </tr>
+            <?php
+            if(!empty($query_list)){ 
+            foreach($query_list as $v){?>
+            <tr>
+                <td><input type="radio"  value="<?php echo $v['goods_id']?>" name="goods_id"/></td>
+                <td><?php echo $v['goods_name'];?></td>
+                <td><?php echo dateformat($v['begin_time'],'Y-m-d').'到'.dateformat($v['end_time'],'Y-m-d')?></td>
+            </tr>
+            <?php }}else{?>
+            <td colspan="3">无数据</td>
+            <?php }?>
+        </table>
+        <div class="tr pt5 pb5"><?php echo $page;?>&nbsp;&nbsp;</div>
+        <div class="fn tc pt20 pb20"><a href="javascript:void(0)" class="btn-all w120 btn-next">下一步</a></div>
+    </div>
+    
+    <div class="showsaloonForm2 dn pb20">
+        <div class="global-input6 fn">
+            <ul>
+                <li class="global-input6-name">*&nbsp;您选择的卡券：</li>
+                <li class="global-input6-input"><p id="show_name"></p></li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;卡券有效期：</li>
+                <li class="global-input6-input"><p id="show_date"></p></li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;使用卡券时间：</li>
+                <li class="global-input6-input">
+                    <div class="judgeDiv">
+                        <label class="ml5" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();">
+                        <input type="radio"  name="verify_time_type" value="0" id="verify_begin_type1"/><span class="ml5">按日期设置</span></label>
+                        <label class="ml10" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();">
+                        <input type="radio"  name="verify_time_type" value="1" id="verify_begin_type2"/><span class="ml5">按天数设置</span></label>
+                    </div>
+                    <div class="judgeCon-time judgeCon1 ">
+                        <p class="ml5">使用开始时间</p>
+                        <input name="verify_begin_date" id="verify_begin_date" type="text" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" value=""/>
+                        <p class="ml20">使用结束时间</p>
+                        <input name="verify_end_date" id="verify_end_date" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')||\\'%y-%M-%d\\'}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="" />
+                        <div class="cl"></div>
+                        <p class="font-12-cc">商户可以自定义验码开始的日期如："4月1号,6月1号";</p>
+                    </div>
+                    <div class="judgeCon-time judgeCon2 ">
+                        <p class="ml5">发送卡券后</p>
+                        <input name="verify_begin_days" id="verify_begin_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="" />&nbsp;天开始使用
+                        <p class="ml20">发送卡券后</p>
+                        <input name="verify_end_days" id="verify_end_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="" />&nbsp;天结束使用
+                        <div class="cl"></div>
+                        <p class="font-12-cc">商户可以自定义验码时间，如：“发送卡券后3天开始使用-发送卡券后5天结束使用”</p>
+                    </div>
+                </li>
+                </ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;彩信标题：</li>
+                <li class="global-input6-input"><input id="mms_title" name="mms_title" type="text" onkeyup="check_lenght(10,'title_text',this);"  class="validate[required,maxSize[10]] textbox w380"/>
+                <br />
+                <p class="font-12-cc" id="title_text">还可以输入10个字</p>
+                </li>
+            </ul>
+            <ul>
+                <li class="global-input6-name">*&nbsp;彩信内容：</li>
+                <li class="global-input6-input"><textarea name="using_rules" id="using_rules" onkeyup="check_lenght(100,'text',this);" class="validate[required,maxSize[100]] texttextarea w380 h50"></textarea>
+                <br />
+                <span class="font-12-cc" id="text">还可以输入100个字</span><p class="font-12-cc">,请短彩信内容按照以下格式：xxx时间到xxxx地点享受xxxx服务</p>
+                </li>
+            </ul>
+            <ul>
+                <li class="global-input6-name"></li>
+                <li class="global-input6-input">
+                    <a href="javascript:void(0)" class="btn-all w120 btn-pre">上一步</a>
+                    <a href="javascript:void(0)" id="smb" class="btn-all w120 btn-updata ml20">确定</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+	<input type="hidden" name="staff" value="<?php echo $ygid; ?>" />
+    </form>
+</body>

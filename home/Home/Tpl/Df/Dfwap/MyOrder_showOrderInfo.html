@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;"/>
+<meta name="format-detection"  content="telephone=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<title>订单凭证中心</title>
+<link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/wap_gift_201503.css?v=__VR__" />
+<script src="__PUBLIC__/Label/Js/jquery-1.7.2.min.js?v=__VR__" type="text/javascript" charset="utf-8"></script>
+<style type="text/css">
+.product-wrap{ margin:0}
+.gift_list{ margin:0; margin-bottom:13px;}
+.tabs .title-list li{ width:25%;}
+.tabs .title-list p{ width:25%;}
+.message_area{ margin:0}
+</style>
+</head>
+
+<body>
+<div class="wrapper">
+<div class="header">
+    <a class="back" href="javascript:history.back();"></a>
+    <span class="headline">个人中心</span>
+    <a class="" href="">&nbsp;&nbsp;</a>
+</div>
+<div class="content">
+    <div class="tabs">
+        <div class="title cf">
+            <ul class="title-list fr cf ">
+                <li class="on"><a href="index.php?g=Df&m=DFStore&a=showOrderList&node_id={$node_id}">我的订单</a></li>
+                    <li><a href="index.php?g=Df&m=DFStore&a=code&node_id={$node_id}">我的凭证</a></li>
+                <li><a href="index.php?g=Df&m=DfWap&a=Dfmember_card">个人信息</a></li>
+                <p></p>
+            </ul>
+        </div>
+        <div class="product-wrap">
+            <div class="product show">
+                <div class="colgroup">订单号：{$orderInfo['order_id']}</div>
+                <div class="colgroup gray">下单时间：{$orderInfo['add_time']|dateformat=###,"Y-m-d H:i:s"}</div>
+                <volist name="orderListInfo" id="vo">
+					<div class="order_area gift_list">
+					<img src="__UPLOAD__/{$vo['batch_img']}">
+					<p><span class="l">{$vo['b_name']}<eq name="orderInfo.is_gift" value="1"><i class="gift_icon"></i></eq></span><span class="r">￥{$vo['batch_amt']}<i class="redfont num">&Chi;&nbsp;{$vo['goods_num']}份</i></span></p>
+					</div>
+				</volist>
+                <div class="colgroup rb">红包：<span class="redfont">-￥{$bonusInfo|number_format=###,2}</span></div>
+                <div class="colgroup tr">订单合计：<span class="price_new"><sub>￥</sub>{$orderInfo['order_amt']+$bonusInfo|number_format=###,2}</span></div>
+                <div class="colgroup tr">订单状态：<span class="status">{$status[$orderInfo['pay_status']]}</span></div>
+            </div>
+			<eq name="orderInfo.order_status" value="0">
+				<eq name="orderInfo.pay_status" value="1">
+					<a href="{:U('gotoPay',array('id'=>$id,'order_id'=>$orderInfo['order_id']))}" class="btn_one">去付款</a>
+				</eq>
+			</eq>
+        </div>
+		<eq  name="orderInfo.is_gift" value="1">
+			<div class="divbar"></div>
+			<div class="pos_list">
+			<eq name="orderInfo.pay_status" value="2">
+			<dl>
+				<dt>送礼信息</dt>
+				<if condition="$orderInfo['buy_num'] gt $hav_count">
+					<dd>您还有未被领取的礼包</dd>
+				</if>
+			</dl>
+			<if condition="$orderInfo['buy_num'] gt $hav_count">
+				<a href="{:U('Label/MyGift/get_gift',array('order_id'=>$orderInfo['order_id']))}" class="btn_one" style="margin-top:0">继续送</a>
+			</if>
+			<dl>
+				<dt>查看领取纪录 （{$hav_count}/{$orderInfo['buy_num']}）</dt>
+				<volist name="codeTrace" id="vo">
+					<eq name="vo.gift_type" value="1">
+						<dd><img src="{$vo['wx_headpic']}"><span><i class="redfont">{$vo['wx_nickname']}</i>领取了一份礼物 </span><span>{$vo['trans_time']|dateformat=###,'Y-m-d'}</span></dd>
+					<else />
+						<dd><span><i class="redfont">{$vo['gift_phone']}</i>领取了一份礼物 </span><span>{$vo['trans_time']|dateformat=###,'Y-m-d'}</span></dd>
+					</eq>
+				</volist>
+			</dl>
+			<else />
+			<dl>
+				<dt>送礼信息</dt>
+					<dd>您还有未支付送礼订单</dd>
+			</dl>
+			</eq>
+			
+			<div class="message_area">
+			<span class="for">对ta/ta们说：</span>{$giftInfo['bless_msg']}
+			</div>
+			</div>
+	</eq>
+    </div>
+
+</div>
+</div>
+</body>
+</html>

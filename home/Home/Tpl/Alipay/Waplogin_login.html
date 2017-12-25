@@ -1,0 +1,243 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>登录旺财</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_fms.css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+        	<!--<div class="goback"><i></i></div>-->
+            <div class="logo"><span>登录旺财</span></div>
+        </div>
+        <div id="main">
+            <div id="mainCon">
+            	<div class="Gform">
+                	<form id="form" method="post" name="form">
+                		<input type="hidden" name="wap" value="wap"/>
+                		<div class="item">
+                			<ul>
+		                        <li class="name w55">用户名</li>
+		                        <li class="input pl55">
+		                        	<input name="email" id="name" type="text" class="textbox validate[required,minSize[3]]" maxlength="32" placeholder="&nbsp;请输入您的用户名" data-rel="" />
+		                        </li>
+		                    </ul>
+	                		<ul>
+		                        <li class="name w55">密码</li>
+		                        <li class="input pl55">
+			                        <input name="password" type="password" id="password" maxlength="32" class="textbox validate[required,minSize[6]]" placeholder="&nbsp;请输入密码" data-rel="" />
+		                        </li>
+		                    </ul>
+                		</div>
+	                    <ul class="btn-ul">
+	                        <li class="btn-li"><input type="button" id="loginsub" value="下一步" class="btn-up" /></li>
+	                    </ul>
+                	</form>
+	            </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    $('#form').validationEngine({
+    	'allrules': {
+			"carname":{
+				"alertText":""
+			}
+		},
+    });
+    
+    $(".Gform .clause label").eq(0).addClass("active");
+	$('.Gform .clause input').attr("checked","checked");
+	$(".Gform .clause input").click(function(){
+		$(this).parent("label").toggleClass("active");
+	});
+   
+ var tips = {
+        basic:function(msg){
+            tips.close();
+            if(!msg.title){var notitle="notitle";msg.title="";}
+            if(!msg.title){var border="border";}
+            if(msg.isclose){var closehtml = '<a href="javascript:void(0)" class="close-msgPop"><i></i></a>'}else{var closehtml = "";}
+            var html = ['<div class="msgPop bg" id="'+msg.id+'">',
+                '<div class="msgBg">',
+                '<div class="msgTitle '+notitle+'">'+msg.title+closehtml+'</div>',
+                '<div class="msgCon">'+msg.html+'</div>',
+                '</div>',
+                '</div>'].join('');
+            $("body").append(html);
+            if(typeof(msg.start) == 'string'){
+                window[msg.start].call(this,$(this));
+            }else if(typeof(msg.start) == 'function'){
+                msg.start.call(this,$(this));
+            }
+            $("body").find(".msgBg",html).on("click",".tipsBtn-back",function(){
+                var index = $(this).index();
+                if(typeof(msg.btn[index].callback) == 'string'){
+                    window[msg.btn[index].callback].call(this,$(this));
+                }else if(typeof(msg.btn[index].callback) == 'function'){
+                    msg.btn[index].callback.call(this,$(this));
+                }else{
+                    msg.repeat ? (tips.close(),tips.login({repeat:msg.repeat})) : tips.close();
+                    if($(this).attr("href")!="javascript:void(0)"){
+                        window.location.href = $(this).attr("href");
+                    }
+                }
+            });
+            $("body").find(".msgBg",html).on("click",".close-msgPop",function(){
+                if(typeof(msg.after) == 'string'){
+                    window[msg.after].call(this,$(this));
+                }else if(typeof(msg.after) == 'function'){
+                    msg.after.call(this,$(this));
+                }
+                msg.repeat ? (tips.remove(),tips.login({repeat:msg.repeat})) : tips.remove();
+            });
+            $("body").on("click","input",msg.html,function(){
+                $(this).removeClass("erro");
+            });
+        },
+        tip:function(msg){
+            $(".tipsTip").remove();
+            var txt = [""];
+            var codeRandom = Math.floor(Math.random()*txt.length);
+            if(!msg){msg = txt[codeRandom]};
+            if(msg==1){return false;}
+            var html = '<div class="tipsTip"><div class="tipsTipTxt"><i></i><p>'+msg+'</p></div><div class="tipsTipbg"></div></div>';
+            $("body").append(html);
+        },
+        content:function(msg){
+            msg = $.extend(true, {}, tips.msg,msg);
+            msg.html = template("js-tmpl-msg",msg);
+            tips.basic(msg);
+        },
+        remove:function(msg){
+            $(".msgPop").remove();
+            var _MsgPopglobal = {
+                refurbish:false,
+                repeat:true
+            }
+            msg = $.extend(true, {}, _MsgPopglobal,msg);
+            if(msg.refurbish){
+                location.href = location.href ;
+            }
+        },
+        close:function(msg){
+            var _MsgPopglobal = {
+                refurbish:false,
+                repeat:true
+            }
+            msg = $.extend(true, {}, _MsgPopglobal,msg);
+            $(".msgPop").not("[id!='']").remove();
+            if(msg.refurbish){
+                location.href = location.href ;
+            }
+        },
+        msg:{
+            id:"",
+            title:false,//标题
+            html:false,//内容
+            refurbish:false,//是否刷新
+            msg:"未知错误",//内容
+            icon:false,//图标
+            repeat:false,//重新填出登陆框
+            btn:[
+                {
+                    text:"返回",//按钮文字
+                    url:"javascript:void(0)",//按钮链接
+                    callback:function(){
+                        tips.close();
+                    }
+                }
+            ],
+            isclose:true,
+            start:false,//弹出之后callback
+            after:false//关闭之后callback
+        }
+    }
+
+
+   var callbackLogin = function(data) {
+   		if (data['success'] == 0) {
+            tips.content({
+                        html:"<p>"+data.error_msg+"</p><a href='javascript:;' class='btn-close'>返回</a>",
+                        icon:true,
+                        btn:false
+                    });//已申请过弹窗结束
+                        $(".btn-close").click(function(){
+                        tips.close();
+                    });
+	        // art.dialog({title:false,time:5,content:"<div class='msg-all-error' style='color:red'>"+data['error_msg']+"</div>",fixed: true,padding:0});
+	        // var verifyImgSrc = "{:U('Home/Verifycode/verify',array('_t'=>time()))}";
+	        // $('#verify_div').html('<input style="padding:18px 20px;" type="text" class="verify mt10 validate[required]" placeholder="验证码" name="verify" id="verify" value="" maxlength="4" /><img id="verifyImg" src="'+verifyImgSrc+'" onclick="fleshVerify()" class="ml10" style="vertical-align:middle; height:32px;cursor:pointer;" />');
+	        // $('#verifyImg').click();
+	    } else {
+	        top.location.href = data['redirectUrl'];
+	    }
+	}
+
+   $("#loginsub").click(function(){
+        var t = $("#form").validationEngine("validate");
+        if(!t) return false;
+        $.ajax({
+            type: "POST",
+            data:$('#form').serialize(),
+            url: "{:U('Home/Login/ssologin')}",
+            success: callbackLogin,
+            error:function(XMLHttpRequest, textStatus, errorThrown){
+                alert('通信错误，请重新登录');
+                window.location.href=window.location.href;
+            },
+            dataType:"json"
+        });
+    });
+});
+
+</script>
+<script type="text/html" id="js-tmpl-msg">
+<div class="tipsText">
+    {{if !html}}
+    <div class="tipsText-con">
+        {{if !icon}}
+            <div class="tipsText-text noicon">{{#msg}}</div>
+        {{else}}
+            <div class="tipsText-text">{{#msg}}</div>
+            <div class="tipsText-img">
+                {{if icon==1}}
+                <img src="__PUBLIC__/Label/Image/lottery/element_17.png" width="">
+                {{else if icon==0}}
+                <img src="__PUBLIC__/Label/Image/lottery/element_34.png" width="">
+                {{else}}
+                <img src="__PUBLIC__/Label/Image/lottery/element_34.png" width="">
+                {{/if}}
+            </div>
+        {{/if}}
+    </div>
+    {{else}}
+    {{#html}}
+    {{/if}}
+</div>
+<div class="tipsBtn">
+{{each btn as value i}}
+    <a href="{{value.url}}" class="tipsBtn-back {{if btn.length>1}}{{if i==0}}sm{{/if}}{{/if}}">{{value.text}}</a>
+{{/each}}
+</div>
+</script>
+

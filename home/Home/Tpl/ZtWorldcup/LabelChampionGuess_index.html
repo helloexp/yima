@@ -1,0 +1,205 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>冠军竞猜</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,天生一对" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link href="__PUBLIC__/Label/Css/activity/wap_worldcup_win.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+function fleshVerify(){ 
+    //重载验证码 
+    var obj = document.getElementById('verifyImg'); 
+    var captcha_img = obj.src; 
+    var i = captcha_img.indexOf('#'); 
+    if(i != -1){ 
+    captcha_img = captcha_img.substr(0,i); 
+    } 
+    obj.src = captcha_img+"#"+Math.random(); 
+}
+$(document).ready(function(e) {
+    $('#sub_button').click(function(){
+        $("form").ajaxSubmit({
+            success:function(data){
+                	popForm('popMsg',data.info,'1');
+                	fleshVerify();
+                    return false;
+                  },
+            dataType:'json'
+        });
+    return false;
+    }) ;
+    //页面大小
+    initialise();
+
+    var prizeNum=$(".sign-prize li").length;
+    if(prizeNum<=3){
+        $(".sign-prize li").css("width",100/$(".sign-prize li").length+"%");
+        $(".sign-prize li img").css("width",30*$(".sign-prize li").length+"%");
+    }else{
+        $(".sign-prizeopr").fadeIn();
+        $(".signPrize").css({"margin":"0 20px"});
+        $(".sign-prize li").css("width",100/3+"%");
+        $(".sign-prize li img").css("width","90%");
+        var prizeWidth=	$(".sign-prize li").width();
+        $(".sign-prize li").css("width",prizeWidth);
+        $(".signPrize h1").show();
+        $(".sign-prize").width(prizeWidth*prizeNum);
+    }
+});
+    
+$(window).resize(function(e) {
+    initialise();
+});
+
+function initialise(){
+    var windowwidth = $(window).width();
+    if (windowwidth > 640) {
+        windowwidth = 640;
+    }
+    var scale = windowwidth / 320;
+    $(".logo-bg").css({
+        "width": scale * 320,
+        "height": scale * 91
+    });
+    $(".logo-con").css({
+        "width": scale * 53,
+        "height": scale * 53,
+        "top": scale * 20,
+        "left": scale * 20,
+    });
+    $("#mainCon .mainCon-contenter").css("padding-top", scale * 130);
+}
+
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div id="mainCon" class="mainCon fn">
+                <div class="logo-bg">
+                    <img src="__PUBLIC__/Label/Image/worldcup/win-top.jpg" id="bg-img"/>
+                    <?php
+                    if($row['log_img']!= ''){?>
+                    <div class="logo-con"><img src="__UPLOAD__/<?php echo $row['log_img']?>"/></div>
+                    <?php }?>
+                </div>
+                <div class="mainCon-contenter">
+                    <div class="mainCon-contenter-bg">
+                        <div class="mainCon-sign-title">活动介绍：</div>
+                        <div class="mainCon-sign-text">{$row['wap_info']|nl2br}</div>
+                        
+                        <div class="fn rel">
+                            <div class="signPrize">
+                                <ul class="sign-prize">
+                                    <php>$count = sizeof($prizeData);</php>
+                                    <volist name="prizeData" id="vo">
+
+                                        <li class="l">
+
+                                            <h1>
+                                                <php>if($count > 1){</php>{$vo.level}<php>}else{echo '&nbsp;';}</php><span></span></h1>
+
+                                            <img src="{$vo['batch_img']|get_upload_url}" /><p>{$vo['batch_name']}</p>
+                                        </li>
+                                    </volist>
+                                </ul>
+                            </div>
+                            <div class="sign-prizeopr dn"><a class="pre">&lt;</a><a class="next">&gt;</a></div>
+                        </div>
+                        <div class="mainCon-sign-phone">
+                        <form id="theform" action="<?php echo U('ZtWorldcup/LabelChampionGuess/add');?>" method="post" name="theform">
+                            <input type="hidden" value="{$id}" name="id" id="id">
+                            <li><input type="tel" name="phone" class="sOne-cjInput" placeholder="请输入您的手机号码"/></li>
+                            <li class="pt20"><input type="text" class="sOne-cjInput-half input-teamname" disabled placeholder="请选择冠军球队"/><input type="hidden" name="team_id" id="team_id" class="input-teamid" ><p class="chooseTeam"><a href="javascript:void(0)">选择</a></p></li>
+                            <li class="pt20" id="verify_li">
+                                <input type="text" class="sOne-cjInput-half" name="verify" id="verify" maxlength="4" placeholder="验证码" >
+                                <a href="javascript:void(0);"><img src="<?php echo U('Label/VerifyCode/index/')?>" class="sOne-cjpasscode-img" id="verifyImg"  onclick="fleshVerify()"></a>
+                            </li>
+                            <li class="pt20 pb30"><a href="javascript:void(0)" class="dib cj-input-button go-input-button" id="sub_button"/>确定</a></li>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+            <include file="./Home/Tpl/Label/Public_share.html"/>
+            </div>
+            <include file="./Home/Tpl/Label/Public_footer.html"/>
+        </div>
+    </div>
+</div>
+<div id="Team" class="dn">
+    <div class="Team-bg">
+        <div class="Team-close"><a href="javascript:void(0)" class="close-Team">+</a></div>
+        <div class="TeamList">
+            <dl class="fn">
+                <volist name="teamData" id="vo">
+                <dd><a href="javascript:void(0)" class="TeamId" data-id="{$vo['team_id']}" data-rel="{$vo['team_name']}">{$vo['team_name']}</a></dd>
+                </volist>
+            </dl>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function(e) {
+    $(".close-AjaxWrapper").click(function(){
+        $("#AjaxWrapper").fadeOut(300);
+    });
+    $(".close-Team").click(function(){
+        $("#Team").fadeOut(300);
+    });
+    $(".chooseTeam").click(function(){
+        $("#Team").fadeIn(300);
+    });
+    $(".TeamId").click(function(){
+        $("#Team").fadeOut(300);
+        $(".input-teamname").val($(this).attr("data-rel"))
+        $(".input-teamid").val($(this).attr("data-id"))
+    });
+});
+function popForm(type,msg,isTrue) {
+    $("#AjaxWrapper").fadeIn(300);
+    if(type=="popForm"){
+        $("#popMsg").hide();
+        $("#popForm").show();
+        $("#popForm .cjText-text").html(msg);
+        $("#nocj_resp_id").hide();
+        $("#cj_resp_id").show();
+        fleshVerify();
+    }else if(type == 'popMsg'){
+        $("#popForm").hide();
+        $("#popMsg").show();
+        $("#popMsg .cjText-text").html(msg);
+        if(isTrue == '1'){
+            $("#cj_resp_id").hide();
+            $("#nocj_resp_id").show();
+        }
+    }
+}
+</script>
+<div id="AjaxWrapper" class="dn">
+    <div class="cjWrapper">
+        <div class="cjWrapper-close"><a href="javascript:void(0)" class="close-AjaxWrapper">+</a></div>
+        <div class="cjCon pb10 dn" id="popMsg">
+            <div class="cjText">
+                <div class="cjText-con">
+                    <div class="cjText-text">选择成功，我们会在世界杯结束之后进行抽奖，如果您中奖了，我们会以短信的形式通知您中奖信息! </div>
+                </div>
+            </div>
+            <div class="cjBtn">
+                <a href="javascript:void(0)" class="cjBtn-back close-AjaxWrapper" id="nocj_resp_id">返回</a>
+                <a href="javascript:void(0)" class="cjBtn-back" style="display: none;" id="cj_resp_id" onclick="popForm('popForm')">返回</a>
+            </div>
+        </div>
+        
+        <div class="cjCon dn" id="popForm"></div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>积分商城</title>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/main.css?v=__VR__"/>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/layout.css?v=__VR__"/>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/module.css?v=__VR__">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__"/>
+<link href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) {
+	$(".icon-edit").live("click", function () {
+                var openUrl = $(this).attr("data-url") || 'about:blank';
+				//openUrl += '&tpl_id='+$('#tpl_id').val();
+                var dialogHeight;
+                art.dialog.open(openUrl, {
+                    id: "editstatus",
+                    lock: true,
+                    fixed: true,
+                    title: "修改状态",
+                    width: "30%",
+                    height: "40%"
+                });
+            });
+	$(".icon-print").live("click", function () {
+                var openUrl = $(this).attr("data-url") || 'about:blank';
+				//openUrl += '&tpl_id='+$('#tpl_id').val();
+                var dialogHeight;
+                art.dialog.open(openUrl, {
+                    id: "editstatus",
+                    lock: true,
+                    fixed: true,
+                    title: "打印订单",
+                    width: "60%",
+                    height: "90%"
+                });
+            });
+	$(".icon-qr").live("click",function(){
+		//location.href="{:U('Df/OrderList/exportOne',array('order_id'=>'1408079364670133'))}";
+		var openUrl = $(this).attr("data-url") || 'about:blank';
+                var dialogHeight;
+                art.dialog.open(openUrl, {
+                    id: "orderoption",
+                    lock: true,
+                    fixed: true,
+                    title: "凭证操作",
+                    width: "80%",
+                    height: "90%"
+                });
+
+	});
+	$("#down").click(function(){
+        $("#theform").attr("action","{:U('Df/OrderList/export')}").submit();
+    });
+	$("#sub_button").click(function(){
+        $("#theform").attr("action","{:U('Df/OrderList/index')}").submit();
+    });
+	//单选
+	$(".onecheck").click(function(){
+		var _thisckeck = $(this).find("input:checked").length;
+		if(_thisckeck==0){
+			$(this).addClass("checked");
+			$(this).find("input").attr("checked",true);
+		}else{
+			$(this).removeClass("checked");
+			$(this).find("input").attr("checked",false);
+		}
+	})
+	
+	//全选
+	$(".allcheck").click(function(){
+		var _thisckeck = $(this).find("input:checked").length;
+		if(_thisckeck==0){
+			$(".shopTable").find(".onecheck input").attr("checked",true);
+			$(".shopTable").find(".onecheck").addClass("checked");
+			$(this).addClass("checked");
+			$(this).find("input").attr("checked",true);
+		}else{
+			$(".shopTable").find(".onecheck input").attr("checked",false);
+			$(".shopTable").find(".onecheck").removeClass("checked");
+			$(this).removeClass("checked");
+			$(this).find("input").attr("checked",false);
+		}
+	})
+});
+</script>
+
+</head>
+<body>
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+	<!--开始载入头部菜单--> 
+        <include file="Top/nav" navmenuid="Navpointshop"/>
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+			<div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <include file="Left/menu" leftmenuid="xddd"/>
+             </div>
+            <div class="subcon">
+                        <div class="main-name fn">
+							<h4>订单列表<a href="javascript:void(0);" class="btn-down first" id="down"><i></i>下载订单列表</a></h4>
+						</div>
+                    	<!--查询-->
+                    	<div class="SearchArea fn">
+                            <form action="" method="POST" name="theform" id="theform">
+                            <div class="SearchAreaLeft">
+                            <label><span>订单号</span><input type="text" name="order_id" value="{$post.order_id}" /></label>
+                            
+							<!--p class="ml20">
+                            <select class="selectbox w100" name="delivery_status" id="delivery_status">
+                                <option value="">配送状态</option>
+                                {:show_arr_opt($deliveryStatus,$post['delivery_status'])}					
+                            </select>
+                            </p-->
+                            <label>
+                            <select class="selectbox w100" name="order_status" id="order_status">
+                                <option value="">订单状态</option>
+								{:show_arr_opt($orderStatus,$post['order_status'])}
+								<!--
+                                <volist name='orderStatus' id='vi' key="order_key">
+									<option <if condition="$post['order_status'] eq $key ">selected="selected"</if> value="{$key}" >{$vi}</option>
+								</volist>--->
+                            </select>
+                            </label>
+                            <label><span>下单时间</span><input type="text" name="start_time" id="start_time" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$Think.request.start_time}" />
+                               -
+                               <input type="text" name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time}" /></label>
+							 <!--p class="ml10">
+							 <select name="receiver_type" class="selectbox">
+								<option value="" >订单类型</option>
+								{:show_arr_opt($receiverType,$post['receiver_type'])}
+							 </select>
+							 </p-->
+							 
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                            <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+                            </div>
+                            </form>
+                        </div>
+                    	<!--查询-->
+                        <!--列表-->
+                        <div class="shopCon">
+                            <table cellpadding="0" cellspacing="0" class="shopTable">
+                                <tr>
+                                    <th class="first">下单时间</th>
+                                    <th>商品数量</th>
+                                    <th>收货人手机号</th>
+                                    <th>应付积分</th>
+                                    <th>订单来源</th>
+                                    <!--th>配送状态</th-->
+                                    <th>订单状态</th>
+                                    <th class="last">操作</th>
+                                </tr>
+								<volist name="orderList" id="vo">
+								<tr class="title hover">
+                                    <td class="title" colspan="7">订单号:{$vo.order_id} <!--span class="ml20"><if condition="$vo['receiver_type'] eq 0">凭证自提订单<else />物流订单</if></span-->
+									<span class="ml20"><eq name="vo.is_gift" value="1">送礼<else />自消费</eq></span>
+									</td>
+                                </tr>
+                                <tr class="info <if condition="$vo['pay_status'] eq 2">hover</if>">
+                                    <td class="first">{$vo['add_time']|dateformat=###,'Y-m-d'}<br />{$vo['add_time']|dateformat=###,'H:i:s'}</td>
+                                    <td>{$vo['buy_num']}</td>
+                                    <td>{$vo['order_phone']}</td>
+                                    <td>{$vo['order_amt']}</td>
+                                    <td>{$vo['channel_name']}</td>
+                                    <!--td>{$deliveryStatus[$vo['delivery_status']]}</td-->
+                                    <td>{$orderStatus[$vo['order_status']]}</td>
+                                    <td class="last">
+										<if condition="$vo['code_show'] neq 0">
+											<a href="javascript:void(0)" title="凭证操作" class="icon-qr" data-url="{:U('LabelAdmin/OrderList/orderOption',array('order_id'=>$vo['order_id']))}">凭证操作</a>
+											<br>
+										</if>
+										
+                                        <a href="javascript:void(0)" title="打印" class="icon-print" data-url="{:U('Df/OrderList/orderPrint',array('order_id'=>$vo['order_id']))}">打印</a>
+                                    </td>
+                                </tr>
+								</volist>
+                            </table>
+                        </div>
+                        <div class="shopPage fn">
+                        	<?php echo $page;?>
+                        </div>
+                        <!--列表-->                        
+                    </div>
+            </div>
+        </div>
+    </div>
+	<include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+<div class="service"></div>
+</body>
+</html>

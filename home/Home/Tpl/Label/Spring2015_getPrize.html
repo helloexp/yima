@@ -1,0 +1,184 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$marketInfo['wap_title']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20150218.css">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+</head>
+<style>body { margin:0; padding:0;}</style>
+<body>
+<div id="wrapper">
+    <div id="container">
+    	<div id="main">
+            <include file="Label/Spring2015/header"/>
+            <div class="page1">
+            	<h3><span>奖品兑换中心</span></h3>
+                <div class="myGold"><span>我的金币</span><em><?php echo $myscore['score'];?></em><span>个</span></div>
+                <div class="prizeList dn">
+                    <ul>
+                        <?php if($jp_arr){
+                	foreach($jp_arr as $jp){
+                	?>
+                        <li>
+                            <img src="__UPLOAD__/<?php echo $jp['batch_img'];?>" />
+                            <h2><?php echo $jp['name'];?></h2>
+                            <h3><?php echo $jp['batch_name'];?></h3>
+                            <h3><a><?php echo $jp['score'];?></a>金币</h3>
+                            <?php if(in_array($jp['cid'],$zj_cate_arr)){?>
+                            <a href="javascript:void(0)" class="btn-prize disabled1">该奖项已领取</a>
+                            <?php }elseif($jp['remain_num'] <= '0'){?>
+                            <a href="javascript:void(0)" class="btn-prize disabled1">已抢光</a>
+                            <?php }elseif($myscore['score'] < $jp['score'] ){?>
+                            <a href="javascript:void(0)" class="btn-prize disabled1">金币不足哦</a>
+                            <?php }else{?>
+                            <a href="javascript:void(0)" data-id="<?php echo $jp['cid'];?>" class="btn-prize getPrize">马上兑换</a>
+                            <?php }?>
+                        </li>
+
+                        <?php }}?>
+
+                    </ul>
+                </div>
+                <a href="javascript:void(0)" class="btn-more dn">加载更多奖品</a>
+            </div>
+            <div class="page3 ptb20">
+            	<p class="tc">去赚取更多金币，冲击大奖，<br />冲击官方排行榜吧！</p>
+            	<p class="tc"><a href="{:U('getList',array('id'=>$id))}" class="btn-all w180">邀好友，赚金币</a></p>
+                <p class="tc">邀请<a>1</a>名好友就可以获得<a>1</a>次机会，<br />赶紧去邀请吧！</p>
+                <p class="tc pt20"><a href="{:U('index',array('id'=>$id))}" class="btn-gohome">返回首页</a></p>
+
+            </div>
+            <div id="footer">
+                <div class="myMicRight">
+                    <p style="padding:5px 0;">
+                        <a href="{:U('Label/Label/index',array('id'=>44418))}" style="overflow:visible; height:16px; font-size:12px; display:block;"><img src="__PUBLIC__/Image/wap-logo-wc.png" style="width:35px; height:35px;" class="vt"/>翼码旺财提供免费技术支持</a>
+                        <a href="{:U('Label/Label/index',array('id'=>44418))}" style="font-size:12px; display:block; text-indent:30px; color:#c50000;">我也要发起"{:L('DA_PAO')}"</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/idangerous.swiper.min.js"></script>
+<script>
+$(document).ready(function(e) {
+    init();
+
+    setTimeout(function(){$(".prizeList").show();},200);
+    var prizeLength = $(".prizeList li").length;
+    if(prizeLength>5){
+        $(".prizeList li:gt(5)").each(function() {
+            $(this).addClass("dn");
+        });
+        $(".btn-more").removeClass("dn");
+    }
+    $(".btn-more").click(function(){
+        var Length = $(".prizeList li.dn").length;
+        if(Length>=5){Length=5;}else{$(".btn-more").addClass("dn");};
+        for(var i=0; i<=Length;i++){
+            $(".prizeList li.dn:eq(0)").removeClass("dn");
+        }
+    })
+
+});
+window.onload = function() {
+	$(".swiper-slide:eq(1)").addClass("next");
+	var	flashSwiper = new Swiper('.flash',{
+		slidesPerView:"auto",
+		moveStartThreshold: 30,
+		autoResize:false,
+		onTouchEnd:function(){
+			var _this = $(".swiper-slide-active");
+			var index = _this.index();
+			var prev = index-1;
+			var next = index+1;
+			$(".swiper-slide").removeClass("prev").removeClass("next");
+			$(".swiper-slide:eq("+prev+")").addClass("prev");
+			$(".swiper-slide:eq("+next+")").addClass("next");
+		},
+		onFirstInit:function(){
+			$(".swiper-wrapper").height($(".swiper-slide").height());
+		}
+	})
+}
+
+function init(){
+	var windowwidth=$("#wrapper").width();
+	var scale=windowwidth/640;
+	$(".flash").css({
+		paddingLeft:207*scale
+	})
+	$(".flash li").css({
+		width:207*scale
+	})
+}
+
+function audio(){
+	var audio = document.getElementById('audio');
+	if(audio.paused){
+		audio.play();
+		$(".music").addClass("on");
+	}else{
+		audio.pause();
+		$(".music").removeClass("on");
+	}
+}
+
+
+
+$('.getPrize').click(function(){
+    cate_id = $(this).attr("data-id")
+    var html = [
+        '<div class="cjForm">',
+        '<ul class="sOne-cjForm">',
+        '<li><p>手机号:</p><input type="tel" name="mobile" id="mobile" class="sOne-cjInput from_mobile" placeholder="请输入手机号" maxlength="11" /></li>',
+        '<li class="pt20"><a href="javascript:void(0)" class="btn-all w250" id="gocj">确认兑换</a></li>',
+        '</ul>',
+        '</div>'].join('');
+    MsgPop({
+        title:"兑换奖品",
+        html:html
+    });
+
+})
+
+var cfsub = false;
+$('body').on("click","#gocj",function(){
+    if(cfsub){
+        return false;
+    }
+    cfsub = true;
+    $.post("{:U('submitCj')}",
+            {"id":"<?php echo $id;?>","mobile":$('#mobile').val(),"cate_id":cate_id},
+            function(data){
+                cfsub = false;
+                if(data.status=='1'){
+                    MsgPop({
+                        title:"兑换提示",
+                        html:"<p>恭喜您领取成功！</p>",
+                        isgourl:true
+                    });
+                }else{
+                    MsgPop({
+                        title:"兑换提示",
+                        html:"<p>"+data.info+"</p>"
+                    });
+                }
+
+            },"json");
+
+})
+</script>
+<script>
+    var wxShareData = {:json_encode($shareData)};
+</script>
+<!--微信分享-->
+<include file="Label/Spring2015/_share"/>

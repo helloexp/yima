@@ -1,0 +1,475 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信被添加自动回复</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script src="__PUBLIC__/Js/weixin2/jq-emotion.js" type="text/javascript"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<style type="text/css">
+.msg-libs .hover{ background:#FFF}
+.msg-libs .Gform .Ginput .switch.hover{ color:#666}
+.msg-libs .Gform .Ginput .switch.hover .extend a { font-weight: normal; color: #2e7dc6;}
+.shopDisplay{ width:360px; overflow:hidden;}
+.shoplist{ margin-right:-100px;}
+.shoplist li{ width:150px; float:left;}
+.shoplist li.hover { color:#666; border: 1px #ff8a00 solid;background: url(__PUBLIC__/Image/eTicket/corner-right_close.png) right bottom no-repeat;}
+.extend{ text-align:right; padding-right:12px; padding-left:0;}
+.extendspan{background:#FFF; float:right; vertical-align:middle; line-height:25px; margin-right:40px; font-size:12px;}
+</style>
+<script>
+
+$(function(){
+	if($(".shoplist li").length<4){
+		$(".extend").hide();
+	}else{
+		$(".extend").css("display","block");
+	}
+	$("body").on("mouseover mouseout",".shoplist li",function(){
+		$(this).toggleClass("hover");
+	});
+	
+	$(".js_extend_one").click(function(e) {
+        var isactive = $(".js_extend_one i").hasClass("active");
+		if(isactive){
+			$(".js_extend_one i").removeClass("active");
+			$(".shoplist").css("height","76px");
+			$(".js_extend_one").html("查看全部<i></i>");
+			
+		}else
+		{
+			
+			$(".shoplist").css("height","auto");
+			$(".js_extend_one").html("收起<i></i>");
+			$(".js_extend_one i").addClass("active");
+			windowheight();
+			
+		}
+		if($(".shoplist").height()>300)
+		{
+			$(".btngp").addClass("fixBtn");
+		}
+		else{
+			$(".btngp").removeClass("fixBtn");
+		}
+    });
+	var stores_is = '';
+	$("body").on("click",".notCheck",function(){
+        stores_is += ','+$(this).find('input:hidden').val();
+        $("#closeStores").val(stores_is.substring(1,stores_is.length));
+        var storeNum = parseInt($('.redfont').text());
+        $('.redfont').text(storeNum-1);
+        $(this).remove();
+    });
+	
+	//开关 开启表示从关闭状态到开始状态 关闭表示从开启状态转到关闭状态
+	$(".Uswitch").click(function(){
+        var flag = $("#location_flag").val();
+        if(flag == 0){
+		// if($(this).attr("title")=="开启"){
+			$(this).find(".Uswitch-on").fadeIn(200);
+			$(this).attr("title","关闭");
+			$("#location_flag").val('1');
+			$(this).find("i").animate({left:29},200,function(){
+			$(".msg-edit").fadeIn(300);	
+				
+			});
+		}else{
+			$(this).find(".Uswitch-on").fadeOut(200);
+            $(this).attr("title","开启");
+			$("#location_flag").val('0');
+			$(this).find("i").animate({left:0},200,function(){
+			$(".msg-edit").fadeOut(300);		
+				
+			});
+		}
+        $.post("{:U('Weixin/WeixinLocation/flagLocation')}",{flag:$("#location_flag").val()},function(d){
+            alert(d.info);
+        },'json');
+
+	}).bind('init',function(){
+		if($("#location_flag").val()=='1'){
+			$(this).find(".Uswitch-on").fadeIn(200);
+			$(this).attr("title","关闭");
+			$(this).find("i").animate({left:29},200,function(){
+			$(".msg-edit").show();	
+				
+			});
+		}else{
+			$(this).find(".Uswitch-on").fadeOut(200);
+			$(this).attr("title","开启");
+			$(this).find("i").animate({left:0},200,function(){
+                $(".msg-edit").hide();
+            });
+		}
+	}).trigger('init');
+});
+
+</script>
+<script type="text/javascript">
+    var kIsSubmiting = false;
+    function sumitingStart() {
+        kIsSubmiting = true;
+    }
+    function submitComplete() {
+        kIsSubmiting = false;
+    }
+    function isSubmiting() {
+        return kIsSubmiting;
+    }
+
+    $(document).ready(function (e) {
+        //保存
+        $('#sub_button').click(function () {
+            if (isSubmiting()) {
+                return;
+            }
+            sumitingStart();
+
+            $.post(
+                    "{:U('Weixin/WeixinLocation/Submit');}",
+                    $('#theform').serialize(),
+                    function (data) {
+                        if (data.status == '1') {
+                            art.dialog("保存成功");
+                           window.parent.location.reload();
+                        } else {
+                            submitComplete();
+                            art.dialog('保存失败');
+                        }
+                    },
+                    'json'
+            );
+        });
+
+    });
+
+    /**
+     * 打开图片上传地址
+     * 格式如下：
+     * {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+     * rationX 图片宽度
+     * rationY 图片长度
+     * 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+     *     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+     * */
+    function uploadImg(cropPresets,callback) {
+        var opt = {
+            cropPresets:cropPresets,
+            callback:callback
+        };
+        open_img_uploader(opt);
+    }
+    /**
+     * 图片上传后回调
+     * 参数：json
+     * d.msg  0000 代表成功
+     * d.error true / false
+     * d.image_name  裁剪后图片名称
+     * d.origin   裁剪*前*图片完整路径
+     * d.absolutepath 裁剪*后*图片完整路径
+     * d.width  图片宽度
+     * d.height 图片高度
+     */
+    function largeimageInfoCallback(d) {
+        //填充图片
+        $('#large_image_view').attr('src', d.src);
+        $('#large-msg-input-imgfile').val(d.savename);
+        $('#thumb_nail').attr('src', d.src);
+    }
+	function smallimageInfoCallback(d) {
+        //填充图片
+        $('#small_image_view').attr('src', d.src);
+        $('#small-msg-input-imgfile').val(d.savename);
+        $('#thumb_nail').attr('src', d.src);
+    }
+    /**
+     * 调整
+     * @param width
+     * @param height
+     * @param targetWidth 显示的宽度
+     * @param identify 元素id
+     */
+    function scaleImage(width, height, targetWidth, identify) {
+        var scale = width / height;
+        var w = targetWidth;
+        var h = w / scale;
+        $(identify).css('width', w + "px");
+        $(identify).css('height', h + "px");
+    }
+	/*获取图片路径中的图片名*/
+	function base_name(url){
+		var urlList = url.split('/'); 
+		var a = urlList[urlList.length-1];
+		return a;
+	}
+	
+</script>
+<script>
+$(function(){
+	$("#chooseShop").click(function(e) {
+        art.dialog.open("{:U('Weixin/WeixinLocation/loadStoreAdd')}&callback=showSelect",{
+			title: '选择可用门店',
+			width:'800px',
+			id:'uduf'
+		});
+    });
+})
+</script>
+
+</head>
+<body class="ready">
+<form method="post" id="theform">
+    <input type="hidden" id='id' name ='id' value="3">
+
+<div id="wrapper fn" class="fn" >
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+    <div id="container" >
+        <div id="main" class="rel">
+            <div class="sidenav">
+                <include file="LabelAdmin/Batch/WleftMenu" leftmenuid="zdhf"/>
+            </div>
+            <div class="subcon fn">
+                <div class="main-name fn">
+                <h4>微信智能导航</h4>
+                </div>
+
+                <div class="msg-libs">
+                    <div class="content_wrap global_mod">
+
+                        <div class="section_tab">                
+                        <ul class="tab_navs">
+                            <li class="tab_nav"><a href="{:U('Weixin/WeixinResp/index')}">关注自动回复</a></li>
+                            <li class="tab_nav"><a href="{:U('Weixin/WeixinResp/msg')}">消息自动回复</a></li>
+                            <li class="tab_nav"><a href="{:U('Weixin/WeixinResp/keywords')}">关键字自动回复</a></li>
+                            <li class="tab_nav selected no_extra "><a href="{:U('Weixin/WeixinLocation/index')}">微信智能导航</a></li>
+                        </ul>            
+                        </div>
+                        <div class="content_wrap" id="div_replyContent" style="">
+                            <div class="tipNormal">微信智能导航开启后，用户在公众号内发送“位置”消息，系统将自动匹配最近的门店消息，以图文的形式回复给用户，用户点击任意门店可实现地图导航
+                                <div class="Uswitch dib ml20" title="关闭">
+                                    <div class="Uswitch-off"></div>
+                                    <div class="Uswitch-on"></div>
+                                    <i class="Uswitch-i-on"></i>
+                                    <input type="hidden" id="location_flag" name="location_flag" value="{$locationInfo['location_flag']}">
+                                </div>
+                            </div>
+                            <div class="msg_tab">
+                                
+                                <div class="z oh msg-edit" style="padding-top:0">
+                                    <div class="l msg-preview">
+                                        <div class="msg-item-wrapper" id="appmsg">
+                                            <div class="msg-item multi-msg">
+                                                <div class="appmsgItem">
+                                                    <p class="msg-meta"><span class="msg-date tc">预览</span></p>
+                                                    <div class="cover">
+            										<notempty name ="locationInfo['large_image_url']">
+            											<img id="large_image_view" src="{$locationInfo['large_image_url']}">
+            										<else />
+                                                        <p class="default-tip">大图片</p>
+            										</notempty>
+                                                        <h4 class="msg-t">
+                                                            <span class="i-title" >上海市浦东新区张衡路300号</span>
+                                                        </h4>
+                                                    </div>
+                                                </div>
+                                                <div class="rel sub-msg-item appmsgItem firstAppmsgItem">
+                                                    <span class="thumb">
+            										<notempty name ="locationInfo['small_image_url']">
+            											<img id="small_image_view" src="{$locationInfo['small_image_url']}">
+            										<else />
+                                                        <p id="small_note" class="default-tip">缩略图</p>
+            										</notempty>
+                                                    </span>
+                                                    <h5 class="msg-t">
+                                                        <span class="i-title">上海市浦东新区张衡路300号</span>
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="msg-edit-area" id="msgEditArea" data-item-index="0">
+                                        <div class="rel msg-editer-wrapper">
+                                            <div class="msg-editer Gform" style="background:#FFF">
+                                                <ul>
+                                                	<li class="Gname">选择门店</li>
+                                                    <li class="Ginput">
+                                                    <div class="switch">
+                                                        <input type="radio" value="<?php echo $locationInfo['wxGpsFlagType'] == 2 ? 1 : 0; ?>" name="chooseType" checked="checked" class="chooseType">
+                                                        <div class="newRadio" style="display:block; float:none">
+                                                            <span class="valfirst <if condition="$locationInfo['wxGpsFlagType'] eq 1">hover</if>" data-val="0">所有门店</span>
+                                                            <span class="vallast <if condition="$locationInfo['wxGpsFlagType'] eq 2">hover</if>" data-val="1" id="chooseShop">指定门店</span>
+                                                        </div>
+                                                        <if condition="$locationInfo['wxGpsFlagType'] eq 2">
+                                                            <div class="newRadio-default" style="float:none;">
+                                                                <div class="txtTips pt5 pb5" id="htmlss">您总共选择了<span id="number" class="redfont pl5 pr5"><?php echo count($stores); ?></span>家门店&nbsp;<a href="javascript:void()" id="editStore"  name="choose_shop" style="color:#2e7dc6">添加门店</a> <span class="extend extendspan"><a href="javascript:void();" class="afblue js_extend_one">查看全部<i></i></a></span></div>
+                                                                <div class="shopDisplay">
+                                                                    <ul class="shoplist already" style="height:76px;">
+                                                                        <volist name="stores" id="vo">
+                                                                            <li class="notCheck" title="{$vo.province}{$vo.city}{$vo.town}{$vo.store_name}">
+                                                                                {$vo.store_name}
+                                                                                <input type="checkbox" name="storeCheckStatus[]" class="storeCheckStatus" value="{$vo.store_id}" style="display:none;" checked="checked">
+                                                                            </li>
+                                                                        </volist>
+                                                                    </ul>
+                                                                    <div class="extend"><a href="javascript:void();" class='afblue js_extend_one'>查看全部<i></i></a></div>
+                                                                </div>
+                                                            </div>
+                                                        <else/>
+                                                            <div class="newRadio-input" style="float:none;">
+                                                                <div class="txtTips pt5 pb5" id="htmlss">您总共选择了<span id="number" class="redfont pl5 pr5">0</span>家门店&nbsp;<a href="javascript:void()" id="editStore"  name="choose_shop" style="color:#2e7dc6">添加门店</a></div>
+                                                                <div class="shopDisplay">
+                                                                    <ul class="shoplist already" style="height:76px;">
+
+                                                                    </ul>
+                                                                    <div class="extend"><a href="javascript:void();" class='afblue js_extend_one'>查看全部<i></i></a></div>
+                                                                </div>
+                                                            </div>
+                                                        </if>
+                                                    </div>
+
+                                                    </li>
+                                                </ul>
+                                                <ul>
+                                                <li class="Gname">回复门店数量</li>
+                                                <li class="Ginput">
+                                                <select name ="resp_count" id ="resp_count" value="">
+            										<for start="1" end="7" name ="k" >
+            											<option value="{$k}" <if condition="$locationInfo['resp_count'] eq $k">selected</if> > {$k}</option>
+            										</for>
+                                                </select>
+                                                </li>
+                                                </ul>
+                                                <ul>
+                                                <li class="Gname">上传大图</li>
+                                                <li class="Ginput">
+                                                	<div class="Gchoose Gview-img">
+                                            		<input name="large_image_name" type="text" id="large-msg-input-imgfile" value="{$locationInfo['large_image']}">
+                                                    <img src="{$locationInfo['large_image']}">
+                                            		<a href="javascript:void(0)" class="Gbtn-pic" title="选择图片"><i></i></a>
+                                                    <div class="Gchoose-opr an" style="display: none;">
+                                                    <div class="Gchoose-opr-img"><img src="{$locationInfo['large_image']}" style="width:100px;"></div>
+                                                    <div class="Gchoose-opr-opr">
+                                                    <a href="javascript:void(0)" class="Gchoose-opr-edit"></a>
+                                                    <a href="javascript:void(0)" class="Gchoose-opr-del"></a>
+                                                    </div>
+                                                    <span class="Gchoose-opr-jt"></span>
+                                                    </div>
+                                                    <div class="Gchoose-oprbg"></div>
+                                                    </div>
+                                                    <p class="txtTips">建议尺寸：720 × 400像素</p>
+                                                </li>
+                                                </ul>
+                                                
+                                                <ul style="overflow:hidden">
+                                                	<li class="Gname">上传小图</li>
+                                                    <li class="Ginput">
+                                                	<div class="Gchoose Gview-img">
+                                            		<input name="small_image_name" type="text" id="small-msg-input-imgfile" value="{$locationInfo['small_image']}">
+                                                    <img src="{$locationInfo['small_image']}">
+                                            		<a href="javascript:void(0)" class="Gbtn-pic" title="选择图片"><i></i></a>
+                                                    <div class="Gchoose-opr an" style="display: none;">
+                                                    <div class="Gchoose-opr-img"><img src="{$locationInfo['small_image']}" style="width:100px;"></div>
+                                                    <div class="Gchoose-opr-opr">
+                                                    <a href="javascript:void(0)" class="Gchoose-opr-edit"></a>
+                                                    <a href="javascript:void(0)" class="Gchoose-opr-del"></a>
+                                                    </div>
+                                                    <span class="Gchoose-opr-jt"></span>
+                                                    </div>
+                                                    <div class="Gchoose-oprbg"></div>
+                                                    </div>
+                                                    <p class="txtTips">建议尺寸：200 × 200 像素</p>
+                                                </li>
+                                                </ul>
+                                                
+                                                <ul style="overflow:hidden">
+                                                <li class="Gname"></li>
+                                                <li class="Ginput"><a href="javascript:void(0);" class="btn-all" id="sub_button">保存</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+             </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</div>
+</form>
+<script type="text/javascript">
+var showSelect = function(d){
+	var newd = [],isnewd = true;
+	$.each(d,function(index1,element1){
+		var dVal = d[index1].Id;
+		$(".shoplist li").each(function(index2, element2) {
+			var _thisVal = parseInt($(this).find("input").val());
+			if(_thisVal == dVal){
+				isnewd = false;
+				return false;
+			}
+		});
+		if(isnewd){
+			newd.push(element1);
+		}else{
+			isnewd = true;
+		}
+	});
+	$("#number").text(parseInt($("#number").text()) + parseInt(newd.length));
+	var shopDisplay = template('shopDisplay',{list : newd});
+	$(".shoplist").append(shopDisplay);
+	art.dialog.close();
+	if($(".shoplist li").length>4){
+		$(".extend").css("display","block");
+	}
+	
+}
+</script>
+<script type="text/html" id="shopDisplay">
+{{each list as value index}}
+<li class="notCheck" title="{{value.Address}}">
+{{value.short_name}}
+<input type="checkbox" name="storeCheckStatus[]" class="storeCheckStatus" value="{{value.Id}}" style="display:none;" checked="checked">
+</li>
+{{/each}}
+</script>
+
+</body>
+</html>
+
+<script type="text/javascript">
+	$(function(){
+		$("body").on("click","#editStore",function(){
+			art.dialog.open("{:U('Weixin/WeixinLocation/loadStoreAdd')}&callback=showSelect",{
+				title: '选择可用门店',
+				width:'800px',
+				id:'uduf'
+			});
+		})
+	})
+</script>
+
+
+

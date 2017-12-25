@@ -1,0 +1,501 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msguser.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msgsend.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+var _user_data = {};
+var _url_userinfo = "{:U('Home/Weixin/wxuserinfo')}";
+var _url_usermsg_reply = "{:U('Home/Weixin/usermsg_reply')}";
+var _url_getnewmsg = "{:U('Home/Weixin/get_newmsg')}";
+var _url_edit_remarkname = "{:U('Home/Weixin/edit_remarkname')}";
+var _url_fansgroup_chg = "{:U('Home/Weixin/fans_group_chg')}";
+var _lasttime = '{$last_time}';
+var _timeout_userinfo = null;
+var _autoquery_timeinterval = 5000;
+var _openid = "{$id}";
+
+
+function get_newmsg_cnt(){
+
+    $.get(_url_getnewmsg, {time:_lasttime, id:_openid}, function(data){
+        // console.log(data.info.sql);
+        if(data.status == 1 && data.info.list != null){
+            $('.message_list').prepend(template.render('msg_tmpl', {list:data.info.list}));
+            _lasttime = data.info.last_time;
+        }
+        setTimeout('get_newmsg_cnt()', _autoquery_timeinterval);
+    }, 'json');
+}
+function reply(msg_id){
+    var type = 0;
+    var params = {};
+    //图文回复
+    if($('#reply_type').val() == '2'){
+        var params = {type:1, wx_id:$('#wx_id').val(), reply_text:$('#material_id').val(), reply_type:2};
+        type = 1;
+    }
+    //文本回复
+    else{
+        var reply_text_id = 'reply_content_'+msg_id;
+        var cnt_obj = $('#'+reply_text_id);
+
+        //处理空格
+        cnt_obj.html($.trim(cnt_obj.html().replace(/&nbsp;/g, '').replace(/<[^>].*?>/g,"")));
+        var reply_text = cnt_obj.html();
+        check_lenght(140,'js_editorTip'+msg_id,document.getElementById(reply_text_id));
+
+        if(reply_text.length == 0){
+            alert('请输入回复内容！');
+            return ;
+        }
+        if(reply_text.length > 140){
+            alert('回复内容超长！');
+            return ;
+        }
+        params = {type:0, wx_id:$('#wx_id').val(), reply_text:reply_text};
+
+        if(msg_id == 0){
+            type = 1;
+            params.type = 1;
+        }
+        else{
+            params.msg_id = msg_id;
+        }
+    }
+
+    var dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0, lock:true});
+    //将回复数据post至后台
+    $('.btn_input button').attr('disabled', true);
+    $.post('{:U('Home/Weixin/usermsg_reply')}', params, function(data){
+        $('.btn_input button').attr('disabled', false);
+        dialog.content("<div class='msg-all-succeed'>"+data.info+"</div>").time(1.5);
+        if(type == 0 && data.status == 1){
+            $('.msgid'+msg_id+' .tips').show();
+            cnt_obj.html('');
+        }
+    }, 'json');
+}
+
+function selectcallback(data){
+    var cnts = $('.tab_panel .tab_content');
+    $('.tab_text').removeClass('selected');
+    $('.tab_appmsg').addClass('selected');
+    $('#material_id').val(data);
+    $('#reply_type').val(2);
+    $.post('{:U('Home/WeixinResp/showMaterialById')}', {material_id:data}, function(data){
+        $(cnts[0]).hide();
+        $(cnts[1]).show().html('').append(data);
+    });
+}
+function render_userinfo(info){
+    var obj = $(".buddyRichInfo");
+    obj.find('.nickName').html(info.nickname);
+    obj.find('.js_remarkName').html(info.remarkname);
+    obj.find('.js_changeRemark').attr('openid', info.openid);
+    obj.find('.area').html([info.country, info.province, info.city].join('&nbsp;'));
+    obj.find('select').val(info.group_id);
+    obj.find('#openid').val(info.openid);
+
+    obj.find('.buddyRichLoading').addClass('dn');
+    obj.find('.buddyRichContent').removeClass('dn');
+}
+$(function(){
+    $(".frm_checkbox").live('change', function(){
+        $(this).closest(".frm_checkbox_label").toggleClass("selected");
+    });
+    $(".js_reply").live('click', function(){
+        $(this).closest("li").find(".quick_reply_box").show();
+    });
+
+
+    //选择图文回复-页面已有
+    $(".tab_appmsg").click(function(){
+        art.dialog.open('{:U('Home/WeixinResp/selectImgTxt', array('callback'=>'selectcallback'))}',{
+            lock: true,
+            background: '#000', // 背景色
+            opacity: 0.5,	// 透明度
+            title:"选择多图文信息",
+            width:740,
+            height: '80%'
+        });
+    });
+
+    //选择文字回复-页面已有
+    $('.tab_text').click(function(){
+        $(this).addClass('selected');
+        $('.tab_appmsg').removeClass('selected');
+        $('.tab_panel .tab_content:eq(0)').show();
+        $('.tab_panel .tab_content:eq(1)').hide();
+        $('#reply_type').val(0);
+    });
+
+
+    //鼠标移到头像上出现详细信息
+    $(".js_msgSenderAvatar").live({
+            mouseenter:function(){
+                if(_timeout_userinfo !== null)
+                    clearTimeout(_timeout_userinfo);
+
+                var img = $(this), id = img.attr('openid'), richinfo = $(".buddyRichInfo"), offset=img.offset();
+                richinfo.css({left :offset.left+img.width()+2, top:offset.top});
+
+                //获取用户信息
+                if(_user_data[id] == undefined){
+                    richinfo.find('.buddyRichLoading').removeClass('dn');
+                    richinfo.find('.buddyRichContent').addClass('dn');
+                    richinfo.show();
+                    $.post(_url_userinfo, {id:id}, function(data){
+                        if(data.status == 1){
+                            _user_data[id] = data.info;
+                            render_userinfo(_user_data[id]);
+                        }
+                    }, 'json');
+                }
+                else{
+                    render_userinfo(_user_data[id]);
+                    richinfo.show();
+                }
+            },
+            mouseleave:function(){
+                _timeout_userinfo = setTimeout(function(){
+                    $(".buddyRichInfo").hide();
+                }, 500);
+            }
+    });
+
+    $('.js_changeRemark').click(function(){
+        var _obj = $(this), openid = _obj.attr('openid');
+        art.dialog({
+            content: '<input id="new_remarkname" class="textbox" value="'+$('.js_remarkName').html()+'" />',
+            fixed: true,
+            icon: 'question',
+            okVal: '确定',
+            lock:true,
+            title:'请输入备注名',
+            init:function(){
+                $('#new_remarkname').focus();
+                if(_timeout_userinfo !== null)
+                    clearTimeout(_timeout_userinfo);
+            },
+            ok: function () {
+                var new_remarkname = $('#new_remarkname').val();
+                $.post(_url_edit_remarkname, {openid:openid, remarkname:new_remarkname}, function(data){
+                    alert(data.info);
+                    if(data.status == 1){
+                        _user_data[openid]['remarkname'] = new_remarkname;
+                        var str = new_remarkname == '' ? _user_data[openid]['nickname'] : new_remarkname+'('+_user_data[openid]['nickname']+')';
+
+                        $(".remark_name[openid='"+openid+"']").html(str);
+                    }else
+                        return false;
+                }, 'json');
+            },
+            cancel: true
+        });
+    });
+
+    $(".buddyRichInfo").hover(function(){
+        if(_timeout_userinfo !== null)
+            clearTimeout(_timeout_userinfo);
+    },function(){
+        _timeout_userinfo = setTimeout(function(){
+            $(".buddyRichInfo").hide();
+        }, 500);
+    });
+
+    $('#groupid').change(function(){
+        var group_id = $(this).val(), openid=$(".buddyRichInfo #openid").val();
+        $.post(_url_fansgroup_chg, {openid:openid, group_id:group_id}, function(data){
+            alert(data.info);
+            if(data.status == 1){
+                _user_data[openid]['group_id'] = group_id;
+            }
+        }, 'json');
+    });
+
+    setTimeout('get_newmsg_cnt()', _autoquery_timeinterval);
+});
+</script>
+</head>
+<body>
+    <input type="hidden" name="wx_id" id="wx_id" value="{$id}">
+    <input type="hidden" name="last_time" id="last_time" value="{$last_time}">
+    <input type="hidden" name="reply_type" id="reply_type" value="0">
+    <input type="hidden" name="material_id" id="material_id" value="">
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+    	<div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>&gt;</p>
+                            <p>微信助手</p>     
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+					<include file="LabelAdmin/Batch/leftMenu" leftmenuid="wxzs"/>
+                </div>
+
+                <div class="subcon">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">
+                            <p class="dib">发送消息</p>
+                        </h4>
+                    </div>
+
+
+                    <div class="inner_container_box side_r split">
+                        <!--发送消息-->
+                        <div class="main_hd_hd">
+                            <h2>
+                                与&nbsp;<span id="js_nick_name">
+                                    <empty name="user_info.remarkname">
+                                    {$user_info.nickname}
+                                    <else/>
+                                    {$user_info.remarkname}({$user_info.nickname})
+                                    </empty>
+                                </span>&nbsp;的聊天</h2>
+                        </div>
+                        <div class="main_bd">
+                            <div id="msgSender">
+                                <div class="msg_sender" id="js_msgSender">
+                                    <div class="msg_tab">
+                                        <ul class="tab_navs">
+                                            <li class="tab_nav tab_text width5 selected" data-type="1" data-tab=".js_textArea">
+                                                <a href="javascript:void(0);" onclick=""><i class="icon_msg_sender"></i>文字</a>
+                                            </li>
+                                            <li class="tab_nav tab_appmsg width5 no_extra" data-type="10" data-tab=".js_appmsgArea">
+                                                <a href="javascript:void(0);"><i class="icon_msg_sender"></i>图文消息</a>
+                                            </li>
+                                        </ul>
+                                        <div class="tab_panel">
+                                            <!--文字-->
+                                            <div class="tab_content">
+                                                <div class="js_textArea inner no_extra">
+                                                    <div class="emotion_editor">
+                                                        <div class="edit_area js_editorArea" id="reply_content_0"  contenteditable="true" style="overflow-y: auto; overflow-x: hidden;"  onkeyup="check_lenght(140,'js_editorTip0',this);"></div>
+                                                        <div class="editor_toolbar">
+                                                            <p class="editor_tip js_editorTip0" id="js_editorTip0">还可以输入<em>140</em>个字</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!--图文-->
+                                            <div class="tab_content" style="display: ;">
+                                                <div class="msg-item-wrapper" style="margin:0 auto;">
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tool_area">
+                                    <span class="btn btn_primary btn_input" id="js_submit"><button onclick="reply(0)">发送</button></span>
+                                </div>
+                            </div>
+
+                            <div class="message_area">
+                                <h4>最近20条聊天记录</h4>
+                                <ul class="message_list" id="listContainer">
+                                    <volist name="list" id="vo">
+                                    <li class="message_item" >
+                                        <?php if($vo['msg_sign'] == '0'){
+                                            $openid = $vo['wx_id'];
+                                            $reply_flag = false;
+                                        ?>
+                                        <div class="message_opr msgid{$vo.msg_id}">
+                                            <a href="javascript:;" class="icon20_common reply_gray js_reply" title="快捷回复">快捷回复</a>
+                                        </div>
+                                        <?php }elseif($vo['msg_sign'] == '1'){
+                                            $openid = $node_weixin_code;
+                                            $reply_flag = true;
+                                        }?>
+                                        <div class="message_info">
+                                            <?php
+                                            if($vo['msg_sign'] == '0' && $vo['msg_response_flag'] == '1')
+                                                $display = 'block';
+                                            else
+                                                $display = 'none';
+                                            ?>
+                                            <div class="message_status"><em class="tips" style="display:{$display};"><i>●</i>已回复</em></div>
+                                            <div class="message_time">{:dateformat($vo['msg_time'], 'defined1')}</div>
+                                            <div class="user_info">
+                                                <span class="remark_name" openid="{$openid}">
+                                                <?php 
+                                                    if($reply_flag)
+                                                        echo $openid;
+                                                    else{
+                                                        if($vo['remarkname'] != '')
+                                                            echo $vo['remarkname'] . '(' . $vo['nickname'] . ')';
+                                                        else
+                                                            echo $vo['nickname'];
+                                                    }
+                                                ?>
+                                                </span>
+                                                <span class="nickname"></span>
+                                                <span class="avatar">
+                                                    <img src="<?php if(!$reply_flag) echo $vo['headimgurl'];?>" openid="{$openid}" class="<?php if(!$reply_flag) echo 'js_msgSenderAvatar';?>">
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="message_content text">
+                                            <div class="wxMsg">
+                                                {:chat_msg_show($vo['msg_type'], $vo['msg_info'])}
+                                            </div>
+                                        </div>
+                                        <div class="js_quick_reply_box quick_reply_box">
+                                            <label for="" class="frm_label">快速回复:</label>
+                                            <div class="emoion_editor_wrp js_editor">
+                                                <div class="emotion_editor">
+                                                    <div class="edit_area js_editorArea" id="reply_content_{$vo.msg_id}" contenteditable="true" style="overflow-y: auto; overflow-x: hidden;"  onkeyup="check_lenght(140,'js_editorTip{$vo.msg_id}',this);"></div>
+                                                    <div class="editor_toolbar">
+                                                        <p class="editor_tip js_editorTip1" id="js_editorTip{$vo.msg_id}">还可以输入<em>140</em>字</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="verifyCode"></div>
+                                            <p class="quick_reply_box_tool_bar">
+                                                <span class="btn btn_primary btn_input">
+                                                    <button class="js_reply_OK" onclick="reply({$vo.msg_id})">发送</button>
+                                                </span>
+                                                <a class="js_reply_pickup pickup" href="javascript:void(0);" onclick="javascript:$(this).closest('div.js_quick_reply_box').hide();">收起</a>
+                                            </p>
+                                        </div>
+                                    </li>
+                                    </volist>
+                                </ul>
+                            </div>
+                        </div>
+                        <!--发送消息-->
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+
+
+    <div class="buddyRichInfo dn" style="top:100px;">
+        <input type="hidden" id="openid" value="">
+        <div class="header">详细资料</div>
+        <div class="buddyRichLoading dn">
+            <img src="__PUBLIC__/Image/w_loader.gif" />
+        </div>
+        <div class="buddyRichContent">
+            <div class="infoArea">
+                <div class="line float-p">
+                    <span class="vm nickName">{$vo.nickname}</span>
+                    <span class="icon16_common man_blue"></span>
+                </div>
+                <div class="line">
+                    <label>备注名：</label>
+                    <span class="js_remarkName">{$vo.remarkname}</span>
+                    <a title="修改备注" class="icon14_common edit_gray js_changeRemark" href="javascript:;" openid="">修改备注</a>
+                </div>
+            </div>
+            <div class="infoArea">
+                <div class="line">
+                    <label>地区：</label>
+                    <span class="area"></span>
+                </div>
+            </div>
+            <div class="infoArea line">
+                <label>分组：</label>
+                <select class="group" id="groupid" >
+                    {:show_arr_opt($group_list)}
+                </select>
+            </div>
+        </div>
+    </div>
+
+<script id="msg_tmpl" type="text/html">
+<%for(i = 0; i < list.length; i ++) {%>
+<li class="message_item" >
+    <%if(list[i].msg_sign=='0'){%>
+    <div class="message_opr msgid<%=list[i].msg_id%>">
+        <a href="javascript:;" class="icon20_common reply_gray js_reply" title="快捷回复">快捷回复</a>
+    </div>
+    <%}%>
+    <div class="message_info">
+        <div class="message_status"><em class="tips" style="display:<%if(list[i].msg_response_flag){%>block<%}else{%>none<%}%>;"><i>●</i>已回复</em></div>
+        <div class="message_time"><%=list[i].msg_time%></div>
+        <div class="user_info">
+            <span class="remark_name" openid="<%=list[i].wx_id%>">
+            <%if(list[i].msg_sign=='1'){%>
+                <%=list[i].node_weixin_code%>
+            <%}else{%>
+                <%if(list[i].remarkname == ''){%>
+                    <%=list[i].nickname%>
+                <%}else{%>
+                    <%=list[i].remarkname%>(<%=list[i].nickname%>)
+                <%}%>
+            <%}%>
+            </span>
+            <span class="avatar">
+                <%if(list[i].msg_sign=='1'){%>
+                <img src="<%=list[i].headimgurl%>">
+                <%}else{%>
+                <img src="<%=list[i].headimgurl%>" openid="<%=list[i].wx_id%>" class="js_msgSenderAvatar">
+                <%}%>
+            </span>
+        </div>
+    </div>
+    <div class="message_content text">
+        <div class="wxMsg">
+            <%==list[i].msg_info%>
+        </div>
+    </div>
+    <div class="js_quick_reply_box quick_reply_box">
+        <label for="" class="frm_label">快速回复:</label>
+        <div class="emoion_editor_wrp js_editor">
+            <div class="emotion_editor">
+                <div class="edit_area js_editorArea" id="reply_content_<%=list[i].msg_id%>" contenteditable="true" style="overflow-y: auto; overflow-x: hidden;"  onkeyup="check_lenght(140,'js_editorTip<%=list[i].msg_id%>',this);"></div>
+                <div class="editor_toolbar">
+                    <p class="editor_tip js_editorTip1" id="js_editorTip<%=list[i].msg_id%>">还可以输入<em>140</em>字</p>
+                </div>
+            </div>
+        </div>
+        <div class="verifyCode"></div>
+        <p class="quick_reply_box_tool_bar">
+            <span class="btn btn_primary btn_input">
+                <button class="js_reply_OK" onclick="reply(<%=list[i].msg_id%>)">发送</button>
+            </span>
+            <a class="js_reply_pickup pickup" href="javascript:void(0);" onclick="javascript:$(this).closest('div.js_quick_reply_box').hide();">收起</a>
+        </p>
+    </div>
+</li>
+<%}%>
+</script>
+</body>
+</html>

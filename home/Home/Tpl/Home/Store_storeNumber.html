@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-门店数据统计</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/highcharts.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+$(function () {
+  var _chartData = <?php echo $_chartData?>;
+  
+  CityCode({
+		province:$("#province_code"),//省
+		city:$("#city_code"),//市
+		town:$("#town_code"),//区
+		business:$("#business_code"),//商圈
+		selected:"{:$_REQUEST['province_code'].$_REQUEST['city_code'].$_REQUEST['town_code'].$_REQUEST['business_code']}",//默认选中的省市区代号
+		url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+	});
+	
+  
+    $('#container-report1').highcharts({
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: ''
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            categories:_chartData.storeSendMaName
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: '单位(个)'
+            }
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                '<td style="padding:0"><b>{point.y:.1f} 个</b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        series: [{
+            name: '发码',
+            data: _chartData.storeSendMaNumber
+
+        }]
+    });
+	
+
+});				
+</script>
+<style type="text/css">
+.Wcanal-tab .Wcanal-tab-list {border-top: solid 2px #e5e5e5;}
+</style>
+</head>
+<body>
+    <div id="wrapper"> 
+    	<include file="./Home/Tpl/Public/Public_header.html" /> 
+        
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav">
+                    <include file="Store:sidenav" leftmenuid="fymtj"/>        
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4>数据统计<a class="btn-add first" href="index.php?g=WangcaiPc&m=BatchTrace&a=index"><i></i>查看发码明细</a></h4>
+                    </div>
+                    
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                	<div class="Wcanal-tab-title fn">
+                    <p class="Wcanal-tab-hover"><a href="{:U('Home/Store/storeNumber')}">发码</a></p>
+                    <p class=""><a href="{:U('Home/Store/storeNumber2')}">验码</a></p>
+                    </div>
+                    <div class="Wcanal-tab-list" style="display: block; padding-top:15px;">
+                    <div class="SearchArea fn">
+                    <form id="theform" action="{:U('Home/Store/storeNumber')}" method="post">
+                    <div class="SearchAreaLeft">
+                    <label>
+                    <span>起止日期</span>
+                    <input type="text" name="start_time" id="start_time" onclick="WdatePicker()" value="<?php echo $_REQUEST['start_time']; ?>">
+                    -
+                    <input type="text" name="end_time" id="end_time" onclick="WdatePicker()" value="<?php echo $_REQUEST['end_time']; ?>">
+                    </label>
+                    
+                    <label>
+                    <span>门店地址</span>
+                   <select class="textbox w80" name="province_code" id="province_code">
+                                    <option value="">选择省</option>
+                                </select>
+                                <select class="textbox w80" name="city_code" id="city_code">
+                                    <option value="">选择市</option>
+                                </select>
+                                <select class="textbox w80" style="width:101px;" name="town_code" id="town_code">
+                                    <option value="">选择区</option>
+                 </select>
+                  </label>
+                  </div>
+                  <div class="SearchAreaRight">
+                      <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                  </div> 
+                    </form>
+                    </div>
+                    <div class="shopCon">
+                    
+                    <div id="container-report1" style="width:860px"></div>
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                    <tbody>
+                    <tr class="th">
+                    <th>门店简称</th>
+                    <th>发码数</th>
+                    </tr>
+                    <?php if($listresult){ foreach($listresult as $v){ ?>
+                    <td>{$v.store_name}</td>
+                    <td>{$v.fcount}</td>
+                    </tr>
+                   <?php }}else{?>
+                    <tr><td colspan="2"><div class="nonedata"></div></td></tr>
+                    <?php }?>
+                    </tbody>
+
+                    </table>
+                    <div class="page"><?php echo $pageShow; ?></div>
+                    </div>
+                    </div>
+
+                    </div>
+                                  
+                    
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+<script>
+$(function(){
+   $("#sub_button").click(function(){
+       $("#theform").submit();
+   });
+   $("#sub_button2").click(function(){
+       $("#theform2").submit();
+   });
+});
+</script>
+</html>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+<meta name="format-detection"  content="telephone=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<title><?php echo session('title')?></title>
+<link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/wap_gift_201503.css?v=__VR__" />
+<script src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__" type="text/javascript" charset="utf-8"></script>
+<script src="__PUBLIC__/Label/Js/inder_tabs.js?v=__VR__" type="text/javascript" charset="utf-8"></script>
+<script src="__PUBLIC__/Label/Js/jquery.Spinner.js?v=__VR__" type="text/javascript" charset="utf-8"></script>
+<script src="__PUBLIC__/Label/Js/jquery.urldecode.js?v=__VR__" type="text/javascript" charset="utf-8"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript">
+$(function(){
+	//设置最大可购买数量
+	window._g = window._g || {};
+	window._g.buy_limit = {$buy_limit};
+	window._g.def_val = 1;
+
+	var strCookie=document.cookie; 
+	var arrCookie=strCookie.split("; ");
+	var gift_cookie;
+	for(var i=0;i<arrCookie.length;i++){ 
+		var arr=arrCookie[i].split("="); 
+		//找到名称的cookie，并返回它的值 
+		if("gift_cookie"==arr[0]){ 
+			gift_cookie=arr[1]; 
+		}
+	}
+	if(gift_cookie != null){
+		var gift_arr= JSON.parse((urldecode(gift_cookie)).substr(6));
+		if(gift_arr.gift_num!= null)
+			window._g.def_val = gift_arr.gift_num;
+		//cookie缓存赋值
+		if(gift_arr.bless_msg != null){
+			$("#bless_msg").val(urldecode(gift_arr.bless_msg));
+		}
+		if(gift_arr.bless_name != null){
+			$("#bless_name").val(urldecode(gift_arr.bless_name));
+		}
+		//短信送礼
+		if(gift_arr.gift_type == 2){
+			$('#gift_type').val('2');
+			$("#note_count").text(gift_arr.gift_num);
+			$(".title-list li").eq(1).addClass('on').siblings().removeClass('on');
+			var liWidth = $('.title-list li').width();
+			$('.tabs .title-list p').stop(false,true).animate({'left' : 1 * liWidth + 'px'},300);
+			$('.product-wrap div.product').eq(1).fadeIn(150).siblings('div.product').hide();
+			if(gift_arr.rece_p_list != null){
+				var phone_array = urldecode(gift_arr.rece_p_list).split("|");
+				for(var i=0;i<phone_array.length;i++){
+					$(".rece_p_list").append('<input type="text" name="rece_phone[]" value="'+phone_array[i]+'"><em class="del_info">-</em>');
+				}
+			}
+		}
+	}
+	$("#d").Spinner();
+	
+	//显示弹框
+	$('.insert_btn').click(function(){
+		className = $(this).attr('class');
+		$('#dialogBg').fadeIn(300);
+		$('#dialog').removeAttr('class').addClass('animated '+className+'').fadeIn();
+	});
+	
+	//关闭弹窗
+	$('.claseDialogBtn').click(function(){
+		$('#dialogBg').fadeOut(300,function(){
+			$('#dialog').addClass('bounceOutUp').fadeOut();
+		});
+	});	
+	
+	$(".js_extend").click(function(e){
+		var content_from = $(this).text();
+		$("#bless_msg").val(content_from);
+		$('#dialogBg').fadeOut();
+		$('#dialog').fadeOut();
+	});
+	
+	$(".add_info").click(function(){
+		var act_num = $(".rece_p_list").children("input").length;
+		if(act_num >= window._g.buy_limit){
+			alert("最多送礼"+act_num+"份");
+			return false;
+		}
+		$(".rece_p_list").append('<input type="text" placeholder="收礼人手机" name="rece_phone[]"><em class="del_info">-</em>');
+		$("#note_count").text(act_num+1);
+	});
+	$(document).on('click','.del_info',function(){
+		$(this).prev().remove();
+		$(this).remove();
+		var act_num = $(".rece_p_list").children("input").length;
+		$("#note_count").text(act_num);
+	});
+
+	$("#confirm_order").click(function(){
+		var bless_msg = $('#bless_msg').val();
+		if(bless_msg == ''){
+			alert('请输入祝福语');
+			return false;
+		}
+		var called_name = $('#bless_name').val();
+		if(called_name == ''){
+			alert('请填写您的称呼');
+			return false;
+		}
+		var type = $('#gift_type').val();
+		if(type == 2){
+			var partten = /^1[34578][0-9]{9}$/;
+			var fl = true;
+			var rece_num = $(".rece_p_list").children("input").length;
+			if(rece_num == 0){
+				alert('请输入收礼人手机号');
+				return false;
+			}
+			//如果是短信送的话对每个收礼的短信进行验证
+			$(".rece_p_list>input").each(function(e,item){
+				if(!partten.test($(item).val())){
+					alert("第"+(e+1)+"个收礼手机号格式不正确");
+					fl = false;
+					return false;
+				}
+			})
+			if(!fl)
+				return false;
+		}
+		//校验销售员号是否存在
+		var saler_phone = $('#saler_phone').val();
+		if(saler_phone){
+			var dialog;
+			$("#theform").ajaxSubmit({
+					beforeSubmit:function(){
+						dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在校验您的销售顾问...</div>",fixed: true,padding:0});
+					},
+					url:"{:U('Label/Present/checkSaler')}",
+					success:function(data){
+							 if(data.status == '1'){
+								dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+								setTimeout(function(){
+									$('#loadingBox').show();
+								},1);
+								$('#theform').submit();
+							  }else{
+								dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+								$("#saler_phone").val('');
+								return false;
+							  }
+						  },
+					dataType:'json'
+				});
+				return false;
+		}
+		else{
+			setTimeout(function(){
+				$('#loadingBox').show();
+			},1);
+			$('#theform').submit();
+		}
+		//$('#theform').submit();
+	})
+});
+</script>
+<style type="text/css">
+.msgPop .msgBg .msgTitle{ height:auto}
+.colgroup a{ color:#666;}
+</style>
+</head>
+
+<body>
+<div class="wrapper">
+<div class="header">
+    <span class="headline">送礼</span>
+</div>
+
+<div class="content">
+	<div class="order_area">
+    	<img src="__UPLOAD__/{$goodsInfo['batch_img']}">
+        <p>
+        	<span>{$goodsInfo['batch_name']}<if condition="$goodsInfo['sku_name'] neq ''"><em>[{$goodsInfo['sku_name']}]</em></if></span>
+            <span class="price"><sub>￥</sub>{$goodsInfo['batch_amt']}</span>
+        </p>
+    </div>
+    <div class="divbar"></div>
+    <div class="tabs">
+        <div class="title cf">
+            <ul class="title-list fr cf ">
+                <li class="on" data-id="1">微信送</li>
+                <li data-id="2">短信送</li>
+                <p></p>
+            </ul>
+        </div>
+        <div class="product-wrap">
+			<form name="theform" id="theform" method="post" action="{:U('Label/Present/pay_confirm')}">
+			<input type="hidden" name="gift_type" id="gift_type" value="1">
+			<input type="hidden" name="id" id="id" value="{$id}">
+			<input type="hidden" name="saler_id" id="saler_id" value="{$saler_id}">
+                        <input type="hidden" name="skuInfo" id="skuInfo" value="{$skuInfo}">
+			<div class="colgroup">
+			<a href="javascript:void(0);" class="insert_btn">使用祝福语模板</a>
+			<label>对ta/ta们说：</label>
+			<textarea class="bless_area" name="bless_msg" id="bless_msg" placeholder="新年快乐！万事大吉！合家欢乐！财源广进！恭喜发财！">新年快乐！万事大吉！合家欢乐！财源广进！恭喜发财！</textarea>
+			</div>
+			<div class="colgroup">
+			<label>您的称呼：</label>
+			<input type="text" name="bless_name" id="bless_name">
+			</div>
+            <div class="product show">
+                <div class="colgroup">
+                <label>送礼份数：</label>
+                <div id="d" class="count Spinner"></div>
+                </div>
+            </div>
+            <div class="product">
+                <div class="colgroup">
+                <label>收礼人信息：</label>
+				<div class="rece_p_list">
+				</div>
+                <a href="javascript:void(0);" class="add_info">+ 添加收礼人</a>
+                </div>
+                <div class="colgroup tr">送礼分数：<span class="redfont" id="note_count">0</span> 份</div>
+            </div>  
+            <eq name="errcode" value="0">
+                <div class="colgroup">
+                <noempty name="salerInfo">    
+                    <if condition="$salerInfo['showSalerName'] eq '1'"><label>您的销售顾问：</label></if>
+                <else />
+                <label>您的销售顾问：</label>
+                </noempty>
+                        <empty name="salerInfo">
+                        <input type="text" name="saler_phone" id="saler_phone">
+                        <else />
+                        <if condition="$salerInfo['showSalerName'] eq '1'"> <input type="text" value="{$salerInfo['custom_no']}{$salerInfo['name']}" readonly="readonly" ></if>
+                        </empty>
+                </div>
+             </eq>
+			</form>
+            <a href="javascript:void(0)" class="btn_one" id="confirm_order">确认订单</a>
+            <p class="sweep_tips">1. 支付完成后，您可以将这份礼品分享给您的好友或群里，好友领取后，只需携带生成的凭证到店验证，即可获得您的送礼。</p>
+            <p class="sweep_tips">2. 个人中心可以看到您的送礼信息。</p>
+        </div>
+    </div>
+</div>
+</div>
+
+<div id="dialogBg"></div>
+<div id="dialog">
+    <div class="dialogTop">
+        <a href="javascript:;" class="claseDialogBtn">关闭</a>
+    </div>
+    <form action="" method="post" id="editForm">
+        <div class="buy_pop">
+        <div class="colgroup"><a href="javascript:void(0);" class="js_extend">新年快乐！万事大吉！合家欢乐！财源广进！恭喜发财！</a></div>
+        <div class="colgroup"><a href="javascript:void(0);" class="js_extend">每一天都为你心跳，每一刻都被你感动，每一秒都为你担心。有你的感觉真好。I miss you ~~~</a></div>
+        <div class="colgroup"><a href="javascript:void(0);" class="js_extend">今天是你的生日，一个我永远忘不掉的日子。愿上帝保佑你一生平平安安、健健康康、幸福快乐！</a></div>
+    </div>
+    </form>
+</div>
+</body>
+</html>

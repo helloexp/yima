@@ -1,0 +1,265 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>选择城市</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_cbc.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main" class="bgf2f2f2">
+            <section class="search">
+                <div class="search-bg">
+                    <input type="search" name="searchKey" id="searchKey" class="search-input" placeholder="请输入城市中文名或拼音">
+                    <input type="submit" class="btn-search" value="">
+                </div>
+            </section>
+            <div id="search_list" class="city-list" style="display: none">
+                <ul class="CityList"></ul>
+            </div>
+            <div id="city_list" class="city-list">
+                <div id="city-list">
+                    <assign name="curP" value="" />
+
+                    <volist name="city_list" id="vo">
+                    <if condition="$vo['py_first'] neq $curP">
+                        <if condition="$curP neq ''">
+                    </ul>
+                        </if>
+
+                    <h3 id="city_{$vo['py_first']}" class="city">{$vo['py_first']}</h3>
+                    <ul class="CityList">
+                        <li city_code="{$vo['ccode']}" pinyin="{$vo['pinyin']}"><p>{$vo.city}</p></li>
+                    <else/>
+                        <li city_code="{$vo['ccode']}" pinyin="{$vo['pinyin']}"><p>{$vo.city}</p></li>
+                    </if>
+                    <assign name="curP" value="$vo['py_first']" />
+                    </volist>
+                    </ul>
+        		</div>
+                
+            </div>
+            <div class="F-cities" style="z-index: 999">
+                <strong class="F-ins" style="display: none">A</strong>
+                <div class="onTouch">
+                    <div id="charNav">
+                        <a>#</a>
+                        <a>A</a>
+                        <a>B</a>
+                        <a>C</a>
+                        <a>D</a>
+                        <a>E</a>
+                        <a>F</a>
+                        <a>G</a>
+                        <a>H</a>
+                        <a>I</a>
+                        <a>J</a>
+                        <a>K</a>
+                        <a>L</a>
+                        <a>M</a>
+                        <a>N</a>
+                        <a>O</a>
+                        <a>P</a>
+                        <a>Q</a>
+                        <a>R</a>
+                        <a>S</a>
+                        <a>T</a>
+                        <a>U</a>
+                        <a>V</a>
+                        <a>W</a>
+                        <a>X</a>
+                        <a>Y</a>
+                        <a>Z</a>
+                    </div>
+                    <div class="onTouch-bg"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<strong class="loading" id="loading" style="display: none">加载中</strong>
+<script>
+    $(function () {
+        //global begin
+        var COMPUTER = 0;
+        var ANDROID = 1;
+        var IPHONE = 2;
+        var DEVICE = ANDROID;
+        var VEVENT = {};
+        var MINUTE = 60;
+        var HOUR = 3600;
+        var DAY = 86400;
+
+        if (navigator.platform && (navigator.platform == 'Win32' || navigator.platform == 'MacIntel')) {
+            DEVICE = COMPUTER;
+        }
+//        console.log('[COMMON.HE] START' + '\tDEVICE:' + DEVICE);
+        //set vevent
+        if (DEVICE == COMPUTER) {
+            VEVENT = {
+                mouseup: 'mouseup',
+                mousedown: 'mousedown',
+                mousemove: 'mousemove',
+                mouseout: 'mouseout'
+            };
+        }
+        else {
+            VEVENT = {
+                mouseup: 'touchend',
+                mousedown: 'touchstart',
+                mousemove: 'touchmove',
+                mouseout: 'touchcancel'
+            };
+        }
+        isAndroid = (/android/gi).test(navigator.appVersion);
+        isIDevice = (/iphone|ipad/gi).test(navigator.appVersion);
+        isTouchPad = (/hp-tablet/gi).test(navigator.appVersion);
+        //global end
+
+
+        var _height = $('#charNav').height();
+        var _top = $('#charNav').offset().top;
+        var _pre_height = _height / $('#charNav a').length;
+
+        var menu = document.getElementById('charNav');
+
+        function onMenuDown(ev) {
+            scrollToNav(ev, true);
+            ev.preventDefault();
+        }
+
+        /* IOS */
+        function onMenuUp(ev) {
+            setTimeout(function () {
+                $('.F-ins').hide();
+            }, 500);
+            ev.preventDefault();
+        }
+
+        /* PC */
+        function onMenuOut(ev) {
+            setTimeout(function () {
+                $('.F-ins').hide();
+            }, 500);
+            ev.preventDefault();
+        }
+
+        /* IOS & PC */
+
+        function onMenuMove(ev) {
+            scrollToNav(ev);
+            ev.preventDefault();
+        }
+
+        function getPos(ev) {
+            var px = py = cx = cy = 0;
+            if (DEVICE == COMPUTER) {
+                ev = ev || window.event;
+                px = ev.pageX;
+                py = ev.pageY;
+                cx = ev.clientX;
+                cy = ev.clientY;
+            } else {
+                try {
+                    if (ev.touches.length >= 1) {
+                        px = ev.touches[0].pageX;
+                        py = ev.touches[0].pageY;
+                        cx = ev.touches[0].clientX;
+                        cy = ev.touches[0].clientY;
+                    }
+                } catch (err) {
+                    //console.log(err.description);
+                }
+            }
+            return {
+                x: px,
+                y: py,
+                cx: cx,
+                cy: cy
+            };
+        }
+
+        function scrollToNav(ev) {
+            var pos = getPos(ev);
+            var offsetHeight = pos.cy - _top;
+            var index = Math.floor(offsetHeight / (_pre_height));
+
+            if (index >= 0) {
+                var x = $('#charNav > a:eq(' + index + ')').text();
+                $('.F-ins').html(x).show();
+                var target = $('#city_' + (x == '#' ? 1 : x));
+                $(document).scrollTop(target.offset().top - 50);
+            }
+        }
+
+        menu = document.getElementById('charNav');
+        if (menu) {
+            menu.addEventListener(VEVENT.mouseup, onMenuUp, false);
+            menu.addEventListener(VEVENT.mousedown, onMenuDown, false);
+            menu.addEventListener(VEVENT.mousemove, onMenuMove, false);
+            menu.addEventListener(VEVENT.mouseout, onMenuOut, false);
+        }
+
+
+        function showRelateCity() {
+            $('#city_list, .F-cities').hide();
+            var txt = $('input[name=searchKey]').val().toLowerCase();
+            $('#search_list li').remove();
+            var found = false;
+            $('#city-list ul li p').each(function() {
+                var name = $(this).parent().attr('pinyin').toLowerCase();
+                var city_code = $(this).parent().attr('city_code');
+                var title = $(this).text();
+                var name_txt = name.substr(txt, txt.length);
+                if (name.substr(txt, txt.length) == txt || title.substr(txt, txt.length) == txt) {
+                    found = true;
+                    $(this).parent().clone().appendTo('#search_list .CityList');
+                }
+            });
+            if (found) {
+                $('#search_list').show();
+            } else {
+                $('#search_list').hide();
+            }
+        }
+
+        function hideRelateCity() {
+            $('#search_list').hide();
+            $('#city_list, .F-cities').show();
+        }
+
+        //检索框绑定
+        $('input[name=searchKey]').bind('focus input', function(ev) {
+            var _title = $(this).attr('title');
+            if ($(this).val() != '' && $(this).val() != _title) {
+                $(this).siblings('span').hide();
+                showRelateCity();
+                $('#charNav').hide();
+            } else {
+                $(this).siblings('span').show();
+                hideRelateCity();
+                $('#charNav').show();
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        $(document).on("click", ".CityList li", function() {
+            $.cookie("city_area_code", $(this).attr('city_code'));
+            $.cookie("city_area_name", $(this).find("p").text());
+
+            $.cookie("town_area_code", '');
+            $.cookie("town_area_name", '');
+
+            window.location.href = "{:U('index')}";
+        });
+    });
+</script>
+</body>
+</html>

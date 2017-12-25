@@ -1,0 +1,529 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无卡券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wselect_et.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivity2015.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script>
+var _callback = "{:I('callback')}";
+var _selectTabValue="{$selectTabValue}";
+var next_step = "{$next_step}";
+// 唐宇要求去掉门店和pos判断的，有问题找唐宇
+// var store_num = '{$stroeNum}';
+var store_num = '1';
+// var pos_store_num = '{$posStoreNum}';
+var pos_store_num = '1';
+var hasShowNoPos;
+var hasShowNoStore;
+if (parseInt(store_num) > 0) {
+	hasShowNoStore = 1;
+}
+if (parseInt(pos_store_num) > 0) {
+	hasShowNoPos = 1;
+}
+
+$(function(){
+	$(".etList ul li").click(function(e) {
+	    var is_exit = $(this).children("div.date").children("mark").text();
+	    var is_selected=$(this).hasClass("selected")
+	    if(is_exit!="无库存"){
+	        if(is_selected == true)
+	        {
+	            $(this).removeClass("selected");
+	        }
+	        else
+	        {
+	            $(".etList ul li").removeClass("selected");
+	            $(this).addClass("selected");
+	        }
+	    
+	    }
+	    else{
+	    	art.dialog({title:false,content:"<div class='msg-all-error'>该卡券已无库存</div>",fixed: true,padding:0,time:1});
+	        $(this).removeClass("selected");
+	    }
+	});
+    
+    $(".btn-next,#pos_store_back,#store_back").click(function(){
+    	//如果是积分提交
+    	var jfTab = $('.Wcanal-tab-title p[data-tab-key="3"]');
+    	if (jfTab.hasClass('Wcanal-tab-hover')) {
+    		var prizeCateId = '{$prizeCateId}';
+    		var mId = '{$mId}'; 
+    		var data = {
+    				js_cate_id : prizeCateId,
+    				goods_id : 'gw1400000000',
+    				day_count : $('#day_count').val(),
+    				goods_count : $('#goods_count').val(),
+    				batch_id : mId,
+    				int_count : $('#int_count').val(),
+    				version : 3	
+    		};
+    		var subHref = "{:U('Common/SelectJp/jpAdd')}";
+    		$.post(subHref, data, function(resp){
+				console.log(resp);
+                if(resp.status=='1'){
+					alert("设置成功");
+                	window.parent.location.reload();
+            	}
+			}, 'json');
+    		return false;
+    	}
+    	
+    	var len = $(".selected").length;
+		var show_type = '{$show_type}';
+        if(len==0){
+			if(show_type == '12')
+				art.dialog({title:false,content:"<div class='msg-all-error'>请选择定额红包</div>",fixed: true,padding:0,time:1});
+			else
+				art.dialog({title:false,content:"<div class='msg-all-error'>请选择卡券</div>",fixed: true,padding:0,time:1});
+            return false;
+        }
+        <eq name="needRemind" value="1">
+    	if(store_num == '0' && show_type != '12'){
+    		$(".etList").hide();
+    		hasShowNoStore = $('#store_back').attr('show_no_store');
+    		if (store_num != 0) {
+    			hasShowNoStore = 1;
+    		}
+    		if (hasShowNoStore != 1) {
+    			$(".no_store").show();
+    			$(".no_pos_store").hide();
+    			$('#store_back').attr('show_no_store', '1');//判定有没有显示过没有"没有pos"
+                return false;
+    		}
+    	}
+    	if(pos_store_num == '0' && show_type != '12'){
+    		$(".etList").hide();
+    		hasShowNoPos = $('#store_back').attr('show_no_pos_store');
+    		if (pos_store_num != 0) {
+    			hasShowNoPos = 1;
+    		}
+    		if (hasShowNoPos != 1) {
+    			$(".no_pos_store").show();
+    			$(".no_store").hide();
+    			$('#pos_store_back').attr('show_no_pos_store', '1');//判定有没有显示过没有"没有pos"
+                return false;
+    		}
+    	}
+    	</eq>
+    	//如果有下一步按钮的，接上奖品Id传过去（招募会员活动用到）
+    	if ($(this).attr('id') == 'next_step') {
+    		var goods_id = $(".selected").attr('data-id');
+    		var card_id = $(".selected").attr('data-cardid'); 
+    		location.href = next_step + "&prizeId=" + goods_id + '&card_id=' + card_id;
+    		return false;
+    	}
+    	$.submit_goods();
+    });
+    
+    $("#store_back").click(function(){
+    	if (next_step != '') {
+    		var goods_id = $(".selected").attr('data-id');
+    		var card_id = $(".selected").attr('data-cardid'); 
+   			if (hasShowNoPos == 1) {
+   				location.href = next_step + "&prizeId=" + goods_id + '&card_id=' + card_id;
+   			}
+    	} else {
+    		$.submit_goods();
+    	}
+    });
+    //没有创建epos的点击这个按钮,如果有下一步的跳转到下一步
+    $('#pos_store_back').click(function(){
+    	if (next_step != '') {
+    		var goods_id = $(".selected").attr('data-id');
+    		var card_id = $(".selected").attr('data-cardid'); 
+   			if (hasShowNoStore == 1) {
+   				location.href = next_step + "&prizeId=" + goods_id + '&card_id=' + card_id;
+   			} 
+    	}
+    });
+    
+    $.submit_goods = function(){
+    	var goods_id = $(".selected").attr('data-id');
+        var card_id = $(".selected").attr('data-cardid'); 
+        var goodsname=$(".selected").attr('data-goodsname');
+        var selectTabValue = $('[name="selectTabValue"]').val();
+        var availableSendType = '0,1';
+        //如果选择的是微信卡券的朋友的券，下一步的发送形式只能选微信卡券形式
+        if (selectTabValue == '5') {
+        	//发送形式
+        	availableSendType = '1';
+        }
+        var wx_flag = $(".selected").attr('data-wxflag');
+        var win = art.dialog.opener;
+        var data = {goods_id:goods_id,selectTabValue:_selectTabValue,card_id:card_id,goodsname:goodsname,availableSendType:availableSendType,wx_flag:wx_flag};
+        if(_callback && win[_callback] && typeof(win[_callback]) == 'function' )
+            win[_callback].call(this, data);
+        art.dialog.close();
+        return ; 
+    }
+    
+    $("#source,#goods_type").change(function(){
+        if ($(this).attr('id') == 'source') {
+            var postData = $('#theform').serialize();
+        	$.post("{:U('getGoodsTypeArr')}", postData, function(data) {
+                    console.log(data);
+                    if (data.status) {
+                        var option = data.info['selectType'];
+                        var optionHtml = '';
+                        $.each(option, function(k,v){
+                            var emptyOption = '';
+                            if (k != '') {
+                                optionHtml += '<option value="'+k+'">'+v+'</option>';
+                            } else {
+                                emptyOption = '<option value="'+k+'">'+v+'</option>';
+                            }
+                            optionHtml = emptyOption + optionHtml;
+                        });
+                        $('#goods_type').html(optionHtml);
+                        $("form").submit();
+                    }
+                },'json'); 
+        } else {
+            $("form").submit();
+        }
+
+    });
+    //切换tab操作
+    $('.Wcanal-tab-title p').click(function(){
+    	var dataTabKey = $(this).attr('data-tab-key');
+    	if (dataTabKey != 3) {
+    		var selectTabKey = $(this).attr('data-tab-key');
+           	$('[name="selectTabValue"]').val(selectTabKey);
+           	$("form").submit();
+    	} else {
+    		$('.Wcanal-tab-title p').removeClass('Wcanal-tab-hover');
+    		$(this).addClass('Wcanal-tab-hover');
+			$('#jf').show();
+			$('.etList').hide();
+			$('.SearchArea').hide();
+			$('.Wcanal-tab-title').children('a').hide();
+			$('.btn-next').text('确定');
+			$("#type0").hide();
+			$("#type1").hide();
+			$("#type2").hide();
+			$("#type3").hide();
+			$("#type4").hide();
+			$('.DiatipsCon').hide();
+    	}
+    });
+    
+    $("#sub_button").click(function(){
+    	$("form").submit();
+    });
+    //无数据页面
+    var list_status = <?php if(empty($list)){echo '0';}else{echo '1';}?>;
+    if(list_status){
+    	$(".etList").show();
+    	$(".Dianodate").hide();
+    }else{
+    	$(".etList").hide();
+		var show_type = $('#source').val();
+		if ($('[name="selectTabValue"]').val() == '2') {
+			$("#type3").show();
+		} else if ($('[name="selectTabValue"]').val() == '4') {
+			$("#type4").show();
+		} else {
+			if(show_type === '') {
+				$("#type0").show();
+			} else if (show_type == '0') {
+				$("#type1").show();
+			} else if (show_type == '1') {
+				$("#type2").show();
+			}
+		}
+    }
+    //跳转提示
+    $(".js_addCard").click(function(){
+		var type = $(this).attr("data-type");
+    	$('.tp').hide();
+    	$('.tp'+type).show();
+		$(".DiatipsCon").show();
+    });
+    var selectTab = $('.Wcanal-tab-title').attr('data-select-tab');
+    var source = $('#source').val();
+    if (selectTab == 1 && source == '') {
+    	$('#instruction1').show();
+		$('#show_get_1').show();
+    }else if(selectTab == 1 && source == '0') {
+    	$('#instruction1').show();
+    	$('#show_get_2').show();
+    }else if(selectTab == 1 && source == '1') {
+    	$('#instruction1').show();
+    	$('#show_get_3').show();
+    }else if(selectTab == 2) {
+    	$('#instruction2').show();
+    	$('#show_get_4').show();
+    }
+	
+	$(".getMore").click(function(){
+		var url = $(this).attr("data-href");
+			/*art.dialog.open(url, {
+				title: '查看详情',
+				width:800,
+				height:650
+			});*/
+		var newTab1 = window.open('about:blank');
+		newTab1.location.href=url;
+		return false;
+	});
+	
+	//var selectTab = $('.Wcanal-tab-title').attr('data-select-tab');
+	//$('#instruction' + selectTab).removeClass('dn');
+	if (selectTab == '2' || selectTab == '4' || selectTab == '5') {
+		$('.SearchAreaLeft').children('label').each(function(){
+			if($(this).index() == '0' || $(this).index() == '1') {
+				$(this).hide();
+			}
+		});
+	}
+})
+
+function clickSearch() {
+	$('#sub_button').click();
+}
+</script>
+</head>
+<body>
+	<div class="iframeCon SelectGoods">
+        <div class="Wcanal-tab inPop">
+            <div class="DiatipsCon dn">
+                <!--p class="tp0">如卡券需要在线下领取或核销，请确保该卡券信息中包含已安装了核验终端的门店。</p-->
+                <p class="tp tp1 dn">请在新打开的页面中完成卡券的创建，已经完成<a href="javascript:clickSearch();">点击刷新</a></a></p>
+                <p class="tp tp2 dn">请在新打开的页面中完成卡券的采购，已经完成<a href="javascript:clickSearch();">点击刷新</a></a></p>
+                <p class="tp tp3 dn">请在新打开的页面中完成定额红包的创建，已经完成<a href="javascript:clickSearch();">点击刷新</a></a></p>
+                <p class="tp tp4 dn">请在新打开的页面中完成微信红包的创建，已经完成<a href="javascript:clickSearch();">点击刷新</a></a></p>
+            </div>
+            <div class="Wcanal-tab-title fn" data-select-tab="{$selectTabValue}">
+            	<foreach name="tabList" item="tabValue" key="tabKey" >
+                <p class="<if condition="$tabKey eq $selectTabValue">Wcanal-tab-hover</if>" data-tab-key="{$tabKey}">
+                <a href="javascript:void(0);">{$tabValue}</a>
+                </p>
+                </foreach>
+                <a href="{$goodsHelp}" target="_blank" class="r dn" id="instruction1"><i class="icon-help-circled"></i>卡券的相关说明</a>
+                <a href="{:U('Ecshop/ElectronicCommerce/index')}" target="_blank" class="r dn" id="instruction2"><i class="icon-help-circled"></i>定额红包的相关说明</a>
+                <a href="{$goodsHelp}" target="_blank" class="r dn" id="instruction3"><i class="icon-help-circled"></i>微信卡券的相关说明</a>
+            </div>
+            <div class="Wcanal-tab-list">
+                <div class="SearchArea fn" style="margin-top:15px;">
+                    <form id="theform" action="{:U('Common/SelectJp/indexNew')}" method="post">
+                    <input type="hidden" name="callback" value="{$_REQUEST['callback']}"/>
+                    <input type="hidden" name="show_source" value="{$_REQUEST['show_source']}"/>
+                    <input type="hidden" name="show_type" value="{$_REQUEST['show_type']}"/>
+                    <input type="hidden" name="next_step" value="{$next_step}" />
+                    <input type="hidden" name="selectTabValue" value="{$selectTabValue}"/>
+                    <input type="hidden" name="wxGoods" value="{$wxGoods}"/>
+                    <!--有些活动可选的券的品种是指定的(例如付满送只能选卡券和卡券)-->
+                    <input type="hidden" name="availableTab" value="{$_REQUEST['availableTab']}" />
+                    <input type="hidden" name="availableSourceType" value="{$_REQUEST['availableSourceType']}" />
+                    <input type="hidden" name="availableGoodsType" value="{$_REQUEST['availableGoodsType']}" />
+                    <input type="hidden" name="availableSendType" value="{$availableSendType}" /><!-- 指定下发的方式的范围(有些活动只能短信下发) -->
+                    <input type="hidden" name="storeMode" value="{$storeMode}" />
+                    <div class="SearchAreaLeft">
+                    <label>
+                    <select name="source" id="source">
+                        <volist name="sourceType" id="vo">
+                            <option value="{$key}" <if condition="strval($key) heq $_REQUEST['source']">selected="selected"</if>>{$vo}</option>
+                        </volist>
+                    </select>
+                    </label>
+                    <label>
+                    <select name="goods_type" id="goods_type">
+                        <volist name="selectType" id="vo">
+                            <option value="{$key}" <if condition="strval($key) heq $_REQUEST['goods_type']">selected="selected"</if>>{$vo}</option>
+                        </volist>
+                    </select>
+                    </label>
+                    <label>
+                    <span>关键字</span>
+                    <input type="text" name="goods_name" value="{$_POST['goods_name']}"/>
+                    </label>
+                    </div>
+                    <div class="SearchAreaRight">
+                    <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                    </div>
+                    </form>
+                </div>
+                <div class="etList">
+                    <ul>
+                        <volist name="list" id="vo">
+                        <li data-id="{$vo['goods_id']}" data-goodsname="{$vo['goods_name']}" data-cardid = "<present name="vo['card_id']">{$vo['card_id']}</present>" data-wxflag="{$vo['wx_flag']}" >
+                            <div class="img" style="background-image:url({:get_upload_url($vo['goods_image'])})"></div>
+                            <div class="text">
+                                <h3>
+	                                <span>{$vo['goods_name']}</span>
+	                                <i class="type{$vo['goods_type']}">
+	                                <!-- 这里以后把逻辑移走，暂时先这样 -->
+		                                <if condition="$selectTabValue eq 2">
+		                                	定额红包
+		                                <elseif condition="$selectTabValue eq 4"/>
+		                                	<if condition="$vo['source'] eq 6">
+		                                	商户自建
+		                                	<else />
+		                                	翼码代发
+		                                	</if>
+		                                <elseif condition="$selectTabValue eq 5"/>
+		                                	朋友的券
+		                               	<elseif condition="$vo['goods_type'] eq 15"/>
+		                               		流量包
+		                                <else />
+		                                	{$selectType[$vo['goods_type']]}
+		                                </if>
+	                                </i><!--原来:{$sourceType[$show_source]}-->
+                                </h3><!--分type1，type2，type3 3种色-->
+                                <p>剩余：<if condition="$vo['storage_type'] eq '1'">{$vo['remain_num']}<else/>不限</if></p>
+                                <p><!-- <i class="icon-eticket1" title="支持支付宝卡券形式发送"></i><i class="icon-eticket2" title="支持微博卡券形式发送"></i> -->
+                                	<!-- 只有当卡券的时候显示(红包什么的不显示) -->
+                                	<eq name="selectTabValue" value="1">
+                                	<i class="icon-eticket4" title="支持短信形式发送"></i>
+                                	<eq name="vo['wx_flag']" value="1">
+                                	<i class="icon-eticket3 <eq name="vo['card_over_time']" value="1">erro</eq>" 
+                                	title="<eq name="vo['card_over_time']" value="1">微信卡券有效期结束时间小于活动结束时间<else />支持微信卡券形式发送</eq>"></i>
+                                	</eq>
+                                	</eq>
+                                </p>
+                                <p><a href="javascript:void(0)" data-href="<switch name="vo.source">
+                                                <case value="0">{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$vo['goods_id']))}</case>
+                                                <case value="1">{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$vo['goods_id']))}</case>
+                                                <case value="3">{:U('Weixin/WeixinCard/cardDetail',array('id'=>$vo['id']))}</case>
+                                                <case value="4">{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$vo['goods_id']))}</case>
+                                                <case value="6">{:U('WangcaiPc/NumGoods/weChatInfo',array('goods_id'=>$vo['goods_id']))}</case>
+                                                <case value="7">{:U('WangcaiPc/NumGoods/weChatInfo',array('goods_id'=>$vo['goods_id']))}</case>
+                                             </switch>
+                                             <if condition="$selectTabValue eq 5">
+                                                {:U('Weixin/WeixinCard/friendCardDetail',array('id'=>$vo['id']))}
+                                             </if>
+                                             " class="getMore">查看详情</a></p>
+                            </div>
+                            <div class="dn date">
+                                <em class="{$sourceColor[$vo['source']]}">{$sourceType[$vo['source']]}</em>
+                                <if condition="$vo['storage_type'] eq '1' and $vo['remain_num'] eq 0">
+                                <mark class="no_storage">无库存</mark>
+                                </if>
+                                <dl>
+                                    <dd><em>类型：</em>{$allProvidedGoodsType[$vo['goods_type']]}</dd>
+                                    <dd><em>数量：</em><strong><if condition="$vo['storage_type'] eq '1'">{$vo['storage_num']}<else/>不限</if></strong></dd> 
+                                    <dd><em>市场价：</em><strong>{$vo['market_price']}</strong> </dd>
+                                    <if condition="$vo['goods_type'] eq '1'">
+                                    <dd><em>核销限制：</em><eq name="vo.validate_type" value="1">按金额核销<else/>限一次核销</eq> </dd>
+                                    <dd><em>面额：</em><strong>{$vo['goods_amt']}</strong> </dd>
+                                    </if>
+                                    <if condition="$vo['goods_type'] eq '3'">
+                                    <dd><em>折扣额度：</em><strong>{$vo['goods_discount']}%</strong> </dd>
+                                    </if>
+                                    <dd><em>可验门店：</em> <strong>{$checkedStoreNum[$vo['id']]['store_num']}</strong>家</dd>
+                                    <dd><em>支持线上提领：</em><strong>
+                                    <if condition="$vo['goods_type'] eq '2'">是<else />否</if></strong></dd>
+                                </dl>
+                            </div>
+                        </li>
+                        </volist>
+                    </ul>
+                    <div class="page mini">
+                        <div class="pagelink dn" id="show_get_1"><a href="{:U('WangcaiPc/NumGoods/addNumGoods')}" target="_blank" class="js_addCard" data-type="1">快速创建</a>或<a href="{:U('Hall/Index/build')}" target="_blank" class="js_addCard" data-type="2">采购</a>卡券</div>
+                        <div class="pagelink dn" id="show_get_2"><a href="{:U('WangcaiPc/NumGoods/addNumGoods')}" target="_blank" class="js_addCard" data-type="1">快速创建</a>卡券</div>
+                        <div class="pagelink dn" id="show_get_3"><a href="{:U('Hall/Index/build')}" target="_blank" class="js_addCard" data-type="2">快速采购</a>卡券</div>
+                        <div class="pagelink dn" id="show_get_4"><a href="{:U('Ecshop/SalePro/addFixBonus')}" target="_blank" class="js_addCard" data-type="3">快速创建</a>红包
+                        </div>
+                        <!-- <div class="pagelink dn" id="show_get_4"><a href="{:U('Weixin/WeixinCard/add')}" target="_blank" class="js_addCard dn" data-type="4">快速创建</a>微信卡券
+                        </div> -->
+                    {$page}
+                    </div>
+                </div>
+                <div id="jf" class="Gform fn dn">
+                	<ul id="int_amount">
+	            		<li class="Gnmae"><span class="red">*</span>&nbsp;积分值</li>
+	            		<li class="Ginput">
+                        	<input type="text" class="validate[required,custom[integer]]" id="int_count" value="" maxlength="8">
+                        	<span class="txtTips">每次中奖获得的积分数量</span>
+                        </li>
+	            	</ul>
+	               	<ul class="moren">
+	                    <li class="Gnmae"><span class="red">*</span>&nbsp;奖品数量</li>
+	                    <li class="Ginput">
+                        	<input type="text" class="validate[required,funcCall[checkNum],custom[integer]]" id="goods_count" value="" maxlength="8">
+                        </li>
+	                </ul>
+	                <if condition="$batch_type neq '61'">
+	               	<ul class="moren">
+	                    <li class="Gnmae"><span class="red">*</span>&nbsp;每日奖品限量</li>
+	                    <li class="Ginput"><input type="text" class="validate[required,funcCall[checkNum],custom[integer]]" id="day_count" value="" maxlength="8"></li>
+	                </ul>
+	                </if>
+                </div>
+                <div class="DiabtnCon">
+                    <empty name="next_step">
+                    <a class="Diabtn-all btn-next">确定</a>
+                    <else />
+                    <a class="Diabtn-all btn-next" id="next_step">下一步</a>
+                    </empty>
+                    <if condition="$actionName neq 'member' ">
+                    <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+                    </if>
+                </div>
+            </div>
+    		<div class="Dianodate dn" id="type0">
+                <img src="__PUBLIC__/Image/member/nodata.gif">
+                <div class="txt">
+                    <p>旺财平台的奖品以卡券形式存在</p>
+                    <p>请先<a href="{:U('WangcaiPc/NumGoods/addNumGoods')}" target="_blank" class="js_addCard" data-type="1">创建卡券</a>
+                    	或者<a href="{:U('Hall/Index/build')}" target="_blank" class="js_addCard" data-type="2">采购卡券</a>
+                    </p>
+                </div>
+            </div>
+            <div class="Dianodate dn" id="type1">
+                <img src="__PUBLIC__/Image/member/nodata.gif">
+                <div class="txt">
+                    <p>旺财平台的奖品以卡券形式存在</p>
+                    <p>请先<a href="{:U('WangcaiPc/NumGoods/addNumGoods')}" target="_blank" class="js_addCard" data-type="1">创建卡券</a></p>
+                </div>
+            </div>
+            <div class="Dianodate dn" id="type2">
+                <img src="__PUBLIC__/Image/member/nodata.gif">
+                <div class="txt">
+                    <p>旺财平台的奖品以卡券形式存在</p>
+                    <p>请先<a href="{:U('Hall/Index/build')}" target="_blank" class="js_addCard" data-type="2">采购卡券</a></p>
+                </div>
+            </div>
+            <div class="Dianodate dn" id="type3">
+                <img src="__PUBLIC__/Image/member/nodata.gif">
+                <div class="txt">
+                    <p>旺财平台的奖品以定额红包形式存在</p>
+                    <p>请先<a href="{:U('Ecshop/SalePro/addFixBonus')}" target="_blank" class="js_addCard" data-type="3">创建定额红包</a></p>
+                </div>
+            </div>
+            <div class="Dianodate dn" id="type4">
+                <img src="__PUBLIC__/Image/member/nodata.gif">
+                <div class="txt">
+                    <p>旺财平台的奖品以微信红包的形式存在</p>
+                    <!-- <p>您可以<a href="">申请服务号</a>或者<a href="">绑定服务号</a></p> -->
+                    <p>请先<a href="{:U('WangcaiPc/NumGoods/ymWeChatIndex')}" target="_blank" class="js_addCard" data-type="4">添加微信红包</a></p>
+                </div>
+            </div>
+        
+        <!-- 无门店 -->
+            <div class="Dianodate no_store dn">
+                <img src="__PUBLIC__/Image/member/nodata.gif" />
+                <p>空空如也，您还没有门店，建议创建门店并申请验证终端，便于卡券的线下核验~~</p>
+                <p>您可以<a href="{:U('Home/Store/add',array('node_id'=>$userInfo['node_id']))}" target="_blank">现在就创建门店</a>或<a href="javascript:void(0)" id="store_back">暂不创建</a></p>
+            </div>
+        
+        <!-- 无终端门店 -->
+            <div class="Dianodate no_pos_store dn">
+                <img src="__PUBLIC__/Image/member/nodata.gif" />
+                <p>空空如也，您还没有申请验证终端，建议申请验证终端，便于卡券的线下核验~~</p>
+                <p>您可以<a href="{:U('Home/Store/Wapply_terminal')}" target="_blank">现在就去申请</a>或<a href="javascript:void(0)" id="pos_store_back">暂不创建</a></p>
+            </div>
+        
+        </div>
+    </div>
+</body>

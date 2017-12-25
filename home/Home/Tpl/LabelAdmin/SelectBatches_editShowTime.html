@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>编辑时间</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/></script>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"/></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript">
+	$(document).ready(function(e) {
+		$('#theform').validationEngine({
+			binded:false
+		})
+        $("#sub_back").click(function(){
+        	//console.log($('#theform').validationEngine('validate'));
+			if ($('#theform').validationEngine('validate')) {
+				var postData = {
+		        		  id:"{$channelId}",
+		        		  batchType:"{$activityInfo['batch_type']}",
+		        		  ckid:"{$mId}",
+		        		  start_time:$('#act_time_from').val(),
+		        		  end_time:$('#act_time_to').val()
+		        };
+				submitSelectBatches(postData);
+			}
+		})
+		$(".timeList").each(function(index, element) {
+			checkTime.timeList.push({"start":$(this).attr("data-start"),"end":$(this).attr("data-end")})
+		});
+    });
+    function normalDatePickerStart() {
+    	WdatePicker({dateFmt:"yyyy-MM-dd HH:mm:ss",startDate:"%y-%M-%d 00:00:00",minDate:'%y-%M-%d 00:00:00', maxDate:"#F{$dp.$D(\\'act_time_to\\')}"});
+    }
+    function normalDatePickerEnd() {
+    	WdatePicker({dateFmt:"yyyy-MM-dd HH:mm:ss",startDate:"%y-%M-%d 23:59:59",minDate:"#F{$dp.$D(\\'act_time_from\\')}"});
+    }
+	var checkTime = {
+			timeList:[],
+			maxtime:function(beginTime,endTime){
+					var startTime = beginTime.replace(/\D/g,""),
+						endTime = endTime.replace(/\D/g,""),
+						yyyy = parseInt(startTime.substr(0,4)),
+						mth = parseInt(startTime.substr(4,2)) - 1,
+						dd = parseInt(startTime.substr(6,2)),
+						hh = parseInt(startTime.substr(8,2)) ? parseInt(startTime.substr(8,2)) : 00,
+						mm = parseInt(startTime.substr(10,2)) ? parseInt(startTime.substr(10,2)) : 00,
+						ss = parseInt(startTime.substr(12,2)) ? parseInt(startTime.substr(10,2)) : 00,
+						startTime = new Date(yyyy,mth,dd,hh,mm,ss),
+						yyyy = parseInt(endTime.substr(0,4)),
+						mth = parseInt(endTime.substr(4,2)) - 1,
+						dd = parseInt(endTime.substr(6,2)),
+						hh = parseInt(endTime.substr(8,2)) ? parseInt(endTime.substr(8,2)) : 00,
+						mm = parseInt(endTime.substr(10,2)) ? parseInt(endTime.substr(10,2)) : 00,
+						ss = parseInt(endTime.substr(12,2)) ? parseInt(endTime.substr(10,2)) : 00,
+						endTime = new Date(yyyy,mth,dd,hh,mm,ss);
+						var a = endTime.getTime(endTime) - startTime.getTime(startTime);
+					return a;
+				},
+			beginTime:function (fromTime,toTime){
+					if(this.timeList.length==0){return "ok"};
+					for(var i=0;i<this.timeList.length;i++){
+						var isfromTime = this.maxtime(fromTime,this.timeList[i].start)
+						if(isfromTime>0){
+							if(i===0){
+								var istoTime = this.maxtime(toTime,this.timeList[i].start);
+								if(istoTime>0){
+									//console.log("两个时间都小")
+									return "ok";
+									break;
+								}
+							}else{
+								var isfromTime = this.maxtime(fromTime,this.timeList[i-1].end);
+								if(isfromTime<0){
+									var istoTime = this.maxtime(toTime,this.timeList[i].start);
+									if(istoTime>0){
+										var istoTime = this.maxtime(toTime,this.timeList[i-1].end);
+										if(istoTime<0){
+											//console.log("落在"+i+"区间")
+											return "ok";
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+					var isfromTime = this.maxtime(fromTime,this.timeList[this.timeList.length-1].end);
+					if(isfromTime<0){
+						//console.log("落在最后边区间")
+						return "ok";
+					}
+					return 0;
+				}
+			}
+	function checkActDayForm(){
+		var fromTime = $("#act_time_from").val();
+		var toTime = $("#act_time_to").val();
+		if(!fromTime || !toTime){return false;};
+		var actTime1 = $(".actTime").attr("data-start");
+		var actTime2 = $(".actTime").attr("data-end");
+		var isend1 = checkTime.maxtime(fromTime,actTime1);
+		var isend2 = checkTime.maxtime(toTime,actTime2);
+		if(isend1<=0 && isend2 >=0){
+			var isend = checkTime.beginTime(fromTime,toTime);
+			if(!isend){
+				return '时间段渠道已被占用';
+			}
+		}else{
+			return '必须在活动有效期内';
+		}
+	}
+	
+	function submitSelectBatches(postData) {
+		var url = "{:U('LabelAdmin/SelectBatches/submit')}";
+		var loading = art.dialog({title:false,lock:true,id:"loading"});
+		$.post(url,postData,function(d){
+	        if(d.status==1){ 
+	           loading.time(2).content(d.info);  
+	           setTimeout("window.parent.location.reload()",2000);
+	        } else {
+	           loading.time(2).content(d.info); 
+	        }
+	    },'json');
+	}
+</script>
+</head>
+
+<body>
+	<form id="theform">
+	<div class="Gform pb30 oh">
+		<notempty name="binded">
+    	<ul>
+        	<li class="Gname">渠道已被占用时间段</li>
+        	<li class="Ginput">
+            	<p>
+            	<foreach name="binded" item="vo" key="k" >
+                <span class="timeList" data-start="{:date('Y-m-d H:i:s', strtotime($vo['start_time']))}" data-end="{:date('Y-m-d H:i:s', strtotime($vo['end_time']))}">{:date('Y-m-d H:i:s', strtotime($vo['start_time']))}到{:date('Y-m-d H:i:s', strtotime($vo['end_time']))}</span>
+                <neq name="length" value="$k+1"><br /></neq>
+                </foreach>
+                &nbsp;
+                </p>
+                
+            	<!--<p>
+                <span class="timeList" data-start="2015-12-16 00:00:00" data-end="2015-12-28 23:59:59">2015-12-16 00:00:00到2015-12-28 23:59:59</span>
+                <br />
+                <span class="timeList" data-start="2015-12-31 00:00:00" data-end="2016-01-02 23:59:59">2015-12-31 00:00:00到2016-1-2 23:59:59</span>
+                <br />
+                <span class="timeList" data-start="2016-01-06 00:00:00" data-end="2016-02-01 23:59:59">2016-1-6 00:00:00到2016-2-1 23:59:59</span>
+                <br />
+                <span class="timeList" data-start="2016-02-05 00:00:00" data-end="2016-03-01 23:59:59">2016-2-5 00:00:00到2016-3-1 23:59:59</span>
+                <br />
+                &nbsp;
+                </p>-->
+            </li>
+        </ul>
+        </notempty>
+    	<ul>
+        	<li class="Gname">活动有效期</li>
+        	<li class="Ginput">
+            	<p class="actTime" data-start="{:date('Y-m-d H:i:s', strtotime($activityInfo['start_time']))}" data-end="{:date('Y-m-d H:i:s', strtotime($activityInfo['end_time']))}">
+            	{:date('Y-m-d H:i:s', strtotime($activityInfo['start_time']))}到{:date('Y-m-d H:i:s', strtotime($activityInfo['end_time']))}
+                </p>
+            </li>
+        </ul>
+    	<ul>
+        	<li class="Gname">在渠道上的活动时间</li>
+        	<li class="Ginput">
+            	<div class="Gtime2 fn">
+                      <input type="text" class="validate[required,funcCall[checkActDayForm]]" onclick="normalDatePickerStart()" name="act_time_from"  id="act_time_from" value="">
+                      <em>至</em>
+                      <input type="text" class="validate[required,funcCall[checkActDayForm]]" onclick="normalDatePickerEnd()" name="act_time_to" id="act_time_to" value="">
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="DiabtnCon">
+        <a class="Diabtn-all btn-next" id="sub_back">确定</a>
+        <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+    </div>
+    </form>
+</body>

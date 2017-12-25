@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>条码支付_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Walipay.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/My97DatePicker/WdatePicker.js?v=20150603"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<style>
+	.alipay-input-content{line-height:30px;}
+	.alipay-input-content .text{
+		width:205px !important;
+		
+	}
+	.alipay-input-name{width:120px;}
+	h1{
+	background:#FFF2F3;
+	padding:5px 30px; 
+	padding-bottom:0 !important;
+	}
+</style>
+</head>
+<body>
+<div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div class="shopNav">
+           <include file="./Home/Tpl/Alipay/Alipay_public_header.html" topmenuid="zhifu"/>
+           </div>
+        <div id="container">
+            <div id="main" class="rel bgfff">
+              		<div class="sidenav">
+                	 <include file="./Home/Tpl/Alipay/Index_left_menuNew2.html" leftmenuid="alipay"/>
+                     </div>
+           
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                            <h4>微信</h4>
+                        </div>
+                    <div class="edit-area">
+                         <div class="alipay"> 
+                         <if condition="empty($wxInfo['status']) || $wxInfo['status'] eq 3">
+                          <div class="alipay" style="padding-bottom: 10px;">
+		                           <div class="tip">
+		                                <p>开通微信条码支付，需完成如下三个步骤，请根据提示完成操作：</p>
+		                            </div>
+                                       <div class="s-tips1 mt10 mb20"> 
+                                <dl>
+                                    <dd <if condition="$wxInfo['check_status'] neq '1'"> class="active"</if> ><span >1</span>提交申请信息</dd>
+                                    <dd <if condition="$wxInfo['check_status'] eq '1' and $wxInfo['sign_status'] eq '0' "> class="active"</if>><span >2</span>签约微信订单</dd>
+                                    <dd <if condition="$wxInfo['check_status'] eq '1' and $wxInfo['sign_status'] eq '1'"> class="active"</if>><span >3</span>在线完成开通</dd>
+                                </dl> 
+                        </if>    
+							</div>
+                              <!--如果提交ok 提示信息-->
+                             <if condition="$wxInfo['check_status'] eq '0'">
+                             <div class='loadTip'>
+                                <div class='loadStatus ok'>
+                                <dl>
+                                <dt>我们已经收到您提交的微信支付申请。</dt>
+                                <dd>旺小二将在1个工作日内完成信息的审核；</dd>
+                                <dd>审核完成后，我们会以短信通知您审核结果。</dd>
+                                <dd><a href="{:U('Alipay/Index/info_weixin',array('act'=>'show'))}" >查看提交信息</a></dd>
+                                </dl>
+                                </div>
+                            </div>
+                            </if>
+                     
+                            <if condition='$wxInfo["check_status"] eq 2'>
+                            
+                            <div class='loadTip'>
+                                <div class='loadStatus fail'>
+                                <dl>
+                                <dt>亲，您提交的审核未通过！</dt>
+                                <dd>未通过原因：{$wxInfo['check_memo']}</dd>
+                                <dd><a href="{:U('Alipay/Index/info_weixin',array('act'=>'show'))}" >重新提交</a></dd>
+                                </dl>
+                                </div>
+                            </div>  
+                            </if>
+                            
+                             <if condition="($wxInfo['check_status'] eq 1) && ($wxInfo['sign_status'] eq '0')">
+                             <div class='loadTip'>
+                                <div class='loadStatus ok'>
+                                <dl>
+                                <dt>您提交的信息已审核通过！</dt>
+                                <dd>您的微信支付账户以及初始密码已发至您的邮箱中！</dd>
+                                <dd>现需您登录<a target="_blank" href="https://pay.weixin.qq.com/index.php/home/login">微信支付平台</a>完成"账户验证"及"协议签署" </dd>
+                                <dd>请尽快完成上述操作。</dd>
+                                <dd><a href="{:U('Alipay/Index/info_weixin',array('act'=>'show'))}">查看提交信息</a></dd>
+                                </dl>
+                                </div>
+                            </div>
+                              </if>  
+                              
+                            <if condition='($wxInfo["check_status"] eq 1) && ($wxInfo["sign_status"] eq 1 ) && ($wxInfo["status"] eq "0")'>
+                             	<form action="<?php echo U('Alipay/Index/wxepos'); ?>" method="post" id="thisoneform"> 
+                              <div class="s-tips-ok">
+                             			 <div class="Gform w1">
+                           		        <ul class="Gtitle">开通终端</ul>
+                                     <ul>
+                                 	   <li class="Gname">可开通终端数</li>
+                        				<if condition="$eposcnt gt 0"> 
+                       				   <li class="Ginput">
+                                         <p class="txtTips-info" >{$eposcnt} &nbsp;&nbsp;<a href="{:U('Home/Store/Wapply_terminal')}">去申请终端</a></p>
+                                      	 <span class="txtTips">注：后续申请的终端，都将自动开启条码支付权限</span>
+                                       </li>
+                                       <else/>  
+                       				     <li class="Ginput">
+                                          	<p>没有可用的终端 &nbsp;&nbsp;<a href="{:U('Home/Store/Wapply_terminal')}">去申请终端</a></p>
+                                      	 	<span class="txtTips">注：后续申请的终端，都将自动开启条码支付权限</span>
+                                        </li>  
+                                    </if> 
+                                    </ul>
+                                 
+                                    <ul>
+                        				<li class="Gname"><span>*</span>APPID</li>
+                       				   <li class="Ginput">
+                                         <input type="text" name='appid' value="{$wxInfo['account_pid']}" maxlength="64" class="Gview-text validate[required] validate[custom[onlyLetterNumber]]" />
+                                         <span class="maxTips forInput" data-max="64">0/64</span> 
+                                       </li>
+                                    </ul>
+                                   
+                                     <ul>
+                        				<li class="Gname"><span>*</span>开通方式</li>
+                       				   <li class="Ginput">
+                                          	<div class="switch">
+                                                <input type="radio" name="type" value="1" checked="checked"/>
+                                                <div class="newRadio">
+                                                    <span  class="valfirst" data-val="0">普通接入</span>
+                                                    <span class="vallast hover" data-val="1">收银接入</span>
+                                                </div>
+                                                <div class="cl fn"></div>
+                                                <div class="newRadio-default">
+                                                    <div style="margin-left:-155px;">
+                                                        <ul >
+                                                        <li class="Gname"><span>*</span>联系人姓名</li>
+                                                        <li class="Ginput">
+                                                        <input type="text" name='contact_name' value="{$wxInfo['contact_name']}" maxlength="64" class="Gview-text validate[required] validate[custom[onlyLetterNumber]]" />
+                                                        </li>
+                                                        </ul>
+                                                        <ul>
+                                                        <li class="Gname"><span>*</span>联系电话</li>
+                                                        <li class="Ginput">
+                                                        <input type="text" name='contact_phone' value="{$wxInfo['contact_phone']}" maxlength="64" class="Gview-text validate[required] validate[custom[onlyLetterNumber]]" />
+                                                        <p class='txtTips l'>请提供开发对接人信息及联系方式，我们会将接口文档发送至您的邮箱，并提供旺财联调技术人员联系信息</p>
+                                                        </li>
+                                                        </ul>
+                                                        
+                                                    </div>
+                                                </div>
+                                            </div>
+			                                        
+			                         </li>
+                                    </ul>   
+                                     
+                                    
+                                     <ul class="pt20">
+                                     <li class="Gname"> </li>
+                                    <li class="Ginput">
+                                        <a href="javascript:void(0)" onclick="sub()"  class="btn-all btn_primary mt45 mb90">确认</a>
+                                        <a href="javascript:void(0)" style="width:100px;" onclick="history.back(-1)" class="btn-all btn-all-del mt45 mb90">取消</a>
+                                    </li>
+                                     </ul>  
+                           </div>
+                              </div> 
+                              </form>
+                              </if>  
+                           <if condition='($wxInfo["check_status"] eq 1) && ($wxInfo["sign_status"] eq 1 ) && ($wxInfo["status"] eq 3)'>
+                              	<div class='loadTip pt30'>
+									<div class='loadStatus ok'>
+									<dl>
+									<dt>我们已经收到您提交的开通申请，旺小二将在一个工作日内处理；</dt>
+                                    <dd>开通完成后，我们会以短信通知您开通结果。</dd>
+									<dd>如需申请核销终端，点击<a target="_blank" href="{:U('Home/Store/Wapply_terminal',array('act'=>'show'))}">前往申请</a> </dd>
+									<dd> 
+                    <a href="{:U('Alipay/Index/info_weixin',array('act'=>'show'))}"  class="pt10">查看提交信息</a> </dd>
+								
+									</dl>
+									</div>
+									</div>
+                              
+                              
+                           </if>     
+                        </div>   
+                    </div>     
+        		</div>
+    		</div>
+		</div>
+	</div> 
+	<include file="./Home/Tpl/Public/Public_footer.html" />
+	<div class="service"></div>
+</div>
+</body>
+</html>
+<script>
+function sub(){ 
+		if($('input[name=appid]').val()==''){
+			 alert('APPID不能为空');
+			 return  false;	
+		} 
+	     
+			if($('input[name=contact_name]').val()==''){
+				 alert('联系人姓名不能为空');
+				 return  false;	
+			}
+			if($('input[name=contact_phone]').val()==''){
+				 alert('联系方式不能为空');
+				 return  false;	
+			}
+		 
+		$.ajax({
+		    url:$('form').attr('action'),
+		    data:$('form').serialize(),
+		    dataType:'json',
+		    success:function(data){
+		     if(data.status==0){ 
+		             alert(data.info);
+		     }
+		     else {
+		             window.location.href="{:U('Index/info_weixin')}"
+		
+		     }
+		
+		
+		    }
+		
+		})  
+}
+</script>

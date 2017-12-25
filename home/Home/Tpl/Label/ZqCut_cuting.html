@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>吴刚砍树我砍价</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20150927.css?v=__VR__
+">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js?v=__VR__"></script>
+<script>
+var wxShareData = {:json_encode($shareData)};
+if(wxShareData) {
+    wx.config({
+        //debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        appId: wxShareData.appId,  //必填，公众号的唯一标识
+        timestamp: wxShareData.timestamp, // 必填，生成签名的时间戳
+        nonceStr: wxShareData.nonceStr, // 必填，生成签名的随机串
+        signature: wxShareData.signature,// 必填，签名，见附录1
+        jsApiList: [
+            'onMenuShareTimeline',
+            'onMenuShareAppMessage',
+            'hideOptionMenu',
+            'hideMenuItems',
+            'hideAllNonBaseMenuItem'
+        ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+    });
+}
+$(document).ready(function(e) {
+	wx.ready(function () {
+		wx.hideMenuItems({
+		    menuList: ['menuItem:share:appMessage','menuItem:share:timeline'] // 要隐藏的菜单项，只能隐藏“传播类”和“保护类”按钮，所有menu项见附录3
+		});
+    })
+	
+    var loadImg = 0;
+    var imgNum = $(".loadimg").length-1;
+    $(".loadimg").one('load', function () {
+        loadImg++;
+        if (loadImg == imgNum) {
+            $("#loading").hide();
+            $("#game").addClass("begin");
+        }
+    }).each(function () {
+        if (this.complete) $(this).load();
+    });
+});
+</script>
+</head>
+<body>
+<div id="loading">
+    <div id="loading">
+        <div class="loadingbox">
+            <h4>{$nodeName}</h4>
+            <div><i></i>
+                <img src="{:get_upload_url($logImg)}" />
+            </div>
+            <h5>Loading...</h5>
+            <h6>吴刚砍树我砍价</h6>
+        </div>
+    </div>
+    <img src="__PUBLIC__/Label/Image/20150927/bg2.jpg" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150927/tree2.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150927/boy2.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150927/boy3.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150927/hand.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150927/flower0.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150927/flower1.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150927/flower2.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150927/btnbg1.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20150927/poptitlebg.png" class="loadimg" />
+</div>
+<div id="game">
+    <div class="time dn">倒计时:<span></span>秒</div>
+    <div class="game">
+        <img src="__PUBLIC__/Label/Image/20150927/tree2.png" class="tree2">
+        <div class="boy"></div>
+        <div class="btn-opr"><a href="javascript:void(0)" class="btn-coffee">马上开始</a></div>
+        <div class="code dn">+砍去<span>￥<em id="price">0.00</em></span>元</div>
+    </div>
+    <div class="ready dn">
+        <span>3</span>
+        <p><i></i>手指抽搐不要紧<br>点击越多砍价越多<br>请猛戳屏幕来砍价</p>
+    </div>
+    <div class="end dn">
+        <div class="bg">
+        <p></p>
+        <div class="btn-opr"><a href="{:U('Label/ZqCut/index',array(id=>$id,wxid=>$wxid))}" class="btn-coffee">返回首页</a></div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+var gearprice = function(){
+    var percent = '{$cutingPrice}'/'{$totalCutPrice}';//还可以砍多少/最多可以砍多少
+    if(percent>=0.8){
+        return 30;
+    }else if(percent>=0.2 && percent<0.8){
+        return 50;
+    }else if(percent<0.2){
+        return 70;
+    }
+};
+var _global = {
+maxprice:'{$cutPrice}', //每次最多砍去的价格
+maxclick:'{$cutPrice}'/gearprice(), //每次能够砍去的价格
+clicknum:0,
+time:4
+}
+
+if(_global.maxclick<0.01){
+_global.maxclick=0.01;
+};
+var begin = false;
+$(document).ready(function(e) {
+	$("body").on("touchstart",function(e){
+        e.preventDefault();
+    });
+    $("body").on("touchmove",function(e){
+        e.preventDefault();
+    });
+    $(".end .btn-opr a").on("touchstart",function(e){
+        e.stopPropagation();
+    });
+    var isSupportTouch = "ontouchend" in document ? true : false;
+    var touchstart = "mousedown";
+    var touchend = "mouseup";
+    if(isSupportTouch){touchstart = "touchstart";touchend = "touchend";};
+    
+    $(".game").on(touchstart,function(){
+        if(begin){
+            var _this = $(this);
+            _this.removeClass("begin");
+            if($(".tree2").hasClass("an")){
+                $(".tree2").removeClass("an");
+            }
+            setTimeout(function(){
+                _this.addClass("begin");
+            },20);
+            setTimeout(function(){
+                $(".tree2").addClass("an");
+                $(".flower").addClass("an");
+            },400);
+            var i = Math.floor(Math.random()*3);
+            var left = Math.floor(Math.random()*20);
+            var top = Math.floor(Math.random()*20);
+            $(".boy").after('<div class="axe"></div><div class="flower an'+i+'" style="left:'+left+'%;top:-'+top+'%;"><img src="__PUBLIC__/Label/Image/20150927/flower'+i+'.png" class="flowerimg"></div>');
+            _global.clicknum++;
+            var num = _global.clicknum*_global.maxclick;
+            if(num>_global.maxprice){
+                $("#price").text(_global.maxprice);
+            }else{
+                $("#price").text(num.toFixed(2));
+            };
+        }
+    });
+    $(".game").on(touchend,function(){
+        var _this = $(this);
+            _this.removeClass("begin");
+    });
+    $(".game .btn-opr").on(touchstart,function(){
+        $(".ready").show();
+        setTimeout(function(){
+            $(".ready span").text("2");
+        },1000);
+        setTimeout(function(){
+            $(".ready span").text("1");
+        },2000);
+        setTimeout(function(){
+            $(".time").show();
+            var checkTime = function(){
+                    $(".time span").text(_global.time);
+                    if(_global.time==0){
+                        clearInterval(Int);
+                        return false;
+                    }
+                    _global.time--;
+                }
+            Int = setInterval(checkTime,1000);
+            $(".ready span").text("0");
+            $(".ready").hide();
+            begin = true ;
+            $(".code").show();
+            setTimeout(function(){
+                begin = false;
+                $(".code").hide();
+                $(".game").removeClass("begin");
+                $(".tree2").removeClass("an");
+                
+                var num = _global.clicknum*_global.maxclick;
+                
+                $.post("{:U('Label/ZqCut/cuting',array('id'=>$id))}",{price:num},function(data){
+					if(num>_global.maxprice){
+						num = _global.maxprice;
+					}else{
+						num = num.toFixed(2);
+					};
+                	var tip_str = '';
+                    if(data.status){
+                    	tip_str = '你大手一挥总共砍去了<span>'+num+'</span>元';
+                    }else{
+                    	tip_str = data.info;
+                    }
+                    setTimeout(function(){
+                        $(".time").hide();
+                        $(".tree2").addClass("anend");
+                        $(".end").show();
+                        var num = _global.clicknum*_global.maxclick;
+                        $(".end p").html(tip_str);
+                    },800);
+                },'json');
+                
+            },_global.time*1000);
+        },3000);
+        $(".game .btn-opr").hide();
+    });
+});
+</script>
+</html>

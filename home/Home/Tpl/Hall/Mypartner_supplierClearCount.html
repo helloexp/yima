@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券分销助手-结算管理</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js?v=__VR__"></script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div class="shopNav">
+          <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="fxzs"/>
+        </div>
+    
+        <div id="container">
+            <div id="main" class="rel">
+                <div class="sidenav"> 
+                    <include file="Hall/Mypartner/leftMenu" leftmenuid="cgjsgl"/> 
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                            <h4>数据管理</h4>
+                        </div>
+                    <div class="SearchArea fn">
+                        <form action="{:U('Hall/Mypartner/supplierClearCount')}" method="post">
+                            <div class="SearchAreaLeft">
+                            <label>
+                            <span>供货方</span>
+                            <input type="text" name="node_name" value="{:I('node_name')}"/>
+                            </label>
+                            
+                            <label>
+                            <span>日期</span>
+                            <input type="text" name="start_time" id="start_time" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$Think.request.start_time}"  />-<input type="text" name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time}" /></label>
+                            
+                            <label>
+                            <span>结算方式</span>
+                            <select name="control_type" id="select" class="textbox w100">
+                                <option value="">全部</option>
+                                <volist name="controlType" id="vo">
+                                <option value="{$key}" class="" <if condition="strval($key) heq $post['control_type']">selected="selected"</if>>{$vo}</option>
+                                </volist>
+                            </select>
+                            </label>
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:;" class="searchBtn" id="search">查询</a>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="shopCon">
+                        <table cellspacing="0" cellpadding="0" class="W-table">
+                            <tr class="th">
+                                <th>日期</th>
+                                <th>供货方</th>
+                                <th>结算方式</th>
+                                <th>应结算金额</th>
+                            </tr>
+                            <empty name="list" >
+                                    <tr class="info">
+                                        <td colspan="10" class="last">
+                                            <div class="nonedata"></div>
+                                        </td>
+                                    </tr>
+                            </empty>
+                            <volist name="list" id="vo">
+                            <tr>
+                                <td><?php echo date("Y-m-d",strtotime($vo['trans_date'])); ?></td>
+                                <td>{$vo.node_name}</td>
+                                <td>{$controlType[$vo['control_type']]}</td>
+                                <td><?php echo sprintf("%.2f",$vo['money']); ?></td>
+                            </tr>
+                            </volist>
+                        </table>
+                        <div class="page">{$page}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+    $(document).ready(function(){
+        $("#search").click(function(){
+            $("form").submit();
+        });
+    })
+</script>

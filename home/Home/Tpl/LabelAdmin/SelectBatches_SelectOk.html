@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>翼码旺财添加已创建活动</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wselect_et.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"/></script>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script>
+$(function(){
+	$("body").on("click",".etList ul li",function(e){
+    	var is_selected=$(this).hasClass("selected");
+    	if(is_selected == true)
+        {
+            $(this).removeClass("selected");
+        }
+        else
+        {
+            $(".etList ul li").removeClass("selected");
+            $(this).addClass("selected");
+        }
+        var batchPayStatus = $(this).attr('batch_pay_status');
+        if(batchPayStatus == '1')
+        {
+			$("#sub_back").addClass("disabled").attr("title","请选择已付费的活动").removeAttr("data-gettitle");
+            return false;
+        }
+        if(batchPayStatus == '2')
+        {
+			$("#sub_back").addClass("disabled").attr("title","请选择已付费的活动").removeAttr("data-gettitle");
+            return false;
+        }
+        if(batchPayStatus == '3')
+        {
+			$("#sub_back").addClass("disabled").attr("title","未购买多宝电商版,无法使用").removeAttr("data-gettitle");
+            return false;
+        }
+		$("#sub_back").removeClass("disabled").removeAttr("title").removeAttr("data-gettitle");
+	});
+    var _this=art.dialog.data('_this');
+    var _artdata=art.dialog.data('_artdata')?art.dialog.data('_artdata'):false;
+	if(_artdata){
+		_artdata.type && $("#chooseAct"+_artdata.type).click();
+		_artdata.canchange || $(".Wcanal-tab-title").hide();
+	}else{
+		$(".Wcanal-tab-title").hide();
+	}
+	$("body").on("click","#sub_back:not('.disabled')",function(e){
+        if($('#id').val() != ''){
+            var id = $("#id").val();
+            var batchType = $(".etList .selected input[name=batchType]").val();
+            var ckid = $(".etList .selected input[name=ckid]").val();
+            var addMoreActivity = $('#addMoreActivity').val();
+            if(!batchType){
+                alert('请选择互动模块');
+                return false;
+            }
+            var loading = art.dialog({title:false,lock:true,id:"loading"});
+            var paysenddata=art.dialog.data('paysenddata');
+            if(paysenddata!=undefined && paysenddata.callback) {
+            	var _callback=1;
+            	var paysenddataCallback = paysenddata.callback;
+            } else {
+            	var _callback=0;
+            	var paysenddataCallback = '';
+            }
+          //判断，重叠时间的在完全在以前活动时间范围以内的需弹不能添加的框，一部分在以前活动时间范围以内的弹修改的框，完全不再以前活动时间范围以内的不弹框
+          var postData = {
+        		  callback:_callback,
+        		  paysenddataCallback:paysenddataCallback,
+        		  id:id,
+        		  batchType:batchType,
+        		  ckid:ckid,
+        		  addMoreActivity:addMoreActivity
+        	};
+            if (addMoreActivity == '1') {
+            	//绑定互动模块前先判断添加模块时是否与原有绑定时间冲突
+            	checkAddedActivityTime(postData);
+            } else {
+            	//原先的直接提交的逻辑
+            	submitSelectBatches(postData);
+            }
+            return false;
+        }else{
+             
+                var ckdata = $(".etList .selected").find("#ckid_data").html();
+                try{
+                    ckdata = eval('('+ckdata+')');
+                    ckdata.rid = '{$rid}';
+                }catch(e){
+                    art.dialog.alert('请选择互动模块！');
+                }
+                var win = art.dialog.opener;
+                if(art.dialog.data('callback')){
+                    if(typeof(callback) == 'string'){
+                        art.dialog.opener[art.dialog.data('callback')].call(this,ckdata);
+                    }else{
+                        art.dialog.data('callback').call(this,ckdata);
+                    }
+                }else{
+                    win['{$callback}'].call(null,ckdata,_this);
+                }
+                art.dialog.close();
+        
+         }
+        
+    });
+	$('#sub_back_url').click(function(){
+		$.ajax({
+			type: "POST",
+		    url:$('#theform2').attr('action'),
+		    data:$('#theform2').serialize(),
+		    dataType:'json',
+		    success:function(data){
+		    	if (data.status==1) { 
+	                var win = art.dialog.open.origin;   //获取弹窗的父类窗口
+	                var datas = data.data;
+	                var call_back = 'editUrlCallBack';
+	                if(call_back && win[call_back] && typeof(win[call_back])=='function'){
+	                    try{ 
+	                        win[call_back].call(this, datas); 
+	                        art.dialog.close();
+	                    }catch(e){
+	                        art.dialog.alert('异常！');         
+	                    }; 
+	                }
+		     	} else {
+		     		Diaerror(data.info);
+				}
+		    }
+		
+		})
+	});
+    $("#sub_button").click(function(){
+        $("#theform").submit();
+    });
+    $("[data-id='batch_{$batch_type}']").addClass("hover");
+	
+	var arrSelect = {$arrSelect},
+		arrSelect = {list:arrSelect};
+	var html = template("arrSelect",arrSelect);
+	$("[name='batch_type1']").html(html);
+    for(var i=0;i<arrSelect.list.length;i++){
+        if(arrSelect.list[i].check){
+            var arrSelectnew = arrSelect.list[i];
+            var html = template("arrSelect",arrSelectnew);
+            $("[name='batch_type2']").html(html);
+        }
+    }
+	$("[name='batch_type1']").change(function(){
+		var text = $(this).find("option:selected").text();
+		for(var i=0;i<arrSelect.list.length;i++){
+			if(arrSelect.list[i].name==text){
+				var arrSelectnew = arrSelect.list[i];
+			}
+		}
+		var html = template("arrSelect",arrSelectnew);
+		$("[name='batch_type2']").html(html);
+	})
+});
+function checkAddedActivityTime(submitData){
+	var url = "{:U('LabelAdmin/SelectBatches/checkAddedActivityTime')}";
+    var id = $("#id").val();
+    var batchType = $(".etList .selected input[name=batchType]").val();
+    var ckid = $(".etList .selected input[name=ckid]").val();
+    var postData = {id:id,batchType:batchType,ckid:ckid};
+	$.post(url,postData,function(d){
+        if(d.status==1){
+        	/*如果是完全没有交叉时间时直接添加成功*/
+        	if (d.info.code == '-1') {
+        		submitSelectBatches(submitData);
+        	} else if (d.info.code == '-2') {
+        		/*有交叉时间的让用户选择修改渠道显示的时间*/
+        		var win = art.dialog.open.origin;
+        		var data = {
+        				title:d.info.m_name,
+        				m_id:ckid,
+        				channel_id:id,
+        				editUrl:d.info.editUrl
+        		};
+                win['addActivityCallback'].call(null,data);
+                art.dialog.close();
+        	}
+        }else{
+           var loading = art.dialog.get('loading');
+         //完全包含于原来活动的时间,报错
+           loading.time(2).content(d.info);
+        }
+     },'json');
+}
+
+function submitSelectBatches(postData) {
+	var url = "{:U('LabelAdmin/SelectBatches/Submit')}";
+	var loading = art.dialog.get('loading');
+	$.post(url,postData,function(d){
+        if(d.status==1){ 
+           if (postData.callback==1) { 
+         	  art.dialog.close();
+         	  art.dialog.open.origin[postData.paysenddataCallback].call(this,d);
+           } else {
+	           loading.time(2).content(d.info);  
+	           setTimeout("window.parent.location.reload()",2000);
+           }
+        } else {
+           loading.time(2).content(d.info);  
+        }
+    },'json');
+}
+</script>
+<script id="arrSelect" type="text/html">
+<option value="">全部</option>
+{{each list}}
+	<option value="{{value.value}}" {{if value.check}}selected="selected"{{/if}}>{{value.name}}</option>
+{{/each}}
+</script>
+</head>
+
+<body>
+	<div class="iframeCon">
+        <div class="Wcanal-tab inPop" id="Wcanal-tabon2">
+            <div class="Wcanal-tab-title fn">
+                <p id="chooseAct1" class="Wcanal-tab-hover"><a href="javascript:void(0);">选择互动模块</a></p>
+                <p id="chooseAct2"><a href="javascript:void(0);">添加模块链接</a></p>
+            </div>
+            <div class="Wcanal-tab-list">
+                <div class="SearchArea">
+                    <form id="theform" action="{:U('LabelAdmin/SelectBatches/SelectOk')}" method="post">
+                    <input type="hidden" id="id" name="id" value="{$id}" />
+                    <input type="hidden" id="filterType" name="filterType" value="{$filterType}" />
+                    <input type="hidden" id="callback" name="call_back" value="{$callback}" />
+                    <input type="hidden" id="addMoreActivity" name="addMoreActivity" value="{$_REQUEST['addMoreActivity']}" />
+                    <div class="SearchAreaLeft" style="width:700px;">
+                        <label <php>if($hide_batchsel==1){echo 'style="display:none"';}</php>>
+                    <select name="batch_type1" style="width:95px;">
+                        <option value="">全部</option>
+                    </select>
+                    <select name="batch_type2" style="width:95px;">
+                        <option value="">-请选择-</option>
+                    </select>
+                    </label>
+        
+                    <label>
+                    <span>活动状态</span>
+                    <select name="batch_status" style="width:85px;">
+                        <option value="">-请选择-</option>
+                        <option value="1" <eq name="batch_status" value="1">selected="selected"</eq> >未开始</option>
+                        <option value="2" <eq name="batch_status" value="2">selected="selected"</eq> >进行中</option>
+                    </select>
+                    </label>
+                    <label>
+                    <span>关键字</span>
+                    <input type="text" name="batch_name" id="jg_name" value="{$batch_name}">
+                    </label>
+                    </div>
+                    <div class="SearchAreaRight">
+                        <a href="javascript:void(0)" class="searchBtn" style="right:0;" id="sub_button">查询</a>
+                    </div>
+                    </form>
+                </div>
+                <div class="etList">
+                    <notempty name="batchList">
+                    <ul>
+                        <foreach name="batchList" item="batchls" >
+                        <li class="noImg <if condition="$batchls['batch_pay_status'] eq '1'">nopay
+                                    <elseif condition="$batchls['batch_pay_status'] eq '2'" />nopay
+                                    <elseif condition="$batchls['batch_pay_status'] eq '3'" />nopay
+                                    </if>" batch_pay_status="{$batchls['batch_pay_status']}">
+                            <notbetween name="batchls['batch_pay_status']" value="1,3">
+                            <input type="hidden" name="ckid" value="{$batchls['batch_id']}" />
+                            <input type="hidden" name="batchType" value="{$batchls['batch_type']}" />
+                            <script id="ckid_data" type="text/json">{$batchls|json_encode}</script>
+                            </notbetween>
+                            <div class="text">
+                                <h3><span title="{$batchls['info']}">{$batchls['smallname']}</span>
+                                    <if condition="$batchls['batch_status'] eq '3'" ><i class="gray type3">已过期</i>
+                                    <elseif condition="$batchls['batch_status'] eq '1'" /><i class="gray type2">未开始</i>
+                                    <elseif condition="$batchls['batch_status'] eq '2'" /><i class="gray">进行中</i>
+                                    </if>
+                                </h3>
+                                <p>有效期：{$batchls['start_time']|strtotime|date="Y-m-d",###}至{$batchls['end_time']|strtotime|date="Y-m-d",###}</p>
+                                <p>
+                                    点击量：<span>{$batchls['click_count']}</span>
+                                    <span class="ml50">
+                                    <if condition="$batchls['batch_pay_status'] eq '1'">付费状态：<span>未付费</span>
+                                    <elseif condition="$batchls['batch_pay_status'] eq '2'" />认证状态：<span>未认证</span>
+                                    <elseif condition="$batchls['batch_pay_status'] eq '3'" />付费状态：<span>未付费</span>
+                                    </if>
+                                </p>
+                            </div>
+                        </li>
+                        </foreach>
+                    </ul>
+                    <else/>
+                    <div class="iframeCon">
+                        <div class="Dianodate">
+                            <img src="__PUBLIC__/Image/member/nodata.gif" />
+                            <p>空空如也，您还没有创建该类活动~~</p>
+                            <p>您可以<a href="{$createUrl}" target="_blank">创建活动</a></p>
+                        </div>
+                    </div>
+                    </notempty>
+                    <div class="page mini"><div class="pagelink"><a href="{$createUrl}" target="_blank">快速创建</a></div>{$page}</div>
+                </div>
+                <div class="DiabtnCon">
+                    <a class="Diabtn-all btn-next" id="sub_back">确定</a>
+                    <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+                </div>
+            </div>
+            <div class="Wcanal-tab-list dn">
+                <form id="theform2" action="{:U('editUrl')}">
+                <div class="Gform pb30 oh">
+                    <ul>
+                        <li class="Gname">请输入链接地址</li>
+                        <li class="Ginput">
+                            <input name="go_url" value="{$go_url}" type="text" placeholder="http://">
+                            <input name="id" value="{$id}" type="hidden">
+                            <span class="txtTips">如："http://www.wangcaio2o.com"</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="DiabtnCon">
+                    <a class="Diabtn-all btn-next" id="sub_back_url">确定</a>
+                    <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+                </div>
+                </form>
+            </div>
+    	</div>
+    </div>
+</body>

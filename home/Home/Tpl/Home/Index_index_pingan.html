@@ -1,0 +1,477 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <title>操作平台-{:C('SITE_TITLE')}</title>
+        <meta name="keywords" content="{:C('SITE_KEYWORDS')}"/>
+        <meta name="description" content="{:C('SITE_DESCRIPTION')}"/>
+        <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <link href="__PUBLIC__/Css/Windex.css?v=__VR__" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery.easing.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/Windex.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    </head>
+    <body>
+        <div id="wrapper" class="edeff5">
+            <include file="./Home/Tpl/Public/Public_header.html"/>
+            <div class="IndHeader">
+                <div class="w1100 fn">
+                    <div class="userbar">
+                        <div class="userbar-portrait">
+                            <div class="portrait" id="js-header-logo">
+                                <?php
+                                if($nodeInfo['head_photo']!=""){
+                                ?>
+                                <img src="{:get_upload_url($nodeInfo['head_photo'])}"
+                                     id="head_photo_src"/>
+                                <?php
+                                }else{
+                                ?>
+                                <img src="__PUBLIC__/Image/portrait.gif" id="head_photo_src"/>
+                                <?php
+                                }
+                                ?>
+                                <input type="hidden" value="" name="resp_head_img" id="resp_head_img"/>
+                            </div>
+                        </div>
+                        <div class="userbar-name">
+                            {$nodename}
+                            <?php if($nodeInfo['node_type']=='2'&&$nodeInfo['check_status']!='2'){?>
+                            <i class="icon-novip"></i>
+                            <?php }else{?>
+                            <i class="icon-vip"></i>
+                            <?php }?>
+                        </div>
+                        <div class="userbar-id">企业旺号：{$clientid}</div>
+                        <?php
+                        //if($nodetype=='1'){
+                        if($nodeInfo['pay_type']==1&&$nodeInfo['node_type']<=2){
+                        ?>
+                        <div class="userbar-money">
+                            余额：<span><?php if(!empty($FlowInfo['AccountPrice'])){?><?php echo $FlowInfo['AccountPrice']; ?><?php}else{?>
+                                0.00<?php }?></span>元
+                            &nbsp;&nbsp;&nbsp;&nbsp;旺币：<span>{$wbInfo['wbOver']}</span>个
+                            <a href="javascript:void(0)" onclick="wbMsg()"><i class="icon-question"></i></a>
+                        </div>
+                        <?php }?>
+                        <div class="userbar-money mt10">
+                            <a href="{:U('Home/AccountInfo/index')}">账户中心</a>
+                            <?php
+                            //&&($nodeInfo['node_type']==1||($nodeInfo['node_type']==2&&$nodeInfo['check_status']==2)
+                            if(($nodeInfo['pay_type']==1||$nodeInfo['pay_type']==0)&&$nodeInfo['node_type']<=2){?>
+                            <a href="<?php echo C('YZ_RECHARGE_URL')?>&node_id=<?php echo $userInfo['node_id'];?>&name=<?php echo $userInfo['user_name'];?>&token=<?php echo $token;?>"
+                               target="_blank" class="ml10">充值</a>
+                            <?php }
+                            if( $nodeInfo['pay_type'] == '1' && ($nodeInfo['node_type'] == '2' || $nodeInfo['node_type'] == '5')  ){
+                            ?>
+                            <a href="{:U('Home/Wservice/buywc')}" class="ml10 red">在线签约</a>
+                            <?php } ?>
+                            <a href="javascript:;" class="ml10 red" id="wangmabi">旺币充值卡</a>
+                        </div>
+                    </div>
+                    <div class="wcService fn">
+                        <a href="javascript:void(0)" onclick="managercard()"><img src="__PUBLIC__/Image/wcService.png"
+                                                                                  class="l"/></a>
+                        <dl>
+                            <dd class="qq"><a href="http://wpa.b.qq.com/cgi/wpa.php?ln=1&key=XzkzODA2Njc3MF8zNzA4NjdfNDAwODgwNzAwNV8yXw"
+                                              target="_blank"><i class="icon-wcService4"></i>在线QQ咨询</a></dd>
+                            <dd class="class">
+                                <a href="javascript:void(0)" onclick="oClass()"><i class="icon-wcService5"><?=date('Y')?>
+                                        <br/><?=date('m.d')?></i>O2O营销公开课</a>
+
+                                <div class="dn">
+                                    <span id="oClassTeacher">讲师{$o2o_info.lector_name}</span>
+                                    <span id="oClassName">{$o2o_info.content}</span>
+                                    <span id="oClassTime"><?=dateformat($o2o_info['apply_time'],'Y-m-d H:i:s')?></span>
+                                    <span id="oClassOrder">{$o2o_info.apply_info}</span>
+                                    <span id="oClassUrl">./Home/Upload/oto/{$o2o_info.lector_url}</span>
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="activityData">
+                        <ul class="fn">
+                            <li><p>{$batchNum}</p><h4>活动数</h4></li>
+                            <li><p>{$visitSum}</p><h4>活动访问人数</h4></li>
+                            <li><p>{$sendSum}</p><h4>卡券发放数</h4></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div id="container">
+                <div id="main">
+                    <div class="ind-steps fn">
+                        <div class="ind-step">
+                            <i class="step-icon1"></i>
+
+                            <div class="step-text pl15">
+                                <h1 class="pl5">创建门店</h1>
+
+                                <p>O2O营销第一步</p>
+                            </div>
+                        </div>
+                        <i class="step-next"></i>
+
+                        <div class="ind-step">
+                            <i class="step-icon2"></i>
+
+                            <div class="step-text pl5">
+                                <h1>申请核验机具</h1>
+
+                                <p class="pl10">O2O营销第二步</p>
+                            </div>
+                        </div>
+                        <i class="step-next"></i>
+
+                        <div class="ind-step">
+                            <i class="step-icon3"></i>
+
+                            <div class="step-text pl15">
+                                <h1>创建卡券</h1>
+
+                                <p>O2O营销第三步</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ind-main">
+                        <div class="nav-hot">
+                            <div class="left-nav">
+                                <div class="news-sign"></div>
+                                <h1>热门营销场景</h1>
+
+                                <p>在这儿设计您的个性化营销活动</p>
+                            </div>
+                            <ul class="list-wrapper fn">
+                                <a href="{:U('LabelAdmin/Bm/index')}">
+                                    <li>
+                                        <div class="hot-part hot-part1">
+                                            <i class="hot-part-i1"></i>
+                                        </div>
+                                        <h1>市场调研</h1>
+
+                                        <p><span>43%</span>的用户正在使用</p>
+                                    </li>
+                                </a>
+                                <a href="{:U('LabelAdmin/SnowBall/index')}">
+                                    <li>
+                                        <div class="hot-part hot-part2">
+                                            <i class="hot-part-i2"></i>
+                                        </div>
+                                        <h1>圣诞节</h1>
+
+                                        <p>已有<span>30万</span>人参加圣诞节活动</p>
+                                    </li>
+                                </a>
+                                <a href="{:U('Number/Index/index')}">
+                                    <li>
+                                        <div class="hot-part hot-part3">
+                                            <i class="hot-part-i3"></i>
+                                        </div>
+                                        <h1>百度直达号</h1>
+
+                                        <p>已有<span>500W</span>商家开通百度直达号</p>
+                                    </li>
+                                </a>
+                                <a href="{:U('Ecshop/O2OHot/index',array('batch_type'=>27,'is_new'=>2))}">
+                                    <li>
+                                        <div class="hot-part hot-part4">
+                                            <i class="hot-part-i4"></i>
+                                        </div>
+                                        <h1>新品推荐</h1>
+
+                                        <p><span>100%</span>的电商用户使用</p>
+                                    </li>
+                                </a>
+                                <a href="{:U('Ecshop/Index/preview')}">
+                                    <li>
+                                        <div class="hot-part hot-part3">
+                                            <i class="hot-part-i5"></i>
+                                        </div>
+                                        <h1>旺财小店</h1>
+
+                                        <p>已带来<span>5200万</span>销售额</p>
+                                    </li>
+                                </a>
+                                <a href="{:U('LabelAdmin/News/index')}">
+                                    <li class="mt70">
+                                        <div class="hot-part hot-part4">
+                                            <i class="hot-part-i6"></i>
+                                        </div>
+                                        <h1>抽奖</h1>
+
+                                        <p><span>6%</span>的用户发起过抽奖活动</p>
+                                    </li>
+                                </a>
+                                <a href="{:U('Alipay/Index/index')}">
+                                    <li class="mt70">
+                                        <div class="hot-part hot-part1">
+                                            <i class="hot-part-i7"></i>
+                                        </div>
+                                        <h1>支付宝扫码支付</h1>
+
+                                        <p><span>68%</span>的用户已选择开通</p>
+                                    </li>
+                                </a>
+                                <a href="{:U('Weixin/Weixin/index')}">
+                                    <li class="mt70">
+                                        <div class="hot-part hot-part2">
+                                            <i class="hot-part-i8"></i>
+                                        </div>
+                                        <h1>微信公众号</h1>
+
+                                        <p><span>80%</span>的用户通过旺财管理</p>
+                                    </li>
+                                </a>
+                            </ul>
+                        </div>
+                        <img src="__PUBLIC__/Image/index-line-shadow.png" alt=""/>
+
+                        <div class="nav-normal" style="padding-top:6px;">
+                            <div class="left-nav">
+                                <h2 style="padding-top:0;">平安营销平台</h2>
+                            </div>
+                            <ul class="list-wrapper fn list-yw">
+                                <a href="{:U('Fb/PinganMerchant/merchant')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon2"></i>
+
+                                        <h2>商户管理</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Fb/PinganGoods/goods')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon4"></i>
+
+                                        <h2>商品管理</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Fb/PinganGoods/coupon')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon5"></i>
+
+                                        <h2>优惠管理</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Fb/PinganMember/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon3"></i>
+
+                                        <h2>客户管理</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Fb/PinganPoint/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon1"></i>
+
+                                        <h2>积分管理</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Fb/PinganBusiness/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon1"></i>
+
+                                        <h2>业务管理</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Fb/PinganActivity/selectCode')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon1"></i>
+
+                                        <h2>活动码查询</h2>
+                                    </li>
+                                </a>
+                            </ul>
+                        </div>
+
+                        <div class="nav-normal">
+                            <div class="left-nav">
+                                <h2 style="padding-top:0;">旺业务</h2>
+                            </div>
+                            <ul class="list-wrapper fn list-yw">
+                                <a href="{:U('Home/Index/marketingShow1')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon1"></i>
+
+                                        <h2>常见营销活动</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Home/Index/marketingShow2')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon2"></i>
+
+                                        <h2>节日营销活动</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Home/Index/marketingShow5')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon3"></i>
+
+                                        <h2>多宝电商</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Alipay/Index/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon5"></i>
+
+                                        <h2>二维码支付</h2>
+                                    </li>
+                                </a>
+                            </ul>
+                        </div>
+                        <div class="nav-normal">
+                            <div class="left-nav">
+                                <h2>旺渠道</h2>
+                            </div>
+                            <ul class="list-wrapper fn list-qd">
+                                <a href="{:U('Weixin/Weixin/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon6"></i>
+
+                                        <h2>微信营销</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('LabelAdmin/Weibo/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon7"></i>
+
+                                        <h2>新浪微博</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Number/Index/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon8"></i>
+
+                                        <h2>百度直达号</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('LabelAdmin/Channel/offlineCancel')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon9"></i>
+
+                                        <h2>二维码标签渠道</h2>
+                                    </li>
+                                </a>
+                            </ul>
+                        </div>
+                        <div class="nav-normal">
+                            <div class="left-nav">
+                                <h2>旺管理</h2>
+                            </div>
+                            <ul class="list-wrapper fn list-gl">
+                                <a href="{:U('WangcaiPc/NumGoods/numGoodsList')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon10"></i>
+
+                                        <h2>卡券管理</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Home/Store/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon11"></i>
+
+                                        <h2>门店管理</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Member/Member/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon12"></i>
+
+                                        <h2>粉丝管理</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('DataCenter/DateData/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon13"></i>
+
+                                        <h2>数据分析</h2>
+                                    </li>
+                                </a>
+                            </ul>
+                        </div>
+                        <div class="nav-normal">
+                            <div class="left-nav">
+                                <h2>旺工具</h2>
+                            </div>
+                            <ul class="list-wrapper fn list-gj">
+                                <a href="{:U('MicroWeb/Index/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon14"></i>
+
+                                        <h2>微官网</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('VisualCode/Index/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon15"></i>
+
+                                        <h2>炫码</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('MarketActive/Tool/pictext')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon16"></i>
+
+                                        <h2>图文编辑</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('ListShop/ListShop/index')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon17"></i>
+
+                                        <h2>门店导航</h2>
+                                    </li>
+                                </a>
+                                <a href="{:U('Home/Case/entrance')}">
+                                    <li>
+                                        <i class="normal-icon normal-icon18"></i>
+
+                                        <h2>O2O案例</h2>
+                                    </li>
+                                </a>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html"/>
+            <div class="service"></div>
+        </div>
+        <script type="text/javascript">
+            $(function(){
+                //上传logo图片
+                $("#js-header-logo").click(function(){
+                    var opt = {
+                        obj:$("#img_resp_show"),
+                        height:160,
+                        width:160,
+                        callback:function(data){
+                            //更新头销
+                            var loading = art.dialog({title:false,content:'正在更新...'});
+                            $.post("{:U('Home/Index/saveHeadLogo')}",{
+                                savename:data.savename
+                            },function(res){
+                                loading.close();
+                                if(!res.status){
+                                    alert(res.info);
+                                    return;
+                                }
+                                $("#img_resp_show").attr('src',data.src);
+                            },'json');
+                        }
+                    };
+                    open_img_uploader(opt);
+                });
+            })
+        </script>
+    </body>
+</html>

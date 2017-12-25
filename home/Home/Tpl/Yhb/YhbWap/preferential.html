@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>优惠详情</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_yhb.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.6/dialog-min.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/artDialog4.6/ui-dialog.css"/>
+<style type="text/css">
+	#mainCon .item:first-child { border-top: 0;}
+</style>
+</head>
+<body>
+<div id="wrapper" class="exgratia">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+        	<div class="goback"><a href="javascript:history.go(-1);"><i ></i></a></div>
+            <div class="logo"><!--<i>惠</i>--><span>优惠详情</span></div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="bgf0efed fn">
+                <div class="item">
+                	<div class="banner"><img src="__UPLOAD__/{$re_goods.goods_image}" width="100%" height="auto" /></div>
+                	<div class="infoCon detail">
+                    	<dl class="detail">
+                    		<dt>{$re_goods.goods_name}</dt>
+                    		<dd>有效期: {$re_goods.start_time}至{$re_goods.end_time}</dd>
+                    		<dd>数量：<span>{$re_goods.remain_num}</span></dd>
+                    	</dl>
+                    	<a href="javascript:;" label_id="{$re_goods.label_id}" flag="{$flag}" class="btn">立即领取</a>
+						<input type="hidden" value="{$wein_appid}" />
+                    </div>
+                </div>
+                <div class="item">
+                	<div class="infoTitle">使用规则</div>
+                	<div class="infoCon">
+                        {$re_goods.goods_desc}
+                    </div>
+                </div>
+                
+                <div class="item">
+                	<div class="infoTitle">适用商店</div>
+                	<volist name="re_store" id="vo">
+                	<div id="suitableShop">
+                		<div class="address">
+							<a href="{:U('Yhb/YhbWap/store',array('store_id'=>$vo['store_id']))}">
+								<p class="title">{$vo.store_name}</p>
+								<p class="con">{$vo.address}<span class="km"><?php if ($vo['distance']) {
+									echo $vo['distance'];
+								} ?></span></p>
+							</a>
+	                    	<a href="tel:{$vo.store_phone}" class="phone"></a>
+	                    </div>
+                	</div>
+                	</volist>
+                </div>
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+
+</body>
+<script type="text/javascript">
+	var loadhtml = '<div id="infscr-loading" style="text-align: center; display:none;"><img src="__PUBLIC__/Label/Image/Item/loading.gif"><div><em>加载中...</em></div></div>';
+	$("body").append(loadhtml);
+	 $('.btn').click(function(){
+		 var flag=$(this).attr('flag');
+	 	 var label_id = $(this).attr('label_id');
+		 if(flag == '1'){
+			 $.ajax({
+				 type: "POST",
+				 url: "{:U('Yhb/YhbWap/goods_exchange')}",
+				 data: {'label_id':label_id},
+				 dataType: "json",
+				 success: function(data){
+					 var code = data['code'];
+					 var info = data['info'];
+					 if(code == '0000'){
+						 $("#infscr-loading").show();
+						 $("#infscr-loading em").text(info);
+						 $("#infscr-loading img").hide();
+						 setTimeout(function(){
+							 var win = art.dialog.open.origin;
+							 $("#infscr-loading").hide();
+						 },3000);
+						 return false;
+					 }
+					 if(code == '1001'){
+						 $("#infscr-loading").show();
+						 $("#infscr-loading em").text('领取失败，优惠券已被领完');
+						 $("#infscr-loading img").hide();
+						 setTimeout(function(){
+							 var win = art.dialog.open.origin;
+							 $("#infscr-loading").hide();
+						 },3000);
+						 return false;
+					 }
+					 if(code == '1003'){
+						 $("#infscr-loading").show();
+						 $("#infscr-loading em").text('今天您已经领取过了！');
+						 $("#infscr-loading img").hide();
+					 }else{
+						 $("#infscr-loading").show();
+						 $("#infscr-loading em").text('领取失败：'+info+'.');
+						 $("#infscr-loading img").hide();
+
+					 }
+					 setTimeout(function(){
+						 $("#infscr-loading").hide();
+					 },3000);
+				 }
+			 });
+		 }
+		 if(flag == '0'){
+		 	location.href = "{:U('Yhb/YhbWap/getone')}&label_id="+label_id;
+		 }
+
+	 });
+
+
+
+	function newPath(path){
+		path = path.split("p=");
+		var p = path[1]*1+1;
+		newpath = path[0]+"p="+p;
+		return newpath;
+	};
+</script>
+</html>

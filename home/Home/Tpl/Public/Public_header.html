@@ -1,0 +1,155 @@
+<!--翼蕙宝导航文件-->
+<if condition="$userInfo['node_id'] eq C('Yhb.node_id')">
+    <link href="__PUBLIC__/Css/Wyhb.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <include file="./Home/Tpl/Yhb/Login/loginHeader.html" />
+    <else/>
+    <php>if((isset($is_yhb) && $is_yhb==1)||in_array($_SERVER['HTTP_HOST'], C('yhb.domain'))){</php>
+    <include file="./Home/Tpl/Public/Public_yhb_header.html" />
+    <php>}elseif((isset($is_cnpc_gx) && $is_cnpc_gx)||in_array($_SERVER['HTTP_HOST'], C('cnpc_gx.domain'))){</php>
+    <include file="./Home/Tpl/Public/Public_cnpcgx_header.html" />
+    <php>}elseif($userInfo['node_id'] == C('df.node_id')){</php>
+    <include file="./Home/Tpl/Public/Public_df_header.html" />
+    <php>}elseif((isset($is_zggk) && $is_zggk)||in_array($_SERVER['HTTP_HOST'], C('zggk.domain'))){</php>
+    <include file="./Home/Tpl/Public/Public_zggk_header.html" />
+    <php>}else{</php>
+    <!--正常顶部-->
+    <div id="headerTwo">
+        <div class="headerBg">
+            <div class="headerCon fn">
+                <div class="logo">
+                    <div class="logo-img">
+                        <a href="{:U('Home/Index/index')}" class="a-hide"></a>
+                    </div>
+                </div>
+                <php>if($new_role_id!=2 && $userInfo['node_id'] == C('GpEye.node_id')){</php>
+                <div class="headerNav" id="headerNav">
+                    <ul id="headerNavUl">
+                        <li><a class="headerNavA" href="javascript:void(0);" onclick="edit_user()">修改密码</a></li>
+                    </ul>
+                </div>
+                <script type="text/javascript">
+                function edit_user(id) {
+                    var title = "编辑";
+                    art.dialog.open("{:U('GpEye/AccountInfo/index')}", {
+                        width: 500,
+                        title: title
+                    });
+                }
+                </script>
+                <php>}else{</php>
+                <include file="./Home/Tpl/Public/Public_headerNav.html" />
+                <php>}</php>
+                <?php
+                if(!empty($userInfo['node_id']))
+                {
+                ?>
+                    <div class="headerOpr">
+                        <div class="headerOprList <?php if($unReadMsg>0){ ?>hasMoreList<?php }?>">
+                            <a href="{:U('Home/AccountInfo/message')}"><i class="icon-mail-alt <?php if($unReadMsg>0){ ?>has<?php }?>"></i></a>
+                            <?php if($unReadMsg>0){ ?>
+                            <div class="headerMore">
+                                <div class="headerMoreNews">
+                                    <volist name="msgArrcount" id='v'>
+                                        <if condition="$v['message_type'] eq 1">
+                                            <a href="{:U('Home/AccountInfo/message')}">系统消息 
+                                    <elseif condition="$v['message_type'] eq 2"/>
+                                    <a href="{:U('Home/AccountInfo/batch_msg')}">O2O活动消息
+                                    <elseif condition="$v['message_type'] eq 3"/>
+                                    <a href="{:U('Home/AccountInfo/message_new')}">
+                                    留言板消息
+                                    <elseif condition="$v['message_type'] eq 4"/>
+                                    <a href="{:U('LabelAdmin/OrderList/index')}">
+                                    电商订单提醒
+                             </if>
+                            <em>
+                            ({$v['new_message_cnt']})
+                            </em>
+                             </a>
+                                    </volist>
+                                </div>
+                            </div>
+                            <?php }?>
+                        </div>
+                        <php>if($new_role_id!=2 && $userInfo['node_id'] == C('GpEye.node_id')){</php>
+                        <php>}else{</php>
+                        <div class="headerOprList"><a href="{:U('Home/Login/index')}">返回官网</a></div>
+                        <php>}</php>
+                        <div class="headerOprList"><a href="index.php?g=Home&m=Logout&a=index">[退出]</a></div>
+                    </div>
+                    <div class="headerMsg">
+                        <div class="text"><span>欢迎，{$userInfo.user_name}</span><i class="icon-down-dir"></i><i class="icon-up-dir"></i></div>
+                        <php>if($new_role_id!=2 && $userInfo['node_id'] == C('GpEye.node_id')){</php>
+                        <php>}else{</php>
+                        <div class="headerMore">
+                            <p>{$userInfo.user_name}</p>
+                            <p><span>{$nodename}<?php if($userInfo['status_tips']==1){ ?>，尊敬的旺财用户：截止到<span><?php echo date('Y年m月d日');?></span>,您的账户<span>已欠费</span>。为了不影响您继续使用旺财,请您尽快充值。如有疑问,请致电客服热线400-8827770。 <a href="<?php echo C('YZ_RECHARGE_URL')?>&node_id=<?php echo $userInfo['node_id'];?>&name=<?php echo $userInfo['user_name'];?>&token=<?php echo $token;?>">马上充值</a>
+                                <?php } ?>
+                                </span>
+                            </p>
+                            <p class="link"><a href="{:U('Home/AccountInfo/index')}">我的账户</a><a href="javascript:void(0)">我的任务</a></p>
+                            <p class="link">
+                                <?php
+                            //支撑工单地址
+                            $pzt=get_iss_page_url('', '');
+                            if($_SESSION['GET_URL']==""){
+                            $userService = D('UserSess', 'Service');
+                            $sso = $userService->initSso();
+                            $userInfo = $userService->getUserInfo();
+                            $epos=C('EPOS_LOGIN_URL')."?token=".$userInfo['token']."&node_id=".$userInfo['node_id']."&node_name=".$userInfo['name']."&user_id=".$userInfo['user_id']."&user_name=".$userInfo['user_name'];
+                            session("epos_url",$epos);
+                            session("token_url",$userInfo['token']);
+                            $ds=C('DS_URL')."?token=".$userInfo['token']."&node_id=".$userInfo['node_id']."&node_name=".$userInfo['name']."&user_id=".$userInfo['user_id']."&user_name=".$userInfo['user_name'];
+                            session("ds_url",$ds);
+                            session('GET_URL','1');   
+                            }
+                            if(_hasIss()){
+                            ?>
+                                    <a target="_blank" href="<?php echo $pzt;?>">翼码凭证通</a>
+                                    <?php
+                            }
+                            ?>
+                                        <a target="_blank" href="<?php echo !empty($epos)?$epos:$_SESSION['epos_url'];?>">EPOS系统</a>
+                                        <a target="_blank" href="<?php echo !empty($ds)?$ds:$_SESSION['ds_url'];?>">电商平台</a>
+                                        <?php
+                            //查询用户是否管理员
+                            $uInfo = M('tuser_info')->field("role_id")->where("node_id='".$userInfo['node_id']."' AND user_id='".$userInfo['user_id']."'")->find();
+                            if($uInfo['role_id']=='2'||$userInfo['node_id']=='00000000'){
+                            $sso_admin_url=C('SSO_ADMIN');
+                            $sso_id=C('SSO_SYSID');
+                            if($userInfo['token']=="" && !empty($_SESSION['token_url'])){
+                                $token_url=$_SESSION['token_url'];
+                            }else{
+                                $token_url=$userInfo['token'];
+                            }
+                            $sso_url=$sso_admin_url.$sso_id."&token=".$token_url;
+                            ?>
+                                            <a target="_blank" href="<?php echo $sso_url;?>">SSO后台</a>
+                                            <?php
+                            }
+                            ?>
+                                                <?php
+                            if(_hasIss() && $userInfo['node_id']=='00000000'){
+                                if($userInfo['token']==""){
+                                    $token_url=$_SESSION['token_url'];
+                                }else{
+                                    $token_url=$userInfo['token'];
+                                }
+                                $wcadmin=C("WCADMIN_URL").$token_url;
+                            ?>
+                                                    <a target="_blank" href="<?php echo $wcadmin;?>">旺财后台</a>
+                                                    <?php
+                            }
+                            ?>
+                            <a href="/view/agent">代理商管理</a>
+                            </p>
+                        </div>
+                        <php>}</php>
+                    </div>
+                    <?php
+                }
+                ?>
+            </div>
+        </div>
+    </div>
+    <php>}</php>
+    </if>

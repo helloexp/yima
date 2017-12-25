@@ -1,0 +1,399 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>翼码旺财注册__{:C('SITE_TITLE')}</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wdefault.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/artDialog6/ui-dialog.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.nivo.slider.pack.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wdefault.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<style>
+	.correct{visibility:hidden;margin-right:20px;color:#51dc14;font-size:20px;font-weight:bold;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(e){
+	$(".btn-regForm").attr("disabled",false);
+	$("#node_name").blur(function(){
+		
+		var nodename=$("#node_name").val();
+		if(nodename!="")
+		{
+			
+			$.post("{:U('Home/Reg/nodequery')}",{nodename:nodename},function(result){
+			
+				if(result==2)
+				{
+					$('#errshow').html('<i class="loginFormclose"></i><span style="color:#f7c7c7;line-height:18px;">由于您已经是翼码其他业务的客户，请拨打400-882-7770客户热线，我们会马上帮您开通旺财免费版业务！</span>');
+					$('#nodeok').val('2');
+				}else
+				{
+					$('#errshow').html('');
+					$('#nodeok').val('1');
+				}			
+			
+			});
+		
+		}		
+
+	});
+
+    //初始化citycode
+    $(function(){
+        CityCode({
+            'province_code':$('#province_code'),
+            'city_code':$('#city_code'),
+            'selected':'{$_SESSION["province_code"]}',
+            'url':"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+        });
+    });
+
+    $(".js-getSmscode").click(function(e){
+        var contact_phone=$("input[name=contact_phone]").val();
+        if(contact_phone == ''){
+            alert("联系人手机不能为空");
+            return false;
+        }
+        if($(this).prop('disabled')){
+            return;
+        }
+        dialogSendSms();
+    });
+
+});
+function submitform()
+{
+	var user_name=$("input[name=user_name]").val();
+	var pw1=$("input[name=user_password]").val();
+	var pw2=$("input[name=re_password]").val();
+	var nodeisok=$('#nodeok').val();
+	var regemail=$("#regemail").val();
+	var node_name=$("#node_name").val();
+	var contact_name=$("#contact_name").val();
+	var contact_phone=$("#contact_phone").val();
+	var client_manager=$("#client_manager").val();
+	var province_code=$("#province_code").val();
+	var city_code=$("#city_code").val();	
+	var verify = $('#verify').val();
+
+	if(regemail=="")
+	{	alert("用户名不能为空！");
+		return false;	
+	}
+	if(node_name=="")
+	{	alert("企业名称不能为空！");
+		return false;	
+	}
+	if(contact_name=="")
+	{	alert("姓名不能为空！");
+		return false;	
+	}
+	if(contact_phone=="")
+	{	alert("手机不能为空！");
+		return false;	
+	}	
+	var text =  /^1\d{10}$/;
+    if (!text.test(contact_phone)) {
+    	alert("手机号只能输入11位数字");
+    	return false;
+    }
+	if(province_code=="")
+	{
+		alert("所在城市不能为空！");
+		return false;	
+	}
+	if(city_code=="")
+	{
+		alert("所在城市不能为空！");
+		return false;	
+	}
+	var myreg = /^([a-zA-Z0-9]+[_|\_|\-|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\-|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+	if(!myreg.test($("#regemail").val()))
+	{
+		alert('请输入有效的邮箱！');			
+		return false;
+	}
+
+	if(pw1 == ''){
+		alert("密码不能为空");
+		return false;
+	}
+    if(pw1.length < 6){
+        alert("密码不能少于6位");
+        return false;
+    }
+	if(pw2 == ''){
+		alert("再次输入密码");
+		return false;
+	}
+	if(pw1 != pw2){
+		alert("两次密码输入不一致");
+		return false;
+	}
+	
+	if(node_name.getBytes() < 6){
+		alert("企业名称不能小于6字节或三个汉字");
+		return false;
+	}
+	if(contact_name.getBytes() < 2){
+		alert("业务负责人姓名不能小于2字节或一个汉字");
+		return false;
+	}
+	if(nodeisok=='2')
+	{
+		alert('“'+node_name+'”（企业名）已在旺财平台注册，请拨打400-882-7770联系客服取回账号！');
+		return false;		
+	}
+
+	var checkstr=0;
+	var agreeit = $("input[name='agreeit']");     
+        agreeit.each( function() {     
+            if ($(this).attr("checked")) {     
+                checkstr+=1;     
+            }     
+       });     
+	if(checkstr==0)
+	{
+		alert("旺财服务协议必须打钩！");
+		return false;	
+	}
+	
+	if (verify == '') {
+		alert("验证码不能为空！");
+		return false;
+	}
+	
+	$(".btn-regForm").css("background","#ddd").css("color","#666").attr("disabled",true);
+	var dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true,id:'submitting'});
+	
+	$.ajax({
+        type: "POST",
+        data:$('#verify').serialize(),
+        url: "{:U('Home/Reg/checkImgCode')}",
+        success: callbackImgCode,
+        dataType:"json"
+     });
+		
+}
+
+callbackImgCode = function(data){
+	if (data.status) {
+		$("#regform").submit();	
+	} else {
+		alert(data.info);
+		$('#verifyImg').click();
+		$('#verify').val('');
+		$('#verify').focus();
+		var subDialog = art.dialog.get('submitting');
+		subDialog.close();
+	}
+}
+
+String.prototype.getBytes = function() {       
+    var cArr = this.match(/[^\x00-\xff]/ig);       
+    return this.length + (cArr == null ? 0 : cArr.length);      
+}  
+
+function fleshVerify(){ 
+    //重载验证码
+    var time = new Date().getTime();
+        document.getElementById('verifyImg').src= '{:U("Home/Verifycode/verify")}&time='+time;
+ }
+
+</script>
+<script type="text/javascript">
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?ab5c1948317f7d13b46c8f6fa373c3ee";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+</head>
+<body>
+
+<div id="wrapper">
+	<include file="Public:loginHeader"/>
+	<div id="container">
+		<div id="main">
+			<p class="reg-title">用户注册<span><a href="{:U('Home/Login/showLogin')}">已注册，立即登录&gt;&gt;</a></span></p>
+			<form action="{:U('Home/Reg/nodeadd')}" method="post" name="regform" id="regform">
+			<input type="hidden" name="nodeok" id="nodeok" value="" />
+			<input type="hidden" name="tg_id" id="tg_id" value="{$tg_id}" />
+			<input type="hidden" name="zqgqtype" id="zqgqtype" value="{$zqgqtype}" />
+			<input type="hidden" name="from_user_id" id="from_user_id" value="{$from_user_id}" />
+            <input type="hidden" name="reg_from" id="reg_from" value="{$_REQUEST['Reg_from']}" />
+            <input type="hidden" name="landname" id="landname" value="{$landname}">
+            <input type="hidden" name="isHlepCome" id="landname" value="{$isHlepCome}">
+			<div class="reg-wrap mt15 mb30">
+				<table>
+					<tr>
+						<td class="l-info">登录信息</td>
+						<td class="r-info">
+							<table class="input-table">
+								<tr>
+									<td class="reg-item-tit"><span>*</span>用户名</td>
+									<td class="reg-item-input"><input name="regemail" id="regemail" class="validate[required,custom[email],ajax[ajaxUserCallPhp]]" type="text" placeholder="如:service@imageco.com.cn" value="<?php if($_SESSION['regemail']!=''){?><?php echo $_SESSION['regemail'];?><?php }?>" style="ime-mode:disabled"/></td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr>
+									<td class="reg-item-tit"><span>*</span>密码</td>
+									<td class="reg-item-input"><input placeholder="请填写您的登录密码" class="validate[required,minSize[6],maxSize[16]]" name="user_password" id="user_password"  type="password"/></td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr>
+									<td class="reg-item-tit"><span>*</span>确认密码</td>
+									<td class="reg-item-input"><input name="re_password" id="re_password"  class="validate[required,equals[user_password],minSize[6],maxSize[16]]" type="password" placeholder="请确认您的登录密码"/></td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr><td colspan="3" style="padding:10px 0 0;"><div class="b-bottom"></div></td></tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td class="l-info">企业信息</td>
+						<td class="r-info">
+							<table class="input-table">
+								<tr>
+									<td class="reg-item-tit"><span>*</span>企业名称</td>
+									<td class="reg-item-input"><input type="text" class="validate[required,ajax[ajaxCheckCompanyName]]" placeholder="请填写营业执照上的名称" name="node_name" id="node_name" value="<?php if($_SESSION['regemail']!=''){?><?php echo $_SESSION['node_name'];?><?php }?>"/></td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr>
+									<td class="reg-item-tit"><span>*</span>姓名</td>
+									<td class="reg-item-input"><input name="contact_name" id="contact_name" class="validate[required]" type="text" placeholder="请填写您的姓名" value="<?php if($_SESSION['regemail']!=''){?><?php echo $_SESSION['contact_name'];?><?php }?>"/></td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr>
+									<td class="reg-item-tit"><span>*</span>手机</td>
+									<td class="reg-item-input rel">
+										<input name="contact_phone" id="contact_phone" type="text" maxlength="11" placeholder="请填写您的手机号码" class="iden-code validate[required,custom[phone]]" value="<?php if($_SESSION['regemail']!=''){?><?php echo $_SESSION['contact_phone'];?><?php }?>"/>
+										<div class="veryfy-win" id="veryfy-win">
+										<!-- <p><img src=''/>
+										<input type="text" class="input-verify" /></p> -->
+										</div>
+									</td>
+									<td class="reg-item-tip"></td>
+								</tr>
+								<tr>
+									<td class="reg-item-tit"><span>*</span>所在城市</td>
+									<td class="reg-item-input">
+										<select name="province_code" id="province_code"  class="validate[required] ml30">
+											<option value="">请选择</option>
+											<php>
+                                				$provinceArr = array_valtokey($provinceInfo,'province_code','province');
+                            				</php>
+                            				{:show_arr_opt($provinceArr,$_SESSION['province_code'])}
+										</select>
+										<select name="city_code" id="city_code" class="validate[required] ml25">
+											<option value="">请选择</option>
+										</select>
+									</td>
+									<td class="reg-item-tip"><span class="correct">√</span></td>
+								</tr>
+								<tr><td colspan="3" style="padding:10px 0 0;"><div class="b-bottom"></div></td></tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td class="l-info">其他信息</td>
+						<td class="r-info">
+							<table class="input-table" style="margin-bottom:20px;">
+								<tr>
+									<td class="reg-item-tit">客户经理编号</td>
+									<td class="reg-item-input"><input name="client_manager" id="client_manager" maxlength="12" value='<if condition="$_SESSION['client_manager'] neq ''">{$_SESSION['client_manager']}<elseif condition="$recid neq ''" />{$recid}<elseif condition="$wid neq ''" />{$wid}</if>' onkeyup="value=value.replace(/[^\w\.\/]/ig,'');limit($(this),12);" type="text" placeholder="请填写您的客户经理编号或手机号码" <?php if($recid!='' || $wid!=''){?><?php echo 'readonly';?> style='color:#757474;background-color:#dcdcdc'<?php }?> /><p class="limit"><span>0</span>/12</p></td>
+									<td class="reg-item-tip"></td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<p class="tc"><label><input name="agreeit" id="agreeit" value="1" type="checkbox" class="vm" checked /><span class="vm ml5">我同意并遵守</span></label><a target="_blank" class="vm" href="index.php?g=Home&m=Agree">《旺财用户注册须知》</a></p>
+			<div id="verify_div" align="center">
+			输入验证码：&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type="text" class="verify mt10 validate[required]" placeholder="验证码" name="verify" id="verify" value="" maxlength="4" /><img id="verifyImg" src="{:U('Home/Verifycode/verify',array('_t'=>time()))}" onclick="fleshVerify()" class="ml10" style="vertical-align:middle; height:32px;cursor:pointer;" />
+			</div>
+			<div class="tc mt25 mb30"><input type="button"  onclick="submitform();" id="sub_button" class="btn-all w200" value="注册" /></div>
+			</form>
+		</div>
+	</div>
+	<include file="./Home/Tpl/Public/Public_Indexfooter.html" />
+</div>
+</body>
+</html>
+<script type="text/javascript">
+	/**
+	 * 记录log
+	 * @param log_info
+	 */
+	function visitLog(log_info) {
+		var title = "首页-了解更多-内容页面";
+		WCO2OVisitLog.visit_log("{:isset($_SESSION['userSessInfo'])?$_SESSION['userSessInfo']['node_id']:''}", location.href, title, log_info);
+	}
+$(document).ready(function(){
+	$.validationEngineLanguage.allRules['ajaxUserCallPhp'] = {
+			"url": "{:U('Home/Reg/ajaxValidEmail')}",
+	        "alertText": "此邮箱已被注册"
+	}
+	$.validationEngineLanguage.allRules['ajaxCheckCompanyName'] = {
+			"url": "{:U('Home/Reg/queryName')}",
+	        "alertText": "此企业名称已在旺财平台注册，如有疑问请致电400-882-7770咨询！"
+	};
+	$.validationEngineLanguage.allRules['email'] = {
+			"regex": /^([a-zA-Z0-9]+[_|\_|\-|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\-|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/,
+            "alertText": "邮件地址无效"
+	}
+	$('#regform').validationEngine({
+		promptPosition:"topLeft:30,0",
+	});
+	
+	$('input,select').bind('jqv.field.result', function(event, field, isError, promptText){
+		if(!isError){
+			$(this).parent().parent().find('.reg-item-tip .correct').css('visibility','visible');
+			if ($(field).attr('id') == 'province_code') {
+				if (!$('#city_code').val()) {
+					$(this).parent().parent().find('.reg-item-tip .correct').css('visibility','hidden');
+				}
+			}
+			if ($(field).attr('id') == 'city_code') {
+				if (!$('#province_code').val()) {
+					$(this).parent().parent().find('.reg-item-tip .correct').css('visibility','hidden');
+				}
+			}
+		} else {
+			$(this).parent().parent().find('.reg-item-tip .correct').css('visibility','hidden');
+		}
+	});
+	limit($('#client_manager'), 12);
+});
+
+// 限制表单字数
+function limit(obj,num){
+	var val = obj.val();
+	var len = val.length-1;
+	var limit_num = obj.parent().find('.limit span');
+	if(len>=num){
+		obj.val(val.substr(0,num));
+		limit_num.css('color','#f00');
+	}else{
+		limit_num.text(len+1);
+		limit_num.css('color','#4d4d4d');
+	}
+}
+
+</script>
+<script type="text/javascript" src="__PUBLIC__/Js/visit_log.js?v=__VR__"></script>

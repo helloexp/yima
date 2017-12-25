@@ -1,0 +1,197 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>欢迎注册翼码旺财</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link href="__PUBLIC__/Css/wap_reg.css?v=__VR__" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script>
+//获取表单值为数组
+function get_form_data(f){
+	var $form = $(f);
+	var o = {};
+	var a = $("input,textarea,select",$form).serializeArray();
+	$.each(a, function() {
+	   if (o[this.name]) {
+		   if (!o[this.name].push) {
+			   o[this.name] = [o[this.name]];
+		   }
+		   o[this.name].push(this.value || '');
+	   } else {
+		   o[this.name] = this.value || '';
+	   }
+	});
+	return o;
+}
+
+String.prototype.getBytes = function() {       
+    var cArr = this.match(/[^\x00-\xff]/ig);       
+    return this.length + (cArr == null ? 0 : cArr.length);      
+}
+
+$(function(){
+	//省市区初始化
+	CityCode({
+		province:$("#province_code"),//省
+		city:$("#city_code"),//市
+		selected:"{:$info['province_code'].$info['city_code'].$info['town_code']}",//默认选中的省市区代号
+		url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+	});
+	
+	//表单提交事件
+	$("#regform").submit(function()
+	{
+		var fData = get_form_data(this);
+
+		if(fData.regemail=="")
+		{	
+			alert("用户名不能为空！");
+			return false;	
+		}
+		if(fData.node_name=="")
+		{	alert("企业名称不能为空！");
+			return false;	
+		}
+		if(fData.node_short_name=="")
+		{	alert("企业简称不能为空！");
+			return false;	
+		}
+		if(fData.contact_name=="")
+		{	alert("业务负责人姓名不能为空！");
+			return false;	
+		}
+		if(fData.contact_phone=="")
+		{	alert("业务负责人手机不能为空！");
+			return false;	
+		}	
+		
+
+		if(fData.province_code=="")
+		{
+			alert("所在城市不能为空！");
+			return false;	
+		}
+		if(fData.city_code=="")
+		{
+			alert("所在城市不能为空！");
+			return false;	
+		}
+
+		var myreg = /^([a-zA-Z0-9]+[_|\_|\-|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\-|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+		if(!myreg.test(fData.regemail))
+		{
+			alert('请输入有效的邮箱！');			
+			return false;
+		}
+
+		if(fData.node_name.getBytes() < 6){
+			alert("企业名称不能小于6字节或三个汉字");
+			return false;
+		}
+		if(fData.node_short_name.length >10){
+			alert("企业简称长度不能大于10");
+			return false;
+		}
+		if(fData.contact_name.getBytes() < 2){
+			alert("业务负责人姓名不能小于2字节或一个汉字");
+			return false;
+		}
+		if(fData.nodeisok=='2')
+		{
+			alert('由于您已经是翼码其他业务的客户，请拨打400-882-7770客户热线，我们会马上帮您开通旺财免费版业务！');
+			return false;		
+		}
+
+		var checkstr = $("input[name='agreeit']").attr('checked');    
+		if(!checkstr)
+		{
+			alert("旺财服务协议必须打钩！");
+			return false;	
+		}
+		$(".btn-regForm").css("background","#ddd").css("color","#666").attr("disabled",true);
+		var actUrl = $(this).attr('action');
+		$("#loadingBox").show();
+		$.post(actUrl,fData,function(d){
+			if(d.status!=1){
+				alert(d.info);
+				$("#loadingBox").hide();
+				$(".btn-regForm").css("background","#bf0600").css("color","#ffffff").attr("disabled",false);
+			}
+			else{
+				window.location.href=d.url;
+			}
+		},'json');
+		return false;
+	});
+});
+
+
+</script>
+</head>
+
+<body>
+    <div id="wrapper">
+    
+        <div id="header">
+            <div class="logo"><img src="__PUBLIC__/Image/wap-logo.png"></div>
+            <div class="logoTitle"><p>旺财出品</p></div>
+        </div>
+        <div class="cl"></div>
+                
+        <div id="container">
+            <div id="main">
+            	<div class="mainCon">
+                	<h1>欢迎注册翼码旺财</h1>
+                    <p>旺小二在此恭候多时啦！您的信息提交后，账号密码、旺号及平台访问地址将发送到您注册的邮箱内请注意查收哦！</p>
+                </div>
+                <div class="mainForm">
+				 <form action="{:U('WapReg/regSubmit')}" method="post" name="regform" id="regform">
+					<input type="hidden" name="nodeok" id="nodeok" value="">
+                	<ul class="sOne-mainForm">
+                        <li><div class="sOne-mainForm-t">*用户名:</div><div class="sOne-mainForm-i"><input type="text" name="regemail" class="sOne-Input" /><span>用户名必须使用邮箱格式，初始密码将发送到该邮箱，建议使用真实邮箱。注册后，用户名不能修改。</span></div></li>
+                        <li><div class="sOne-mainForm-t">*企业名称:</div><div class="sOne-mainForm-i"><input type="text" name="node_name" class="sOne-Input"/><span>请填写营业执照上的企业名称，以便获得更多服务权限</span></div></li>
+                        <li><div class="sOne-mainForm-t">*企业简称:</div><div class="sOne-mainForm-i"><input type="text" name="node_short_name" class="sOne-Input"/><span>企业简称将显示在下发卡券的短彩信内容内,最长10个</span></div></li>
+                        <li><div class="sOne-mainForm-t">*负责人:</div><div class="sOne-mainForm-i"><input type="text" name="contact_name" class="sOne-Input" placeholder="" /><span>业务负责人姓名,注册后在账户中心可变更信息</span></div></li>
+                        <li><div class="sOne-mainForm-t">*手机号:</div><div class="sOne-mainForm-i"><input type="tel" name="contact_phone" class="sOne-Input" maxlength="11" /><span>业务负责人手机号</span></div></li>
+                        <li><div class="sOne-mainForm-t">客户经理号:</div><div class="sOne-mainForm-i">
+						<notempty name="cmId">
+						 <input type="hidden" name="client_manager" class="sOne-Input" maxlength="4" value="{$cmId}"/>
+						 <span>{$cmId}</span>
+						<else/>
+						<input type="text" name="client_manager" class="sOne-Input" maxlength="4" value="{$cmId}"/>
+						<span>最长4位，请输入您的客户经理编号，不知道可以不用填写</span></notempty>
+						</div></li>
+                        <li>
+                        	<div class="sOne-mainForm-t">*所在城市:</div>
+                            <div class="sOne-mainForm-i">
+                            <select name="province_code" id="province_code"  class="sOne-select"></select>
+                            <select name="city_code" id="city_code" class="sOne-select"></select>
+                        	</div>
+                        </li>
+                        <li class="last"><div class="sOne-mainForm-t">&nbsp;</div><div class="sOne-mainForm-i"><input type="checkbox" checked="checked" name="agreeit" id="agreeit" class="sOne-checkbox vm"/><a href="{:U('Agree/index')}" class="vm">《旺财服务协议》</a></div>
+                        </li>
+                        <li class="last"><div class="sOne-mainForm-b"><input type="submit" name="subcj" value="同意协议并注册" class="sOne-input-button btn-regForm"/></div></li>
+                    </ul>
+				 </form>
+                </div>
+                <div class="mainContact">
+                	<p><i class="wap-icon-tel"></i>业务咨询热线：<br><span>400-882-7770</span></p>
+                    <p class="last"><i class="icon-msg"></i>微信公众号：<br><span>翼码旺财</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="footer">
+            <a href="http://www.wangcaio2o.com.cn"><p>©2016&nbsp;&nbsp;wangcaio2o.com&nbsp;翼码旺财&nbsp;&nbsp;版权所有&nbsp;</p></a>
+        </div>
+        
+    </div>
+
+	<section style="display: none;" class="fullHtml" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>

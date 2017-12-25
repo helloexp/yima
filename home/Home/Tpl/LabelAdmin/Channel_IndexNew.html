@@ -1,0 +1,371 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>渠道标签渠道_营销推广渠道_翼码旺财</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/WchannelNew.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+    <load href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"/>
+    <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/Wcanal.js?v=__VR__"/>
+    <js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+    <script>
+        $(function(){
+			var labelNum = $(".infoArea ul");
+			$(labelNum).each(function(index, element) {
+			  var _thisVal = $(this).find("li").length;             
+			  if(_thisVal >= 6){
+					$(this).find("li.addLabel").hide();
+			  }
+			});
+			
+			$("body").on("click",".infoArea ul li .delBtn",function(){
+				var t = $(this);
+                var memo_li =  t.closest("li").attr("data-memo");
+                var memo = memo_li.split("<");
+                var id = t.closest(".infoArea").attr("data-id");
+                $.ajax({
+                    type: "post",
+                    url: "{:U('LabelAdmin/Channel/memoDelete')}",
+                    data: {memo:memo,channel_id:id},
+                    success:function (data){
+						t.closest("li").hide();
+						var _thisVal = t.closest("li").length;             
+						if(_thisVal < 5){
+							t.closest("ul").find("li.addLabel").show();
+						}
+                    }
+                });
+
+			});
+			
+            $("#uduf").on('click',function(event) {
+                event.preventDefault();
+                art.dialog.open("{:U('LabelAdmin/Channel/add')}",{
+                    id:'uduf',
+                    title: '创建新渠道',
+                    width:500
+                });
+            });
+
+
+
+            $(".addBtn").on('click',function(event) {
+                var channel_id = $(this).closest(".infoArea").attr("data-id");
+                event.preventDefault();
+                art.dialog.open("{:U('LabelAdmin/Channel/addLabel?channel_id=')}"+channel_id,{
+                    id:'uduf',
+                    title: '添加渠道备注',
+                    width:500
+                });
+            });
+
+            $(".editActivity").on('click',function(event) {
+                var id = $(this).closest(".editArea").attr("data-id");
+                event.preventDefault();
+                art.dialog.open("{:U('LabelAdmin/Channel/add?id=')}"+id,{
+                    id:'uduf',
+                    title: '编辑渠道名称',
+                    width:500
+                });
+            });
+
+            $(".allActivity").click(function(e) {
+				var _t = $(this);
+                var id = $(this).closest(".editArea").attr("data-id");
+				if(_t.hasClass("active")){
+					_t.removeClass("active");
+                	_t.closest("tr").next("tr.editshow").addClass("dn");
+				}else{
+					$(".allActivity").removeClass("active");
+				    $("tr.editshow").addClass("dn");
+					_t.addClass("active");
+                	_t.closest("tr").next("tr.editshow").removeClass("dn");
+					$.ajax({
+					   url: "{:U('LabelAdmin/Channel/getActivityList')}",
+					   type: "post",
+					   data: {channel_id:id},
+					   dataType: 'json',
+					   success: function (data) {
+						   if(data == null ){
+							   //无数据的时候
+							   var activityData = {};
+							   activityList = template("showActivity",activityData);
+							   _t.closest("tr").next("tr").find("td").html("<div class='nonedata'></div>");
+						   }else{
+							   //有数据的时候
+							   
+							   
+							   var activityData = {list:data};
+							   var activityList = template("showActivity",activityData);
+							   _t.closest("tr").next("tr").find("div.showLayer").html(activityList);
+							   
+							   $(".clip2Board").each(function(i){
+									var id = $(this).attr('data');
+									var clip=null;
+									clip = new ZeroClipboard.Client();
+									ZeroClipboard.setMoviePath( './Home/Public/Js/ZeroClipboard.swf' );  //和html不在同一目录需设置setMoviePath
+									ZeroClipboard.setMoviePath( './Home/Public/Js/ZeroClipboard.swf' );
+									clip.setHandCursor( true );
+									clip.setText( $("#clip2Board"+id).attr("data-rel"));
+									clip.addEventListener('complete', function (client, text) {
+										Diasucceed("链接已保存至剪贴板","",2)
+									});
+									clip.glue( 'clip2Board'+id);
+								});
+						   }
+					   } 
+						
+					});
+					windowheight();
+				}
+                
+            });
+
+            $(".searchBtn").on('click',function(event) {
+                $('#theone').submit();
+            });
+
+            $("body").on("click",".EditActivity",function(){
+                var m_id = $(this).attr('m_id');
+                var goUrl = "{:U('MarketActive/Activity/edit')}&m_id="+m_id;
+                window.open(goUrl);
+            });
+
+        });
+
+        function addChannelMemo(id){
+
+        }
+        function set_code(id){
+            art.dialog.open("{:U('LabelAdmin/EditCode/index?type=a&id=')}"+id,{
+                title: '设置渠道',
+                width:800,
+                height:500
+            });
+        }
+        //删除渠道
+        function delc(id){
+            var title="您确认删除该渠道？删除后该渠道将失效";
+            art.dialog.confirm(title,function(){
+                Dialoading("正在提交...");
+                $.post("{:U('LabelAdmin/Channel/deleteChannel')}",{"id":id},function(data){
+
+                    if(data.status==1){
+                        Diasucceed("删除成功");
+                        window.location.reload();
+                    }else{
+                        Diaerror(data.info);
+                    }
+                },"json");
+            });
+        }
+        //删除渠道下活动
+        function dela(id){
+            var title="您确认删除该活动？删除后渠道下该活动将失效";
+            art.dialog.confirm(title,function(){
+                Dialoading("正在提交...");
+                $.post("{:U('LabelAdmin/Channel/deleteActivity')}",{"id":id},function(data){
+
+                    if(data.status==1){
+                        Diasucceed(data.info);
+						$("dl[data-id="+id+"]").remove();
+                        //window.location.reload();
+                    }else{
+                        Diaerror(data.info);
+                    }
+                },"json");
+            });
+        }
+        //活动数据
+        function batchStat(obj) {
+            var jqObj = $(obj);
+            var id = jqObj.attr('data-channelId');
+            var mId = jqObj.attr('data-mId');
+            art.dialog.open("{:U('LabelAdmin/ChannelBatchList/batchStat?id=')}" + id + '&mId=' + mId, {
+                title: '活动数据',
+                width: 500,
+                cancel: true
+            });
+        }
+
+    </script>
+</head>
+<body>
+<div id="wrapper" class="bgeee">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="ChannelIndex"/>
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+            <div class="sidenav">
+                <!--开始载入左菜单-->
+                <ul id="accordion" class="accordion">
+                    <li>
+                        <div class="title">我的渠道</div>
+                    </li>
+                    <li class="open2">
+                        <div class="link" id="menu_id-myChannel"><a href="{:U('LabelAdmin/Channel/IndexNew')}">我的渠道</a></div>
+                    </li>
+                </ul>
+            </div>
+            <div class="subcon fn">
+                <div class="main-name">
+                    <h4>我的渠道<a class="btn-add first" href="javascript:void(0);" id="uduf"><i></i>创建渠道</a></h4>
+                </div>
+                <div class="SearchArea  fn">
+                    <form method="post" action="{:U('LabelAdmin/Channel/IndexNew')}" id="theone">
+                        <div class="SearchAreaLeft">
+                            <label><span>渠道名称</span><input type="text" name="c_name" value="{$map['c_name']}" /></label>
+                            <label><span>渠道备注</span><input type="text" name="c_label" value="{$map['c_label']}" id="c_label" style="width:300px;" placeholder="请输入自定义的渠道备注" />&nbsp;<i style="margin-top:0; margin-left:0" class="allAsk" title="" data-gettitle="可以同时输入多个备注关键词，以“，”分隔，如：“中秋活动，摇一摇“" alt=""></i></label>
+                            <label><span>活动名称</span><input type="text" name="activity_name" value="{$map['activity_name']}" id="activity_name" /></label>
+                        </div>
+                        <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" id="seachcc" class="searchBtn">查询</a>
+                        </div>
+
+                        <input type="hidden" name="sortByVisit" id="sortByVisit" value="<?php if($map['sortByVisit']){echo $map['sortByVisit'];}else{echo 'asc';}?>">
+                        <input type="hidden" name="sortByActivitynum" id="sortByActivitynum" value="<?php if($map['sortByActivitynum']){echo $map['sortByActivitynum'];}else{echo 'asc';}?>">
+                        <input type="hidden" name="clickType" value="" id="clickType">
+                    </form>
+                </div>
+
+                <div class="channelList">
+                    <table cellpadding="0" cellspacing="0" class="H-table">
+
+                        <tr class="th">
+                            <th width="50%">渠道名称</th>
+                            <th><a href="javascript:void(0);" class="sortByVisit">访问量<i></i></a></th>
+                            <th><a href="javascript:void(0);" class="sortByActivitynum">总活动数<i></i></a></th>
+                            <th>进行中活动</th>
+                            <th>操作</th>
+                        </tr>
+
+                        <foreach name="list" item="vo" >
+                            <tr>
+                                <td>
+                                    <div class="infoArea" data-id="<?php echo $vo['id']?>" >
+                                        <h2>{$vo.name}</h2>
+                                        <ul>
+
+                                            <volist name="vo['memoList']" id="memo">
+                                                <if condition="$memo neq ''">
+                                                    <li data-memo="{$memo}">{$memo}<i class="delBtn"></i></li>
+                                                </if>
+                                            </volist>
+
+                                            <li class="addLabel"><a href="javascript:void(0);" class="addBtn">添加备注</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                                <if condition="$vo['click'] neq ''">
+                                <td>{$vo.click}</td>
+                                    <else />
+                                    <td>0</td>
+                                </if>
+                                <td>{$vo.num_all}</td>
+                                    <td>{$vo.num_now}</td>
+                                <td>
+                                    <div class="editArea" data-id="<?php echo $vo['id']?>"><a href="javascript:void(0);" class="editActivity">编辑</a><a href="javascript:void(0)"  class="delChannel ml15" onclick="delc('<?php echo $vo['id'];?>')">删除</a></div>
+                                    <div class="editArea" data-id="<?php echo $vo['id']?>"><a href="javascript:void(0);" class="allActivity">所有活动<i></i></a></div>
+                                </td>
+                            </tr>
+                            
+                                <tr  class="editshow dn">
+                                    <td colspan="5">
+                                        <div class="showLayer">
+                                            
+                                        </div>
+                                    </td>
+                                </tr>
+                            </if>
+                        </foreach>
+                        </tbody>
+                    </table>
+
+                </div>
+
+
+                <div class="page">{$page}</div>
+            </div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+<div class="service"></div>
+</body>
+</html>
+<script type="text/html" id="showActivity">
+{{each list as value index}}
+<dl data-id="{{value.batchid}}">
+<dd class="QR_block">
+	<img src="<?php echo U('LabelAdmin/ChannelSetCode/code',array('id'=>"{{value.batchid}}",'type'=>'a'));?>" alt="">
+	<div class="shade-wrapper">
+		<a href="javascript:void(0)" onclick="set_code('{{value.batchid}}')" class="show"><div class="shade"></div></a>
+	</div>
+</dd>
+<dd class="Info_block">
+	<div style="width: 450px;">
+	<h2 class="hdTitle" style="display:inline-block">{{value.name}}</h2>
+	</div>
+
+	<p class="hdDate"><span>活动时间：{{value.start_time}} 到{{value.end_time}}</span><span class="ml30">访问量：{{value.click_count}}</span></p>
+	<p class="hdEdit"><a href="<?php echo U('LabelAdmin/ChannelSetCode/code',array('id'=>"{{value.batchid}}",'isdown'=>'1','type'=>'a'));?>" class="mr10">下载</a>|<a href="javascript:void(0);" data="{{value.batchid}}" data-rel="<?php echo U('Label/Label/index',array('id'=>"{{value.batchid}}"),'','',true);?>"  id="clip2Board{{value.batchid}}" class="clip2Board ml10 mr10" style="position:relative;">复制链接</a>|<a href="javascript:void(0);"  m_id="{{value.id}}" class="EditActivity ml10 mr10">编辑活动</a>|<a href="javascript:void(0)" class="ml10 mr10" data-mId="{{value.batchid}}" data-channelId="{{value.id}}" onclick="batchStat(this)">活动数据</a>|<a href="javascript:void(0);" onclick="dela('{{value.batchid}}')" class=" ml10">删除</a></p>
+</dd>
+</dl>
+{{/each}}
+</script>
+<script src="__PUBLIC__/Js/ZeroClipboard.js"></script>
+<script language="JavaScript">
+
+    $(function(){
+        var initsortBy_x = "{$map['sortByVisit']}";
+        var initsortBy_y = "{$map['sortByActivitynum']}";
+
+        if(initsortBy_x == 'desc'){
+            $(".sortByVisit").removeClass("active");
+        }else if(initsortBy_x == 'asc'){
+            $(".sortByVisit").addClass("active");
+        }
+
+        if(initsortBy_y == 'desc'){
+            $(".sortByActivitynum").removeClass("active");
+        }else if(initsortBy_y == 'asc'){
+            $(".sortByActivitynum").addClass("active");
+        }
+        $(".sortByVisit").click(function() {
+
+            var sortBy = $("#sortByVisit").val();
+            $("#sortByActivitynum").val('desc');
+            $("#clickType").val('sortByVisit');
+            if(sortBy == 'desc'){
+                $("#sortByVisit").val('asc');
+                $('#theone').submit();
+            }else if(sortBy == 'asc'){
+                $("#sortByVisit").val('desc');
+                $('#theone').submit();
+            }
+        });
+        $(".sortByActivitynum").click(function() {
+            var sortBy = $("#sortByActivitynum").val();
+            $("#clickType").val('sortByActivitynum');
+            $("#sortByVisit").val('desc');
+            if(sortBy == 'desc'){
+                $("#sortByActivitynum").val('asc');
+                $('#theone').submit();
+            }else if(sortBy == 'asc'){
+                $("#sortByActivitynum").val('desc');
+                $('#theone').submit();
+            }
+        });
+
+    })
+
+</script>

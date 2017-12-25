@@ -1,0 +1,323 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>会员管理-会员中心设置</title>
+        <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+        <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wmember.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <link href="__PUBLIC__/Css/Whygl.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <script src="__PUBLIC__/Js/jquery.zclip.min.js?v=__VR__" type="text/javascript"></script>
+        <style type="text/css">
+    		.subcon .sweet_tips { border: none; color: #666666; background: #fef7ee; font-size: 14px; line-height: 24px;}
+        	.Wcanal-tab .Wcanal-tab-title .Wcanal-tab-hover, .Wcanal-tab .Wcanal-tab-title .Wcanal-tab-hover:hover { border-top: 3px #ed1c24 solid;}
+        </style>
+        <script type="text/javascript">
+            $(function () {
+                $('#logo_sub').click(function () {
+                    $("#logo_form").submit();
+                });
+
+                $('#third-tab p').click(function () {
+                    window.location.hash = $(this).index();
+                    $(".shopFreight-edit").css({height: $(".shopFreight table").height()});
+                });
+                var hash = (!window.location.hash) ? "#0" : window.location.hash;
+                if (hash != '#0') {
+                    $('#third-tab p:eq(' + hash.substring(1) + ')').trigger('click');
+                }
+                $(".shopFreight-edit").css({height: $(".shopFreight table").height()});
+                $("body").on("click", "#addshopFreight", function () {
+                    var t = $(this);
+                    var addshopFreight = {
+                        callback: function (data, text, citycode, uniqueCode) {
+                            t.closest("tr").before('<tr class="' + uniqueCode + '"><td class="tl">' + text + '</td><td><input type="text" id="' + uniqueCode + '" rel="' + uniqueCode + '" name="' + citycode + '" class="validate[required,custom[number]]" maxlength="10"></td><td><a href="javascript:void(0)" class="edit" rel="' + uniqueCode + '" >修改城市</a><a href="javascript:void(0)" class="del" rel="' + uniqueCode + '">删除</a></td></tr>');
+
+                            $('.del').click(function () {
+                                var cityCode = $(this).attr('rel');
+                                $.post("{:U('Ecshop/BusiOption/delShippingConfig')}", {'cityCode': cityCode}, function () {
+                                    $('.' + cityCode).empty();
+                                    $('tr').removeClass(cityCode);
+                                });
+                            });
+
+                            $('.edit').click(function () {
+                                var key = $(this).attr('rel');
+                                var t = $(this);
+                                var addshopFreight = {
+                                    callback: function (data, text, citycode) {
+                                        $('.' + key + ' .tl').html(text);
+                                    }
+                                }
+                                art.dialog.data('addshopFreight', addshopFreight);
+                                art.dialog.open("{:U('Ecshop/BusiOption/shippingCity')}" + '&key=' + key, {
+                                    title: '添加城市',
+                                    width: '500px',
+                                    height: '481px',
+                                    lock: true
+                                });
+                            });
+                        }
+                    }
+                    art.dialog.data('addshopFreight', addshopFreight);
+                    art.dialog.open("{:U('Ecshop/BusiOption/shippingCity')}&key=-1", {
+                        title: '添加城市',
+                        width: '500px',
+                        height: '481px',
+                        lock: true
+                    });
+                })
+            })
+            function node_service_hotline(node_id, user_info, type) {
+                art.dialog.open("?g=Home&m=AccountInfo&a=node_service_hotline&node_id=" + node_id + "&user_info=" + user_info + "&type=" + type, {
+                    title: '账户基本信息',
+                    width: '650px',
+                    height: '330px'
+                });
+            }
+            function node_account_edit() {
+                var check_pwd = "{$account_pwd}";
+                if (check_pwd == "") {
+                    art.dialog.open("?g=LabelAdmin&m=NodeAccount&a=edit", {
+                        title: '编辑收款账号信息',
+                        width: '520px',
+                        lock: true,
+                        height: '500px'
+                    });
+                } else {
+                    var data = {};
+                    var html = template("checkPassword", data);
+                    art.dialog({
+                        title: '输入保护密码',
+                        width: '520px',
+                        lock: true,
+                        height: '200px',
+                        content: html,
+                        okVal: "确定",
+                        ok: function () {
+                            var input_pwd = $('#person_pwd').val();
+                            if (input_pwd == '') {
+                                alert("请输入保护密码");
+                                return false;
+                            }
+                            var dialog = art.dialog({title: false, content: "<div class='msg-all-succeed'>正在提交...</div>", fixed: true, padding: 0});
+                            $.post("{:U('LabelAdmin/NodeAccount/check_pwd')}",
+                                    {"input_pwd": input_pwd},
+                            function (data) {
+                                var status = data.status;
+                                if (status == 1) {
+                                    dialog.close();
+                                    art.dialog.open("?g=LabelAdmin&m=NodeAccount&a=edit", {
+                                        title: '编辑收款账号信息',
+                                        width: '520px',
+                                        lock: true,
+                                        height: '500px'
+                                    });
+                                } else {
+                                    dialog.time(3).content("<div class='msg-all-error'>" + data.info + "</div>");
+                                }
+                            }, 'JSON');
+                        },
+                        button: [
+                            {name: '忘记密码',
+                                callback: function () {
+                                    var dialog = art.dialog({title: false, content: "<div class='msg-all-succeed'>正在提交...</div>", fixed: true, padding: 0});
+                                    $.post("{:U('LabelAdmin/NodeAccount/reset_pwd')}", {}, function (data) {
+                                        var status = data.status;
+                                        if (status == 1) {
+                                            dialog.close();
+                                            art.dialog({
+                                                title: '取回密码',
+                                                width: '520px',
+                                                lock: true,
+                                                height: '200px',
+                                                content: "<img src='__PUBLIC__/Image/msgsucceed.png' class='l'><p style='font-size:14px;line-height:30px;margin-left: 130px;'>" + data.info + "</p>",
+                                                okVal: "返回",
+                                                ok: function () {
+                                                    node_account_edit();
+                                                }
+                                            });
+                                        } else {
+                                            dialog.time(3).content("<div class='msg-all-error'>" + data.info + "</div>");
+                                        }
+                                    }, 'JSON');
+                                }
+                            }
+                        ]
+                    });
+                }
+            }
+            function freightConfig() {
+                $("#shopFreight2").removeClass('dn');
+                $("#shopFreight1").addClass('dn');
+            }
+
+            function copyText(obj) {
+                var rng = document.body.createTextRange();
+                rng.moveToElementText(obj);
+                rng.scrollIntoView();
+                rng.select();
+                rng.execCommand("Copy");
+                rng.collapse(false);
+                alert("复制成功!");
+            }
+
+            //logo回调函数
+            function elogoCallback(d) {
+                //填充缩略图
+                $('#e_logo_show').attr('src', d.src);
+                $('#e_logo_showscreen').attr('src', d.src);
+                //上传用
+                $('#e_logo_img').val(d.savename);
+            }
+
+            /*获取图片路径中的图片名*/
+            function base_name_bg(url) {
+                var urlList = url.split('/');
+                var a = urlList[urlList.length - 1];
+                return a;
+            }
+
+            function uploadImg_bg(url) {
+                var opt = {
+                    cropPresets: '80x80',
+                    callback: elogoCallback
+                }
+                open_img_uploader(opt);
+            }
+        </script>
+    </head>
+    <body>
+        <div id="wrapper"> 
+            <include file="./Home/Tpl/Public/Public_header.html" />
+            <div id="container" class="bgfff"> 
+                <div id="main" class="rel"> 
+                    <include file="Wmember/Member/leftMenu" leftmenuid="hyzh" />
+                    <div class="subcon fn">
+                        <div class="main-name fn">
+                            <h4>会员中心设置</h4>
+                        </div>
+                        <div class="Wcanal-tab" id="Wcanal-tabon">
+                            <div class="Wcanal-tab-title fn">
+                                <p class=""><a href="{:U('personCenterShowSet')}">会员中心设置</a></p>
+                                <p class="Wcanal-tab-hover"><a href="{:U('personCenterSet')}">登录页面设置</a></p>
+                                <li class="last" style="width:160px;"></li>
+                            </div>
+                        </div>
+
+                        <div class="Wcanal-tab" id="Wcanal-tabon">
+                            <div class="Wcanal-tab-list" style="display: block;">
+                                <div class="shopCon">
+                                    <div class="hd_list">
+                                        <div class="Wcanal-tab-list">
+                                            <div class="fn pt20">                
+                                                <div class="edit-area fn">
+                                                    <div class="phone">
+                                                        <div class="screen">
+                                                            <div class="loginForm wap">
+                                                                <ul class="sOne-loginForm wap">
+                                                                    <li>
+                                                                        <?php if($logoInfo['img_url'] != NULL){?>
+                                                                        <img class="img" src="<?php echo get_upload_url($logoInfo['img_url'])?>" alt="" id="e_logo_showscreen"/>
+                                                                        <?php }else{ ?>
+                                                                        <img class="img" src="__PUBLIC__/Image/logoTwo.png" alt="11" id="e_logo_showscreen"/>
+                                                                        <?php } ?>
+                                                                        <?php if($logoInfo['biaoti'] != NULL){?>
+                                                                        <p><?php echo $logoInfo['biaoti']?></p>
+                                                                        <?php }else{ ?>
+                                                                        <p>上海翼码-用户登录</p>
+                                                                        <?php } ?>
+                                                                    </li>
+                                                                    <li>
+                                                                        <input type="text" class="sOne-loginInput-half" placeholder="请输入您的手机号" />
+                                                                        <input type="button" class="sOne-getpasscode" value="获取动态密码" data-href="" />
+                                                                    </li>
+                                                                    <li>
+                                                                        <input type="text" class="sOne-loginInput l" placeholder="动态密码" />
+                                                                    </li>
+                                                                    <li>
+                                                                        <input type="button" class="sOne-loginInput-btn" value="快速登录" />
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="e-right">
+                                                        <div class="e-logo edit-box">
+                                                            <form  action="{:U('Wmember/Member/logo_add')}" method="POST" class="Gform" name="logo_form" id="logo_form" enctype="multipart/form-data">
+                                                                <input type="hidden" name="m_id" id="m_id" value="{$marketInfo['id']}" />
+                                                                <input type="hidden" name="logo_id" id="logo_id" value="{$logoInfo['id']}" />
+	                                                        	<ul>
+	                                                        		<li class="Gname">商户名称</li>
+	                                                        		<li class="Ginput">
+	                                                        			<input type="text" value="{$biaoti}" name="node_name" id="node_name" maxlength="100"/>
+	                                                        		</li>
+	                                                        	</ul>
+	                                                        	<ul>
+	                                                        		<li class="Gname">商家LOGO</li>
+	                                                        		<li class="Ginput">
+	                                                        			<div class="pic">
+		                                                                    <?php if($logoInfo['img_url'] != NULL){?>
+		                                                                    <img class="img" src="<?php echo get_upload_url($logoInfo['img_url'])?>" id="e_logo_show" />
+		                                                                    <?php }else{ ?>
+		                                                                    <img class="img" src="__PUBLIC__/Image/shop/no-head.png" id="e_logo_show" />
+		                                                                    <?php } ?>
+		                                                                    <a class="btn" href="javascript:void(0);" onclick="return uploadImg_bg('logo');" >上传图片</a>
+		                                                                    <input type="hidden" value="" name="e_logo_img" id="e_logo_img" />
+		                                                                </div>
+	                                                        		</li>
+	                                                        	</ul>
+	                                                        	<ul>
+	                                                        		<li class="Gname"></li>
+	                                                        		<li class="Ginput">
+	                                                        			<a href="javascript:void(0);" class="btn-all w80" id="logo_sub">确定</a>
+                                                                    	<a href="javascript:history.go(-1);" class="btn-all-del w80 ml10">取消</a>
+	                                                        		</li>
+	                                                        	</ul>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>               
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html" /> 
+        </div>
+        <div class="service"></div>
+    </body>
+</html>
+
+<script type="text/javascript">
+    $(document).ready(function(e) {
+        $(".clippy").zclip({
+            path: "__PUBLIC__/Js/ZeroClipboard.swf",
+            copy: function() {
+                var cvalue = $("#link_url").text();
+                return cvalue;
+            },
+            afterCopy: function() {
+                alert("复制成功!");
+            }
+        });
+    });
+</script>

@@ -1,0 +1,91 @@
+<ul>
+    <li class="global-input2-name"><?php if($tbatch_type!='35'){echo '活动页面Logo上传';}else{echo '商户LOGO';}?>：</li>
+    <li class="global-input2-input">
+        <neq name="batchTv" value="16">
+            <label><input name="is_log_img" id="is_log_img"  type="radio" value="0" <eq name="info.is_log_img" value="0">checked</eq> />否</label>
+            <label class="ml10"><input name="is_log_img" id="is_log_img"  type="radio" value="1" <eq name="info.is_log_img" value="1">checked</eq> />是</label>
+        </neq>
+
+        <div id="logo-upload2" class="vm dib ml10" <eq name="info.is_log_img" value="1">style="display:inline-block;*display:inline;*zoom:1;"<else/>style="display:none;"</eq> >
+            <div class="rel l">
+                <!--/*<a href="javascript:void(0);" title="上传" class="btn-all w60 "
+                onclick="return uploadImg_logo('{:U('ImgResize/Resize/index',array('ratioX'=>75,'ratioY'=>75,'suggestX'=>75,'suggestY'=>75,'bathName'=>'这是您在活动中的LOGO图片'))}')">上传</a>*/-->
+                <a href="javascript:void(0);" title="上传" class="btn_inner w60 " onclick="log_add()">上传</a>
+                <input type="text" value="{$node_logo}" name="resp_log_img" id="resp_log_img" class="validate[required,condRequired[logo-false],funcCall[checkActLogo]]]" style="width:1px;height: 1px;border-style:none" />
+            </div>
+        </div>
+        <div class="cl"></div>
+        <img id="img_logo_show" class="mt5 w80 dn" src="{:get_upload_url($node_logo)}" />
+    </li>
+</ul>
+<input type="hidden" name="previewimgis_logo" vale="0" />
+<script>
+    $(document).ready(function(e) {
+        var is_log_img = $("input[name='is_log_img']:checked").val();
+        showimg(is_log_img);
+        $("input[name='is_log_img']").change(function() {
+            var t = $(this).val();
+            showimg(t)
+        })
+        
+        //初始化页面logo
+        //function startaction(){
+            //$('#img_logo_show').show();
+            //previewuploadimg('{:get_upload_url($node_logo)}', "logo");
+            //$('#resp_log_img').val('{$node_logo}');
+            //$('#reset_logo').val(1);
+        //}
+        //调用初始化页面logo
+        //startaction();
+    });
+    function showimg(t) {
+        if (t == 0) {
+            $('#img_logo_show').hide('');
+            $('#logo-upload2').hide();
+            $(".Preview-mainCon").addClass("noLogo");
+            var i = $("[name='node_name_radio']:checked").val();
+            if (i == 0) {
+                $(".Preview-mainCon").addClass("noTitle");
+            } else {
+                $(".Preview-mainCon").removeClass("noTitle");
+            }
+        } else {
+            $('#logo-upload2').show();
+            $(".Preview-mainCon").removeClass("noLogo");
+            $(".Preview-mainCon").removeClass("noTitle");
+            $('#img_logo_show').show();
+            if ('{$node_logo}' != '' && $('input[name="previewimgis_logo"]').val() == 0) {
+                previewuploadimg('{:get_upload_url($node_logo)}', "logo");
+                $('#resp_log_img').val('{$node_logo}');
+                $('#reset_logo').val(1);
+            }
+        }
+    }
+    function log_add() {
+        var opt = {
+            obj: $("#img_resp_show"),
+            height: 160,
+            width: 160,
+            callback: function(data) {
+                $('#img_logo_show').attr('src', data['src']);
+                $('#img_logo_show').show();
+                $('#resp_log_img').val(data['savename']);
+                $('#reset_logo').val(1);
+                $('input[name="previewimgis_logo"]').val(1);
+                previewuploadimg(data['src'], "logo");
+            }
+        };
+        open_img_uploader(opt);
+    }
+
+    function openUploaderMeitu_log(url) {
+        var win_width = 700;
+        art.dialog.open(url, {
+            lock: true,
+            title: "上传LOGO图片",
+            width: win_width,
+            height: win_width / 1.6,
+            id: 'art_upload'
+        });
+    }
+</script>

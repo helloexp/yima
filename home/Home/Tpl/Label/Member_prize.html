@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>领取红包</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_jfyx.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js?v=__VR__"></script>
+<style type="text/css">
+	body { margin: 0 auto;}
+	#header .headerorder { width: 22px; height: 18px; float: right; position: absolute; right: 7px; top: 7px; padding: 6px 4px; background: url(__PUBLIC__/Label/Image/jfyx/Shop/icon-navUser.png) no-repeat center center; background-size: 16px 19px;}
+	#mainCon .item:first-child { border-top: 0;}
+	#mainCon { background: #ffffff; margin-top: 15px;}
+	.box img { width: 80px; height: 80px;}
+	.choose ul li.fn { border-right: 0;}
+	.choose ul li .county a.all { width: auto; color: #333333; position: relative; border-bottom: 1px #e5e5e5 solid;}
+	.choose ul li .county a.all.active { color: #ed3f41; font-weight: bold;}
+	.choose ul li .county .all.active i { border-width: 2px 0 0 2px; margin-bottom: -8px;}
+	.choose ul li .county .third { margin-left: 10px;}
+	.choose ul li .county .third a {/* width: 50%;*/ text-indent: 15px; float: left; margin-left: 0;}
+	.choose ul li .all i { right: 15px;}
+	.choose ul li#sequence { border-right: 0;}
+	.choose ul li.sequence .item { display: block;}
+	.choose ul li.sequence { background: none;}
+	.choose ul li.fn .county { background: #ffffff; margin-left: 0; width: 100%; box-shadow: -1px 0 1px rgba(0,0,0,0.1); right: -1px; top: 0px;}
+	.choose ul li.sequence .item a { margin: 0; text-align: left; text-indent: 20px;}
+	.choose ul li.sequence:before { display: none;}
+	.box .proItem-msg { position: relative;}
+	.box .proItem-msg .phone { display: inline-block; position: absolute; right: 0; top: 50%; z-index: 100; margin-top: -25px; width: 25px; height: 25px; background: url(__PUBLIC__/Label/Image/jfyx/jfyx-icon1.png) no-repeat; background-size: 100%;}
+	.box .proItem-msg h2 { padding: 2px 0;}
+	.box .proItem-msg h2 .red { color: #ed3f41;}
+	/*.box .proItem-msg h2 .gray { text-decoration:line-through;}*/
+	.box .proItem-msg a.vote { display: block; width: 75px; height: 30px; position: absolute; right: 0; bottom: 0; z-index: 100; font-size: 16px; line-height: 30px; text-align: center; background: #ed3f41; border: 1px #ed3f41 solid; border-radius: 3px; color: #ffffff;}
+	.box .proItem-msg a.voting { display: block; width: 75px; height: 30px; position: absolute; right: 0; bottom: 0; z-index: 100; font-size: 16px; line-height: 30px; text-align: center; background: #f5f5f5; border: 1px #d6d6d6 solid; border-radius: 3px; color: #666666;}
+</style>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+    	<div class="goback"><a href="{:U('Label/Member/index', array('id'=>$label_id,'node_id'=>$node_id))}"><i></i></a></div>
+        	<!--<div class="headerorder" onclick="login_to('')"></div>-->
+            <div class="logo"><!--<i>惠</i>--><span>领取红包</span></div>
+        </div>
+        <div id="main">
+            <div class="mainTop">
+            </div>
+            <div id="mainCon">
+                <div id="masonry">
+                    <!--循环-->
+                    <volist name="bonus_list" id="re" >
+                    <div class="box">
+                        <a href="javascript:;">
+                        	<img src="__UPLOAD__/{$re.goods_image}" />
+                            <div class="proItem-msg">
+                            	<h1 style="width:55%;">{$re.bonus_page_name}</h1>
+                                <h2>红包金额：<span class="red">￥{$re.amount}</span></h2>
+                                <h2>已有{$re.get_num}人领取</h2>
+                                <?php if ($re['is_bonus_get'] == '1') { ?>
+                                <a href="javascript:;" class="voting" bonus="{$re.id}">已领取</a>
+                                <?php }elseif ($re['last_num'] == '0')  { ?>
+                                <a href="javascript:;" class="voting" bonus="{$re.id}">已发完</a>
+                                <?php }else{ ?>
+                                <a href="javascript:;" class="vote" bonus="{$re.id}">领取</a>
+                                <?php } ?>
+                            </div>
+                        </a>
+                    </div>
+                    </volist>
+                    <!--循环-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$('.vote').click(function(){
+            var id="{$label_id}";
+            var node_id = "{$node_id}";
+            var bonus_id = $(this).attr("bonus");
+            Util_tools.ui.loading('处理中...');
+            $.post("{:U('Label/Member/getPrize')}&id="+id+"&node_id="+node_id, {'bonus_id':bonus_id}, function(data){
+                if (data.status == '0') {
+                    Util_tools.ui.loading(false);
+                    art.dialog({
+                        title:'提示',
+                        content:data['info'],
+                        width:'300px',
+                        height:'50px'
+                    })
+                }
+                if (data.status == '1') {
+                    Util_tools.ui.loading(false);
+                    art.dialog({
+                        title:'成功',
+                        content:data['info'],
+                        width:'300px',
+                        height:'50px',
+                        close:function(){
+                            location.href = "{:U('Label/MyOrder/myBonus',array('node_id'=>$node_id))}";
+                        }
+                    })
+                };
+            },"json");
+        });
+	});
+</script>
+</html>

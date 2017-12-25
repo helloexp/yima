@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_我的场景码_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript">
+var _callback = "{:I('callback')}";
+$(document).ready(function(e) {
+	Gform();
+    $("#sub_list").click(function(){
+		var selectedArray = [];
+		var selectedList = $(".shoplist li.selected");
+		selectType = selectedList.closest("ul").attr("id");
+		if(selectType == 'groupList'){
+			selectedList.each(function(index, element) {
+				var storeid = splitString($(this).attr("data-storeid"));
+				var storename = splitString($(this).attr("data-storename"));
+				var storetitle = splitString($(this).attr("data-search"));
+				for(var j=0;j<storeid.length;j++){
+					var subList={};
+					subList["Id"]=storeid[j];
+					subList["short_name"]=storename[j];
+					subList["Address"]=storetitle[j];
+					selectedArray.push(subList);
+				}
+			});
+		}else if(selectType == 'shoplist'){
+			selectedList.each(function(index, element) {
+				var selectedId = $(this).find("input").val();
+				var selectedName = $(this).attr("data-name");
+				var selectedTitle = $(this).attr("title");
+				var toPush = {"Id":selectedId,"short_name":selectedName,"Address":selectedTitle};
+				selectedArray.push(toPush);
+			});
+		}
+		
+		
+		var data=selectedArray;
+		var win = art.dialog.opener;
+		if(_callback && win[_callback] && typeof(win[_callback]) == 'function') {
+			win[_callback].call(this, data);
+			art.dialog.close();
+			return ; 
+		}
+		
+        if(data.length==0){
+            Diaerror('请选择可用门店');
+            return false;
+        }
+
+        var checkNumber = shopArray.join(",")
+        if(this.getAttribute('id')=='sub_list') {
+            $.post("{:U('Weixin/WeixinLocation/changeStatus')}", {
+                store_id: checkNumber
+            }, function (d) {
+                if (1 == d.status) {
+                    Diasucceed(d.info);
+                    //parent.location.reload();
+                    parent.art.dialog.list['uduf'].close();
+                }
+            }, 'json')
+        }
+    });
+
+});
+
+
+function splitString(str){
+	array = str.split(",");
+	return array;
+}
+</script>
+
+<style type="text/css">
+.popupWin .Wcanal-tab .Wcanal-tab-title p:first-child{ padding-right:0;border-left: 0px #dfdfdf solid;}
+.popupWin .Wcanal-tab .Wcanal-tab-title p.Wcanal-tab-hover{border-left: 1px #dfdfdf solid;}
+.Wcanal-tab .Wcanal-tab-title{ margin:0}
+.Wcanal-tab{ padding-top: 0px;}
+</style>
+</head>
+<body>
+<div class="popupWin">
+    <include file="./Home/Tpl/Public/Public_StoresAdnAddress.html" />
+    <div class="Wcanal-tab-list">
+    <div class="DiabtnCon">
+        <a href="javascript:void(0);" class="Diabtn-all" id="sub_list">提交</a>
+        <a href="javascript:void(0);" class="Diabtn-all-del">取消</a>
+    </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+$(function(){
+	$(".Diabtn-all-del").click(function(e) {
+		art.dialog.close();
+	});
+})
+</script>

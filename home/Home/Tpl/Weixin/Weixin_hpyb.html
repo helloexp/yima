@@ -1,0 +1,624 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_呼朋引伴_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcard.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<style>
+.aui_inner{}
+.aui_state_noTitle .aui_inner{ background:none; border-radius:15px 15px 0 0;}
+.Gform .Ginput input[type=text], .Gform .Ginput input[type=password]{ width:298px;}
+.Gform .Ginput input[type=text].notips{ width:343px; padding-right:6px;}
+.Gform .Ginput .Gchoose{ width:318px;}
+.Gform .Ginput textarea{ width:342px;}
+.Gform .Ginput .maxTips.forInput, .Gform .Ginput .maxTips.forArea {left: 458px;}
+pre {
+white-space: pre-wrap;
+word-wrap: break-word;
+}
+</style>
+
+<script type="text/javascript">
+//选择卡券的回调
+var cardresp = function(d){
+	var d_id=d.id;
+    $(".wxCard").remove();
+    if(d.source == 6){
+        var html2 = template('hongbaoresp',d);
+    }else{
+    	var html2 = template('cardresp',d);
+    }
+	$(".award_list").append(html2);
+	$("."+d_id).find(".cardInfo").css("background",d.cardbg);
+	// $("."+d_id).find(".cardInfo span").html(d.shopname);
+	// $("."+d_id).find('.adShow_l img').attr("src",d.logo_url);
+	// $("."+d_id).find('.cardtitle').html(d.goods_name);
+    if(d.source !=6){
+        var da = new Date(d.date_begin_timestamp*1000);
+        var year = da.getFullYear();
+        var month = da.getMonth()+1;
+        var date = da.getDate();
+        var da2 = new Date(d.date_end_timestamp*1000);
+        var year2 = da2.getFullYear();
+        var month2 = da2.getMonth()+1;
+        var date2 = da2.getDate();
+        var html = '有效期：'+[year,month,date].join('/')+' 00:00:00-'+[year2,month2,date2].join('/')+' 23:59:59';
+    }else{
+        var html = '不限';
+        // var html = '发送卡券后'+d.date_fixed_begin_timestamp+'天开始使用-发送卡券后'+d.date_fixed_timestamp+'天结束使用'
+    }
+	$("."+d_id).find('.AstaticDate').html(html);
+	$("."+d_id).find("#cardId").val(d.card_id);
+	$("."+d_id).find("#respid").val(d.id);
+	$("."+d_id).find(".totalNum").html(d.cardCount);
+    $("."+d_id).find(".remainNum").html(d.cardCount);
+	// $("."+d_id).find(".remainNum").html(d.quantity - d.card_get_num);
+	var card_num = parseInt(d.quantity - d.card_get_num);
+    $(".delWard").click(function(e) {
+		$(this).closest("dd").remove();
+	});
+}
+$(function(){
+    $(".delWard").click(function(e) {
+		$(this).closest("dd").remove();
+	});
+})
+</script>
+<script>
+$(function(){		
+	var initColor = "{$info['message_info']['regret_info']}";
+	$(".wx-show .wx-show-top").css("background",$(".Sselect").find("i").css("background"));
+	$(".wx-show .wx-sc-btn a").css("background",$(".Sselect").find("i").css("background"));
+
+	var initFlag = "{$flag}";
+	if(initFlag == "0"){
+		$(".IntroPic").show();
+		$(".Wcanal-tab-list").hide();
+	}
+	else
+	{
+		$(".IntroPic").hide();
+		$(".Wcanal-tab-list").show();
+	}
+    //开关 开启表示从关闭状态到开始状态 关闭表示从开启状态转到关闭状态
+	var data = {};
+	var popContent = template('openTip', data);
+	
+    $("body").on("click",".Uswitch",function(){
+        var uthis = $(this);
+        if($(this).attr("data-rel")=="0"){
+			$(".IntroPic").hide();
+			$(".Wcanal-tab-list").show();
+            windowheight();
+            $(this).find(".Uswitch-on").fadeIn(200);
+            $(this).attr("data-rel","1");
+            $(this).find("[name='flag']").val('1');
+            $(this).find("i").animate({left:29},200,function(){
+				art.dialog({
+					content:popContent,
+					width:500,
+					ok:true,
+					okVal:"确定"
+				})               
+            });
+        }else{
+			$(".IntroPic").show();
+			$(".Wcanal-tab-list").hide();
+			$(this).find(".Uswitch-on").fadeOut(200);
+            $(this).attr("data-rel","0");
+            $(this).find("[name='flag']").val('0');
+            $(this).find("i").animate({left:0},200,function(){
+                $.post("{:U('hpyb_del')}", function(data){
+                    if(data.status == 1){
+                        window.location.reload()
+                    }else{
+                        alert(data.info);
+                    }
+                }, 'json');
+            });
+        }
+    });
+	
+	$(".Sselect>div").click(function(){
+        $(this).closest(".Sselect").toggleClass("hover");
+    })
+    $(".Sselect>ul li").click(function(){
+        $(this).closest(".Sselect").find("span i").attr("class",$(this).attr("data-val"));
+        $(this).closest(".Sselect").find("input").val($(this).attr("data-val"));
+        $(".wx-show .wx-show-top").css("background",$(this).find("i").css("background"));
+		$(".wx-show .wx-sc-btn a").css("background",$(this).find("i").css("background"));
+        $(this).closest(".Sselect").toggleClass("hover");
+    });
+	
+	$("body").on("click",".js_quitView",function(){
+		art.dialog.list['jsView'].close();
+	})
+	
+});
+</script>
+<script type="text/javascript">
+	$(function(){
+		var data = {};
+		$(".reView").click(function(e) {
+			var viewContent = template('viewTip', data);
+            art.dialog({
+				title: false,
+				id:"jsView",
+				padding:0,
+				close:false,
+				content:viewContent,
+				width:336,
+				cancel:false
+			})
+
+			var wbgcolor = $(".Sselect>div span").find("i").css("background");
+			var parentDesc = $("#gzhDesc").val();
+			haha=parentDesc.replace(/\n/g,'<br />');
+			$(".Gview-desc").html(haha);
+			$(".shopBoxCon.nobottom .shopBoxView").css("background",wbgcolor);
+			$(".share-btn").css("background",wbgcolor);
+        });
+		
+		
+		$(".addPrise").click(function(e) {
+            var isopen = 1; //0：未开通微信卡包业务，1：已开通微信卡包业务
+			if(isopen == 0)
+			{
+				art.dialog.msg({
+					content:"您的微信公众号未开通微信卡包业务",
+					ok:function(){
+						window.open("https://mp.weixin.qq.com");
+					},
+					okVal:"去开通",
+					width:400
+				})
+			}
+			else
+			{            
+				art.dialog.open("{:U('Weixin/Weixin/addAward')}&callback=cardresp",{
+					title: '添加卡券',
+					width:800
+				});
+			}
+        });
+        
+        $("body").on("click",".addStorage",function(e){
+            art.dialog.open("{:U('Weixin/Weixin/cardConfig')}"+"&isEdit=1&card_id="+$('#cardId').val()+"&prizeId="+$('#goodsId').val()+"&batchId="+$('#batchId').val(),{
+                title: '编辑卡券',
+                width:500
+            });
+        });
+	})
+</script>
+</head>
+<body>
+	<div id="wrapper" >
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+        <div id="container" >
+            <div id="main" class="rel">
+              <div class="sidenav">
+					<!--开始引入左菜单-->
+					<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="hpyb"/>
+                </div>
+
+                <div class="subcon">
+                	<div class="main-name fn">
+                        <h4>呼朋引伴 <a href="http://www.wangcaio2o.com/index.php?g=Home&m=Help&a=helpDetails&newsId=1539&classId=45" style="float:right; font-size:14px" target="_blank">呼朋引伴帮助说明</a></h4>
+                    </div>
+                    <form action="{:U('Weixin/Weixin/hpybSubmit')}" method="POST" name="theform" id="theform">
+                    <input type="hidden" value="{$info['message_info']['m_id']}" name="m_id" id='m_id'/>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover"><a href="javascript:void(0);">活动配置</a></p>
+                            <p class=""><a href="{:U('Weixin/Weixin/hpyb_static')}">活动数据</a></p>
+                        </div>
+                        <div class="tipNormal mt15">
+                        <span>鼓励粉丝推荐公众号给自己的微信好友，活动期间的新粉丝可以获得公众号提供的卡券奖品。</span>
+                        <div class="Uswitch dib ml20" <eq name="flag" value="0">data-rel="0"<else />data-rel="1"</eq> >
+                            <div class="Uswitch-off"></div>
+                            <div class="Uswitch-on" <eq name="flag" value="0">style="display:none"</eq> ></div>
+                            <i class="Uswitch-i-on" <eq name="flag" value="0">style="left: 0px;"<else />style="left:29px;"</eq> ></i>
+                            <input type="hidden" id="flag" name="flag" value="{$flag}">
+                            <input type="hidden" id="message_id" name="messageId" value="{$id}">
+                        </div>
+                    </div>
+                        <img src="__PUBLIC__/Image/weixin2/hpyb-stop.png" class="IntroPic" <eq name="flag" value="0">style="display:none"<else />style="display:block"</eq>>
+                        <div class="Wcanal-tab-list" <eq name="flag" value="0">style="display:none"<else />style="display:block"</eq>>
+                        	<div class="Gform w1 pt15">
+                            	<h3>编辑被关注回复内容</h3>
+                                <!--<div class="tipNormal nullbg">
+                                	<p>活动保存后，以下内容将覆盖“自动回复 - 被添加自动回复”。切换右上角按钮，停止呼朋引伴功能，可以恢复被添加自动回复。</p>
+                                </div>-->
+                                <ul>
+                                	<li class="Gname"><span>*</span>&nbsp;活动奖品</li>
+                                    <li class="Ginput">
+                                    	<div class="addPrise mr10"><a href="javascript:void(0);" class="addPriseBtn"><i></i>添加奖品</a></div>
+                                        <span class="txtTips">最多添加一个</span>
+                                        <div class="showPrise">
+                                        	<div class="award_list pt10">
+                                            <volist name="info['card_info']" id="card">
+                                                <dl  class="wxCard">
+                                                    <dd data-id="{$card['batchId']}" class="{$card['goods_id']}">
+                                                        <p class="adward_title">
+                                                            <strong class="cardtitle">{$card['goods_name']}</strong>
+                                                            <span>
+                                                                <a href="javascript:void(0)" class="delWard">删除</a>
+                                                            </span>
+                                                            <span style="margin-right:10px">
+                                                                <a href="javascript:void(0)" class="addStorage">编辑</a>
+                                                            </span>
+                                                        </p>
+                                                        <div class="adShow">
+                                                            <div class="adShow_l shinfo">
+                                                                <?php if($card['source'] == 6):?>
+                                                                    <img src="__PUBLIC__/Image/weixin2/wxIcon.png">
+                                                                <?php else:?>
+                                                                    <img src="__URL_UPLOAD__/{$card['goods_image']}">
+                                                                <?php endif;?>
+                                                            </div>
+                                                            <div class="adShow_r">
+                                                                <span class="Astatic">总投入数量<em class="totalNum">{$card['totalCount']}</em></span>
+                                                                <span class="Astatic">剩余数量<em class="remainNum">{$card['surplus']}</em></span>
+                                                            </div>
+                                                            <div class="cl pt5"></div>
+                                                            <p class="AstaticDate tip pt5" style="text-align:left">{$card['time']}</p>
+                                                        </div>
+                                                        <input type="hidden" value="{$card_info['card_id']}" name="cardId" id="cardId">
+                                                        <input type="hidden" value="{$card_info['respContent']}" name="respContent" id="respContent">
+                                                        <input type="hidden" value="{$card_info['goods_id']}" name="goodsId" id="goodsId">
+                                                        <input type="hidden" value="{$card_info['source']}" name="source" id="source">
+                                                        <input type="hidden" value="{$card_info['totalCount']}" name="cardCount" id="cardCount">
+                                                        <input type="hidden" value="{$card['batchId']}" name="batchId" id='batchId'/>
+                                                        <input type="hidden" value="{$card['sendType']}" name="sendType" id='sendType'/>
+                                                        <input type="hidden" value="{$card['dayLimit']}" name="dayLimit" id='dayLimit'/>
+                                                    </dd>
+                                                </dl>
+                                            </volist>
+                                        </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <h3 class="mt15">设置分享页</h3>
+                                <div class="imvBox">
+                                    <div class="imvBox-edit">
+                                        <ul>
+                                            <li class="Gname"><span>*</span>&nbsp;分享标题</li>
+                                            <li class="Ginput">
+                                                <input type="text" maxlength="10" name="shareTitle" id="shareTitle" class="validate[required] Gview-shareTitle" placeholder="呼朋引伴，关注有礼" value="{$card_info['shareTitle']}"/>
+                                                <span class="maxTips forInput" data-max="10">0/10</span>
+                                            </li>
+                                        </ul>                                 
+                                        <ul>
+                                            <li class="Gname"><span>*</span>&nbsp;分享描述</li>
+                                            <li class="Ginput">
+                                                <textarea maxlength="30" class="validate[required] Gview-shareDesc" style="height:48px;" name="shareDesc" id="shareDesc" placeholder="我刚获得了一份新粉丝礼包。关注公众号，一起来领吧！">{$card_info['shareDesc']}</textarea><span class="maxTips forArea" data-max="30" style="top:68px;">0/30</span>
+                                            </li>
+                                        </ul>                                       
+                                        <ul>
+                                            <li class="Gname"><span>*</span>&nbsp;分享图标</li>
+                                            <li class="Ginput">
+                                                <div class="Gchoose Gview-img">
+                                                <input name="img_resp" id="img_resp" type="hidden" value="{$card_info['img_resp']}">
+                                                <a href="javascript:void(0)" class="Gbtn-pic" title="" data-gettitle="选择图片" alt=""><i></i></a>
+                                                <div class="Gchoose-opr an" style="bottom: 0px; opacity: 0; display: none;">
+                                                <div class="Gchoose-opr-img"><img src="" style="height:150px;"></div>
+                                                <div class="Gchoose-opr-opr">
+                                                <a href="javascript:void(0)" class="Gchoose-opr-edit"></a>
+                                                <a href="javascript:void(0)" class="Gchoose-opr-del"></a>
+                                                </div>
+                                                <span class="Gchoose-opr-jt"></span>
+                                                </div>
+                                                <div class="Gchoose-oprbg"></div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                            <li class="Gname"><span>*</span>&nbsp;页面背景</li>
+                                            <li class="Ginput">
+                                                <div class="Sselect mr10">
+                                                    <input type="hidden" name="color" class="view-color" value="<empty name='info.message_info.regret_info'>Color010</empty> {$info['message_info']['regret_info']}" />
+                                                    <div class="SselectInput">
+                                                        <span><i class="<empty name='info.message_info.regret_info'>Color010</empty>{$info['message_info']['regret_info']}"></i></span>
+                                                        <a href="javascript:void(0)"></a>
+                                                    </div>
+                                                    <ul>
+                                                    <li data-val="Color010"><i class="Color010"></i></li>
+                                                    <li data-val="Color020"><i class="Color020"></i></li>
+                                                    <li data-val="Color030"><i class="Color030"></i></li>
+                                                    <li data-val="Color040"><i class="Color040"></i></li>
+                                                    <li data-val="Color050"><i class="Color050"></i></li>
+                                                    <li data-val="Color060"><i class="Color060"></i></li>
+                                                    <li data-val="Color070"><i class="Color070"></i></li>
+                                                    <li data-val="Color080"><i class="Color080"></i></li>
+                                                    <li data-val="Color081"><i class="Color081"></i></li>
+                                                    <li data-val="Color090"><i class="Color090"></i></li>
+                                                    <li data-val="Color100"><i class="Color100"></i></li>
+                                                    <li data-val="Color101"><i class="Color101"></i></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                            <li class="Gname"><span>*</span>&nbsp;活动描述</li>
+                                            <li class="Ginput">
+                                                <textarea maxlength="120" class="validate[required] Gview-desc" id="gzhDesc" style="height:140px;" name="respDesc"  placeholder="你的公众号功能介绍一定要把主要服务内容写出来，这样别人在关注你的公众号的时候，才能简明扼要的了解你的信息，以便关注。 关注即送超值大礼！">{$info['message_info']['explain_info']}</textarea><span class="maxTips forArea" data-max="120" style="top:155px;">0/120</span>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                            <li class="Gname"><span>*</span>&nbsp;引导关注页</li>
+                                            <li class="Ginput">
+                                            <input type="text" name="guide_url" class="notips" placeholder="http://" value="{$info['weixin_info']['guide_url']}"/>
+                                            <span class="txtTips"><a href="http://www.wangcaio2o.com/index.php?g=Home&m=Help&a=helpDetails&newsId=1333&classId=45" target="_blank" class="fr">查看如何制作</a></span>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                    <li class="Ginput">
+                                    	<a href="javascript:void(0);" class="btn-all" id="js_submit">保存</a>
+                                        <notempty name='id'>
+                                        <a href="javascript:void(0);" data="" data-rel="" id="copyBtn" class="clip2Board copyBtn" data-placement="right">复制链接<div class='hovertip'>将活动链接复制到图文消息或自定义菜单使用</div></a>
+                                        </notempty>
+                                    </li>
+                                </ul>
+                                    </div>
+                                    <div class="imvBox-show">
+                                    	<div class="wx-share">
+                                        	<span class="wx-share-title Gshow-shareTitle">呼朋引伴，关注有礼</span>
+                                            <div class="wx-share-content">
+                                            	<div class="wx-sc-logo"><img src="__PUBLIC__/Image/oto_head.png" class="Gshow-img"></div>
+                                                <div class="wx-sc-txt Gshow-shareDesc">我刚获得了一份新粉丝礼包。关注公众号，一起来领吧！</div>
+                                            </div>
+                                        </div>
+                                        <div class="wx-show">
+                                        	<div class="wx-show-top">
+                                                <div class="wx-sc-logo"><img src="{$info['weixin_info']['head_img']}"></div>
+                                                <div class="wx-sc-owner">{$info['weixin_info']['weixin_code']}</div>
+                                            </div>
+                                            <div class="wx-sc-content" ><pre><p style="text-indent:2em; word-break:break-all; word-wrap:break-word; width:290px; display:block" class="Gshow-desc">你的公众号功能介绍一定要把主要服务内容写出来，这样别人在关注你的公众号的时候，才能简明扼要的了解你的信息，以便关注。 关注即送超值大礼！</p></pre></div>
+                                            <div class="wx-sc-btn"><a>分享公众号</a></div>
+                                        </div>
+                                    </div>
+                                    <div class="cl"></div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+
+<script type="text/html" id="openTip">
+<div class='loadTip'>
+	<div class='loadStatus ok'>
+	<dl>
+	<dt>已成功开启！</dt>
+	<dd>功能开启后，保存成功的内容将作为“<span class="redfont">关注自动回复</span>”发送给新粉丝。</dd>
+	</dl>
+	</div>
+</div>
+</script>
+
+<script type="text/html" id="viewTip">
+<div class="preview">
+<div class="shopBox" style="padding-bottom: 70px;">
+	<div class="shopBoxCon nobottom">
+		<div class="shopBoxCon-top"></div>
+		<div class="shopBoxView nopadding fn">
+			<div class="shopMod disabled" id="shopMod_0" data-edit="0" data-special="0">
+				<div id="firstMain">
+					<!--新的卡券领取页面-->
+					<div class="Interface">
+						<div class="InterfaceContent">
+							<div class="Interfacelogo">
+								<img src="{$info['weixin_info']['head_img']}" class="show_img img-logo" id="showLogo"/>
+							</div>
+							<h1 class="card_name">{$info['weixin_info']['weixin_code']}</h1>
+							<dl>
+							<dd class="Gview-desc tc"></dd>
+							<!-- <dd>关注即送超值大礼！</dd> -->
+							<dd><a href="javascript:;" class="share-btn">分享公众号</a></dd>
+							</dl>
+						</div>
+					</div>
+					<!--新的卡券领取页面 end-->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="tc"><a href="javascript:void(0);" class="btn-all-del js_quitView">退出预览</a></div>
+</div>
+</script>
+
+<!-- 选择的卡券信息 -->
+<script type="text/html" id="cardresp">
+    <dl class="wxCard {{id}}">
+		<dd class="{{goods_id}}" data-id="0">
+    	<p class="adward_title">
+            <strong class="cardtitle">{{title}}</strong>
+            <em class="type1" title="" style="float:right; margin-left:10px;" data-gettitle="微信红包领取后可在微信钱包中查看" alt="">微信卡券</em>
+            <span>
+            <a href="javascript:void(0)" class="addStorage">编辑</a>
+            <a href="javascript:void(0)" class="ml10" id="isDel">删除</a>
+            <input name="prizeStatus[5924]" value="1" type="hidden">
+            </span>
+            <!--样式：type1==卡券,type2==积分,type3==定额红包,-->
+        </p>
+        <div class="adShow">
+			<div class="adShow_l shinfo">
+				<img src="__URL_UPLOAD__/{{goods_image}}">
+			</div>
+			<div class="adShow_r">
+				<span class="Astatic">总投入数量<em class="totalNum">{{cardCount}}</em></span>
+				<span class="Astatic">剩余数量<em class="remainNum">{{cardCount}}</em></span>
+			</div>
+			<div class="cl pt5"></div>
+			<p class="AstaticDate tip pt5"><span>发送形式:</span>
+            <i title="支持微信卡券形式发送" class="icon-eticket3"></i>
+                        </p>
+		</div>
+        <input type="hidden" value="{{card_id}}" name="cardId" id="cardId">
+        <input type="hidden" value="{{goods_id}}" name="goodsId" id="goodsId">
+        <input type="hidden" value="{{source}}" name="source" id="source">
+        <input type="hidden" value="{{title}}" name="goodsName" id="goodsName">
+        <input type="hidden" value="{{cardCount}}" name="cardCount" id="cardCount">
+        <input type="hidden" value="{{sendType}}" name="sendType" id="sendType">
+        <input type="hidden" value="{{dayLimit}}" name="dayLimit" id="dayLimit">
+        <input type="hidden" value="{{respContent}}" name="respContent" id="respContent">
+        <input type="hidden" value="2" name="batchId" id='batchId'/>
+    </dd>
+	</dl>
+</script>
+<script type="text/html" id="hongbaoresp">
+<dl class="wxCard">
+<dd data-id="0" class="{{goods_id}}">
+    <p class="adward_title">
+        <strong class="cardtitle">{{goods_name}}</strong>
+        <em class="type3" style="float:right; margin-left:10px;" title="" data-gettitle="" alt="">微信红包</em>
+        <span style="float:right">
+            <a href="javascript:void(0)" class="addStorage">编辑</a>
+            <a href="javascript:void(0)" class="ml10" id="isDel">删除</a>
+            <input name="prizeStatus[5906]" value="1" type="hidden">
+        </span>
+    </p>
+    <div class="adShow">
+        <div class="adShow_l shinfo">
+            <img src="__PUBLIC__/Image/weixin2/wxIcon.png">
+        </div>
+        <div class="adShow_r">
+            <span class="Astatic">总投入数量<em class="totalNum">{{cardCount}}</em></span>
+            <span class="Astatic">剩余数量<em class="remainNum">{{cardCount}}</em></span>
+        </div>
+        <div class="cl pt5"></div>
+    </div>
+    <input type="hidden" value="" name="cardId" id="cardId">
+    <input type="hidden" value="{{goods_id}}" name="goodsId" id="goodsId">
+    <input type="hidden" value="{{source}}" name="source" id="source">
+    <input type="hidden" value="{{goods_name}}" name="goodsName" id="goodsName">
+    <input type="hidden" value="{{cardCount}}" name="cardCount" id="cardCount">
+    <input type="hidden" value="{{sendType}}" name="sendType" id="sendType">
+    <input type="hidden" value="{{dayLimit}}" name="dayLimit" id="dayLimit">
+    <input type="hidden" value="{{respContent}}" name="respContent" id="respContent">
+    <input type="hidden" value="2" name="batchId" id='batchId'/>
+</dd>
+</dl>
+</script>
+<script src="__PUBLIC__/Js/ZeroClipboard.js"></script>
+<script type="text/javascript">
+$(function(){
+    var shareTitle = $('#shareTitle').val();
+    var shareDesc = $('#shareDesc').val();
+    var respDesc = $('#gzhDesc').val();
+    if(shareTitle == ""){
+        $('.wx-share-title').html("呼朋引伴，关注有礼");
+    }else{
+        $('.wx-share-title').html(shareTitle);
+    }
+
+    if(shareDesc == ""){
+        $('.wx-sc-txt').html("我刚获得了一份新粉丝礼包。关注公众号，一起来领吧！");
+    }else{
+        $('.wx-sc-txt').html(shareDesc);
+    }
+
+    if(respDesc == ""){
+        $('.Gshow-desc').html("你的公众号功能介绍一定要把主要服务内容写出来，这样别人在关注你的公众号的时候，才能简明扼要的了解你的信息，以便关注。 关注即送超值大礼！");
+    }else{
+        $('.Gshow-desc').html(respDesc);
+    }
+    //删除卡券
+    $("body").on("click","#isDel",function() {
+        $('#isAddCard').removeClass('dn');
+        $('#isTip').removeClass('dn');
+        $('.wxCard').remove();
+    })
+
+	$("#js_submit").click(function(e) {
+        if($("input[name=goodsId]").length == 0){
+            Diaerror("请选择卡券")
+            return false;
+        }
+        if($("textarea[name=respDesc]").val() == ''){
+            Diaerror("请填写公众号描述")
+            return false;
+        }
+        if($("input[name=guide_url]").val() == ''){
+            Diaerror("请填写引导关注页")
+            return false;
+        }
+        if($("input[name=guide_url]").val().substr(0,23) != "http://mp.weixin.qq.com"){
+            Diaerror("请正确填写引导关注页")
+            return false;
+        }
+        $("textarea[name=respDesc]").val($.trim($("textarea[name=respDesc]").val().replace(/<br\/?[^>]*>/g, "\n")));
+        if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if (data.status == 1){
+                        dialog.close();
+                        
+						art.dialog({
+							title:"活动创建成功",
+							content:"<div class='Diawarning'><p>活动配置的内容将覆盖“自动回复 - 关注自动回复”。<br />切换配置页面右上角开启关闭按钮，停止呼朋引伴功能，可以恢复被添加自动回复。</p></div>",
+							width:"500px",
+							ok:function(){
+								Diasucceed('活动保存成功。')
+                                reload()
+								},
+							okVal:"确定"
+						});
+						
+                        //reload();
+                    } else {
+                        dialog.close();
+                        Diaerror(data.info)
+                    }
+                },
+                dataType:'json'
+            });
+            return false;
+		  }
+    });
+    
+    $("#copyBtn").each(function(e) {
+        var id = $("input[name=message_id]").val();
+        var url = "{:U('Label/FuWenText/hpyb','','','',true)}&id="+id;
+        //alert(url);
+        var clip=null;
+        clip = new ZeroClipboard.Client();
+        ZeroClipboard.setMoviePath( './Home/Public/Js/ZeroClipboard.swf' );  //和html不在同一目录需设置setMoviePath
+        ZeroClipboard.setMoviePath( './Home/Public/Js/ZeroClipboard.swf' );
+        clip.setHandCursor( true );
+        clip.setText(url);
+        clip.addEventListener('complete', function (client, text) {
+            Diasucceed("链接已保存至剪贴板","",2)
+        });
+        clip.glue( 'copyBtn');
+    });	
+})
+</script>

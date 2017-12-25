@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>会员管理-编辑会员信息</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wmember.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+    $(document).ready(function(e) {
+        Gform();
+		$('#smb').click(function(){
+				_name=$('input[name=name]').val();
+				_gender=$('input[name=gender]:checked').val(); 
+				_phone=$('input[name=phone]').val();
+				if(_name==''){alert('姓名不能为空');return false;}
+				if(_gender==undefined ||  _gender==''){alert('性别必选');return false;}
+				if(_phone==''){alert('手机号码不能为空');return false;}
+				 var myreg = /^1[35789]{1}\d{9}$/; 
+				if(!myreg.test(_phone)) 
+				{ 
+				    alert('请输入有效的手机号码！'); 
+				    return false; 
+				} 
+				$.post('{:U("Member/editinfo",array("id"=>$memberinfo['member_id']))}',$("#form").serialize(),function(data){
+				if(data.info==1)	
+					$('#back').click();
+				else{
+					alert(data.info);
+				if(data.status==1)
+				 	$('#back').click();
+				}
+			},'json');
+				})
+		
+        })
+
+</script>
+<style>
+.Gform.eTicket{ width:520px; padding:30px}
+.Gform.eTicket .Ginput{  padding: 12px 0 0 150px;}
+</style>
+</head>
+<body>
+<div id="Wform" class="Gform eTicket">
+<form id="form" action="">
+ <input type="hidden"  name="id"   value="{$memberinfo['id']}"/>
+<ul>
+    <li class="Gnmae">*&nbsp;姓名：</li>
+    <li class="Ginput">
+        <input type="text" maxlength="20" name="name" class="validate[required]" value="{$memberinfo['name']}"/>
+      </li>
+</ul>
+<ul>
+    <li class="Gnmae">*&nbsp;性别：</li>
+    <li class="Ginput">
+    	<label><input type="radio" value="1" <if condition="$memberinfo['sex'] eq 1"> checked="checked" </if> name="gender"/>男</label>
+        <label><input type="radio"  value="2" <if condition="$memberinfo['sex'] eq '2'"> checked="checked" </if> name="gender"/>女</label>
+  	</li>
+</ul>
+<ul>
+    <li class="Gnmae">*&nbsp;手机号码：</li>
+    <li class="Ginput">
+        <input name='phone' type="text" class="validate[required]" value="{$memberinfo[phone_no]}"/>
+      </li>
+</ul>
+<ul>
+    <li class="Gnmae">*&nbsp;出生日期：</li>
+    <li class="Ginput pt10">
+    	<p>
+    	{$memberinfo['birthday']|preg_replace='/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])(.*)/','$1-$2-$3',###|default="未知"}
+     </p>
+      </li>
+</ul>
+<ul>
+    <li class="Gnmae">*&nbsp;所在区域：</li>
+      <li class="Ginput pt10">
+      <p>
+    		{$memberinfo['address']|default='未知区域'}
+       </p>
+      </li>
+</ul>
+
+<ul>
+    <li class="Gnmae">*&nbsp;首次来源：</li>
+    <li class="Ginput pt10"><p>{$memberinfo[tname]|default='未知渠道'}</p></li>
+</ul>
+
+<ul>
+    <li class="Gnmae">*&nbsp;活动参与次数：</li>
+    <li class="Ginput pt10">
+    <p>
+     <if condition="$memberinfo['join_cnt'] gt 0">
+    {$memberinfo['join_cnt']}
+    <else/>
+    0
+    </if>
+    </p>
+    </li>
+</ul>
+
+<ul>
+    <li class="Gnmae">*&nbsp;发码数：</li>
+    <li class="Ginput pt10"><p>
+     <if condition="$memberinfo['send_cnt'] gt 0">
+    {$memberinfo['send_cnt']}
+    <else/>
+    0
+    </if>
+    </p></li>
+</ul>
+
+<ul>
+    <li class="Gnmae">*&nbsp;验码数：</li>
+    <li class="Ginput pt10"><p>
+    <if condition="$memberinfo['verify_cnt'] gt 0">
+    {$memberinfo['verify_cnt']}
+    <else/>
+    0
+    </if>
+    </p></li>
+</ul>
+
+<ul>
+    <li class="Gnmae">*&nbsp;登记日期：</li>
+    <li class="Ginput pt10"><p>{$memberinfo['add_time']|preg_replace='/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])(.*)/','$1-$2-$3',###}</p></li>
+</ul>
+
+<ul>
+    <li class="Gnmae"></li>
+    <li class="Ginput mt10">
+    <a href="javascript:void(0);" id='back' onclick="(function(){parent.art.dialog.list['editordialog'].close()})()" title="返回" class="btn-all-del">返回</a>
+    <a href="javascript:void(0);" title="提交" id="smb" class="btn-all">提交</a>
+    </li>                            
+</ul>
+</form>
+</div>
+    
+</body>
+</html>

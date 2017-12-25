@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$marketInfo['wap_title']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20150218.css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.new.js?v=__VR__"></script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+    	<div id="main">
+            <include file="Label/Spring2015/header"/>
+            <div class="page1">
+                <if condition="$_GET['friend'] eq 1">
+                    <div class="myGold pr0" style="margin-bottom: 10px"><em>{$frow['fcount']}</em><span>次</span><p>您一共获得<a>{$frow['fcount']}</a>位好友共<a>{$frow['fcount']}</a>个赠送的机会~</p></div>
+                    <else/>
+                    <div class="bddashed"><p>您的累计的金币数为：<a>{$myranking['score']}</a>枚</p><p>排名名次为：第<a>{$myranking['ranking']}</a>名！</p></div>
+                </if>
+            </div>
+            <div class="page1">
+            	<h3>
+                    <span class="{$_GET['friend']==0?'':'erro'}"><a href="{:U('',array('friend'=>0,'id'=>$id))}">{:L('DA_PAO')}排行榜</a></span>
+                    <span class="{$_GET['friend']==1?'':'erro'}"><a href="{:U('',array('friend'=>1,'id'=>$id))}">我的{:L('PAO_YOU')}</a></span>
+                </h3>
+                <div id="orderList1" class="orderList">
+                	<ul id="masonry">
+                        <volist name="result" id="vo" key="k">
+                            <php>
+                                $kk = ($_GET['p']-1)*10+$k;
+                            </php>
+                            <if condition="($_GET['p'] eq 1) && $_GET['friend'] eq 0">
+                                <if condition="$k eq 1">
+                                    <li class="box"><span class="one">炮神</span><img src="{$vo['headimgurl']}" /><p class="l">{$vo.nickname}</p><p class="r"><a>{$vo.score}</a>金币</p></li>
+                                    <elseif condition="$k eq 2"/>
+                                    <li class="box"><span class="two">炮圣</span><img src="{$vo['headimgurl']}" /><p class="l">{$vo.nickname}</p><p class="r"><a>{$vo.score}</a>金币</p></li>
+                                    <elseif condition="$k eq 3"/>
+                                    <li class="box"><span class="three">炮尊</span><img src="{$vo['headimgurl']}" /><p class="l">{$vo.nickname}</p><p class="r"><a>{$vo.score}</a>金币</p></li>
+                                    <else/>
+                                    <li class="box"><span class="other">{$k}</span><img src="{$vo['headimgurl']}" /><p class="l">{$vo.nickname}</p><p class="r"><a>{$vo.score}</a>金币</p></li>
+                                </if>
+                                <else/>
+                                <li class="box"><span class="other">{$kk}</span><img src="{$vo['headimgurl']}" /><p class="l">{$vo.nickname}</p><p class="r"><a>{$vo.score}</a>金币</p></li>
+                            </if>
+
+                        </volist>
+                    </ul>
+                    <nav id="page-nav">
+                        <a href="<?php echo $nextUrl;?>" class="btn-more load">加载更多好友</a>
+                    </nav>
+                </div>
+            </div>
+            <div class="page3 ptb20">
+            	<p class="tc">去赚取更多金币，冲击大奖，<br />冲击官方排行榜吧！</p>
+            	<p class="tc"><a href="javascript:void(0);" class="btn-all w180 btnshow">邀好友，赚金币</a></p>
+                <p class="tc">邀请<a>1</a>名好友就可以获得<a>1</a>局{:L('DA_PAO')}机会，<br />赶紧去邀请吧！</p>
+                <p class="tc pt20"><a href="{:U('index',array('id'=>$id))}" class="btn-gohome">返回首页</a></p>
+            </div>
+            <div id="footer">
+                <div class="myMicRight">
+                    <p style="padding:5px 0;">
+                        <a href="{:U('Label/Label/index',array('id'=>44418))}" style="overflow:visible; height:16px; font-size:12px; display:block;"><img src="__PUBLIC__/Image/wap-logo-wc.png" style="width:35px; height:35px;" class="vt"/>翼码旺财提供免费技术支持</a>
+                        <a href="{:U('Label/Label/index',array('id'=>44418))}" style="font-size:12px; display:block; text-indent:30px; color:#c50000;">我也要发起"{:L('DA_PAO')}"</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    $('#masonry').infinitescroll({
+        navSelector  : '#page-nav',    // selector for the paged navigation 
+        nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
+        itemSelector : '.box',     // selector for all items you'll retrieve
+		loadingImg   : '__PUBLIC__/Label/Image/Item/loading.gif',
+        loading: {
+            	finishedMsg: '没有更多数据了',
+            	loadingImg: '__PUBLIC__/Label/Image/Item/loading.gif'
+			}
+	});
+	$(window).unbind('.infscr');
+	$('a.btn-more').click(function(){
+		$(document).trigger('retrieve.infscr');
+		return false;
+	});
+	$(document).ajaxError(function(e,xhr,opt){
+		if(xhr.status==404)$('a.btn-more').remove();
+	});
+});
+</script>
+<script>
+    var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Spring2015/_share"/>

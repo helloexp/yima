@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>会员管理-信息采集项</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wmember.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.masonry.min.js?v=201602011"></script>
+<script type="text/javascript">
+$(function(){
+	$('.Wcanal-tab-list').masonry({       
+		itemSelector:'.pop_cjx',    
+	}); 
+});
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html"/>
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+            <include file="Wmember/Member/leftMenu" leftmenuid="xxcjx"/>
+            <div class="subcon fn">
+                <div class="main-name fn">
+                    <h4>信息采集项<a class="btn-add first add_xxcjx" href="javascript:void(0)"><i></i>自定义采集项信息</a></h4>
+                </div>
+                <div class="tipNormal part mb15"><p>您已添加了{$collectCount}个会员信息采集项，还可以再添加{$residueCount}个信息采集项<span class="r font14"><a
+                        href="{:U('Home/Help/helpDetails',array('newsId'=>1558,'classId'=>61))}"
+                        target="_blank">什么是自定义信息采集项</a><i class="allAsk mr5" style="vertical-align:-5px;"></i></span>
+                </p></div>
+                <div class="Wcanal-tab" id="Wcanal-tabon">
+                    <div class="Wcanal-tab-list" style="display: block;">
+                        <volist name="collect" id="vo">
+                        <div class="pop_cjx l">
+                            <table cellpadding="0" cellspacing="0" class="W-table mt15">
+                                <tbody>
+                                <tr class="th">
+									<th hidden id="hid">{$vo.id}</th>
+									<th class="pop_cjx_name">{$vo.text}</th>
+                                    <th class="pop_cjx_edit"><a href="javascript:void(0)">修改</a></th>
+                                </tr>
+                                <tr class="title">
+                                    <td class="chose_item">选项</td>
+                                    <td class="member_nums">会员数</td>
+                                </tr>
+                                <volist name="vo['value_lists']" id="voo">
+                                <tr class="title cjlist">
+                                    <td>{$voo['0']}</td>
+                                    <if condition="$voo['1'] eq 0 ">
+                                        <td><span>{$voo['1']}</span></td>
+                                        <else />
+                                        <td><a href="{:U('Member/msginfo',array('text'=>$vo['text'],'opt'=>$voo['0'],'name'=>$vo['name'],'value'=>$voo['2'],'count'=>$voo['1']))}">{$voo['1']}</a></td>
+                                    </if>
+                                </tr>
+                                </volist>
+                                </tbody>
+                            </table>
+                        </div>
+                        </volist>
+                        <div class="pop_cjx l add_xxcjx" id="addcjx">
+                            <a class="add_collect add_cjxs"><span style="font-size:20px;font-weight:700">+</span> 添加采集项（{$residueCount}）</a>
+                        </div>
+                    </div>
+                    <div class="page fn">
+                        <?php echo $page;?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<a href="{:U('Member/InfoInit')}">禁止点击</a>-->
+    <include file="./Home/Tpl/Public/Public_footer.html"/>
+</div>
+<div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+var memberItemCon = 0;
+$(function(){
+     Gform();
+    //自定义采集项
+    $(".add_xxcjx").live("click",function(e){
+	    var viewContent=template('add_xxcjx',e);
+	    var view_list=template('cjx_list',e);
+		var cjname=e.collect_name;
+		var hasnum={$collectCount};
+        art.dialog({
+            title:'添加自定义采集项',
+            width:500,
+			content:viewContent,
+            padding:0,
+            okVal:'确认',
+            ok:function(){
+			 memberItemCon=0;
+			 var m=0;
+			 var nameval=$('input[name=collect_name]');
+			 if(nameval.val()==''){
+                  alert('采集项名称不能为空');
+				  $(nameval).focus();
+                  return  false;	
+                }else if($(".memberItem").children(".memberItemCon").length<=0){
+					alert("请添加设置项！");
+					return false;
+				}else{
+			     $(".memberItemCon .setopt1").each(function(){
+					if ($(this).val() ==""){
+						$(this).addClass('empty_input');
+						 m=1;
+						return;
+					}else{
+					   $(this).removeClass('empty_input');
+					}
+				  });
+			      if(m==1){
+				    alert("设置项不能为空！");
+					$(".memberItem .empty_input:first").focus();
+					return false;
+				 }
+				$.ajax({
+                    type: "POST",
+                    dataType:"json",
+                    url: "{:U('Member/addCollect')}",
+                    data : $('#caiji').serialize(),
+                    success: function(result) {
+                        //console.log(result);
+						if(result==true){
+							Diasucceed('添加成功');
+							window.parent.location.reload();
+						}else {
+                           if( hasnum >=15){
+						    Diaerror('已满15个采集项');
+							}else{
+							Diaerror('添加失败');
+							}
+						   return false;
+						}
+                    }
+			     })
+			    $('.Wcanal-tab-list').masonry('reload');
+              }
+		   }
+       })
+	   memberItemCon=0;
+	})
+
+	//添加采集项弹窗中增加采集项设置
+      $(".js_AddPtion").live('click',function(){
+                    if(memberItemCon>8){
+                        return false;
+                    }else{
+                        var html ='<div class="memberItemCon rel"><input type="text" maxlength="15" class="setopt1 validate[required]" name="setopt[]" value=""><span class="maxTips forInput" data-max="15" style="top:10px;left:225px">0/15</span><a href="javascript:void(0)" class="memberItemCon-del"><i></i></a></div>';
+                        memberItemCon += 1;
+                        $(".memberItem").append(html);
+                        if(memberItemCon==8){
+                            $(".Gset").css('display','none');
+                        }
+                    }
+                });
+    //添加采集项弹窗内部删除设置采集项
+    $('body').on("click",".memberItem  .memberItemCon-del",function(){ 
+               memberItemCon -= 1;
+               $(this).parent().remove();
+               if(memberItemCon<8){
+                 $(".Gset").css('display','block');
+               }
+        });
+    //修改采集项
+    $(".pop_cjx_edit a").live("click",function(e){
+		var edit_cjname=$(this).parent().prev().text();
+		var edit_cjid=$(this).parent().prev().prev().text();
+		var edit_cjlist=$(this).parent().parent().parent().find(".cjlist");
+		var edit_conts='<form name ="caiji" action="" method="post" id="edit_caiji"><div class="Gform l"><ul><div class="DiatipsCon"><p>如已有会员选择某选项，则此选项不可删除或修改。</p></div><li class="Ginput"><div style="margin-left:-155px"><ul><li class="Gname"><span class="red">*</span>&nbsp;采集项名称</li><li class="Ginput"><input type="hidden" name="id" value="'+edit_cjid+'"><input type="text" maxlength="6" name="collect_name" value="'+edit_cjname+'"  readonly style="border:none" onfocus="blur()"> </li></ul><ul class="set_options"><li class="Gname"><span class="red">*</span>&nbsp;设置选项</li><li class="Ginput"><div class="condition-con"><div class="fn ModifyItem" id="ModifyItem"></div><div class="Gset1"><div class="GsetPtion1 Mod_AddPtion"><span> + 添加设置选项</span></div></div></div><p class="txtTips" style="padding-bottom:30px">最多可添加8个设置选项</p></li></ul></div></li></ul></div></form>';
+	    art.dialog({
+	        title:'修改自定义信息采集项',
+            width:500,
+			content:edit_conts,
+            padding:0,
+            okVal:'确认',
+            ok:function(){
+			 var n=0;
+			 if($('input[name=collect_name]').val()==''){
+                  alert('采集项名称不能为空');
+				  $(this).focus();
+                  return  false;	
+                }else if($("#ModifyItem").children(".ModifyItemCon").length<=0){
+					alert("请添加设置项！");
+					return false;
+				}else{
+			     $(".ModifyItemCon .setopt1").each(function(){
+					if ($(this).val() ==""){
+						$(this).addClass('empty_input');
+						 n=1;
+						return;
+					}else{
+					   $(this).removeClass('empty_input');
+					}
+				  });
+			      if(n==1){
+				    alert("设置项不能为空！");
+					$("#ModifyItem .empty_input:first").focus();
+					return false;
+				  }
+				  $.ajax({
+					type: "POST",
+					dataType:"json",
+					url: "{:U('Member/editCollect')}",
+					data : $('#edit_caiji').serialize(),
+					success: function(result) {
+						//console.log(result);
+						if(result==true){
+							Diasucceed('修改成功');
+							window.parent.location.reload();
+						}else{
+							Diaerror('修改失败');
+						}
+					}
+				})
+			  }
+			}
+	     })
+		edit_cjlist.each(function(){ 
+		  var set_name=$(this).children().first().text();
+		  var set_name1=$(this).children().first().next().text();
+		  var val_nums=set_name.length;
+		  var edit_setname='<div class="ModifyItemCon rel"><input type="text" maxlength="15" class="setopt1" name="setopt[]" value="'+set_name+'" readonly></div>';
+		  var edit_setname01='<div class="ModifyItemCon rel"><input type="text" maxlength="15" class="setopt1" name="setopt[]" value="'+set_name+'"><span class="maxTips forInput" data-max="15" style="top:10px;left:225px">'+val_nums+'/15</span><a href="javascript:void(0)" class="ModifyItemCon-del"><i></i></a></div>';
+		  if(set_name1>0){
+		   $('#ModifyItem').append(edit_setname);
+		  }else{
+		   $('#ModifyItem').append(edit_setname01);
+		  }
+		});
+	})
+	//修改采集项弹窗增加采集项
+    $(".Mod_AddPtion").live('click',function(){
+		var modify=$("#ModifyItem").children(".ModifyItemCon").length;
+        if(modify>=8){
+			$(".Gset1").css('display','none');
+            return false;
+        }else{
+            var html ='<div class="ModifyItemCon rel"><input type="text" maxlength="15" class="setopt1"  name="setopt[]" value=""><span class="maxTips forInput" data-max="15" style="top:10px;left:225px">0/15</span><a href="javascript:void(0)" class="ModifyItemCon-del"><i></i></a></div>';
+            modify += 1;
+            $("#ModifyItem").append(html);
+            if(modify==8){
+                $(".Gset1").css('display','none');
+             }
+             }
+     });
+     //修改采集项弹窗中删除采集项 
+     $("#ModifyItem .ModifyItemCon-del").live("click",function(e){
+		var modify=$("#ModifyItem").children(".ModifyItemCon").length;
+         modify -= 1;
+         $(this).parent().remove();
+            if(modify<8){
+              $(".Gset1").css('display','block');
+            }
+     })
+ })
+</script>
+<script type="text/html" id="add_xxcjx">
+  <form name ="caiji" action="" method="post" id="caiji">
+    <div class="Gform l">
+	  <ul>
+	   <div class="DiatipsCon">
+            <p>您已创建{$collectCount}个自定义采集项，最多可创建15个，请谨慎使用!</p>
+       </div>
+		<li class="Ginput">
+		 <div style="margin-left:-155px">
+			 <ul>
+			   <li class="Gname"><span class="red">*</span>&nbsp;采集项名称</li>
+			   <li class="Ginput">
+				 <input type="text" maxlength="6" name="collect_name" value="" class="validate[required,maxSize[6]]">
+				 <p class="txtTips">请输入会员信息采集项名称，最多6字，不可修改</p>
+			   </li>
+			 </ul>
+		     <ul class="set_options">
+			    <li class="Gname"><span class="red">*</span>&nbsp;设置选项</li>
+		        <li class="Ginput">
+				  <div class="condition-con">
+					 <div class="fn memberItem"></div>
+					 <div class="Gset">
+					   <div class="GsetPtion  js_AddPtion"><span> + 添加设置选项</span></div>
+					 </div>
+				  </div>
+		          <p class="txtTips" style="padding-bottom:30px">最多可添加8个设置选项</p>
+				</li>
+			 </ul>
+		 </div>
+		 </li>
+	   </ul>
+	 </div>
+   </form>
+</script>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>{$login_title}_订单凭证中心</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+<script>
+$(document).ready(function(e) {
+    var bgnum = Math.floor(Math.random()*4);
+	$(".loginFormwap").addClass("bg"+bgnum);
+	loginForm();
+});
+$(window).resize(function(e) {		
+	loginForm();
+});
+function loginForm(){	 
+	$('body,html').animate({scrollTop:1},17);
+}
+
+</script>
+</head>
+<body style=" height:100%;">
+<div id="wrapper" style=" height:100%;">
+    <div id="container" class="alone">
+        <div class="loginForm alone">
+        	<div class="loginFormwap">
+            <form action="index.php?g=Label&m=MyOrder&a=loginPhone" method="post"  name="loginform" id="loginform">
+                <ul class="sOne-loginForm">
+                    <li class="loginFormTop">
+                        <div class="loginFormTopLogoborder"><div class="loginFormTopLogo"><p><a><span><img src="__UPLOAD__/<?php echo $img_url;?>"></span></a></p></div></div>
+                        <p>{$login_title}-用户登录</p>
+                    </li>
+                    <li>
+                        <input type="tel" class="sOne-loginInput-half" name="phone" id="phone" placeholder="&nbsp;&nbsp;请输入您的手机号">
+                        <input type="button" class="sOne-getpasscode" value="获取验证码" id="getpasscode" name="getpasscode" data-href="">
+                        <span style="display: none;" id="phone_err">手机号错误</span>
+                    </li>
+                    <li>
+                        <input type="password" class="sOne-loginInput" name="check_code" placeholder="&nbsp;&nbsp;验证码">
+                        <span style="display: none;" id="pass_err">验证码错误</span>
+                    </li>
+                    
+                    <li class="p0">                      
+                        <input type="hidden" name="ajax" value="1"/>
+						<input type="hidden" name="node_id" id="node_id" value="{$node_id}"/>
+                        <input type="hidden" id="jump_url" value="{$jumpUrl}"/>
+                        <input type="button" id="login_button" class="sOne-loginInput-btn" value="快速登录" />
+                     
+                    </li>
+                    <li class="loginFormMsg">
+						<h4>亲，请输入您的有效手机号码以便查询您的订单及商品凭证</h4>
+                    </li>
+                </ul>
+            </form>
+            </div>
+            <php>if($node_id!=C('df.node_id')){</php>
+            <div id="footer2">
+                <div class="myMicRight">
+                    <p>Copyright © 2016 {$node_short_name}</p>
+                    <p><span>翼码旺财出品</span></p>
+                </div>
+            </div>
+            <php>}</php>
+        </div>        
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+
+<script>
+$(function(){
+	$('#login_button').live('click',function(){
+		$("#phone_err,#pass_err").hide();
+	    $("#loginform").ajaxSubmit({
+	        success:function(data){
+	             if(data.status == '1'){
+	            	   $(".dn-bg,.loginForm").hide();
+	            	   var url = $("#jump_url").val();					  
+	            	   link_to(url);
+	                   return false;
+	              }else{
+					
+	                 var datas = data.data;					
+	                 if(datas.type == 'phone'){
+	                	 $("#phone_err").html(data.info).show();
+	                 }else if(datas.type == 'pass'){   	 
+						
+						 $("#pass_err").html(data.info).show();
+	                 }
+	              }
+	        },
+	        dataType:'json'
+	    });
+	    return false;
+	});
+	var Int;
+	$("#getpasscode").live("click",function(){
+		$("#phone_err").html("").hide();
+		$("#phone_err,#pass_err").hide();
+        $(this).val("正在发送..");
+        var phone = $("#phone").val();
+		var node_id = $("#node_id").val();
+        var id = $("#id").val();
+		var verify =$("#verify").val();
+        $.post("{:U('Label/MyOrder/sendCheckCode')}",{"id":id,"phone":phone,"verify":verify,"node_id":node_id},function(data){
+            if(data.status=='1'){
+                $("#getpasscode").attr("id","noSend");
+                Int = setInterval(checkTime,1000)
+            }else{
+            	$("#phone_err").html(data.info).show();
+                setTimeout("$('#loadingBox').hide()",2000);
+                $("#getpasscode").val("获取验证码");
+            }
+        },"json");
+    });
+    var time = {$expiresTime};
+    var checkTime = function(){
+        $("input[name='getpasscode']").val("已发送,"+time+"秒");
+        if(time==0){
+            $("input[name='getpasscode']").val("获取验证码");
+            $("input[name='getpasscode']").attr("id","getpasscode");
+            time = {$expiresTime};
+            clearInterval(Int);
+            return false;
+        }
+        time--;
+    }
+});
+function login_to(url){
+	var id="<?php echo session('id');?>";
+	$.post("{:U('Label/MyOrder/checkPhoneLogin')}",{'id':id},function(data){
+		if(data.status==1){
+			link_to(url);
+		}else{
+			setTimeout(function(){
+	            $('#loadingBox').show();
+	        },1);
+	        setTimeout(function(){$('#loadingBox').hide();},1000);
+	        setTimeout(function(){$(".loginForm").show();},1000);
+	        setTimeout(function(){$(".dn-bg").show();},1000);
+	        $("#jump_url").val(url);
+		}
+	},'json');
+}
+function link_to(url,fun){
+    setTimeout(function(){
+        $('#loadingBox').show();
+    },1);
+    setTimeout(function(){
+    if(typeof url == 'string'){
+    location.href=url;
+    }
+    if(typeof url == 'function'){
+    url();
+    }
+    },500);
+    setTimeout(function(){$('#loadingBox').hide();},6000);
+    if(typeof fun == 'string'){
+    var jscode = new Function('return function(){'+fun+'}')();
+        jscode();
+    }else if(typeof fun == 'function'){
+        fun();
+    }
+}
+
+function fleshVerify(){ 
+    //重载验证码
+    var time = new Date().getTime();
+        document.getElementById('verifyImg').src= '{:U("Home/Verifycode/verify")}&time='+time;
+ } 
+ function close_to(){
+    $('.loginForm').hide();
+    $('.dn-bg').hide();
+}
+
+</script>

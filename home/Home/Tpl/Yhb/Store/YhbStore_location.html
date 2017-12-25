@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-导航定位</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<!--引用百度地图API-->
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=idPLV3BaPlUmcGnlE86dd39n"></script>
+</head>
+<body>
+<div class="popupWin">
+  <ul>
+  <li style="line-height:40px;"><label>门店地址：</label>
+  <span id="addStore">
+  <span id='province_code'>{:D('CityCode')->getProvince($info['province_code'])}</span>
+  <span id='city_code'> {:D('CityCode')->getCityTown($info['province_code'].$info['city_code'],'city')}</span>
+  <span id='town_code'> {:D('CityCode')->getCityTown($info['province_code'].$info['city_code'].$info['town_code'],'town')}</span>
+  <span id="address">{$info['address']}</span>
+  </span>
+  </li>
+  <li>
+  <!--百度地图容器-->
+  <div style="width:350px;height:300px; float:left" id="dituContent"></div>
+  <div style="float:left; line-height:30px;" class="ml10">
+		<p>定位后的门店可以加入门店导航中，通过地图指引消费者到达您的门店。</p>
+        <p>操作提示：在地图区域相应位置单击为您的门店定位，用于门店导航。</p>
+        <if condition="empty($info['lbs_y']) or ($info['lbs_y'] lt 1) or ($info['lbs_x'] lt 1) or empty($info['lbs_x'])">
+        <p style="color: red">温馨提示：您的门店地址不详无法定位，请返回列表修改。</p>
+        <else/>
+          <p style="color:#ff0000">经度：<span id="txtLng" ><?php echo $info['lbs_y'] == '0' ? '未定位' : trim($info['lbs_y'],'0');?></span> &nbsp;纬度：<span id="txtLat"><?php echo $info['lbs_x'] == '0' ? '未定位' : trim($info['lbs_x'],'0');?></span></p>
+        </if>
+         
+        
+      
+  </div>
+  </li>
+  
+  <li class="cl tc">
+    <a href="javascript:void(0);" title="确认" id="getLocation" onclick="reloadpoint();" class="btn-all w110 mt40">更新定位</a>
+   &nbsp;&nbsp;
+  &nbsp;&nbsp; <a href="javascript:void(0);" title="关闭" id="getColse" class="btn-all w110 mt40" style="background-color:#999999;">关闭</a>
+  </li>
+
+  </ul>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+	$('#getColse').click(function(){
+		parent.art.dialog.list['locaID'].close();		
+
+		});
+	
+})
+function showInfo(e){
+            map.clearOverlays();
+            map.addOverlay(new BMap.Marker(e.point));
+            $("#txtLat").html(e.point.lat);
+            $("#txtLng").html(e.point.lng);
+            //$("#lbs_x").val(e.point.lat);
+            //$("#lbs_y").val(e.point.lng);
+			var id={$Think.get.id};
+			$.get("{:U('Yhb/YhbStore/location')}&id="+id+"&lat="+e.point.lat+"&lng="+e.point.lng,'',function(d){
+			    if(d.codeText == '0000'){
+			        success(d.codeText);
+				}else{
+				    result_(d.codeText);
+				}
+			},'json');
+        }
+		
+function success(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				    art.dialog.close();
+				    parent.art.dialog.list['locaID'].close();
+					
+				}
+			})
+   }
+function result_(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				   //art.dialog.close();
+				}
+			})
+   }
+		
+    //创建和初始化地图函数：
+    function initMap(){
+        createMap();//创建地图
+        setMapEvent();//设置地图事件
+        addMapControl();//向地图添加控件
+        addMarker();//向地图中添加marker
+    }
+    
+    //创建地图函数：
+    function createMap(){
+        var map = new BMap.Map("dituContent"); 
+		map.addEventListener("click", showInfo);
+		<if condition="empty($info['lbs_y']) or ($info['lbs_y'] lt 1) or ($info['lbs_x'] lt 1) or empty($info['lbs_x'])">
+		 map.centerAndZoom($('#city_code').text(),13);    
+		<else/>
+		 	 var point = new BMap.Point( {$info.lbs_y},{$info.lbs_x}); 
+		 	 map.centerAndZoom(point,18); 
+	   </if>
+        window.map = map; 
+    }
+    
+    //地图事件设置函数：
+    function setMapEvent(){
+        map.enableDragging();//启用地图拖拽事件，默认启用(可不写)
+        map.enableScrollWheelZoom();//启用地图滚轮放大缩小
+        map.enableDoubleClickZoom();//启用鼠标双击放大，默认启用(可不写)
+        map.enableKeyboard();//启用键盘上下左右键移动地图
+    }
+    
+    //地图控件添加函数：
+    function addMapControl(){
+        //向地图中添加缩放控件
+	var ctrl_nav = new BMap.NavigationControl({anchor:BMAP_ANCHOR_TOP_LEFT,type:BMAP_NAVIGATION_CONTROL_LARGE});
+	map.addControl(ctrl_nav);
+        //向地图中添加缩略图控件
+	var ctrl_ove = new BMap.OverviewMapControl({anchor:BMAP_ANCHOR_BOTTOM_RIGHT,isOpen:1});
+	map.addControl(ctrl_ove);
+        //向地图中添加比例尺控件
+	var ctrl_sca = new BMap.ScaleControl({anchor:BMAP_ANCHOR_BOTTOM_LEFT});
+	map.addControl(ctrl_sca);
+    }
+    
+     
+    <if condition="empty($info['lbs_y']) or ($info['lbs_y'] lt 1) or ($info['lbs_x'] lt 1) or empty($info['lbs_x'])">
+	<else/>
+     var markerArr = [{ title:"{$info['store_name']}",content:"{$info['store_name']}",point:" {$info.lbs_y}|{$info.lbs_x}",isOpen:0,icon:{w:23,h:25,l:46,t:21,x:9,lb:12}}
+		 ];
+	 </if>
+    
+    function addMarker(){
+        if(window.markerArr)
+        for(var i=0;i<markerArr.length;i++){
+            var json = markerArr[i];
+            var p0 = json.point.split("|")[0];
+            var p1 = json.point.split("|")[1];
+            var point = new BMap.Point(p0,p1);
+			var iconImg = createIcon(json.icon);
+            var marker = new BMap.Marker(point,{icon:iconImg});
+			var iw = createInfoWindow(i);
+			var label = new BMap.Label(json.title,{"offset":new BMap.Size(json.icon.lb-json.icon.x+10,-20)});
+			marker.setLabel(label);
+            map.addOverlay(marker);
+            label.setStyle({
+                        borderColor:"#808080",
+                        color:"#333",
+                        cursor:"pointer"
+            });
+			
+			(function(){
+				var index = i;
+				var _iw = createInfoWindow(i);
+				var _marker = marker;
+				_marker.addEventListener("click",function(){
+				    this.openInfoWindow(_iw);
+			    });
+			    _iw.addEventListener("open",function(){
+				    _marker.getLabel().hide();
+			    })
+			    _iw.addEventListener("close",function(){
+				    _marker.getLabel().show();
+			    })
+				label.addEventListener("click",function(){
+				    _marker.openInfoWindow(_iw);
+			    })
+				if(!!json.isOpen){
+					label.hide();
+					_marker.openInfoWindow(_iw);
+				}
+			})()
+        }
+    }
+    //创建InfoWindow
+    function createInfoWindow(i){
+        var json = markerArr[i];
+        var iw = new BMap.InfoWindow("<b class='iw_poi_title' title='" + json.title + "'>" + json.title + "</b><div class='iw_poi_content'>"+json.content+"</div>");
+        return iw;
+    }
+    //创建一个Icon
+    function createIcon(json){
+        var icon = new BMap.Icon("http://app.baidu.com/map/images/us_mk_icon.png", new BMap.Size(json.w,json.h),{imageOffset: new BMap.Size(-json.l,-json.t),infoWindowOffset:new BMap.Size(json.lb+5,1),offset:new BMap.Size(json.x,json.h)})
+        return icon;
+    }
+	
+    var myGeo = new BMap.Geocoder();
+	function reloadpoint(){
+		var _address=$('#province_code').text()+$('#city_code').text()+$('#town_code').text()+$('#address').text();
+		myGeo.getPoint(_address, function(point){
+			if (point) {
+				var _e={};
+				_e.point=point; 
+				showInfo(_e);
+			}else{
+				alert("您的门店地址不详无法定位，请返回列表修改");
+			}
+		}, $("city_code").text()); 
+	}
+    
+	  
+    initMap();//创建和初始化地图
+</script>

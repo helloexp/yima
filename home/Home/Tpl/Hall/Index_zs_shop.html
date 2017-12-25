@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>我要展示商家信息</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+    <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+    <script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+    <js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+    <js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+</head>
+
+<body class="bgfff">
+<div class="showsaloonForm pb20">
+    	<form action="{:U('Index/zs_shop')}" method="post" >
+    	<div class="global-input4 fn w1">
+         	<ul>
+                <li class="global-input4-name">*&nbsp;联系人：</li>
+                <li class="global-input4-input"><input name="szname" id="szname" maxlength="32" class="validate[required,maxSize[32]] textbox w220" type="text" value="<?php echo $row_busi['busi_contact_name']; ?>"/></li>
+            </ul>
+        	<ul>
+                <li class="global-input4-name">*&nbsp;联系电话：</li>
+                <li class="global-input4-input"><input name="tel" id="tel" maxlength="32" class="validate[required,maxSize[32]] textbox w220" type="text" value="<?php echo $row_busi['busi_contact_tel']; ?>"/></li>
+            </ul>
+			<ul>
+                <li class="global-input4-name">*&nbsp;联系邮箱：</li>
+                <li class="global-input4-input"><input name="eml" id="eml" maxlength="32" class="validate[required,maxSize[32]] textbox w220" type="text" value="<?php echo $row_busi['busi_contact_eml']; ?>"/></li>
+            </ul>
+			<ul>
+                <li class="global-input4-name">&nbsp;</li>
+                <li class="global-input4-input">
+					<a href="javascript:void(0)" class="btn-all w90" id="smb">确定</a>
+					<a href="javascript:void(0)" class="btn-all w90 ml20" id="cancel">取消</a>
+				</li>
+            </ul>
+        </form>
+    </div>
+	<div class="cl"></div>
+    <div class="fn mt20 ml20 mr20">
+		<table cellpadding="0" cellspacing="0" class="W-table">
+		<tr><th>门店列表</th></tr>
+		<tr><td>
+	    <?php foreach($row_bstore_name as $v){ ?>
+			<p class="l font-14-ee pl20"><?php echo $v['store_name']; ?></p>
+		<?php } ?>
+		</td></tr>
+	</div>	
+    <div class="dn showsaloonmsg mt70 tc" id="successDiv">
+    	<p class="font-18-99 pt50">您的采购需求发布成功</p>
+		 <div class="fn tc mt50">
+            <a href="javascript:void(0)" id="confirmok" class="btn-all w120 btn-ok ml20">确定</a>
+        </div>
+        
+    </div>
+<script>
+$(function(){
+    $("#smb").click(function(){
+        var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                        setTimeout("var win = art.dialog.open.origin;win.location.href = win.location.href;",500);
+                        return false;
+                    }else{
+                        dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json'
+            });
+        }
+
+    });
+	//取消
+	$("#cancel").click(function(){
+		art.dialog.close();
+	});
+
+	$("#confirmok").click(function(){
+		var win = art.dialog.open.origin;
+		win.location.reload();
+		art.dialog.close();
+	});
+
+	//城市选择框
+    $('#selctCity').click(function(){
+		art.dialog.open('index.php?g=Hall&m=Index&a=city_dialog&call_back=city_call_back',{
+					title: '选择城市',
+					width:'422px',
+					height:'473px'
+		});
+     });
+
+	
+	//关闭城市
+	$('.cityListForm i').live("click",function(){
+				
+				//获取原有城市名称
+				var city_name=$("#city_name").val();
+				var cityarr=city_name.split(",");
+
+				//获取原有城市编码
+				var city_str=$("#select_city").val();
+				var citycodearr=city_str.split(",");
+
+				var closecity=$(this).closest("dd").not("i").text();
+				var cityzhname=closecity.substring(-1,closecity.length-1);				
+			
+				//循环判断
+				for(var i=0;i<cityarr.length;i++){
+					
+					if(cityarr[i]==cityzhname){						
+						cityarr.splice(i,1);
+						citycodearr.splice(i,1);
+					}
+				}			
+
+				var city_name_str="";
+				var city_code_str="";
+
+				//重新拼装
+				for(var j=0;j<citycodearr.length;j++)
+				{
+					if(city_code_str!=""){
+						city_code_str=city_code_str+",";
+					}
+					city_code_str=city_code_str+citycodearr[j];
+
+					if(city_name_str!=""){
+						city_name_str=city_name_str+",";					
+					}
+					city_name_str=city_name_str+cityarr[j];				
+				}
+				
+				$("#select_city").val(city_code_str);
+				$("#city_name").val(city_name_str);
+
+				//alert($("#city_name").val());				
+				$(this).closest("dd").remove();				
+           });		
+
+    $(':radio[name="amount_type"]').change(function(){
+        var v = $(':radio[name="amount_type"][checked]').val();
+        if(v == '0')
+            $('#amount').show();
+        else
+            $('#amount').hide();
+    });
+
+});
+function city_call_back(cityList){	
+		
+		//获取当前已选择城市
+		var city_str=$("#select_city").val();	
+		var city_name=$("#city_name").val();		
+		
+		for(var j=0;j<cityList.length;j++){
+			for(var i=0;i<cityList[j].length;i++){
+				
+				var newcity=cityList[j][i].split("-");
+
+				//没找到已经选择的城市
+				if(city_str.indexOf(newcity[1])==-1){
+					$("#cityspan").before(" <dd >"+newcity[0]+"<i>x</i></dd>");
+					//赋值
+					if(city_str!=""){				
+						city_str=city_str+",";
+					}
+					city_str=city_str+newcity[1];
+					if(city_name!=""){				
+						city_name=city_name+",";
+					}
+					city_name=city_name+newcity[0];
+				}
+			
+			}
+		
+		}		
+		
+		$("#select_city").val(city_str);
+		$("#city_name").val(city_name);		
+
+		//alert(city_str+"=="+city_name);		
+}
+
+</script>
+</body>

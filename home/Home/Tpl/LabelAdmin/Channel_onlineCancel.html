@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>互联网渠道_营销推广渠道_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<load href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Wcanal.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script>
+$(function(){
+	//业务介绍
+	productIntroduce(5,"qd-<?php echo $htmlid; ?>","javascript:void(0)");
+	
+  $("#uduf").on('click',function(event) {
+        event.preventDefault(); 
+		if(<?php echo $type; ?>=='11'){
+		  var url="{:U('LabelAdmin/Channel/onlineAddapi')}";
+		}else{
+		  var url="{:U('LabelAdmin/Channel/onlineAdd')}";
+		}
+        art.dialog.open(url,{
+		        id:'uduf',
+                title: '创建新渠道',
+                width:500
+            });
+    });
+	
+    $("#seach").click(function(){
+        $("form").submit();
+    });
+	$('#on-cls').attr('class','Wcanal-tab-hover');
+});
+function bind(channel_id){
+    var w = 800;     //宽度
+     var h = 650;   //高度
+     var t = (screen.height-h)/2; //离顶部距离
+     var l = (screen.width-w)/2; //离左边距离
+    window.open("<?php echo U('Sns/authorize','channel_id=');?>"+channel_id,'_blank',"width="+w+",height="+h+",scrollbars=no,location=no,top="+t+",left="+l);
+}
+function edit(id){
+	var name = $("#input_"+id).val();
+	$.post("{:U('LabelAdmin/Channel/edit')}",{"name":name,"id":id},function(data){
+		if(data.status==1){
+			$("#span_"+id).html(name).closest("span").show();
+			$("#input_"+id).closest("span").hide();
+			$("#icon_"+id).css("visibility","hidden");
+		}else{
+		    art.dialog({title:false,content:data.info,time:2});
+		}
+	},"json");
+};
+//更改状态
+function statusChange(id,status){
+	if(status==1){
+        var title="您确认启用该渠道？";
+    }else{
+        var title="您确认停止该渠道？";
+    }
+	art.dialog.confirm(title,function(){
+		Dialoading("正在提交...");
+		$.post("{:U('LabelAdmin/Channel/changeStatus')}",{"id":id,"status":status},function(data){
+			Dialoading();
+            if(data.status==1){
+				Diasucceed("更新成功");
+                window.location.reload();
+            }else{
+				Diaerror(data.info);
+            }
+        },"json");
+	});
+};
+
+   function historya(id){
+          art.dialog.open("{:U('LabelAdmin/ChannelBatchList/index?id=')}"+id,{
+				title: '查看渠道数据',
+				width:800
+			});
+    }
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <if condition="($htmlid eq 23)">
+            <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="shejiao"/>
+        <elseif condition="($htmlid eq 24)"/>
+            <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="zidingyi"/>
+        </if>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+                    <if condition="($htmlid eq 23)">
+                        <include file="LabelAdmin/Channel/leftMenu2" leftmenuid="2vm"/>
+                    <elseif condition="($htmlid eq 24)"/>
+						<include file="LabelAdmin/Channel/leftMenu4" leftmenuid="2vm"/>
+                    </if>
+					
+                </div>
+                <div class="subcon fn">
+                        <div class="main-name">
+                            <h4><?php echo $arr_[$type];?><a class="btn-add first" href="javascript:void(0);" id="uduf"><i></i>创建新渠道</a></h4>	
+                        </div>
+                            <div class="SearchArea  fn">
+                            <form method="post" action="{:U('LabelAdmin/Channel/onlineCancel')}">
+							    <input type="hidden" name="htmlid" value="<?php echo $htmlid; ?>" />
+								<input type="hidden" name="sns_type" value="<?php echo $type; ?>" />
+                            	<div class="SearchAreaLeft">
+                                <label><span>渠道名称</span><input type="text" name="c_name" value="{$map['c_name']}" /></label>
+                                <?php if($type=='11'){?>
+                              	<label>
+							    <span>渠道状态</span><select name="channel_status" id="select" class="selectbox" >
+                                        <option value="" class="">全部</option>
+                                        <option value="1">已接入</option>
+										<option value="2">已过期</option>
+                                        <option value="3">未接入</option>
+                                    </select>
+                                </label>
+								<?php }else{ ?>
+                                <label>
+							    <span>渠道类别</span><select name="channel_type" id="select" class="selectbox" >
+                                        <option value="" class="">全部</option>
+                                        <option value="2">腾讯微博</option>  
+										<option value="4">人人网</option>
+										<option value="5">开心网</option>
+										<option value="3">QQ空间</option> 
+										<option value="6">豆瓣网</option>       
+                                    </select>
+                                </label>
+								 <label><span>渠道状态</span><select name="channel_status" id="select" class="selectbox" >
+                                        <option value="" class="">全部</option>
+                                        <option value="1">已绑定</option>
+										<option value="2">已过期</option>
+                                        <option value="3">未绑定</option>
+                                    </select>
+                                </label>
+								<?php } ?>
+                                <label><span>创建日期</span><input type="text" name="start_time" id="start_time" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="" />-<input type="text" name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="" /></label>
+                                </div>
+                                <div class="SearchAreaRight">
+                                <a href="javascript:void(0);" id="seach" class="searchBtn">查询</a>
+                                <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+                                </div>
+                            </form>
+                            </div>
+                        
+                            <table class="W-table" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <th>渠道名称<i class="icon-change"></i><i class="icon-change-ok"></i></th><th>所属商户</th><th>创建时间</th><th>状态</th><th>访问量</th><th>操作</th>
+                                </tr>
+                                <?php
+                                if(!empty($query_list)){ 
+                                foreach($query_list as $v){?>
+                                <tr>
+                                    <td><span class="t-change-span" id="span_<?php echo $v['id'];?>"><?php echo $v['name'];?></span><span class="t-change-input"><input type="text" id="input_<?php echo $v['id'];?>" class="textbox w80" value="<?php echo $v['name'];?>" /></span><i class="<?php if($v['sns_type']!='12'){?>icon-change<?php }?>"></i><i class="icon-change-ok" id="icon_<?php echo $v['id'];?>" onclick="edit(<?php echo $v['id'];?>);"></i></td>
+                                    <td><?php echo D('node')->getNodeName($v['node_id']);?></td>
+                                    <td><?php echo date('Y-m-d',strtotime($v['add_time']));?></td>
+                                    <?php if($v['sns_type'] != 3 && $v['sns_type'] != 4 && $v['sns_type'] != 8 && $v['sns_type'] != 11 && $v['sns_type'] != 10){?>
+                                    <td>
+                                      <?php if($v['bing_status']==1){?>
+                                      <i class="icon-canal<?php echo $v['sns_type']?>"></i>
+                                      <?php }else{?>
+                                      <i class="icon-canal<?php echo $v['sns_type']?>-off"></i>
+                                      <?php }?>
+                                      <?php echo $bindStatus[$v['bing_status']];?>
+                                    </td>
+                                    <?php }else{?>
+                                    <td>--</td>
+                                    <?php }?>
+                                    <td>
+                                    <a href="javascript:void(0)" onclick="historya('<?php echo $v['id'];?>')"><?php echo $v['click_count'];?></a></td>
+                                    <td>
+                                    <?php if($v['type'] == 1 && $v['sns_type'] != 4 && $v['sns_type'] != 3 && $v['sns_type'] != 11 && $v['sns_type']!='12' && $v['sns_type']!='10' && $userInfo['node_id'] == $v['node_id']){?>
+                                    <?php if($v['bing_status'] !=1){?>
+                                    <a href="javascript:void(0);" onclick="bind(<?php echo $v['id']?>);">现在绑定</a>
+                                    <?php }else{?>
+                                    <a href="javascript:void(0);" onclick="bind(<?php echo $v['id']?>);">重新绑定</a>
+                                    <?php }}else{?>
+									<?php if($v['sns_type'] == '11'){?>
+									<a href="./Home/Upload/serviceDown/imageco_web.zip">下载文档</a>
+									
+									<?php }}?>
+                                    
+                                    <?php if($v['status'] == '1'){?>
+                                    <a href="javascript:void(0)" onclick="statusChange('<?php echo $v['id'];?>','2')">停用</a>
+                                    <?php }else{?>
+                                    <a href="javascript:void(0)" onclick="statusChange('<?php echo $v['id'];?>','1')">启用</a>
+                                    <?php }?>
+                                    </td>
+                                </tr>
+                               <?php }}else{
+							     if(!$_POST){
+                                ?>	
+                                <tr><td colspan="5"><div class="nonedata"><p>您还未创建互联网渠道，请先去<a href="<?php echo U('LabelAdmin/Channel/onlineAdd');?>">创建渠道</a>然后操作业务。</p></div></td></tr>
+                             <?php }else{?>
+                             <tr><td colspan="5">
+                                 <div class="nonedata"></div>
+                                 </td></tr>
+							<?php }}?>
+                            </table>
+                            <div class="page"><?php echo $page;?></div>
+                        </div>
+            </div>
+        </div>
+    </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

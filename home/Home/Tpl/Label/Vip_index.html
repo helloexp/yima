@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$fb_wap_title}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<load href="__PUBLIC__/Label/Css/wap_Csyd.css"/>
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/masonry/jquery.masonry.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/masonry/jquery.infinitescroll.min.js?v=__VR__"/>
+<script>
+$(document).ready(function() {
+	$(".subnav-con").click(function(){
+		if($(".subnav").hasClass("subnavanimate")){
+			$(".subnavbg").hide();
+			$(".subnav-li2").show();
+			$(".subnav").removeClass("subnavanimate").addClass("subnavanimateover");
+			return false;
+		}
+		event.stopPropagation();
+		$(".subnavbg").show();
+		$(".subnav").removeClass("subnavanimateover").addClass("subnavanimate");
+	})
+	
+	//点击分组以外区域隐藏分组
+	$(".subnavbg").click(function(){
+		if($(".subnav").hasClass("subnavanimate")){
+			$(".subnavbg").hide();
+			$(".subnav-li2").show();
+			$(".subnav").removeClass("subnavanimate").addClass("subnavanimateover");
+		}
+	});
+	
+	
+	//点赞
+	$(".box_opr1").click(function(){    
+		$("#AjaxWrapper").remove();
+		var Wrapperclose="$('#AjaxWrapper').fadeOut(300)";
+		var html=[
+		'<div id="AjaxWrapper" class="dn">',
+			'<div class="cjWrapper">',
+				'<div class="cjWrapper-close"><a href="javascript:void(0)" onclick="javascript:'+Wrapperclose+'">+</a></div>',
+				'<div class="cjCon pb10 dn" id="popMsg">',
+					'<div class="cjText">',
+						'<div class="cjText-con">',
+							'<div class="cjText-text">恭喜您获得一次抽奖机会！</div>',
+						'</div>',
+					'</div>',
+					'<div class="cjBtn">',
+						'<a href="javascript:void(0)" onclick="javascript:'+Wrapperclose+'">立即抽奖</a>',
+					'</div>',
+				'</div>',
+			'</div>',
+		'</div>'].join('');
+		$("body").append(html);
+		$("#AjaxWrapper").fadeIn(300);
+		$("#popMsg").show();
+		$(this).removeClass("box_opr").addClass("box_opr2");
+		$(this).text("已赞");
+	})
+	
+	
+	
+});
+function link_to(url){
+	setTimeout(function(){
+		$('#loadingBox').show();
+	},1);
+	setTimeout(function(){
+		if(typeof url == 'string'){
+			location.href=url;
+		}
+		if(typeof url == 'function'){
+			url();
+		}
+	},300);
+	setTimeout(function(){$('#loadingBox').hide();},6000);
+}
+
+
+
+
+</script>
+</head>
+
+<body>
+	<div id="wrapper" class="bggray">
+    	<div id="container">
+            <div id="main" class="sOne-mainbg">
+            	<div class="mainTop"><img src="__UPLOAD__/<?php echo $batch_logo;?>" /></div>
+                <div class="mainNav">
+                	<ul>
+                    	<li <?php if(empty($type)){?>class="hover" <?php }?> onClick="location.href='<?php echo U('Label/Vip/index',array('id'=>$id)); ?>'">最新发布</li>
+                    	<li <?php if($type == '1'){?>class="hover" <?php }?> onClick="location.href='<?php echo U('Label/Vip/index',array('id'=>$id,'type'=>'1')); ?>'">最多点赞</li>
+                    	<li <?php if($type == '2'){?>class="hover" <?php }?>  onClick="location.href='<?php echo U('Label/Vip/index',array('id'=>$id,'type'=>'2')); ?>'">我的发布</li>
+                    </ul>
+                </div>
+                
+                <div id="masonry" class="">
+                    <?php if($list){
+                    foreach($list as $v){
+                    ?>
+                    <div class="box photo col3">
+                    <?php if(!empty($v['up_img'])){?>
+                      <a href="<?php echo U('Label/Vip/info',array('id'=>$id,'msg_id'=>$v['id'] )); ?>"><img src="__UPLOAD__/<?php echo 'FbUpload/'.$v['up_img']?>" /></a>
+                       <?php }?>
+                        <div class="box_name">
+                            <div class="box_contect">
+                                <h1 onclick="javascript:location.href='<?php echo U('Label/Vip/info',array('id'=>$id,'msg_id'=>$v['id'] )); ?>'"><?php echo $v['title'];?></h1>
+                                <p onclick="javascript:location.href='<?php echo U('Label/Vip/info',array('id'=>$id,'msg_id'=>$v['id'] )); ?>'"><?php echo mb_substr($v['content'],0,100,'utf-8');?></p>
+                                <div class="fn">
+                                	<div class="box_msg"><span class="dzcount<?php echo $v['id'];?>"><?php echo $v['dz_count'];?></span>人已赞</div>
+                                	
+                                	<div class="box_opr<?php echo in_array($v['id'],$dz_arr) ? '2':'';?>  d<?php echo $v['id'];?>" onclick="dz('<?php echo $v['id'];?>')"><i></i><?php echo in_array($v['id'],$dz_arr) ? '已赞':'赞';?></div>
+                                	
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                   <?php }}?>
+                    
+                </div>
+                
+                <nav id="page-nav">
+                    <a href="<?php echo $nextUrl;?>"></a>
+                </nav>
+                
+               <include file="Vip:menu"/>
+            </div>
+        </div>
+    </div>
+
+<section style="display: none;" class="loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>
+
+<script>
+ var _one_sub = false;
+function dz(msg_id){
+		if($(".d"+msg_id).text() =="已赞")
+			return false;
+		if(_one_sub)
+            return false;
+        _one_sub = true;
+        $.post("{:U('Label/Vip/dz')}",{"msg_id":msg_id,"id":'<?php echo $id;?>'},function(data){
+        	_one_sub = false;
+            if(data.status=='1'){
+            	$(".d"+msg_id).removeClass("box_opr").addClass("box_opr2");
+				$(".d"+msg_id).text("已赞");
+				$(".dzcount"+msg_id).html(parseInt($(".dzcount"+msg_id).html())+1);
+				if(data.data == 'iscj'){
+					popForm('恭喜您获取一个抽奖机会,请点击抽奖 ！','true',msg_id);
+				}
+				
+            }
+        },"json");
+	
+	
+}
+
+
+ var _one_sub_2 = false;
+function choujiang(msg_id){
+		if(_one_sub_2)
+            return false;
+        _one_sub_2 = true;
+        $.post("{:U('Label/Vip/dzCj')}",{"msg_id":msg_id,"id":'<?php echo $id;?>'},function(data){
+        	_one_sub_2 = false;
+            if(data.status=='1'){
+            	if(data.data== 'success'){
+            		popForm(data.info);
+            	}else if(data.data== 'error'){
+            		popForm(data.info);
+            	}
+				
+            }
+        },"json");
+}
+
+
+
+
+//消息提示
+function popForm(msg,iscj,msg_id) {
+	$("#AjaxWrapper").remove();
+	var Wrapperclose="$('#AjaxWrapper').fadeOut(300)";
+	var html=[
+	'<div id="AjaxWrapper" class="dn">',
+		'<div class="cjWrapper">',
+			'<div class="cjWrapper-close"><a href="javascript:void(0)" onclick="javascript:'+Wrapperclose+'">+</a></div>',
+			'<div class="cjCon pb10 dn" id="popMsg">',
+				'<div class="cjText">',
+					'<div class="cjText-con">',
+						'<div class="cjText-text">'+msg+'</div>',
+					'</div>',
+				'</div>',
+				'<div class="cjBtn">',
+					'<a href="javascript:void(0)" onclick="javascript:'+Wrapperclose+'">返回</a>',
+				'</div>',
+			'</div>',
+		'</div>',
+	'</div>'].join('');
+	$("body").append(html);
+    $("#AjaxWrapper").fadeIn(300);
+	$("#popMsg").show();
+	$("#popMsg .cjText-text").html(msg);
+	
+	if(iscj=="true"){
+        $(".cjBtn").html('<a href="javascript:void(0)" id="cj_button" onclick=choujiang("'+msg_id+'")>抽奖</a>')
+    }
+   
+}
+$(document).ready(function(e){
+    var $container = $('#masonry');
+    $container.imagesLoaded( function(){
+      $container.masonry({
+        itemSelector : '.box'
+      });
+    });
+    $container.infinitescroll({
+        navSelector  : '#page-nav',    // selector for the paged navigation 
+        nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
+        itemSelector : '.box',     // selector for all items you'll retrieve
+        loading: {
+            finishedMsg: '没有更多活动了',
+            img: '__PUBLIC__/Label/Image/Item/loading.gif'
+          }
+        },
+        // trigger Masonry as a callback
+        function( newElements ) {
+          // hide new items while they are loading
+          var $newElems = $( newElements ).css({ opacity: 0 });
+          // ensure that images load before adding to masonry layout
+          $newElems.imagesLoaded(function(){
+            // show elems now they're ready
+            $newElems.animate({ opacity: 1 });
+            $container.masonry( 'appended', $newElems, true ); 
+          });
+        }
+      );
+});
+</script>

@@ -1,0 +1,450 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>抽奖设置_营销活动_翼码旺财</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wprize.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+    <js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+    <js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+    <script>
+window._g = window._g || {};
+_g.batch_id = '<?php echo $batch_id;?>';
+        $(function(){
+	var initobj = $(".EditGprize-conItemList");
+	$(initobj).each(function(index, element) {
+		var _thisVal = $(this);
+		var initStatus = _thisVal.hasClass("erro");
+		//alert(initStatus);
+		if(initStatus){
+			_thisVal.find(".icon-prizeRollback").removeClass("dn");
+		}
+	})
+            //中秋节隐藏参数数
+            var batch_type = "{$batch_type}";
+            if(batch_type == '30'){
+                $('.zqj').hide();
+                $('.zqj_cy').show();
+            }
+            $("input[name='cj_phone_type']").change(function(){
+                var _thisval = parseInt($(this).val());
+                if(_thisval>=2){
+                    var _thislength = $(".EditGprize").length;
+                    if(_thislength>7){
+                        art.dialog({
+                            content: '特殊抽奖最多设置7个奖项',
+                            ok: function () {
+                                this.close();
+                                return false;
+                            }
+                        });
+                        $("input[name='cj_phone_type']:first").attr("checked",true);
+                        return false;
+                    }
+                }
+            })
+            //抽奖设置
+            var _one_sub = false;
+            $('#smb').click(function(){
+                if($("#form1").validationEngine('validate')){
+                    var phone_total_count = '0',phone_day_count ='0',phone_total_part='0',phone_day_part = '0',param1 = '0';
+                    if($("input[name='phone_total_count']:checked").val() == '1'){
+                        phone_total_count = $('#zzj').val();
+                    }
+                    if($("input[name='phone_day_count']:checked").val() == '1'){
+                        phone_day_count = $('#rzj').val();
+                    }
+                    if($("input[name='phone_total_part']:checked").val() == '1'){
+                        phone_total_part = $('#zcj').val();
+                    }
+                    if($("input[name='phone_day_part']:checked").val() == '1'){
+                        phone_day_part = $('#rcj').val();
+                    }
+
+                    if($("input[name='param1']:checked").val() == '1'){
+                        param1 = $('#ticket_seq').val();
+                    }
+
+                    if(_one_sub)
+                        return false;
+
+                    _one_sub = true;
+
+                    var data = {
+                        total_chance : $('#total_chance', '#form1').val(),
+                        cj_button_text : $('#cj_button_text', '#form1').val(),
+                        phone_total_count : phone_total_count,
+                        phone_day_count : phone_day_count,
+                        phone_total_part : phone_total_part,
+                        phone_day_part : phone_day_part,
+                        cj_resp_text : $('#cj_resp_text', '#form1').val(),
+                        batch_id : $('#batch_id').val(),
+                        cj_phone_type : $("input[name='cj_phone_type']:checked").val(),
+                        param1 : param1,
+                    }
+                    //dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                    $.post('{:U('Common/SelectJp/jpRuleSave')}', data, function(resp){
+                        art.dialog({width:"200px",title:"提示",lock:true,content:resp.info,
+                            okVal: '确认',
+                            ok: function () {
+                                _one_sub = false;
+                                if(resp.status=='1'){
+                                    window.location.reload();
+                                }
+                            }
+                        });
+
+
+                    }, 'json');
+
+
+
+                }
+            }) ;
+
+            //奖项删除
+
+        })
+
+
+
+
+    </script>
+</head>
+<body>
+<div id="wrapper" class="bgfff">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+            <div class="bread">
+                <div class="bread-con fn">
+                    <include file="./Home/Tpl/LabelAdmin/Path_index.html" />
+                    <div class="bread-history" style="display: block;">
+                        <i class="icon-history"></i>
+                        <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                    </div>
+                </div>
+            </div>
+            <form name="form1" id="form1">
+                <input type="hidden" id="batch_id" value="{$batch_id}"/>
+                <div class="global-input2 Gform fn pb30 w7">
+                    <ul class="newsadd-title" id="isAllowCj" >活动奖品配置</ul>
+                    <ul id="cj_style" <?php if(!$cj_rule_arr){?>style="display:none;"<?php }?>>
+                    <li class="global-input2-name">中奖概率：</li> 
+                     <li class="global-input2-input">1000个人中有<input type="text" maxlength="4" value="{$num}" id="cjjl" style="width:35px;" class="cjjl"/>个人可以集齐8种材料
+                    
+                    </li>
+                    <li class="global-input2-name">绑定抽奖：</li>
+                    <li class="global-input2-input">
+                        <div class="Gprize">
+                            <div class="EditGprize IngGprize" data-rel="+datarel+" >
+                                <div class="EditGprize-add">
+                                    <div class="fn"><a href="javascript:void(0)" class="btn-EditGprizeAdd" onclick="editjp('<?php echo $batch_id;?>','','')">添加奖品</a></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="Gprize">
+                            <?php if($cj_cate_arr){foreach($cj_cate_arr as $key=>$cate_arr){?>
+                            <div class="EditGprize IngGprize" data-rel="+datarel+" >
+                                <div class="EditGprize-head">
+                                    	<i class="icon-prizeRollback dn"><a href="javascript:void(0)" class="a-hide btn-EditGprizeAdd-rollback" onclick="prize_back('<?php echo $jparr['id'];?>')">回退到库存</a></i>
+                                    <i class="icon-prizeDel r"><a href="javascript:void(0)" class="a-hide btn-DelEditGprize" onclick="delCate('<?php echo $batch_id;?>','<?php echo $cate_arr['id'];?>')">删除</a></i>
+                                    <p class="GprizeName"><span><?php echo $cate_arr['name'];?></span></p>
+                                </div>
+                                <div class="EditGprize-add">
+                                    <div class="fn"><a href="javascript:void(0)" class="btn-EditGprizeAdd" onclick="editjp('<?php echo $batch_id;?>','<?php echo $cate_arr['id'];?>','')">添加奖品</a></div>
+                                </div>
+                                <php>
+                                    if($key==0){
+                                    foreach($first_arr as $val){
+                                </php>
+                                <div class="EditGprize-conItem fn">
+                                    <div class="EditGprize-conItemList <?php echo $jparr['status']=='2' ? 'erro' :'';    ?> fn">
+                                        <div class="EditGprize-con-name"><?php echo $val['name'];?></div>
+                                        <div class="EditGprize-con-day">中奖概率<?php echo $val['probability'];?>%</div>
+                                        <div class="EditGprize-con-all">&nbsp;</div>
+                                    </div>
+                                </div>
+                                <php>}}</php>
+                                <div class="EditGprize-con">
+                                    <?php
+                                    	if($jp_arr){foreach($jp_arr as $key=>$jparr){
+                                          	if($cate_arr['id']!=$jparr['cj_cate_id']){
+                                    		   continue;
+                                            }
+                                 ?>
+                                    <div class="EditGprize-conItem fn">
+                                        <div class="EditGprize-conItemList <?php echo $jparr['status']=='2' ? 'erro' :'';    ?> fn">
+                                            <div class="EditGprize-con-name"><?php echo $jparr['batch_name'];?></div>
+                                            <div class="EditGprize-con-all"><eq name="jparr['online_verify_flag']" value="1">可线上提领<else />&nbsp;</eq></div>
+                                            <div class="EditGprize-con-day">共<?php echo $jparr['total_count'];?>份</div>
+                                            <div class="EditGprize-con-all">&nbsp;</div>
+                                            <div class="EditGprize-con-edit">
+                                                	<i class="icon-prizeRollback dn"><a href="javascript:void(0)" class="a-hide btn-EditGprizeAdd-rollback" onclick="prize_back('<?php echo $jparr['id'];?>')">回退到库存</a></i>
+                                                <i class="icon-prizeEdit2 "><a href="javascript:void(0)" class="a-hide btn-EditGprizeAdd-edit" onclick="editjp('<?php echo $batch_id;?>','<?php echo $cate_arr['id'];?>','<?php echo $jparr['id']?>')">修改</a></i>
+                                                <i class="icon-prizeDel2 "><a href="javascript:void(0)" class="a-hide btn-EditGprizeAdd-del" onclick="jpStatus('<?php echo $batch_id;?>','<?php echo $jparr['id'];?>','<?php echo $jparr['status']=='1' ? '1' :'2';    ?>')">停用</a></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php }}?>
+                                </div>
+                            </div>
+
+                            <?php }}?>
+                        </div>
+                    </li>
+                    </ul>
+                    <div class="dn">
+                        <div class="Html-EditGprize">
+                            <div class="EditGprize-member-title">是否会员独享:</div>
+                            <div class="EditGprize-member-div">
+                                <?php if($member_off!=1){?>
+                                <?php if($mem_batch){foreach($mem_batch as $mem_arr){?>
+                                <label class="ml5"><input type="checkbox" name="mem_batch[]" class="mem_batch" value="<?php echo $mem_arr['id'];?>"/><span><?php echo $mem_arr['level_name'];?></span></label>
+                                <?php }}else{?>
+                                <label class="ml5">还没配置粉丝类别<a href="<?php echo U('Member/Regulation/index');?>">去配置(只能粉丝中奖)</a></label>
+                                <?php }}?>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="fn tc">
+                        <a class="btn-all" href="javascript:void(0)" id="sub_lll">确认</a>
+                    </div>
+                </div>
+            </form>
+            <div class="prizeIntroduce">
+                <div class="prizeIntroduceNav">
+                        <li style="width:100%">奖品配置攻略</li>
+                    </div>
+                    <div class="lotteryPrizeCon prizeIntroduceCon">
+                        <div class="prizeIntroduceList">
+                            <h4>活动 说明：</h4>
+                            <p>1. 参与者每天登录可获得 3 次摇一摇机会</p>
+                            <p>2. 参与者每次摇一摇可获得一种粽子食材，粽子食材会重复获得</p>
+                            <p>3. 参与者只要集齐 8 个食材即可抽奖 如参与者多次集齐 8 个不同的食材即可多次抽奖，用于抽奖的食材在 “ 我的食材 ” 中立即扣除</p>
+                            <p>4. 参与者可将食材分享至朋友圈或指定好友，分享后食材将直接被扣除，好友可通过分享链接获取相应的食材 </p>
+                           
+                            <div style="color:orange">
+                          
+                            </div>
+                        </div>
+                       
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+<include file="./Home/Tpl/Public/Public_footer.html" />
+<div class="service"></div>
+</body>
+</html>
+<script type="text/html" id="rollbackResult">
+<div class='loadTip'>
+    <div class='loadStatus ok'>
+    <dl>
+    <dt>奖品回退成功！</dt>
+    <dd>您已成功回退<span class='redfont'>{{backNum}}</span>份奖品！</dd>
+    </dl>
+    </div>
+</div>
+</script>
+<script>
+    //添加编辑奖品类型
+    function editcate(batch_id,cj_cate_id){
+        var prizetype = parseInt($("input[name='cj_phone_type']:checked").val());
+        if(prizetype>=2){
+            var prizelength = $(".EditGprize").length;
+            if(prizelength>=7){
+                art.dialog({
+                    content: '特殊抽奖最多只能设置7个奖项',
+                    ok: function () {
+                        this.close();
+                        return false;
+                    }
+                });
+                return false;
+            }
+        }
+        var title = cj_cate_id!='' ? '编辑奖项' :'添加奖项';
+        art.dialog.open("{:U('jpType','batch_id=')}"+batch_id+"&cj_cate_id="+cj_cate_id,{
+            width:500,
+            height:230,
+            title:title,
+            lock: true
+        });
+    }
+
+    //添加编辑奖品
+    function editjp(batch_id,cj_cate_id,cj_batch_id){
+        var title = cj_batch_id!='' ? '编辑奖品' :'添加奖品';
+        art.dialog.open("{:U('CjSet/selectJp','batch_id=')}"+batch_id+"&cj_cate_id="+cj_cate_id+"&cj_batch_id="+cj_batch_id+"&show_source=0,1,4",{
+            width:800,
+            title:title,
+            lock: true
+        });
+    }
+
+    //删除奖项
+    function delCate(batch_id,cj_cate_id){
+
+        art.dialog({
+            title:"确认",
+            content:'您确定要删除该奖项吗？',
+            fixed: true,
+            lock:true,
+            okVal: '确认',
+            ok: function () {
+                var data = {
+                    cj_cate_id : cj_cate_id,
+                    batch_id : batch_id
+                }
+                $.post('{:U('Common/SelectJp/jpCateDel')}', data, function(resp){
+                    art.dialog({width:"200px",title:"提示",lock:true,content:resp.info,
+                        okVal: '确认',
+                        ok: function () {
+                            if(resp.status=='1'){
+                                window.location.reload();
+                            }
+                        }
+                    });
+
+                }, 'json');
+            },
+            cancel: true
+        });
+    }
+
+
+    //奖品停用
+    function jpStatus(batch_id,cj_batch_id,type){
+        var jpsetUrl = "";
+        var content = "";
+        if(type == '1'){
+            content ="您确定要停用该奖品吗？";
+            jpsetUrl ="{:U('Common/SelectJp/jpStop')}";
+        }else{
+            content ="您确定要启用该奖品吗？";
+            jpsetUrl ="{:U('Common/SelectJp/jpStart')}";
+        }
+
+        art.dialog({
+            title:"确认",
+            content:content,
+            fixed: true,
+            lock:true,
+            okVal: '确认',
+            ok: function () {
+                var data = {
+                    cj_batch_id : cj_batch_id,
+                    batch_id : batch_id
+                }
+                $.post(jpsetUrl, data, function(resp){
+                    art.dialog({width:"200px",title:"提示",lock:true,content:resp.info,
+                        okVal: '确认',
+                        ok: function () {
+                            if(resp.status=='1'){
+                                window.location.reload();
+                            }
+                        }
+                    });
+
+                }, 'json');
+            },
+            cancel: true
+        });
+    }
+
+
+    $(function(){
+        //限制与不限
+        $(".judgeDiv label").live("click",function(){
+            var _val=$(this).find("input[type='text']").length ? true : false ;
+            if(_val){
+                $(this).find("input[type='text']").show();
+                $(this).find("input[type='text']").focus();
+            }else{
+                $(this).closest(".judgeDiv").find("input[type='text']").val('');
+            }
+        });
+        $(".lotteryPrize").click(function(){
+            $(".lotteryPrize").removeClass("hover");
+            $(this).addClass("hover");
+            $(".lotteryPrizeCon").hide();
+            $(".lotteryPrizeCon:eq("+$(this).index()+")").show();
+        })
+    })
+    function refresh_jp(){
+        window.location.reload();
+    }
+
+
+
+</script>
+<script type="text/javascript">
+    $("#sub_lll").click(function(){
+        var url="{:U('LabelAdmin/ZongZiCjSet/zhongjl',array('batch_id'=>$batch_id))}";
+        var batch_id="{$batch_id}";
+        var num=$("#cjjl").val();
+
+        var bool=num.match(/^\d{1,4}$/g);
+
+        if(bool && bool > 0 && bool < 1001){
+            $.ajax({
+            url:url,
+            type:"POST",
+            data:{num:num,batch_id:batch_id},
+            dataType:"json",
+            success:function(resp){
+                if(resp.status){
+                    art.dialog.alert("保存成功！");
+                }else{
+                    art.dialog.alert("保存失败！");
+                }
+            }
+        });
+        }else{ 
+              art.dialog.alert("请输入1到1000之间!");
+            return false;
+        }
+
+
+
+        
+    });
+function prize_back(p_id){
+        art.dialog.confirm("您确定要将该卡券回退到库存？", function(){
+            var m_id = _g.batch_id;
+            $.post("{:U('LabelAdmin/CjSet/prizeBack')}",{"m_id":m_id,"p_id":p_id}, function(data) {
+                if (data.status == 1) {
+                    var data={"backNum":data.info};
+                    var html = template("rollbackResult",data);
+                    art.dialog({
+                        title: '卡券回退',
+                        width:"400px",
+                        content:html,
+                        cancel:function(){
+                            //art.dialog.list['PrizeBack'].close();
+                            var win = art.dialog.open.origin;
+                            win.location.reload();
+                        },
+                        cancelVal:"关闭"
+                    })
+                }else{
+                	Diaerror(data.info);
+                }
+            }, 'json');
+        })
+    }
+</script>
+

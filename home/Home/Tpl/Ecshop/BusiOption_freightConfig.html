@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>收款账户信息_账户中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Common.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(document).ready(function (e) {
+	Gform();
+    //保存
+    $('#save').click(function () {
+        if($("#theform").validationEngine('validate')){
+            $.post(
+                    "{:U('freightConfig')}",
+                    $('#theform').serialize(),
+                    function (data) {
+                        if (data.status == '1') {
+                            var win = art.dialog.open.origin;//来源页面
+                            win.location.reload();
+                        } else {
+                            art.dialog('保存失败！' + data.info);
+                        }
+                    },
+                    'json'
+            );
+        }
+    });
+});
+
+</script>
+</head>
+    <body class="bgfff" >
+        <div class="showsaloonForm pt20 pb20 pl20">
+    	<form action="{:U('freightConfig')}" method="post" id="theform">
+    	<div class="Gform fn w1">
+        	<ul>
+                <li class="Gname">*单笔订单统一运费：</li>
+                <li class="Ginput">
+                	<input maxlength="50" class="validate[required,custom[number]] textbox" type="text" name="freight" value="{$info['freight']}" style="width:236px;" />
+                </li>
+            </ul>
+        	<ul>
+                <li class="Gname">*免运费规则：</li>
+                <li class="Ginput">
+                	<php>
+                    $ck1 = $info['freight_free_flag'] != '1' ? '0' : '1';
+                    $cls = $info['freight_free_flag'] != '1' ? 'hover' : '';
+                    $hover = $info['freight_free_flag'] == '1' ? 'hover' : '';
+                    </php>
+                	<div class="switch {$hover}">
+                        <input type="radio" name="freight_free_flag" value="$ck1" checked="checked">
+                        <div class="newRadio">
+                            <span class="valfirst {$cls}" data-val="0">关闭</span>
+                            <span class="vallast {$hover}" data-val="1">开启</span>
+                        </div>
+                        <div class="newRadio-input">
+                            <div class="Gtime1 fn special mt10">
+                                <em class="em1" style="width:135px;">单笔订单金额大于等于</em>
+                                <input type="text" name="freight_free_limit" class="validate[required,custom[number]]" maxlength="10" value="{$info['freight_free_limit']}" style="width:78px; padding-left:135px;">
+                                <em class="em2" style="left:215px">元，免运费</em>
+                            </div>
+                        </div>
+                    </div>
+            </ul>
+			<ul>
+                <li class="Gname">&nbsp;</li>
+                <li class="Ginput">
+					<a href="javascript:void(0)" class="btn-all w90" id="save">确定</a>
+					<a href="javascript:art.dialog.close();" class="btn-all-del w90 ml20" id="cancel">取消</a>
+				</li>
+            </ul>
+        </div>
+        </form>
+    </div>
+    </body>
+</form>
+</html>
+<style>
+.Gform .Gname { width:140px;}
+.Gform .Ginput { padding:12px 0 0 140px;}
+</style>

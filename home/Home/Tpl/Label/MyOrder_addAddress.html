@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>新增收货地址</title>
+    <meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+    <meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+    <meta content="telephone=no" name="format-detection" />
+    <meta content="email=no" name="format-detection" />
+    <meta name="apple-touch-fullscreen" content="NO">
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_tlq.css?v=__VR__">
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+    <style type="text/css">
+        body { padding-bottom: 70px;}
+        .item { width: 100%; max-width: 640px;}
+        .item ul.btn-ul { margin: 8px 15px;}
+        .Gform .copyright { width: 100%; max-width: 640px; text-align: center; margin-bottom: 0;}
+        .Gform .item.bottom { width: 100%; position: fixed; bottom: 0; text-align: center; margin-bottom: 0;}
+    </style>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+            <div class="goback"><a href="{:U('MyOrder/managerAddressIndex',array('node_id'=>$node_id))}"><i></i></a></div>
+            <div class="logo"><span>新增收货地址</span></div>
+        </div>
+        <div id="main">
+            <div id="mainCon">
+                <div class="Gform">
+                    <form id="form" action="javascript:void(0);" method="post" name="form">
+                        <div class="item">
+                            <ul>
+                                <li class="name w72">所在区域</li>
+                                <li class="input pl72 fn">
+                                    <select name="province" id="province" class="validate[required]"><option>选择省</option></select>
+                                    <select name="city" id="city" class="ml validate[required]"><option>选择市</option></select>
+                                    <select name="town" id="town" class="ml validate[required]"><option>选择县</option></select>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="name w72">具体地址</li>
+                                <li class="input pl72">
+                                    <input name="address" type="text" id="m_Address" maxlength="20" class="textbox validate[required]" placeholder="&nbsp;例如街道名称，门牌号码等" data-rel="">
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="name w72">收货人</li>
+                                <li class="input pl72">
+                                    <input name="username" type="text" id="m_Name" maxlength="4" class="textbox validate[required]" placeholder="&nbsp;请输入收货人姓名" data-rel="">
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="name w72">联系方式</li>
+                                <li class="input pl72">
+                                    <input name="phone" id="phone" type="tel" class="textbox validate[required,minSize[11]]" maxlength="11" placeholder="&nbsp;请输入收货人联系方式" data-rel=""  />
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="copyright"><p>©2016 翼码科技 wangcaio2o.com 版权所有</p></div>
+                        <div class="item bottom">
+                            <ul class="btn-ul">
+                                <input type="hidden" name="node_id" value="{$node_id}">
+                                <li class="btn-li"><input id="save" type="submit" value="保存" class="btn-up" /></li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+    $(document).ready(function(e) {
+        $('#form').validationEngine({
+            'allrules': {
+                "carname":{
+                    "alertText":""
+                }
+            },
+        });
+
+        CityCode({
+            province: $("#province"), //省
+            city: $("#city"), //市
+            town: $("#town"), //区
+            selected: "{$data.province}{$data.city}", //默认选中的省市区代号
+            url: "{:U('Home/AjaxCity/index')}"
+        });
+        
+        $(".Gform .clause label").eq(0).addClass("active");
+        $('.Gform .clause input').attr("checked","checked");
+        $(".Gform .clause input").click(function(){
+            $(this).parent("label").toggleClass("active");
+        });
+
+    });
+    
+        $("#save").click(function(e) {
+        var province = document.getElementById('province');
+        var city = document.getElementById('city');
+        var town = document.getElementById('town');
+        var m_Address = document.getElementById('m_Address');
+        var m_Name = document.getElementById('m_Name');
+        var m_phone = document.getElementById('m_phone');
+        if(province.value && city.value && town.value && m_Address.value && m_Name.value && phone.value){
+         art.dialog({
+             content: '<div>是否保存该地址？</div>',
+             padding:'0px',
+             width:400,
+             title:'删除',
+             okVal: '确定',
+             fixed:true,
+             ok: function () {
+                 $.ajax({
+                    type: "POST",
+                    url:"{:U('MyOrder/addAddress')}",
+                    data:$('form').serialize(),
+                    success: function(result) {
+                        var d2 = art.dialog({content: '<div class="msg-all-error">保存成功</div>'});
+                        setTimeout(function () {
+                            d2.close();
+                            location.href="{:U('MyOrder/managerAddressIndex', array('node_id' =>$node_id))}";
+                        }, 1000); 
+                    }
+                 })
+             },  
+             cancelVal: '取消',
+             cancel: true
+         });
+        }
+    });
+
+</script>

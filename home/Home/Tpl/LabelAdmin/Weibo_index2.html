@@ -1,0 +1,615 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="Keywords" content="二维码,O2O平台,微信网站,手机二维码,O2O模式,微商城,电子凭证,线上线下,微信商城,二维码营销,电子优惠劵,微团购,二维码防伪,旺财,微信推广,二维码扫描,企业营销,微营销,二维码制作,企业推广,微信营销,二维码名片,网络营销,微信开发,二维码生成器,防伪标签,移动互联网,O2O,O2O营销,微网站" />
+<title>新浪微博_营销推广渠道_翼码旺财</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wweibo.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wweibo.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/json2.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script src="http://open.web.meitu.com/sources/xiuxiu.js" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	//秀秀
+	$('.sinaxiuxiu').on("click",function(event){
+		$('#Wlayer').hide();
+		art.dialog({
+			width:"800px",
+			height:"560px",
+			title:false,
+			content:"<div id='xiuxiu'><div id='altContent'></div><div class='closexiuxiu1'></div><div class='closexiuxiu2'></div></div>",
+			id:"xiuxiu",
+			padding:0
+		});
+		xiuxiu.params.wmode = "transparent";
+		xiuxiu.embedSWF("altContent",2,"100%","100%");
+		   /*第1个参数是加载编辑器div容器，第2个参数是编辑器类型，第3个参数是div容器宽，第4个参数是div容器高*/
+		xiuxiu.setUploadURL("<?php echo $xiuxiu_upload_path;?>");//修改为您自己的上传接收图片程序
+		xiuxiu.setUploadType(2);
+		xiuxiu.setUploadDataFieldName("Filedata");
+		xiuxiu.onInit = function ()
+		{
+			//xiuxiu.loadPhoto("http://open.web.meitu.com/sources/images/1.jpg");
+		}	
+		xiuxiu.onUploadResponse = function (data)
+		{
+			art.dialog({id:'xiuxiu'}).close();
+			var ret = JSON.parse(data);
+			$("#content_pic").val(ret['pic_short_path']);
+			$("#photo_show").html("<img  class='view-uploadimg' name='photoshow' src='"+ret['thumb_pic']+"' data='"+ret['imgurl']+"' width='35' height='35'> <a class='del-pic'>删除</a>");
+			
+			
+		}
+	});
+	$('.closexiuxiu1,.closexiuxiu2').on("click",function(event){
+		art.dialog({id:'xiuxiu'}).close();
+	});
+	
+	//视频、话题-传值
+	$('.btn-movie').on("click",function(event){
+		var movie=$("#sina-movie-val").val()+" ";
+		var app_id="1362404091"
+		//链接
+		$.ajax({
+			dataType : 'jsonp',
+			url : 'https://api.weibo.com/2/short_url/shorten.json?source=' + app_id +'&url_long='+movie,
+			success : function(response) {
+				var data = response.data;
+				var sinaurl=data["urls"][0]["url_short"];
+				var val=$(".sinaSend-input").val();
+				$(".sinaSend-input").val(val+sinaurl);
+				check_lenght_weibo(140,'sinaSend-num','.sinaSend-input');
+			}
+		});
+	});
+	$('.btn-qing').on("click",function(event){
+		var qing=$("#sina-qing-val").val()+" ";
+		var val=$(".sinaSend-input").val();
+		$(".sinaSend-input").val(val+qing);
+		check_lenght_weibo(140,'sinaSend-num','.sinaSend-input');
+	});
+	
+
+	$('.sina-link').on("click",function(event){
+		
+		art.dialog.open("{:U('LabelAdmin/SelectBatches/index')}",{
+			title:"选择互动模块",
+			width:800
+			});  
+	});
+
+
+	$('.del-pic').on("click",function(event){
+
+		art.dialog.confirm('确定删除？', function () {
+			$("#photo_show").html("");
+			$("#content_pic").val("");
+		}, function () {
+		});
+	});
+	
+	//编辑微博
+	$('.opr-item-edit').on("click",function(event){
+		art.dialog.open("弹窗的发布.html",{
+			title:"编辑微博",
+			width:860
+		});
+	});
+	//编辑长微博
+	$('.sina-chang').on("click",function(event){
+		art.dialog.open("index.php?g=LabelAdmin&m=Weibo&a=publish_long&call_back=long_call_back",{
+			title:"长微博",
+			width:750
+		});
+	});	
+	
+	
+	//草稿立即发布
+	$('.draft_publish').click(function(){
+		if(!confirm('是否立即发布？'))
+			return ;
+		var id = $(this).data('id');
+		var that = $(this);
+		// dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>发送中...</div>",fixed: true,padding:0});
+		$.post("index.php?g=LabelAdmin&m=Weibo&a=weibo_draft_submit", {id: id}, function(data){
+			alert(data.info);
+			if(data.status == 1){
+				that.closest('li').remove();
+			}
+		}, 'JSON');
+	});
+	
+	
+	
+	//  将草稿中变更到定时发布中
+	$('.draft_pulish_time').click(function(){
+		var _this = $(this)
+		 $("#choosetime").on("click",function(){
+				WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d %H:{%m+5}:%s'}); 
+		 }); 
+		var html = [
+					'<form method="post" action="">',
+						'<div class="Gform">',
+						'<ul><li class="Gname">*选择时间:</li><li class="Ginput"><input type="text" name="choosetime" id="choosetime" class="textbox w200" /></li></ul>',
+						'</div>',
+					'</form>'].join('');
+				art.dialog({
+					title: '定时发布时间',
+					content: html,
+					padding:0,
+					width:240,
+					okVal: '确认',
+					ok: function () {
+						var id=_this.data('id');
+						var that=_this;
+						var choosetime=$("#choosetime").val();
+						
+						 $.post("index.php?g=LabelAdmin&m=Weibo&a=weibo_time_submit",{id:id,choosetime:choosetime},function(data){
+							alert(data.info);
+							
+							if(data.status==1){
+								that.closest('li').remove();
+							}
+						},'JSON');
+					},
+					cancel: true
+		});
+	});
+	
+	
+	
+	//删除微博
+	$('.opr-item-del').click(function(){
+		if(!confirm('是否确认删除记录？'))
+			return ;
+		var id = $(this).data('id');
+		var that = $(this);
+		// dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>删除中...</div>",fixed: true,padding:0});
+		$.post("index.php?g=LabelAdmin&m=Weibo&a=weibo_delete", {id: id}, function(data){
+			alert(data.info);
+			if(data.status == 1){
+				that.closest('li').remove();
+			}
+		}, 'JSON');
+	});
+
+
+	//切换账号
+	 $('#change_u').click(function(){
+	        
+			var pid=$("#pid").val();
+			var node_id=$("#node_id").val();
+			var para = '&pid='+pid+"&node_id="+node_id;
+    	    art.dialog.open("{:U('LabelAdmin/Weibo/change_account')}"+para,{
+    	    	width:500,
+    	    	title:'切换微博帐号'
+    	    })
+        });
+
+	 //修改
+	 $("#change_w").click(function(event) {
+	 		var pid=$("#pid").val();
+			var node_id=$("#node_id").val();
+			var  para = '&pid='+pid+"&node_id="+node_id;
+    	    art.dialog.open("{:U('LabelAdmin/Weibo/modify_weibo')}"+para,{
+    	    	width: 650,
+    	    	title:'自定义来源'
+    	    })
+	 });
+
+})
+</script>
+</head>
+
+<body>
+    <div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="shejiao"/>
+    	<div id="container" class="bgfff">
+            <div id="main" class="rel">
+                
+               <div class="sidenav">
+                    <!--开始载入左菜单-->
+					<include file="LabelAdmin/Channel/leftMenu2" leftmenuid="2vm"/>
+                </div>
+                
+				<div class="subcon">
+                    <div class="main-name fn">
+                        <h4>发布微博</h4>
+                    </div>
+                            
+                            <div class="sina-account fn">
+                            	<ul>
+								<?php
+								if(empty($openidInfo)){
+								?>
+								
+								<a href="index.php?g=LabelAdmin&amp;m=Weibo&amp;a=authorize"><li class="add-account"><i></i></li></a>
+								<?php
+								}else{
+								?>
+
+                            	<li class="head">
+                            		<img src="<?php echo $openidInfo['head_photo'];?>" alt="" />
+                            	</li>
+                            	<li>
+                            		<p class="tit"><?php echo $openidInfo['name']?></p>
+                            		<p><span class="border">粉丝：<?php echo  !empty($userinfo['followers_count'])?$userinfo['followers_count']:0?></span><span>绑定有效期：<?php echo $expire;?></span></p>
+									<?php 
+									if($node_type_name=='c2'){  
+									?>
+									<p>微博小尾巴：<?php if($openidInfo['app_name']==""){echo "翼码旺财"; }else{ echo $openidInfo['app_name'];}?> <a id="change_w" class="ml10" href="javascript:void(0)">修改</a></p>
+									<?php
+									}
+									?>
+                            	</li>
+                            	<li class="btn"><a id="change_u" class="btn-updata r" href="javascript:void(0)">切换账号</a></li>
+								<?php
+								}								
+								?>
+								
+                            	<!--
+                                	<?php
+									if(!empty($weibo_account_info)){
+										foreach($weibo_account_info as $wk=>$wl){
+									?>								
+									<li class="sinaAccount  <?php
+										if(!empty($_SESSION['publish_token']['openid'])){
+											if($_SESSION['publish_token']['openid']==$wl['openid']){											
+									?>								
+									onAccount
+									<?php
+											}else{											
+									?>
+									offAccount
+									<?php
+											}
+									}else{
+											if($wk==0){
+									?>
+									onAccount
+									<?php
+
+										}else{								
+									?>
+									offAccount
+									<?php
+										}
+									}
+									?>">
+									<a href="index.php?g=LabelAdmin&m=Weibo&a=index&pid=<?php echo $wl['openid']?>"><img src="<?php echo $wl['head_photo'];?>" alt="<?php echo $wl['openid']?>"/><i></i></li>
+									<?php
+										}
+									}
+									?>								
+                                    <a href="index.php?g=LabelAdmin&m=Weibo&a=authorize"><li class="add-account"><i></i></li></a>
+                                    -->
+                                </ul>
+                            </div>
+
+                            
+
+                            <div class="sina-send fn">
+							<form action="index.php?g=LabelAdmin&m=Weibo&a=weibo_public_submit" method="post" enctype="multipart/form-data">
+								<input type="hidden" name="content_pic" id="content_pic" value="">
+								<input type="hidden" name="pid" id="pid" value="<?php echo $pid;?>">
+								<input type="hidden" name="node_id" id="node_id" value="<?php echo $node_id;?>">
+								<input type="hidden" name="save_type" id="save_type" value="">
+                            	<div class="sinaSend-num" id="sinaSend-num">您还可以输入<span>140</span>字</div>
+                                <div class="sinaSend-area"><textarea class="validate[required,maxSize[140]] texttextarea sinaSend-input" name="content" id="content" onkeyup="check_lenght_weibo(140,'sinaSend-num',this)"></textarea></div>
+                                <div class="sinaSend-func fn">
+                                	<a href="javascript:void(0)" class="save_cg btn-savedata r" onclick="weibo_submit('1');">存入草稿</a>
+                                	<ul>
+                                    	<li class="sina-face"><i class="icon-face"></i>表情</li>
+                                        <li class="sina-img"><i class="icon-img"></i>图片</li>
+                                        <li class="sina-movie"><i class="icon-movie"></i>视频</li>
+                                        <li class="sina-qing"><i class="icon-qing"></i>话题</li>
+                                        <li class="sina-chang"><i class="icon-chang"></i>长微博</li>
+                                        <li class="sina-link"><i class="icon-link"></i>选择互动模块</li>
+										<li id="photo_show"></li>
+                                    </ul>
+                                </div>
+                                <div class="sinaSend-updata fn">                                	
+									<a href="javascript:void(0)" class="btn-updata r" id="smb" onclick="weibo_submit('2');">发布</a>
+                                	<ul>
+										<li id="sinaSend-updata-time" class="mr20 dn"><input type="text" class="textbox" name="settime" id="settime" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d %H:{%m+5}:%s'})"/></li>
+                                    	<li class="mr5"><input type="radio" id="updata2" name="publish_flag" value="2"/><label for="updata2" >定时发送</label></li>
+                                    	<li class="mr20"><input type="radio"  checked="checked"  id="updata1" name="publish_flag" value="1"/><label for="updata1">立即发送</label></li>
+                                    </ul>
+                                </div>
+								</form>
+                            </div>
+
+							
+							<div id="Wcanal-tabon" class="Wcanal-tab mt20">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="<?php if($tab_idx == 1) echo 'Wcanal-tab-hover';?>"><a href="index.php?g=LabelAdmin&m=Weibo&a=index&tab_idx=1">发送历史记录</a></p>
+                            <p class="<?php if($tab_idx == 2) echo 'Wcanal-tab-hover';?>"><a href="index.php?g=LabelAdmin&m=Weibo&a=index&tab_idx=2">定时发送</a></p>
+                            <p class="<?php if($tab_idx == 3) echo 'Wcanal-tab-hover';?>"><a href="index.php?g=LabelAdmin&m=Weibo&a=index&tab_idx=3">我的草稿</a></p>
+                        </div>
+                        
+                        <div class="Wcanal-tab-list">
+                        	<div class="sina-history">
+                            	<ul class="fn">
+                            		<volist name="tab_list" id="vo">
+                                	<li class="fn">
+                                    	<div class="sinaHistory-con">{$vo.content}</div>
+                                    	<notempty name="vo.content_pic">
+                                        <div class="sinaHistory-img"><img src="__UPLOAD__/Weibo/{$vo.thumb_img}" data="__UPLOAD__/Weibo/{$vo.content_pic}" class="weibo_pic view-weibo-uploadimg"></div>
+                                        </notempty>
+                                        <eq name="tab_idx" value="1">
+                                        <div class="sinaHistory-account fn">
+                                            <a href="#"><i class="icon-sinalogo"></i>&nbsp;{$vo.name}</a><span class="r">{$vo.send_time|dateformat='Y-m-d H:i'}</span>
+                                        </div>
+                                        </eq>
+                                        
+                                        <eq name="tab_idx" value="2">
+                                        <div class="sinaHistory-account fn">
+                                             <a href="#"><i class="icon-sinalogo"></i>&nbsp;{$vo.name}</a><span class="r">定时发送时间:{$vo.set_time|dateformat='Y-m-d H:i'}</span>
+                                        </div>
+                                        <div class="sinaHistory-opr fn">
+                                        	<p class="opr-item"><a href="javascript:void(0)" class="opr-item-del" data-id="{$vo.id}"><i class="icon-stop"></i><span>删除微博</span></a></p>
+                                        </div>
+                                        </eq>
+                                        
+                                        <eq name="tab_idx" value="3">
+                                        <div class="sinaHistory-account fn">
+                                            <a href="#"><i class="icon-sinalogo"></i>&nbsp;{$vo.name}</a><span class="r">草稿时间:{$vo.add_time|dateformat='Y-m-d H:i'}</span>
+                                        </div>
+                                        <div class="sinaHistory-opr fn">
+                                        	<p class="opr-item"><a href="javascript:void(0)" class="opr-item-del" data-id="{$vo.id}"><i class="icon-stop"></i><span>删除微博</span></a></p>
+                                        	<p class="opr-item r"><a href="javascript:void(0);" class="btn-updata r draft_pulish_time" data-id = "{$vo.id}">定时发布</a></p>
+                                        	<p class="opr-item r"><a href="javascript:void(0);" class="btn-updata r draft_publish" data-id = "{$vo.id}">立即发布</a></p>
+                             			 </div>
+                                        </eq>
+                                    </li>
+                                    </volist>
+                                </ul>
+                            </div>
+                            <div class="page">{$page}</div>
+                        	</div>     
+                        </div>
+                    </div>
+          		</div>
+     	 	</div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+$(function(){
+    $("#dd").click(function(){
+		var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    //dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+				timeout:60000,
+                success:function(data){
+                    if(data.status == '1'){
+                        //dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                        //setTimeout("art.dialog.close();",1000);
+                        //
+                        //$('.showsaloonForm').hide();
+                       // $('.showsaloonmsg').show();
+						//var win = art.dialog.open.origin;
+						//win.location.reload();
+						//art.dialog.close();
+						alert('成功');
+                        return false;
+                    }else{
+                        art.dialog({content:"<div class='msg-all-error'>"+data.info+"</div>", time:2, lock:true});
+                        //dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                        //$('#msg').html(data.info);
+                    }
+                },
+                dataType:'json'
+            });
+        }
+	 });
+
+
+	
+	$("#updata2").change(function(){
+		$("#sinaSend-updata-time").width("0px");
+		$("#sinaSend-updata-time").show();
+		$("#sinaSend-updata-time").animate({width:143},500);
+	})
+	$("#updata1").change(function(){
+		$("#sinaSend-updata-time").animate({width:0},500,function(){$("#sinaSend-updata-time").hide();});
+	})
+
+
+	//上传图片
+	$('#up_pic').on('change',function(){ 
+		ajaxFileUploadview('up_pic','resp_head_img','show1',"{:U('LabelAdmin/Weibo/upload_pic','type=img')}");
+	});
+
+
+	//查看微博内容图片
+	$(".view-weibo-uploadimg").on("click",function(event){
+		var src=$(this).attr("data");
+		art.dialog({
+			lock: true,			
+			title:false,
+			padding:0,
+			width:"440px",
+			top:"30%",
+			content:"<img src='"+src+"' class='art-img dn' />"
+		});
+		setTimeout("var imgwidth=parseInt($('.art-img').width());if(imgwidth>630){$('.art-img').width('630px')};$('.art-img').fadeIn(600);",500)
+	});
+
+	//查看图片
+	$(".view-uploadimg").on("click",function(event){
+		var src=$(this).attr("data");
+		art.dialog({
+			lock: true,			
+			title:false,
+			padding:0,
+			width:"440px",
+			top:"30%",
+			content:"<img src='"+src+"' class='art-img' />"
+		});
+		setTimeout("var imgwidth=parseInt($('.art-img').width());if(imgwidth>630){$('.art-img').width('630px')};$('.art-img').fadeIn(600);",500)
+	});
+
+
+ });
+//提交发布
+ function weibo_submit(submit_type){
+		var check_num=check_lenght_weibo(140,'sinaSend-num','.sinaSend-input');
+		if(check_num==1){
+			var dialog;
+			if(submit_type=="1"){
+				//草稿
+				$("#save_type").val("1");		
+			}
+			
+			//if($("form").validationEngine('validate')){
+				$("form").ajaxSubmit({
+					beforeSubmit:function(){
+						dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+					},
+					timeout:60000,
+					success:function(data){
+						if(data.status == '1'){
+										
+							dialog.close();
+							//dialog.time(4).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+							art.dialog({title:false,content:"<div class='msg-all-succeed'>"+data.info+"</div>",fixed: true,padding:0});
+							$("#save_type").val("");
+							$("#content_pic").val("");
+							location.reload();
+						   
+
+						}else{
+							dialog.close();
+							art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>", time:4, lock:true,padding:0});                       
+						}
+					},
+					dataType:'json'
+				});
+
+				
+			//} 
+		}else{
+			$(".sinaSend-input").css("background","#fff2f2");
+			setTimeout("$('.sinaSend-input').css('background','#fff')",100);
+			setTimeout("$('.sinaSend-input').css('background','#fff2f2')",200);
+			setTimeout("$('.sinaSend-input').css('background','#fff')",300);
+			setTimeout("$('.sinaSend-input').css('background','#fff2f2')",400);
+			setTimeout("$('.sinaSend-input').css('background','#fff')",500);
+		}
+ }
+
+
+
+function long_call_back(pic_url,pic_short,thumb_path){
+	$("#content_pic").val(pic_short);
+	$("#photo_show").html("<img  class='view-uploadimg' name='photoshow' src='"+thumb_path+"' data='"+pic_url+"' width='35' height='35'> <a class='del-pic'>删除</a>");
+	
+}
+
+ function ajaxFileUploadview(imgid,hiddenid,showid,url){
+		
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.ajaxFileUpload
+		({
+			url:url,
+			secureuri:false,
+			fileElementId:imgid,
+			dataType: 'json',
+			data:{name:'logan', id:'id'},
+			success: function (data, status)
+			{
+				if(typeof(data.error) != 'undefined')
+				{
+					if(data.error != '')
+					{
+						dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+					}else{
+
+						var resp = data.msg;						
+						if(resp != '0000'){
+							dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+							return false;
+						}else{
+							
+							dialog.close();
+							$("#content_pic").val(data.pic_short_path);	
+							$("#photo_show").html("<img  class='view-uploadimg' name='photoshow' src='"+data.thumb_pic+"' data='"+data.imgurl+"' width='35' height='35'> <a class='del-pic'>删除</a>");
+					
+						}
+					}
+				}
+			},
+			error: function (data, status, e)
+			{
+				dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+			}
+		})
+		return false;
+	}
+
+	//打开窗口的回调函数
+var selectActivityCallback = function(d){
+   
+	//alert(d.name);
+	$('#batch_name').val(d.name);
+    $('#batch_type').val(d.batch_type);
+    $('#batch_id').val(d.batch_id);
+
+	var batch_name=d.name;
+	//ajax 返回微博渠道访问链接	
+	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在打开...</div>",fixed: true,padding:0});
+    	$.ajax({
+            error:function(e){
+                alert(e);
+            },
+            type:'POST',
+            data:{batch_id: d.batch_id, batch_type: d.batch_type },
+            url:"{:U('LabelAdmin/Weibo/get_batch_channel')}",
+            success:function(data){
+               if( data.status == '1')
+                {
+            		dialog.close();
+					var pre_content=$("#content").val();
+					$("#content").val(pre_content+batch_name+data.label_url);
+				
+				   //插入活动链接和名字
+				   
+				   //dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+            	   //setTimeout("window.location.reload();",500);
+                   //return false;
+                }else{
+                	dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+                }
+            },
+            dataType:"json"
+        });
+
+
+   
+}
+ </script>

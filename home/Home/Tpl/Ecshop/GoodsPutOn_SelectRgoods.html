@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>选择卡券1</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script>
+var _json_data = <?php echo json_encode(array_valtokey($list, 'id'));?>;
+var _arr = [];
+var cb_init = '{:I('cb_init')}';
+var cb_rgoodsadd = '{:I('cb_rgoodsadd')}';
+var cb_rgoodsdel = '{:I('cb_rgoodsdel')}';
+var is_sku = '{:I('is_sku')}';
+var clear_rgoodsinit = 'clear_rgoodsinit';
+var max_num = 8 ;
+$(document).ready(function(e){
+	var win = art.dialog.opener;
+	var _this=art.dialog.data('_this');
+
+	if(cb_init && win[cb_init] && typeof(win[cb_init]) == 'function' )
+		_arr = win[cb_init].call(this,_this);
+        if(is_sku && win[is_sku] && typeof(win[is_sku]) == 'function' )
+		_arr = win[is_sku].call(this,_this);   
+
+
+	if(_arr.length == max_num) $(".groupList li:not('.selected')").addClass('disabled');
+	
+	$("body").on("click",".etListReady ul li i.del",function(e) {
+		var _liId = $(this).closest("li").attr("data-id");
+		var value = $(this).closest("li").find("input").val();
+		$(this).closest("li").remove();
+		$(".etList ul li:not('.etList.etListReady ul li')").each(function(i){
+			if($(this).find("input").val()==value){
+				$(this).removeClass("selected");
+			}
+		})
+	});
+	$("body").on("click",".etList ul li:not('.etList.etListReady ul li')",function(e) {
+		var _liId = $(this).attr("data-id");
+		var _liGoodsname = $(this).attr("data-goodsname");
+		var _liCardid = $(this).attr("data-cardid");
+		var value = $(this).closest("li").find("input").val();
+		if($(this).text().indexOf("无库存")<0){
+			if($(".etListReady ul li").length<max_num){
+				var is_selected=$(this).hasClass("selected");
+				if(is_selected){
+					$(this).find("input").attr("checked",false);
+					$(this).removeClass("selected");
+					$(".etListReady ul li").each(function(i){
+						if($(this).find("input").val()==value){
+							$(this).remove();
+						}
+					})
+				}else{
+					$(".etList.etListReady ul").append("<li data-id='"+_liId+"' data-goodsname='"+_liGoodsname+"' data-cardid='"+_liCardid+"'>"+$(this).html()+"<i class='del'></i></li>");
+					$(this).find("input").attr("checked",true);
+					$(this).addClass("selected");
+				}
+			}else if($(".etListReady ul li").length==max_num){
+					var is_selected=$(this).hasClass("selected");
+					if(is_selected){
+						$(this).find("input").attr("checked",false);
+						$(this).removeClass("selected");
+						$(".etListReady ul li").each(function(i){
+							if($(this).find("input").val()==value){
+								$(this).remove();
+							}
+						})
+					}else{
+						Diaerror("最多选择"+max_num+"个，请先删除一个");
+					}
+			}else{
+				Diaerror("最多选择"+max_num+"个，请先删除一个");
+			}
+	    }else{
+			Diaerror("该商品已无库存");
+	        $(this).removeClass("selected");
+	    }
+	});
+	
+	$(".btn-next").click(function(){
+		if(cb_rgoodsdel && win[cb_rgoodsdel] && typeof(win[cb_rgoodsdel]) == 'function' ){
+			if(clear_rgoodsinit && win[clear_rgoodsinit] && typeof(win[clear_rgoodsinit]) == 'function' ){
+				win[clear_rgoodsinit].call(this);
+			}
+		$(".etListReady ul li").each(function(index, element) {
+            if(cb_rgoodsadd && win[cb_rgoodsadd] && typeof(win[cb_rgoodsadd]) == 'function' )
+				// _arr = win[cb_rgoodsadd].call(this, _json_data[$(this).find("input").val()],_this);
+				_arr = win[cb_rgoodsadd].call(this, $(this).find("input").data('json'),_this);
+        });
+		}
+		art.dialog.close();
+	});
+	$(".etListReady ul").sortable({items: "li",distance:10,tolerance:"pointer"});
+});
+</script>
+</head>
+<body>
+	<div class="iframeCon SelectGoods">
+        <div class="etList etListReady">
+            <p class="etListReadyTitle">已选择的商品:</p>
+            <ul>
+            </ul>
+        </div>
+        <div class="etList">
+            <ul class="loadCon">
+                <?php
+                if(!empty($list)){ 
+                    foreach($list as $v){
+                ?>
+                <li data-id="{$v['goods_id']}" data-goodsname="{$v['goods_name']}" data-cardid = "<present name="v['card_id']">{$v['card_id']}</present>">
+                    <div class="img"><img src="{:get_upload_url($v['goods_image'])}"></div>
+                    <div class="text">
+                        <h3><span><?php echo $v['goods_name'];?></span></h3>
+                        <p>市场价：<span>&yen;{$v['batch_amt']}</span></p>
+                        <p>库存：<?php if($v['storage_num'] == '-1'){?>不限<?php }else{ echo $v['remain_num']; }?><!--  <a href="{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$v['goods_id']))}" target="_blank">查看详情</a>--></p>
+                    </div>
+                    <div class="dn date">
+                        <?php if($v['storage_type'] != '-1' && $v['remain_num'] == 0 ){
+                        	echo '(无库存)';
+                        }else{?>
+                        	<input type="checkbox" value="<?php echo $v['id']?>" name="id" class="dn" data-json='<?php echo json_encode($v); ?>' />
+                        <?php }?>
+                    </div>
+                </li>
+                <?php }}else{?>
+                <div class="Dianodate">
+                    <img src="__PUBLIC__/Image/member/nodata.gif" />
+                    <p>你还未上架旺财小店商品~~</p>
+                    <p><a target="_parent" href="<?php echo U('Ecshop/GoodsInfo/addNew');?>">马上去添加商品</a></p>
+                </div>
+                <?php }?>
+            </ul>
+            
+            <div class="page mini" data-load=".loadCon" data-callback="call">{$page}</div>
+        </div>
+        <div class="DiabtnCon">
+            <a class="Diabtn-all btn-next">确定</a>
+            <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+        </div>
+    </div>
+    <div id="masonry"></div>
+</body>
+</html>
+<script type="text/javascript">
+function call(){
+	$(".etList.etListReady ul li").each(function(i){
+		var value = $(this).find("input").val();
+		$(".etList ul li:not('.etList.etListReady ul li')").each(function(i){
+			if($(this).find("input").val()==value){
+				$(this).addClass("selected");
+			}
+		})
+	})
+}
+</script>

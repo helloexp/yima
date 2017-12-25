@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="format-detection"  content="telephone=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<title>电商送礼-微信收礼</title>
+<link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/wap_gift_201503.css" />
+<script src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js" type="text/javascript" charset="utf-8"></script>
+<script>
+$(document).ready(function(){
+	$('#sub_button').click(function(){
+		var rece_p = $('#rece_phone').val();
+		var partten = /^1[34578][0-9]{9}$/;
+		if(!partten.test(rece_p)){
+			alert("收礼手机号格式不正确");
+			return false;
+		}
+		//提交
+		var authflag = {$auth_flag};
+		if(authflag == 1)
+			$("#theform").attr("action","{:U('Label/MyGift/send_gift')}").submit();
+		else
+			$("#theform").attr("action","{:U('Label/MyGift/goAuthorize')}").submit();
+	})	
+
+	event.preventDefault();
+	$('.cd-popup').addClass('is-visible');
+	
+	//close popup
+	$('.cd-popup').on('click', function(event){
+		if( $(event.target).is('.cd-popup-close') || $(event.target).is('.cd-popup') ) {
+			event.preventDefault();
+			$(this).removeClass('is-visible');
+		}
+	});
+	//close popup when clicking the esc keyboard button
+	$(document).keyup(function(event){
+    	if(event.which=='27'){
+    		$('.cd-popup').removeClass('is-visible');
+	    }
+    });
+})
+</script>
+</head>
+<body>
+<div class="wrapper">
+	<div class="header">
+		<span class="headline">来自{$giftData['bless_name']}的礼物</span>
+	</div>
+
+	<div class="content" style="margin-bottom:0">
+		<div class="whole_gray">
+		<div class="gift_pos">
+			<img src="__UPLOAD__/{$goodsInfo['batch_img']}">
+			<p class="tc">{$goodsInfo['b_name']}</p>
+		</div>
+		<div class="gift_words">
+			<span><strong>{$giftData['bless_name']}</strong>想对你说：</span>{$giftData['bless_msg']}
+		</div>
+		<div class="colgroup" style=" background-color:#e0e0e0">
+			<form name="theform" id="theform" method="post" action="javascript:void(0)">
+			<input type="hidden" name="order_id" id="order_id" value="{$order_id}">
+			<input type="text" name="rece_phone" id="rece_phone" value="{$rece_phone}" placeholder="请输入您的手机号码，以方便我们发送商品凭证给您。" style="border:1px #dcdcdc  solid">
+			<a href="javascript:void(0)" class="btn_one" id="sub_button">确认领取</a>
+			</form>
+		</div>
+		</div>    
+	</div>
+</div>
+</body>
+</html>
+<script>
+var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Public/_shareWx"/>
+<eq name="show_wx" value="1">
+<div class="cd-popup" role="alert">
+    <div class="cd-popup-container">
+		<img src="__PUBLIC__/Label/Image/spelling/share-wx.png" alt="example3">
+    </div>
+</div>
+</eq>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+	<meta content="telephone=no" name="format-detection" />
+	<meta content="email=no" name="format-detection" />
+	<meta name="apple-touch-fullscreen" content="NO">
+	<title>中国O2O践行者沙龙（深圳）</title>
+	<load href="__PUBLIC__/Label/Css/o2o.css"/>
+	<js href="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"/>
+	<js href="__PUBLIC__/Js/jquery.form.js?v=__VR__"/>
+</head>
+<php>
+$host = 'http://'.$_SERVER['HTTP_HOST'];
+$currentUrl = $host.$_SERVER['REQUEST_URI'];
+</php>
+<script>
+	$(document).ready(function(){
+		setStyle();
+
+		var _one_sub = false;
+		$('#bm_sub_id').click(function(){
+			if($("input[name='true_name']").val() == ''
+					|| $("input[name='company']").val()==''
+					|| $("input[name='email']").val()==''
+					|| $("input[name='mobile']").val()==''
+					|| $("input[name='position']").val()=='' ){
+				alert('报名选项不能为空！');
+				return false;
+			}
+			if(isNaN($("input[name='mobile']").val())  || $("input[name='mobile']").val().length !=11){
+				alert('您的电话号码填写错误！');
+				return false;
+			}
+
+			if(_one_sub)
+				return false;
+
+			_one_sub = true;
+			$("#bmform").ajaxSubmit({
+				success:function(data){
+					_one_sub = false;
+					if(data.data == 'success'){
+						alert('报名成功！');
+						$('#bm_sub_id').attr('disabled',true);
+						$('#bm_sub_id').val("已报名");
+						return false;
+					}else{
+						alert('报名失败！'+data.info);
+						return false;
+					}
+				},
+				dataType:'json'
+			});
+		});
+
+        var shareData = {
+            img_url: "{$host}/Home/Public/Label/Image/zy/o2opark.png",
+            img_width: 200,
+            img_height: 200,
+            link: '{$currentUrl}',
+            desc: '2014年12月19日 14:00 ～ 18:00',
+            title: '中国O2O筑梦践行者沙龙（深圳）邀请函',
+            appid: 0
+        };
+        document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+            // 发送给好友
+            WeixinJSBridge.on('menu:share:appmessage', function(argv){
+                shareFriend();
+            });
+            // 分享到朋友圈
+            WeixinJSBridge.on('menu:share:timeline', function(argv){
+                shareTimeline();
+            });
+        }, false);
+
+        function shareTimeline() {
+            WeixinJSBridge.invoke('shareTimeline', shareData, function(res) {
+                _report('timeline', res.err_msg);
+            });
+        }
+
+        function shareFriend() {
+            WeixinJSBridge.invoke('sendAppMessage', shareData, function(res) {
+                _report('send_msg', res.err_msg);
+            });
+        }
+	});
+
+	$(document).ready(function(){
+		$('.bottom li').on('click',function(){
+			var ind = $(this).index();
+			$('.swiper-slide').hide();
+			$('.swiper-slide').removeClass('animate');
+			$('.swiper-slide').eq(ind).addClass('animate').show();
+		});
+	});
+	function setStyle(){
+		var h = $("body").height();
+		var w = $("body").width();
+		$('.swiper-container-whole').height(h);
+		if(w>320){
+			$('.swiper-container-whole').css('font-size','14px');
+		}else{
+			$('#page1 .m-title').css({'padding-top':'12%','font-size':'1.4em'})
+			$('#page1 p input[type=text]').css('height','2em');
+			$('#page1 .btn').css('margin','1.4em auto');
+			$('.bottom li img').css('margin-top','15%');
+		}
+	}
+</script>
+<body>
+	<div class="swiper-container-whole">
+		<div class="swiper-wrapper">
+			<section id="page1" class="swiper-slide animate">
+				<h1 class="m-title">中国O2O筑梦践行者沙龙（深圳）</h1>
+				<p>地址：（广东深圳）南山区科苑地铁站伞友咖啡</p>
+				<p>时间：2014年12月19日 14:00 ～ 17:00</p>
+				<form id="bmform" action="/index.php?g=Label&m=Bm&a=Submit" method="post">
+					<input type="hidden" value="<?php echo $_GET['id']?>" name="id" id="id" />
+					<input type="hidden" value="<?php echo $row['select_type']?>" name="select_type" />
+				 	<p class="mt08"><span>企业名称</span><input type="text" name="company"></p>
+				 	<p class="mt04"><span>邮　　箱</span><input type="text" name="email"></p>
+				 	<p class="mt04"><span>手　　机</span><input type="text" name="mobile" maxlength="11"></p>
+				 	<p class="mt04"><span>姓　　名</span><input type="text" name="true_name"></p>
+				 	<p class="mt04"><span>职　　位</span><input type="text" name="position"></p>
+					<input class="btn" type="button" id="bm_sub_id" value="我要报名" />				
+				</form>
+			</section>
+			<section id="page2" class="swiper-slide dn">
+				<img class="title" src="__PUBLIC__/Label/Image/zy/intro.png" alt="会议简介">
+				<h2>【活动内容】</h2>
+				<table width="100%" cellspacing="0" cellpadding="0">
+					<tr>
+						<td class="fir">活动主题：</td>
+						<td>O2O--2014--中国O2O践行者沙龙（深圳站）</td>
+					</tr>
+					<tr>
+						<td class="fir">活动时间：</td>
+						<td>2014/12/19 14:00-17:00</td>
+					</tr>
+					<tr>
+						<td class="fir">主办方：</td>
+						<td>深圳蚁客创业沙龙（E＆K Club)</td>
+					</tr><tr>
+						<td class="fir">承办方：</td>
+						<td>上海翼码　O2O Park</td>
+					</tr>
+					<tr>
+						<td class="fir">协办方：</td>
+						<td>无名创投，TCL创投，酣客公社（FFC粉丝经济践行群体），伞友咖啡</td>
+					</tr>
+					<tr>
+						<td class="fir">特邀嘉宾：</td>
+						<td>O2O教父，中国第一个专注于O2O领域自组织社群—— 上海翼码战略合作副总裁，O2OPark 创始人 张波先生。</td>
+					</tr>
+				</table>
+				<h2>【活动简介】</h2>
+				<p class="ti">B2C、C2C这些概念相信大家已经不陌生了，电子商务已经改变了大众的生活方式。不可否认，把商品塞到箱子里送到消费者面前，这个市场已经成熟。但日常生活中的大多数消费离不开到实体店实现。而将线上客源与实体店消费进行对接，其中蕴含着巨大的商机,这种环境下就催生了电子商务的另一种模式。2011年，随着团购风潮的袭来，这种全新的互联网经济模式O2O“闪亮登场”，并迅速蔓延至虚拟商业经济的每个角落，同时深刻改变着传统经济的商业行为，甚至还会改变亿万普通消费者的行为习惯。那么,究竟什么是O2O?</p>
+				<p class="ti">O2O，代表着互联网与实体门店在价值、渠道方面的相互认可。线上利用实体零售的渠道，掌握流量入口，丰富服务产品、消费体验，增加客户粘性。实体零售商借助线上平台导入客流，提升用户的忠诚度和留存率，实现数字化用户管理、社交化精准营销等。那么，发展到今天的O2O，有怎样的现状？未来又有怎样的发展趋势呢？</p>
+				<p class="ti">蚁客创特邀张波先生举办的“深入分析O2O现状及发展趋势”活动将于2014年12月19日（周五）下午2点到6点在深圳伞友咖啡进行。</p>
+				<p>会议咨询：柏亚玲，蚁客创业沙龙负责人。</p>
+				<p>电话 - 18822808185  </p>
+				<p>邮箱 - bernice@goingant.com </p>
+				<p>报名参加请加微信 ：muxiaobai00</p>
+				<h2>【项目名单】</h2>
+				<p>O2O领域具代表性的神秘项目等着你，还不快来？</p>
+				<h2>【参与方一览】</h2>
+				<table width="100%" cellspacing="0" cellpadding="0">
+					<tr>
+						<td class="fir"><p>上海翼码：</p></td>
+						<td><p>上海翼码信息科技股份有限公司成立于2006年，多年来翼码一直坚持“个性化的内容+碎片化的渠道=各式精准的互动营销”的市场营销理念，在国内首创二维码O2O业务模型。2013年，翼码厚积薄发，推出了功能强大的二维码营销平台——翼码旺财，成为企业O2O营销必备利器。 我们的客户覆盖移动通信、金融保险、零售连锁、教育培训、服装快消等30多个行业和领域；客户创建的个性化营销活动年均达到10万个，客户通过自有媒体渠道、公共渠道以及付费渠道等碎片化渠道，实现了平台年交易金额达到200亿，年引流2亿人次。</p></td>
+					</tr>
+					<tr>
+						<td class="fir"><p>O2OPark：</p></td>
+						<td><p>O2OPark定位为O2O践行三创的教育自组织社群平台，三创分别是创智、创新、创业，针对于企业创智中O2O元素的理论方法论、企业创新中O2O元素的工具策展、企业创业中O2O元素的垂直领域相关服务，最终利用O2O实现中国异业联盟互联网化的梦想。</p></td>
+					</tr>
+					<tr>
+						<td class="fir"><p>蚁客创：</p></td>
+						<td><p>又名E＆K（Entrepreneur knowledge)Club，是深圳最具活力的公益性创业者俱乐部。多年致力于为深圳年轻创业者提供最有效的服务和帮助。服务包括媒体资讯，交流分享，产品展示，投资咨询等项目，线下设有周末沙龙活动。</p></td>
+					</tr>
+					<tr>
+						<td class="fir"><p>无名创投：</p></td>
+						<td><p>无名创投是孵化创投众包平台。平台设立了亿元GP梦想基金和全功能孵化器；利用网络平台高效快捷、信息对等、联点成体的优势将创投流程中的不同环节分解，直接对接各环节领域对应的专业人士、团队；充分挖掘、释放社会价值资源，促进项目快速成长，同时孵化一批具备综合理统筹能力的独立GP。</p></td>
+					</tr>
+					<tr>
+						<td class="fir"><p>TCL创投：</p></td>
+						<td><p>TCL集团全资持有的创业投资公司，创投团队主要来自于原TCL集团战略与投资管理中心（SIMC），SIMC已经帮助TCL成功完成超过20个各类主要投融资项目，初步将自身的产业经验和投资经验在创投领域得到展现和映证。</p></td>
+					</tr>
+					<tr>
+						<td class="fir"><p>酣客公社：</p></td>
+						<td><p style="padding-bottom:2em;">全世界酣客的商业家园。酣客，就是酣畅的生活态度和商业哲学，不做顾客做酣客，不要忽悠做商权！</p></td>
+					</tr>
+				</table>
+			</section>
+			<section id="page3" class="swiper-slide dn">
+				<img class="title" src="__PUBLIC__/Label/Image/zy/schedule.png" alt="会议日程">
+				<table class="tl" cellpadding="0" cellspacing="0">
+					<tr><td id="ipspe" style="width:35%;"><p class="big">时间</p></td><td><p>安排</p></td></tr>
+					<tr><td><p>14:00-14:30</p></td><td><p>入场签到</p></td></tr>
+					<tr><td><p>14:30-14:45</p></td><td><p>E&K Club创始人jony主持开场（介绍蚁客创，张波，无名创投,TCL创投）</p></td></tr>
+					<tr><td><p>14:45-15:30</p></td><td><p>主题分享：《O2O践行》张波</p></td></tr>
+					<tr><td><p>15:30-15:45</p></td><td><p>休息时间</p></td></tr>
+					<tr><td><p>15:45-16:15</p></td><td><p>圆桌讨论：</p><p>张波（上海翼码副总裁）</p><p>王磊（无名创投）</p><p>Amy（TCL创投）</p></td></tr>
+					<tr><td><p>16:15-16:35</p></td><td><p>观众提问</p></td></tr>
+					<tr><td><p>16:35-17:00</p></td><td style="padding-bottom:2em;"><p>线上线下抽奖环节（微信活跃参与者）</p></td></tr>
+				</table>
+			</section>
+			<section id="page4" class="swiper-slide dn">
+				<img class="title" src="__PUBLIC__/Label/Image/zy/guest.png" alt="嘉宾简介">
+				<table class="tl" cellpadding="0" cellspacing="0">
+					<tr><td style="width:30%;"><img style="width:60%;" src="__PUBLIC__/Label/Image/zy/zb.jpg" alt=""></td><td><p class="big">张波</p><p>O2O教父</p></td></tr>
+					<tr><td><img style="width:60%;" src="__PUBLIC__/Label/Image/zy/gc.jpg" alt=""></td><td><p class="big">郭诚</p><p>E＆K Club 创始人</p></td></tr>
+					<tr><td><img style="width:60%;" src="__PUBLIC__/Label/Image/zy/cl.jpg" alt=""></td><td><p class="big">王磊</p><p>无名创投 投资经理</p></td></tr>
+					<tr><td><img style="width:60%;" src="__PUBLIC__/Label/Image/zy/lwm.jpg" alt=""></td><td><p class="big">罗无名</p><p>TCL创投资经理</p></td></tr>
+				</table>
+			</section>
+			<section id="page6" class="swiper-slide dn">
+				<img src="__PUBLIC__/Label/Image/zy/share.png" alt="分享到朋友圈">
+			</section>
+		</div>
+		<div class="blank"></div>
+		<nav class="bottom">
+			<ul>
+				<li><img src="__PUBLIC__/Label/Image/zy/icon1.png" alt="我要报名"><p>我要报名</p></li>
+				<li><img src="__PUBLIC__/Label/Image/zy/icon2.png" alt="会议简介"><p>会议简介</p></li>
+				<li><img src="__PUBLIC__/Label/Image/zy/icon3.png" alt="会议日程"><p>会议日程</p></li>
+				<li><img src="__PUBLIC__/Label/Image/zy/icon4.png" alt="会议嘉宾"><p>会议嘉宾</p></li>
+				<li><img src="__PUBLIC__/Label/Image/zy/icon6.png" alt="我要分享"><p>我要分享</p></li>
+			</ul>
+		</nav>
+	</div>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无卡券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wselect_et.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+var _json_data = <?php echo json_encode(array_valtokey($list, 'card_id'));?>;
+var _callback = "{:I('callback')}";
+var next_step = "{$next_step}";
+$(function(){
+	if($(".DiatipsCon").height()==0){$(".DiatipsCon").hide();}
+	$(".etList ul li").click(function(e) {
+	    var is_exit = $(this).find(".date").find("mark").text();
+	    var is_selected=$(this).hasClass("selected")
+	    if(is_exit!="无库存"){
+	        if(is_selected == true)
+	        {
+	            $(this).removeClass("selected");
+	        }
+	        else
+	        {
+	            $(".etList ul li").removeClass("selected");
+	            $(this).addClass("selected");
+	        }
+	    
+	    }
+	    else{
+	    	art.dialog({title:false,content:"<div class='msg-all-error'>该卡券已无库存</div>",fixed: true,padding:0,time:1});
+	        $(this).removeClass("selected");
+	    }
+	});
+    
+    $(".etList ul li").mouseover(function(e) {
+        $(this).children("div.details").show();
+    });
+    
+    $(".etList ul li").mouseout(function(e) {
+        $(this).children("div.details").hide();
+    });
+    
+    $(".btn-next,#pos_store_back,#store_back").click(function(){
+    	var store_num = '{$stroeNum}';
+    	var pos_store_num = '{$posStoreNum}';
+    	var len = $(".selected").length;
+		var show_type = '{$show_type}';
+        if(len==0){
+			if(show_type == '12')
+				art.dialog({title:false,content:"<div class='msg-all-error'>请选择定额红包</div>",fixed: true,padding:0,time:1});
+			else
+				art.dialog({title:false,content:"<div class='msg-all-error'>请选择卡券</div>",fixed: true,padding:0,time:1});
+            return false;
+        }
+    	if(store_num == '0' && show_type != '12'){
+    		$(".SelectGoods").hide();
+    		$(".no_store").show();
+    		return false;
+    	}
+    	if(pos_store_num == '0' && show_type != '12'){
+    		$(".SelectGoods").hide();
+            $(".no_pos_store").show();
+            return false;
+    	}
+    	//如果有下一步按钮的，接上奖品Id传过去（招募会员活动用到）
+    	if ($(this).attr('id') == 'next_step') {
+    		var card_id = $(".selected").attr('data-id');
+    		location.href = next_step + "&prizeId=" + card_id;
+    		return false;
+    	}
+    	$.submit_goods();
+    });
+    
+    $("#pos_store_back,#store_back").click(function(){
+    	if (next_step != '') {
+    		location.href = location.href;
+    	} else {
+    		$.submit_goods();
+    	}
+    });
+    
+    $.submit_goods = function(){
+    	var card_id = $(".selected").attr('data-id');
+        var datas = _json_data[card_id];
+        var win = art.dialog.opener;
+        if(_callback && win[_callback] && typeof(win[_callback]) == 'function' )
+            win[_callback].call(this, datas);
+        art.dialog.close();
+        return ; 
+    }
+    
+    $("#source,#goods_type").change(function(){
+        $("#theform").submit();
+    });
+    $("#sub_button").click(function(){
+    	$("form").submit();
+    });
+    //无数据页面
+    var list_status = <?php if(empty($_POST) && empty($list)){echo '0';}else{echo '1';}?>;
+    var goodsTypes = '{$goodsType}';
+    if(list_status){
+            $(".SelectGoods").show();
+            $(".no_goods").hide();
+            $(".no_bonus").hide();   
+    }else{
+    	$(".SelectGoods").hide();
+        if('6' == goodsTypes){
+            $(".no_goodsInfo").show();
+        }else{
+		var show_type = '{$show_type}';
+		if(show_type == '12')
+			$(".no_bonus").show();
+		else
+			$(".no_goods").show();
+       }            
+    }
+    //跳转提示
+    $("#go_goods,#go_hall").click(function(){
+    	$(".no_goods").hide();
+    	$(".location_tip").show();
+    });
+	//跳转提示
+    $("#go_bonus").click(function(){
+    	$(".no_bonus").hide();
+    	$(".location_tip2").show();
+    });
+    $("#show_go_tip").click(function(){
+    	$(".SelectGoods").hide();
+    	$(".no_goods").show();
+    });
+    
+    <eq name="showSetElec" value="1">
+    $("#show_go_tip").click();
+    </eq>
+	
+	$(".getMore").click(function(){
+		var url = $(this).attr("data-href");
+                window.open(url);
+		return false;
+	})
+	if($(".etList li").length==0){
+		var show_type = '{$show_type}';
+        var show_source = "{$_REQUEST['show_source']}"
+		$(".etList").remove();
+		if(show_type=="" && show_source != 3){
+			$(".no_goodsInfo").show();
+		}else{
+			if(show_type == 12){
+				$("#type12").show()
+			}else{
+				$("#type2").show()
+			}
+		}
+	}
+})
+</script>
+</head>
+
+<body class="no">
+    <div class="iframeCon SelectGoods">
+    	<notempty name="show_type">
+        <div <neq name="show_type" value="12">class="DiatipsCon"</neq>>
+            <if condition="($show_type neq '6') && ($show_type neq '22')">
+                <eq name="show_type" value="12">
+                    <a href="{:U('Ecshop/ElectronicCommerce/index')}" target="_blank" class="r">如何使用定额红包？</a>
+                <else/>
+                    <a href="{$goodsHelp}" target="_blank" class="r">
+                    <if condition="$_REQUEST['source'] eq 3 or $_REQUEST['show_source'] eq '3'">微信卡券的相关说明<else />卡券的相关说明</if>
+					</a>
+                </eq>
+            </if>
+            <if condition="$show_type eq '22'">
+                
+            </if>
+            <if condition="($_REQUEST['goods_type'] neq '6') and ($show_type neq '12') and ($show_type neq '22')">
+                <p>如卡券需要在线下领取或核销，请确保该卡券信息中包含已安装了核验终端的门店。</p>
+            </if>
+        </div>
+        </notempty>
+        <div class="SearchArea fn">
+            <form id="theform" action="{:U('Common/SelectJp/index')}" method="post">
+                <div class="SearchAreaLeft">
+                <input type="hidden" name="callback" value="{$_REQUEST['callback']}"/>
+                <input type="hidden" name="show_source" value="{$_REQUEST['show_source']}"/>
+                <input type="hidden" name="show_type" value="{$_REQUEST['show_type']}"/>
+                <input type="hidden" name="store_mode" value="{$_REQUEST['store_mode']}"/>
+                <input type="hidden" name="next_step" value="{$next_step}" />
+                <if condition="$_REQUEST['goods_type'] eq '6'">
+                <input type="hidden" name="goods_type" value="6"/>
+                </if>
+                <eq name="sourceSelectStatus" value='1'>
+                <label>
+                    <select name="source" id="source">
+                        <option value="">卡券来源</option>
+                        <volist name="sourceType" id="vo">
+                            <if condition="$key neq '4'">
+                            <option value="{$key}" <if condition="strval($key) heq $_REQUEST['source']">selected="selected"</if>>{$vo}</option>
+                            </if>
+                        </volist>
+                    </select>
+                </label>
+                </eq>
+                <eq name="goodsTypeSelectStatus" value='1'>
+                <label>
+                <select name="goods_type" id="goods_type">
+                    <option value="">卡券类型</option>
+                    <volist name="selectType" id="vo">
+                        <option value="{$key}" <if condition="strval($key) heq $_REQUEST['goods_type']">selected="selected"</if>>{$vo}</option>
+                    </volist>
+                </select>
+                </label>
+                </eq>
+                <label><span>关键字</span><input type="text" name="goods_name" value="{$_POST['goods_name']}"/></label>
+            </div>
+            <div class="SearchAreaRight">
+            <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+            </div>
+            </form>
+        </div>
+        <div class="etList">
+            <ul>
+            <if condition="$_REQUEST['goods_type'] neq '6'">
+                <volist name="list" id="vo">
+                <li data-id="{$vo['card_id']}">
+                    <if condition="$_REQUEST['store_mode'] eq '2'">
+                        <div class="img" style="background-image:url({$vo['logo_url']})"></div>
+                    <elseif condition="$vo['source'] eq '6'" />
+                        <div class="img" style="background-image:url(__PUBLIC__/Image/eTicket/wechat_bf.png)"></div>
+                    <else />
+                        <div class="img" style="background-image:url(__UPLOAD__/{$vo['goods_image']})"></div>
+                    </if>
+                    <div class="text">
+                        <h3><span>{$vo['goods_name']}</span><i class="type{$vo['goods_type']}"><if condition="$_REQUEST['show_type'] eq '12'">定额红包<elseif condition="$vo['source'] eq '6'" />微信红包 <else />{$selectType[$vo['goods_type']]}</if></i></h3>
+                        <p>剩余：<if condition="$_REQUEST['store_mode'] eq '2'">{$vo['quantity'] - $vo['card_get_num']}<else/><if condition="$vo['storage_type'] eq '1'">{$vo['remain_num']}<else/>不限</if></if></p>
+                        <p><a href="javascript:void(0)" data-href="<switch name="vo.source">
+                                    <case value="0">{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$vo['goods_id']))}</case>
+                                    <case value="1">{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$vo['goods_id']))}</case>
+                                    <case value="3">{:U('Weixin/WeixinCard/cardDetail',array('id'=>$vo['id']))}</case>
+                                    <case value="4">{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$vo['goods_id']))}</case>
+                                    <case value="6">{:U('WangcaiPc/NumGoods/weChatInfo',array('goods_id'=>$vo['goods_id']))}</case>
+                                 </switch>" class="getMore">查看详情</a></p>
+                    </div>
+                    <div class="dn date">
+                        <em class="{$sourceColor[$vo['source']]}">{$sourceType[$vo['source']]}</em>
+                        <if condition="$_REQUEST['store_mode'] eq '2'">
+                            <if condition="($vo['quantity'] - $vo['card_get_num']) elt 0">
+                            <mark class="no_storage">无库存</mark>
+                            </if>
+                        <else/>
+                            <if condition="$vo['storage_type'] eq '1' and $vo['remain_num'] eq 0">
+                            <mark class="no_storage">无库存</mark>
+                            </if>
+                        </if>
+                        <dl>
+                            <dd><em>类型：</em>{$selectType[$vo['goods_type']]}</dd>
+                            <dd><em>数量：</em><strong><if condition="$vo['storage_type'] eq '1'">{$vo['storage_num']}<else/>不限</if></strong></dd> 
+                            <dd><em>市场价：</em><strong>{$vo['market_price']}</strong> </dd>
+                            <if condition="$vo['goods_type'] eq '1'">
+                            <dd><em>核销限制：</em><eq name="vo.validate_type" value="1">按金额核销<else/>限一次核销</eq> </dd>
+                            <dd><em>面额：</em><strong>{$vo['goods_amt']}</strong> </dd>
+                            </if>
+                            <if condition="($vo['source'] eq '3' and $vo['goods_type'] eq '0') or ($vo['source'] neq '3' and $vo['goods_type'] eq '3')">
+                            <dd><em>折扣额度：</em><strong>{$vo['goods_discount']}%</strong> </dd>
+                            </if>
+                            <dd><em>可验门店：</em> <strong>{$vo['store_num']}</strong>家</dd>
+                        </dl>
+                    </div>
+                </li>
+                </volist>
+            <else />
+            	<volist name="list" id="v">
+            	<li data-id="{$v['goods_id']}" data-goodsname="{$v['goods_name']}" data-cardid = "<present name="v['card_id']">{$v['card_id']}</present>">
+                    <div class="img"><img src="{:get_upload_url($v['goods_image'])}"></div>
+                    <div class="text">
+                        <h3><span><?php echo $v['goods_name'];?></span></h3>
+                        <p>市场价：<span>&yen;{$v['market_price']}</span></p>
+                        <p>库存：<?php if($v['storage_num'] == '-1'){?>不限<?php }else{ echo $v['remain_num']; }?><!--  <a href="{:U('WangcaiPc/NumGoods/numGoodsDetail',array('goods_id'=>$v['goods_id']))}" target="_blank">查看详情</a>--></p>
+                    </div>
+                    <div class="dn date">
+                        <if condition="$v['storage_type'] eq '1' and $v['remain_num'] eq 0">
+                        <mark class="no_storage">无库存</mark>
+                        </if>
+                    </div>
+                </li>
+                </volist>
+            </if>
+            </ul>
+            
+            <div class="page mini">
+            <if condition="($_REQUEST['goods_type'] neq '6') and ($show_type neq '12') and ($_REQUEST['show_source'] neq '6')">
+                <div class="pagelink"><a href="{:U('WangcaiPc/NumGoods/addNumGoods')}" target="_blank">快速创建</a>或<a href="{:U('Hall/Index/build')}" target="_blank">采购</a>卡券</div>
+            </if>
+            {$page}</div>
+        </div>
+        <div class="DiabtnCon">
+            <empty name="next_step">
+            <a class="Diabtn-all btn-next">确定</a>
+            <else />
+            <a class="Diabtn-all btn-next" id="next_step">下一步</a>
+            </empty>
+            <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+        </div>
+    </div>
+
+    <!-- 无定额红包 -->
+    <div class="iframeCon no_bonus dn" id="type12">
+        <div class="Dianodate">
+        	<img src="__PUBLIC__/Image/member/nodata.gif" />
+            <p>旺财平台的奖品以定额红包形式存在</p>
+            <p>请先<a href="{:U('Ecshop/SalePro/addFixBonus')}" id="go_bonus" target="_blank">创建定额红包</a></p>
+        </div>
+    </div>
+    <!-- 无卡券 -->
+    <div class="iframeCon no_goods dn" id="type2">
+    	<div class="Dianodate">
+        	<img src="__PUBLIC__/Image/member/nodata.gif" />
+            <if condition="$_REQUEST['source'] eq 3 or $_REQUEST['show_source'] eq '3'">
+            <p>旺财平台的奖品以卡券形式存在</p>
+            <p>请先<a href="{:U('WangcaiPc/NumGoods/addNumGoods',array('isWcadd'=>1))}" id="go_goods" target="_blank">创建微信卡券</a></p>
+            <elseif condition="$_REQUEST['source'] eq '6' or $_REQUEST['show_source'] eq '6'" />
+            <p>旺财平台的奖品以微信红包形式存在</p>
+            <p>请先<a href="{:U('WangcaiPc/NumGoods/creatWeChat')}" id="go_goods" target="_blank">创建微信红包</a></p>
+            <else />
+            <p>旺财平台的奖品以卡券形式存在</p>
+            <p>
+          	 请先<a href="{:U('WangcaiPc/NumGoods/addNumGoods')}" target="_blank" class="js_addCard" data-type="1">创建卡券</a>
+                                     或者<a href="{:U('Hall/Index/build')}" target="_blank" class="js_addCard" data-type="2">采购卡券</a>
+            </p>
+            </if>
+        </div>
+    </div>
+    <!-- 无商品需创建 -->
+    <div class="iframeCon no_goodsInfo dn">
+        <div class="Dianodate">
+        	<img src="__PUBLIC__/Image/member/nodata.gif" />
+            <p>您还没有创建商品</p>
+            <p>请先<a href="{:U('Ecshop/GoodsInfo/add')}" id="go_bonus" target="_blank">创建商品</a></p>
+        </div>
+    </div>
+    <!-- 无门店 -->
+    <div class="iframeCon no_store dn" id="type3">
+        <div class="Dianodate">
+        	<img src="__PUBLIC__/Image/member/nodata.gif" />
+            <p>空空如也，您还没有门店，建议创建门店并申请验证终端，便于卡券的线下核验~~</p>
+            <p>您可以<a href="{:U('Home/Store/add',array('node_id'=>$userInfo['node_id']))}" target="_blank">现在就创建门店</a>或<a href="javascript:void(0)" id="store_back">暂不创建</a></p>
+        </div>
+    </div>
+    
+    <!-- 无终端门店 -->
+    <div class="iframeCon no_pos_store dn" id="type4">
+        <div class="Dianodate">
+        	<img src="__PUBLIC__/Image/member/nodata.gif" />
+            <p>空空如也，您还没有申请验证终端，建议申请验证终端，便于卡券的线下核验~~</p>
+            <p>您可以<a href="{:U('Home/Store/Wapply_terminal')}" target="_blank">现在就去申请</a>或<a href="javascript:void(0)" id="pos_store_back">暂不创建</a></p>
+        </div>
+    </div>
+    
+    <!-- 跳转提示 -->
+    <div class="iframeCon location_tip dn" id="type5">
+        <if condition="$_REQUEST['source'] eq '6' or $_REQUEST['show_source'] eq '6'" >
+        <div class="Dianodate">
+            <img src="__PUBLIC__/Image/member/nodata.gif" />
+            <p>请在新打开的页面中完成微信红包的创建</p>
+            <p><a href="javascript:art.dialog.close();">没有完成创建，点这里返回</a>或<a href="javascript:location.reload();">我已完成创建，点击刷新</a></p>
+        </div>
+        <else />
+        <div class="Dianodate">
+            <img src="__PUBLIC__/Image/member/nodata.gif" />
+            <p>请在新打开的页面中完成卡券的创建或采购</p>
+            <p><a href="javascript:art.dialog.close();">没有完成创建或采购，点这里返回</a>或<a href="javascript:location.reload();">我已完成创建或采购，点击刷新</a></p>
+        </div>
+        </if>
+    </div>
+
+	<div class="iframeCon location_tip2 dn" id="type0">
+        <div class="Dianodate">
+        	<img src="__PUBLIC__/Image/member/nodata.gif" />
+            <p>请在新打开的页面中完成定额红包的创建</p>
+            <p><a href="javascript:art.dialog.close();">没有完成创建或采购，点这里返回</a>或<a href="javascript:location.reload();">我已完成创建或采购，点击刷新</a></p>
+        </div>
+    </div>
+</body>

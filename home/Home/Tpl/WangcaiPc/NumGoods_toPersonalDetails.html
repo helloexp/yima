@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券中心</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/highcharts.js"></script>
+<script type="text/javascript">
+
+$(function () {   
+	$(".more-filter").toggle(function(e){
+        $(this).parent().children(".hidelayer").slideToggle("slow");
+        $(".more-filter").html("收起筛选");
+        $(".more-filter").addClass("active");
+    },function(e){
+        $(".more-filter").removeClass("active");
+        $(this).parent().children(".hidelayer").slideToggle("slow");
+        $(".more-filter").html("更多筛选");
+    });
+    //查询
+	$("#search").click(function(){
+        var phone = $('#phone').val();
+        var url = "{:U('WangcaiPc/NumGoods/toPersonalDetails')}";
+        $.ajax({
+            url: url,
+            data: {phone:phone},
+            dataType: 'json',
+            type: 'post',
+            async:false,
+            success:function(data){
+                if(data.status == 1){
+                    $("form").attr("action","{:U('WangcaiPc/NumGoods/toPersonalDetails')}").submit();
+                }else{
+                    alert(data.info);
+                }
+            }
+        });
+    });
+    $("#down").click(function(){
+        $("form").attr("action","{:U('WangcaiPc/NumGoods/goodsCodeDown')}").submit();
+    });
+});                                                                                     
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="dzqsj"/>  
+        </div>
+
+        
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                    <include file="WangcaiPc/NumGoods/dataMenu" leftmenuid="personal"/>                   
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4><a href="javascript:history.go(-1);" class="back"><i></i>批量发送卡券</a> / 详情  <a style="float:right" href="{:U('WangcaiPc/NumGoods/downloadToSendCard',array('batchId'=>$configData['batch_id']))}" class="btn-down"><i></i>下载列表</a></h4>
+                    </div>
+                    <div class="steps">详情</div>
+                    <div class="w1 receiveInfo">
+                        <dl>
+                            <dd><label>批次号</label><span>{$configData['batch_id']}</span></dd>
+                            <dd><label>时间</label><span>{$configData['add_time']}</span></dd>
+                            <dd><label>卡券名称</label><span>{$configData['goods_name']}</span></dd>
+                            <dd><label>卡券使用时间</label><span>{$configData['verify_begin_time']} 至 {$configData['verify_end_time']}</span></dd>
+                            <dd><label>发送方式</label><span>短信</span></dd>
+                            <dd><label>发送数量</label><span>{$configData['total_count']}</span></dd>
+                            <dd><label>发送成功</label><span>{$configData['succ_num']}</span></dd>
+                            <dd><label>发送失败</label><span>{$configData['fail_num']}</span></dd>
+                            <dd><label>使用说明</label><span>{$configData['mms_notes']}</span></dd>
+                            <dd><label>备注</label><span>{$configData['batch_desc']}</span></dd>
+                        </dl>
+                    </div>
+                    <div class="shopCon">
+                   	<div class="SearchArea fn" style="margin-top:0">
+                    <form id="theform" action="{:U('WangcaiPc/NumGoods/toPersonalDetails')}" method="post">
+                    <input type="hidden" value="{$configData['batch_id']}" name="batchId">
+                    <div class="SearchAreaLeft">
+                    <label>
+                    <span>手机号</span><input type="text" value="{$phone}" name="phone" id="phone">
+                    </label>
+                    <label>
+                    <span>状态</span>
+                    <select name="status">
+                    <option value="0" <?php echo $queryType == 0?"selected='selected'":'';?>>全部</option>
+                    <option value="1" <?php echo $queryType == 1?"selected='selected'":'';?>>发送成功</option>
+                    <option value="2" <?php echo $queryType == 2?"selected='selected'":'';?>>发送失败</option>
+                    <option value="3" <?php echo $queryType == 3?"selected='selected'":'';?>>未发送</option>
+                    </select>
+                    </label>
+                    </div>
+                    <div class="SearchAreaRight">
+                    <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                    </div>
+                    </form>
+                    </div>
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                    <tr class="th">
+                    <th>卡券名称</th>
+                    <th>手机号</th>
+                    <th>状态</th>
+                    <th>说明</th>
+                    </tr>
+                    <?php if(!empty($list)):?>
+                        <?php foreach($list as $key => $value):?>
+                            <tr>
+                            <td>{$configData['goods_name']}</td>
+                            <td>{$value['phone_no']}</td>
+                            <td>{$status[$value['status']]}</td>
+                            <td>{$value['ret_desc']}</td>
+                            </tr>
+                        <?php endforeach;?>
+                    <?php else:?>
+                        <tr class="info">
+                            <td colspan="5" class="last">
+                                <div class="nonedata"></div>
+                            </td>
+                        </tr>
+                    <?php endif;?>
+                    </table>
+                    <div class="page">{$page}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+    <script type="text/javascript">
+        $(function(){
+        var arr = $('#sort_field').val().split('|')
+        if(arr.length == 2){
+            $('.sort[data-field="'+arr[0]+'"] i').addClass(arr[1]=='asc' ? 'icon-orderup' : 'icon-orderdown');
+        }
+        $('.sort').click(function(){
+            var obj = $(this), field=obj.data('field')+'|', obji = obj.find('i');
+
+            if(obji.hasClass('icon-orderdown'))
+                field += 'asc';
+            else if(obji.hasClass('icon-orderup'))
+                field += 'desc';
+            else
+                field += 'desc';
+            $('#sort_field').val( field );
+            $('#theform').submit();
+        });
+    });
+    </script> 
+</body>
+</html>

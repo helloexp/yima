@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>百度地图渠道_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/dtree/dtree.js?v=__VR__"/>
+<script>
+$(function(){
+	
+	
+	//省市区初始化
+	CityCode({
+		province:$("#province"),//省
+		city:$("#city"),//市
+		town:$("#town"),//区
+		selected:"{:$_GET['province'].$_GET['city'].$_GET['town']}",//默认选中的省市区代号
+		url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+	});
+
+
+	$("#add-shop").click(function(){
+			art.dialog.open(this.href,{
+				title: '新增门店',
+				width:'900px',
+				height:'80%',
+				lock:true
+			});
+			return false;
+    });
+	
+	
+	$(".Uswitch").click(function(){
+		if($(this).attr("title")=="开启"){
+			$(this).find(".Uswitch-on").fadeIn(200);
+			$(this).attr("title","关闭");
+			$(this).find("i").animate({left:29},200,function(){
+				
+				$.post("{:U('Home/BaiduMap/open_channel')}",{status:1},function(result){			
+					if(result==1)
+					{
+						 art.dialog({title:false,content:"渠道开启成功", time:2, lock:true});
+						 location.reload();
+						 
+					}else
+					{
+						art.dialog({title:false,content:"渠道开启失败", time:2, lock:true});	
+					}			
+			
+				});
+
+
+			});
+		}else{
+			$(this).find(".Uswitch-on").fadeOut(200);
+			$(this).attr("title","开启");
+			$(this).find("i").animate({left:0},200,function(){
+				
+				
+				//启用					
+				$.post("{:U('Home/BaiduMap/open_channel')}",{status:2},function(result){			
+					if(result==1)
+					{
+						 art.dialog({title:false,content:"渠道关闭成功", time:2, lock:true});
+						 location.reload()
+					}else
+					{
+						art.dialog({title:false,content:"渠道关闭失败", time:2, lock:true});	
+					}			
+			
+				});
+
+
+
+			});
+		}
+	})
+	//发布活动
+	$(".add-activity").click(function(){
+         art.dialog.open("index.php?m=BaiduMap&a=PublishBatch",{
+			lock: true,
+			title:"添加已创建活动",
+			width:800,
+			height:600
+		});  
+     })
+
+	//分支机构
+	$(".dtreeList").hoverDelay( 
+		function(){ 
+		    $(".dtreeCon").fadeIn(); 
+		}, 
+		function(){ 
+		    $(".dtreeCon").fadeOut(); 
+		} 
+	); 
+
+	//操作
+	$(".artD").click(function(){
+		var url = $(this).attr('href');
+		art.dialog.open(url,{
+			title: this.title,
+			width:'900px',
+			height:'450px',
+			lock:true
+		});
+		return false;
+	});
+});
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+    	<div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="{:U('Home/LabelAdmin/Channel/offlineCancel')}">营销渠道库</a></p>
+							<p>></p>
+                            <p>百度地图渠道</p>							
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+					<include file="LabelAdmin/Channel/leftMenu" leftmenuid="baidu"/>
+                </div>
+
+				<div class="subcon">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">
+                    	<?php
+							if(!empty($channelinfo)&&$channelinfo['status']==1){
+						?>
+						<a href="javascript:void(0)" class="btn-all w90 r add-activity">发布活动</a>
+						<?php
+						}
+						?>
+                            <p class="dib">百度地图渠道</p>
+							<?php
+								if(!empty($channelinfo)){
+									if($channelinfo['status']==2){
+							?>
+
+							<!--关闭状态开启-->
+                        	<div class="Uswitch dib ml20" title="开启">
+                            	<div class="Uswitch-off"></div>
+                            	<div class="Uswitch-on dn"></div>
+                            	<i></i>
+                            </div>
+							<?php
+							}else{
+							
+							?>
+							<!--默认关闭-->
+                        	<div class="Uswitch dib ml20" title="关闭">
+                            	<div class="Uswitch-off"></div>
+                            	<div class="Uswitch-on"></div>
+                            	<i class="Uswitch-i-on"></i>
+                            </div>
+							<?php 
+								
+							}
+								}else{
+							
+							?>
+							
+							<!--关闭状态开启-->
+                        	<div class="Uswitch dib ml20" title="开启">
+                            	<div class="Uswitch-off"></div>
+                            	<div class="Uswitch-on dn"></div>
+                            	<i></i>
+                            </div>
+							<?php
+							}
+							?>                            
+                            <!---->
+                        </h4>
+                    </div>
+                    <div class="bgf4f4f4 plr10 ptb10 font-13-666">
+                        百度地图由百度提供的一项网络地图搜索服务，覆盖国内数千区县以及拥有海量商户信息。已经成为国内使用最多的地图软件；旺财平台与百度地图打通，您可以通过百度地图助手，将您的活动快速发布到百度地图，从而让更多的地图用户参与您的活动！
+                    </div>
+                    <div class="bgf4f4f4 plr10 ptb10 font-13-666">
+                    	<?php
+							if(!empty($channelinfo)&&$channelinfo['status']==1){
+						?>
+						<a href="{:U('BaiduMap/viewData')}" class="r ml10">活动数据统计</a>
+						 您可以使用的门店共有<?php echo $count;?>家,马上发布活动吧
+						<?php
+						}
+						?>  
+                       
+                    </div>
+					<?php
+					if(!empty($channelinfo)&&$channelinfo['status']==1){
+					?>
+					<div class="main-name fn">
+                        <h4 class="bd-b-565656">
+                            <div class="dtreeList r"> 
+                                <a href="javascript:void(0);" class="btn-dtree w110">选择分支机构</a> 
+                                <div class="dtreeCon"> 
+                                <script> 
+                                <!-- 
+                                
+                                d = new dTree('d'); 
+                                
+                                <?php 
+                                foreach($node_list as $k=>$v){
+                                	if($k == 0){
+                                		echo "d.add('".$v['node_id']."',-1,'".$v['node_name']."','".U('Home/BaiduMap/BatchAdd',array('node_id'=>$v['node_id']))."');";
+                                	}else{
+                                		echo "d.add('".$v['node_id']."','".$v['parent_id']."','".$v['node_name']."','".U('Home/BaiduMap/BatchAdd',array('node_id'=>$v['node_id']))."');";
+                                	}
+                                }
+                                ?>
+                                document.write(d); 
+                                
+                                //--> 
+                                
+                                </script> 
+                                </div> 
+                                </div>
+                                <?php 
+                                foreach($node_list as $k=>$v){
+                                    if($v['node_id'] == $node_id){
+                                        echo $v['node_name'].'-门店列表';
+										break;
+                                    }
+								}
+                                ?>
+                        </h4>
+                    </div>
+                    <div class="Wcanal-tab">
+                    	<div class="Wcanal-tab-title fn">
+                        	<p class="Wcanal-tab-hover"><a href="{:U('Home/BaiduMap/BatchAdd',array('sns_type'=>'42','batch_type'=>$batch_type,'batch_id'=>$batch_id))}">查看门店信息</a></p>
+                            <p><a href="{:U('BaiduMap/ViewBaiduList')}">已发布的活动</a></p>
+							 
+							<a class="mem-updatego r w110" href="{:U('Store/add',array('node_id'=>$node_id))}" id="add-shop">门店录入</a>
+                        </div>
+
+                        <div class="Wcanal-tab-list">
+                            <div class="form-search fn">
+                            <!--原地址 Home\Tpl\Home\Store_index.html-->
+                                <form method="get" action="">
+                                    <input type="hidden" name="g" value="{$Think.GROUP_NAME}"/>
+                                    <input type="hidden" name="m" value="{$Think.MODULE_NAME}"/>
+                                    <input type="hidden" name="a" value="{$Think.ACTION_NAME}"/>
+                                    <input type="hidden" name="node_id" value="{$node_id}"/>
+                                    <input type="hidden" name="pos_count_status" value="{$_GET['pos_count_status']}"/>
+                                    <p>门店名称</p>
+                                    <p><input type="text" class="textbox w120" name="store_name" value="{$_GET['store_name']}"/></p>
+                                    <p class="ml10">门店地址</p>
+                                    <p>
+                                        <select name="province" id="province" class="address-select" >
+                                            <option value="">=选择省=</option>
+                                        </select>
+                                        <select name="city" id="city" class="address-select" >
+                                        <option value="">=选择市=</option>
+                                        </select>
+                                        <select name="town" id="town" class="address-select" >
+                                        <option value="">=选择区=</option>
+                                        </select>
+                                    </p>
+                                    <button type="submit" class="btn-all w80" style="float:right;">查询</button>
+                                </form>
+                                <!--原地址 Home\Tpl\Home\Store_index.html-->
+                            </div>
+                            <table cellpadding="0" cellspacing="0" class="W-table">
+                                <tr>
+                                    <th>门店名称</th>
+                                    <th>所在省市区</th>
+                                    <th>详细地址</th>
+                                    <th>联系电话</th>
+                                    <th>操作</th>
+                                </tr>
+                                <php>
+								$empty = '<tr><td colspan="7">没有满足条件的数据</td></tr>';
+								</php>
+								<volist name="queryList" id="vo" empty="$empty">
+								<tr>
+                                    <td>{$vo.store_name|default='未填写'}</td>
+                                    <td>{$vo.province}{$vo.city}{$vo.town}</td>
+                                    <td>{$vo.address|default='未填写'}</td>
+                                    <td>{$vo.principal_tel|default='未填写'}</td>
+                                    <td>
+                                   <a href="{:U('Store/view',array('id'=>$vo['id']))}" class="artD" title="详情">详情</a>
+								<a href="{:U('Store/edit',array('id'=>$vo['id']))}" class="mlr5 artD" title="编辑">编辑</a>
+                                    </td>
+                                </tr>
+                                </volist>
+                            </table>
+                            <div class="page">{$pageShow}</div>
+                            
+                        </div>
+                    </div>
+					<?php
+					}					
+					?>
+				</div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

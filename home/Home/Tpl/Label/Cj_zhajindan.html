@@ -1,0 +1,202 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>快乐大转盘</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Lottery2.css">
+    <script>
+        function readyAction(){
+            $(".lotCenter:eq(0)").addClass("lotCenter-animation1");
+            $(".lotCenter:eq(1)").addClass("lotCenter-animation2");
+            $(".lotCenter:eq(2)").addClass("lotCenter-animation3");
+        }
+        function beginAction(id){
+            $(".lotHammer").show();
+            if(window.lot==1){
+                $(".lotHammer").css("left",80);
+                $(".lotCenter-none,.lotCenter-prize").css("left",51);
+            }else if(window.lot==2){
+                $(".lotHammer").css("left",150);
+                $(".lotCenter-none,.lotCenter-prize").css("left",123);
+            }else if(window.lot==3){
+                $(".lotHammer").css("left",220);
+                $(".lotCenter-none,.lotCenter-prize").css("left",193);
+            }
+            setTimeout(function(){
+                if(id!=10){
+                    $(".lotCenter-prize").addClass("show");
+                    $(".lotCenter-none").removeClass("show");
+                }else{
+                    $(".lotCenter-none").addClass("show");
+                    $(".lotCenter-prize").removeClass("show");
+                }
+                $("[data-rel='"+window.lot+"']").hide();
+            },4000);
+            if($(".lotCenter").hasClass("lotCenter-market")){
+                $(".lotCenter").attr("class","lotCenter lotCenter-market");
+            }else{
+                $(".lotCenter").attr("class","lotCenter");
+            }
+            $(".lotHammer").addClass("lotHammer-animation");
+            setTimeout(function(){
+                //初始化
+                $("[data-rel='"+window.lot+"']").show();
+                $(".lotCenter-prize").removeClass("show");
+                $(".lotCenter-none").removeClass("show");
+                $(".lotHammer").hide();
+                $(".lotHammer").removeClass("lotHammer-animation");
+                $(".lotCenter:eq(0)").addClass("lotCenter-animation1");
+                $(".lotCenter:eq(1)").addClass("lotCenter-animation2");
+                $(".lotCenter:eq(2)").addClass("lotCenter-animation3");
+                window._is_click = false;
+				window._is_sub = false;
+            },7000);
+        }
+
+    </script>
+<script>
+window.lot = 0 ;
+window._is_click = false;
+window._is_sub = false;
+$(document).ready(function(e){
+    readyAction();
+    $(".lotCenter").on("click",function(){
+        var lotCenterlogin = "<?php echo session('cjUserInfo');?>";
+		if(window._is_sub){return false;}
+		if(window._is_click){return false;}
+		window._is_click = true;
+		window.lot = $(this).attr("data-rel");
+    	if($(this).hasClass("lotCenter-market")){
+    		popForm('popForm',0);
+    		return false;
+    	}
+    	if(lotCenterlogin){
+            popForm('popForm',0);
+            return false;
+        }
+        //$("#AjaxWrapper").fadeIn();
+        popForm('popForm',0);
+    });
+    
+    //抽奖
+    $('#subcj').on('click',function(){
+        // 2015元旦临时非标代码，过后删除--start
+        var tmpcookie = eval('(' +$.cookie('tmpcookie{ $label_batch_id}')+')');
+        if(tmpcookie)
+        {
+            setTimeout(function(){popForm('popMsg',tmpcookie.info,0)},10);
+            return false;
+        }
+        // 2015元旦临时非标代码，过后删除--end
+        if(window._is_sub) { //正在处理不可以再次提交
+            return false;
+        }
+
+        var needIgnore = $.cookie('{$needIgnoreKey}');
+        if (needIgnore == '1') { //不允许再抽奖
+
+            return false;
+        }
+
+        if (CountDowner.isCountdowning()) {//正在倒计时 不可以再次提交
+
+            return false;
+        }
+        CountDowner.notCountdowningAndInitAndStart();//开始倒计时
+        window._is_sub = true;
+        $.post(
+        "{:U('Label/Cj/submit')}",
+        $('#theform').serialize(),
+        function(data) {
+        	if($(".lotCenter").hasClass("lotCenter-market")){
+	    		$(".lotCenter").attr("class","lotCenter lotCenter-market");
+	    	}else{
+            	$(".lotCenter").attr("class","lotCenter");
+            }
+        	if(data.status==0){
+        		if(data.data==3){
+                    $("#AjaxWrapper").hide();
+                    $("#popForm").hide();
+        		    beginAction(10);
+                    //唐山非标
+                <php>if($node_id==C("tangshan.node_id")){</php>
+                        if(typeof(data.info.tangshan_url) === "string"){
+                            setTimeout(function(){tangshan_pingan(data.info.tangshan_url,4);},6000);
+                            return false;
+                        }else{
+                            setTimeout(function(){popForm('popMsg',data.info,data.status)},6000);
+                            return false;
+                        }
+                    <php>}else{</php>
+                    setTimeout(function(){popForm('popMsg',data.info,data.status)},6000);
+                        return false;
+                    <php>}</php>
+                }
+                popForm('popMsg',data.info,data.status);
+				window._is_sub = false;
+        		return false;
+        	}else if(data.status==3){
+                popForm('popMsg',data.info,data.status);
+				window._is_sub = false;
+                return false;
+            }
+        	$("#AjaxWrapper").hide();
+            $("#popForm").hide();
+            //中奖了
+            //唐山平安非标
+            <php>if($node_id==C("tangshan.node_id")){</php>
+                if(typeof(data.tangshan_url) === "string"){
+                    beginAction(data.data);
+                    setTimeout(function(){tangshan_pingan(data.tangshan_url,3);},6000);
+                    return false;
+                }
+            <php>}</php>
+            var _endCj = handelCjResult(data);
+          setTimeout(_endCj,6000);
+          beginAction(data.data);
+        },
+        'json'
+       );        
+    });
+    
+	$(".close-specialCj").click(function(){
+		$(".specialCj").hide();
+		$(".specialCj").html("");
+	})
+	
+	$(".close-AjaxWrapper").click(function(){
+		window._is_click = false;
+	})
+	
+});
+</script>
+</head>
+<body>
+	<div class="specialCj-con">
+                <div id="lottery">
+    				<div class="close-specialCj">+</div>
+                    <div class="lotBg">
+                    	<div class="lotEgg">
+                        	<div class="lotCenter" data-rel="1" style="left:70px;">
+                            	<a href="javascript:void(0)"></a>
+                            </div>
+                        	<div class="lotCenter" data-rel="2" style="left:140px;">
+                            	<a href="javascript:void(0)"></a>                            	
+                            </div>
+                        	<div class="lotCenter" data-rel="3" style="left:210px;">
+                            	<a href="javascript:void(0)"></a>                            	
+                            </div>
+                            <div class="lotHammer lotHammer-animation"></div>
+                            <div class="lotCenter-prize"><p></p></div>
+                            <div class="lotCenter-none"><p></p></div>
+                        </div>
+                    </div>
+                </div>
+	</div>
+    
+</body>
+</html>

@@ -1,0 +1,396 @@
+<?php 
+//本模板同时被 respType=0 以及 respType=1 以及respType=2 使用，所以，根据不同的respClass进行文字替换
+if($respType == '0'){
+$title = "被添加自动回复";
+}
+elseif($respType == '1'){
+$title = "消息自动回复";
+}
+elseif($respType == '2'){
+$title = "关键词自动回复";
+}
+else{
+$title = "自动回复";
+}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信被添加自动回复</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script src="__PUBLIC__/Js/weixin2/jq-emotion.js" type="text/javascript"></script>
+<script>
+$(function(){
+	//开关 开启表示从关闭状态到开始状态 关闭表示从开启状态转到关闭状态
+	$(".Uswitch").click(function(){
+		if($(this).attr("title")=="开启"){
+			$(this).find(".Uswitch-on").fadeIn(200);
+			$(this).attr("title","关闭");
+			$("#location_flag").val('1');
+			$(this).find("i").animate({left:29},200,function(){
+			$(".msg-edit").fadeIn(300);	
+				
+			});
+		}else{
+			$(this).find(".Uswitch-on").fadeOut(200);
+			$(this).attr("title","开启");
+			$("#location_flag").val('0');
+			$(this).find("i").animate({left:0},200,function(){
+			$(".msg-edit").fadeOut(300);		
+				
+			});
+		}
+
+            $.post("{:U('Pingan/WeixinLocation/flagLocation')}",{flag:$("#location_flag").val()},function(d){
+                alert(d.info);
+            },'json');
+
+
+	}).bind('init',function(){
+		if($("#location_flag").val()=='1'){
+			$(this).find(".Uswitch-on").fadeIn(200);
+			$(this).attr("title","关闭");
+			$(this).find("i").animate({left:29},200,function(){
+			$(".msg-edit").show();	
+				
+			});
+		}else{
+			$(this).find(".Uswitch-on").fadeOut(200);
+			$(this).attr("title","开启");
+			$(this).find("i").animate({left:0},200,function(){
+                $(".msg-edit").hide();
+            });
+		}
+	}).trigger('init');
+
+});
+
+
+</script>
+<script type="text/javascript">
+    var kIsSubmiting = false;
+    function sumitingStart() {
+        kIsSubmiting = true;
+    }
+    function submitComplete() {
+        kIsSubmiting = false;
+    }
+    function isSubmiting() {
+        return kIsSubmiting;
+    }
+
+
+    $(document).ready(function (e) {
+        //保存
+        $('#sub_button').click(function () {
+            if (isSubmiting()) {
+                return;
+            }
+            sumitingStart();
+            /*
+             if($('#input_i-url_type').val() == '1'){
+             if($('#batch_type').val() == '' ||  $('#batch_id').val()==''){
+             art.dialog('请选择互动模块');
+             submitComplete();
+             return false;
+             }
+             }else{
+             if($('#url').val()==''){
+             art.dialog('请输入url');
+             submitComplete();
+             return false;
+             }
+             var resp = checkrule_url($('#url').val());
+             if(resp !==true){
+             art.dialog(resp);
+             submitComplete();
+             return false;
+             }
+             }
+             */
+
+            $.post(
+                    "{:U('Pingan/WeixinLocation/Submit');}",
+                    $('#theform').serialize(),
+                    function (data) {
+                        if (data.status == '1') {
+                            art.dialog("保存成功");
+                           window.parent.location.reload();
+                        } else {
+                            submitComplete();
+                            art.dialog('保存失败');
+                        }
+                    },
+                    'json'
+            );
+        });
+
+    });
+
+	
+
+
+    /**
+     * 打开图片上传地址
+     * 格式如下：
+     * {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+     * rationX 图片宽度
+     * rationY 图片长度
+     * 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+     *     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+     * */
+	
+    function uploadImg(cropPresets,callback) {
+        var opt = {
+            cropPresets:cropPresets,
+            callback:callback
+        };
+        open_img_uploader(opt);
+    }
+    /**
+     * 图片上传后回调
+     * 参数：json
+     * d.msg  0000 代表成功
+     * d.error true / false
+     * d.image_name  裁剪后图片名称
+     * d.origin   裁剪*前*图片完整路径
+     * d.absolutepath 裁剪*后*图片完整路径
+     * d.width  图片宽度
+     * d.height 图片高度
+     */
+    function largeimageInfoCallback(d) {
+        //填充图片
+        $('#large_image_view').attr('src', d.src);
+        $('#large-msg-input-imgfile').val(d.savename);
+        $('#thumb_nail').attr('src', d.src);
+    }
+	function smallimageInfoCallback(d) {
+        //填充图片
+        $('#small_image_view').attr('src', d.src);
+        $('#small-msg-input-imgfile').val(d.savename);
+        $('#thumb_nail').attr('src', d.src);
+    }
+    /**
+     * 调整
+     * @param width
+     * @param height
+     * @param targetWidth 显示的宽度
+     * @param identify 元素id
+     */
+    function scaleImage(width, height, targetWidth, identify) {
+        var scale = width / height;
+        var w = targetWidth;
+        var h = w / scale;
+        $(identify).css('width', w + "px");
+        $(identify).css('height', h + "px");
+    }
+	/*获取图片路径中的图片名*/
+	function base_name(url){
+		var urlList = url.split('/'); 
+		var a = urlList[urlList.length-1];
+		return a;
+	}
+    //表单校验函数
+    function checkrule_url(str) {
+        if (!str) return true;
+
+        if (str.indexOf("http://") != 0 && str.indexOf("https://") != 0)
+            return "链接格式不正确";
+
+        return true;
+
+    }
+
+    function isBlank(str) {
+        return (!str || /^\s*$/.test(str));
+    }
+	
+</script>
+<script>
+$(function(){
+	$(".vallast").click(function(e) {
+        art.dialog.open("{:U('Pingan/WeixinLocation/loadStoreAdd');}",{
+			title: '选择可用门店',
+			width:'800px'
+		});
+    });
+})
+</script>
+</head>
+<body>
+<form method="post" id="theform">
+    <input type="hidden" id='id' name ='id' value="3">
+
+<div id="wrapper" >
+<include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu_pingan.html" topmenuid="gongzhonghao"/>
+<div id="container" >
+<div id="main" class="rel">
+<div class="sidenav">
+    <include file="LabelAdmin/Batch/WleftMenu_pingan" leftmenuid="zdhf"/>
+</div>
+<div class="subcon fn">
+    <div class="main-name fn">
+    <h4>微信智能导航</h4>
+    </div>
+
+    <div class="msg-libs">
+        <div class="content_wrap global_mod">
+
+            <div class="section_tab">                
+            <ul class="tab_navs">                    
+            <li class="tab_nav"><a href="{:U('Pingan/WeixinResp/index')}">被添加自动回复</a></li>
+            <li class="tab_nav"><a href="{:U('Pingan/WeixinResp/msg')}">消息自动回复</a></li>
+            <li class="tab_nav"><a href="{:U('Pingan/WeixinResp/keywords')}">关键词自动回复</a></li>
+            <li class="tab_nav selected no_extra "><a href="{:U('Pingan/WeixinLocation/index')}">微信智能导航</a></li>
+            </ul>            
+            </div>
+
+			<style type="text/css">
+			.Gform .Ginput select{ width:245px;}
+			.Gform .Ginput input[type=text], .Gform .Ginput input[type=password]{ width:230px; padding-right:0;}
+			ul, ol{ margin-left:0;}
+			
+			.btn_but{ margin-top:10px ;background-image: linear-gradient(to bottom,#fff 0,#fff 100%);border:1px #e7e7eb solid;color: #222;height: 30px;line-height: 30px;}
+			.btn_but:hover{ background:#e6f3e6; color:#222; border:1px #82ce86 solid}
+            </style>
+            <div class="content_wrap" id="div_replyContent" style="">
+                <div class="msg_sender" id="js_msgSender">
+                <div class="msg_tab">
+                    <div class="bgf4f4f4 plr10 font-13-666 highlight_box">微信智能导航开启后，用户在公众号内发送“位置”消息，系统将自动匹配最近的门店消息，以图文的形式回复给用户，用户点击任意门店可实现地图导航
+                    <div class="Uswitch dib ml20" title="关闭">
+                            <div class="Uswitch-off"></div>
+                            <div class="Uswitch-on"></div>
+                            <i class="Uswitch-i-on"></i>
+                            <input type="hidden" id="location_flag" name="location_flag" value="{$locationInfo['location_flag']}">
+                        </div>
+                    </div>
+                    <div class="z oh msg-edit" style="padding-top:0px; margin-bottom:20px">
+                        <div class="l msg-preview">
+                            <div class="msg-item-wrapper" id="appmsg">
+                                <div class="msg-item multi-msg">
+                                    <div class="appmsgItem">
+                                        <p class="msg-meta"><span class="msg-date tc">预览</span></p>
+                                        <div class="cover">
+										<notempty name ="locationInfo['large_image_url']">
+											<img id="large_image_view" src="{$locationInfo['large_image_url']}">
+										<else />
+                                            <p class="default-tip">大图片</p>
+										</notempty>
+                                            <h4 class="msg-t">
+                                                <span class="i-title" >上海市浦东新区张衡路300号</span>
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    <div class="rel sub-msg-item appmsgItem firstAppmsgItem">
+                                        <span class="thumb">
+										<notempty name ="locationInfo['small_image_url']">
+											<img id="small_image_view" src="{$locationInfo['small_image_url']}">
+										<else />
+                                            <p id="small_note" class="default-tip">缩略图</p>
+										</notempty>
+                                        </span>
+                                        <h5 class="msg-t">
+                                            <span class="i-title">上海市浦东新区张衡路300号</span>
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="msg-edit-area" id="msgEditArea" data-item-index="0">
+                            <div class="rel msg-editer-wrapper">
+                                <div class="msg-editer Gform" style="width:435px; padding:0 0 30px 0; border:1px solid #d3d3d3">
+                                    <ul style="overflow:hidden;">
+                                    	<li class="Gname">选择门店</li>
+                                        <li class="Ginput" style="overflow:hidden;">
+                                        <div class="switch" style="background:#f8f8f8">
+                                            <input type="radio" value="0" checked="checked">
+                                            <div class="newRadio">
+                                                <span class="valfirst hover" data-val="0">所有门店</span> 
+                                                <span class="vallast" data-val="1">指定门店</span>
+                                            </div>
+                                            <div class="cl" style="clear:both; display:block"></div>
+                                            <div class="newRadio-input">
+                                            </div>
+                                        </div>
+                                        </li>
+                                    </ul>
+                                    
+                                    <ul style="overflow:hidden">
+                                    <li class="Gname">回复门店数量</li>
+                                    <li class="Ginput">
+                                    <select class="selectbox w1" name ="resp_count" id ="resp_count" value="">
+										<for start="1" end="7" name ="k" >
+											<option value="{$k}" <if condition="$locationInfo['resp_count'] eq $k">selected</if> > {$k}</option>
+										</for>
+                                    </select>
+                                    </li>
+                                    </ul>
+                                    <ul style="overflow:hidden">
+                                    <li class="Gname">上传大图</li>
+                                    <li class="Ginput">
+                                    <input name="large_image_name" type="text" id="large-msg-input-imgfile" value="{$locationInfo['large_image']}" style=" padding:3px 6px; border-radius:2px"/><br />
+                                    <a href="javascript:void(0);" title="选择" class="btn btn_primary btn_input btn_but" onclick="return uploadImg('720x400','largeimageInfoCallback');">选择</a>
+                                        <p id="imgArea" class="cover-bd" style="display: none;">
+                                            <img src="{$vo}" id="img"><a href="javascript:;" class="btn-all-del" id="delImg">删除</a>
+                                        </p>
+                                    	<p class="font-12-cc" style="font-size:12px">大图片建议尺寸：720像素 * 400像素</p>
+                                    </li>
+                                    </ul>
+                                    
+                                    <ul style="overflow:hidden">
+                                    	<li class="Gname">上传小图</li>
+                                        <li class="Ginput">
+                                          <input name="small_image_name" type="text" id="small-msg-input-imgfile" value="{$locationInfo['small_image']}" style=" padding:3px 6px; border-radius:2px"/>
+                                            <br />
+                                            <a href="javascript:void(0);" title="选择" class="btn btn_primary btn_input btn_but" onclick="return uploadImg('200x200','smallimageInfoCallback');">选择</a>
+                                            <p id="imgArea" class="cover-bd" style="display: none;">
+                                                <img src="" id="img"><a href="javascript:;" class="vb cover-del" id="delImg">删除</a>
+                                            </p>
+                                        	<p class="font-12-cc" style="font-size:12px">小图片建议尺寸：200像素 * 200像素</p>
+                                        </li>
+                                    </ul>
+                                    
+                                    <ul style="overflow:hidden">
+                                    <li class="Gname"></li>
+                                    <li class="Ginput"><a href="javascript:void(0);" class="btn btn_primary btn_input" id="sub_button">保存</a></li>
+                                   </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            
+            
+        </div>
+    </div>
+ </div>
+</div>
+</div>
+<include file="./Home/Tpl/Public/Public_footer_pingan.html" />
+</div>
+<div class="service"></div>
+</form>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+-->
+</html>

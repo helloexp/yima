@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>会员管理_多宝电商</title>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/main.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/layout.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/module.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__"/>
+        <link href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+        <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+    </head>
+    <body>
+        <div id="wrapper" >
+            <include file="./Home/Tpl/Public/Public_header.html" />
+            <div id="container" class="bgfff">
+                <div id="main" class="rel">
+                    <div class="sidenav">
+                        <!--开始引入左菜单-->
+                        <include file="Member/menu" leftmenuid="hylb"/>
+                    </div>
+                    <div class="subcon fn">
+                        <div class="main-name fn">
+                            <h4 class="bd-b-565656">会员列表</h4>
+                        </div>
+                        <div class="form-search fn">
+                            <form method="post" id="sfrom" action="{:U()}">
+                                <p>会员ID：</p>
+
+                                <p><input name="id" type="text" value="{$Think.request.id}" class="textbox w100"/></p>
+                                <p>客户姓名：</p>
+
+                                <p><input name="name" type="text" value="{$Think.request.name}" class="textbox w100"/></p>
+
+                                <p>手机号：</p>
+
+                                <p><input name="mobile" type="text" value="{$Think.request.mobile}" class="textbox w100"/>
+                                </p>
+                                <div class="cl pt10"></div>
+                                <p>生日：</p>
+
+                                <p>
+                                    <input type="text" name="begin_time" id="begin_time" value="{$Think.request.begin_time}" onClick="WdatePicker({skin:'whyGreen', maxDate:'#F{$dp.$D(\\'end_time\\');}'})" class="textbox w100"/>-<input type="text" name="end_time" id="end_time" value="{$Think.request.end_time}" onClick="WdatePicker({skin:'whyGreen', minDate:'#F{$dp.$D(\\'begin_time\\');}'})"  class="textbox w100"/>
+                                </p>
+                                <div class="cl pt10"></div>
+                                <p>星座：</p>
+                                <volist name="horoscope" id="vo">
+                                            <p><input name="horoscope_list[]" type="checkbox" value="{$key}" <php>if(in_array(strval($key),$post['horoscope_list'])){</php>checked="checked"<php>}</php> />{$vo}</p>
+                                            <php>if($key==6){</php><div class="cl pt10"></div><php>}</php>
+	                </volist>
+
+                                <a href="javascript:void(0);" class="btn-all w110 r mr10" id="subform">查询</a>
+                                <if condition="$list">
+                                    <a href="javascript:void(0);" class="btn-all w110 r mr10" id="download">下载</a>
+                                </if>
+                            </form>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <div style="width: auto;">
+                                <table cellpadding="0" cellspacing="0" class="W-table">
+                                    <tr>
+                                        <th>会员ID</th>
+                                        <th>姓名</th>
+                                        <th>关注来源</th>
+                                        <th>手机号码</th>
+                                        <th>积分</th>
+                                        <th>生日</th>
+                                        <th>星座</th>
+                                        <th>修改</th>
+                                         <th>消费记录 </th>
+                                    </tr>
+
+                                    <if condition="$list">
+                                        <volist name="list" id="vo" empty="$empty">
+                                            <tr>
+                                                <td><php>if($vo['tablename']=='0'){echo $vo['id'];}else{echo "--";}</php></td>
+                                                <td>{$vo['name']}</td>
+                                                <td>{$vo['source_name']}</td>
+                                                <td>{$vo['mobile']}</td>
+                                                <td>{$vo['point']|intval}</td>
+                                                <td>{$vo['birthday']|dateformat='Y-m-d'}</td>
+                                                <td><php>echo getConstellation(substr($vo['birthday'],4,2),substr($vo['birthday'],6,2),0);</php></td>
+                                                <td><a href="javascript:;" id="info_edit" onclick="info_edit('<php>echo U('Df/Member/edit',array('id'=>$vo['id'],'tablename'=>$vo['tablename']));</php>');">修改</a></td>
+                                                <td>
+                                                    <a href="javascript:;" id="point_log" onclick="point_log('{:U('point_log', array('id'=>$vo['id'],'tablename'=>$vo['tablename']))}');">查看消费记录</a>
+                                                </td>
+                                            </tr>
+                                        </volist>
+                                        <else/>
+                                        <if condition="$post">
+                                            <tr>
+                                                <td colspan="9">
+                                                    <div class="nonedata"></div>
+                                                </td>
+                                            </tr>
+                                            <else/>
+                                            <tr>
+                                                <td colspan="9">
+                                                    <div class="nonedata"></div>
+                                                    <p>请至少输入会员ID、客户姓名、手机号、生日其中一项来查询会员信息</p>
+                                                </td>
+                                            </tr>
+                                        </if>
+                                    </if>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="page">{$page}</div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+        <div class="service"></div>
+    </body>
+    <script>
+	window._g = window._g || {};
+	_g.inajax = false;
+	$(function () {
+		$form = $('#sfrom');
+		$("#subform").click(function () {
+			$form.attr('action', "{:U('Df/Member/index')}").submit();
+		});
+		$("#download").click(function () {
+			$form.attr('action', "{:U('Df/Member/download')}").submit();
+		});
+	});
+        
+            function info_edit(url){
+        art.dialog.open(url,
+        {
+            title:'编辑会员',
+            id:'select_user',
+            width:730,
+            height:400,
+            lock:true,
+            close: function(){
+                location.reload();
+            }
+        });
+        
+    }
+    function point_log(url){
+        art.dialog.open(url,
+        {
+            title:'参看消费记录',
+            id:'point_log',
+            width:800,
+            height:400,
+            lock:true,
+            close: function(){
+            }
+        });
+    }
+</script>
+</html>

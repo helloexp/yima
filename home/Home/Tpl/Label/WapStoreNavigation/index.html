@@ -1,0 +1,387 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>适用门店</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_cbc.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js?v=__VR__"></script>
+</head>
+<body style="position:relative">
+<div id="wrapper">
+    <div id="container">
+        <div id="header" style="z-index:30px">
+            <div class="header-info fn">
+	        	<div class="location"><i></i>上海</div>
+	        	<div class="search-input">
+	        	    <a href="{:U('serachStores')}"><i></i><input type="text" name="searchname" placeholder="请输入商户名称"></a>
+	        	</div>
+        	</div>
+        </div>
+ 
+        <div id="main">
+			<div class="mainTop" style="z-index:30px">
+			    <ul class="mainTop-info">
+			    	<li data-name="chose01" class="allarea"><span><a>全部地区</a></span><i></i></li>
+			    	<li data-name="chose02"><span><a>全部分类</a></span><i></i></li>
+			    	<li data-name="chose03"><span><a>智能排序</a></span><i></i></li>
+			    </ul>
+            </div>
+           
+			<div class="dropdown_sub_scroller">
+				<div id="chose01" class="dropdown-list areas dn">
+					<div class="leftnav">
+						<ul>
+							<li><span data-code="">全部</span></li>
+							<volist name="town_list" id="vo">
+							<li><span data-code="{$vo['area_code']}">{$vo['area_name']}</span></li>
+							</volist>
+					    </ul>
+					</div>
+				</div>					
+					
+				<div id="chose02" class="dropdown-list select-down  dn">
+					<input type="hidden" id="selid" value="0" id="selected" style="display:none">
+					<ul id="activity_click">
+						<li data-id="0">全部分类</li>
+						<volist name="activity_list" id="vo">
+						<li data-id="{$vo['id']}">{$vo['activity_title']}</li>
+						</volist>
+					</ul>
+				</div>					
+				
+				<div id="chose03" class="dropdown-list select-down dn">
+					<form action="#" method="post" name="sort-name">
+						  <input type="hidden" name="sortname" value="1" id="selected" style="display:none">
+						  <ul>
+							<li class="selected" data-id="1">距离最近</li>
+						  </ul>
+					</form>
+				</div>					
+			</div>
+			<!-- 遮罩 -->
+            <div class="coverbj dn"></div>
+			
+            <div id="mainCon">
+                <div id="masonry" class="item">
+                	<notempty name='lists'>
+                    <!--循环-->
+                    <volist name="lists" id="vo">
+					<div class="box">
+						<div class="box-info">
+						    <div class="box-a">
+								<a href="javascript:;" onclick="btn_detail('{$vo['store_id']}')">
+								<div class="box-des">
+										<div class="list-logo" style="background-image:url({:get_upload_url($vo['store_pic'])});background-repeat:no-repeat;background-size:cover;background-position:center;overflow:hidden"></div>
+										<div class="proItem-msg">
+											<h1>{$vo['store_desc']}</h1>
+											<p>{$vo['address']}</p>
+										</div>
+								</div>
+								</a>
+								<dl class="long"  lat="{$vo['lbs_x']}" lng="{$vo['lbs_y']}">
+									<dt class="going"></dt>
+									<dd>{$vo['distance']}</dd>
+								</dl>
+							</div>
+							<div class="box-piont">
+								<php>if(count($vo['act']) > 1) {</php>
+								<em></em>
+								<php>}</php>
+								<volist name="vo.act" id="v">
+								<php>if($key == 0) {</php>
+								<p class="<?php if($v['activity_type'] == 4) echo 'djfd'; else echo 'qcyh'; ?>"><i></i>{$v['activity_title']}</p>
+								<div class="dn">
+								<php>} else {</php>
+								<p class="<?php if($v['activity_type'] == 4) echo 'djfd'; else echo 'qcyh'; ?>"><i></i>{$v['activity_title']}</p>
+								<php>}</php>
+								</volist>
+								</div>
+							</div>
+						</div>
+					</div>
+                    </volist>
+                    <!--循环-->
+                    <else/>
+					<!-- 无数据 -->
+					<div class="nodata">
+					    <span>未查询到结果</span>
+					</div>
+					<!--//无数据 -->
+					</notempty>
+               </div>
+        	</div>
+
+        	<php>if($next_page) {</php>
+        	<div class="get-more" data-url="{:U('index')}&p=2"><i></i><a href="javascript:;">往上拉查看更多</a></div>
+        	<php>} else {</php>
+        	<div class="get-more"><i></i><a href="javascript:;">没有更多门店</a></div>
+        	<php>}</php>
+    	</div>
+	</div>
+</div>
+</body>		
+<script>
+    //点击下拉菜单里选项
+    function sel(a,b,c){
+	    $(a).click(function(){
+			var _this = $(this);
+			var dataid = _this.attr("data-id");
+			var selectval = $("#selected").attr("value",dataid);
+			$(a).each(function() {
+				if(dataid != selectval) {
+					$(this).children(".icodh").remove();
+					$(this).removeClass("selected");
+				}
+			});
+			$(this).addClass("selected");
+			$(b).removeClass("active");
+			$("<i class='icodh'></i>").appendTo(_this);
+			$(c).text(_this.text());
+			$(".dropdown_sub_scroller .dropdown-list").addClass("dn");	
+			$(".select-down").slideUp();
+			$(".coverbj").addClass("dn");
+		})
+	}
+		
+	sel("#chose02 ul li",".mainTop ul li:nth-child(2)",".mainTop ul li:nth-child(2) span a");
+	sel("#chose03 ul li","ul li:nth-child(3)","ul li:nth-child(3)  span  a");
+	  
+	$(document).ready(function() {
+		bmapGetLbs();
+
+		$(".location").click(function() {
+	    	window.location.href = "{:U('selectCity')}";
+		});
+
+		var sel_city = $.cookie("city_area_code");
+		if(sel_city != '') {
+			$(".location").html("<i></i>"+$.cookie("city_area_name"));
+		}
+
+		var sel_act_id = $.cookie("select_activity_id");
+		if(sel_act_id != '' && sel_act_id != undefined && sel_act_id != 0) {
+			$("#selid").val(sel_act_id);
+			$(".mainTop .mainTop-info li[data-name='chose02']").find("span").text($.cookie("select_activity_name"));
+
+			var sel_li = $("#activity_click li[data-id='"+sel_act_id+"']");
+			sel_li.addClass("selected");
+			sel_li.append('<i class="icodh"></i>');
+		} else {
+			var sel_li = $("#activity_click li[data-id='0']");
+			sel_li.addClass("selected");
+			sel_li.append('<i class="icodh"></i>');
+		}
+
+		var sel_town = $.cookie("town_area_code");
+		if(sel_town != '' && sel_town != undefined) {
+			$(".allarea").find("span").text($.cookie("town_area_name"));
+
+			var sel_li = $("#chose01 .leftnav li span[data-code='"+sel_town+"']");
+			sel_li.parent().addClass("hover");
+		} else {
+			var sel_li = $("#chose01 .leftnav li span[data-code='']");
+			sel_li.parent().addClass("hover");
+		}
+
+		var loadhtml = '<div id="infscr-loading" style="text-align: center; display:none;"><img src="__PUBLIC__/Label/Image/Item/loading.gif"><div><em>加载中...</em></div></div>';
+		$("#masonry").append(loadhtml);
+		$("body").append("<div id='masonry2' style='display:none;'></div>");
+		var flag = true;
+		$(window).scroll(function () {
+		    if ($(document).scrollTop() + $(window).height() >= $(document).height()) {
+		    	if(flag) {
+		    		flag = false;
+		    		if($("#masonry2").hasClass("erro")) {
+		    			flag = true;
+		    			return false;
+		    		}
+					$("#masonry2").addClass("erro");
+					var url = $('.get-more').attr("data-url");
+					if(url == undefined) {
+						flag = true;
+						return false;
+					}
+					var link = url,
+						select_activity = $("#selid").val();
+					if(select_activity != 0) {
+						link += "&activity_id="+select_activity;
+					}
+
+					$("#infscr-loading").show();
+					$('#masonry2').load(link + ' ' + ".box", null, function(data){
+						var l = $("#masonry2 .box").length;
+						if (l == 0) {
+							$("#infscr-loading em").text("没有更多数据了");
+							$("#infscr-loading img").hide();
+							setTimeout(function(){
+								$("#infscr-loading").hide();
+							},2000);
+							//$('.get-more').hide();
+							$('.get-more a').text("没有更多门店");
+						} else {
+							$('#masonry').append($('#masonry2').html());
+							$("#infscr-loading").fadeOut(500);
+                            flag = true;
+						}
+						var newpath = newPath(url);
+						$(".get-more").attr("data-url",newpath);
+						$("#masonry2").removeClass("erro");
+					});
+			    }
+			}
+		});
+		
+
+	   //导航选项
+	    $(".mainTop .mainTop-info li").click(function() {
+			var dataname=$(this).attr("data-name");	
+			var orhasdn=$("#"+dataname).hasClass("dn");
+			var orhasact=$(this).hasClass("active");
+			$(".dropdown_sub_scroller .dropdown-list").slideUp();
+			if(!orhasact){
+				$(".mainTop .mainTop-info li").removeClass("active");
+				$(this).addClass("active");
+				$(".coverbj").removeClass("dn");
+			} else {
+				$(".mainTop .mainTop-info li").removeClass("active");
+				$(".coverbj").addClass("dn");
+			}
+			if(orhasdn) {
+				$(".coverbj").removeClass("dn");
+				$("#"+dataname).slideDown(500);
+				$(".dropdown_sub_scroller .dropdown-list").addClass("dn");
+
+				$("#"+dataname).removeClass("dn");		  
+			} else {	
+				$(".coverbj").addClass("dn");
+				$(".dropdown_sub_scroller .dropdown-list").addClass("dn");
+				$(".dropdown_sub_scroller .dropdown-list").slideUp(100);
+			}						  
+		});
+				
+	   //点击遮罩	
+	    $(".coverbj").click(function() {
+			$(".mainTop .mainTop-info li").removeClass("active");
+			$(".dropdown_sub_scroller .dropdown-list").addClass("dn");
+			$(this).addClass("dn");
+			$(".dropdown-list").slideUp();
+	    });
+	  
+	    //列表展开收缩
+	    $(document).on("click", ".box-piont p:first-of-type", function() {
+			$(this).parent().toggleClass("open");
+			$(this).next('div').slideToggle();
+	    });
+		
+		$(document).on("click", ".box-piont em", function() {
+			$(this).parent().toggleClass("open");
+			$(this).next().next("div").slideToggle();
+	    });
+
+	    $(document).on("click", "#chose01 .leftnav li", function() {
+	    	$(this).parent().find("li").removeClass("hover");
+	    	$(this).addClass("hover");
+	    	var obj = $(this).find("span");
+	    	$.cookie("town_area_code", obj.data().code);
+	    	$.cookie("town_area_name", obj.text());
+
+	    	$(".allarea").find("span").text(obj.text());
+
+	    	window.location.href = "{:U('index')}";
+	    });
+
+	    $(document).on("click", "#activity_click li", function() {
+	    	var data = $(this).data();
+	    	$("#selid").val(data.id);
+	    	$.cookie("select_activity_id", data.id);
+	    	$.cookie("select_activity_name", $(this).text());
+
+	    	$(".mainTop .mainTop-info li[data-name='chose02']").find("span").text($(this).text());
+
+	    	var url = "{:U('index')}&activity_id="+data.id;
+	    	window.location.href = url;
+	    });
+
+	    $(".box .long").on('click',function(){
+            endLng = $(this).attr('lng');
+            endLat = $(this).attr('lat');
+            bmapGetLbs(function(){
+                location.href = "{:U('drivingRoute')}"+'&start='+$.cookie('lng')+','+$.cookie("lat")+'&end='+endLng+','+endLat;
+            });
+        });
+		//无数据时页面高度
+		var wdheight=$(window).height()-70;
+		$(".nodata").css("height",wdheight);
+	});
+
+	function newPath(path){
+		path = path.split("p=");
+		var p = path[1]*1+1;
+		newpath = path[0]+"p="+p;
+		return newpath;
+	};
+
+	function btn_detail(s_id)
+	{
+		var url = "{:U('detail')}&store_id="+s_id;
+		var activity_id = $("#selid").val();
+		if(activity_id != 0) {
+			url += "&activity_id="+activity_id;
+		}
+		window.location.href = url;
+	}
+
+	//获取当前lbs信息
+    function bmapGetLbs()
+    {  
+        var callback = arguments.length > 0 ? arguments[0] : null;
+
+        if (navigator.geolocation) {
+            Util_tools.ui.loading('正在获取当前位置...');
+            navigator.geolocation.getCurrentPosition(function(r){
+                $.ajax({
+                    url: "{:U('geoconv')}",
+                    data: {x: r.coords.latitude, y: r.coords.longitude},
+                    async: false,
+                    dataType: 'json',
+                    success: function(resp){
+                        Util_tools.ui.loading(false);
+                        if(resp.status == 0){
+                            Util_tools.ui.loading(resp.info);
+                            setTimeout(function(){
+                                Util_tools.ui.loading(false);
+                            }, 3000);
+                        }
+                        else{
+                            var a = new Date();
+                            a.setTime(a.getTime() + (60 * 60 * 1000));
+                            $.cookie("lng", resp.y, {expires: a});
+                            $.cookie("lat", resp.x, {expires: a});
+                            Util_tools.ui.loading(false);
+                            if(callback && typeof callback == 'function'){
+                                callback();
+                            }
+                        }
+                    }
+                });
+            }, function(error){
+                Util_tools.ui.loading('您的浏览器暂时无法为您所在的位置服务');
+                console.log('定位失败！',error);
+                setTimeout(function(){
+                    Util_tools.ui.loading(false);
+                }, 3000);
+            }, {timeout:3000});
+        } else {
+            alert('该浏览器不支持获取当前位置信息');
+        }
+        return ;
+    }
+</script>
+</html>

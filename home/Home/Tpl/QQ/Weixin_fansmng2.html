@@ -1,0 +1,620 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_粉丝管理</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msguser.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wqq.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/jquery-ui.css" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/datepicker.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/msg.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/weixin2/jquery-ui-datepicker.js"></script>
+<script>
+var _user_data = {};
+var _url_userinfo = "{:U('QQ/Weixin/wxuserinfo')}";
+var _url_usermsg_reply = "{:U('QQ/Weixin/usermsg_reply')}";
+var _url_getnewmsg = "{:U('QQ/Weixin/get_newmsg')}";
+var _url_edit_remarkname = "{:U('QQ/Weixin/edit_remarkname')}";
+var _url_fansgroup_chg = "{:U('QQ/Weixin/fans_group_chg')}";
+var _url_fansgroup_batchchg = "{:U('QQ/Weixin/fans_group_batchchg')}";
+var _url_fansgroup_add = "{:U('QQ/Weixin/fans_group_add')}";
+var _url_fansgroup_edit = "{:U('QQ/Weixin/fans_group_edit')}";
+var _page_url = "{:U('QQ/Weixin/fansmng')}";
+var _timeout_userinfo = null;
+
+
+$(function(){
+		$("#date_8").datepicker({
+		showOn: "button",
+		buttonImage: "__PUBLIC__/Image/weixin2/calendar.gif",
+		buttonImageOnly: true
+	});
+	
+	$("#date_9").datepicker({
+		showOn: "button",
+		buttonImage: "__PUBLIC__/Image/weixin2/calendar.gif",
+		buttonImageOnly: true
+	});
+	
+	$("#result-btn").click(function(){
+		$("#search-result").css("display","block");
+		
+		$("#first_col").css("display","none");
+		$("#second_col").css("display","none");
+		$("#third_col").css("display","none");
+		var filter_name = $('[name="filter_name"]').val();
+		var province = $('[name="province"]').val();
+		var city = $('[name="city"]').val();
+		var sex = $('[name="sex"]').val();
+		var filter_date_start = $('[name="filter_date_start"]').val();
+		var filter_date_last = $('[name="filter_date_last"]').val();
+		var keywords = $('[name="keywords"]').val();
+        var clientName = $('[name="clientName"]').val();
+        var clientType = $('[name="clientType"]').val();
+        var clientGroup = $('[name="clientGroup"]').val();
+		window.location.href="{:U('QQ/Weixin/fansmng?n=')}"+filter_name
+		+'&pr='+province
+		+'&c='+city
+		+'&x='+sex
+		+'&d1='+filter_date_start
+		+'&d2='+filter_date_last
+		+'&k='+keywords
+        +'&cN='+clientName
+        +'&cT='+clientType
+        +'&cG='+clientGroup;
+	});
+	
+	
+	
+	//点击全选
+	$("#alluserGroups .icon_checkbox").click(function(){
+		if ($(this).closest(".frm_checkbox_label").hasClass("selected")){
+			$(".frm_checkbox_label").removeClass("selected");
+			$("#userGroups .frm_checkbox_label").find(".frm_checkbox").attr("checked",false);
+		}else{
+			$(".frm_checkbox_label").removeClass("selected").addClass("selected");
+			$("#userGroups .frm_checkbox_label").find(".frm_checkbox").attr("checked",true);
+		}
+		if($("#userGroups .selected").length>=1){
+			$(".dropdown_wrp").removeClass("disabled");
+		}else{
+			$(".dropdown_wrp").addClass("disabled");
+		}
+	});
+	//点击单个input
+	$("#userGroups .icon_checkbox").click(function(){
+		
+		$(this).closest(".frm_checkbox_label").toggleClass("selected");
+		if($("#userGroups .selected").length>=1){
+			$(".dropdown_wrp").removeClass("disabled");
+		}else{
+			$(".dropdown_wrp").addClass("disabled");
+		}
+	});
+	//点击分组显示分组
+	$(".dropdown_menu").live("click",function(event){
+		event.stopPropagation();
+		if($(this).hasClass("disabled")){return false;};
+		$(this).addClass("open");
+		$(this).find(".dropdown_data_list").show();
+	});
+	//点击修改分组
+	$(".group_edit").click(function(){
+		$(this).closest(".inner_menu_item").addClass("editing")
+	})
+	// $(".enter_gray").click(function(){
+	// 	alert("63行")
+	// })
+	//点击添加分组
+	$("#js_groupAdd").click(function(){
+		$("#js_groupAddCon").show();
+	})
+
+	//点击分组以外区域隐藏分组
+	$("body").live("click",function(){
+		$(".dropdown_menu").removeClass("open").find(".dropdown_data_list").hide();
+	});
+
+    $('.btn_group_add').click(function(){
+        group_add($('#groupNew'));
+    });
+
+    $('.btn_group_edit').click(function(){
+        group_edit($(this).prev('input'));
+    });
+
+	$('#groupNew').keydown(function(event){
+		if(event.keyCode == 13)
+            group_add($(this));
+	});
+
+	$('.js_groupInput').keydown(function(event){
+		if(event.keyCode == 13)
+			group_edit($(this))
+	});
+
+	//鼠标移到头像上出现详细信息
+	$(".js_msgSenderAvatar").hover(
+			function(){
+				if(_timeout_userinfo !== null)
+					clearTimeout(_timeout_userinfo);
+
+				var img = $(this), id = img.attr('openid'), richinfo = $(".buddyRichInfo"), offset=img.offset();
+				richinfo.css({left :offset.left+img.width()+2, top:offset.top});
+
+				//获取用户信息
+				if(_user_data[id] == undefined){
+					richinfo.find('.buddyRichLoading').removeClass('dn');
+					richinfo.find('.buddyRichContent').addClass('dn');
+					richinfo.show();
+					$.post(_url_userinfo, {id:id}, function(data){
+						_user_data[id] = data.info;
+						render_userinfo(_user_data[id]);
+					}, 'json');
+				}
+				else{
+					render_userinfo(_user_data[id]);
+					richinfo.show();
+				}
+			},
+			function(){
+				_timeout_userinfo = setTimeout(function(){
+					$(".buddyRichInfo").hide();
+				}, 500);
+			}
+	);
+
+	$('.js_changeRemark').click(function(){
+		var _obj = $(this), openid = _obj.attr('openid');
+		art.dialog({
+			content: '<input id="new_remarkname" class="textbox" value="" />',
+			fixed: true,
+			icon: 'question',
+			okVal: '确定',
+			lock:true,
+			title:'请输入备注名',
+			init:function(){
+				check_userinfo(openid);
+				$('#new_remarkname').val(_user_data[openid]['remarkname']).focus();
+				if(_timeout_userinfo !== null)
+					clearTimeout(_timeout_userinfo);
+			},
+			ok: function () {
+				var new_remarkname = $('#new_remarkname').val();
+				$.post(_url_edit_remarkname, {openid:openid, remarkname:new_remarkname}, function(data){
+					alert(data.info);
+					if(data.status == 1){
+						_user_data[openid]['remarkname'] = new_remarkname;
+						var str = new_remarkname == '' ? _user_data[openid]['nickname'] : _user_data[openid]['nickname']+'('+new_remarkname+')';
+
+						$(".remark_name[openid='"+openid+"']").html(str);
+					}else
+						return false;
+				}, 'json');
+			},
+			cancel: true
+		});
+	});
+
+	$(".buddyRichInfo").hover(function(){
+		if(_timeout_userinfo !== null)
+			clearTimeout(_timeout_userinfo);
+	},function(){
+		_timeout_userinfo = setTimeout(function(){
+			$(".buddyRichInfo").hide();
+		}, 500);
+	});
+
+	$('#groupid').change(function(){
+		var group_id = $(this).val(), group_name=$(this).find('option:selected').text(), openid=$(".buddyRichInfo #openid").val();
+		$.post(_url_fansgroup_chg, {openid:openid, group_id:group_id}, function(data){
+			alert(data.info);
+			if(data.status == 1){
+				_user_data[openid]['group_id'] = group_id;
+				$('#selectArea'+openid+' .jsBtLabel:eq(0)').html(group_name);
+			}
+		}, 'json');
+	});
+
+	//组变更
+	$('.js_selectArea .jsDropdownItem').click(function(){
+		var openid = $(this).closest('div').attr('openid'),group_id=$(this).attr('data-value'),group_name=$(this).attr('data-name');
+		$.post(_url_fansgroup_chg, {openid:openid, group_id:group_id}, function(data){
+			alert(data.info);
+			if(data.status == 1){
+				check_userinfo(openid);
+				_user_data[openid]['group_id'] = group_id;
+				$('#selectArea'+openid+' .jsBtLabel:eq(0)').html(group_name);
+			}
+		}, 'json');
+	});
+
+    //批量组变更
+    //
+    $('#allGroup .jsDropdownItem').click(function(){
+        var group_id=$(this).attr('data-value'),group_name=$(this).attr('data-name'), openids=[];
+        // alert(group_id+':'+group_name);
+        $(':checkbox[name="openid[]"][checked]').each(function(){openids.push($(this).val());});
+
+        if(openids.length == 0){
+            alert('请至少选择一个用户！');
+            return false;
+        }
+
+        $.post(_url_fansgroup_batchchg, {openids:openids.join(','), group_id:group_id}, function(data){
+            alert(data.info);
+            if(data.status == 1){
+                for(i in openids){
+                    openid = openids[i];
+                    $('#selectArea'+openid+' .jsBtLabel:eq(0)').html(group_name);
+                }
+            }
+        }, 'json');
+    });
+});
+
+function group_add(obj){
+    var group_name = $.trim(obj.val());
+    if(group_name == '')
+        return ;
+
+    $.post('{:U('QQ/Weixin/fans_group_add')}', {group_name:group_name}, function(data){
+        alert(data.info);
+        if(data.status == 1){
+            // $("#groupNew").val('');
+            // $("#js_groupAddCon").hide();
+            document.location.href = _page_url;
+        }
+    }, 'json');
+}
+
+function group_edit(obj){
+    var obj_input = obj;
+    var group_name = obj_input.val();
+    var old_group_name = $.trim(obj_input.attr('old_value'));
+    var group_id = obj_input.attr('group_id');
+    if(group_name == '' || (group_name == old_group_name))
+        return ;
+
+    $.post('{:U('QQ/Weixin/fans_group_edit')}', {group_id:group_id,group_name:group_name}, function(data){
+        if(data.status == 1){
+            obj_input.attr('old_value', group_name).closest(".inner_menu_item").removeClass("editing").find('strong').html(group_name);
+        }
+        else{
+            alert(data.info);
+        }
+    }, 'json');
+}
+
+function check_userinfo(openid){
+	if(_user_data[openid] == undefined){
+		//同步请求，非异步
+		$.ajax({
+			async:false,
+			type:'POST',
+			url:_url_userinfo,
+			dataType:'json',
+			data:{id:openid},
+			success:function(data){
+				_user_data[openid] = data.info;
+			}
+		});
+	}
+}
+function render_userinfo(info){
+	var obj = $(".buddyRichInfo");
+	obj.find('.nickName').html(info.nickname);
+	obj.find('.js_remarkName').html(info.remarkname);
+	obj.find('.js_changeRemark').attr('openid', info.openid);
+	obj.find('.area').html([info.country, info.province, info.city].join('&nbsp;'));
+	obj.find('select').val(info.group_id);
+	obj.find('#openid').val(info.openid);
+
+	obj.find('.buddyRichLoading').addClass('dn');
+	obj.find('.buddyRichContent').removeClass('dn');
+}
+function group_del(group_id, obj){
+	if(!confirm('删除该组后，改组的粉丝会被移动到未分组中！是否确认删除？'))
+		return ;
+	
+	$.post('{:U('QQ/Weixin/fans_group_del')}', {group_id:group_id}, function(data){
+		if(data.status == 1){
+			alert('删除成功！');
+			// $(obj).closest(".inner_menu_item").remove();
+            location.href = _page_url;
+		}
+		else{
+			alert(data.info);
+		}
+	}, 'json');
+}
+
+</script>
+</head>
+<body>
+	<?php
+	$group_html = '<ul class="dropdown_data_list jsDropdownList" style="display: none;">';
+	foreach($group_list as $key=>$val){
+		$html = '
+		<li class="dropdown_data_item">
+			<a href="javascript:;" class="jsDropdownItem" data-value="%d" data-name="%s">%s</a>
+		</li>';
+		$group_html .= sprintf($html, $val['id'], $val['name'], $val['name']);
+	}
+	$group2_html = $group_html;
+
+	$group_html .= '</ul>';
+
+	echo $group_html;
+
+	?>
+
+	<input type="hidden" name="reply_type" id="reply_type" value="0">
+	<input type="hidden" name="reply_text" id="reply_text" value="">
+	<input type="hidden" name="material_id" id="material_id" value="">
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+		<include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="qqgzh"/>
+		<div id="container" >
+			<div id="main" class="rel">
+				<div class="sidenav">
+					<include file="Batch/WleftMenu" leftmenuid="fsgl"/>
+				</div>
+
+				<div class="subcon">
+					<div class="main-name fn">
+						<h4><p class="dib">粉丝管理</p><a href="javascript:;" class="btn btn_primary" id="js_groupAdd"
+ style="float:right"><i class="icon14_common add_white"></i> 新建分组</a><</h4>
+					</div>
+                    <div class="SearchArea fn" style="margin:10px 20px">
+                    <form id="theform" action="" method="post">
+                        <div class="SearchAreaLeft" style="width:650px;">
+                            <label><span>粉丝名称</span><input type="text" name="filter_name" id=""/></label>
+                            <label><span>粉丝标签</span><input type="text" name="filter_label" id=""/></label>
+                            <label><span>性别</span>
+                                <select name="sex" id="sex">
+                                    <option value="">全部</option>
+                                    <option value="1" class="">男</option>
+                                    <option value="2" class="">女</option>
+                                </select>
+                            </label>
+                            <label><span>客户名称</span><input type="text" name="clientName"></label>
+                            <label><span>客户行业</span>
+                                <select name="clientGroup">
+                                	<option value=""></option>
+                                    <foreach name="industry" item="vo" >
+                                        <option value="{$vo.industry_name}">{$vo.industry_name}</option>
+                                    </foreach>
+                                </select>
+                            </label>
+                            <label><span>地区</span>
+                                <select name="province" id="province">
+                                <option value="">全部</option>
+                                </select>
+                                <select name="city" id="city">
+                                <option value="">市</option>
+                                </select>
+                            </label>
+                            <label><span>客户类型</span>
+                                <select name="clientType">
+                                <!--旺财版本 v0 => 旺财免费版, v0.5 => 旺财认证版, v1 => 旺财标准版, v2 => 旺财电商版, v3 => 旺财全民营销版, v4 => 旺财演示版, v5 => 旺财微博版, v6 => 旺财凭证活动版, v7 => 旺财凭证版-->
+                                <option value=""></option>
+                                <option value="v0" class="">免费版</option>
+                                <option value="v0.5" class="">认证版</option>
+                                <option value="v1" class="">标准版</option>
+                                <option value="v2" class="">电商版</option>
+                                <option value="v4" class="">演示版</option>
+                                <option value="v5" class="">微博版</option>
+                                <option value="v6" class="">凭证活动版</option>
+                                <option value="v7" class="">凭证版</option>
+                                </select>
+                            </label>
+                            <label><span>备注关键字</span><input type="text" name="keywords"></label>
+                        </div>
+                        <div class="SearchAreaRight">
+                        <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+                        <a href="javascript:void(0);" class="searchBtn" id="result-btn">查询</a>
+                        </div>
+                    </form>
+                    </div>
+                    
+					
+					<div class="inner_container_box side_r split">
+						<!--右侧用户分类管理-->
+						<div class="inner_side">
+							<div class="bd">
+								<div class="group_list">
+									<div class="inner_menu_box" id="groupsList">
+										<dl class="inner_menu">
+											<dt class="inner_menu_item">
+												<a href="{:U('QQ/Weixin/fansmng')}" class="inner_menu_link">
+													<strong>全部用户</strong><em class="num">({$fans_cnt})</em>
+												</a>
+											</dt>
+											<volist name="group_list" id="vo">
+											<neq name="vo.id" value="1">
+                                            <php>$sel_str = I('group_id') == $vo['id'] ? 'selected' : '';</php>
+											<dd class="inner_menu_item {$sel_str}" id="group100">
+												<a href="{:U('QQ/Weixin/fansmng', array('group_id'=>$vo['id']))}" class="inner_menu_link"><strong>{$vo.name}</strong><em class="num">({:intval($group_num_arr[$vo['id']])})</em></a>
+
+												<!-- 未分组、标星组不能编辑 -->
+												<notin name="key" value="0,2">
+												<span class="frm_input_box append" id="groupInput100" data-gid="100" data-gname="{$vo.name}" data-gnum="1">
+													<input type="text" old_value="{$vo.name}" group_id="{$vo.id}" value="{$vo.name}" class="frm_input js_groupInput">
+													<a href="javascript:void(0);" class="frm_input_append icon16_common enter_gray js_groupNameEnter btn_group_edit">确定</a>
+												</span>
+												<span class="menu_opr">
+													<a data-gid="100" href="javascript:void(0);" class="icon16_common edit_gray group_edit no_extra js_iconEdit">编辑</a>
+													<a data-gid="100" href="javascript:void(0);" onclick="group_del('{$vo.id}', this);" class="icon16_common del_gray js_iconDel">删除</a>
+												</span>
+												</notin>
+											</dd>
+											</neq>
+											</volist>
+										</dl>
+										<div class="inner_menu_item editing dn" id="js_groupAddCon">
+											<span class="frm_input_box append">
+												<input type="text" class="frm_input" id="groupNew" value="">
+												<a href="javascript:void(0);" class="frm_input_append icon16_common enter_gray btn_group_add js_enter">确定</a>
+											</span>
+										</div>
+										<!--<div class="inner_menu_item extra" id="js_groupAdd">
+											<a href="javascript:void(0);" class="inner_menu_link"><i class="icon14_common add_gray"></i><strong>新建分组</strong></a>
+										</div>-->
+										<dl class="inner_menu no_extra">
+											<dt class="inner_menu_item selected">
+												<a href="{:U('QQ/Weixin/fansmng', array('group_id'=>1))}" class="inner_menu_link"><strong>屏蔽组</strong><em class="num">({:intval($group_num_arr['1'])})</em></a>
+											</dt>
+										</dl>
+									</div>                    
+								</div>
+							</div>
+						</div>
+						<!--右侧用户分类管理-->
+						<!--左侧用户信息-->
+						<div class="inner_main">
+							<div class="bd" style="margin-left:20px;">
+								
+								<div class="table_wrp user_list">
+									<table class="table" cellspacing="0">
+										<thead class="thead">
+											<tr>
+												<th class="table_cell user no_extra" colspan="3" id="alluserGroups">
+													<label for="selectAll" class="frm_checkbox_label"><i class="icon_checkbox"></i><input type="checkbox" class="frm_checkbox" id="selectAll">全选</label>
+                                                <div id="allGroup" class="dropdown_wrp dropdown_menu disabled">
+                                                <a href="javascript:;" class="btn dropdown_switch jsDropdownBt"><label class="jsBtLabel">添加到</label><i class="arrow"></i></a>
+                                                {$group_html}
+                                                </div>
+												</th>
+                                                <th>客户名称</th>
+                                                <th>客户类型</th>
+                                                <th>客户行业</th>
+											</tr>
+										</thead>
+										<tbody class="tbody" id="userGroups">
+											<volist name="user_list" id="vo">
+											<tr>
+												<td class="table_cell user">
+													<div class="user_info">
+														<a target="_blank" href="{:U('QQ/Weixin/chat_someone', array('id'=>$vo['openid']))}" class="remark_name" openid="{$vo['openid']}">
+														<empty name="vo.remarkname">
+														{$vo.nickname}
+														<else/>
+														{$vo.nickname}({$vo.remarkname})
+														</empty>
+														</a>
+														<a target="_blank" href="{:U('QQ/Weixin/chat_someone', array('id'=>$vo['openid']))}" class="avatar">
+															<img src="{$vo.headimgurl}" openid="{$vo.openid}" class="js_msgSenderAvatar">
+														</a>
+														<label for="check{$vo.openid}" class="frm_checkbox_label">
+															<i class="icon_checkbox"></i>
+															<input class="frm_checkbox js_select" type="checkbox" name="openid[]" value="{$vo.openid}" id="check{$vo.openid}">
+														</label>
+													</div>
+												</td>
+												<td class="table_cell user_category">
+													<div id="selectArea{$vo.openid}" class="js_selectArea dropdown_menu" openid="{$vo.openid}">
+														<a href="javascript:void(0);" class="btn dropdown_switch jsDropdownBt">
+															<label class="jsBtLabel">{$group_arr[$vo['group_id']]}</label><i class="arrow"></i>
+														</a>
+														{$group_html}
+													</div>
+												</td>
+                                                <!--
+												<td class="table_cell user_opr">
+													<a class="btn remark">修改备注</a>
+												</td>
+												-->
+                                                <td></td>
+                                                <td>{$vo.petname}</td>
+                                                <td><?php echo $versionArr[$vo[wc_version]];?></td>
+                                                <td><?=$vo[industry_name] ? $vo[industry_name] : '--';?></td>
+											</tr>
+											</volist>
+										</tbody>
+									</table>
+								</div>
+								<div class="tool_area">
+									<div class="pagination_wrp js_pageNavigator">
+										<div class="page">{$page}</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<!--左侧用户信息-->
+					</div>
+					
+					
+					
+				</div>
+			</div>
+		</div>
+
+		<div class="buddyRichInfo dn" style="top:100px;">
+		<input type="hidden" id="openid" value="">
+		<div class="header">详细资料</div>
+		<div class="buddyRichLoading dn">
+			<img src="__PUBLIC__/Image/w_loader.gif" />
+		</div>
+		<div class="buddyRichContent">
+			<div class="infoArea">
+				<div class="line float-p">
+					<span class="vm nickName">{$vo.nickname}</span>
+                    <php>if(1 == $vo['sex']){echo '<span class="icon16_common man_blue"></span>';}else{echo '<span class="icon16_common woman_orange"></span>';}</php>
+				</div>
+				<div class="line">
+					<label>备注名：</label>
+					<span class="js_remarkName">{$vo.remarkname}</span>
+					<a title="修改备注" class="icon14_common edit_gray js_changeRemark" href="javascript:;" openid="">修改备注</a>
+				</div>
+			</div>
+			<div class="infoArea">
+				<div class="line">
+					<label>地区：</label>
+					<span class="area"></span>
+				</div>
+			</div>
+			<div class="infoArea line">
+				<label>分组：</label>
+				<select class="group" id="groupid" >
+					{:show_arr_opt($group_arr)}
+				</select>
+			</div>
+		</div>
+	</div>
+
+
+		<!--开始引入底部-->
+		<include file="./Home/Tpl/Public/Public_footer.html" />
+	</div>
+
+	<div class="service"></div>
+</body>
+</html>
+<script>
+$(function(){
+	CityCode({
+		province:$("#province"),//省
+		city:$("#city"),//市
+		town:$("#town"),//区
+		selected:"",//默认选中的省市区代号
+		url:"index.php?g=Weixin&m=AjaxCity&a=index"//数据查询页
+	});
+  })
+
+</script>

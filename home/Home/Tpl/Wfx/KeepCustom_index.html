@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>客户保护_旺分销</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wfx.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/dtree/dtree.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wfx.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script>
+$(function(){
+	$(".js_bind").click(function(e) {
+    	art.dialog.open("{:U('Wfx/KeepCustom/bind')}",{
+    		id:"stop",
+    		title:"绑定",
+    		width:"500px",
+    		height:"400px",
+    		lock:true
+    	});
+    });
+})
+</script>
+</head>
+<body>
+    <div id="wrapper" class="nomalCon">
+    	<include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <include file="./Home/Tpl/Wfx/topMenu.html" topmenuid="wfxkhbh"/>
+        </div>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel w1200">
+                <div class="main-name fn">
+                    <h4>客户保护<if condition="$node_info['customer_bind_flag'] neq '1'"><a class="tbtn btn-add first js_bind" href="javascript:void();"><i></i>手动绑定</a> <a href="{:U('Wfx/KeepCustom/loadRelation')}" target="_black" class="tbtn btn-down"><i></i>下载列表</a></if> <span style="float:right; padding:0"><a href="{:U('Home/Help/helpArt',array('news_id'=>'1341'))}" class="toggle" target="_black"><i class="more_tips" style="vertical-align:middle">?</i>什么是客户保护</a></span></h4>
+                </div>
+                <if condition="!in_array($node_info['customer_bind_flag'],array('2','3'))">
+                <div class="sweet_tips"><i class="close"></i>您尚未开启客户保护 <a href="{:U('Wfx/BasicSet/index')}">立即开启</a></div>
+                <else />
+                <div class="SearchArea fn">
+                        <form id="theform" action="{:U('Wfx/KeepCustom/index')}" method="post">
+                            <div class="SearchAreaLeft">
+                        	<label>
+                            <span>销售员名称</span><input type="text" name="saler_name" id="saler_name" class="textbox w160" value="{$saler_name}"></label>
+                            <label>
+                            <span>销售员手机号</span><input type="text" name="saler_phone" id="saler_phone" value="{$saler_phone}"/></label>
+                            <label>
+                            <span>消费者手机号</span><input type="text" name="customer_phone" id="customer_phone" class="textbox w160" value="{$customer_phone}"></label>
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                            </div>
+                        </form>
+                        </div>
+                <div class="shopCon">
+                    <form name="allselect" class="mb15 ml20">
+                    	<input type="checkbox" class="topcheck vm"><a href="javascript:void(0)" class="btn-add first" id="allot_btn" title="批量分配给其他经销商销售员">分配给他人</a>
+                    </form>
+                    <form id="hform" action="{:U('Wfx/KeepCustom/allot')}" method="post">
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                            <tbody>
+                            <tr class="th">
+                            	<th class="w50 first"></th>
+                                <th>消费者手机号</th>
+                                <th>绑定时间</th>
+                                <th>销售员名称</th>
+                                <th>销售员手机号</th>
+                                <th>所属经销商</th>
+                                <th>操作</th>
+                            </tr>
+                            <if condition="!empty($relation_info)">
+                            <volist name="relation_info" id="vr">
+                            <tr>
+                            	<td><input type="checkbox" name="checkedid[]" value="{$vr['id']}" ></td>
+                                <td>{$vr['phone_no']}</td>
+                                <td>{$vr['add_time']|strtotime|date="Y-m-d",###}&nbsp;
+                                    <if condition="$vr['bind_from'] eq '2'">手动绑定<elseif condition="$vr['bind_from'] eq '3'"/>抽奖绑定<else/>交易绑定</if>
+                                </td>
+                                <td>{$vr['saler_name']}</td>
+                                <td>{$vr['saler_phone']}</td>
+                                <td>{$vr['parent_name']}</td>
+                                <td><a href="javascript:void(0)" rid ="{$vr['id']}" class="single_allot" title="批量分配给其他经销商销售员">分配给他人</a></td>
+                            </tr>
+                            </volist>
+                            <else />
+                                <td colspan="7"><div class="nonedata"></div></td>
+                            </if>
+                        </table>
+                    </form>
+                    <div class="page" style="float:right">{$page}</div>
+                </div>
+                </if>
+                <div>
+                    <form action="" method="get" id="uform">
+                    </form>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#sub_button").click(function(){
+            $("#theform").submit();
+        });
+        $(".topcheck").click(function(){
+            var cb = $("input[name='checkedid[]']");
+            for(var i = 0;i<cb.length;i++){
+                cb[i].checked = this.checked;
+            }
+        }); 
+        $("#allot_btn").click(function(){
+            art.dialog({
+                id:"allot_art",
+                title:"分配给他人",
+                content:'<div class="Gform" style="margin-left:-30px; margin-right:50px;"><ul><li class="Gname">分配给</li><li class="Ginput"><input type="text" style="padding-right:0" placeholder="请输入销售员/经销商手机号码" name="phone_no"></li></ul></div>',
+                width:300,
+                height:100,
+                fixed:true,
+                ok:function(){
+                    var phone = $('input[name="phone_no"]').val();
+                    var url = $("#hform").attr("action")+"&phone_no="+phone;
+                    $("#hform").attr("action",url).ajaxSubmit({
+                        beforeSubmit:function(){
+                            dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                        },
+                        success:function(data){
+                            if(data.status == '1'){
+                                dialog.time(1).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                                window.location.href="{:U('Wfx/KeepCustom/index')}"
+                                return false;
+                            }else{
+                                dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                            }
+                        },
+                        dataType:'json',
+                    });
+                },
+                cancel:function(){
+                    art.dialog.close();
+                }
+            });
+        });
+        $(".single_allot").click(function(){
+            var cf = $(this);
+            art.dialog({
+                id:"allot_art",
+                title:"分配给他人",
+                content:'<div class="Gform" style="margin-left:-30px; margin-right:50px;"><ul><li class="Gname">分配给</li><li class="Ginput"><input type="text" style="padding-right:0" placeholder="请输入销售员/经销商手机号码" name="phone_no"></li></ul></div>',
+                width:300,
+                height:100,
+                fixed:true,
+                ok:function(){
+                    var phone = $('input[name="phone_no"]').val();
+                    var url = $("#hform").attr("action")+"&phone_no="+phone;
+                    var id = cf.attr('rid');
+                    $("#uform").attr("action",url+"&id="+id).ajaxSubmit({
+                        beforeSubmit:function(){
+                            dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                        },
+                        success:function(data){
+                            if(data.status == '1'){
+                                dialog.time(1).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                                window.location.href="{:U('Wfx/KeepCustom/index')}"
+                                return false;
+                            }else{
+                                dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                            }
+                        },
+                        dataType:'json',
+                    });
+                },
+                cancel:function(){
+                    art.dialog.close();
+                }
+            });
+        });
+    });
+$(function(){
+        productIntroduce(10,"wfx","{:U('Wfx/Index/index')}");}
+    );
+</script>

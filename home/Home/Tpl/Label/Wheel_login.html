@@ -1,0 +1,199 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>手机号码登录</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_dzp.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+    $(document).ready(function(e){
+        $("#getpasscode").click(function(){
+            var bindPhoneNo = $('#phoneNo').val();
+            if(!bindPhoneNo){
+                art.dialog.alert("手机号码不得为空");
+                return false;
+            }
+            var phoneArray = new Array();
+            phoneArray.push({name: 'bindPhoneNo', value: bindPhoneNo});
+
+            var self = $(this);
+            if(self.data('in_ajax') != 0) return ;
+            self.data('in_ajax', 1);
+            self.val("正在发送......");
+            $.ajax({
+                type: "POST",
+                data: phoneArray,
+                url: "{:U('Label/Wheel/verifyCode')}",
+                dataType:"json",
+                success: function(data) {
+                    self.data('in_ajax', 0);
+                    if(data.status == '0') {
+                        art.dialog.alert(data.info);
+                        self.val("获取密码");
+                    } else {
+                        self.data('in_ajax', 2);
+                        self.val("60秒后重获密码");
+                        var sed = 60, Int;
+                        function aha(){
+                            sed = sed - 1;
+                            if( sed == 0){
+                                self.data('in_ajax', 0);
+                                self.val('重新获取密码');
+                                clearInterval(Int);
+                                return;
+                            }else{
+                                self.val(sed+'秒后重获密码');
+                            }
+                        }
+                        Int = setInterval(aha, 1000);
+                    }
+                }
+            });
+        });
+        $("#sub").click(function(){
+            var bindPhoneNo = $('#phoneNo').val();
+            var verifyCode  = $('#verify').val();
+            if(!bindPhoneNo){
+                art.dialog.alert("手机号码不得为空");
+                return false;
+            }
+            if(!verifyCode){
+                art.dialog.alert("密码不得为空");
+                return false;
+            }
+            var phoneArray = new Array();
+            phoneArray.push({name: 'bindPhoneNo', value: bindPhoneNo});
+            phoneArray.push({name: 'verifyCode', value: verifyCode});
+
+            var self = $(this);
+            $.ajax({
+                type: "POST",
+                data: phoneArray,
+                url: "{:U('Label/Wheel/login')}",
+                dataType:"json",
+                success: function(data) {
+                    if(data.status == '0') {
+                        art.dialog.alert(data.info);
+                    } else {
+                        var userType = data.userType;
+                        if(userType == '1' || userType == '3'){
+                            window.location.href="{:U('Label/Wheel/gotoPcTips')}";
+                        }else if(userType == '2'){
+                            window.location.href="{:U('Label/Wheel/hasEventTips')}";
+                        }else{
+                            window.location.href="{:U('Label/Wheel/createEvent')}";
+                        }
+                    }
+                }
+            });
+            return false;
+        });
+        $("#lawIntro").click(function(){
+            var html = 
+                ['<div><p>创建“幸运大转盘”活动的用户须知V1.0</p>',
+
+                    '<p>1.  “幸运大转盘”是上海翼码信息科技股份有限公司（简称：翼码科技）自主研发的旺财产品的一个功能模块，此次活动仅支持手机端用户开展，用户使用手机号和验证码即可登录旺财平台创建“幸运大转盘”活动。</p>',
+                    '<p>2.  用户在手机端自行登录创建“幸运大转盘”活动，即表明您已经：对创建“幸运大转盘”活动的模式与风险等有深入了解、已经认真阅读并同章和接受公本须知所有内容。</p>',
+                    '<p>3.  活动规则：</p>',
+                    '<p>1)  活动期间，您可登录旺财平台免费创建一次“幸运大转盘”活动，活动有效期最长45天。</p>',
+                    '<p>2)  翼码科技提供1-2套活动模板，您可任意选择，免费使用；</p>',
+                    '<p>3)  活动创建完成后，翼码为您自动开通虚拟验证受理环境（EPOS），EPOS使用有期效至您所创建的活动结束后的第30天。</p>',
+                    '<p>4)  活动期间，您可免费发码100条。</p>',
+                    '<p>4.  您须确保所发布的内容真实有效，不得发布虚假或违法违规信息。</p>',
+                    '<p>5.  客服：</p>',
+                    '<p>1）您在创建“幸运大转盘”活动并开展业务时，必须充分考虑到向消费者公示您的客服电话或其它客服通道的问题。</p>',
+                    '<p>2）您与您的消费者之间就您开展的活动、商品或服务质量、发票等的事宜所产生的纠纷，与翼码科技无关，您必须自行解决。</p>',
+                    '<p>6.  风险：</p>',
+                    '<p>1）您充分知晓开展“幸运大转盘”活动可能面临网络交易安全等风险。该些风险须由您自行承担。</p>',
+                    '<p>2）您不能因此向上海翼码提出任何法律主张。</p>',
+                    '<p>7.  其它</p>',
+                    '<p>1）在不违反法律法规的前提下，该公告的解释权归翼码科技。</p>',
+                    '</div>',].join('');
+            art.dialog({
+                title:"用户须知",
+                content:html,
+                lock: true,
+                cancelVal: '关闭',
+                cancel: true,
+                width:"300px",
+                fixed:false,
+                padding:"10px"
+            });
+        });
+    });
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+        	<div class="goback"><i onclick="javascript:window.history.go(-1);"></i></div>
+            <div class="title"><span><em>①</em>&nbsp;手机号码登录</span></div>
+        </div>
+        <div id="main">
+            <div id="mainCon">
+            	<div class="mainTips">
+            		<p class="tips">验证手机，即刻起航啦！</p>
+            	</div>
+            	<div class="Gform">
+                	<form id="form" name="form">
+                		<div class="item">
+                			<ul>
+		                        <li class="name w55">手机号</li>
+		                        <li class="input pl55">
+		                        	<input name="phoneNo" id="phoneNo" type="tel" class="textbox validate[required,minSize[11]]" maxlength="11" placeholder="&nbsp;请输入手机号码" data-rel=""  />
+		                        </li>
+		                    </ul>
+	                		<ul>
+		                        <li class="name w55">密　码</li>
+		                        <li class="input pl55">
+			                        <input name="verify" type="text" id="verify" maxlength="6" class="textbox half validate[required]" placeholder="&nbsp;请输入密码" data-rel="" >
+			                        <input type="button" name="getpasscode" id="getpasscode" class="btn-input half" value="获取密码" data-in_ajax="0">
+		                        </li>
+		                    </ul>
+                		</div>
+                		<div class="clause">
+                			<label><input type="radio" disabled="disabled" value="radio" name="clause" />我已同意<a href="javascript:;" id="lawIntro">【幸运大转盘用户须知】</a>条款</label>
+                		</div>
+	                    <ul class="btn-ul">
+	                        <li class="btn-li"><input type="submit" id="sub" value="免费创建一个活动" class="btn-up" /></li>
+	                    </ul>
+                	</form>
+	            </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    $('#form').validationEngine({
+    	'allrules': {
+			"phoneNo":{
+				"alertText":"手机号码不得为空"
+			}
+		},
+    });
+    
+    $(".Gform .clause label").eq(0).addClass("active");
+	$('.Gform .clause input').attr("checked","checked");
+	$(".Gform .clause input").click(function(){
+		$(this).parent("label").toggleClass("active");
+	});
+   
+});
+
+</script>

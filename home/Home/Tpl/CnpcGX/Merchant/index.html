@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>商户列表</title>
+    <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshopconfig.css" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+    <script type="text/javascript">
+    $(function() {
+        Gform();
+        $(".js_status").click(function(e) {
+            var id = $(this).attr('m_id');
+            var status = $(this).attr('status');
+            art.dialog({
+                id: 'art_deleted',
+                lock: true,
+                content: '是否确认更改状态？',
+                ok: function() {
+                    dialog = art.dialog({
+                        title: false,
+                        content: "<div class='msg-all-succeed'>正在执行...</div>",
+                        fixed: true,
+                        padding: 0
+                    });
+                    othis = this;
+                    $.post("{:U('CnpcGX/Merchant/change_status')}", {
+                        id: id,
+                        status: status
+                    }, function(resp) {
+                        if (resp.status == '1') {
+                            dialog.time(1).content("<div class='msg-all-succeed'>" + resp.info + "</div>");
+                            setTimeout(function() {
+                                othis.close();
+                                reload();
+                            }, 1000);
+                        } else {
+                            othis.close();
+                            dialog.time(2).content("<div class='msg-all-error'>" + resp.info + "</div>");
+                        }
+                    }, 'json');
+                    return false;
+                },
+                cancelVal: '关闭',
+                cancel: true //为true等价于function(){}
+            });
+        });
+        $(".js_delete").click(function(e) {
+            var id = $(this).attr('m_id');
+            art.dialog({
+                id: 'art_deleted',
+                lock: true,
+                content: '是否确认删除？',
+                ok: function() {
+                    dialog = art.dialog({
+                        title: false,
+                        content: "<div class='msg-all-succeed'>正在执行...</div>",
+                        fixed: true,
+                        padding: 0
+                    });
+                    othis = this;
+                    $.post("{:U('CnpcGX/Merchant/delete')}", {
+                        id: id
+                    }, function(resp) {
+                        if (resp.status == '1') {
+                            dialog.time(1).content("<div class='msg-all-succeed'>" + resp.info + "</div>");
+                            setTimeout(function() {
+                                othis.close();
+                                reload();
+                            }, 1000);
+                        } else {
+                            othis.close();
+                            dialog.time(2).content("<div class='msg-all-error'>" + resp.info + "</div>");
+                        }
+                    }, 'json');
+                    return false;
+                },
+                cancelVal: '关闭',
+                cancel: true //为true等价于function(){}
+            });
+        });
+    });
+    </script>
+    <script>
+    $(function() {
+        $("#parent_id").change(function() {
+            loadCatalog($("#parent_id option:selected").val());
+        });
+        if ($("#parent_id option:selected").val() != '') {
+            loadCatalog($("#parent_id option:selected").val());
+        }
+
+        function loadCatalog(parentid) {
+            var selected_id = '{$post["catalog_id"]}';
+            $.ajax({
+                url: "{:U('CnpcGX/Merchant/AjaxCatalog')}&parent_id=" + parentid,
+                type: 'POST',
+                dataType: 'JSON',
+                timeout: 5000,
+                error: function() {
+                    alert('Error loading data!');
+                },
+                success: function(msg) {
+                    $("#catalog_id").empty();
+                    $("<option value=''>请选择</option>").appendTo($("#catalog_id"));
+                    $.each(eval(msg), function(i, item) {
+                        if (selected_id == item.id) {
+                            $("<option value='" + item.id + "' selected='selected'>" + item.catalog_name + "</option>").appendTo($("#catalog_id"));
+                        } else {
+                            $("<option value='" + item.id + "'>" + item.catalog_name + "</option>").appendTo($("#catalog_id"));
+                        }
+
+                    });
+                }
+            });
+        }
+        $("#download").click(function() {
+            $form = $('#theform');
+            $form.attr('action', "{:U('CnpcGX/Merchant/download')}").submit();
+        });
+        $("#sub_button").click(function() {
+            $form = $('#theform');
+            $form.attr('action', "{:U('CnpcGX/Merchant/index')}").submit();
+        });
+    });
+
+    function chg_order(id, order) {
+        $.post("{:U('CnpcGX/Merchant/chg_order')}", {
+            "id": id,
+            "order": order
+        }, function(data) {
+            if (data.status == 1) {
+                art.dialog({
+                    title: false,
+                    content: "<div class='msg-all-succeed'>操作成功</div>",
+                    fixed: true,
+                    padding: 0,
+                    time: 2
+                });
+                window.location.reload();
+            } else {
+                art.dialog({
+                    title: false,
+                    content: "<div class='msg-all-error'>" + data.info + "</div>",
+                    fixed: true,
+                    padding: 0,
+                    time: 2
+                });
+            }
+        }, "json");
+    }
+    </script>
+</head>
+
+<body>
+    <div id="wrapper">
+        <include file="Login:loginHeader" />
+        <!--开始载入头部菜单-->
+        <include file="./Home/Tpl/Ecshop/Shop_nav.html" navmenuid="Navshop" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <!--开始引入左菜单-->
+                <div class="sidenav">
+                    <include file="./Home/Tpl/Ecshop/Shop_menu.html" leftmenuid="shlb" />
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn" style="padding-top: 50px;">
+                        <h4><span>商户管理</span><a class="tbtn btn-add btn-red first" id="add-classify" href="{:U('CnpcGX/Merchant/add')}"><i></i>新增商户</a><a class="tbtn btn-down" href="javascript:;" id="download"><i></i>商户明细下载</a></h4>
+                    </div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-list">
+                            <div class="SearchArea fn mb20">
+                                <form id="theform" action="" method="post">
+                                    <div class="SearchAreaLeft">
+                                        <label>
+                                            <span>商户名称</span>
+                                            <input type="text" name="merchant_name" id="merchant_name" value="{$post['merchant_name']}" class="textbox w120" />
+                                        </label>
+                                        <label>
+                                            <span>编号</span>
+                                            <input type="text" name="id" id="id" value="{$post['id']}" class="textbox w120" />
+                                        </label>
+                                        <label>
+                                            <span>注册时间</span>
+                                            <input type="text" name="start_time" id="start_time" value="{$post['start_time']}" class="textbox w120" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" />-
+                                            <input type="text" name="end_time" id="end_time" value="{$post['end_time']}" class="textbox w120" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" />
+                                        </label>
+                                        <label>
+                                            <span>所属分类</span>
+                                            <select name="parent_id" id="parent_id" class="validate[required]">
+                                                <option value="">请选择</option>
+                                                <php>
+                                                    $parentArr = array_valtokey($parentInfo,'id','catalog_name');
+                                                </php>
+                                                {:show_arr_opt($parentArr,$post['parent_id'])}
+                                            </select>
+                                            <select name="catalog_id" id="catalog_id" class="catalog_id validate[required] ml25">
+                                                <option value="">请选择</option>
+                                            </select>
+                                        </label>
+                                        <label>
+                                            <span>状态</span>
+                                            <select name="status" class="textbox w100">
+                                                <option value="" <?php if($_REQUEST[ 'status']=='' ){?> selected="selected"
+                                                    <?php }?> >请选择</option>
+                                                <option value="1" <?php if($_REQUEST[ 'status']=='1' ){?> selected="selected"
+                                                    <?php }?> >展示中</option>
+                                                <option value="0" <?php if($_REQUEST[ 'status']=='0' ){?> selected="selected"
+                                                    <?php }?> >未展示</option>
+                                            </select>
+                                        </label>
+                                        <div class="SearchAreaRight">
+                                            <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                                            <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="shopCon">
+                                <table cellpadding="0" cellspacing="0" class="shopTable">
+                                    <thead>
+                                        <tr class="th">
+                                            <th class="first">排序</th>
+                                            <th>编号</th>
+                                            <th width="20%">商户名称</th>
+                                            <th>注册时间</th>
+                                            <th width="15%">一级分类</th>
+                                            <th width="15%">二级分类</th>
+                                            <th>状态</th>
+                                            <th class="last">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <if condition="$list">
+                                            <volist name="list" id="vo" empty="$empty">
+                                                <tr>
+                                                    <td class="first">
+                                                        <input type="text" maxlength="5" value="{$vo.order_sort}" class="w50" onchange="chg_order('{$vo.id}', this.value);" />
+                                                    </td>
+                                                    <td>
+                                                        <php> echo sprintf('%05s', $vo['id']);</php>
+                                                    </td>
+                                                    <td>{$vo['merchant_name']}</td>
+                                                    <td>{$vo['add_time']|dateformat='Y-m-d'}</td>
+                                                    <td>{$catalog_array[$vo['parent_id']]}</td>
+                                                    <td>{$catalog_array[$vo['catalog_id']]}</td>
+                                                    <td>
+                                                        <php>if($vo['show_status']==1){echo "展示中";}else{echo "未展示";}</php>
+                                                    </td>
+                                                    <td class="last"><a href="{:U('CnpcGX/Merchant/edit',array('id'=>$vo['id']))}" class="js_orderconfirm">修改</a> |
+                                                        <a href="javascript:void(0);" class="js_orderdetail js_status" m_id="{$vo['id']}" status="<php>if($vo['show_status']==1){echo 0;}else{echo 1;}</php>">
+                                                            <php>if($vo['show_status']==1){echo "下架";}else{echo "展示";}</php>
+                                                        </a> <php>if($vo['type']==0){</php>| <a href="javascript:void(0);" class="js_orderdetail js_delete" m_id="{$vo['id']}">删除</a><php>}</php></td>
+                                                </tr>
+                                            </volist>
+                                            <else/>
+                                            <tr>
+                                                <td colspan="7">
+                                                    <div class="nonedata"></div>
+                                                </td>
+                                            </tr>
+                                        </if>
+                                    </tbody>
+                                </table>
+                                <div class="page"> {$page}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+</body>
+
+</html>

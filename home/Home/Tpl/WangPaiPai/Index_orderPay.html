@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>订单支付</title>
+    <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wpaipai20150705.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script src="__PUBLIC__/Js/jquery.Spinner.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+        $(function() {
+            $('#Payment').on('click', function(event){
+                var url = "<?php echo C('YZ_RECHARGE_URL')?>&node_id=<?php echo $userInfo['node_id'];?>&name=<?php echo $userInfo['user_name'];?>&token=<?php echo $token;?>";
+                window.open(url);
+                var isDisable = $(this).hasClass("disable");
+                if(!isDisable)
+                {
+                    $(this).addClass("disable");
+                    art.dialog({
+                        content:'<div id="content">'+
+                        '<div class="newRule">'+
+                        '<dl class="PayStatus">'+
+                        '<dt><span>请在新打开的页面中完成账户的充值！</span></dt><dd><a href="" class="btn btn_del"><em class="fail">充值失败</em>，返回修改订单</a></dd><dd><a  href="" class="btn btn_del ml15"><em class="ok">充值成功</em>，刷新页面完成付款</a></dd>'+
+                        '</dl>'+
+                        '</div>'+
+                        '</div>',
+                        lock:true,
+                        padding:"0",
+                        width:"500px",
+                        title:"充值提醒",
+                    });
+                }
+                else
+                {
+                    return false;
+                }
+            });
+
+            $("#d").Spinner();
+            var $dj=$(".dj").html();
+            $(".Amount").val({$orderInfo['num']});
+			$(".je").html($(".Amount").val()*$dj);
+            $(".DisDe,.Increase").click(function(e) {
+
+                var num = $(".Amount").val();
+                var data = {
+                    num:num,
+                    batch_id:{$_GET['batch_id']},
+                };
+                $.post("{:U('WangPaiPai/Index/carriagAjax')}", data, function(d){
+                    if(0==d.status){
+                        art.dialog.alert(d.info);
+                    }else{
+                        var num = $(".Amount").val()*$dj;
+                        num = num.toFixed(2);
+
+                        $(".je").html(num);
+                        $("#region").html(region);
+                        var region = d.info['region_price'];
+                        $("#region").html(region);
+                        var total = Number(region) + Number(num);
+                        $("#total").html(total);
+                    }
+                },'json');
+				
+				if(($(".Amount").val()*$dj)<={$AccountPrice['AccountPrice']})
+				{
+					window.location.reload();
+					$(".Enough").show();
+					$(".notEnough").hide();
+				}
+				else
+				{
+					window.location.reload();
+					$(".notEnough").show();
+					$(".Enough").hide();
+				}
+            });
+			
+			$(".Amount").change(function(e) {
+                var num = $(".Amount").val();
+                var data = {
+                    num:num,
+                    batch_id:{$_GET['batch_id']},
+                };
+                $.post("{:U('WangPaiPai/Index/carriagAjax')}", data, function(d){
+                    if(0==d.status){
+                        art.dialog.alert(d.info);
+                    }else{
+                        var num = $(".Amount").val()*$dj;
+                        num = num.toFixed(2);
+
+                        $(".je").html(num);
+                        $("#region").html(region);
+                        var region = d.info['region_price'];
+                        $("#region").html(region);
+                        var total = Number(region) + Number(num);
+                        $("#total").html(total);
+                    }
+                },'json');
+				
+				if(($(".Amount").val()*$dj)<={$AccountPrice['AccountPrice']})
+				{
+					window.location.reload();
+					$(".Enough").show();
+					$(".notEnough").hide();
+				}
+				else
+				{
+					window.location.reload();
+					$(".notEnough").show();
+					$(".Enough").hide();
+				}
+
+
+            });
+
+            $(".btn_primary").click(function(){
+
+                //防止2次连续点击
+                var lose = $("#btnLose").val();
+                if(1 == lose){
+                    return false;
+                }
+
+                var num = $(".Amount").val();
+                var data = {
+                    num:num,
+                    batch_id:{$_GET['batch_id']},
+                };
+
+                $.post("{:U('WangPaiPai/Index/orderSumbit')}", data, function(d){
+                    if('1'==d.status) {
+                        art.dialog.alert(d.info);
+                        window.location.href = "{:U('WangPaiPai/Index/ok')}";
+                    }else{
+                        art.dialog.alert(d.info);
+                    }
+                },'json');
+
+                $("#btnLose").val(1);
+            });
+
+        });
+    </script>
+</head>
+<body>
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="2vm10"/>
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+            <div class="sidenav">
+                <!--开始载入左菜单-->
+                <include file="LabelAdmin/Channel/leftMenu" leftmenuid="2vm18"/>
+            </div>
+            <div class="subcon fn">
+                <div class="main-name fn">
+                    <h4>订单支付</h4>
+                </div>
+
+                <div class="orderList">
+                    <table cellpadding="0" cellspacing="0" class="W-table blue">
+                        <tbody>
+                        <tr>
+                            <th>水牌样式</th>
+                            <th>单价（元）</th>
+                            <th>数量(个)</th>
+                            <th class="toPay">小计（元）</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hdDetail">
+                                    <php>if(2 == $orderInfo['type']){</php>
+                                        <div class="card2" id="t2">
+                                        <div class="hdImage vm"><img src="__PUBLIC__/Image/Wpaipai/selectType2.png"></div>
+                                        <div class="hdName vm"><span>轻奢版</span></div>
+                                        </div>
+                                    <php>}else{</php>
+                                        <div class="card1" id="t1">
+                                        <div class="hdImage vm"><img src="__PUBLIC__/Image/Wpaipai/selectType1.png"></div>
+                                        <div class="hdName vm"><span>青春版</span></div>
+                                        </div>
+                                        </div>
+                                    <php>}</php>
+
+                                </div>
+                            </td>
+                            <td>
+                                <span class="dj">18</span>
+                            </td>
+                            <td>
+                                <div id="d" class="count Spinner"></div>
+                            </td>
+                            <td class="toPay">
+                                <em class="je">{$orderInfo['count_price']|default=0.0}</em>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="moneyArea">
+                        <div class="money normal">
+                            <span>运费金额：</span>
+                            <span class="payAcount" id="region">{$priceInfo['region_price']|default=0.0}</span>
+                        </div>
+
+                        <div class="money hight">
+                            <span>应付金额：</span>
+                            <span class="payAcount" id="total">{$priceInfo['total_price']|default=0.0}</span>
+                        </div>
+                        <div class="money leave">
+                            <span>账户余额：</span>
+                            <span class="payAcount">{$AccountPrice['AccountPrice']}</span>
+                        </div>
+                        <div class="money">
+                                <span class="agreement">
+                                    <label for="selectAll" class="group_select_label frm_checkbox_label selected">
+                                        <i class="icon_checkbox" style="width:16px; vertical-align:middle"></i><input type="checkbox" class="frm_checkbox js_selectall" checked="checked">使用账户余额支付</label>
+                                </span>
+
+                            <php>
+                                if($AccountPrice['AccountPrice'] < $priceInfo['total_price']){
+                            </php>
+                            	<div class="notEnough">
+                                    <span class="moneyless w1">
+                                        余额不足&nbsp;&nbsp;<a href="javascript:void();" id="Payment">去充值</a>
+                                    </span>
+                                    <div class="cl"></div>
+                                    <div class="moneyPay" style="padding-right:0;">
+                                        <span><a href="{:U('WangPaiPai/Index/apply')}&batch_id={$_GET['batch_id']}" class="modify" style="padding:0">修改订单</a></span>
+                                    </div>
+                                </div>
+                            <php>
+                                }else{
+                            </php>
+                        <div class="cl pt15" class="Enough">
+                            <div class="moneyPay" style="padding-right:0">
+                                <input type="hidden" id="btnLose" name="lose" value="0" />
+                                <span><a href="{:U('WangPaiPai/Index/apply')}&batch_id={$_GET['batch_id']}" class="modify">修改订单</a></span>
+                                <span><a href="javascript:void(0)" class="btn-all btn_primary btn_blue">确认支付</a></span>
+                            </div>
+                        </div>
+                        <php>}</php>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<include file="./Home/Tpl/Public/Public_footer.html" />
+<div class="service"></div>
+</body>
+</html>

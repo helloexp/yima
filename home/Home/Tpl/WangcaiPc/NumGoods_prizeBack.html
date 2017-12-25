@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无卡券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wselect_et.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+</head>
+
+<body class="no">
+    <div class="iframeCon SelectGoods">
+        <div class="DiatipsCon">
+            <p>您的卡券被用在以下活动中，您可以选择已结束且有剩余卡券奖品的活动，将剩余卡券回退至库存。</p>
+        </div>
+        <empty name="list">
+            <div class="nodata_new">
+                <dl class="nodata_new_content" style="height:110px;">
+                    <dt style="padding-top:50px;">您没有可以回退的卡券</dt>
+                </dl>
+            </div>
+            <div class="DiabtnCon">
+                <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+            </div>
+        <else/>
+        <div class="etList">
+            <ul>
+                <volist name="list" id="vo">
+                <li data-id="{$vo['id']}" <if condition="$vo['end_time'] lt date('Ymd000000') and $vo['remain_num'] gt 0"> class="" <else/> class="disabled" </if>>
+                    <div class="img"><img src="__PUBLIC__/Image/small_festival/{$vo['batch_type']}.png" /></div>
+                    <div class="text">
+                        <h3><span><if condition="$vo['end_time'] lt date('Ymd000000')"><i class="typeOff">已结束</i><else/><i class="typeOn">进行中</i></if>{$vo['name']}</span></h3>
+                        <p>{$vo.start_time|dateformat=###,'Y-m-d'}至{$vo.end_time|dateformat=###,'Y-m-d'}</p>
+                        <p><span class="quantity_txt"><strong>投入量：</strong>{$vo['storage_num']}</span><span class="quantity_txt ml20"><strong>剩余数量：</strong>{$vo['remain_num']}</span></p>
+                    </div>
+                </li>
+                </volist>
+            </ul>
+            <div class="page mini">
+                <label for="selectAll" class="group_select_label frm_checkbox_label">
+                    <i class="icon_checkbox"></i><input type="checkbox" class="frm_checkbox js_selectall" />全选
+                </label>
+            {$page}
+            </div>
+            <div class="DiabtnCon">
+                <a class="Diabtn-all" id="smb">回退</a>
+                <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+            </div>
+        </div>
+        </empty>
+        
+    </div>
+</body>
+<script type="text/javascript">
+$(function(){
+	$(".etList ul li").click(function(e) {
+		var isDisabled = $(this).hasClass("disabled");
+		if(isDisabled){
+			Diaerror("该奖品不符合回退条件");
+			return false;
+		}
+		var is_exit = $(this).find(".date").find("mark").text();
+		var is_Allselected = $(".etList ul li.selected").length+1;
+		var Allli = $(".etList ul li").length;
+		var is_selected=$(this).hasClass("selected");
+		if(is_exit!="无库存"){
+			if(is_selected == true)
+			{
+				$(this).removeClass("selected");
+				$(".frm_checkbox_label").removeClass("selected");
+				$(".frm_checkbox_label").find(".frm_checkbox").attr("checked",false);
+				is_Allselected = is_Allselected-2;
+			}else
+			{
+				$(this).addClass("selected");
+			}
+			if(Allli == is_Allselected)
+			{
+				$(".frm_checkbox_label").addClass("selected");
+				$(".frm_checkbox_label").find(".frm_checkbox").attr("checked",true);
+			}else if(is_Allselected == 0){
+				$(".frm_checkbox_label").removeClass("selected");
+				$(".frm_checkbox_label").find(".frm_checkbox").attr("checked",false);
+			}
+		
+		}
+		else{
+			art.dialog({title:false,content:"<div class='msg-all-error'>该卡券已无库存</div>",fixed: true,padding:0,time:1});
+			$(this).removeClass("selected");
+		}
+	});
+
+	
+	$(".frm_checkbox_label").click(function(){
+		if ($(this).hasClass("selected"))
+		{
+			$(this).removeClass("selected");
+			$(this).find(".frm_checkbox").attr("checked",false);
+			$(".etList ul li").removeClass("selected");
+		}else{
+			
+			$(this).removeClass("selected").addClass("selected");
+			$(this).find(".frm_checkbox").attr("checked",true);
+			$(".etList ul li").addClass("selected");
+			$(".etList ul li.disabled").removeClass("selected");
+			
+		}
+	});
+	
+	$("#smb").click(function(e) {
+		var backNum = $(".etList ul li.selected").length;
+		if(backNum == 0){
+			Diaerror("请选择需要回退的卡券");
+			return false;
+		}else{
+			var m_id = [];
+			var goods_id = '{$_REQUEST['goods_id']}';
+			$(".etList ul li.selected").each(function() {
+	            var dataId = $(this).attr("data-id");
+	            m_id.push(dataId);
+	        });
+			
+			$.post("{:U('WangcaiPc/NumGoods/prizeBack')}",{"goods_id":goods_id,"m_id":m_id}, function(data) {
+			    if (data.status == 1) {
+    				var data={"backNum":data.info};
+    				var html = template("rollbackResult",data);
+    				art.dialog({
+    					title: '卡券回退',
+    					width:"400px",
+    					id:"PrizeBack",
+    					content:html,
+    					cancel:function(){
+    						//art.dialog.list['PrizeBack'].close();
+    						var win = art.dialog.open.origin;
+    						win.location.reload();
+    					},
+    					cancelVal:"关闭"
+    				})
+    			}else{
+    				Diaerror(data.info);
+    			}
+    		}, 'json');
+		return false;
+		}
+    });
+})
+</script>
+
+<script type="text/html" id="rollbackResult">
+<div class='loadTip'>
+	<div class='loadStatus ok'>
+	<dl>
+	<dt>回退成功！</dt>
+	<dd>您已成功回退<span class='redfont'>{{backNum}}</span>份奖品！</dd>
+	</dl>
+	</div>
+</div>
+</script>

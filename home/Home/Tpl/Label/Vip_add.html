@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$fb_wap_title}</title>
+<meta name="viewport" content="width=360, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<load href="__PUBLIC__/Label/Css/wap_Csyd.css"/>
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/jquery.form.js?v=__VR__"/>
+<script>
+$(document).ready(function() {	
+  //提交
+    var _one_sub = false;
+    $('#dosubmit').click(function(){
+          if(_one_sub)
+            return false;
+        _one_sub = true;
+        $("#theform").ajaxSubmit({
+            beforeSubmit:function(){
+                $('#loadingBox').fadeIn(300).find('span').html('提交中，请等待...');
+            },
+            success:function(data){
+                $('#loadingBox').hide();
+                _one_sub = false;
+
+               if(data.status == '1'){
+               		$('#img_li').show();
+               		if(data.data !='success'){
+               			$('#pic_src').attr("src","__UPLOAD__/<?php echo 'FbUpload/';?>"+data.data);
+               		}
+               		
+               			popForm('popMsg',data.info,data.status);
+               		
+                    
+                   // $('#dosubmit').attr('disabled',true);
+  
+                }else{
+                    popForm('popMsg',data.info,data.status);
+                }
+            },
+            dataType:'json'
+        });
+    });
+    
+    $(".subnav-con").click(function(){
+		if($(".subnav").hasClass("subnavanimate")){
+			$(".subnavbg").hide();
+			$(".subnav-li2").show();
+			$(".subnav").removeClass("subnavanimate").addClass("subnavanimateover");
+			return false;
+		}
+		event.stopPropagation();
+		$(".subnavbg").show();
+		$(".subnav").removeClass("subnavanimateover").addClass("subnavanimate");
+	})
+	
+	//点击分组以外区域隐藏分组
+	$(".subnavbg").click(function(){
+		if($(".subnav").hasClass("subnavanimate")){
+			$(".subnavbg").hide();
+			$(".subnav-li2").show();
+			$(".subnav").removeClass("subnavanimate").addClass("subnavanimateover");
+		}
+	});
+	$(".header-Back").click(function(){
+		history.go(-1);
+	})
+
+});
+
+function popForm(type,msg,isTrue) {
+	
+	
+	$("#AjaxWrapper").remove();
+	var Wrapperclose="$('#AjaxWrapper').fadeOut(300)";
+	if(isTrue == '1'){
+		Wrapperclose = "location.href='<?php echo U('Label/Vip/index',array('id'=>$id)); ?>'";
+	}
+	var html=[
+	'<div id="AjaxWrapper" class="dn">',
+		'<div class="cjWrapper">',
+			'<div class="cjWrapper-close"><a href="javascript:void(0)" onclick="javascript:'+Wrapperclose+'">+</a></div>',
+			'<div class="cjCon pb10 dn" id="popMsg">',
+				'<div class="cjText">',
+					'<div class="cjText-con">',
+						'<div class="cjText-text">您填写的信息有误，<br />请重新输入！</div>',
+					'</div>',
+				'</div>',
+				'<div class="cjBtn">',
+					'<a href="javascript:void(0)" onclick="javascript:'+Wrapperclose+'">返回</a>',
+				'</div>',
+			'</div>',
+		'</div>',
+	'</div>'].join('');
+	$("body").append(html);
+    $("#AjaxWrapper").fadeIn(300);
+	$("#popMsg").show();
+	$("#popMsg .cjText-text").html(msg);
+    if(type=="popForm"){
+        $(".cjBtn").html('<a href="javascript:void(0)" id="cj">抽奖</a>')
+    }
+}
+
+
+</script>
+</head>
+
+<body>
+	<div id="wrapper" class="bgfff">
+    	<div id="header" class="fn">
+        	<div class="header-Back" onclick="javascript:history.go(-1);">返回</div>
+        	<div class="header-Title">发布内容</div>
+        </div>
+    	<div id="container">
+            <div id="main" class="bgfff">
+            	<div class="Fbform">
+            	<form name="theform" id="theform" action="<?php echo U('Label/Vip/add')?>" method="post" enctype="multipart/form-data">
+            	<input name="id" value="<?php echo $id;?>" type="hidden"/>
+                	<ul>
+                    	<li><input type="text" class="title" name="title" placeholder="标题" value="" maxlength="20"/></li>
+                    	<li><textarea name="content" class="con" placeholder="正文内容" <?php if($maxlength > 0){?> maxlength="<?php echo $maxlength;?>" <?php }?> ></textarea></li>
+                    	<li><div class="file"><a href="javascript:void(0)">图片上传</a><input type="file" name="pic" id="pic" /></div></li>
+                    	<li class="fn dn" id="img_li"><img id="pic_src" src="" /></li>
+                    	<li><input type="button" name="dosubmit" id="dosubmit" class="sOne-loginInput-btn" value="发&nbsp;&nbsp;&nbsp;&nbsp;布"  /></li>
+                    </ul>
+                    </form>
+                </div>
+                
+                <include file="Vip:menu"/>
+            </div>
+        </div>
+    </div>
+
+<section style="display: none;" class="loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>

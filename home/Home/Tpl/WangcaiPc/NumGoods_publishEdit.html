@@ -1,0 +1,273 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>发布的卡券编辑</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jsScroll.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e){
+    var ue = UE.getEditor('show_batch_desc',{
+        imageUrl:"{:U('LabelAdmin/Upfile/editoImageSave')}",
+        imagePath:"__UPLOAD__",
+        catcherUrl:"{:U('LabelAdmin/Upfile/getRemoteImage')}",
+        catcherPath:"__UPLOAD__",
+        initialFrameWidth:320,
+        initialFrameHeight:280
+    });
+    ue.addListener("contentChange",function(){
+        $(".Preview-mainCon-text").html(this.getContent());
+        jsScroll(document.getElementById('iphonePreview'),11, 27, 'divSrollBar');
+    });
+    $("#smb,#smb1").click(function(){
+        var dialog;
+        if(!ue.getContent()){
+            $('#show_batch_desc').validationEngine('showPrompt', '不能为空','error','topRight',true);
+        }else{
+            $('#show_batch_desc').validationEngine('hide');
+        }
+        if($("form").validationEngine('validate')){
+            //手动提交需要手动同步编辑器数据
+            ue.sync();
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    Dialoading("正在提交...");
+                },
+                success:function(data){
+					 Dialoading();
+                     if(data.status == '1'){
+                           $(".showsaloonChoose").hide();
+                           $(".showsaloonForm1").hide();
+                           $(".showsaloonForm2").hide();
+                           $(".showsaloonmsg").show();
+                           return false;
+                      }else{
+                           Diaerror(data.info);
+                      }
+                },
+                dataType:'json'
+            });
+            return false;
+        }
+        
+    });
+    //类目
+    requestCate2($("#cate1"),'{$activityInfo['goods_cat']}');
+    $("#cate1").change(function(){
+        var obj = $(this);
+        requestCate2(obj);
+    });
+    $("#cate2").change(function(){
+        var ele_cate2 = $(this).val();
+        $.cookie('ele_cate2', ele_cate2);
+    });
+});
+function requestCate2(obj,p) {
+    var obj_2 = $("#cate2");
+    var val = obj.val();
+    if(val){
+        $.post("{:U('WangcaiPc/NumGoods/ajaxGoodsCate')}",{"id":val},function(data){
+            if(data.status==1){
+                var datas = data.data;
+                obj_2.html('');
+                obj_2.append("<option value=''>请选择二级类目</option>");
+                $.each(datas,function(i,n){
+                	if(n.path == p){
+                		obj_2.append("<option value='"+n.path+"' selected='selected'>"+n.name+"</option>"); 
+                	}else{
+                		obj_2.append("<option value='"+n.path+"'>"+n.name+"</option>"); 
+                	}
+                    
+                });
+                if ($.cookie('ele_cate2')) {
+                    obj_2.val($.cookie('ele_cate2'));
+                }
+            }else{
+                return false;
+            }
+        },"json");
+    }else{
+        obj_2.html("<option value=''>请选择二级类目</option>");
+    }
+}
+
+
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="wddzq"/>  
+        </div>
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                    <ul class="shop-Menu"> 
+                        <include file="WangcaiPc/NumGoods/tabMenu" leftmenuid="fbdzq"/>
+                    </ul>
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>发布卡券编辑</h4>
+                    </div>
+                    
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-list">
+                        <form method="post" action="{:U('WangcaiPc/NumGoods/publishEdit')}">
+                            <input type="hidden" name="id" value="{$activityInfo[id]}" />
+                            <div class="showsaloonForm2">
+                                <div class="Gform l">
+                                    <ul>
+                                        <li class="Gname">&nbsp;发布渠道</li>
+                                        <li class="Ginput"><p>卡券商城</p></li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname">&nbsp;卡券名称</li>
+                                        <li class="Ginput"><p>{$activityInfo['batch_name']}</p></li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*&nbsp;</span>类目</li>
+                                        <li class="Ginput">
+                                            <select id="cate1" class="n2" >
+                                                <option value="">请选择一级类目</option>
+                                                <volist name="goodsCate" id="vo">
+                                                    <option value="{$vo['code']}" <if condition="substr($activityInfo['goods_cat'],0,3) eq $vo['code']">selected="selected"</if>>{$vo['name']}</option>
+                                                </volist>
+                                            </select>
+                                            <select name="cate2" id="cate2" class="validate[required] n2" >
+                                                <option value="">请选择二级类目</option>
+                                                <volist name="twoCate" id="vo">
+                                                    <option value="{$vo['path']}">{$vo['name']}</option>
+                                                </volist>
+                                            </select>
+                                        </li>
+                                    </ul>
+                                    <!-- 
+                                    <ul>
+                                        <li class="Gname">&nbsp;卡券有效期</li>
+                                        <li class="Ginput"><p>{$activityInfo.gb_time|dateformat=###,'Y-m-d'}&nbsp;到&nbsp;{$activityInfo.ge_time|dateformat=###,'Y-m-d'}</div></li>
+                                    </ul>
+                                     -->
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;卡券图片</li>
+                                        <li class="Ginput">
+                                        	<div class="Gchoosemore">
+                                            <php>$imgArr = $hallModel->getImgArr($activityInfo[batch_img]);</php>
+                                            <volist name="imgArr" id="vo">
+                                            <div class="Gchoosemore-list" style="bottom: 0px; opacity: 1; display: block;">
+                                                <input type="text" name="batch_img[]" value="{$vo}" />
+                                                <div class="Gchoosemore-img" style="background-image:url({:get_upload_url($vo)})"></div>
+                                                <div class="Gchoosemore-opr"><a href="javascript:void(0)" class="Gchoosemore-edit"></a><a href="javascript:void(0)" class="Gchoosemore-del"></a></div>
+                                            </div>
+                                            </volist>
+                                            <div class="Gchoosemore-add">
+                                                <a href="javascript:void(0)" class="Gbtn-picmore" title="选择图片" data-rel="{width:641,height:321,maxlength:3,inputname:'batch_img[]'}"><i></i><span>选择图片</span></a>
+                                            </div>
+                                            
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <!-- 
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;展示截止日期</li>
+                                        <li class="Ginput">
+                                        <div class="Gtime1 fn l">
+                                        <input name="show_end_date" type="text" value="{$activityInfo['end_time']|dateformat=###,'Ymd'}" onClick="WdatePicker({minDate:'<?php echo dateformat($activityInfo['gb_time'],'Y-m-d');?>',maxDate:'<?php echo dateformat($activityInfo['ge_time'],'Y-m-d');?>'})" class="validate[required] textbox w380" />
+                                        <em></em>
+                                        </div>
+                                        </li>
+                                    </ul>
+                                    -->
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;卡券价格</li>
+                                        <li class="Ginput">
+                                            <input name="show_price" value="{$activityInfo['batch_amt']}" type="text" class="validate[custom[number],min[0.01]] choosetext" />
+                                        </li>
+                                    </ul>
+                                     
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;卡券描述</li>
+                                        <li class="Ginput">
+                                        <textarea name="show_batch_desc" id="show_batch_desc">{$activityInfo['batch_desc']}</textarea>
+                                        <p class="font-12-cc" style="font-size:12px;">在卡券描述中,建议填写卡券使用规则、可兑换城市、消费者常见问题、<br/>品牌信息等,并配以相应的图片,以便浏览者更加全面地了解卡券详情.</p>
+                                        </li>
+                                    </ul>
+                                    <ul id="use_setting">
+                                        <li class="Gname"><span>*&nbsp;</span>发票类型</li>
+                                        <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="invoice_type" value="{$activityInfo['invoice_type']}" checked="checked" />
+                                            <div class="newRadio">
+                                                <span class="valfirst hover" data-val="0">不提供发票</span>
+                                                <span class="vallast" data-val="1">地税通用发票</span>
+                                                <span class="vallast" data-val="2">增值税发票</span>
+                                            </div>
+                                        </div>
+                                        <span class="txtTips">其他商户在卡券商城采购该卡券时可获得发票</span>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;采购联系人</li>
+                                        <li class="Ginput"><input name="cg_name" id="cg_name" value="{$activityInfo['cg_name']}" type="text" class="validate[required,maxSize[24]]"/></li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;邮箱</li>
+                                        <li class="Ginput"><input name="cg_mail" id="cg_mail" value="{$activityInfo['cg_mail']}" type="text" class="validate[required]"/></li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;电话</li>
+                                        <li class="Ginput"><input name="cg_phone" id="cg_phone" value="{$activityInfo['cg_phone']}" type="text" class="validate[required]"/></li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname">&nbsp;采购条件</li>
+                                        <li class="Ginput"><textarea name="cg_mark" class="validate[maxSize[200]]" >{$activityInfo['cg_mark']}</textarea> <!--富文本--></li>
+                                    </ul>
+                                    <ul>
+                                        <li class="Gname">&nbsp;</li>
+                                        <li class="Ginput">
+                                        <a href="javascript:void(0)" id="smb" class="btn-all btn-updata">确定</a>
+                                        <a href="javascript:history.go(-1);" class="btn-all-del">取消</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="dn showsaloonmsg mt70 tc">
+                            <p class="font-18-99 pt50">卡券需要审核,审核之后我们会把您的卡券上架到卡券商城</p>
+                            <div class="fn tc mt50">
+                                <a href="{:U('WangcaiPc/NumGoods/pulishList')}" class="btn-all w120 btn-ok ml20">确定</a>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

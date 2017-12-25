@@ -1,0 +1,640 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券中心-卡券编辑</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcard.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+	$("#editStore").click(function(){
+		art.dialog.open("{:U('Home/Store/toNavigation')}",{
+			title: '选择门店',
+			width:'800px'
+		});
+	});
+	
+    $("#smb").click(function(){
+        var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                    	 dialog.close();
+                         var pulish_status = $("#pulish_status").val();
+                         $(".add").hide();
+                         $(".addCard").hide();
+                         if(data.isCreatWx == '1'){
+                             if(data.wxCardStatus == '1'){
+                                 $("#wx_card").html("您同时创建了一张微信卡券，微信卡券需要通过审核才能使用。");
+                                 $("#go_url").append(' | <a href="{:U('Weixin/WeixinCard/index')}">查看微信卡券</a>');
+                             }else{
+                                 $("#wx_card").html("微信卡券创建失败:"+data.wxMsg);
+                             }
+                         }
+                         $(".sucess").show();
+                         return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                              }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+    
+    
+    $('#withDrawChooseShop').click(function(){
+        $(this).addClass('hover');
+        var type = $(this).attr('rel');
+        $('.'+type).removeClass('newRadio-input');
+        $('#withDrawAllShop').removeClass('hover');
+        $('input[name=shop]').val(2);
+    });
+    
+    $('#otherChooseShop').click(function(){
+        $(this).addClass('hover');
+        var type = $(this).attr('rel');
+        $('.'+type).removeClass('newRadio-input');
+        $('#otherAllShop').removeClass('hover');
+        $('input[name=shop]').val(2);
+    });
+    
+    $('#withDrawAllShop').click(function(){
+        $(this).addClass('hover');
+        var type = $(this).attr('rel');
+        $('.'+type).addClass('newRadio-input');
+        $('#withDrawChooseShop').removeClass('hover');
+        $('input[name=shop]').val(1);
+    });
+    
+    $('#otherAllShop').click(function(){
+        $(this).addClass('hover');
+        var type = $(this).attr('rel');
+        $('.'+type).addClass('newRadio-input');
+        $('#otherChooseShop').removeClass('hover');
+        $('input[name=shop]').val(1);
+    });
+    //选择门店
+    $(".choose_shop").click(function(){
+        var type = '&type=0';
+        if($(this).attr("id") == "choose_shop"){
+            type = "&type=1";
+        }
+        art.dialog.open("{:U('WangcaiPc/NumGoods/shopList')}"+type,{
+            title:"选择门店",
+            width:'800px'
+        });
+    });
+    
+    
+    //微信卡券处理begin
+    $.select_wx_card = function(){
+         var selectaddnum = '{$goodsData['goods_type']}';
+         if(selectaddnum == '1'){/*代金券*/
+            $(".view-price1").closest("ul").show();
+            $(".view-price2").closest("ul").show();
+         }else if(selectaddnum == '3'){/*折扣券*/
+             $(".view-discount").closest("ul").show();
+         }else if(selectaddnum == '2'){/*提领券*/
+             $(".view-gift").closest("ul").show();
+             $("#send_withdrow_detail").closest("ul").show();
+         }else if(selectaddnum == '0'){/*优惠券*/
+             $(".view-default-detail").closest("ul").show();
+         }
+    }
+    $("#creatCard").click(function(e) {
+        $.select_wx_card();
+        $(".addCard").show('fast');
+		windowheight();
+    });
+    $("#cancelCard").click(function(e) {
+        $(".addCard").hide('fast');
+    });
+    
+    $(".Sselect>div").click(function(){
+        $(this).closest(".Sselect").toggleClass("hover");
+    })
+    $(".Sselect>ul li").click(function(){
+        $(this).closest(".Sselect").find("span i").attr("class",$(this).attr("data-val"));
+        $(this).closest(".Sselect").find("input").val($(this).attr("data-val"));
+        $(".shopBoxView").css("background",$(this).find("i").css("background"));
+        $(".Interface .InterfaceContent a.btn").css("background",$(this).find("i").css("background"));
+        $(this).closest(".Sselect").toggleClass("hover");
+    });
+    //微信卡券处理end
+	
+	
+	//初始化线上线下门店
+	var _openStores = $("input[name=openStores]").val();//门店列表
+	var _shop = $("input[name=shop]").val();//门店
+	var _online_verify_flag = $("input[name=online_verify_flag]").val();//线上线下
+	if(_online_verify_flag==1){
+		$("#js_open").click();
+	}
+	if(_shop==1){
+		$("#js_close").click();
+		$("#withDrawAllShop").click();
+	}
+	if(_shop==2 && _openStores){
+		$(".choose_shop").addClass("hover");
+        $(".allShop").removeClass("hover");
+        $("#js_close").click();
+	}
+	if(_shop==2 && !_openStores){
+        $(".allShop").click();
+		$("#widthDrowOffline").hide();
+	}
+});
+function widthDrowOffline(t){
+	var hasclass = t.hasClass("hover");
+	$("input[name=online_verify_flag]").val(t.attr("data-val"));
+	if(t.attr("data-val")=="0"){
+	    if(hasclass){
+	        $("#widthDrowOffline").show();
+	        $("#print_show").show();
+			$('input[name=shop]').val(1);
+            if($("#js_open").hasClass("hover")){
+				$("input[name=online_verify_flag]").val(1);
+                if($("#withDrawChooseShop").hasClass("hover")){
+                	$('input[name=shop]').val(2);
+                }
+            };
+	    }else{
+			$("#withDrawAllShop").click();
+			$("input[name=openStores]").val("");
+			$("#number").html(0);
+	        $("#widthDrowOffline").hide();
+	        $("#print_show").hide();
+	        if($("#js_open").hasClass("hover")){
+				$("input[name=online_verify_flag]").val(1);
+	        	$('input[name=shop]').val(2);
+	        }else{
+				$("input[name=online_verify_flag]").val(0);
+				$('input[name=shop]').val(0);
+			};
+	    }
+	}else if(t.attr("data-val")=="1"){
+        if(hasclass){
+            $.post("{:U('WangcaiPc/NumGoods/OnlineStoreStatus')}",function(data){
+                if(!data.status){
+                    art.dialog({
+                        title: '线上提领开通',
+                        content:'<div class="openonline" style="display:block">您还未开通线上提领，现在<a href="{:U("Home/Store/onlineStore")}">需要开通</a>吗？</div>',
+                        width:'400px',
+                        okVal: '开通',
+                        ok: function(){
+                            $('input[name=online_verify_flag]').val(1);
+                            if($('#withDrawAllShop').hasClass('hover') == true && $('#js_close').hasClass('hover') == true){
+                                $('input[name=shop]').val(1);
+                            }else if($('#withDrawChooseShop').hasClass('hover') == true && $('#js_close').hasClass('hover') == true){
+                                $('input[name=shop]').val(2);
+                            }
+                            window.open("{:U('Home/Store/onlineStore')}");
+                        },
+                        cancelVal: '关闭',
+                        cancel: function(){
+                            art.dialog.close();
+                            $('#js_open').removeClass('hover');
+                        }
+                    });
+                }else{
+                    $('input[name=online_verify_flag]').val(1);
+                    if($('input[name=shop]').val() == 0){
+                        if($('#withDrawAllShop').hasClass('hover') == true && $('#js_close').hasClass('hover') == true){
+                            $('input[name=shop]').val(1);
+                        }else{
+                            $('input[name=shop]').val(2);
+                        }
+                    }
+                }
+            },'json');
+        }else{
+            $('input[name=online_verify_flag]').val(0);
+            if($('#withDrawAllShop').hasClass('hover') == true && $('#js_close').hasClass('hover') == true){
+                $('input[name=shop]').val(1);
+            }else if($('#withDrawChooseShop').hasClass('hover') == true && $('#js_close').hasClass('hover') == true){
+                $('input[name=shop]').val(2);
+            }else if($('#js_close').hasClass('hover') == false){
+                $('input[name=shop]').val(0);
+            }
+        }
+	}
+}
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="wddzq"/>  
+        </div>
+
+        <div id="container"> 
+            <div id="main"> 
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                    <ul class="shop-Menu"> 
+                        <include file="WangcaiPc/NumGoods/tabMenu" leftmenuid="lxck"/>
+                    </ul>
+                <script>
+                //设置当前菜单
+                $(function(){
+                    var menu_id = "Eticket-"+("info"||"ewmbqqd");
+                    var _currentMenu = $("#"+menu_id,".alinav");
+                    _currentMenu.addClass('hover');
+                });
+                </script>                    
+                </div> 
+                <div class="subcon fn add">
+                    <div class="main-name fn">
+                        <h4>卡券编辑</h4>
+                    </div>
+                    <div class="fn">
+                        <form method="post" action="<?php echo U('NumGoods/numGoodsEdit');?>">
+                            <div class="Gform w1">
+                            <ul>
+                                <li class="Gname">&nbsp;卡券名称</li>
+                                <li class="Ginput"><p>{$goodsData['goods_name']}</p></li>
+                            </ul>
+                            <ul>
+                                <li class="Gname"><span>*</span>&nbsp;卡券图片</li>
+                                <li class="Ginput">
+                                    <div class="Gchoose Gview-img">
+                                        <input type="hidden" value="<?php echo $goodsData['goods_image'];?>" name="img_resp" />
+                                        <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片"><i></i></a>
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gname"><span>*</span>&nbsp;<?php if($goodsData['goods_type']=='0'){echo '优惠内容';}else{echo '打印小票内容';}?></li>
+                                <li class="Ginput"><textarea name="print_text" id="print_text" class="validate[maxSize[100],required] " style="width:355px;">{$goodsData['print_text']}</textarea>
+                                <div class="newRadio-input">
+                                <div class="switch auto fn cl">
+                                <input type="hidden" value="{$goodsData['print_text']}" name="pre_print_text" />
+                                <p class="txtTips">该内容将显示在验证后的打印小票上，运营员根据打印小票内容提供服务</p>
+                                </div>
+                                </div>
+                                </li>
+                            </ul>
+                            <input type="hidden" id="openStores" name="openStores" value="{:implode(',',$storeArr)}"/>
+                            <input type="hidden" name="shop" id="shop" <if condition="$goodsData['pos_group_type'] eq '1'">value="1"<else/>value="2"</if> />
+                            <input type="hidden" name="preOnlineVerify" value="{$goodsData['online_verify_flag']}" />
+                            <if condition="$goodsData['goods_type'] eq '2'">
+                            <ul id="isonline">
+                                <li class="Gname"><span>*&nbsp;</span>核验方式</li>
+                                <li class="Ginput">
+                                <div class="switch  auto " data-callback="widthDrowOffline">
+                                    <input type="checkbox" name="online_verify_flag" value="{$goodsData['online_verify_flag']}" />
+                                    <div class="newRadio">
+                                        <span class="valfirst" data-val="1" id="js_open">线上提领（支持物流配送）</span>
+                                        <span class="vallast widthDrowOffline" id="js_close" data-val="0">线下门店自提</span>
+                                    </div>
+                                </div>
+                                <div style="clear:both; display:block; margin-top:12px;"></div>
+                                <div class="switch" id="widthDrowOffline">
+                                        <div class="newRadio">
+                                            <span class="valfirst allShop" rel="withDraw" data-val="1" id="withDrawAllShop">所有门店</span>
+                                            <span class="vallast beforeChoseShop choose_shop" rel="withDraw" data-val="2" id="withDrawChooseShop">指定门店</span>
+                                        </div>
+                                        <div class="withDraw" style="float:none; clear:both; padding-top:0px;">
+                                        <div class="sweet_tips2" id="htmlss">您总共选择了<span id="number" class="shopNumber"><notempty name='storeArr'>{:count($storeArr)}<else />0</notempty></span>家门店&nbsp;&nbsp;<a href="javascript:void()" id="editStore" name="choose_shop" class="">点击查看</a></div>
+                                        </div>
+                                    </div>
+                                <p class="txtTips"><a href="javascript:void(0);" class="js_whatis">什么是线上提领？</a>持有卡券的消费者可以申请通过物流获取对应的实际商品</p>
+                                <p class="txtTips">注：只有安装了验证终端的门店才能验证卡券</p>
+                                </li>
+                            </ul>
+                            <else />
+                                <ul id="isOffline">                         
+                                    <li class="Gname"><span>*&nbsp;</span>核验方式</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <div class="newRadio">
+                                                <span class="valfirst allShop <if condition="$goodsData['pos_group_type'] eq '1'">hover</if>" rel="other" id="withDrawAllShop" data-val="1">所有门店</span>
+                                                <span class="vallast beforeChoseShop <if condition="$goodsData['pos_group_type'] eq '2'">hover</if>" id="withDrawChooseShop" rel="other" data-val="2">指定门店</span>
+                                            </div>
+                                            <div class="<if condition="$goodsData['pos_group_type'] neq '2'">newRadio-input </if> other" style="float:none; clear:both; padding-top:10px;">
+                                            <a href="javascript:void(0);" class="btn-up fl choose_shop">选择门店</a>
+                                            <div class="sweet_tips ml10" style="display:inline-block">您已选择<span id="number" class="shopNumber">{:count($storeArr)}</span>家核验门店</div>
+                                            <p class="txtTips">注：只有安装了验证终端的门店才能验证卡券</p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </if>
+                            <if condition="$type eq 'yimaSellRice' ">
+                            <ul>
+                                <li class="Gname">是否萨湾金谷发货</li>
+                                <li class="Ginput">
+                                <div class="switch">
+                                    <div class="newRadio">
+                                        <span <if condition="$goodsData['source'] eq '5' "> class="valfirst hover"<else />class="valfirst"</if> data-val="1">是</span>
+                                        <span <if condition="$goodsData['source'] neq '5' "> class="vallast hover" <else />class="vallast"</if> data-val="0">否</span>
+                                    </div>
+                                </div>
+                                </li>
+                            </ul>
+                            </if>
+                            <ul>                         
+                                <li class="Gname"><span>*&nbsp;</span>同步创建微信卡券</li>
+                                <li class="Ginput">
+                                    <if condition="!empty($isSyncWxCard)">
+                                        <p>已同步创建微信卡券</p>
+                                        <else />
+                                        <div class="switch">
+                                        <input type="radio" name="is_createWx" id="is_createWx" value="0" checked="checked" />
+                                        <div class="newRadio">
+                                            <span class="valfirst hover" data-val="0" id="cancelCard">否</span>
+                                            <span class="vallast " data-val="1" id="creatCard">是</span>
+                                        </div>
+                                    </div>
+                                    </if>
+                                </li>
+                            </ul>
+                            </div>
+                            
+                            <div class="addCard dn">
+                                <div class="steps mt15">创建微信卡券</div>
+                                <div class="tipNormal mt15">同步创建微信卡券，您需要开通微信卡包业务并将您的微信公众号授权绑定至旺财 <a target="_blank" href="{:U('Weixin/Weixin/index')}">前去绑定</a></div>
+                                <div class="shopBox fn mr30 mt15">
+                                    <div class="shopBoxCon nobottom" style="margin-right:0;">
+                                        <div class="shopBoxCon-top"></div>
+                                        <div class="shopBoxCon-title" onClick="nextMain(0)"><span><em class="cardtype"></em></span></div>
+                                        <div class="cl"></div>
+                                        <div class="shopBoxView nopadding fn">
+                                            <div class="shopMod disabled" id="shopMod_0" data-edit="0" data-special="0">
+                                                <div id="firstMain">
+                                                    <!--新的卡券领取页面-->
+                                                    <div class="Interface">
+                                                        <div class="InterfaceContent">
+                                                            <div class="Interfacelogo">
+                                                                <img src="<?php if(!empty($nodeInfo['head_photo'])){echo '__UPLOAD__/'.$nodeInfo['head_photo'];}?>" class="show_img img-logo" id="showLogo"/>
+                                                            </div>
+                                                            <h2 class="card_user">{$nodeInfo['node_name']}</h2>
+                                                            <h1 class="card_name">蛋糕提领券</h1>
+                                                            <a class="btn">使用</a>
+                                                            <h3 class="card_subname">蛋糕免费送</h3>
+                                                            <p id="date_str">有效期: 2015-11-11~2015-11-30</p>
+                                                            <ul class="oprMenu">
+                                                                <li>礼品券详情<i></i></li>
+                                                                <li>适用门店<i></i><span>最近距离11.3公里&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
+                                                                <li>公众号<i></i></li>
+                                                                <li class="dn withdrow">线上领取<i></i></li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <!--新的卡券领取页面 end-->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--页面-->
+                                    <div class="Gform l">
+                                            <ul>
+                                                <li class="Gname"><span>*</span>&nbsp;使用方式<li>
+                                                <li class="Ginput">
+                                                <div class="switch" data-callback="swith">
+                                                    <input type="radio" value="1" checked="checked" name="useType">
+                                                    <div class="newRadio">
+                                                        <span class="valfirst hover" data-val="1">投放</span>
+                                                        <span class="vallast" data-val="2">预存</span>
+                                                    </div>
+                                                    <i class="allAsk" title='<div class="showDetail">
+                                                        <dl><dt>投放</dt><dd>此类型的微信卡券可用于卡券投放，活动礼品，不支持自动回复和群发。</dd></dl>
+                                                        <dl><dt>预存</dt><dd>此类型的微信卡券可用于自动回复和群发。库存上限10W张。</dd></dl>
+                                                    </div>'></i>
+                                                </div>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="Gname"><span>*</span>&nbsp;商家名称<li>
+                                                <li class="Ginput">
+                                                    <input type="text" name="node_name" class="validate[required,maxSize[12]]  view-user" maxlength="12" value="{$userInfo['node_name']}" /><span class="maxTips forInput" data-max="12">0/12</span>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="Gname">*&nbsp;卡券标题：</li>
+                                                <li class="Ginput">
+                                                    <input type="text" class="validate[required,maxSize[9]] textbox view-name" name="title" id="title" maxlength="9" value="{$goodsData['goods_name']}" /><span class="maxTips forInput" data-max="9">0/9</span>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="Gname">&nbsp;卡券副标题<li>
+                                                <li class="Ginput">
+                                                    <input type="text" class="validate[maxSize[18]]  view-subname" name="sub_title" maxlength="18" value="" /><span class="maxTips forInput" data-max="18">0/18</span>
+                                                </li>
+                                            </ul>
+                                            <ul class="dn">
+                                                <li class="Gname"><span>*</span>&nbsp;减免金额<li>
+                                                <li class="Ginput">
+                                                    <input type="text" name="reduce_cost" id="reduce_cost"  class="validate[custom[number],min[1],required]  view-price1" maxlength="9" value="{$goodsData['goods_amt']}" /><span class="maxTips forInput">元</span>
+                                                </li>
+                                            </ul>
+                                            <ul class="dn">
+                                                <li class="Gname">&nbsp;抵扣条件<li>
+                                                <li class="Ginput">
+                                                    <input type="text" name="least_cost" class="validate[custom[number],min[0]]  view-price2" maxlength="9" value="" /><span class="maxTips forInput">元</span>
+                                                    <span class="txtTips">消费多少元可用</span>
+                                                </li>
+                                            </ul>
+                                            <ul class="dn">
+                                                <li class="Gname"><span>*</span>&nbsp;折扣额度<li>
+                                                <li class="Ginput">
+                                                    <input type="text" name="discount" id="discount" class="validate[custom[number],min[0],required]  view-discount" maxlength="5" value="{$goodsData['goods_discount']}" /><span class="maxTips forInput">%</span>
+                                                </li>
+                                            </ul>
+                                            <ul class="dn">
+                                                <li class="Gname"><span>*</span>&nbsp;礼品内容<li>
+                                                <li class="Ginput">
+                                                    <textarea name="gift" class="validate[required,maxSize[100]]  view-gift" maxlength="100"></textarea><span class="maxTips forArea" data-max="100">0/100</span>
+                                                </li>
+                                            </ul>
+                                            <ul class="dn">
+                                                <li class="Gname"><span>*</span>&nbsp;优惠详情<li>
+                                                <li class="Ginput">
+                                                    <textarea name="default_detail" id="default_detail" class="validate[required,maxSize[100]]  view-default-detail" maxlength="500">{$goodsData['print_text']}</textarea><span class="maxTips forArea" data-max="500">0/500</span>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="Gname"><span>*</span>&nbsp;卡券颜色<li>
+                                                <li class="Ginput">
+                                                    <div class="Sselect">
+                                                        <input type="hidden" name="card_color" class="view-color" value="Color010" />
+                                                        <div class="SselectInput">
+                                                            <span><i class="Color010"></i></span>
+                                                            <a href="javascript:void(0)"></a>
+                                                        </div>
+                                                        <ul>
+                                                            <volist name="color" id="vo">
+                                                            <li data-val="{$vo['name']}"><i class="{$vo['name']}"></i></a></li>
+                                                            </volist>
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="Gname"><span>*</span>&nbsp;商家LOGO<li>
+                                                <li class="Ginput">
+                                                <div class="Gchoose Gview-img">
+                                                    <input type="text" name="node_img" id="node_img" value="{$userInfo['head_photo']}" /><img src="{$userInfo['head_photo']}">
+                                                    <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:641,height:321,type:1}"><i></i></a>
+                                                </div>
+                                                <span class="txtTips">建议尺寸300*300像素，仅支持jpg、jpeg、bmp、png格式正方形照片<br />大小不超过2M</span>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="Gname"><span>*</span>&nbsp;有效期<li>
+                                                <li class="Ginput">
+                                                <div class="Gtime2 fn">
+                                                    <input type="text" id="start_time" class="validate[required]" name="start_time" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" />
+                                                    <em>至</em>
+                                                    <input type="text" id="end_time" class="validate[required]" name="end_time"  onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="" />
+                                                </div>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="Gname"><span>*</span>&nbsp;领券限制<li>
+                                                <li class="Ginput">
+                                                    <input type="text" class="validate[required,custom[number],min[1]]" name="get_limit" maxlength="9" value="1" /><span class="maxTips forInput">张</span>
+                                                    <span class="txtTips">每个用户领券上限</span>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="Gname"><span>*</span>&nbsp;用户分享<li>
+                                                <li class="Ginput">
+                                                    <div class="switch">
+                                                        <input type="radio" value="1" name="can_give_friend" checked="checked">
+                                                        <div class="newRadio">
+                                                            <span class="valfirst hover" data-val="1">可以</span>
+                                                            <span class="vallast" data-val="2">不可以</span>
+                                                        </div>
+                                                    </div>
+                                                    <span class="txtTips">用户领取后，可分享给其他好友</span>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="Gname"><span>*</span>&nbsp;销券设置<li>
+                                                <li class="Ginput">
+                                                    <div class="switch">
+                                                        <input type="radio" value="3" name="code_type" checked="checked">
+                                                        <div class="newRadio">
+                                                            <span class="valfirst hover" data-val="3">二维码</span>
+                                                            <span class="vallast" data-val="1">仅卡券号</span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                            
+                                            <ul>
+                                                <li class="Gname"><span>*</span>&nbsp;使用须知<li>
+                                                <li class="Ginput">
+                                                    <textarea name="description" class="validate[required,maxSize[500]]" maxlength="500"></textarea><span class="maxTips forArea" data-max="500">0/500</span>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="Gname">&nbsp;客服电话：</li>
+                                                <li class="Ginput">
+                                                    <input type="text" name="service_phone" class="textbox view-servicetel" maxlength="16" value="" />
+                                                </li>
+                                            </ul>
+                                            <ul class="dn">
+                                                <li class="Gname">短信提醒<li>
+                                                <li class="Ginput">
+                                                <div class="switch">
+                                                    <input type="radio" value="1" name="send_withdrow_detail" id="send_withdrow_detail" checked="checked">
+                                                    <div class="newRadio">
+                                                        <span class="valfirst hover" data-val="1">发送</span>
+                                                        <span class="vallast" data-val="2">不发送</span>
+                                                    </div>
+                                                </div>
+                                                <span class="txtTips">短信资费0.1元／条，费用将从账户余额里扣除</span>
+                                                </li>
+                                            </ul>
+                                    </div>
+                                    <!--页面-->
+                                </div>
+                            
+                           </div>
+                           <div class="ml150">
+                                <input type="hidden" name="goods_id" value="{$goodsData['goods_id']}" /><a href="javascript:void(0);" title="确认" id="smb" class="btn-all w110">提交</a><a href="javascript:history.go(-1);" title="取消" id="" class="btn-all-del ml10 w110">返回</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- 成功div -->
+                <div class="subcon sucess dn">
+                    <div class="eTicket_form">
+                        
+                        <div class="loadTip">
+                            <div class="loadStatus ok">
+                                <dl>
+                                    <dt class="font20">恭喜您，翼码卡券编辑成功！</dt>
+                                    <dd id="wx_card"></dd>
+                                    <dd></dd>
+                                    <dd id="go_url">您可以：<a href="{:U('WangcaiPc/NumGoods/numGoodsList')}">返回列表</a></dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>                   
+                </div>
+                <!-- 成功div -->
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+    <div class="whatis">
+<ul class="tipNormal">
+    <li>您可以创建支持线上提领的提领券，持有此卡券的消费者可以申请线上提领请求。</li>
+    <li>您需要前往<a target="_blank" href="{:U('LabelAdmin/OrderList/withdrawList')}">提领明细</a>处理订单，将对应的实际商品通过物流邮寄送至消费者。</li>
+</ul>
+
+<dl class="whatisDetail">
+<dt>基本价：<em>30元</em>/月</dt>
+<dd>开通当月，服务费按“月服务费/30天×当月使用天数“收取。</dd>
+<dd>下线当月，服务费按整月收取。</dd>
+<dd>服务开通时将一次性扣除当月剩余天数的费用。</dd>
+<dd>次月生成结算单、开票。</dd>
+<dd>到期自动扣款续费。</dd>
+</dl>
+</div>
+</body>
+</html>
+<script>
+$(function(){
+$("body").on("click",".js_whatis",function(){
+    art.dialog({
+        title: '线上提领',
+        content:'<div class="whatis" style="display:block">'+ $(".whatis").html()+'</div>',
+        width:'500px',
+        lock:true,
+        height:'340px'
+    });
+})  
+
+
+
+})
+</script>

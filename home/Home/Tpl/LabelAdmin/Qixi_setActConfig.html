@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>抽奖设置_营销活动_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wprize.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wmember.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" >
+window._g = window._g || {};
+_g.batch_id = '{$m_id}';
+$(function(){
+	showOrHideWxzmhd();
+	//抽奖设置
+		var _one_sub = false;
+        $('#save').click(function(){
+	        if($("#form1").validationEngine('validate')){
+	       	var phone_total_count = '0',phone_day_count ='0',phone_total_part='0',phone_day_part = '0';
+	        	if($("input[name='phone_total_count']:checked").val() >= 1){
+	        		phone_total_count = $('#zzj').val();
+	        	}
+	        	if($("input[name='phone_day_count']:checked").val() >= 1){
+	        		phone_day_count = $('#rzj').val();
+	        	}
+	        	if($("input[name='phone_total_part']:checked").val() >= 1){
+	        		phone_total_part = $('#zcj').val();
+	        	}
+	        	if($("input[name='phone_day_part']:checked").val() >= 1){
+	        		phone_day_part = $('#rcj').val();
+	        	}
+	        	if(_one_sub)
+					return false;
+
+				 _one_sub = true;
+				
+                var jointype = $('#join_mode').val(), arr = [], is_limit = 0, member_reg_mid = '', fans_collect_url = '', arr_zj = [];
+                    arr = $('input[name="phone_member_group"]:checked').map(function(){return this.value}).get();
+                    arr_zj = $('input[name="phone_member_group_zj"]:checked').map(function(){return this.value}).get();
+                    is_limit = $("#ul_jointype_0").find('[name="limit"]').val();
+                    is_limit_zj = $("#ul_jointype_0").find('[name="limit_zj"]').val();
+                    if ($('[name="phone_recruit"]').val() == 1) {
+                    	member_reg_mid = $('[name="member_reg_mid"]').val();
+                    }
+                if (is_limit_zj == 1) {
+                	var is_in_arr = 0;
+                    for (var i = 0; i < arr_zj.length; i++) {
+                    	is_in_arr = $.inArray(arr_zj[i], arr);
+                    	if (is_in_arr == -1) {
+                    		break;
+                    	}
+                    }
+                }
+                
+                if (is_limit == 1 && is_in_arr == -1) {
+                	dialog = art.dialog({title:false,content:"<div class='msg-all-error'>勾选抽奖限制的分组必须在参与的分组范围内</div>",fixed: true,padding:0,lock:true,time:2});
+                	_one_sub = false;
+                	return false;
+                }
+                
+                var member_batch_id = arr.join();
+                var member_batch_id_zj = arr_zj.join();
+                if (is_limit == 1 && member_batch_id == '') {
+                	dialog = art.dialog({title:false,content:"<div class='msg-all-error'>请勾选参与限制的分组</div>",fixed: true,padding:0,lock:true,time:2});
+                	_one_sub = false;
+                	return false;
+                }
+                if (is_limit_zj == 1 && member_batch_id_zj == '') {
+                	dialog = art.dialog({title:false,content:"<div class='msg-all-error'>请勾选抽奖限制的分组</div>",fixed: true,padding:0,lock:true,time:2});
+                	_one_sub = false;
+                	return false;
+                }
+                var data = {
+                is_limit : 0,
+                is_limit_zj : 0,
+				phone_total_count : phone_total_count,
+				phone_day_count : phone_day_count,
+				phone_total_part : phone_total_part,
+				phone_day_part : phone_day_part,
+				m_id : {$m_id}
+			}
+
+			dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+			$.post('{:U('LabelAdmin/Qixi/setActConfig')}', data, function(resp){
+                dialog.close();
+                if (resp.status) {
+                	if ($('#isReEdit').val() == 1) {
+                		window.location.href="{:U('MarketActive/Activity/MarketList')}";
+                	} else {
+                		window.location.href="{:U('LabelAdmin/Qixi/setPrize', array('m_id' => $m_id, 'isReEdit' => 0))}";
+                	}
+                } else {
+                	dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true,time:2});
+                	_one_sub = false;
+                }
+				//跳转
+			}, 'json');
+        }
+    }) ; 
+
+	//奖项删除   
+	//选择抽奖
+   $('#chooseMember').click(function(){
+        art.dialog.open("{:U('LabelAdmin/CjSet/selectMemreg?call_back=call_back')}",{
+             width: 800,
+             height: 600,
+             title:'会员招募活动',
+             lock: true
+        })
+   });
+   $("#jointype").on("click",".Gform .switch .newRadio span",function(){
+	   var t = $(this),
+	       s = t.closest(".switch"),
+		   val = t.attr("data-val");
+       checkjoin(val);
+   })
+
+   //参与对象处理
+   $('body').on('click', '#phone_member .newRadio span,#wx_member .newRadio span', function(){
+        var t = $(this), v = t.data('val'), p = t.closest('.switch'), h = t.hasClass("hover"), pp = t.parent().parent(), id = pp.attr('id');
+        if(id == 'phone_member'){
+            $obj = $('#ul_member_join');
+            if( pp.find('input[value="0"]:checked').length > 0 ){
+                $obj.hide();
+            }
+            else{
+                $obj.show();
+            }
+        }
+        //是否显示微信招募活动
+        showOrHideWxzmhd();
+   })
+   //微信授权种类控制参与和中奖限制
+   $('body').on('click', '#wx_auth_type .newRadio span', function(){
+	   var span = $(this);
+	   var wx_auth_type = span.parent().parent().find('input[name="wx_auth_type"]');
+	   if (wx_auth_type.val() == 0) {
+		   $('#wx_join_limit').removeClass('disabled');
+		   $('#wx_zj_limit').removeClass('disabled');
+		   $('#wx_join_limit span[data-val="0"]').click();
+		   $('#wx_zj_limit span[data-val="0"]').click();
+		   $('#wx_join_limit').addClass('disabled');
+		   $('#wx_zj_limit').addClass('disabled');
+	   }
+	   if (wx_auth_type.val() == 1) {
+		   $('#wx_join_limit').removeClass('disabled');
+		   $('#wx_zj_limit').removeClass('disabled');
+	   }
+   });
+
+   if( ($('#join_mode').val() == '0' && $("#phone_member").find('input[value="0"]:checked').length > 0 ) 
+		   || $('#join_mode').val() == '1' && $("#wx_member").find('input[value="0"]:checked').length > 0){
+        $('#ul_member_join').hide();
+   }
+
+});
+//是否显示微信招募活动
+function showOrHideWxzmhd() {
+	var is_select_ungroup = false;
+	$('#ul_jointype_1_1 #wx_member').find('input[name="wx_member_group"]:checked').each(function(){
+		if ($(this).val() == 0) {
+			is_select_ungroup = true;
+		}
+	});
+	//如果选中了未分组这个组，就显示
+	if (is_select_ungroup == true) {
+		$('#wx_zmhd').show();//微信招募活动
+	} else {
+		$('#wx_zmhd').hide();
+	}
+}
+
+function call_back(datas){
+	$("#chooseMemberName").html(datas.name);
+    $("#va_choose_mem").val('1');
+    $("#member_reg_mid").val(datas.id);
+}
+function checkposen(field, rules, i, options){
+	var name = field.closest(".switch").find(">input").attr("name");
+	var a = parseInt($("#zcj").val()),b = parseInt($("#rcj").val()),c = parseInt($("#zzj").val()),d = parseInt($("#rzj").val());
+	if(name=="phone_total_part" || name=="phone_day_part"){
+        var e = $('input[name="phone_total_part"]').val(),f = $('input[name="phone_day_part"]').val();
+		if(e=='1' && f == 1 && a<b){return "总参与次数必须大于日参与次数";}
+	}else if(name=="phone_total_count" || name=="phone_day_count"){
+        var e = $('input[name="phone_total_count"]').val(),f = $('input[name="phone_day_count"]').val();
+		if(e=='1' && f == 1 && c<d){return "总中奖次数必须大于日中奖次数";}
+	};
+}
+function checkjoin(type){
+	var w = [$("#allprize"),$("#dayprize"),$("#phone_member"),$("#wx_member"),$('#ul_member_join')];
+	var i = [w[0].find(".newRadio-input input[type='text']"),w[1].find(".newRadio-input input[type='text']")];
+	if(type==0){
+		w[0].removeClass("disabled");
+		w[1].removeClass("disabled");
+		w[0].find("span[data-val='1']").click();
+		w[1].find("span[data-val='1']").click();
+        $('#ul_jointype_0').show();
+        $('#ul_jointype_1').hide();
+		i[0].attr("disabled",false);
+		i[1].attr("disabled",false);
+        w[4].show();
+
+        if( $("#phone_member").find('input[value="0"]:checked').length > 0 ){
+            w[4].hide();
+        }
+        else{
+            w[4].show();
+        }
+	}
+	if(type==1){
+		w[0].find("span[data-val='1']").click();
+		w[1].find("span[data-val='1']").click();
+		w[0].addClass("disabled");
+		w[1].addClass("disabled");
+		i[0].attr("disabled",true).val(1);
+		i[1].attr("disabled",true).val(1);
+        $('#ul_jointype_0').hide();
+        $('#ul_jointype_1').show();
+        w[4].hide();
+	}
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            	<div class="member_con">
+            		{$stepBar}
+                </div>
+                <form name="form1" id="form1">
+                <!-- <input type="hidden" name="wx_bd" value="{$wx_bd}"> -->
+                <input type="hidden" id="batch_id" value="{$batch_id}"/>
+				<div class="Gform prize l">
+                            <ul class="zqj">
+                                <li class="Gnmae">&nbsp;总参与次数：</li>
+                                <li class="Ginput">
+                                    <div class="switch">
+                                        <input type="radio" name="phone_total_part" value="<if condition="empty($cj_rule_arr['phone_total_part'])">0<else />1</if>" checked="checked">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0">不限</span>
+                                            <span class="vallast" data-val="1">限制</span>
+                                        </div>
+                                        <div class="newRadio-input">
+                                            <input id="zcj" type="text" maxlength="6" class="validate[required,custom[integer],min[1],funcCall[checkposen]]" value="<if condition="!empty($cj_rule_arr['phone_total_part'])">{$cj_rule_arr['phone_total_part']}</if>" style="width:300px" ><span class="maxTips forInput">次</span>
+                                        </div>
+                                    </div>
+                                    <span class="txtTips">单个用户活动期间可参与抽奖次数</span>
+                                </li>
+                            </ul>
+                            <ul class="zqj">
+                                <li class="Gnmae">&nbsp;日参与次数：</li>
+                                <li class="Ginput">
+                                    <div class="switch">
+                                        <input type="radio" name="phone_day_part" value="<if condition="empty($cj_rule_arr['phone_day_part'])">0<else />1</if>" checked="checked">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0">不限</span>
+                                            <span class="vallast" data-val="1">限制</span>
+                                        </div>
+                                        <div class="newRadio-input">
+                                            <input id="rcj" type="text" maxlength="6" class="validate[required,custom[integer],min[1],funcCall[checkposen]]" value="<if condition="!empty($cj_rule_arr['phone_day_part'])">{$cj_rule_arr['phone_day_part']}</if>" style="width:300px" ><span class="maxTips forInput">次</span>
+                                        </div>
+                                    </div>
+                                    <span class="txtTips">单个用户活动期间每日可参与抽奖次数</span>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gnmae">&nbsp;总中奖次数：</li>
+                                <li class="Ginput">
+                                    <div id="allprize" class="switch">
+                                        <input type="radio" name="phone_total_count" value="<if condition="empty($cj_rule_arr['phone_total_count'])">0<else />1</if>" checked="checked">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0">不限</span>
+                                            <span class="vallast" data-val="1">限制</span>
+                                        </div>
+                                        <div class="newRadio-input">
+                                            <input id="zzj" type="text" maxlength="6"  class="validate[required,custom[integer],min[1],funcCall[checkposen]]" value="<if condition="!empty($cj_rule_arr['phone_total_count'])">{$cj_rule_arr['phone_total_count']}</if>" style="width:300px" ><span class="maxTips forInput">次</span>
+                                        </div>
+                                    </div>
+                                    <span class="txtTips">单个用户活动期间总中奖次数</span>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gnmae">&nbsp;日中奖次数：</li>
+                                <li class="Ginput">
+                                    <div id="dayprize" class="switch">
+                                        <input type="radio" name="phone_day_count" value="<if condition="empty($cj_rule_arr['phone_day_count'])">0<else />1</if>" checked="checked">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0">不限</span>
+                                            <span class="vallast" data-val="1">限制</span>
+                                        </div>
+                                        <div class="newRadio-input">
+                                            <input id="rzj" type="text" maxlength="6" class="validate[required,custom[integer],min[1],funcCall[checkposen]]" value="<if condition="!empty($cj_rule_arr['phone_day_count'])">{$cj_rule_arr['phone_day_count']}</if>" style="width:300px" ><span class="maxTips forInput">次</span>
+                                        </div>
+                                    </div>
+                                    <span class="txtTips">单个用户活动期间总中奖次数</span>
+                                </li>
+                            </ul>
+                    <div class="fn tc pt20 mt20 mb20 Ginput">
+							<input type="hidden" name="m_id" value="{$m_id}" id="m_id"/>
+							<input type="hidden" name="isReEdit" value="{$isReEdit}" id="isReEdit"/>
+                            <a href="{:U('MarketActive/Activity/MarketList')}" class="btn-all-del ml10">取消</a>
+                            <eq name="isReEdit" value="0"><a href="{:U('LabelAdmin/Qixi/setActBasicInfo',array('m_id' => $m_id, 'isReEdit' => 0))}" class="btn-all ml10">上一步</a></eq>
+                            <a href="javascript:void(0)" class="btn-all ml10" id="save"><eq name="isReEdit" value="1">保存<else />下一步</eq></a>
+					</div>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+    <div class="service"></div>
+</body>
+</html>

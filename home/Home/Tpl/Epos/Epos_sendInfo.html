@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+<title>翼码旺财</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name = "format-detection" content="telephone = no" />
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/app_css.css"/>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/require.js"></script>
+</head>
+<body>
+	<!-- <div id="header">
+    <i class="icon-back l"><a href="{:U('sendList',array('sid'=>$sid))}" class="a-hide goNav"></a></i>
+    <h1>数据明细</h1>
+    <i class="icon-home r"><a href="<?php echo C('INDEX_URL')?>" class="a-hide loginOut"></a></i>
+</div>
+<div id="wrapper"> -->
+	<div id="main">
+		 <div class="detail-top">
+	  <div class="detail-name01">
+	    <p>{$data['status']}</p>
+	    <p>{$data['batch_short_name']}</p>
+	  </div>
+	  <div class="detail-name02">
+	   <div class="w95">{$data['phone_no']}</div>
+	  </div>
+	</div>
+	<div class="detail-cont bdtop">
+	  <ul>
+	     <li><span>交易类型</span>发码</li>
+	     <li><span>交易流水号</span>{$data['req_seq']}</li>
+	     <li><span>交易时间</span>{$data['trans_time']}</li>
+	     <li><span>操作员</span>{$user_name}</li>
+	  </ul>
+		</div>
+		<if condition="$data['status'] eq '发送成功'">
+		<div class="btn">
+			<a class="btn-all w2" id="resend">重发</a>
+			<a class="btn-all btn-cx w2"id="cancel">撤销</a>
+		</div>
+		<else />
+		<div class="btn" style="text-align: center">
+			<a href="{:U('sendList',array('sid'=>$sid))}" class="btn-all">返回</a>
+		</div>
+		</if>
+	</div>
+</body>
+<script>
+var pos_id = '{$pos_id}';
+var req_seq = '{$data['req_seq']}';
+var epos_acount = '{$data['epos_acount']}';
+requirejs(['jquery','zDialog01'], function($,zDialog01) {
+	$(document).ready(function(e) {
+		$("#resend").click(function(){
+			var diag = new Dialog();
+			//diag.Title = "提示";
+			diag.Width=300;
+    	    diag.Height=120;
+			diag.ShowButtonRow =true;
+			diag.ShowcancelButton=true;
+			diag.OKEvent = function () {
+				diag.close();
+				$.post('{:U('resend')}',{'pos_id':pos_id,'req_seq':req_seq,'epos_acount':epos_acount},function(result){
+					result = eval("("+result+")");
+					var diag = new Dialog();
+					//diag.Title = result;
+					diag.Width=300;
+    	            diag.Height=120;
+					diag.ShowButtonRow =true;
+					diag.ShowcancelButton=true;
+					diag.OKEvent = function () {
+						diag.close();
+					}
+					diag.InnerHtml ='<div class="rjpop"><dl><dt>'+result+'</dt><dd></dd></dl></div>';
+					diag.show();
+				})
+			};
+			diag.CancelEvent = function () {
+				diag.close();
+			};
+			diag.InnerHtml = '<div class="rjpop"><dl><dt>是否重发？</dt><dd></dd></dl></div>';
+			diag.show();
+		});
+		
+		$("#cancel").click(function(){
+			var diag = new Dialog();
+			//diag.Title = "提示";
+			diag.Width=300;
+    	    diag.Height=120;
+			diag.ShowButtonRow =true;
+			diag.ShowcancelButton=true;
+			diag.OKEvent = function () {
+				diag.close();
+				$.post('{:U('cancel')}',{'pos_id':pos_id,'req_seq':req_seq,'epos_acount':epos_acount},function(result){
+					result = eval("("+result+")");
+					var diag = new Dialog();
+					//diag.Title = result;
+					diag.Width=300;
+    	            diag.Height=120;
+					diag.ShowButtonRow =true;
+					diag.ShowcancelButton=true;
+					diag.OKEvent = function () {
+						diag.close();
+						window.location.reload();
+					};
+					diag.CancelEvent = function () {
+						diag.close();
+						window.location.reload();
+					};
+					diag.InnerHtml ='<div class="rjpop"><dl><dt>'+result+'</dt><dd></dd></dl></div>';
+					diag.show();
+				})
+			};
+			diag.CancelEvent = function () {
+				diag.close();
+			};
+			diag.InnerHtml = '<div class="rjpop"><dl><dt>是否撤销？</dt><dd></dd></dl></div>';
+			diag.show();
+		});
+	});
+});
+</script>
+</html>

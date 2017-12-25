@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>挂机短信设置-翼惠宝</title>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/main.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/layout.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/module.css?v=__VR__"/>
+        <link href="__PUBLIC__/Css/Wyhb.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+        <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+        <js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+        <js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+        <style>
+            .Gform { margin-bottom: 0;}
+            .Gform .name { width: 100px; text-align: right; line-height: 26px; position: absolute; top: 0px; left: -10px; font-size: 14px; color: #33373c; box-sizing: border-box;}
+            .Gform ul:first-child .Ginput { padding-top: 0;}
+            #content{ display:table;}
+            .newRule{ padding:30px; text-align:center; display:table-cell; vertical-align:middle}
+            .tips{ font-size:16px; text-align:center; width:80%; margin:0 auto}
+            .Gform p { text-align: left; margin-left: 100px; font-size: 14px; color: #989898; line-height: 28px;}
+            .btn-li{ margin:20px 0 0 57px;}
+        </style>
+    </head>
+    <body>
+
+        <div id="headerTwo" style="z-index: 999">
+            <include file="Login:loginHeader"/>
+        </div>
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+                <include file="Store:Yhb_menu" leftmenuid="message_setting"/>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>挂机短信设置</h4>
+
+
+                        <div class="shopCon">
+                            <form action="{:U('setting_save')}" method="POST" name="theform" id="theform">
+                                <div class="Gform">
+                                    <ul>
+                                        <li class="name"><span>*&nbsp;</span>商户名称</li>
+                                        <li class="Ginput">
+                                            <input type="text" class="textbox validate[required,ajax[ajaxCheckCompanyName]]" maxlength="20" placeholder="请填写营业执照上的名称" name="merchant_name" id="merchant_name" value="{$merchant['merchant_name']}" disabled='disabled'/>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="name"><span>*&nbsp;</span>商户简称</li>
+                                        <li class="Ginput">
+                                            <input type="text" class="textbox validate[required]" maxlength="20" placeholder="请填写商户简称" name="merchant_short_name" data-rel="" id="merchant_short_name" value="{$merchant['merchant_short_name']}" disabled='disabled'/>
+                                        </li>
+                                    </ul>
+                                    <ul>
+                                        <li class="name">*短信内容设置</li>
+                                        <li class="Ginput">
+                                            <textarea class="textbox validate[required,minSize[1]]" maxlength="200" placeholder="&nbsp;字数限制200字" name="message" data-rel="">{$merchant['message']}</textarea>
+                                        </li>
+                                    </ul>
+                                    <p>限制在240字以内</p>
+                                    <ul class="btn-ul">
+                                        <input name="id" type="hidden" id="id"  value="{$merchant['id']}"/>
+                                        <input name="user_id" id="user_id" type="hidden" value="{$merchant['user_info_id']}"/>
+                                        <li class="btn-li"><a href="javascript:void(0)" class="btn btn_primary" id="sub_button">保存设置</a></li>
+                                    </ul>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html" /> 
+        </div>
+        </div>
+
+    </body>
+    <script>
+        $(function () {
+            $form = $("#theform");
+
+            $('#sub_button').click(function () {
+                var dialog, btn = $(this);
+                if ($form.validationEngine('validate')) {
+                    btn.attr('disabled', 'disabled');
+                    $form.ajaxSubmit({
+                        beforeSubmit: function () {
+                            dialog = art.dialog({title: false, content: "<div class='msg-all-succeed'>正在提交...</div>", fixed: true, padding: 0});
+                        },
+                        success: function (data) {
+                            btn.removeAttr('disabled');
+                            if (data.status == '1') {
+                                dialog.time(2).content("<div class='msg-all-succeed'>" + data.info + "</div>");
+                                setTimeout("window.parent.location.reload();art.dialog.close();", 500);
+                                return false;
+                            } else {
+                                dialog.time(5).content("<div class='msg-all-error'>" + data.info + "</div>");
+                            }
+                        },
+                        dataType: 'json'
+                    });
+                    return false;
+                }
+            });
+        });
+    </script>
+</html>

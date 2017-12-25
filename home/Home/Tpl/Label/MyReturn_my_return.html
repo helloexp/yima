@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+	<meta content="telephone=no" name="format-detection" />
+	<meta content="email=no" name="format-detection" />
+	<meta name="apple-touch-fullscreen" content="NO">
+	<title>我的返佣</title>
+	<link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_marketing.css?v=__VR__">
+	<script type="text/javascript" src="__PUBLIC__/Label/Js/zepto.min.js?v=__VR__"></script>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="container">
+			<div id="main">
+				<div class="m-my-comm">
+					<div class="header">
+						<p class="tl">可提领返佣</p>
+						<php>
+							$decimal = ($remain_amount - intval($remain_amount))*100;
+						</php>
+						<h1>￥<span class="int-num">{$remain_amount|intval}</span>.{$decimal}<span class="font">元</span></h1>
+						<!--<p class="tr"><a class="font-down" href="javascript:;">还没有收入？快点我</a></p>-->
+					</div>
+					<div class="data fn">
+						<div class="module left">
+							<p class="tit">累计返佣</p>
+							<php>
+								$decimal = ($all_amount - intval($all_amount))*100;
+							</php>
+							<p class="cont">￥<span class="int-num">{$all_amount|intval}</span>.{$decimal}<span class="font">元</span></p>
+						</div>
+						<div class="module right">
+							<p class="tit">已提领金额</p>
+							<php>
+								$decimal = ($get_amount - intval($get_amount))*100;
+							</php>
+							<p class="cont">￥<span class="int-num">{$get_amount|intval}</span>.{$decimal}<span class="font">元</span></p>
+						</div>	
+					</div>
+					<div class="m-gap"></div>
+					<p class="list"><a href="javascript:void(0);" onclick="get_return();">提领现金返佣<i class="left-arrow"></i></a></p>
+					<p class="list m-bn"><a href="{:U('Label/MyReturn/my_return_code', array('id'=>$id))}">我的返佣凭证<i class="left-arrow"></i></a></p>
+					<div class="m-gap"></div>
+					<!--{:U('Label/MyReturn/bind_zfbaccount')}-->
+					<p class="list bindalipay"><a href="javascript:void(0);">绑定支付宝账号<i class="left-arrow"></i></a></p>
+					<p class="list m-bn"><a href="{:U('Label/MyReturn/my_return_money', array('id'=>$id))}">现金返佣详情<i class="left-arrow"></i></a></p>
+					<div class="m-gap"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script id="return_get" type="text/html">
+	<div class="m-bind" style="margin-top: 10px;">
+		<div class="m-input">
+			<p class="s-line">您可提领的现金总额<span>{$remain_amount}</span>元</p>
+		</div>
+		<p class="tip">满5元可申请提领，提领须扣除0.5元手续费。</p>
+		<p class="tip" style="margin-bottom:5%;">提领后将在7个工作日内到账。</p>
+		<a class="m-btn" id="btn_get_return" href="javascript:;">确认提领</a>
+	</div>
+</script>
+<script>
+	window._g = window._g || {};
+	_g.alipay_account = '{$bindpay}';
+	_g.alipay_name = '{$bindname}';
+	_g.remain_amount = {$remain_amount|floatval};
+	_g.url_withdraw = "{:U('withdraw')}";
+	//弹层
+	function msgPop(msg){
+		msgPopclose();
+		var html=['<div class="msgPop">',
+			'<div class="msgPopCon">',
+			'<a href="javascript:void(0)" class="close" onclick="msgPopclose()">+</a>',
+			''+msg+'',
+			'</div>',
+			'</div>'].join('');
+		$("body").append(html);
+	}
+	function msgPopclose(){
+		$(".msgPop").remove();
+	}
+
+	$(function(){
+		$(document).on('click', '.bindalipay', function(){
+			var html = ['<form id="bindform" action="{:U('Label/MyReturn/bindalipay', array('id'=>$id))}" method="post" name="bindform"><input type="hidden" name="id" value="<?php echo session("id");?>">',
+				'<div class="cjForm">',
+				'<div class="cjFormTitle">绑定支付宝账号<br /> <span class="tips">请确保支付宝账号无误，否则无法收到您的佣金</span></div>',
+				'<ul class="sOne-cjForm">',
+				'<li><input type="text" name="aliaccount" id="aliaccount" class="sOne-alipayInput"  value="'+_g.alipay_account+'"placeholder="请输入支付宝账号" /></li>',
+				'<li><input type="text" name="alipay_name" id="alipay_name" class="sOne-alipayInput"  value="'+_g.alipay_name+'"placeholder="请输入支付宝姓名" /></li>',
+				'<li class="pt20"><input type="button" name="but" id="but" value="立即绑定" class="btn-alipay-button" /></li>',
+				'<li id="bind_error" class="tips"></li>',
+				'</ul>',
+				'</div>',
+				'</form>'].join('');
+			msgPop(html);
+		});
+		$(document).on('click', '#but', function(e){
+			var sub_url = $('#bindform').attr('action');
+			$.post(sub_url, $('#bindform').serialize(), function(resp){
+				if(resp.status != 1){
+					$('#bind_error').html(resp.info);
+				}else{
+					_g.alipay_account = $('#aliaccount').val();
+					_g.alipay_name = $('#alipay_name').val();
+					msgPopclose();
+					msgPop('绑定成功！');
+					setTimeout(function(){msgPopclose()}, 1500);
+				}
+			},'json');
+		});
+
+		$(document).on('click', '#btn_get_return', function(){
+			$.post(_g.url_withdraw, function(resp){
+				msgPop(resp.info);
+				if(resp.status == 0){
+					setTimeout(function(){location.reload();}, 1500);
+				}
+			}, 'json');
+		});
+	});
+
+	//获取返佣
+	function get_return(){
+		if(_g.remain_amount < 5){
+			msgPop('满5元才能提现');
+			return ;
+		}
+		if(_g.alipay_account == '' || _g.alipay_name == ''){
+			msgPop('请先绑定支付宝信息！<br><a class="bindalipay btn">马上绑定</a>');
+			return ;
+		}
+		msgPop($('#return_get').text());
+	}
+</script>
+</html>

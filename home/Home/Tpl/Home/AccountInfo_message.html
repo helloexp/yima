@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>系统消息_旺消息_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript">
+
+function message_dialog(id){
+		art.dialog.open("?g=Home&m=AccountInfo&a=reply_view&id="+id,{
+			title: '留言回复信息',
+			width:'660px',
+			height:'500px'
+		});
+}
+function reply(id){
+	$.get("{:U('AccountInfo/replay_status')}",{"id":id},function(data){
+		if(data!='0'){
+			alert("系统错误，查看回复失败");
+		}
+	});	
+}
+function look(id){
+	$.get("{:U('AccountInfo/message_view')}",{"id":id},function(data){
+		if(data!='0'){
+			alert("系统错误，查看内容失败");
+		}
+	});
+}
+function readed(){
+	$.get("{:U('AccountInfo/readed')}" ,null,function(data){
+		data=eval('('+data+')');
+		if(data.status=='0'){
+			alert("全部设为已读失败");
+		}
+		else if(data.status=='1'){
+			alert("全部设为已读成功");
+			window.location.reload(0);
+		}
+	});
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始引入左菜单-->
+					<assign name="leftMenuId" value="8"/>
+                    <include file="Home/AccountCenter/menu2"  leftmenuid="mes"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4>系统消息</h4>
+                    </div>
+                    <div class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn">
+                        	<if condition=" $unreadCount gt 0">
+                        	<a href="javascript:void(0)" onclick="readed()" style=" float:right; font-size:14px; margin-top:12px;">全部设为已读</a>
+                            </if>
+                            <p class="<if condition='!isset($readstatus)'>Wcanal-tab-hover</if>"><a href="{:U('AccountInfo/message')}">全部(<span style="color:#999;">{$sumCount}</span>)</a></p>
+                            <p class="<if condition='$readstatus eq "1"'>Wcanal-tab-hover</if>"><a href="{:U('AccountInfo/message',array('status'=>1))}">已读(<span style="color:#999;"><if condition="empty($alreadyReadCount)">0<else/>{$alreadyReadCount}</if></span>)</a></p>
+                            <p class="<if condition='$readstatus eq "0"'>Wcanal-tab-hover</if>"><a href="{:U('AccountInfo/message',array('status'=>0))}">未读<span style="color: #ed1c24;">(<if condition="empty($unreadCount)">0<else/>{$unreadCount}</if>)</span></a></p>
+                        </div>
+                    </div>
+                    <div class="fn pt10">
+                    	<if condition="!empty($newData)">
+                            <ul class="Ufont-List-four">
+                            	<volist name="newData" id="val">
+                                <li class="<?php if($val['status'] == '1'){ echo '' ;}else{ ?>new<?php } ?>">
+                                	<span class="time">{$val.add_time|dateformat}</span>
+                                    <p class="title">
+                                    	<a  class="<?php if($val['status'] == '1'){ echo 'sysread'; }else{ ?>sysunread<?php } ?>" href="?g=Home&m=AccountInfo&a=message_view&id={$val.id}&seq={$val.seq_id}">
+                                    	{$val.title}
+                                    	<if condition="$val[is_special] eq 1">
+                                    	<i class="special"></i></if>
+                                    	
+                                    	</a>
+                                    </p>
+                                    <div class="news-description">
+                                      {$val['content']|htmlspecialchars_decode|strip_tags|msubstr=0,90}
+                                    </div>
+                                </li>
+                            
+                            </volist>
+                            </ul>
+                        <else/>
+                        	<div class="nonedatb mt20 bgf4f4f4"><p>没有更多的数据了</p></div>	
+                        </if>
+                          <div class="pageBase-sm pt20">
+                            <ul class="pageul">{$pages}</ul>
+                         </div>
+					</div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

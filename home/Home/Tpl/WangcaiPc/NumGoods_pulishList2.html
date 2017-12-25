@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>发布卡券列表_卡券_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/Wcanal.js?v=__VR__"/>
+<script>
+$(function(){
+    $("#search").click(function(){
+        $("form").submit();
+    });
+})
+function stopNumGoods(id){
+    art.dialog({
+        content:"你确定把该卡券下架?",
+        button: [{
+            name: '下架',
+            callback: function(){
+                $.post("{:U('NumGoods/stopNumGoods')}",{"id":id},function(data){
+                    if(data.status==1){
+                        art.dialog({
+                            content:data.info,
+                            ok:function(){
+                                window.location.reload();
+                            }
+                        });
+                    }else{
+                        art.dialog(data.info);
+                    }
+                },"json");
+            }
+        }],
+        cancel: true
+    });
+}
+</script>
+</head>
+
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="index.php?g=WangcaiPc&m=NumGoods&a=numGoodsList">卡券</a></p>
+							<p>></p>
+							<p>卡券管理</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                   <include file="WangcaiPc/NumGoods/leftMenu" leftmenuid="yxpkcgl"/>
+                </div>
+                <div class="subcon fn">
+				<br>
+                    <div class="Wcanal-tab">
+                            <div class="Wcanal-tab-title fn">
+                              <p><a href="{:U('WangcaiPc/NumGoods/numGoodsList')}">全部卡券</a></p>
+                            <p class="Wcanal-tab-hover"><a href="{:U('WangcaiPc/NumGoods/pulishList2',array('batch_type'=>'2'))}">爱拍赢大奖</a></p>
+                            <!--<p><a href="{:U('WangcaiPc/NumGoods/pulishList',array('batch_type'=>'3'))}">异业联盟中心卡券</a></p>-->
+                            <a href="{:U('WangcaiPc/NumGoods/addNumGoods')}" class="mem-updatego r w110">我要创建卡券</a>
+                            </div>
+                            <div class="Wcanal-tab-list">
+                                <div class="form-search fn">
+                                    <form method="post" action="{:U('WangcaiPc/NumGoods/pulishList')}">
+                                    <input type="hidden" name="batch_type" value="{$post.batch_type}"/>
+                                        <p>类&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;型</p>
+                                        <p>
+                                            <select name="batch_class" id="select" class="selectbox" >
+                                                <option value="" class="">全部</option>
+                                                
+                                                <volist name="batchClass" id="vo">
+                                                <option value="{$key}" class="" <if condition="strval($key) heq $post['batch_class']">selected="selected"</if>>{$vo}</option>
+                                                </volist>
+                                                
+                                            </select>
+                                        </p>
+                                        <p class="ml20">创建日期</p><p><input name="badd_time" type="text" value="{$post.badd_time}"  onClick="WdatePicker()" class="textbox w100"/></p><p>-</p><p><input name="eadd_time" type="text"  onClick="WdatePicker()" value="{$post.eadd_time}" class="textbox w100"/></p>
+                                        <p class="ml10">状态</p>
+                                        <p>
+                                            <select name="status" class="selectbox ">
+                                                <option value="">全部</option>
+                                                <volist name="status" id="vo">
+                                                <option value="{$key}" <if condition="strval($key) heq $post['status']">selected="selected"</if>>{$vo}</option>
+                                                </volist>
+                                            </select>
+                                        </p>
+                                        <a href="javascript:void(0);" id="search" class="btn-all w120 ml20">查询</a>
+                                        <div class="cl mb5"></div>
+                                        <p>所属商户</p>
+                                        <p>
+                                            <select name="node_id" id="select" class="selectbox" >
+                                                <option value="" class="">全部</option>
+                                                
+                                                <volist name="nodeList" id="vo">
+                                                <option value="{$vo['node_id']}"  <if condition="$vo['node_id'] eq $post['node_id']">selected="selected"</if>>{$vo['node_name']}</option>
+                                                </volist>
+                                                
+                                            </select>
+                                        </p>
+                                        <p class="ml20">卡券名称</p><p><input name="name" type="text" value="{$post.name}" class="textbox w100"/></p>
+                                    </form>
+                                </div>
+                                <table cellpadding="0" cellspacing="0" class="W-table">
+                                    <tr>
+                                        <th>卡券名称</th><th>审核状态</th><th>所属商户</th><th>创建时间</th><th>总库存</th><th>有效期</th><th>状态</th><th>类型</th><th>操作</th>
+                                    </tr>
+                                    <if condition="$list"> 
+                                    <volist name="list" id="vo" >
+                                    <tr>
+                                        <td>{$vo.batch_short_name}</td>
+                                        <td>{$checkStatus[$vo['check_status']]}</td>
+                                        <td>{$vo['node_name']}</td>
+                                        <td>{$vo.add_time|dateformat=###,'Y-m-d'}</td>
+                                        <td><?php if($vo['storage_num'] == '-1'){echo '不限';}else{echo $vo['storage_num'];}?></td>
+                                        <td>{$vo.begin_time|dateformat=###,'Y-m-d'}到{$vo.end_time|dateformat=###,'Y-m-d'}</td>
+                                        <td>{$status[$vo['status']]}</td>
+                                        <td>{$batchClass[$vo['batch_class']]}</td>
+                                        <td>
+                                        <if condition="$userInfo['node_id'] eq $vo['node_id'] ">
+                                            <if condition="$vo['status'] eq 0 AND $vo['check_status'] eq 1">
+                                                <a href="javascript:void(0);" onclick="stopNumGoods({$vo['id']});">下架</a>
+                                            </if>
+                                            <if condition="$vo['check_status'] eq 2 ">
+                                            <a href="javascript:void(0);" onclick="art.dialog.open('{:U('WangcaiPc/NumGoods/publishEdit?id='.$vo['id'])}',{width: 800, height: 600,title:'卡券编辑',lock: true})">编辑</a>
+                                            </if>
+                                        </if>
+                                        <a href="{:U('NumGoods/publishDetail',array('batch_id'=>$vo['id']))}">详情</a>
+                                        </td>
+                                    </tr>                                   
+                                    </volist>
+                                    <else/>
+                                        <if condition="$post">
+                                            <tr>
+                                                <td colspan="10">
+                                                    <div class="nonedata"></div>
+                                                </td>
+                                            </tr> 
+                                       <else/>
+                                            <tr>
+                                                <td colspan="10">
+                                                    <div class="nonedata"><p>您还未<a href="<?php echo U('WangcaiPc/NumGoods/addNumGoods');?>">创建卡券</a>，请先去创建卡券然后操作业务。</p></div>
+                                                </td>
+                                            </tr>
+                                        </if>
+                                   </if>
+                                </table>
+								<div class="page">{$page}</div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

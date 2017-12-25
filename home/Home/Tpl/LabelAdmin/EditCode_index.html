@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>营销渠道库二维码设置</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jscolor/jscolor.js?v=__VR__"></script>
+
+<script type="text/javascript">
+$(document).ready(function(e){
+	var qr_color=art.dialog.data('qr_color');
+	var qr_size=art.dialog.data('qr_size');
+	var qr_url=art.dialog.data('qr_url');
+	var qr_img=art.dialog.data('qr_img');
+	if(qr_color){$("#qr_color").val(qr_color)};
+	if(qr_size){$("#qr_size").val(qr_size)};
+	if(qr_url){$("#qr_url").val(qr_url)};
+	if(qr_img){$("#qr_img").attr("src",qr_img)};
+
+	$("#sub_button").click(function(){
+	   $("#theform").submit();
+	});
+	$('#show_page').click(function(){
+	    var logo = '';
+        var type = $('.type_value').val();
+	    if($("input[name='is_img']:checked").val() == '0'){
+            logo = '';
+        }else{
+            logo =  $('#resp_log_img').val();
+        }
+        $('#show_pic').attr('src',"{:U('LabelAdmin/ChannelSetCode/index?color=')}"+$('#color').val()+'&type='+type+'&logo='+logo+'&id=<?php echo $row['id'];?>');
+	});
+
+    //是否内嵌图片
+     $("input[name=is_img]").change(function(){
+		if($(this).val() == '1'){
+		  $('#show_up').show();
+          $('#resp_log_img').val('{$headLogo}');
+		}else{
+		  $('#show_up').hide();
+		}
+	});
+});
+
+    function log_add(){
+        var opt = {
+            obj:$("#img_resp_show"),
+            height:160,
+            width:160,
+            callback:function(data){
+                $('#logo_pic_show').attr('src',data['src']);
+                $('#resp_log_img').val(data['savename']);
+            }
+        };
+        open_img_uploader(opt);
+    };
+    function openUploaderMeitu_log(url) {
+        var win_width = 700;
+        art.dialog.open(url, {
+            lock: true,
+            title: "上传LOGO图片",
+            width: win_width,
+            height: win_width / 1.6,
+            id: 'art_upload'
+        });
+    }
+
+function statusChange(id,status){
+
+
+};
+</script>
+</head>
+
+<body>
+<div class="DiatipsCon">觉得还不够酷炫？前往旺财炫码制作工具，万千特效满足你！ <a href="<?php echo U('MarketActive/VisualCode/setimg',array('channelid'=>$row['id']));?>" target="_blank">立即创建</a></div>
+<form id="theform" action="{:U('LabelAdmin/EditCode/Submit')}" method="post">
+<input type="hidden" name="id" value="<?php echo $id;?>"/>
+<input type="hidden" name="type" value="<?php echo $type;?>" class="type_value"/>
+<div class="fn">
+    <img border="0" id="show_pic" width="150" height="150" style="float:left; margin-top:12px;" src="<?php echo U('LabelAdmin/ChannelSetCode/code',array('id'=>$row['id'],'type'=>$type));?>" />
+    <div class="Gform" style="float:left">
+    	<ul>
+        	<li class="Gname">二维码颜色</li>
+            <li class="Ginput"><input  type="text" id="color"  name="color" class="color" style="width:120px;" value="<?php echo $row['qr_color']==''?'000000' : $row['qr_color'];?>"/></li>
+        </ul>
+    	<ul>
+        	<li class="Gname">二维码尺寸</li>
+            <li class="Ginput">
+            	<select name="size" id="size">
+                    <?php
+					$sns_arr= C('SIZE_ARR');
+					foreach($sns_arr as $k=>$v){
+					?>
+					<option value="<?php echo $k;?>" <?php if($k==$row['qr_size']) echo 'selected="selected"';?>><?php echo $v;?></option>
+					<?php }?>
+                </select>
+
+            </li>
+        </ul>
+        <ul>
+        	<li class="Gname">内嵌图片</li>
+            <li class="Ginput">
+            	<div class="switch <if condition="$is_img eq 1 ">hover</if>">
+                    <input type="radio" id="is_img" name="is_img" value="{$is_img}" checked="checked">
+                    <div class="newRadio">
+                        <span class="valfirst <if condition="$is_img eq 0 ">hover</if>" data-val="0">否</span>
+                        <span class="vallast <if condition="$is_img eq 1 ">hover</if>" data-val="1">是</span>
+                    </div>
+                    <div class="cl"></div>
+                    <div class="newRadio-input mt10">
+                        <div class="Gchoose" style="width:260px;">
+                        	<a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:80,height:80}"><i></i></a>
+                            <input type="hidden" id="resp_log_img" name="resp_log_img" value="{$originHeadLogo}" />
+                        </div>
+                        <input type="hidden" name="is_upload" id="is_upload" value="">
+                        <span class="txtTips">建议大小:80*80px;</span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="DiabtnCon">
+	<a href="javascript:void(0)" class="Diabtn-all" id="show_page">预览</a>
+    <a href="javascript:void(0)" class="Diabtn-all" id="sub_button">确认</a>
+    <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+</div>
+</form>
+</body>
+</html>

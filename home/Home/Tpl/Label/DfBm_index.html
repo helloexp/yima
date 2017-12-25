@@ -1,0 +1,349 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title><?php if($node_id == '00017467'){echo '爱恋珠宝';}else{echo $row['wap_title'];}?></title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/countdown.js?v=__VR__"/>
+<?php if($row['page_style'] == '1'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_a.css"/>
+<?php }elseif($row['page_style'] == '2'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_b.css"/>
+<?php }elseif($row['page_style'] == '3'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_c.css"/>
+<?php }else{?>
+<load href="__PUBLIC__/Label/Css/wap_main_d.css"/>
+<?php }?>
+<load href="__PUBLIC__/Label/Css/wap_Bm.css"/>
+<script>
+$(document).ready(function(e) {
+	//判断字符
+	$("hr:eq(0)").hide();
+	var fData=$(".top-title").text();
+	var intLength=0;
+    for (var i=0;i<fData.length;i++)
+    {
+        if ((fData.charCodeAt(i) < 0) || (fData.charCodeAt(i) > 255))
+            intLength=intLength+2
+        else
+            intLength=intLength+1    
+    }
+	if(intLength<=20){ 
+		$(".top-title").css("font-size","20px"); 
+	}else{ 
+		$(".top-title").css("font-size","18px"); 
+	}
+	
+	$(".baseForm h6").each(function(){
+		var hdata=$(this).text().length;
+		if(hdata>4 && hdata<=6){
+			$(this).css("font-size","13px"); 
+		}else if(hdata>6){
+			$(this).addClass("lang");
+			$(this).closest("li").find("input").width("270");
+		}
+	});
+	
+	var specialCj = "{$row['cj_phone_type']}";
+	if(specialCj=="1"){
+		//普通抽奖,特殊抽奖在单独页面中
+		var _is_sub = false;
+		$('#subcj').click(function(){
+			 if(_is_sub)
+				return false;
+			_is_sub = true;
+		   $.post(
+			"{:U('Label/Cj/submit')}",
+			$('#theform').serialize(),
+			function(data) {
+            var _endCj = handelCjResult(data);
+            _endCj();
+			  _is_sub = false;
+	
+			},
+			'json'
+		   ); 
+		});
+	}
+    //调研
+    var _one_sub = false;
+    $('#bm_sub_id').click(function(){
+          if(_one_sub)
+            return false;
+
+        _one_sub = true;
+        $.post(
+                "{:U('Label/DfBm/Submit')}",
+                $('#bmform').serialize(),
+                function(data) {
+                    <?php if(C('GWYL_NODE') == $node_id  && $row['defined_one_name'] == '小票号') {?> 
+                    $('#shopping_trace').val($("input[name='defined_one']").val());
+                    <?php }?>
+                    _one_sub = false;
+                    var cj_type = "{$row['cj_phone_type']}";
+                    if(data.data == 'success_cj'){
+                        if(cj_type == "1"){
+                            $(".from_mobile").val($("input[name='mobile']").val());
+                            popForm('popForm',data.info,data.status);
+                            $('#bm_sub_id').attr('disabled',true);
+                            $('#bm_sub_id').css('background','#dddddd');
+                        }else{
+                            $('#subcj').off();
+                            $(".specialCj").fadeIn().load("{:U('Label/Cj/cjindex',array('id'=>$id))}");
+                            //window.location.href = "{:U('Label/Cj/cjindex',array('id'=>$id))}";
+                        }
+                    }else if(data.data == 'success'){
+                        popForm('popMsg',data.info,data.status);
+                        $('#bm_sub_id').attr('disabled',true);
+                        $('#bm_sub_id').css('background','#dddddd');
+                    }else{
+                        popForm('popMsg',data.info,data.status,"",1);
+                    }
+                },
+                'json'
+            );
+        
+    })
+
+
+
+	
+	//图片链接
+	var openimg=$(".mainCon-text img").length; 
+	if(openimg!=0){ 
+		var img=$(".mainCon-text img"); 
+		var imgurl; 
+		$(".mainCon-text img").each(function() { 
+			if($(this).closest("a").length=="0"){ 
+				imgurl="<?php echo U('Label/Img/index');?>"+'&url='+$(this).attr("src"); 
+				$(this).wrapAll("<a href='"+imgurl+"'></a>"); 
+			}; 
+		}); 
+	}
+
+
+    var userAgent = navigator.userAgent.toLowerCase();
+    var a = userAgent.split(' ');
+    var is_android = userAgent.indexOf("android") > 1 ?  true :false;
+    if(is_android){
+        var last = a[a.length-1];
+        var arr = last.split('/');
+        if(arr[0] == 'micromessenger' && arr[1] < '5.2.000'){
+            $('#update_notice').show();
+        }
+    }
+});
+
+
+function file_change(obj_id){
+    var file = document.getElementById(obj_id).files[0];
+    var img_txt = $('.sOne-file-name');
+
+    if (file) {
+        var fileSize = 0;
+        var fileType = file.name.substr(file.name.lastIndexOf('.')).toLowerCase();
+        var msg = '';
+
+        if(fileType != '.jpg' && fileType != '.png' && fileType != '.gif' )
+            msg = '图片格式不正确！';
+
+
+        if(msg == '' && file.size > 1024*1024*3)
+            msg = '图片不能超过3M！';
+
+        if(msg != ''){
+            img_txt.html('传照片');
+            document.getElementById(obj_id).outerHTML =   document.getElementById(obj_id).outerHTML;
+            popForm('popMsg',msg,0);
+            return;
+        }
+
+        img_txt.html('已选择');
+    }
+    else{
+        img_txt.html('传照片');
+    }
+}
+</script>
+</head>
+<body>
+<include file="Public:file"/>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div class="mainTop">
+                <div class="top-img">
+                    <?php if($row['bg_style'] == '1'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sOne.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style'] == '2'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sTwo.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style']== '4'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sThree.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style']== '3'){?>
+                    <img src="__UPLOAD__/<?php echo $row['bg_pic']?>"  class="vip-img" />
+                     <?php }elseif($row['bg_style']== '5'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sFour.png"  class="vip-img" />
+                    <?php }?>
+                </div>
+            </div>
+            <div id="mainCon" class="mainCon fn <?php if($row['log_img']==''){?> noLogo <?php }?> <?php if($row['node_name']== ''){?> noTitle <?php }?> ">
+            	<div class="top-title">{$row['node_name']}</div>
+                <div class="logo-bg">
+                	<?php
+                	if($row['log_img']!= ''){?>
+                    <div class="logo-con"><img src="__UPLOAD__/<?php echo $row['log_img']?>"  class="vip-img" /></div>
+                	<?php }?>
+                </div>
+                <div class="multimedia">
+					<?php if($row['music'] != ''){?>
+                    <audio src="__UPLOAD__/<?php echo $row['music']?>" autoplay="true" loop id="audio" style="display:none;"></audio>
+                	<div class="voice_button"><a href="javascript:void(0)" class="a-hide" onClick="audio()">音乐</a></div>
+					<script>
+                        function audio(){
+                            var audio = document.getElementById('audio');
+                                if(audio.paused){
+                                    audio.play();
+									$(".voice_button").css("background","__PUBLIC__/Label/Image/voice_button.png");
+                                }else{
+                                    audio.pause();
+									$(".voice_button").css("background","__PUBLIC__/Label/Image/stop_button.png");
+                                }
+                            }
+                    </script>
+                    <?php }?>
+                	<?php if($row['video_url'] != ''){?>
+                	<div class="video_button"><a href="<?php echo $row['video_url']?>" class="a-hide" target="_blank">视频</a></div>
+                    <?php }?>
+                </div>
+                <div class="mainCon-contenter">
+                    <div class="mainCon-title"><?php echo $row['wap_title']?></div>
+                    <div class="mainCon-text"><?php echo $row['wap_info'];?></div>
+                	<div class="mainCon-contenter-bg">
+                        <div class="mainForm">
+                            <form name="bmform" id="bmform" action="<?php echo U('Label/DfBm/Submit')?>" method="post" enctype="multipart/form-data">
+                                <input type="hidden" value="<?php echo $_GET['id']?>" name="id" id="id" />
+                                <input type="hidden" value="<?php echo $row['select_type']?>" name="select_type" />
+                                <div class="baseForm  bigbaseForm">
+                                     <?php 
+                                     $bm_arr=C('BM_TYPE_ARR');
+                                       $get_bm_arr = array(
+                                        '1'=>'true_name',
+                                        '2'=>'mobile',
+                                        '3'=>'sex',
+                                        '4'=>'age',
+                                        '5'=>'edu',
+                                        '6'=>'address',
+                                        '7'=>'email',
+                                        '8'=>'company',
+                                        '9'=>'position',
+                                        '10'=>'defined_one',
+                                        '11'=>'defined_two',
+                                        '12'=>'defined_three',
+                                        '13'=>'pic_one',
+                                        '14'=>'car_num',
+                                        '15'=>'city',
+                                        '16'=>'id_card',
+                                        '17'=>'get_goods_address',
+                                        '18'=>'defined_four',
+                                        '19'=>'defined_five',
+                                        '20'=>'defined_six',
+                                        );
+
+                                     foreach($query_arr as $v){ ?>
+                                     <li>
+                                        	<?php
+                                            if($v == '10')echo "<p>".$row['defined_one_name'].":</p>";
+                                            elseif($v == '11')echo "<p>".$row['defined_two_name'].":</p>";
+                                            elseif($v == '12')echo "<p>".$row['defined_three_name'].":</p>";
+                                            elseif($v == '18')echo "<p>".$row['defined_four_name'].":</p>";
+                                            elseif($v == '19')echo "<p>".$row['defined_five_name'].":</p>";
+                                            elseif($v == '20')echo "<p>".$row['defined_six_name'].":</p>";
+                                            else echo "<p>".$bm_arr[$v].":</p>";
+                                            ?>
+                                        <?php if($get_bm_arr[$v]=='sex'){?>
+                                        <input type="radio" name="<?php echo $get_bm_arr[$v]?>" value='男' checked="checked" class="sOne-Radio" id="sex-boy"><label for="sex-boy">&nbsp;男</label>
+                                        <input type="radio" name="<?php echo $get_bm_arr[$v]?>" value="女"  class="sOne-Radio" id="sex-girl"/><label for="sex-girl">&nbsp;女</label>
+                                        <?php }elseif($get_bm_arr[$v]=='edu'){ ?>
+                                        <select name="edu" class="sOne-select">
+                                            <option value="">请选择</option>
+                                            <option value='小学'>小学</option>
+                                            <option value='初中'>初中</option>
+                                            <option value='高中'>高中</option>
+                                            <option value='专科'>专科</option>
+                                            <option value='本科'>本科</option>
+                                            <option value='硕士'>硕士</option>
+                                            <option value='博士'>博士</option>
+                                            <option value='其他'>其他</option>
+                                        </select>
+                                        <?php }elseif($get_bm_arr[$v]=='pic_one'){ ?>
+                                         <div id="pic_one_view"></div>
+                                         <div class="sOne-file-div">
+                                            <i class="icon-photo"></i><p class="sOne-file-name">传照片</p>
+                                            <input type="file" name="pic_one" id="pic_one" class="sOne-file sOne-Input" onchange="javascript:file_change('pic_one');">
+                                        </div>
+                                         <div class="fn"></div>
+                                         <span id="update_notice" style="display: none;">请升级微信至最新版本，或点击右上角选择“在浏览器中打开”，否则无法上传图片。</span>
+                                        <?php }elseif($get_bm_arr[$v]=='city'){ ?>
+                                        <select name ="city" class="sOne-select">
+                                        <?php foreach(C('pingan.city_arr') as $cityname){?>
+                                        <option value="<?php echo $cityname;?>"><?php echo $cityname;?></option>
+                                        <?php }?>
+                                        </select>
+                                        <?php }else{?>
+                                        <input name="<?php echo $get_bm_arr[$v]?>" type="text" class="sOne-Input"/>
+                                        <?php } ?>
+                                    </li>
+                                    <?php }?>
+                                </div>
+                                <div class="bmForm">
+                                    <?php
+                                    $q_type= array('1'=>'单选题','2'=>'多选题','3'=>'问答题');
+                                    $add_count = 0;
+                                     foreach($resp_arr as $k=>$v){
+                                        $add_count++;
+                                    ?>
+                                    <li>
+                                    	<hr/>
+                                        <h3><b><?php echo $add_count;?>:</b><?php echo $v['info']['questions']?></h3>
+                                    </li>
+                                    <?php if($v['info']['type'] == '3'){?>
+                                    <li>
+                                        <textarea name="textarea-<?php echo $v['info']['id']?>" class="sOne-Textarea"></textarea>
+                                    </li>
+                                    <?php }else{?>
+                                    <?php
+                                    foreach($v['list'] as $kk=>$vv){ ?>
+                                    <li>
+                                        <?php if($v['info']['type'] == '1'){?>
+                                        <input type="radio" name="radio-<?php echo $v['info']['id']?>" value="<?php echo $vv['value']?>" class="sOne-Radio" id="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><label for="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><?php echo $vv['answers'];?></label>
+                                        <?php }elseif($v['info']['type'] == '2'){?>
+                                        <input type="checkbox" name="checkbox-<?php echo $v['info']['id']?>[]" value="<?php echo $vv['value']?>" class="sOne-Checkbox" id="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><label for="id-<?php echo $v['info']['id']?>-<?php echo $vv['value']?>"><?php echo $vv['answers'];?></label>
+                                        <?php }?>
+                                    </li>
+                                    <?php }}}?>
+                                </div>
+                                <div class="content_button">
+                                    <input type="button"  value="<?php if($row['is_cj'] == '1'){echo $cj_text!='' ? $cj_text :'点击提交并抽奖'; }else{echo '点击提交';}   ?>" class="input_button" id="bm_sub_id"  />
+                            	</div>
+                            </form>
+                        </div>
+                	</div>
+                </div>
+            </div>
+      		<include file="Public:share"/>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+</div>
+<include file="Public:pop"/>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+<div class="specialCj">
+	
+</div>
+</body>
+</html>

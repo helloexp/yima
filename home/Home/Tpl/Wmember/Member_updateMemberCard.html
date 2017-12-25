@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>更换会员卡</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/UI.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<style type="text/css">
+	.mark { display: none;}
+	.popupWin { padding-bottom: 20px;}
+	.tipNormal { position: relative; top: -15px; left: -10px;}
+</style>
+<script type="text/javascript">
+	$(function(){
+		
+		$(".mark").eq(0).show();
+		$("body").on("click",".Gform .switch .newRadio span",function(){
+			var $index = $(this).index();
+			$(".mark").hide();
+			$(".mark").eq($index).show();
+		});
+	});
+	
+	$(function(){
+		Gform();
+		
+		$("#smb").click(function(){
+			var dialog;
+			if($("#theform").validationEngine('validate')){
+				$("#theform").ajaxSubmit({
+					beforeSubmit:function(){
+						dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+					},
+					success:function(data){
+						 if(data.status == '1'){
+							   dialog.time(3).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+							   var win = art.dialog.open.origin;
+							   win.location.href = win.location.href;
+						  }else{
+							   dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+						  }
+					},
+					dataType:'json'
+				});
+				return false;
+			}
+		});
+	});
+</script>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab db" id="Wcanal-tabon">
+    <div class="Gform">
+		<form id="theform" action="{:U('updateMemberCard')}" method="POST" name="form">
+			<input type="hidden" name="m_id" value="{$m_id}" />
+    		<div class="tipNormal">
+    			<i></i><p>为{$memberNum}位会员批量更换会员卡</p>
+    		</div>
+    		<ul data-val="21" class="mark">
+    			<li class="Gname">选择会员卡</li>
+                <li class="Ginput">
+                	<select class="textbox w100" name="card_id" id="card_id" style="padding: 3px 0; width: 200px;">
+                		<volist name="cards" id="vo">
+                        	<option value="{$vo.id}">{$vo.card_name}</option>
+                		</volist>
+					</select>
+				</li>
+            </ul>
+            <div class="DiabtnCon">
+	            <a href="javascript:void(0)" class="Diabtn-all" id="smb">确定</a>
+	            <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+	        </div>
+        </form>
+    </div>
+</div>
+</div>
+</body>
+</html>

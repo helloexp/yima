@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>营销渠道库二维码设置</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/member.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jscolor/jscolor.js?v=__VR__"></script>
+
+<script type="text/javascript">
+$(document).ready(function(e){
+	var qr_color=art.dialog.data('qr_color');
+	var qr_size=art.dialog.data('qr_size');
+	var qr_url=art.dialog.data('qr_url');
+	var qr_img=art.dialog.data('qr_img');
+	if(qr_color){$("#qr_color").val(qr_color)};
+	if(qr_size){$("#qr_size").val(qr_size)};	
+	if(qr_url){$("#qr_url").val(qr_url)};
+	if(qr_img){$("#qr_img").attr("src",qr_img)};	
+	
+	$("#sub_button").click(function(){
+	   $("#theform").submit();
+	});
+	$('#show_page').click(function(){
+	    var logo ;
+	    if($("input[name='is_img']:checked").val() == '0'){
+            logo = '';}else{ logo =  $('#resp_log_img').val();}
+		$('#show_pic').attr('src',"{:U('LabelAdmin/ChannelSetCode/index?color=')}"+$('#color').val()+'&logo='+logo+'&id=<?php echo $row['id'];?>');
+	});
+    //是否抽奖
+     $("input[name=is_img]").change(function(){
+		if($(this).val() == '1'){
+		  $('#show_up').show();
+
+		}else{
+		  $('#show_up').hide();
+		}
+	});
+	//二维码默认自定义
+	$("input[name=qr_type]").change(function(){
+		 if($(this).val()=='2'){
+		 	$('#qr_default').show();
+			$('#qr_div').hide();
+			$('#code2').hide();
+			$('#code1').hide();
+		 	
+		 }else if($(this).val()=='1'){
+		 	$('#qr_default').hide();
+			$('#qr_div').show();
+			$('#code2').show();
+			$('#code1').show();
+		 			 	
+		 }
+		
+	})
+	
+}); 
+
+function statusChange(id,status){
+
+
+};
+</script>
+</head>
+
+<body class="bgfff">
+<form id="theform" action="{:U('LabelAdmin/EditCode/SubmitAiPai')}" method="post">
+<input type="hidden" name="id" value="<?php echo $id;?>"/>
+<div class="mem-form">
+    <div class="global-input5 rel mt20">
+		
+		<?php if($row['qr_type'] == '1'){?>
+		<div  id="code1" >
+								<img id="show_pic"  class="abs c_bd_d1 r20 top8" src="<?php echo U('LabelAdmin/ChannelSetCode/code',array('id'=>$row['id']));?>" />
+							</div>
+				
+				<?php }else{?>
+				<div  id="code2"  <?php if($row['qr_type'] == '2'){?>class="dn"<?php }?>>
+				<img id="show_pic"  class="abs c_bd_d1 r20 top8" src="<?php echo U('LabelAdmin/ChannelSetCode/index');?>"  />
+				</div>
+				<?php }?>
+			
+
+		<ul class="mt10">
+            <li class="global-input5-name">*&nbsp;渠道标签设置：</li>
+            <li class="global-input5-input"><p><input name="qr_type" type="radio" value="2" <?php if($row['qr_type'] == '2'){?>checked="checked"<?php }?>/> 默认二维码模板    <input name="qr_type" type="radio" value="1" <?php if($row['qr_type'] == '1'){?>checked="checked"<?php }?>/> 自定义二维码</p></li>
+        </ul>
+		<ul id="qr_default" <?php if($row['qr_type'] == '1'){?>class="dn" <?php }?> >
+			<li class="global-input5-name">&nbsp;</li>
+            <li class="global-input5-input"><p><img src="__PUBLIC__/Image/aipai_qr.png" width="283" height="220"/></p></li>
+		</ul>
+		
+		<div id="qr_div"  <?php if($row['qr_type'] == '2'){?>class="dn"<?php }?>>
+    	<ul>
+        	<li class="global-input5-name">二维码颜色：</li>
+            <li class="global-input5-input"><input  type="text" id="color"  name="color" class="textbox w150 color new_input2" value="<?php echo $row['qr_color']==''?'000000' : $row['qr_color'];?>" /></li>
+        </ul>
+    	<ul class="pt20">
+        	<li class="global-input5-name">二维码尺寸：</li>
+            <li class="global-input5-input">
+            	<select name="size" id="size" class="selectbox w162">
+                    <?php 
+					$sns_arr= C('SIZE_ARR');
+					foreach($sns_arr as $k=>$v){
+					?>
+					<option value="<?php echo $k;?>" <?php if($k==$row['qr_size']) echo 'selected="selected"';?>><?php echo $v;?></option>
+					<?php }?>
+                </select>
+                             
+            </li>
+        </ul>
+    	<ul class="pt20">
+        	<li class="global-input5-name">是否内嵌图片：</li>
+            <li class="global-input5-input rel">
+             <input  type="radio" value="1" name="is_img" <?php if($row['logo_img']!=''){?>checked="checked" <?php } ?> /> 是 <input type="radio" value="0" name="is_img" <?php if($row['logo_img']==''){?>checked="checked" <?php } ?> /> 否
+             </li>
+           
+        </ul>
+        
+        	<ul class="pt20" id="show_up" <?php if($row['logo_img']==''){?> style="display: none ;"<?php }?>>
+        	<li class="global-input5-name">内嵌图片：</li>
+            
+            <li class="global-input5-input rel">
+               
+                <input id="log_img_show" type="text"  class="textbox w80" />
+				<input type="file" name="log_img" id="log_img" class="upload_file top8" onChange="$('#log_img_show').val($(this).val())"/>
+				<a href="javascript:;" title="上传" class="btn-all w40 ml5 h32">浏览</a>
+				<a href="javascript:;" title="上传" class="btn-all w40 ml5 h32" onClick="return ajaxFileUpload('log_img','resp_log_img','logo_image','{:U('LabelAdmin/Upfile/channelLogo','type=img')}');">上传</a>
+				<input type="hidden"  name="resp_log_img" id="resp_log_img" value="<?php echo $row['logo_img'];?>"/>
+               
+            </li>
+        </ul>
+		</div>
+		
+    	<ul class="pt40">
+        	<li class="global-input5-name">&nbsp;</li>
+            <li class="global-input5-input">
+            	<a href="javascript:void(0)" title="确认" id="sub_button" class="btn-all w110">确认</a>
+                <a href="javascript:void(0)" title="预览" id="show_page" class="btn-all w110 ml20">预览</a>
+            </li>
+        </ul>
+    </div>
+</div>
+</form>
+</body>
+</html>
+<script>
+//文件上传
+function ajaxFileUpload(imgid,hiddenid,showid,url){
+var dialog = art.dialog({title:false,fixed: true,padding:0});
+$.ajaxFileUpload
+({
+	url:url,
+	secureuri:false,
+	fileElementId:imgid,
+	dataType: 'json',
+	data:{name:'logan', id:'id'},
+	success: function (data, status)
+	{
+		if(typeof(data.error) != 'undefined')
+		{
+			if(data.error != '')
+			{
+				dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+			}else{
+
+				var resp = data.msg;
+				if(resp != '0000'){
+					dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+					return false;
+				}else{
+					dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+				}
+				$('#'+hiddenid).val(data.imgurl);
+				$('#'+showid).attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+			}
+		}
+	},
+	error: function (data, status, e)
+	{
+		dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+	}
+})
+
+return false;
+}
+</script>

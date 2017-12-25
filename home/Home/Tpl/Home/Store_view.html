@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-查看详情</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<style>
+.popupWin .view ul li label {width: 110px;}
+</style>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab" id="Wcanal-tabon">
+    <div class="steps">基本信息</div>
+    <div class="eTicket_form">
+        <div class="view">
+            <ul>
+                <li><label>门店简称：</label><p>{$info.store_short_name}</p></li>
+                <li><label>门店所属区域：</label><p>{$info.province}{$info.city}{$info.town}</p></li>
+                <li><label>门店详细地址：</label><p>{$info.address}</p></li>
+                <li><label>负责人：</label><p>{$info.principal_name}</p></li>
+                <li><label>负责人电话：</label><p>{$info.principal_tel}</p></li>
+                <li><label>负责人邮箱：</label><p>{$info.principal_email}</p></li>
+                <li><label>门店创建时间：</label><p><?php echo date('Y-m-d H:i:s',strtotime($info['add_time'])); ?></p></li>
+            	 <li><label>所属商圈：</label><p><if  condition="!empty($businuss_circle)">{$businuss_circle}
+            	 <else/>无
+            	 </if>
+            	 </p></li>
+                 <li><label>所属分组：</label><p>{$groupName}</p></li>
+            </ul> 
+            </div>
+    </div>
+    <div class="steps mt20">门店图片</div>
+    <div class="eTicket_form mt20">
+    <img id="" class="" src="{:get_upload_url($info['store_pic'])}" style="margin-left: 10px;"/>
+    </div>
+    <div class="steps mt20">终端信息</div>
+    <div class="eTicket_form mt20">
+    <table cellpadding="0" cellspacing="0" class="W-table">
+    <tbody>
+    <tr class="th">
+    <th>终端号</th>
+    <th>终端简称</th>
+    <th>终端类型</th>
+    <th>状态</th>
+    <th>操作</th>
+    </tr>
+
+	             <php>
+				$empty = '<tr><td colspan="5">没有满足条件的数据</td></tr>';
+				</php>
+				<volist name="posList" id="vo" empty="$empty">
+				    <tr class="title">
+					<td class="hover">{$vo.pos_id}</td>
+					<td>{$vo.pos_short_name}</td>
+					<td>{$vo.pos_type|show_defined_text=array('0'=>'ER1100','1'=>'ER6800','2'=>'Epos')}</td>
+					<td>{$vo.pos_status|show_defined_text=array('0'=>'正常','1'=>'欠费','2'=>'停机保号','3'=>'注销')}</td>
+					<td>
+					<eq name="vo['pos_type']" value="2">
+					<a href="{:C('EPOS_LOGIN_URL').'&posId='.$vo['pos_id']}" target="_blank">登录Epos</a>
+					</eq>
+					</td>
+				</tr>
+				</volist>
+    </tbody>
+    </table>
+    </div>
+    <div class="steps mt20">定位信息</div>
+    <div class="eTicket_form mt20">
+    <div class="view oneline">
+    	<ul>
+        <li><label style="text-align:right">经度：</label><p>{$info.lbs_x|default='未定位'}</p></li>
+        <li><label style="text-align:right">纬度：</label><p>{$info.lbs_y|default='未定位'}</p></li>
+        <li><p><!--<a href="">重新定位</a>--></p></li>
+        </ul>
+    </div>
+    </div>
+    <php>if($is_cnpc_gx){</php>
+    <div class="steps mt20">门店标签</div>
+    <div class="eTicket_form mt20">
+        <?php if($labellist){
+	   foreach($labellist as $v){
+	 ?>
+         <?php echo $v['label']; ?>、
+         <?php } }else{ ?>
+         没有满足条件的数据
+	<?php } ?>
+    </div>
+    <php>}</php>
+    <div class="steps mt20">渠道信息</div>
+    <div class="eTicket_form mt20">
+    <table cellpadding="0" cellspacing="0" class="W-table">
+    <tbody>
+    <tr class="th">
+    <th>渠道名称</th>
+    <th>创建时间</th>
+    <th>操作</th>
+    </tr>
+	<?php if($storeChannel){
+	   foreach($storeChannel as $v){
+	 ?>
+    <tr class="title">
+    <td class="hover"><?php echo $v['name']; ?></td>
+    <td><?php echo date('Y-m-d',strtotime($v['add_time'])); ?></td>
+    <td><a href="<?php echo U('LabelAdmin/ChannelSetCode/code',array('id'=>$v['id'],'isdown'=>'1'));?>">下载二维码</a></td>
+    </tr>
+	<?php } }else{ ?>
+	<tr><td colspan="3">没有满足条件的数据</td></tr>
+	<?php } ?>
+    </tbody>
+    </table>
+    </div>
+    </div>
+</div>
+<div class="DiabtnCon">
+    <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+</div>
+</body>
+</html>

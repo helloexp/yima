@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>我的旺水牌</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wpaipai20150705.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+$(function(){
+	Gform();
+	$(".js_stop").click(function(e) {
+        var url = "{:U('WangPaiPai/Index/Index_stop')}";
+		art.dialog.open(url,{
+			id:"stop",
+			title:"停用旺拍拍",
+			width:"500px"
+		});
+    });
+})
+
+function confirm(id){
+    var url = "{:U('WangPaiPai/Index/order_confirm')}&id="+id;
+    art.dialog.open(url,{
+        id:"confirm",
+        title:"确认收货",
+        width:"500px"
+    });
+}
+
+function info(id){
+    var url = "{:U('WangPaiPai/Index/order_details')}&id="+id;
+    art.dialog.open(url,{
+        id:"info",
+        title:"订单详情",
+        width:"500px"
+    });
+};
+</script>
+
+
+<script>
+$(function(){
+
+    $("#search").click(function(){
+        $("form").attr("action","").submit();
+    });
+
+    $("#down").click(function(){
+        $("#export").val(1);
+        $("form").attr("action","").submit();
+        $("#export").val(0);
+    });
+
+})
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="2vm10"/>
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+            	<div class="sidenav">
+                    <!--开始载入左菜单-->
+					<include file="LabelAdmin/Channel/leftMenu" leftmenuid="2vm18"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>申请旺水牌<a class="tbtn btn-add first" href="{:U('WangPaiPai/Index/apply')}"><i></i>申请旺水牌</a><a class="tbtn btn-down" id="down" href="javascript:vodi(0)"><i></i>下载列表</a></h4>
+                        <div class="SearchArea fn">
+                        	<form id="theform" action="{:U('WangPaiPai/Index/applylist')}" method="post">
+                                <div class="SearchAreaLeft">
+                                    <input type="hidden" name="export" id="export" value="0">
+                                <label>
+                                <span>申请单号</span>
+                                <input type="text" name="bId" id="" value="{$_POST['bId']}">
+                                </label>
+                                <label>
+                                <span>申请单状态</span>
+                                <select name="dType">
+                                    <option value="" class="">全部</option>
+                                    <option value="0" class="" <?='0'==$_POST['dType']?'selected="selected"':''?>>未配送</option>
+                                    <option value="1" class="" <?='1'==$_POST['dType']?'selected="selected"':''?>>配送中</option>
+                                    <option value="2" class="" <?='2'==$_POST['dType']?'selected="selected"':''?>>已配送</option>
+                                </select>
+                                </label>
+
+                                <label>
+                                    <span>支付状态</span>
+                                    <select name="pType">
+                                        <option value="" class="">全部</option>
+                                        <option value="0" class="" <?='0'==$_POST['pType']?'selected="selected"':''?>>未支付</option>
+                                        <option value="1" class="" <?='1'==$_POST['pType']?'selected="selected"':''?>>已支付</option>
+                                    </select>
+                                </label>
+                                </div>
+                                <div class="SearchAreaRight">
+                                    <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="shopCon">
+                            <table cellpadding="0" cellspacing="0" class="shopTable">
+                            <tbody>
+                            <tr class="th">
+                            <th class="first">申请单单号</th>
+                            <th>水牌型号</th>
+                            <th>申请单状态</th>
+                            <th>申请单数量</th>
+                            <th>支付状态</th>
+                            <th>支付金额</th>
+                            <th class="last">操作</th>
+                            </tr>
+                            <volist name="list" id="vo">
+                            <tr>
+                            <td class="first">{$vo.batch_id2}</td>
+                            <td>{$vo.type2}</td>
+                            <td>{$vo.delivery_type2}</td>
+                            <td>{$vo.num}</td>
+                            <td>{$vo.pay_type2}</td>
+                            <td>{$vo.total_price2}</td>
+                            <td class="last">
+                                <php>if('1' == $vo['delivery_type']){</php>
+                                <a href="javascript:void(0);" onclick="confirm({$vo.batch_id})" class="js_orderconfirm">确认收货</a>
+                                <br />
+                                <php>}</php>
+                                <php>if('0' == $vo['pay_type']){</php>
+                                <a href="{:U('WangPaiPai/Index/orderPay',array('batch_id'=>$vo['batch_id']))}" class="js_orderconfirm">去支付</a>
+                                <br />
+                                <php>}</php>
+                                <a href="javascript:void(0);" onclick="info({$vo.batch_id})"  class="js_orderdetail">订单详情</a>
+                            </td>
+                            </tr>
+                            </volist>
+                            </table>
+
+                            <div class="page">
+                                {$page}
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    </div>
+    <div class="service"></div>
+</body>
+</html>

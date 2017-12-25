@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>新增账号</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WonlineSales.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(document).ready(function(e) {
+	 $("#sub").click(function(){
+	        var dialog;
+	        if($("form").validationEngine('validate')){
+	        	$("form").ajaxSubmit({
+	                beforeSubmit:function(){
+	                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+	                },
+	                success:function(data){
+	                     if(data.status == '1'){
+	                           dialog.close();
+	                           $(".tip_title").html(data.info);
+	                           $("#content").hide();
+	                           $("#success").show();
+	                      }else{
+	                           dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+	                      }
+	                },
+	                dataType:'json'
+	            });
+	            return false;
+	        }
+	        
+	    });
+});
+</script>
+
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div class="shopNav">
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="zxjy"/>  
+        </div>
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav"> 
+                    <include file="./Home/Tpl/WangcaiPc/OnlineTrading_leftMenu.html" leftmenuid="zhgl"/>                 
+                </div> 
+                <div class="subcon fn" id="content">
+                    <div class="main-name fn">
+                        <h4><i class="icon-Eticket no105"></i>账户管理</h4>
+                    </div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                    <div class="Wcanal-tab-list" style="display: block;">
+                        <div class="eTicket_form">
+                        <form method="post" action="{:U('supplyNodeAccount')}">
+                            <div id="Wform" class="Gform eTicket">
+                                <ul>
+                                    <li class="Gnmae">&nbsp;支付通道：</li>
+                                    <li class="Ginput"><input type="text" class="textbox w380" value="支付宝" readonly="readonly"/>
+                                    <p class="font-12-cc">支付扣率为卡券交易金额的2%，T+3自动到账</p>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gnmae">*&nbsp;支付宝账号：</li>
+                                    <li class="Ginput"><input name="account_name" value="{$AccountInfo['account_no']}" type="text" class="validate[required] textbox w380"/>
+                                    <p class="font-12-cc">该账号将用于卡券在线交易业务，包括 付款、收款</p>
+                                    </li>
+                                </ul>
+                                
+                                <ul>
+                                    <li class="Gnmae">*&nbsp;输入保护密码：</li>
+                                    <li class="Ginput">
+                                        <input name="pwd" id="pwd" type="password" class="validate[required,minSize[6],maxSize[16],custom[onlyLetterNumber]] textbox w380"/>
+                                        <p class="font-12-cc">用于修改支付宝账号时使用,请牢记该密码,由'0-9a-zA-Z'的6到16位字符组成</p>
+                                    </li>
+                                </ul>
+                                <if condition="empty($AccountInfo['account_no'])">
+                                <ul>
+                                    <li class="Gnmae">*&nbsp;再次输入密码：</li>
+                                    <li class="Ginput">
+                                        <input name="cpwd" type="password" class="validate[required,equals[pwd]] textbox w380"/>
+                                    </li>
+                                </ul>
+                                </if>
+                                <ul>
+                                    <li class="Gnmae"></li>
+                                    <li class="Ginput mt5">
+                                    <a href="javascript:void(0);" title="确认" id="sub" class="btn-all w110"><if condition="empty($AccountInfo['account_no'])">确定<else />修改</if></a>
+                                    </li>
+                                </ul> 
+                                </div>
+                        </form>
+                    </div>
+                    </div>
+                    </div>
+                </div>
+                <div id="success" class="dn" style="margin:0 auto">
+                    <div class="eTicket_form_OK_tip">
+                        <div class="eTicket_form_OK_tip_img"></div>
+                        <div class="eTicket_form_OK_tip_text">
+                        <ul>
+                            <li class="tip_title"></li>
+                            <li><a href="{:U('WangcaiPc/NumGoods/numGoodsList')}" class="btn-all l mt15">马上发布卡券</a><a href="{:U('WangcaiPc/OnlineTrading/supplyOrderList')}" class="btn-all l mt15 ml10">查看供货订单</a></li>
+                        </ul>
+                        </div>
+                    </div>
+               </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

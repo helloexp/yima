@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>代金券使用统计_代金券_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js?v=__VR__"></script>
+
+<script>
+
+$(function(){
+	$("#search").click(function(){
+		$("form").submit();
+	});
+})
+function revocation(id){
+    if(!confirm("你确认撤销吗？")) return false;
+    $.get("{:U('VoucherNum/revocationCode')}&id="+id,"",function(d){
+    	if(d.status==1){ window.location.reload();}
+    	else{ art.dialog(d.data);}
+    },'json');
+}
+</script>
+</head>
+
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+							<p>代金券分销助手</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="Hall/Mypartner/left" leftmenuid="djqmx"/>
+                </div>
+            <div class="subcon fn">
+                    <div class="Wcanal-tab">
+                    	<div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover"><a href="{:U('Hall/VoucherNum/searcher')}">流水查询</a></p>
+                            <p><a href="{:U('Hall/VoucherNum/verification')}">验证流水</a></p>
+                        </div>                
+                        <div class="Wcanal-tab-list">
+                            <div class="form-search fn">
+                                <form action="{:U('Hall/VoucherNum/searcher')}" method="post">
+                                    <p>手机号</p><p><input name="mobile" type="text" value="{$Think.request.mobile}" class="textbox w120"/></p>
+                                    <p class="ml20">所属商户</p>
+                                    <p>
+                                        <select name="status" id="select" class="selectbox">
+                                            <option value="">全部</option>
+                                            <volist name="nodeList" id="vo">
+                                                <option value="{$vo['node_id']}"  <if condition="$vo['node_id'] eq $_REQUEST['node_id']">selected="selected"</if>>{$vo['node_name']}</option>
+                                                </volist>
+                                        </select>
+                                    </p>
+                                    <a href="{:U('VoucherNum/downTrace')}" class="btn-all w90 ml20">数据下载</a>
+                                    <a href="javascript:void(0);" class="btn-all w90" id="search">查询</a>
+                                </form>
+                                </div>
+                                <div class="fn">
+                                <table cellpadding="0" cellspacing="0" class="W-table mt10">
+                                    <tr>
+                                        <th>编号</th><th>所属商户</th><th>名称</th><th>手机号</th><th>发码时间</th><th>交易类型</th><th>状态</th><th>操作</th>
+                                    </tr>
+                                    <if condition="$list"> 
+                                    <volist name="list" id="vo">
+                                    <tr>
+                                        <td>{$vo.batch_no}</td>
+                                        <td>{$vo.node_name}</td>
+                                        <td>{$batch_arr[$vo['batch_no']]}</td>
+                                        <td>{$vo.phone_no}</td>
+                                        <td>{$vo.trans_time|dateformat=###,'Y-m-d H:i:s'}</td>
+                                        <td>{$transType[$vo['trans_type']]}</td>
+                                        <td>{$status[$vo['status']]}</td>
+                                        <td>
+                                        <if condition="($vo['trans_type'] eq 0001) AND ($vo['status'] eq 0) and ($vo['data_from'] neq '9') and ($userInfo['node_id'] eq $vo['node_id']) "> 
+                                        <a onclick="return confirm('确认重发:{$vo[phone_no]}吗?')" href="{:U('BatchTrace/reSend?id='.$vo[id])}">重发</a>
+                                        <a href="javascript:void(0);" onclick="revocation('{$vo['id']}')">撤销</a>
+                                        <else />
+                                        --
+                                        </if>
+                                        </td>
+                                    </tr>
+                                    </volist>
+                                    <else/>
+                                        <tr>
+                                            <td colspan="7">
+                                                <div class="nonedata"></div>
+                                            </td>
+                                        </tr> 
+                                   </if>
+                                </table>
+                                <div class="page">{$page}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

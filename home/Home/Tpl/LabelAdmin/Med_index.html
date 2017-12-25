@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>图文编辑_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivities.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker//WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script>
+$(function(){
+	var prodata = {list:[
+		{title:"迪孚时代",text:"迪孚时代",qr:"http://t-static.wangcaio2o.com/wcadmin/upload/00000000/2015/11/25/BatchCode/89341.png",img:"http://t-static.wangcaio2o.com/wcadmin/upload/00000000/2015/11/25/750306f25d97ee7748f28a344e685122.jpg"},
+		{title:"WHTV睛彩武汉频道",text:"小小外交家报名表带主持人选项",qr:"http://t-static.wangcaio2o.com/wcadmin/upload/00000000/2015/11/13/BatchCode/88104.png",img:"http://t-static.wangcaio2o.com/wcadmin/upload/00000000/2015/11/13/dae305f1ef49e3cbc31c37b91025928f.png"},
+		{title:"公牛开关",text:"G05精致系列开关",qr:"http://t-static.wangcaio2o.com/wcadmin/upload/00000000/2015/10/29/BatchCode/87413.png",img:"http://t-static.wangcaio2o.com/wcadmin/upload/00000000/2015/10/29/f1236dd80b69404a08c2beb7f5b2b605.jpg"},
+		{title:"年审服务新升级",text:"免费检车",qr:"http://t-static.wangcaio2o.com/wcadmin/upload/00000000/2015/10/16/BatchCode/86666.png",img:"http://t-static.wangcaio2o.com/wcadmin/upload/00000000/2015/10/16/fc0988d1932cb468e1f85643cf23e5df.jpg"}
+		]}
+	var html = template("proInt",prodata);
+	var hasV = "{$hasV}";
+	if(hasV == 'noData'){
+		$("#wrapper").addClass("nomalCon");
+		$("#main").html(html);
+	}
+	proInt(html);
+    $('#sub_button').click(function(){
+        $('#theform').submit();
+    });
+    $("#down").click(function(){
+        $("form").attr("action","{:U('Med/export')}").submit();
+    });
+})
+function statusChange(batch_id,status){
+    if(status==1){
+        var title="您确认启用该活动？";
+    }else{
+        var title="您确认停止该活动？";
+    }
+    art.dialog.confirm(title,function(){
+        $.post("{:U('LabelAdmin/Med/editStatus')}",{"batch_id":batch_id,"status":status},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>更新成功</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="new_sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="LabelAdmin/Batch/leftMenu" leftmenuid="med"/>
+                </div>
+                <div class="subcon">
+                    <div class="main-name fn">
+                        <h4>
+						<?php
+						//图文编辑
+						$medlink="&model=event&type=question&action=create&customer=".$node_type_name;					
+						?>
+                        图文编辑
+                        <a href="{:U('LabelAdmin/Med/add')}<?php echo $medlink;?>" class="btn-add first"><i></i>创建图文编辑</a>
+                        <a href="javascript:void(0);" class="btn-down" id="down"><i></i>下载列表</a>
+                        </h4>
+                    </div>
+                    <div class="SearchArea  fn">
+                        <form action="{:U('LabelAdmin/Med/index/')}" method="post" name="theform" id="theform">
+                        <div class="SearchAreaLeft">
+                        <label>
+                        <span>图文编辑标题</span>
+                        <input type="text" name="key" class="textbox w100" value="{$Think.request.key}" />
+                        </label>
+                        
+                        <label>
+                        <span>创建日期</span>
+                        <input type="text" name="start_time" id="start_time" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$Think.request.start_time}" />
+                           -
+                           <input type="text" name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time}" />
+                           </label>
+                           <label>
+                           <span>状态</span>
+                        <select name="status" id="status">
+                            <option value="" <?php if($_REQUEST['status'] == ''){?> selected="selected" <?php }?> >请选择</option>
+                            <option value="1" <?php if($_REQUEST['status'] == '1'){?> selected="selected" <?php }?> >正常</option>
+                            <option value="2" <?php if($_REQUEST['status'] == '2'){?> selected="selected" <?php }?> >停用</option>
+                        </select>
+                        </label>
+                        <label>
+                        <span>所属商户</span>
+                            <select name="node_id" id="select" class="selectbox" >
+                                <option value="" class="">全部</option>
+                                
+                                <volist name="nodeList" id="vo">
+                                <option value="{$vo['node_id']}"  <if condition="$vo['node_id'] eq $_REQUEST['node_id']">selected="selected"</if>>{$vo['node_name']}</option>
+                                </volist>
+                                
+                            </select>
+                        </label>
+                        </div>
+                        <div class="SearchAreaRight">
+                        <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                        </div>
+                        </form>
+                    </div>                  
+                    <if condition="$query_list neq '' ">
+                    <volist name="query_list" id="v" >
+                    <div class="activities-list">
+                        <div class="activities-list-wrapper fn">
+                            <div class="activities-list-wrapper-state"><?php echo $v['status'] == '1'?'<i class="icon-on"></i>':'<i class="icon-off"></i>';?></div>
+                            <div class="activities-list-wrapper-con">
+                                <div class="activities-list-wrapper-title fn"><?php echo $v['wap_title'];?> <span class="ml30 font-14-fe"><?php if($v['is_mem_batch'] == 'Y'){echo '粉丝专享';}?></span><?php if($v['is_halt'] == '1'){?><a style="color:#ff0000" href="javascript:void(0)" onclick="art.dialog('您的活动内容不符合规范，已被强制停止，如有疑问，请联系客服400-882-7770！')">强制停止</a><?php }?></div>
+                                <div class="activities-list-wrapper-meta fn">
+                                                                                                             所属商户：<span><?php echo D('node')->getNodeName($v['node_id']);?></span>
+                                </div>
+                                
+                                <div class="activities-list-wrapper-data fn">
+                                    <p>访问量：<span><a href="javascript:void(0)" onclick="art.dialog.open('{:U('LabelAdmin/Chart/clickChart',array('batch_id'=>$v['id'],'batch_type'=>10))}',{width:900,height: 600,title:'图文编辑-访问量'})">{$v['click_count']}</a></span></p>
+                                    
+                                </div>
+                            </div>
+                            <div class="activities-list-wrapper-opr">
+                                <if condition="$userInfo['node_id'] eq $v['node_id'] ">
+                                <a href="<?php echo U('LabelAdmin/BindChannel/index','batch_type=19&batch_id='.$v['id']);?>"><p>发布图文编辑</p></a>
+                                </if>
+                                <!-- 
+                                <p class="mlr10">|</p>
+                                <a href="javascript:void(0)"><p>查看活动页面</p></a>
+                                 -->
+                            </div>
+                        </div>
+                        <div class="activities-list-opr">
+                            <ul class="fn">
+                                <if condition="$userInfo['node_id'] eq $v['node_id'] ">
+                                <li class="opr-item">
+                                    <a href="<?php echo U('LabelAdmin/Med/edit/',array('id'=>$v['id']));?>"><i class="icon-edit"></i><span>编辑内容</span></a>
+                                </li>
+                                </if>
+                                <li class="opr-item">
+                                    <?php if($v['status'] == '1'){?>
+                                    <a href="javascript:void(0);" onclick="statusChange('<?php echo $v['id']?>','2')"><i class="icon-stop"></i><span>停止发布</span></a>
+                                    <?php }else{?>
+                                    <a href="javascript:void(0);" onclick="statusChange('<?php echo $v['id']?>','1')"><i class="icon-begin"></i><span>启用活动</span></a>
+                                    <?php }?>
+                                </li>
+                                <li class="opr-item">
+                                    <a href="javascript:void(0)" onclick="art.dialog.open('{:U('LabelAdmin/Chart/channelChart',array('batch_type'=>19,'batch_id'=>$v['id']))}',{width:900,height: 600,title:'图文编辑-渠道分析'})"><i class="icon-data"></i><span>渠道分析</span></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    </volist>
+                    <else/>
+                    
+                                  
+                    
+                    
+                                    <?php if($_POST){?>
+                        <div class="nonedata"></div>
+                                   
+                                     <?php }else{?>
+                                    <?php }?>
+                                    </if>
+                    <div class="page"><?php echo $page;?></div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+
+<script id="proInt" type="text/html">
+<div class="picnodata">
+	<div style="width:100%;height:100%;background:url(__PUBLIC__/Image/dlhdyx/pictxtbj.png) no-repeat">
+        <div class="pictxt_r rel">
+           <h1>图文编辑</h1>
+           <h2 class="c666">快速创建图文以及多媒体共存的手机WAP页面</h2>
+           <ul class="fn">
+                <li><i></i>支持动画、视频、音乐等多媒体的参加编辑</li>
+                <li><i></i>支持超链接的添加编辑</li>
+                <li><i></i>多样式风格模板可供选择</li>
+           </ul>
+           <a href="{:U('LabelAdmin/Med/add')}<?php echo $medlink;?>" class="btn-add w130 h40 reg">马上体验</a>
+        </div>
+	</div>
+</div>
+<h3 style="margin:0 auto;width:1100px;">优秀图文编辑样例</h3>
+<div class="proIntCase fn pb20 pt5">
+	<div class="proIntCaseCon">
+	{{each list as value i}}
+	<div class="case">
+		<div class="shade-wrapper">
+			<div class="shade-box"></div>
+			<div class="shade">
+				<p class="info-tit">{{value.title}}</p>
+				<p class="info-type">{{value.text}}</p>
+				<div class="code-pic">
+					<img src="{{value.qr}}">
+				</div>
+			</div>
+		</div>
+		<img src="{{value.img}}">
+	</div>
+	{{/each}}
+	</div>
+</div>
+</script>

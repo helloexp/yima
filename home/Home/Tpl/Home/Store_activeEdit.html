@@ -1,0 +1,358 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="activeEdit" ng-controller="activeEdit">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-添加门店</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/store.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=WRzAu3DNewWB4oeOELaczjsM"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/angularjs/angular.min.js?v=__VR__"></script>
+    <script type="text/javascript">
+        function subclick(){
+            var openStores = '';
+            //$("#smbmit").attr('id','noSub');
+            if($('#getAllStores').hasClass("hover")){
+                openStores = '1';
+            }else{
+                openStores = $('#openStores').val();
+            }
+            var activity_type = $('#activity_type').val();
+            var start_time = $('#start_time').val();
+            var end_time = $('#end_time').val();
+            var activity_title = $('#activity_title').val();
+            var activity_desc = $('#activity_desc').val();
+            var active_type = $('#active_type').val();
+            var activity_id = $('#activity_id').val();
+            var batch_img = [];
+               $('[name^="batch_img"]').each(function (i , j) {
+                   batch_img[i] = $(j).val();
+            });
+            //console.log(batch_img);return false;
+
+            $("#activeAdd").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+//                     dialog.close();
+                    if(data.status == '1'){
+                        dialog.close();
+                        Diasucceed(data.info);
+                        window.location.href="index.php?g=Home&m=Store&a=active";
+
+                        return false;
+                    }else{
+                        dialog.close();
+                        Diaerror(data.info);
+
+                    }
+                },dataType:'json'
+            });
+
+        }
+        function result_(contents){
+            art.dialog({
+                title:"提示",
+                height:100,
+                content:contents,
+                icon: 'error',
+                lock:true,
+                ok:function(){
+                    //art.dialog.close();
+                }
+            })
+        }
+
+        function success(contents){
+            art.dialog({
+                title:"提示",
+                height:100,
+                content:contents,
+                icon: 'succeed',
+                lock:true,
+                ok:function(){
+                    window.location.href="index.php?g=Home&m=Store&a=active";
+                }
+            })
+        }
+        $(function(){
+
+            $("#smb").click(subclick);
+
+            $("#reset").click(function(){
+
+            });
+            $("input[name='shop']").change(function(){
+                if($(this).val()==1){
+                    $("#chooseShop").css("display","none");
+                }else{
+                    $("#chooseShop").css("display","block");
+                }
+            });
+
+
+
+            $('#otherChooseShop').click(function(){
+                $(this).addClass('hover');
+                var type = $(this).attr('rel');
+                $('.'+type).removeClass('newRadio-input');
+                $('#otherAllShop').removeClass('hover');
+                $('input[name=shop]').val(1);
+            });
+
+
+
+            $('#otherAllShop').click(function(){
+                $(this).addClass('hover');
+                var type = $(this).attr('rel');
+                $('.'+type).addClass('newRadio-input');
+                $('#otherChooseShop').removeClass('hover');
+                $('input[name=shop]').val(1);
+            });
+            $(".choose_shop").click(function(){
+                //指定门店走这里
+                var type = '&type=0';
+                if($(this).attr("id") == "choose_shop"){
+                    type = "&type=1";
+                }
+                var sta = '&sta=1';
+                art.dialog.open("{:U('Home/Store/toActivity')}"+type+sta,{
+                    title:"选择门店",
+                    width:'800px'
+                });
+            });
+            $(".icon-del").live('click',function(){
+                $(this).closest(".numgoodsList-item").detach();
+            });
+        })
+
+        function result_(contents){
+            art.dialog({
+                title:"提示",
+                height:100,
+                content:contents,
+                icon: 'error',
+                lock:true,
+                ok:function(){
+                    //art.dialog.close();
+                }
+            })
+        }
+
+        function success(contents){
+            art.dialog({
+                title:"提示",
+                height:100,
+                content:contents,
+                icon: 'succeed',
+                lock:true,
+                ok:function(){
+                    window.location.href="index.php?g=Home&m=Store&a=active";
+                }
+            })
+        }
+    </script>
+    <script>
+        $(function(){
+
+            $("a[name='choose_shop'],a[name='choose_shop2']").click(function(){
+                var type = '&type=0';
+                if($(this).attr("name") == "choose_shop"){
+                    type = "&type=1";
+                }
+                var activity_id = $('#activity_id').val();
+                //点击查看走这里
+                art.dialog.open("{:U('Home/Store/posStorePop')}"+'&id=' + activity_id,{
+                    title:"选择门店",
+                    width:800
+                });
+            });
+
+            $("#selectShop").click(function(e){
+                art.dialog.open("{:U('Home/Store/posStorePop')}",{
+                    title: '选择门店',
+                    width:'800px'
+                });
+                //$(".newRadio-default").show();
+            });
+
+
+            $(".js_case").hoverDelay(function() {
+                $(".showCase").fadeIn();
+            }, function() {
+                $(".showCase").fadeOut();
+            });
+
+            if (parseInt($('#number').text()) == 0) {
+                $('#openStores').val('');
+            }
+
+        })
+    </script>
+</head>
+<body>
+    <div id="wrapper"> 
+    	<include file="./Home/Tpl/Public/Public_header.html" />         
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav">
+                    <include file="Store:sidenav" leftmenuid="mdhd"/>      
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>门店活动</h4>
+                    </div>
+                    <form method="post" action="{:U('Home/Store/activeAdd')}" id="activeAdd">
+                    <div class="Gform l" style="width:600px;">
+                        <ul class="Gtitle">活动信息</ul>
+                        <ul>
+                            <li class="Gname"><span>*</span>活动类型</li>
+                            <li class="Ginput loadingStatus">
+                                <input type="hidden" value="{{ active_type }}" name="activity_type" id="activity_type">
+                                <span ng-click="synType('1')" ng-class="{'active':active_type==1}" class="synclass" >优惠 <img src="__PUBLIC__/Image/youhui.png"  /></span>
+                                <span ng-click="synType('2')" ng-class="{'active':active_type==2}" class="synclass">打折 <img src="__PUBLIC__/Image/dazhe.png"  /></span>
+                                <span ng-click="synType('3')" ng-class="{'active':active_type==3}" class="synclass">促销 <img src="__PUBLIC__/Image/cuxiao.png"  /></span>
+                                <span ng-click="synType('4')" ng-class="{'active':active_type==4}" class="synclass">服务 <img src="__PUBLIC__/Image/fuwu.png"  /></span>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="Gname"><span>*</span>活动日期</li>
+                            <li class="Ginput"><div class="Gtime2 fn">
+                                <input type="text" id="start_time" class="validate[required]" name="start_time" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$activity['start_time']||dateformat=###,'Y-m-d'}">
+                                <em>至</em>
+                                <input type="text" id="end_time" class="validate[required]" name="end_time" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$activity['end_time']||dateformat=###,'Y-m-d'}">
+                                </div>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="Gname"><span>*</span>活动标题</li>
+                            <li class="Ginput">
+                                <input type="text" name="activity_title" id="activity_title" class="validate[required,maxSize[10]] textbox view-user" maxlength="10" value="{$activity['activity_title']}"><span class="maxTips forInput" data-max="10"></span>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="Gname"><span>*</span>活动详情</li>
+                            <li class="Ginput"><textarea maxlength="200" name="activity_desc" id="activity_desc" class="Gview-textarea" value="{$activity['activity_desc']}">{$activity['activity_desc']}</textarea><span class="maxTips forArea" data-max="200"></span></li>
+                        </ul>
+                        <ul>
+                            <li class="Gname">活动图片</li>
+                            <li class="Ginput">
+                                <div class="Gchoosemore">
+
+                                    <?php foreach($imgArr as $key => $value):?>
+                                    <div class="Gchoosemore-list" style="bottom: 0px; opacity: 1; display: block;">
+                                    <input type="text" name="batch_img[]" value="{$value}" />
+                                    <div class="Gchoosemore-img" style="background-image:url({:get_upload_url($value)})"></div>
+                                    <div class="Gchoosemore-opr"><a href="javascript:void(0)" class="Gchoosemore-edit"></a><a href="javascript:void(0)" class="Gchoosemore-del"></a></div>
+                                    </div>
+                                    <?php endforeach;?>
+
+                                    <div class="Gchoosemore-add">
+                                        <a href="javascript:void(0)" class="Gbtn-picmore" title="选择图片" data-rel="{width:641,height:321,maxlength:9,inputname:'batch_img[]'}"><i></i><span>选择图片</span></a>
+                                    </div>
+                                </div>
+								<span class="txtTips">最多可添加9张图片</span>
+
+                            </li>
+
+                        </ul>
+                        <ul>
+                            <li class="Gname"><span>*</span>适用门店</li>
+                            <li class="Ginput">
+                                <div class="switch">
+                                    <input type="radio" value="{$checktypeStore}" name="checktypeStore" checked="checked" id="checktype">
+                                    <div  class="newRadio">
+                                        <span class='valfirst allShop ' data-val="1" id="getAllStores" >所有门店</span>
+                                        <span class='vallast beforeChoseShop  choose_shop'  data-val="2" >指定门店</span>
+                                    </div>
+                                    <div class="cl fn"></div>
+                                    <div class='<eq name="opened_stores_count" value="0">newRadio-input</eq>' id="showSelectStoreInfo">
+                                        <input type="hidden" id="openStores" name="openStores" value="{$opened_stores}"/>
+                                        <div class="sweet_tips2" id="htmlss">您总共选择了<span id="number">{$opened_stores_count}</span>家门店&nbsp;&nbsp;<a href="javascript:void(0);" id="editStore"  name="choose_shop">点击查看</a></div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <div style="width:500px; overflow:hidden;display:none;">
+                            <ul class="shoplist n2" style="margin-right:-100px">
+                                <?php foreach ($navigation as $key => $value):?>
+                                <li class="notCheck" title="{$value['province']} {$value['city']} {$value['town']}">
+                                    {$value['store_short_name']}
+                                    <input type="checkbox" name="storeCheckStatus[]" class="storeCheckStatus" value="{$value['store_id']}" style="display:none;" checked="checked">
+                                </li>
+                                <?php endforeach;?>
+                            </ul>
+                        </div>
+
+                            <input type="hidden" name="active_type" id="active_type" value="{$type}" />
+                        <input type="hidden" name="activity_id" id="activity_id" value="{$activity_id}"/>
+
+                        <ul>
+                            <li class="Ginput"><a href="javascript:void(0)" class="btn-all" id="smb">确定</a><a href="{:U('Store/active')}" class="btn-all-del">取消</a></li>
+                        </ul>
+                    </div>
+                </form>
+                
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+
+    <div class="service"></div>
+</body>
+</html>
+<script>
+var app=angular.module('activeEdit', [])
+app.controller('activeEdit', function ($scope) {
+var aaa = <?php if(!empty($activity['activity_type'])){echo $activity['activity_type'];}else{echo 1;}?>;
+
+    $scope.active_type=aaa;
+    $scope.synType=function(t){
+        $scope.active_type=t;
+
+    }
+    
+}) 
+    $(function(){
+        $("body").on("click",".js_whatis",function(){
+            art.dialog({
+                title: '线上提领',
+                content:'<div class="whatis" style="display:block">'+ $(".whatis").html()+'</div>',
+                width:'500px',
+                lock:true,
+                height:'200px'
+            });
+        })
+
+        $(".editStore").click(function(){
+            art.dialog.open("{:U('WangcaiPc/NumGoods/shopList')}",{
+                title: '选择门店',
+                width:'800px'
+            });
+        });
+		
+		//
+		if($(".Gchoosemore").children(".Gchoosemore-list").length>=9){
+		  $(".Gchoosemore-add").hide();
+		}else{
+		  $(".Gchoosemore-add").show();
+		}
+
+    })
+</script>

@@ -1,0 +1,345 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>翼码旺财商品订单</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="__PUBLIC__/Css/Wshop.css?v=__VR__" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+</head>
+<body class="bgfff">
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <!--开始载入头部菜单-->
+    <include file="Ecshop/Shop/nav"  navmenuid="Navorder" />
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+
+            <div class="sidenav">
+                <!--开始引入左菜单-->
+                <include file="OrderList/menu" leftmenuid="dgdd"/>
+            </div>
+
+            <div class="subcon fn">
+                <div class="main-name fn">
+                    <h4><a href="" class="btn-back"><i></i>订购订单</a> / 批处理配送<a href="javascript:void(0);" class="btn-import first"><i></i>导入已配送订单</a></h4>
+                </div>
+                <div class="SearchArea fn">
+                    <form action="{:U('OrderList/batchHandleDelivery')}" method="post" name="theform" id="theform">
+                        <div class="SearchAreaLeft">
+                            <label>
+                                <span>批处理配送日期</span>
+                                <input type="text" name="start_time" id="start_time" onClick="WdatePicker({dateFmt:'yyyyMMdd',maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value={$showStartTime} />
+                                -
+                                <input type="text" name="end_time" id="end_time" onClick="WdatePicker({dateFmt:'yyyyMMdd',minDate:'#F{$dp.$D(\\'start_time\\')}'})" value={$showEndTime?$showEndTime:$showStartTime} />
+                            </label>
+                            <if condition="$orderListCount == 0">
+                                <span class="red">请选择日期！</span>
+                                </if>
+                        </div>
+                        <div class="SearchAreaRight">
+                            <input  type="submit" class="searchBtn" id="sub_button" value="查询">
+                        </div>
+                    </form>
+
+                </div>
+                <div class="tipNormal"><a href="{:U('OrderList/downLoad?fileType=batchHandleOrderList')}" class="r">我要导出处理</a><p>共计 {$orderListCount} 个待配送订单，您可以逐条录入快递单号，也可以导出所有需配送订单，处理完成后再导入系统。</p></div>
+                <!--列表-->
+                <div class="fn mt15">
+                    <table cellpadding="0" cellspacing="0" class="W-table">
+                        <tr>
+                            <th>编号</th>
+                            <th>收货人手机</th>
+                            <th>订单号</th>
+                            <th>快递单日期</th>
+                            <th>商品名称</th>
+                            <th>数量</th>
+                            <th>收货地址</th>
+                            <th class="last">快递单号</th>
+                        </tr>
+                        <volist name="orderListShow" id="vo">
+                        <tr>
+                            <td class="first">{$vo.id}</td>
+                            <td>{$vo.receiver_tel}</td>
+                            <td>{$vo.order_id}</td>
+                            <td>{$vo.delivery_time}</td>
+                            <td>{$vo.b_name}</td>
+                            <td>{$vo.commodity_number}</td>
+                            <td>{$vo.receiver_addr}</td>
+                            <td class="last"><a class="UpdateDelivery" href="javascript:void(0)" receiveId ="{$vo.id}" receiveName ="{$vo.receiver_name}" receiveNum = "{$vo.receiver_tel}" data-o="{$vo.order_id}" data-d="{$vo.delivery_status}" data-c="{$vo.delivery_company}" data-n="{$vo.delivery_number}" data-dd="{$vo.delivery_date}"><if condition="$vo['delivery_company'] eq '' ">录入单号<else />修改运单</if></a></td>
+                        </tr>
+                        </volist>
+                        <empty name="orderListShow">
+                            <tr><td colspan="10" class="last"><div class="nonedata"></div></td></tr>
+                        </empty>
+                    </table>
+                </div>
+                <div class="page fn">
+                    <?php echo $page;?>
+                </div>
+                <div class="tc"><a href="{:U('OrderList/cycleOrderIndex')}" class="btn-all">确定</a></div>
+                <!--列表-->
+            </div>
+        </div>
+    </div>
+    <include file="Public:Public:footer" />
+</div>
+<div class="service"></div>
+
+</body>
+<script>
+    $(document).ready(function(e) {
+        $(".btn-import").click(function(){
+            var _url = "{:U('OrderList/batchHandleWindow')}";
+            art.dialog.open(_url,{
+                title: '导入已配送订单',
+                width:500
+            })
+        });
+
+
+        $(".UpdateDelivery").on("click", function () {
+            var orderId = $(this).attr("data-o");
+            var id = $(this).attr("receiveId");
+            var dst = $(this).attr("data-d");
+            var dsd = $(this).attr("data-dd");
+            var dsn = $(this).attr("data-n");
+            var dsc = $(this).attr("data-c");
+            var expressName = '{$usedExpress}';
+            var optionv = '';
+
+            var udata = {
+                "status": $(this).attr("data-d"),
+                "optionv": optionv,
+                "dst": dst,
+                "dsd": dsd,
+                "dsn": dsn,
+                "dsc": dsc,
+                experess: [{$expressStr}]
+            };
+
+            var uhtml = template("inputDeliveryInfo", udata);
+
+            art.dialog({
+                title: '编辑物流',
+                width: 500,
+                padding: 0,
+                content: uhtml,
+                okVal: "提交",
+                ok: function () {
+                    var delivery_company = $('#delivery_company').val();
+                    var delivery_number = $('#delivery_number').val();
+                    if (delivery_company == '') {
+                        alert('请您输入物流公司后再提交');
+                        return false;
+                    }
+                    if (delivery_number == '') {
+                        alert('请您输入物流单号后再提交');
+                        return false;
+                    }
+                    Dialoading("正在提交...");
+                    $.post("{:U('OrderList/singleUpdate')}",
+                            {
+                                "id": id,
+                                "delivery_status": '3', "delivery_company": delivery_company,
+                                "delivery_number": delivery_number, "order_id": orderId
+                            },
+                            function (cdata) {
+                                Dialoading();
+                                var c_status = cdata.status;
+                                if (c_status == 1) {
+                                    Diasucceed(cdata.info, function () {
+                                        top.location.reload();
+                                    });
+                                } else {
+                                    Diaerror(cdata.info);
+                                }
+                            }, 'JSON');
+                },
+                cancel: true
+            });
+            var receiveNum = $(this).attr('receiveNum');
+            var receiveName = $(this).attr('receiveName');
+            $('#orderNum').empty();
+            $('#orderNum').html(orderId);
+            $('#receiveNum').empty();
+            $('#receiveNum').html(receiveNum);
+            $('#receiveName').empty();
+            $('#receiveName').html(receiveName);
+            if (dsc != '') {
+                $('#delivery_company').val(dsc);
+            } else if (expressName != '') {
+                $('#delivery_company').val(expressName);
+            }
+
+
+            $('.recentExpress').click(function () {
+                var expressName = $(this).html();
+                $('#delivery_company').val(expressName);
+            });
+
+        });
+
+    });
+</script>
+
+<script id="inputDeliveryInfo" type="text/html">
+    <div class="tipNormal Diagray">
+        <p>订单号<span id="orderNum" class="ml10">{{orderName}}</span></p>
+
+        <p>收货人手机号码<span id="receiveNum" class="ml10">{{receiveName}}</span></p>
+
+        <p>收货人姓名<span id="receiveName" class="ml10">{{receiveNum}}</span></p>
+    </div>
+    <h6 class="pl30 mt10">运单信息</h6>
+    <div class="Gform fn pb30">
+        <ul>
+            <li class="Gname"><span>*</span>物流公司：</li>
+            <li class="Ginput">
+                <input type="text" name="experess" id='delivery_company' value="{$usedExpress}"
+                       class="validate[required]"/>
+
+                <div class="bankList dn">
+                    <ul>
+                        {{each experess}}
+                        <li class="dn">{{value}}</li>
+                        {{/each}}
+                        <li class="erro dn" rel="error">抱歉，没有找到该快递公司</li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+        <ul>
+            <li class="Gname"><span>*</span>物流单号：</li>
+            <li class="Ginput"><input type="text" class="validate[required]" maxlength="50" name="delivery_number"
+                                      id="delivery_number" value="{{dsn}}"/></li>
+        </ul>
+    </div>
+</script>
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        $("body").on("click", "[name='experess']", function (e) {
+            e.stopPropagation();
+            var val = $(this).val();
+            if (val != "") {
+                var erro = 0;
+                $(".bankList").show();
+                $(".bankList>ul>li").each(function (index, element) {
+                    var text = $(this).text();
+                    if (text.indexOf(val) >= 0) {
+                        $(this).removeClass("hover");
+                        if (index == 0) {
+                            $(this).addClass("hover");
+                        }
+                        $(this).removeClass("dn");
+                        erro++;
+                    } else {
+                        $(this).removeClass("hover");
+                        $(this).addClass("dn");
+                    }
+                });
+                erro == 0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+            } else {
+                $(".bankList").show();
+                $(".bankList>ul>li").each(function (index, element) {
+                    if (index == 0) {
+                        $(this).addClass("hover");
+                    }
+                    var hasErrorClass = $(this).attr('rel');
+                    if (hasErrorClass != 'error') {
+                        $(this).removeClass("dn");
+                    }
+                });
+            }
+        });
+        $("body").on("keyup", "[name='experess']", function (e) {
+            if (e.keyCode != 38 && e.keyCode != 40) {
+                var val = $(this).val();
+                var erro = 0;
+                $(".bankList").show();
+                $(".bankList>ul>li").each(function (index, element) {
+                    var text = $(this).text();
+                    if (text.indexOf(val) >= 0) {
+                        $(this).removeClass("dn");
+                        erro++;
+                    } else {
+                        $(this).addClass("dn");
+                    }
+                });
+                $(".bankList>ul>li").removeClass("hover");
+                $(".bankList li:not(.dn):first").addClass("hover");
+                erro == 0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+            }
+            if (e.keyCode == 13) {
+                if ($(".bankList li.hover:not(.dn)").length >= 1) {
+                    var v = $(".bankList li.hover").attr("data-city");
+                    var key = $(".bankList li.hover").attr("data-key");
+                    return false;
+                } else {
+                    alert("输入的快递不存在")
+                }
+            }
+            if (e.keyCode == 38) {
+                var t = $(".bankList li.hover");
+                var tnext = t.prevAll("li:not(.dn):first");
+                if (tnext.length > 0) {
+                    tnext.addClass("hover");
+                    t.removeClass("hover");
+                    if (t.nextAll("li:not(.dn)").index() > 4) {
+                        $(".bankList ul").scrollTop($(".bankList ul").scrollTop() - 30);
+                    }
+                    var text = $(".bankList li.hover").text();
+                    $(this).val(text);
+                }
+            }
+            if (e.keyCode == 40) {
+                var t = $(".bankList li.hover");
+                var tnext = t.nextAll("li:not(.dn):first");
+                if (tnext.length > 0) {
+                    if (tnext.hasClass("erro")) {
+                        return false;
+                    }
+                    tnext.addClass("hover");
+                    t.removeClass("hover");
+                    if (tnext.index() > 4) {
+                        $(".bankList ul").scrollTop($(".bankList ul").scrollTop() + 30);
+                    }
+                    var text = $(".bankList li.hover").text();
+                    $(this).val(text);
+                }
+            }
+        });
+        $("body").on('focus', '#delivery_company', function (e) {
+            $('.bankList ul').css('display', 'block');
+        });
+        $("body").on("click", ".bankList ul li:not('.erro')", function (e) {
+            e.stopPropagation();
+            var val = $(this).text();
+            $("[name='experess']").val(val);
+            $(".bankList").addClass("dn");
+            $('.bankList ul').css('display', 'none');
+        })
+        //点击以外区域隐藏分组
+        $("body").on("click", function () {
+            $(".bankList").hide();
+        });
+    });
+    document.onkeypress = function (e) {
+        if (e.keyCode == 13) {
+            return false;
+        }
+        if (e.keyCode == 38) {
+            return false;
+        }
+        if (e.keyCode == 40) {
+            return false;
+        }
+    }
+</script>

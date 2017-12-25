@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>购物卡管理_卡券_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/card.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+
+<script type="text/javascript">
+function revocation(id){
+    art.dialog({
+        content:"确认撤销?",
+        button: [{
+            name: '确认',
+            callback: function(){
+                $.post("{:U('WangcaiPc/BatchTrace/revocationCode')}",{"id":id},function(data){
+                    if(data.status==1){
+                        art.dialog({
+                            content:data.info,
+                            ok:function(){
+                                window.location.reload();
+                            }
+                        });
+                    }else{
+                        art.dialog(data.info);
+                    }
+                },"json");
+            }
+        }],
+        cancel: true
+    });
+}
+function reSend(id){
+	 art.dialog({
+	        content:"确认重发?",
+	        button: [{
+	            name: '确认',
+	            callback: function(){
+	                $.post("{:U('WangcaiPc/BatchTrace/reSend')}",{"id":id},function(data){
+	                    if(data.status==1){
+	                        art.dialog({
+	                            content:data.info,
+	                            ok:function(){
+	                                window.location.reload();
+	                            }
+	                        });
+	                    }else{
+	                        art.dialog(data.info);
+	                    }
+	                },"json");
+	            }
+	        }],
+	        cancel: true
+	    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="javascript:void(0)">卡券</a></p>
+                            
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                   <!--开始载入左菜单--> 
+                    <include file="WangcaiPc/NumGoods/leftMenu" leftmenuid="yxpkcgl"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4 class="bd-b-565656">购物卡详情</h4>
+                    </div>
+                    <div class="card-repay-prize fn bgf3f3f3 p20 tc">
+                        <span>{$cardsInfo['batch_name']}</span><span class="ml20">详细信息</span>
+                    </div>
+                    <div class="card-libs">
+                        <a href="{:U('ValueCards/cardsDetail',array('batch_no'=>$cardsInfo['batch_no']))}"><p class="p">基本信息</p></a>
+                        <a href="{:U('ValueCards/daysConsume',array('batch_no'=>$cardsInfo['batch_no']))}"><p class="p">日消费统计</p></a>
+                        <a href="{:U('ValueCards/sendCodeDetail',array('batch_no'=>$cardsInfo['batch_no']))}"><p class="p hover">发卡记录</p></a>
+                        <a href="{:U('ValueCards/verifyDetail',array('batch_no'=>$cardsInfo['batch_no']))}"><p class="p">日消费流水</p></a>
+                        <div class="card-libs-content show">
+                        	<div class="Wcanal-tab">
+                                <div class="Wcanal-tab-title fn">
+                                    <p class="Wcanal-tab-hover"><a href="{:U('ValueCards/sendCodeDetail',array('batch_no'=>$cardsInfo['batch_no']))}">单条流水</a></p>
+                                    <p><a href="{:U('ValueCards/sendBatch',array('batch_no'=>$cardsInfo['batch_no']))}">批量流水</a></p>
+                                </div>
+                                <div class="Wcanal-tab-list">
+                                    <table cellpadding="0" cellspacing="0" class="W-table mt20">
+                                        <tr>
+                                            <th>日期</th><th>手机号码</th><th>交易类型</th><th>状态</th><th>操作</th>
+                                        </tr>
+                                        <volist name="dataList" id="vo" empty="$empty">
+                                        <tr>
+                                            <td>{$vo['trans_time']|dateformat=###,'Y-m-d H:i:s'}</td>
+                                            <td>{$vo['phone_no']}</td>
+                                            <td>{$transType[$vo['trans_type']]}</td>
+                                            <td>{$status[$vo['status']]}</td>
+                                            <td>
+                                                <if condition="($vo['trans_type'] eq 0001) AND ($vo['status'] eq 0) "> 
+                                                <a href="javascript:void(0);" onclick="reSend('{$vo['id']}')">重发</a>
+                                                <a href="javascript:void(0);" onclick="revocation('{$vo['id']}')">撤销</a>
+                                                <else />
+                                                --
+                                                </if>
+                                            </td>
+                                        </tr>
+                                        </volist>
+                                    </table>
+                                    <div class="page">{$page}</div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

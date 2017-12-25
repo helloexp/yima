@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+    <meta content="telephone=no" name="format-detection" />
+    <meta content="email=no" name="format-detection" />
+    <meta name="apple-touch-fullscreen" content="NO">
+    <title>招募奖金明细</title>
+    <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+    <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_wfx.css?v=__VR__">
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.new.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+    <include file="Public:Public:wechatAllShareJsdk" />
+    <script type="text/javascript">
+        $(function () {
+            wx.ready(function () {
+                wx.hideOptionMenu();
+            })
+        })
+    </script>
+</head>
+<style>
+	.m-gap{
+		border:none;
+	}
+	.m-commission .box .month{
+		border-bottom: 1px solid #dcdcdc;
+	}
+	.m-commission  .month h3{
+		
+		font-weight: bold;
+	}
+	.m-commission .detail{
+		border-bottom: none;
+	}
+	.m-commission .box a{
+		margin:0 0 20px 0;
+	}
+	.on{
+		color: #333333;
+	}
+    /* 加载更多 */
+    .get-more { text-align: center; padding: 10px 0 20px 0; margin:0 15px;}
+    .get-more i { display: block; width: 12px; height: 12px; margin: 0 auto; background: url(__PUBLIC__/Label/Image/jfyx/jfyx-icon2.png) no-repeat; background-size: 100%;}
+    .get-more a { display:block; height:30px; line-height:30px; color:#999;}
+</style>
+<body>
+    <div id="wrapper">
+        <div id="container">
+            <div id="main">
+                <div id="header" class="fn">
+				    <div class="goback" onclick="link_to('{:U('Label/MhOrder/mhMyCommission', array('node_id'=>session('node_id')))}')" ><i></i></div>
+				    <div class="headerorder" onclick="link_to('{:U('Label/MyOrder/index', array('node_id'=>session('node_id')))}')"></div>
+				    <div class="title">招募奖金明细</div>
+				</div>
+                <?php if($all_trace != null){ ?>
+                <div class="m-commission" style='padding-bottom:40px;'>
+                    <div id="masonry">
+                        <volist name="all_trace" id="vo" >
+                            <div class="box">
+                                <div class="detail month">
+                                    <div class="name">
+                                        <h3>{$vo.trace_time}</h3>
+                                    </div>
+                                    <div class="status">
+                                        <p class="on">{$vo.amount}</p>
+                                        <p class="on">{$type_array[$vo['user_get_flag']]}</p>
+                                    </div>
+                                </div>
+                                <volist name="vo.trace_details" id='vo1'>
+                                    <div class="detail bbn">
+                                        <div class="name">
+                                            <p>{$vo1.phone_no}</p>
+                                            <p class="time">{$vo1.trace_time}</p>
+                                        </div>
+                                        <div class="status">
+                                            <p class="on">{$vo1.amount}</p>
+                                        </div>
+                                    </div>
+                                </volist>
+                                <div class="m-gap"></div>
+                            </div>
+                        </volist>
+                    </div>
+                    <div class="get-more" data-url="{$nextUrl}"><i></i><a href="javascript:;">往上拉查看更多</a></div>
+                </div>
+                <?php }else{ ?> 
+                <div class="nodata">
+                    <p style="margin-top: 115px;font-size: 16px;font-weight: bold;color: #C0C0C0;text-align:center;">您还未获得招募奖金</p>
+                </div>
+                <?php } ?>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    $(document).ready(function() {
+        _in_ajax = false;
+        var loadhtml = '<div id="infscr-loading" style="text-align: center; display:none;"><img src="__PUBLIC__/Label/Image/Item/loading.gif"><div><em>加载中...</em></div></div>';
+        $("#masonry").append(loadhtml);
+        $("body").append("<div id='masonry2' style='display:none;'></div>");
+        $(window).scroll(function () {
+            setTimeout(function(){
+                if ($(document).scrollTop() + $(window).height() >= $(document).height()) {
+                    if (_in_ajax) return ;
+                    _in_ajax = true;
+                    if($("masonry2").hasClass("erro")){return false;}
+                    $("masonry2").addClass("erro");
+                    var url = $('.get-more').attr("data-url");
+                    $("#infscr-loading").show();
+                    $('#masonry2').load(url + ' ' + ".box", null, function(data,status){
+                        var l = $("#masonry2 .box").length;
+                        if (l == 0) {
+                            $("#infscr-loading em").text("没有更多数据了");
+                            $("#infscr-loading img").hide();
+                            setTimeout(function(){
+                                $("#infscr-loading").hide();
+                            },2000);
+                            $('.get-more').hide();
+                            _in_ajax = true;
+                        }else{
+                            $('#masonry').append($('#masonry2').html());
+                            console.log($('#masonry2').html());
+                            $("#infscr-loading").fadeOut(500);
+                            _in_ajax = false;
+                        }
+                        var newpath = newPath(url);
+                        $(".get-more").attr("data-url",newpath);
+                        $("masonry2").removeClass("erro");
+                    });
+               };
+            },1000);
+        });
+    })
+
+    function newPath(path){
+        path = path.split("p=");
+        var p = path[1]*1+1;
+        newpath = path[0]+"p="+p;
+        return newpath;
+    };
+</script>

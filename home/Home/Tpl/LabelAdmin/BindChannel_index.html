@@ -1,0 +1,368 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{$webTitle}</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivity2015.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+var zdyqd = '';
+$(function(){
+	Gform();
+	//显示渠道全称
+	$(".channelList li").hover(function(){
+		$(this).children(".moreinfo").fadeIn(300);
+	},function(){
+		$(this).children(".moreinfo").fadeOut(300);
+	})
+	/* $("#sms").click(function(event) {
+	       var id=$("#staff_id").val();
+		   var batchid=$("#batch_id").val();
+		   if(id==''){
+		    if(!confirm('您还没有配置员工渠道，马上去配置吧！！！')) return false;
+		    window.location.href='index.php?g=LabelAdmin&m=Channel&a=staffChannel&htmlid=32&type=5&sns_type=51';return false;
+		   }
+        	art.dialog.open("<?php echo U('LabelAdmin/Channel/addsmsSubmit'); ?>&id1="+batchid+"&type1="+4+"&sid="+id,{
+			   	id:'uduf',
+	   			title: '短信',
+				width:600,
+				height:480,
+	  			lock:true,
+				close: function(){location.reload();}
+         })
+     }); */
+     $('.wrapper-demo .dropdown li').click(function(){
+    	 if ($(this).index() == 0) {
+    		 $('#channelList_tp1 li').hide();
+    		 $('#channelList_tp1 li:not(".unbinded")').css('color', 'gray');
+    		 $('#channelList_tp1 li.unbinded').show();
+    	 } else {
+    		 $('#channelList_tp1 li').show();
+    	 }
+    	 var a_label = $(this).find('a').html();
+    	 $('#selected_channel').html(a_label);
+     });
+     
+     $('.wrapper-demo .dropdown li:eq(0)').click();
+     
+     $('.channelList:not(".already_selected") input[type="checkbox"]').click(ctrlCheck);
+     //创建社交渠道
+     $('#social_channel').click(function(event){
+	 	event.preventDefault(); 
+		var url="{:U('LabelAdmin/Channel/onlineAdd2')}&callback=clickNewChannelSocial";
+		art.dialog.open(url,{
+   			        id:'uduf',
+   	                title: '创建新渠道',
+   	                width:500,
+   					close: function(){}
+		});
+     });
+     //创建线下标签渠道
+     $("#label_channel").on('click',function(event) {
+         event.preventDefault(); 
+         art.dialog.open(
+        		"{:U('LabelAdmin/Channel/add')}&type=21&callback=clickNewChannelOffLine",
+        		{
+	 		        id:'uduf',
+	                title: '创建新渠道',
+	                width:'800px',
+	 				close: function(){
+	 				}
+     			}
+     		);
+     });
+     //创建自定义渠道
+     $("#zdyqd").on('click',function(event) {
+         event.preventDefault(); 
+         zdyqd = art.dialog.open(
+        		"{:U('LabelAdmin/Channel/onlineAddapi')}&callback=clickNewChannelSelfDefined",
+        		{
+	 		        id:'uduf',
+	                title: '创建新渠道',
+	                width:500,
+	 				close: function(){
+	 					
+	 				}
+     			}
+     		);
+     });
+     
+     $(".channelList li").hover(function(){
+ 		$(this).children(".moreinfo").fadeIn(300);
+ 	},function(){
+ 		$(this).children(".moreinfo").fadeOut(300);
+ 	});
+
+});
+
+function clickNewChannelSocial(d) {
+	d['channelType'] = 'social';
+	clickNewChannel(d);
+}
+function clickNewChannelOffLine(d) {
+	d['channelType'] = 'offLine';
+	clickNewChannel(d);
+}
+
+function clickNewChannelSelfDefined(d) {
+	zdyqd.close();
+	d['channelType'] = 'selfDefined';
+	clickNewChannel(d);
+}
+
+function clickNewChannel(d) {
+	var arr = ['<li class="unbinded">',
+				'<label>',
+				'<input name="offLineChecked[]" type="checkbox" data-channelId="'+d.channel_id+'" checked="checked"/>',
+				'<span title="'+d.name+'">'+d.name+'</span>',
+				'</label>',
+				'</li>'];
+	var html = arr.join('');
+	var ul_id = '';
+	if (d.channelType == 'social') {
+		$('#social').append(html);
+		ul_id = 'social';
+	} else if (d.channelType == 'offLine') {
+		$('#channelList_tp1').append(html);
+		ul_id = 'channelList_tp1';
+	} else if (d.channelType == 'selfDefined') {
+		$('#selfDefined').append(html);
+		ul_id = 'selfDefined';
+	}
+	
+	var lastCheckBox = $('#'+ul_id+' input[type="checkbox"]').last();
+	lastCheckBox.bind('click', ctrlCheck);
+	lastCheckBox.click();
+	lastCheckBox.attr('checked', 'checked');
+}
+
+function removeSelected(obj){
+	var selectId = $(obj).val();
+	$(obj).parent().replaceWith('');
+	$('.channelList:not(".already_selected") input[type="checkbox"]').each(function(){
+		if($(this).attr('data-channelId') == selectId){
+			$(this).removeAttr('checked');
+		}
+	});
+}
+
+function confirmPublish() {
+	//判断能不能发布[中奖概率是否为空，有没有添加奖项和奖品，有没有编辑过活动配置]
+	$.ajax({
+	   type: "POST",
+	   url: "{:U('LabelAdmin/BindChannel/checkCanPublish', array('batch_id' => $batch_id))}",
+	   data:$('#batch_type').serialize(),
+	   success: function(dat){
+		   if (dat.status == 1) {
+			   //前端为了显示才改的disabled，提交时把disabled去掉，保持后台的逻辑
+			   $('.already_selected input').removeAttr('disabled');
+			   submitBindChannel();
+		   } else {
+			   var contentData = '';
+			   $.each(dat.result, function(k,v){
+				   contentData += '<div><a href="'+v.url+'" target="_blank">'+v.tips+'</a></div>';
+			   });
+			   var dialog = art.dialog({
+					content: contentData,
+					width: '200px',
+					title:"完善信息"
+				});
+		   }
+	   },
+	   dataType: "json"
+	});
+}
+function locationToLastStep() {
+	var prev = $('.member_steps li.current').prev().find('a');
+	location.href = prev.attr('href');
+}
+
+function submitBindChannel() {
+	var postUrl = "{:U('submitBind')}";
+	var data = $('#checked_channel').serialize();
+	$.post(postUrl, data, function(resp){
+		if (resp.status == '1') {
+			window.location.href = "{:U('checkSuccess', array('batch_type' => $batch_type, 'batch_id' => $batch_id, 'publishGroupModule' => $publishGroupModule, 'isReEdit' => $isReEdit, 'selfDefineActionArr' => $selfDefineActionArr))}";
+		} else {
+			dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+		}
+	}, 'json');
+}
+
+var ctrlCheck = function(){
+	 if ($(this).prop("checked") == false) {
+		 var selectId = $(this).attr('data-channelId');
+		 $('.already_selected input[type="checkbox"]').each(function(){
+				if($(this).val() == selectId){
+					$(this).parent().replaceWith('');
+				}
+		 });
+	 } else {
+		 var selectId = $(this).attr('data-channelId');
+		 var selectName = $(this).next().html();
+		 var html = '<li><input type="checkbox" checked="checked" value="'+selectId+'" name="channel[]" onclick="removeSelected(this)"/><span>'+selectName+'</span></li>';
+		 $('.already_selected>ul').append(html);
+	 }
+}
+</script>
+
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+            	<div class="member_con">
+                    <div class="member_hd_title">{$batch_name}</div>
+                    <!-- <div class="steps">默认渠道 
+                    <span>无需创建或选择渠道，创建快速。对渠道分类管理没有太高要求者首选！</span>
+                    </div> -->
+                    <div class="steps">我的渠道 
+                    <span>在该渠道下生成活动二维码<a style="margin-left:10px;" target="_blank" href="{:U('LabelAdmin/Channel/IndexNew')}">查看我的渠道</a></span>
+                    </div>
+                    <div class="channelList">
+                    	<ul id="channelList_tp1">
+                    		<!-- 如果batch_type或batch_id为空的，表示没有被任何活动绑定过 -->
+                    		<volist name="myChannel" id="eachMyChannel">
+                    		<!-- todo -->
+                        	<li <empty name="eachMyChannel['bcid']">class="unbinded"</empty> >
+                        		<label>
+                        		<input name="myChannel[]" type="checkbox" data-channelId="{$eachMyChannel['id']}" <notempty name="eachMyChannel['bcid']">checked="checked" disabled="disabled"</notempty> />
+                        		<span title="<eq name="eachMyChannel['sns_type']" value="62">在旺财APP上展示活动二维码，扫码即可参与活动<else />{$eachMyChannel['name']}</eq>">{$eachMyChannel['name']}<eq name="eachMyChannel['sns_type']" value="62">(系统自建)</eq></span>
+                        		</label>
+                        	</li>
+                        	</volist>
+                        </ul>
+                    </div>
+                     <div class="steps">微信公众号 <span><strong>83%</strong>的参与者都是通过微信渠道访问活动的，当下最火的社交营销渠道，您必须试一试！<a target="_blank" href="{:U('Weixin/Weixin/materialAdd', array('type' => 1, 'sns_type' => 41, 'batch_type' => $batch_type, 'batch_id' => $batch_id))}">点击前往“微信公众号”进行配置</a></span> </div>
+                     <div class="steps">支付宝服务窗 <span><strong>43%</strong>的参与者都是通过支付宝渠道访问活动的，当下最火的社交营销渠道，您必须试一试！<a target="_blank" href="{:U('AlipayServiceWindow/Index/index')}">点击前往“支付宝服务窗”进行配置</a></span></div>
+                     <div class="steps">新浪微博 <span><strong>67%</strong>的参与者都是通过新浪微博渠道访问活动的，当下最火的社交营销渠道，您必须试一试！<a target="_blank" href="{:U('LabelAdmin/Weibo/index',array('html'=>'25','type'=>'1','sns_type'=>'1','batch_type'=>$batch_type,'batch_id'=>$batch_id))}">点击前往“新浪微博”进行配置</a></span></div>
+                     <eq name="hasStaffChannel" value="1">
+                     <!-- #19638 有员工渠道的显示员工渠道发送邮件的入口，没有的话不显示 -->
+                     <div class="steps">员工渠道 <span><strong>24%</strong>的用户选择通过内部员工推广活动 <a href="javascript:void(0)" class="js_pubPersonal">立即发布</a></span></div>
+                     </eq>
+                     <form name="checked_channel" method="post" id="checked_channel" action="{:U('LabelAdmin/BindChannel/submitBind')}">
+                     <input name="batch_id" value="{$batch_id}" id="batch_id" type="hidden"/>
+                     <input name="batch_type" value="{$batch_type}" id="batch_type" type="hidden"/>
+                     <input name="publishGroupModule" value="{$publishGroupModule}" id="publishGroupModule" type="hidden"/>
+                     <div class="steps allready">已选择的渠道</div>
+                     <div class="channelList already_selected">
+                     	<ul>
+                            <!-- <li>
+                                <input type="checkbox" checked="checked" value=""  name="channel[]" onclick="removeSelected(this)"/>
+                                <span title="默认渠道">默认渠道</span>
+                            </li> -->
+                     		<volist name="myChannel" id="list">
+                     		<notempty name="list['channel_id']">
+                        	<li>
+                        		<input type="checkbox" checked="checked" disabled="disabled" value="{$list['channel_id']}" name="channel[]"/>
+                        		<span title="{$list['name']}">{$list['name']}</span>
+                        	</li>
+                        	</notempty>
+                            </volist>
+                        </ul>
+                     </div>
+                     </form>
+                     <div align="center" class="Ginput noName">
+                     <empty name="isReEdit">
+                     <a href="javascript:locationToLastStep();" class="btn-all">上一步</a>
+                     </empty>
+                     <a href="javascript:confirmPublish();" class="btn-all">确认发布</a>
+					 <a href="{$cancelUrl}" class="btn-all-del vt">取消</a>
+                     </div>
+                    
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+//下拉列表
+function DropDown(el) {
+	this.dd = el;
+	this.initEvents();
+}
+DropDown.prototype = {
+	initEvents : function() {
+		var obj = this;
+
+		obj.dd.on('click', function(event){
+			$(this).toggleClass('active');
+			event.stopPropagation();
+		});	
+	}
+}
+
+$(function() {
+	var dd = new DropDown( $('#dd') );
+	$(document).click(function() {
+		// all dropdowns
+		$('.wrapper-dropdown-2').removeClass('active');
+	});
+	
+	$(".js_pubPersonal").click(function(e) {
+		var html = ['<div class="tipNormal"><p>点击发送成功后， 系统会将各个员工的专属活动链接以附件的形式发送到您指定的邮箱。</p></div>',
+					'<form action="{:U('LabelAdmin/Channel/addsmsSubmit')}" method="post" id="thef1">',
+					'<input name="id" value="{$batch_id}" id="id" type="hidden"/>',
+					'<input name="type1" value="{$batch_type}" id="type1" type="hidden"/>',
+					'<input name="sid" value="{$staffChannelId}" id="sid" type="hidden"/>',
+					'<div class="Gform pb20">',
+						'<ul>',
+							'<li class="Gname">* 接收邮箱：</li>',
+							'<li class="Ginput">',
+								'<input type="text" name="sms_title" class="validate[required,custom[email]]">',
+								'<p class="tipWord"></p>',
+							'</li>',
+						'</ul>',
+					'</div>',
+					'</form>'].join("");
+		art.dialog({
+				id:'uduf',
+				title: '提示',
+				content:html,
+				width:500,
+				padding:0,
+				ok:function(){
+					if($('#thef1').validationEngine('validate')){
+						var fromTxt = $("[name='sms_title']").val();
+						$("#thef1").ajaxSubmit({
+							beforeSubmit:function(){
+								dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+							},
+							success:function(data){
+							  if (data.status == '1'){
+								  dialog.time(2).content("<div class='msg-all-succeed'>发送邮件成功</div>");
+							  } else {
+								  dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+							  }
+							},
+							url:"{:U('LabelAdmin/Channel/addsmsSubmit')}",
+							dataType:'json'
+						});
+						$(".js_popwin").fadeOut(300);
+					}else{
+						return false;
+					}
+				},
+				cancel:true
+		});
+    });
+})
+</script>

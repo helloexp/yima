@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>{$marketInfo['wap_title']}</title>
+	<meta name="viewport" content="width=320,user-scalable=no,maximum-scale=1">
+	<link rel="stylesheet" href="__PUBLIC__/Label/Css/activity/wap_20150312.css">
+    <script src="__PUBLIC__/Label/Js/zepto.min.js"></script>
+    <script>
+        //全局变量设置
+        var _global = $.extend({},{
+            error_code:0,
+            error_msg:'',
+            score_url:"",//要提交分数的url
+            initgame_url:"{:U('initGame')}",//初始化地址
+            top_score:0,
+            location_flag:true,//
+            game_time:0,//游戏时间(秒数)
+			history:0
+        },{$globalJs});
+    </script>
+
+    <script>
+        function popWin(html){
+            if(typeof(html) == 'string'){
+                html = {content:html};
+            }
+            MsgPop(html);
+        }
+        //loding的
+        function popWinLoading(msg){
+            MsgPop({
+                content:msg,
+                closeFlag:false,
+                button:false
+            });
+        }
+
+        function closeMsgPop(){
+            $(".shade").remove();
+        }
+
+        function MsgPop(msg){
+            msg = $.extend({},{
+                content:'',
+                closeFlag:true,
+                button:{text:'确定',click:function(e){
+                    closeMsgPop();
+                }}
+            },msg);
+            //先关再加
+            closeMsgPop();
+            var html = $([
+                '<div class="shade">',
+                '<div class="c-game">',
+                    //是否允许关闭
+                 msg.closeFlag?
+                    '<a href="javascript:;" class="close-pop" onClick="closeMsgPop()">+</a>':'',
+                '<p>'+msg.content+'</p>',
+                '<p class="j-button-area"></p>',
+                '</div>',
+                '</div>'
+            ].join(''));
+            if(msg.button){
+                var button = $('<a href="javascript:;" class="btn">'+msg.button.text+'</a>');
+                button.click(function(e){
+                    if(!msg.button.click(e)){
+                        closeMsgPop();
+                    }
+                });
+                html.find('.j-button-area').html(button);
+            }
+            $(".wrap").append(html)
+        }
+
+    </script>
+</head>
+<body>
+    <div class="music">
+        <audio loop preload="preload" id="music-start">
+            <source src="__PUBLIC__/Label/Image/20150312/start.mp3" type="audio/mpeg">
+        </audio>
+        <audio preload="preload" id="music-stop">
+            <source src="__PUBLIC__/Label/Image/20150312/stop.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+	<div class="wrap">
+		<div class="container">
+			<div class="gaming main-bg">
+				<div class="input-win">
+					<img class="wobble" src="__PUBLIC__/Label/Image/20150312/hands.png" alt="摇一摇">
+					<p><span>猛烈摇动</span>你的手机开始游戏</p>
+					<a href="javascript:;" class="btn" id="startGame">马上开始游戏</a>
+				</div>
+				<div class="c-game"><p>还要继续游戏么？</p>
+					<a href='javascript:;' class='btn' id='continueGame'>继续游戏</a>
+				</div>
+				<header><p><i></i>摇一摇自动开始计时</p></header>
+				<div class="time-meter">
+					<div class="parts">
+						<div class="line"></div>
+						<div class="part">
+							<span class="score score1 in">0</span>
+							<span class="score score1 out">1</span>
+						</div>
+						<div class="part">
+							<span class="score score2 in">0</span>
+							<span class="score score2 out">2</span>
+						</div>
+						<div class="part">
+							<span class="score score3 in">0</span>
+							<span class="score score3 out">3</span>
+						</div>
+						<div class="part">
+							<span class="score score4 in">0</span>
+							<span class="score score4 out">4</span>
+						</div>
+					</div>
+				</div>
+				<div class="data">
+					<p class="tr">需要坚持时间：</p>
+					<p class="tr">历史最高成绩：</p>
+					<p><span id="time"></span>秒</p>
+					<p><span id="times">0</span>次</p>
+				</div>
+				<div class="hands">
+					<img id="hands-shake" src="__PUBLIC__/Label/Image/20150312/hands.png" alt="摇一摇">
+				</div>
+				<div class="bottom-bar">
+					<div class="rank-win">
+						<div class="content">
+							<p>您现在位于第 <span>{$my_rank}</span> 位</p>
+							<p>与第一名相差 <span>{$diff_score}</span> 次</p>
+						</div>
+					</div>
+					<ul>
+						<a href="{:U('index',array('id'=>$id))}">
+							<li>
+								<i class="index"></i>
+								<p>返回首页</p>
+							</li>
+						</a>
+						<li id="rank-show">
+							<i class="rank"></i>
+							<p>当前排名</p>
+						</li>
+						<a href="{:U('details',array('id'=>$id))}">
+							<li>
+								<i class="prize"></i>
+								<p>查看奖项</p>
+							</li>
+						</a>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+    <div id='bodyfix' style='position:fixed; width:100%; height:100%; left:0; top:0;z-index:100000; display:none;'></div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+	$("#bodyfix").on("touchmove",function(e){
+		e.preventDefault();
+	});
+});
+    //初始化数据
+    function initData(){
+        $('#times').html(_global.history);
+        $('#time').html(_global.game_time);
+
+        $('#rank-show').tap(function(){
+            var win = $('.rank-win');
+            if(win.css('visibility')=='hidden'){
+                win.css('visibility','visible');
+                $(this).addClass('hover');
+            }else{
+                $(this).removeClass('hover');
+                win.css('visibility','hidden');
+            }
+        });
+        $('#startGame').tap(function(){
+            $('.input-win').hide();
+            $('#hands-shake').addClass('wobble');
+            shakeStart();
+        });
+        $('#continueGame').tap(function(){
+            $('.c-game').css('z-index','-1');
+            location.reload();
+        });
+    }
+
+	window.onload = function(){
+        if(+_global.error_code != 0){
+            popWinLoading(_global.error_msg);
+            return false;
+        }
+        if(+_global.location_flag != 0){
+            getLocation();
+        }
+        else{
+            initData();
+        }
+	}
+    var _shaking = false;
+	function shakeStart(){
+        //正在摇的话，就不控制了
+        if(_shaking) return;
+        hideScore();
+        if(window.DeviceMotionEvent) {
+        	
+        	function fBrowserRedirect(speed){
+			 var sUserAgent = navigator.userAgent.toLowerCase();
+			 var isIphone = sUserAgent.match(/iphone/i) == "iphone";
+			 var isAndroid = sUserAgent.match(/android/i) == "android";
+			 if(isIphone){ 
+				 speed = 20;
+				}
+			 if(isAndroid){
+				 speed = 3;
+				}
+			 return speed;
+			}
+        	var speed = 0;
+        	speed = fBrowserRedirect(speed);
+//      	alert(speed);
+        	
+            var start = new Date(); //摇动开始的时间点
+//          var speed = 20; //摇动的幅度
+            var x = y = lastX = lastY = 0; //起始点和终止点坐标
+            var count = 0; //摇动次数
+            var end = null; //摇动结束的时间点
+            var time = _global.game_time; //摇动时长（单位秒）
+            var arr_score = null; //成绩
+            var t = true;
+            var onShake = function(){
+                _shaking = true;//正在摇
+                console.log(t);
+                if(t){
+                    end = new Date();
+                    var acceleration = event.accelerationIncludingGravity;
+                    x = acceleration.x;
+                    y = acceleration.y;
+                    if(end-start<=_global.game_time*1000){
+						$("#bodyfix").show();
+                        if(Math.abs(x-lastX) > speed || Math.abs(y-lastY) > speed ){
+                            count++;
+                            var musicStart = document.getElementById('music-start');
+                            musicStart.play();
+							arr_score = change(count);
+                            setScore(arr_score);
+                        }else{
+                            arr_score = change(count);
+                            setScore(arr_score);
+                        }
+                    }
+                    lastX = x;
+                    lastY = y;
+                }else{
+                    _shaking = false;
+                    window.removeEventListener('devicemotion',onShake,false);
+                    showScore(count);
+                    var musicStart = document.getElementById('music-start');
+                    musicStart.pause();
+                }
+            };
+            window.addEventListener('devicemotion',onShake,false);
+            var timer = setInterval(function(){
+                if(time>=0){
+                    $("#time").text(time);
+                    time--;
+                }else{
+                    $('#hands-shake').removeClass('wobble');
+                    t = false;
+                    clearInterval(timer);
+                }
+            },1000);
+        }
+	}
+
+	function change(count){
+		if(typeof(count)!='String'){
+			count+="";
+		}
+		var arr_count = count.split("");
+		if(arr_count.length > 4){
+			return [0,0,0,0];
+		}
+		return arr_count;
+	}
+	function setScore(arr){
+		var s1 = $('.score1.out,.score1.in');var s2 = $('.score2.out,.score2.in');var s3 = $('.score3.out,.score3.in');var s4 = $('.score4.out,.score4.in');
+		if(arr.length==1){
+			s1.text(0);s2.text(0);s3.text(0);s4.text(arr[0]);
+		}else if(arr.length==2){
+			s1.text(0);s2.text(0);s3.text(arr[0]);s4.text(arr[1]);
+		}else if(arr.length==3){
+			s1.text(0);s2.text(arr[0]);s3.text(arr[1]);s4.text(arr[2]);
+		}else{
+			s1.text(arr[0]);s2.text(arr[1]);s3.text(arr[2]);s4.text(arr[3]);
+		}
+	}
+	function showScore(score){
+        /*
+		var score_in = $('.score.in');
+		var score_out = $('.score.in').parent().find('.out');
+		score_in.css('-webkit-transform','rotateX(-90deg)');
+		score_out.css('-webkit-transform','rotateX(0deg)');
+        */
+        var musicStop = document.getElementById('music-stop');
+        musicStop.play();
+		setTimeout(function(){
+            onGameEnd({
+                data:{
+                    score:score
+                }
+            });
+		},2000)
+	}
+
+    function hideScore(){
+        var score_in = $('.score.in');
+        var score_out = $('.score.in').parent().find('.out');
+        score_in.css('-webkit-transform','rotateX(0deg)');
+        score_out.css('-webkit-transform','rotateX(90deg)');
+    }
+
+
+    //获取位置
+    function getLocation(){
+        //成功时
+        function onSuccess(position){
+            //返回用户位置
+            //经度
+            var longitude =position.coords.longitude;
+            //纬度
+            var latitude = position.coords.latitude;
+            $.post(_global.initgame_url,{longitude:longitude,latitude:latitude},function(res){
+                if(!res){
+                    popWinLoading('系统正忙');
+                    return;
+                }
+                closeMsgPop();
+                if(+res.status == 0){
+                    popWinLoading(res.info);
+                    return;
+                }
+                //未登录
+                if(+res.status == 999){
+                    window.location.href="{:U('login')}";
+                    return;
+                }
+                initData();
+            },'json');
+        }
+        //失败时
+        function onError(error){
+            var msg = '';
+            switch(error.code){
+                case 1:
+                    msg = "位置服务被拒绝";//可调用popWin
+                    break;
+                case 2:
+                    msg = "暂时获取不到位置信息";
+                    break;
+                case 3:
+                    msg = "获取信息超时";
+                    break;
+                case 4:
+                    msg = "未知错误";
+                    break;
+            }
+            MsgPop({content:msg,closeFlag:false,button:false});
+        }
+
+        var options={
+            enableHighAccuracy:true,
+            maximumAge:1000
+        }
+        if(navigator.geolocation){
+            //支持geolocation
+            popWinLoading('正在获取地理位置信息');
+            navigator.geolocation.getCurrentPosition(onSuccess,onError,options);
+        }else{
+            popWinLoading("无法获取地理位置信息");
+            return false;
+        }
+    }
+
+    //必需调用的几个接口，根据不同的业务需求，并可以作当点调试用
+    //当游戏结束时
+    function onGameEnd(opt){
+		$("#bodyfix").hide();
+        popWinLoading('正在提交数据');
+        var opt = $.extend({},{
+            url:_global.score_url,
+            data:{},
+            callback:function(res){
+                var status = +res.status;
+                if(status == 0){
+                    popWinLoading(res.info);
+                    return;
+                }
+                MsgPop({
+                    content:"继续参加",
+                    button:{text:'确定',click:function(){
+                      shakeStart();
+                    }}
+                });
+            }
+        },opt),
+        data = opt.data,
+        url = opt.url,
+        callback=opt.callback;
+		if(opt.data.score>_global.history){_global.history=opt.data.score; $('#times').html(_global.history);};
+        $.post(url,data,function(res){
+            callback && callback(res);
+        },'json');
+    }
+
+    //当游戏开始之前,可以预先去服务端取得数据
+    function beforeGameStart(){
+
+    }
+</script>
+<div style="display:none">
+<script type="text/javascript">
+    var _bdhmProtocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+    document.write(unescape("%3Cscript src='" + _bdhmProtocol + "hm.baidu.com/h.js%3Fd63513a907e602a2cc2cb6970d7765b8' type='text/javascript'%3E%3C/script%3E"));
+</script>
+</div>

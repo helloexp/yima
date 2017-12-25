@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>商户详情</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_cbc.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js?v=__VR__"></script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div class="flash" style="height:200px;overflow:hidden;background:url({:get_upload_url($info['store_pic'])}) no-repeat center;background-size:cover">
+				  <div class="flash-txt"><span>{$info['store_desc']}</span></div>
+            </div>
+            <div id="mainCon">
+                	<div class="details-item">
+					      <div class="address">
+								<ul>
+									<li class="name"><i></i></li>
+									<li class="input"><a href="javascript:void(0);" id="gps_url" class="going" lat="{$info['lbs_x']}" lng="{$info['lbs_y']}"><p>{$info['address']}</p><i></i></a></li>
+								</ul>
+						   </div>
+						   <div class="tel">
+								<ul>
+									<li class="name"><i></i></li>
+									<li class="input"><a href="tel:{$info['store_phone']}"><p>{$info['store_phone']}</p><i></i></a></li>
+								</ul>
+						   </div>
+                	</div>
+
+					<volist name="info.act" id="vo">
+					<div class="details-item">
+					     <ul class="shopdes">
+		                        <li class="name <?php if($vo['activity_type'] == 4) echo 'djfk'; else echo 'thxc'; ?>"><i></i></li>
+		                        <li class="input <?php if($key == 0) echo 'open'; ?>"><a href="javascript:;"><p>{$vo['activity_title']}</p><i></i></a></li>
+								<div class="cont-hide <?php if($key > 0) echo 'dn'; ?>">
+									<li class="time"><p>{$vo['activity_date']}</p></li>
+									<li class="shop-txt"><p>{$vo['activity_desc']}</p></li>
+								</div>
+		                 </ul>
+					</div>
+					</volist>
+					<php>if($info['store_group_id']) {</php>
+					<div class="details-item">
+					     <ul class="othershop">
+						   <li class="input"><a href="{:U('otherStores')}&group_id={$info['store_group_id']}&activity_id={$activity_id}"><p>其他门店</p><i></i></a></li>
+                         </ul> 						 
+					</div>
+					<php>}</php>
+             </div>
+             <div class="get-more"></div>
+     </div>
+</div>
+</div>
+</body>
+</html>
+<script>
+	$(document).ready(function() {
+		bmapGetLbs();
+
+		$(".shopdes .input").click(function() {
+			$(this).toggleClass("open");
+			$(this).next().slideToggle();
+		});
+
+		$(document).on('click', ".going", function(){
+            endLng = $(this).attr('lng');
+            endLat = $(this).attr('lat');
+            bmapGetLbs(function(){
+                location.href = "{:U('drivingRoute')}"+'&start='+$.cookie('lng')+','+$.cookie("lat")+'&end='+endLng+','+endLat;
+            });
+        });
+	});
+
+	//获取当前lbs信息
+    function bmapGetLbs()
+    {
+        var callback = arguments.length > 0 ? arguments[0] : null;
+
+        if (navigator.geolocation) {
+            Util_tools.ui.loading('正在获取当前位置...');
+            navigator.geolocation.getCurrentPosition(function(r){
+                $.ajax({
+                    url: "{:U('geoconv')}",
+                    data: {x: r.coords.latitude, y: r.coords.longitude},
+                    async: false,
+                    dataType: 'json',
+                    success: function(resp){
+                        Util_tools.ui.loading(false);
+                        if(resp.status == 0){
+                            Util_tools.ui.loading(resp.info);
+                            setTimeout(function(){
+                                Util_tools.ui.loading(false);
+                            }, 3000);
+                        }
+                        else{
+                            var a = new Date();
+                            a.setTime(a.getTime() + (60 * 60 * 1000));
+                            $.cookie("lng", resp.y, {expires: a});
+                            $.cookie("lat", resp.x, {expires: a});
+                            Util_tools.ui.loading(false);
+                            if(callback && typeof callback == 'function'){
+                                callback();
+                            }
+                        }
+                    }
+                });
+            }, function(error){
+                Util_tools.ui.loading('您的浏览器暂时无法为您所在的位置服务');
+                console.log('定位失败！',error);
+                setTimeout(function(){
+                    Util_tools.ui.loading(false);
+                }, 3000);
+            }, {timeout:3000});
+        } else {
+            alert('该浏览器不支持获取当前位置信息');
+        }
+        return ;
+    }
+</script>

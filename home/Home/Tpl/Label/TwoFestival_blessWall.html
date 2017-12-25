@@ -1,0 +1,474 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$marketInfo['name']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+{$cacheControl}
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20151224.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jweixin-1.0.0.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.min.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) {
+	var loadImg = 0;
+	var imgNum = $(".loadimg").length-1;
+	$(".loadimg").one('load', function () {
+		loadImg++;
+		if (loadImg == imgNum) {
+			$("#loading").hide();
+			$("#wrapper").addClass("begin");
+		}
+	}).each(function () {
+		if (this.complete) $(this).load();
+	});
+});
+</script>
+</head>
+<body>
+<div id="loading">
+    <div class="loadingbox">
+        <h4>{$marketInfo['node_name']}</h4>
+        <div><i></i>
+            <img src="{:get_upload_url($marketInfo['log_img'])}" />
+        </div>
+        <h5>Loading...</h5>
+        <h6>{$marketInfo['name']}</h6>
+    </div>
+    <img src="__PUBLIC__/Label/Image/20151224/playbg.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/playheader.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/play.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/btn-j.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/btn-l.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/btn-w.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/btn-w2.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/btn-z.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/stop.png" class="loadimg" />
+</div>
+<div id="wrapper">
+    <div id="container">
+    	<div id="main">
+        	<div id="header" class="p0">
+    			<img src='<empty name="bg_pic2">__PUBLIC__/Label/Image/20151224/playheader.png<else />{$bg_pic2}</empty>' class="playheader" />
+                <div class="playName"><span>{$firstRecord['nickname']}</span>的留言</div>
+                <div class="playCon">
+                	<img src="{:get_upload_url($firstRecord['headimgurl'])}">
+                    <a href="javascript:void(0)" data-voiceId="{$firstRecord['id']}" class="play"><i></i><audio src="{:get_upload_url($firstRecord['path'])}" id="audio2">您的浏览器不支持音频</audio></a>
+                </div>
+            </div>
+            <div class="playList">
+                <audio controls class="audio" id="audio">
+                    您的浏览器不支持音频
+                </audio>
+            	<div class="playItem">
+                	<div class="playItemP">收到好友<span>{$voiceCount}</span>条留言</div>
+                	<ul class="for_record">
+                		<include file="TwoFestival:page"/>
+                    </ul>
+                </div>
+                <if condition="$voiceCount eq 0">
+            	<div class="noDate">
+                	<img src="__PUBLIC__/Label/Image/20151224/nodate.png">
+                	<if condition="$fromOpenId eq $toOpenId">
+                    <p>您还没有收到小伙伴的祝福~</p>
+                    <else />
+                    <p>你的小伙伴正在等你的祝福呢~</p>
+                    </if>
+                </div>
+                </if>
+                <input type="hidden" name="currentOpenId" value="{$fromOpenId}" />
+            </div>
+            <div class="playBtn">
+            	<if condition="$fromOpenId eq $toOpenId">
+            	<a href="{:U('operate', array('id' => $id, 'toOpenId' => $toOpenId))}" class="playbtn-j"><img src="__PUBLIC__/Label/Image/20151224/btn-j.png"></a>
+            	<a href="javascript:void(0)" class="playbtn-z"><img src="__PUBLIC__/Label/Image/20151224/btn-z.png"></a>
+            	<else />
+            	<a href="{:U('operate', array('id' => $id, 'toOpenId' => $toOpenId))}" class="playbtn-l"><img src="__PUBLIC__/Label/Image/20151224/btn-l.png"></a>
+	            	<if condition="$hasOwnWall eq 0">
+	            	<a href="{:U('index', array('id' => $id))}" class="playbtn-w"><img src="__PUBLIC__/Label/Image/20151224/btn-w.png"></a>
+	            	<else />
+	            	<a href="{:U('blessWall', array('id' => $id, 'toOpenId' => $fromOpenId))}" class="playbtn-w2"><img src="__PUBLIC__/Label/Image/20151224/btn-w2.png"></a>
+	            	</if>
+            	</if>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="out-box" onClick="$(this).hide();">
+	<img src="__PUBLIC__/Label/Image/tip-share.png?v=__VR__" class="img">
+</div>
+</body>
+</html>
+
+<script>
+var isSupportTouch = "ontouchend" in document ? true : false;
+var touchstart = "click";
+var touchend = "mouseup";
+if(isSupportTouch){touchstart = "touchstart";touchend = "touchend";};
+var time = 1;
+var check = false;
+var praisenum = 0;
+var praiseindex = false;
+var update = true;
+var voiceId;
+var setInt = function(){
+	if (update == false) {
+		return false;
+	}
+		if(time>0){
+			time--;
+		}else{
+			time=1;
+			if(check){
+				check = false;
+				$(".praise em").remove();
+				var currentOpenId = $('[name="currentOpenId"]').val();
+				update = false;
+				var readyData = {"changedata":changedata};
+				$.ajax({
+			        url: "{:U('TwoFestival/updateLike', array('id' => $id))}",
+			        type: "POST",
+			        data: readyData,
+			        dataType: "json",
+			        success: function (res) {
+			        	changedata = [];
+						praiseindex = false;
+						praisenum = 0;
+						update = true;
+			        }
+			    }); 
+			}
+		}
+	}
+var changedata = [];
+var audio = $("#audio")[0];
+var isnew = true;
+var playsrc = [];
+var audio2 = $("#audio2")[0];
+var page = 1;
+$(document).ready(function(e) {
+	//setInterval(setInt,2000);
+	$(".playItem ul li").each(function(index, element) {
+        $(this).css("z-index",100000-index);
+	//	var imgsrc = ["__PUBLIC__/Label/Image/20151224/headerimg1.png","__PUBLIC__/Label/Image/20151224/headerimg2.png","__PUBLIC__/Label/Image/20151224/headerimg3.png","__PUBLIC__/Label/Image/20151224/headerimg4.png","__PUBLIC__/Label/Image/20151224/headerimg5.png"];
+	//	var imgsrcnum = parseInt(5*Math.random());
+	//	var imgsrc = imgsrc[imgsrcnum];
+	//	$(this).find("img").attr("src",imgsrc).show();
+    });
+	pageshow();
+	$(".talktape").each(function(index, element) {
+		var src = $(this).attr("data-url");
+		var id = $(this).attr("data-id");
+		var isnews = $(this).hasClass("new") ? true : false;
+        playsrc.push({
+			src:src,
+			isnew:isnews,
+			id:id
+		})
+    });
+	$("body").on("click",".playCon a.play",function(){
+		$(".playCon a").removeClass("play").addClass("stop");
+		audio2.play();
+	})
+	$("body").on("click",".playCon a.stop",function(){
+		$(".playCon a").removeClass("stop").addClass("play");
+		audio2.paused();
+	})
+	$(".playbtn-z").click(function(){
+		$(".out-box").show();
+	});
+	$("body").on("click",".praise",function(){
+		if($(this).hasClass("erro")){
+			cj.content({
+				msg:"您已经点过赞了"
+			});
+			return false;
+		}
+		$(this).addClass("erro");
+		if (update == false) {
+			return false;
+		}
+		voiceId = $(this).attr("data-voiceId");
+		if(praiseindex!=$(this).closest("li").index()){
+			praiseindex = $(this).closest("li").index();
+			var changedataNew = true;
+			for(var i=0;i<changedata.length;i++){
+				if(changedata[i].voiceId==voiceId){
+					praisenum=changedata[i].clicknum;
+					changedataNew = false;
+					break;
+				}
+			}
+			if(changedataNew){
+				praisenum=0;
+			}
+		}
+		check = true;
+		var changedataNew = true;
+		var clicknum = $(this).find("span").text()*1;
+		var color = "color"+parseInt(10*Math.random());
+		var an = "an"+parseInt(3*Math.random());
+		if($(this).find("em").length>=50){$(this).find("em:lt(30)").remove();}
+		$(this).append("<em class='icon-heart "+color+" "+an+"'></em>");
+		$(this).find("span").text(clicknum+1);
+		praisenum ++;
+		time = 1;
+		for(var i=0;i<changedata.length;i++){
+			if(changedata[i].voiceId==voiceId){
+				changedata[i].clicknum = praisenum;
+				changedataNew = false;
+				break;
+			}
+		}
+		if(changedataNew){
+			changedata.push({voiceId:voiceId,clicknum:praisenum});
+		}
+		if(check){
+			check = false;
+			$(".praise em").remove();
+			var currentOpenId = $('[name="currentOpenId"]').val();
+			var readyData = {"changedata":changedata};
+			$.ajax({
+				url: "{:U('TwoFestival/updateLike', array('id' => $id))}",
+				type: "POST",
+				data: readyData,
+				dataType: "json",
+				success: function (res) {
+					changedata = [];
+					praiseindex = false;
+					praisenum = 0;
+				}
+			}); 
+		}
+	});
+	
+	$(".talktape").click(function(){
+		if($(this).hasClass("new")){
+			var voiceId = $(this).attr('data-id');
+			updateListened(voiceId);
+			play($(this).closest("li").index());
+		}else{
+			isnew=false;
+			play($(this).closest("li").index());
+		}
+		$(".talktape").removeClass("playing");
+		$(this).addClass("playing");
+		$(this).removeClass("new");
+	});
+	audio.addEventListener('canplaythrough', function () {
+		//更新是否该用户听过这个音频
+		if(playsrc[i].isnew){
+			updateListened(playsrc[i].id);
+		}
+		$(".playItem ul li:eq("+i+")").find(".talktape").removeClass("new");
+		playsrc[i].isnew = false;
+	},false); 
+	audio.addEventListener('ended',function(){
+		playsrc[i].isnew = false;
+		$(".playItem ul li:eq("+i+")").find(".talktape").removeClass("playing");
+		if(isnew){
+			i++;
+			var hasnew = true;
+			for(var j=i;j<playsrc.length;j++){
+				if(playsrc[j].isnew){
+					i=j;
+					hasnew = true;
+					break;
+				}else{
+					hasnew = false;
+				}
+			}
+			if(playsrc[i] && hasnew){
+				$(".playItem ul li:eq("+i+")").find(".talktape").addClass("playing").removeClass("new");
+				audio.src = playsrc[i].src;
+				audio.loop = false;
+				audio.play();
+			}else{
+				//alert("放完了")
+			}
+		}else{
+			isnew=true;
+		}
+	},false);
+	audio2.addEventListener('ended',function(){
+		$(".playCon a").removeClass("stop").addClass("play");
+	},false);
+});
+var i = 0;
+function play(index){
+	i = index;
+	audio.src = playsrc[i].src;
+	audio.loop = false;
+	audio.play();
+}
+function pageshow(){
+	$(".playItem ul li:lt("+page*10+")").each(function(index, element) {
+		$(this).show();
+    });	
+}
+function updateListened(voiceId) {
+	//console.log(voiceId);
+	var currentOpenId = $('[name="currentOpenId"]').val();
+	var data = {currentOpenId:currentOpenId, voiceId:voiceId}
+    $.ajax({
+        url: "{:U('TwoFestival/updateListened', array('id' => $id))}",
+        type: "POST",
+        data: data,
+        dataType: "json",
+        success: function (res) {}
+    });     
+}
+$(window).scroll(function(){
+    if($(document).scrollTop() >= ($(document).height() - $(window).height()) ){
+        page++;
+		pageshow();
+    }
+});
+</script>
+<script>
+var _global = {
+		onsub:false,
+		g:true
+	}
+var cj = {
+	basic:function(msg){
+		cj.close();
+		if(!msg.title){var notitle="notitle";msg.title="";}else{var notitle="hastitle"}
+		if(msg.isclose){var closehtml = '<a href="javascript:void(0)" class="close-msgPop"><i><span>+</span></i></a>'}else{var closehtml = "";}
+		var html = ['<div class="msgPop bg" id="'+msg.id+'">',
+			'<div class="msgBg bg2">',
+			'<div class="msgTitle '+notitle+'">'+msg.title+closehtml+'</div>',
+			'<div class="msgCon">'+msg.html+'</div>',
+			'</div>',
+			'</div>'].join('');
+		$("body").append(html);
+		if(typeof(msg.start) == 'string'){
+			window[msg.start].call(this,$(this));
+		}else if(typeof(msg.start) == 'function'){
+			msg.start.call(this,$(this));
+		}
+		$("body").find(".msgBg",html).on("click",".cjBtn-back",function(){
+			var index = $(this).index();
+			if(typeof(msg.btn[index].callback) == 'string'){
+				window[msg.btn[index].callback].call(this,$(this));
+			}else if(typeof(msg.btn[index].callback) == 'function'){
+				msg.btn[index].callback.call(this,$(this));
+			}else{
+				msg.repeat ? (cj.close(),cj.login({repeat:msg.repeat})) : cj.close();
+				if($(this).attr("href")!="javascript:void(0)"){
+					window.location.href = $(this).attr("href");
+				}
+			}
+		});
+		$("body").find(".msgBg",html).on("click",".close-msgPop",function(){
+			if(typeof(msg.after) == 'string'){
+				window[msg.after].call(this,$(this));
+			}else if(typeof(msg.after) == 'function'){
+				msg.after.call(this,$(this));
+			}
+			msg.repeat ? (cj.remove(),cj.login({repeat:msg.repeat})) : cj.remove();
+		});
+		$("body").on("click","input",msg.html,function(){
+			$(this).removeClass("erro");
+		});
+	},
+	tip:function(msg){
+		$(".cjTip").remove();
+		var txt = ["记得分享至朋友圈秀祝福哦~"];
+		var codeRandom = Math.floor(Math.random()*txt.length);
+		if(!msg){msg = txt[codeRandom]};
+		if(msg==1){return false;}
+		var html = '<div class="cjTip"><div class="cjTipTxt"><i></i><p>'+msg+'</p></div><div class="cjTipbg"></div></div>';
+		$("body").append(html);
+	},
+	content:function(msg){
+		msg = $.extend(true, {}, cj.msg,msg);
+		msg.html = template("js-tmpl-msg",msg);
+		cj.basic(msg);
+	},
+	remove:function(msg){
+		_global.g = true;
+		$(".gameCon").removeClass("end");
+		$(".msgPop").remove();
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	close:function(msg){
+		_global.g = true;
+		$(".gameCon").removeClass("end");
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		$(".msgPop").not("[id!='']").remove();
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	msg:{
+		id:"",
+		title:false,//标题
+		html:false,//内容
+		refurbish:false,//是否刷新
+		msg:"未知错误",//内容
+		icon:false,//图标
+		repeat:false,//重新填出登陆框
+		btn:[
+			{
+				text:"返回",//按钮文字
+				url:"javascript:void(0)",//按钮链接
+				callback:function(){
+					cj.close();
+				}
+			}
+		],
+		isclose:true,
+		start:false,//弹出之后callback
+		after:false//关闭之后callback
+	}
+}
+</script>
+
+<script type="text/html" id="js-tmpl-msg">
+<div class="cjText">
+	{{if !html}}
+	<div class="cjText-con">
+		{{if !icon}}
+			<div class="cjText-text noicon">{{#msg}}</div>
+		{{else}}
+			<div class="cjText-text">{{#msg}}</div>
+			<div class="cjText-img">
+				{{if icon==1}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-6.png" width="64">
+				{{else}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-19-{{icon}}.png" width="100">
+				{{/if}}
+			</div>
+		{{/if}}
+	</div>
+	{{else}}
+	{{#html}}
+	{{/if}}
+</div>
+<div class="cjBtn">
+{{each btn as value i}}
+	<a href="{{value.url}}" class="cjBtn-back {{if btn.length>1}}{{if i==0}}sm{{/if}}{{/if}}">{{value.text}}</a>
+{{/each}}
+</div>
+</script>
+<script>
+var wxShareData = {:json_encode($shareData);};
+</script>
+<include file="Label/Public/_shareWx"/>

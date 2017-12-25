@@ -1,0 +1,661 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_互动有礼_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<script type="text/javascript">
+var cardWhere = '';
+var editCard = function(d){
+        if(d.batchId ==2){
+            cardWhere.find('.totalNum').html(d.cardCount);           //总数
+            cardWhere.find('.remainNum').html(d.cardCount);          //日上限
+
+            cardWhere.find('#respContent').val(d.respContent);      //回复内容
+            cardWhere.find('#sendType').val(d.sendType);            //是否有日上限
+            cardWhere.find('#cardCount').val(d.cardCount);          //卡券总数
+            cardWhere.find('#dayLimit').val(d.dayLimit);
+            cardWhere.find('#source').val(d.source);
+        }else{
+            cardWhere.find('#respContent').val(d.respContent);      //回复内容
+        }
+    }
+//检测是否有可编辑的卡券
+var hasEdit = function(d,k){
+    var allDD = $(".award_list dd");
+    $.each(allDD,function(key,value){
+        if($(value).attr('data-id') == d && key == k){
+            cardWhere = $(value);
+            // return false;
+        }
+    })
+}
+//新添加的卡券(未生效)，获取相应的dd标签
+var newCardToEdit = function(d,k){
+    var allDD = $(".award_list dd");
+    $.each(allDD,function(key,value){
+        if(key == k){
+            cardWhere = $(value);
+            // return false;
+        }
+    })
+}
+var cardresp = function(d){
+    if(d.batchId == 1){    // 1是新添加的
+        var d_id=d.id;
+        $(".wxCard").remove();
+        if(d.source == 6){
+            var html2 = template('hongbaoresp',d);
+        }else{
+            var html2 = template('cardresp',d);
+        }
+        $(".award_list dl").append(html2);
+        $("."+d_id).find(".cardInfo").css("background",d.cardbg);
+        // $("."+d_id).find(".cardInfo span").html(d.shopname);
+        // $("."+d_id).find('.adShow_l img').attr("src",d.logo_url);
+        // $("."+d_id).find('.cardtitle').html(d.goods_name);
+        if(d.source !=6){
+            var da = new Date(d.date_begin_timestamp*1000);
+            var year = da.getFullYear();
+            var month = da.getMonth()+1;
+            var date = da.getDate();
+            var da2 = new Date(d.date_end_timestamp*1000);
+            var year2 = da2.getFullYear();
+            var month2 = da2.getMonth()+1;
+            var date2 = da2.getDate();
+            var html = '有效期：'+[year,month,date].join('/')+' 00:00:00-'+[year2,month2,date2].join('/')+' 23:59:59';
+        }else{
+            var html = '不限';
+            // var html = '发送卡券后'+d.date_fixed_begin_timestamp+'天开始使用-发送卡券后'+d.date_fixed_timestamp+'天结束使用'
+        }
+        $("."+d_id).find('.AstaticDate').html(html);
+        /*
+        $("."+d_id).find("#cardId").val(d.card_id);
+        $("."+d_id).find("#respid").val(d.id);
+        $("."+d_id).find(".totalNum").html(d.cardCount);
+        $("."+d_id).find(".remainNum").html(d.cardCount);
+        // $("."+d_id).find(".remainNum").html(d.quantity - d.card_get_num);
+        var card_num = parseInt(d.quantity - d.card_get_num);
+        */
+
+    }else if(d.batchId == 2){           //新添加的但未生效的编辑
+        newCardToEdit(d.goods_id,d.cardKey);
+        if(cardWhere != ''){
+            editCard(d);return;
+        }
+    }else{
+        hasEdit(d.batchId,d.cardKey);
+        if(cardWhere != ''){
+            editCard(d);return;
+        }
+    }
+}
+
+$(function(){
+    $("body").on("click",".delWard",function(e) {
+		$(this).closest("dd").remove();
+	});
+	
+	$("body").on("keyup","input[name='hb_num[]']",function(){
+		var inputVal = parseInt($(this).val());
+		var remainVal = parseInt($(this).next("input[name='remain_num[]']").val());		
+	 	if(inputVal > remainVal){
+			Diaerror("红包数量不能大于库存量！");
+			$(this).focus();
+			return false;
+		}
+		if(inputVal<1){
+			Diaerror("红包数量不能小于1！");
+			$(this).focus();
+			return false;
+		}
+	});
+})
+</script>
+<style type="text/css">
+.Gform .Ginput input[type=text], .Gform .Ginput input[type=password]{ width:298px;}
+.Gform .Ginput input[type=text].notips{ width:343px; padding-right:6px;}
+.Gform .Ginput .Gchoose{ width:318px;}
+.Gform .Ginput textarea{ width:342px;}
+.Gform .Ginput .maxTips.forInput, .Gform .Ginput .maxTips.forArea {left: 458px;}
+.Gform .Ginput .Gtime2 input[type=text] {width: 109px;}
+.award_list dl dd{ margin-right:20px;}
+</style>
+</head>
+<body id="hdyls_cont">
+<form action="{:U('Weixin/Weixin/interactSubmit')}" method="post" id="theform">
+<input type="hidden" value="{$info['message_info']['m_id']}" name="m_id" id='m_id'/>
+<div id="wrapper" >
+<!--开始引入头部-->
+<include file="./Home/Tpl/Public/Public_header.html" />
+<include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+<div id="container" >
+    <div id="main" class="rel">
+      <div class="sidenav">
+		<!--开始引入左菜单-->
+		<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="hdyl"/>
+      </div>
+      <div class="subcon">
+         <div class="main-name fn">
+            <h4><a href="javascript:history.go(-1);" class="back"><i></i> 互动有礼</a> / 创建活动</h4>
+        </div>
+		 <div class="cl"></div>
+            <!--微信消息-->
+            <div class="main_bd">
+                    <div class="Gform fn l" style="width:auto">
+                        <h3>编辑内容</h3>
+                        <ul>
+                            <li class="Gname">活动名称</li>
+                            <li class="Ginput">
+                            <input maxlength="18" name="ruleName" <eq name="sendType" value="1">readonly</eq> id="title" type="text" onkeyup="check_lenght(18,'name_text',this);" class="validate[required,maxSize[18]] textbox w120" value="{$info['message_info']['message_name']}">
+                            <span class="maxTips forInput" data-max="18">0/18</span>
+                            </li>
+                        </ul>
+                        <ul class="hdyl_time">
+                            <li class="Gname">活动时间</li>
+                            <li class="Ginput">
+                                <div class="Gtime2 fn">
+                                    <input type="text" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d %H:%m:%s'})" name="begin_time" id="act_time_from" value="{$info['message_info']['begin_time']|dateformat='Y-m-d H:i:s'}">
+                                    <em>至</em>
+                                    <input type="text" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d %H:%m:%s'})" name="end_time" id="act_time_to" value="{$info['message_info']['end_time']|dateformat='Y-m-d H:i:s'}">
+                                </div>
+                                <span class="txtTips">不填写默认永久生效</span>
+                            </li>
+                         </ul>
+                        <ul id="listItemNew">
+                           <div class="keywordsList">
+                              <li class="Gname">关键词</li>
+                              <li class="Ginput">
+                                <p class="key_areas" style="padding:0px">
+                                  <a href="javascript:void(0)" class="btn_area js_addkeywords"><span>+</span>添加关键词</a>
+                                  <span class="ms">粉丝发送带有关键词的内容，都将获得奖品。</p>
+                              </li>
+                              <ul class="keywordItems">
+                                <volist name="info['keywords_info']" id="voKey">
+                                    <li class="item float-p">
+                                        <input type="hidden" name="kwdId[]" value="{$voKey['id']}"/>
+                                        <div class="val l">{$voKey['key_words']}</div>
+                                        <input type="text" name="keywordStr[]" class="val-input l" value="{$voKey['key_words']}" style="display:none;" maxlength="20" jscheckrule="null=0" jschecktitle="关键词">
+                                        <button class="delKeyword btnGreenS r">删除</button>
+                                        <a href="javascript:;" class="keywordEditor r">编辑</a>
+                                        <label class="c-gA matchMode r">全匹配</label>
+                                        <input type="hidden" name="matchMode[]" class="matchMode-input" value="{$voKey['match_type']|default_nvl='0'}">
+                                    </li>
+                                 </volist>
+                              </ul>
+                           </div>
+                        </ul>
+                        <ul>
+                           <li class="Gname">活动奖品</li>
+                            <li class="Ginput">
+                                <p class="key_areas" style="padding:0px">
+                                <a class="btn_area addAward_btn" href="javascript:void(0)" id="Ucard"><span>+</span>添加奖品</a>
+                                <span class="ms cardtip" style="color:#ed3f41;">添加多个时，系统会随机发放奖品。</span>
+                                <span class="ms ms2 dn">最多添加一个红包</span></p>
+                            </li>
+                        </ul>
+                        <ul class="sayfx_cont">
+                           <li class="Gname">&nbsp;</li>
+                            <li class="Ginput">
+                                <div class="award_list">
+                                <dl>
+                                    <volist name="info['card_info']" id="card">
+                                        <dd style="margin-top:15px"  class="{$card['goods_id']}" data-id="{$card['batchId']}">
+                                            <p class="adward_title">
+                                                <strong class="cardtitle">{$card['goods_name']}</strong>
+                                                <span>
+                                                    <a href="javascript:void(0)" class="delWard">删除</a>
+                                                </span>
+                                                <span style="margin-right:10px">
+                                                    <a href="javascript:void(0)" class="addStorage">编辑</a>
+                                                </span>
+                                            </p>
+                                            <div class="adShow">
+                                                <div class="adShow_l shinfo">
+                                                    <?php if($card['source'] == 6):?>
+                                                            <img src="__PUBLIC__/Image/weixin2/wxIcon.png">
+                                                    <?php else:?>
+                                                        <?php if(empty($card['logo_url'])):?>
+                                                            <img src="__PUBLIC__/Image/weixin2/wxIcon.png">
+                                                            <!--   请填写红包图片地址  -->
+                                                        <?php else:?>
+                                                            <img src="__URL_UPLOAD__/{$card['goods_image']}">
+                                                        <?php endif;?>
+                                                    <?php endif;?>
+                                                </div>
+                                                <div class="adShow_r">
+                                                    <span class="Astatic">总投入数量<em class="totalNum">{$card['totalCount']}</em></span>
+                                                    <span class="Astatic">剩余数量<em class="remainNum">{$card['surplus']}</em></span>
+                                                </div>
+                                                <div class="cl pt5"></div>
+                                                <p class="AstaticDate tip" style="text-align:left">{$card['time']}&nbsp;</p>
+                                            </div>
+                                           <input type="hidden" value="{$card['respContent']}" name="respContent[]" id="respContent">
+                                           <input type="hidden" value="{$card['sendType']}" name="sendType[]" id="sendType">
+                                            <input type="hidden" value="{$card['dayLimit']}" name="dayLimit[]" id="dayLimit">
+                                            <input type="hidden" value="{$card['totalCount']}" name="cardCount[]" id="cardCount">
+                                            <input type="hidden" value="{$card['goods_name']}" name="goodsName[]" id='goodsName'/>
+                                            <input type="hidden" value="{$card['source']}" name="source[]" id='source'/>
+                                            <input type="hidden" value="{$card['goods_id']}" name="goodsId[]" id='goodsId'/>
+                                            <input type="hidden" value="{$card['card_id']}" name="cardId[]" id='cardId' />
+                                            <input type="hidden" value="{$card['batchId']}" name="batchId[]" id='batchId'/>
+                                        </dd>
+                                    </volist>
+                                </dl>
+                                </div>
+                            </li>
+                        </ul>
+                        <ul class="sayfx_cont">
+                            <li class="sayfx_title">对已领到奖品的粉丝说点什么吧：</li>
+                            <li class="Ginput">
+                                <textarea maxlength="60" placeholder="如：您已领过奖品，邀请更多好友一起参加吧！" name="explain_info"><neq name="info['response_info'][0]['explain_info']" value="您已领过奖品，邀请更多好友一起参加吧！">{$info['message_info']['explain_info']}</neq></textarea><span class="maxTips forArea" data-max="60">0/60</span>
+                            </li>
+                        </ul>
+                        <ul class="sayfx_cont">
+                            <li class="sayfx_title">对没有领到奖品的粉丝说点什么吧
+                            （奖品库存为0时回复）：</li>
+                            <li class="Ginput">
+                                <textarea maxlength="60" name="regret_info" placeholder="如：很遗憾奖品都被领完啦！"><neq name="info['response_info'][0]['regret_info']" value="很遗憾奖品都被领完啦！">{$info['message_info']['regret_info']}</neq></textarea><span class="maxTips forArea" data-max="60">0/60</span>
+                            </li>
+                         </ul>
+                        
+                        <ul class="sayfx_cont">
+                            <li class="sayfx_title">奖品达到单日发放上限时回复：</li>
+                            <li class="Ginput">
+                                <textarea maxlength="60" name="day_limit_info" placeholder="如：今天的奖品都领完了，明天再来吧！"><neq name="info['response_info'][0]['day_limit_info']" value="很遗憾奖品都被领完啦！">{$info['message_info']['day_limit_info']}</neq></textarea><span class="maxTips forArea" data-max="60">0/60</span>
+                            </li>
+                         </ul>
+                         <ul>
+                          <li class="Ginput">
+                            <input type="hidden" name="messageId" value="{$info['message_info']['id']}"/>
+                            <input type="hidden" name="actType" value="{$actType}"/>
+                            <button id="js_submit" class="btn-all"><eq name="actType" value="add">保存<else/>修改</eq></button>
+                          </li> 
+                         </ul>
+                  </div>
+             </div>
+         </div>
+    </div>
+</div>
+<!--开始引入底部-->
+<include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+</form>
+<div class="service"></div>
+<script type="text/javascript">
+  $(function(){
+    
+    matchMode();
+	Editor();
+	change();
+	if(!$.cookie('click_hidden')){
+			art.dialog({
+	            content:"<div class='tipNormal'><p>你可以设置群发内容、关键词、及添加奖品来创建下面的场景。像下面演示那样，通过与你的粉丝互动，发放卡券奖品。完成线上引</p><p>流目的的同时，还提高了公众号与粉丝的互动率。</p></div><div style='width:100%'><img src='__PUBLIC__/Image/introduce/hdyl.jpg' style='margin:10px auto 0px;display:block'><input type='checkbox' name='istip' style='display:none'></div>",
+	            width:500,
+				padding:0,
+	            ok:function(){
+				    $("input[name='istip']").attr("checked","checked")
+	                var isTip = $("input[name='istip']").is(":checked");
+	                if(isTip){
+	                    $.cookie('click_hidden','1',{expires:100}); 
+	                }
+	            },
+	            okVal:"我知道了"
+	        })
+	}
+	
+    $(".ask_cjhd").click(function(){
+		art.dialog({
+			title: '如何创建“互动有礼”场景',
+			width:500,
+			padding:0,
+			content: "<div class='tipNormal'><p>你可以设置群发内容、关键词、及添加奖品来创建下面的场景。像下面演示那样，通过与你的粉丝互动，发放卡券奖品。完成线上引</p><p>流目的的同时，还提高了公众号与粉丝的互动率。</p></div><div style='width:100%'><img src='__PUBLIC__/Image/introduce/hdyl.jpg' style='margin:10px auto 0px;display:block'></div>",
+			ok:true,
+			okVal:'我知道了'
+			});
+	  });
+	//选择卡券
+		$(".addAward_btn").click(function(e) {
+		var isopen = 1; //0：未开通微信卡包业务，1：已开通微信卡包业务
+		if(isopen == 0)
+		{
+			art.dialog.msg({
+				content:"您的微信公众号未开通微信卡包业务",
+				ok:function(){
+					window.open("https://mp.weixin.qq.com");
+				},
+				okVal:"去开通",
+				width:400
+			})
+		}
+		else
+		{
+        art.dialog.open("{:U('Weixin/Weixin/addAward')}&callback=cardresp",{
+			title: '添加奖品',
+			width:800
+		});
+		}
+    });
+    $("body").on("click",".addStorage",function(e){
+        var cardId = $(this).parent().parent().parent().find('#cardId').val();
+        var prizeId = $(this).parent().parent().parent().find('#goodsId').val();
+        var batchId = $(this).parent().parent().parent().find('#batchId').val();
+        var index = $(this).parent().parent().parent().index();
+        art.dialog.open("{:U('Weixin/Weixin/cardConfig')}"+"&isEdit=1&card_id="+cardId+"&prizeId="+prizeId+"&batchId="+batchId+"&index="+index,{
+            title: '添加奖品',
+            width:500
+        });
+    });
+	//添加关键词键盘事件
+	 $("body").on("keydown",".js_editorArea",function(e) {  
+           var keywordContent = $(".js_editorArea").val();
+           var keywordItem = '<li data-content="'+ keywordContent +'"><em class="keywords_name" data-content="'+ keywordContent +'">'+ keywordContent +'</em><a href="javascript:;" class="btn_del Js_temp_item_close">X</a></li>';  
+            // 回车键事件 
+            if(e.keyCode==13) {
+                if(keywordContent==""){
+                    Diaerror("请输入关键字");
+					$(this).focus();
+                    return false;
+                }
+                else{
+                    $("#Js_editorKeywordList").append(keywordItem);
+                    setTimeout(function(){
+						$(".js_editorArea").val("");
+					},100);
+					$(this).focus();
+                }
+           }             
+       });
+       $("body").on("click",".Js_temp_item_close",function(){
+            $(this).closest("li").remove();
+       });
+       
+       $('#search-btn').click(function(){
+        $('#search-btn').attr('disabled', true);
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在查询...</div>",fixed: true,padding:0});
+        var group_id = $('[name="group_id"]').val();
+        var sex = $('[name="sex"]').val();
+        var province = $('[name="province"]').val();
+        var city = $('[name="city"]').val();
+        var keywords = $('[name="keywords"]').val();
+        var scene = $('[name="scene"]').val();
+
+        var data = {
+            group_id : group_id,
+            sex :sex,
+            province : province,
+            city : city,
+            keywords : keywords,
+            scene : scene
+        };
+
+        $.post("{:U('Weixin/Weixin/batch_send_count')}", data, function(data){
+            if(data.status ==1){
+                $('#count').html(data.info +'您已准备向 ' + data.data.countTotal + ' 位粉丝发送消息');
+                dialog.time(2).close();
+            }else{
+                $('#count').html(data.info);
+                dialog.time(2).close();
+            }
+
+        },'json');
+        
+	});
+    
+    $("#theform").submit(function(){
+        if($("input[name='ruleName']").val()==''){
+			Diaerror("请填写活动名称");
+			return false;
+		}
+        if($("input[name='keywordStr[]']").length==0){
+			Diaerror("请添加关键词");
+			return false;
+		}
+  //       if($("input[name='cardid[]']").length==0){
+		// 	Diaerror("请添加奖品");
+		// 	return false;
+		// }
+		// var uSource = "{$nodeId}";
+		// if(uSource == "{:C('new_year_node_id')}"){
+		// 	var inputVal = parseInt($(this).val());
+		// 	var remainVal = parseInt($(this).next("input[name='remain_num[]']").val());	
+		// 	if(inputVal > remainVal){
+		// 		Diaerror("卡券数量不能大于库存量！");
+		// 		$(this).focus();
+		// 		return false;
+		// 	}
+		// 	if(inputVal < 1){
+		// 		Diaerror("卡券数量不能小于1！");
+		// 		$(this).focus();
+		// 		return false;
+		// 	}
+		// }
+        var dialog;
+        $("#theform").ajaxSubmit({
+            beforeSubmit:function(){
+                $('#js_submit').attr('disabled', true);
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+                $('#js_submit').attr('disabled', false);
+                if(data.status == '1'){
+                    dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                    setTimeout("art.dialog.close();",1000);
+                    location.href="{:U('Weixin/Weixin/interact_created')}";
+                    return false;
+                }else{
+                    dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },
+            dataType:'json'
+        });
+        return false;
+    });
+  })
+ //点击添加关键词
+ function change(){ 
+		   //计算图文数量
+		var countInfo = function(obj){
+			var txtNum = $(obj).find(".replyItems li.replyWords").length;
+			var imgNum = $(obj).find(".replyItems li.replyImages").length;
+			$(".wordsCnt",obj).text(txtNum);
+			$(".appMsgCnt",obj).text(imgNum);
+		}
+
+		$(".delKeyword").live("click",function(){
+			var delbox=$(this).closest(".keywordsList").find(".keywordItems").find("li")
+				delsize=delbox.length;
+			for(i=0;i<delsize;i++){
+				if(delbox.eq(i).find(".keywordcheckbox").attr("checked")=="checked"){
+					delbox.eq(i).detach();
+				}
+			}
+		});
+		$(".delReply").live("click",function(){
+			var delbox=$(this).closest(".replyList").find(".replyItems").find("li");
+			delbox.detach();
+			countInfo($(this).closest('form'));
+		});
+		$("body").on("click",".keywordEditor",function(){
+		$(this).closest("li").find(".val").css("display","none");
+		$(this).closest("li").find(".wordContent").css("display","none");
+		$(this).closest("li").find(".val-input").css("display","block");
+		$(this).closest("li").find(".wordContent-input").css("display","block");
+	   })
+
+	   $("body").on("click",".delKeyword",function(){
+		   $(this).closest("li").remove();
+	    })
+	   $(".js_addkeywords").click(function(){
+    	var data = {};
+		var keywordsContent = template("tpl_addkeywords", data);
+		art.dialog({
+			content:keywordsContent,
+			title:"添加关键词",
+			width:500,
+			okVal:"确认",
+			ok:function(){
+				var inputContent = $(".js_editorArea").val();
+				console.log(inputContent);
+				var ulContent= $("#Js_editorKeywordList").html();
+				if(ulContent !='' || inputContent!=''){
+					var toappentinputContent = '<li class="item float-p"><input type="hidden" name="kwdId[]" value=><div class="val l">'+ inputContent +'</div><input type="text" name="keywordStr[]" class="val-input l" value="'+ inputContent +'" style="display:none;" maxlength="20" jscheckrule="null=0" jschecktitle="关键词"><button class="delKeyword btnGreenS" title="删除">删除</button><a href="javascript:;" class="keywordEditor" title="编辑">编辑</a><label class="c-gA matchMode r">模糊匹配</label><input type="hidden" name="matchMode[]" class="matchMode-input" value="0"></li>';
+					if(inputContent!=""){
+					  	$("#Js_editorKeywordList li").each(function(){
+						  var appendContent = $(this).find(".keywords_name").attr("data-content");
+						  var toappentContent = '<li class="item float-p"><input type="hidden" name="kwdId[]" value=><div class="val l">'+ appendContent +'</div><input type="text" name="keywordStr[]" class="val-input l" value="'+ appendContent +'" style="display:none;" maxlength="20" jscheckrule="null=0" jschecktitle="关键词"><button class="delKeyword" title="删除">删除</button><a href="javascript:;" class="keywordEditor" title="编辑">编辑</a><label class="c-gA matchMode r">模糊匹配</label><input type="hidden" name="matchMode[]" class="matchMode-input" value="0"></li>';
+						  $("#listItemNew .keywordItems").append(toappentContent);
+						});
+						$("#listItemNew .keywordItems").append(toappentinputContent);
+					}else{
+						$("#Js_editorKeywordList li").each(function(){
+						  var appendContent = $(this).find(".keywords_name").attr("data-content");
+						  var toappentContent = '<li class="item float-p"><input type="hidden" name="kwdId[]" value=><div class="val l">'+ appendContent +'</div><input type="text" name="keywordStr[]" class="val-input l" value="'+ appendContent +'" style="display:none;" maxlength="20" jscheckrule="null=0" jschecktitle="关键词"><button class="delKeyword" title="删除">删除</button><a href="javascript:;" class="keywordEditor" title="编辑">编辑</a><label class="c-gA matchMode r">模糊匹配</label><input type="hidden" name="matchMode[]" class="matchMode-input" value="0"></li>';
+						  $("#listItemNew .keywordItems").append(toappentContent);
+						});
+					}
+				}else{
+					Diaerror("请输入关键词");
+					return false;
+			    }
+			},
+			cancelVal:"取消",
+			cancel:true
+		})
+    });
+  }
+  
+  function matchMode(){
+	$(".matchMode").live("click",function(){
+		var matchInput = $(this).closest("li").find(".matchMode-input");
+		var matchModelVal = matchInput.val() || '0';
+		if(matchModelVal == '0'){
+			$(this).addClass("matchMode1");
+			$(this).text("精确匹配");
+			matchInput.val("1");
+		}else{
+			$(this).removeClass("matchMode1");
+			$(this).text("模糊匹配");
+			matchInput.val("0");
+		}
+    }).each(function(){
+		var matchInput = $(this).closest("li").find(".matchMode-input");
+		var matchModelVal = matchInput.val() || '0';
+		if(matchModelVal == '1'){
+			$(this).addClass("matchMode1");
+			$(this).text("精确匹配");
+		}else{
+			$(this).removeClass("matchMode1");
+			$(this).text("模糊匹配");
+		}
+	});
+}
+function Editor(){
+	$(".keywordEditor").click(function(){
+		$(this).closest("li").find(".val").css("display","none");
+		$(this).closest("li").find(".val-input").css("display","block");
+    });
+	$(".replyEditor").click(function(){
+		$(this).closest("li").find(".wordContent").css("display","none");
+		$(this).closest("li").find(".wordContent-input").css("display","block");
+    });
+}
+</script>
+<!-- 添加关键词 -->
+<script id="tpl_addkeywords" type="text/html">
+	<div class="emotion_editor_wrp" id="Js_textEditor">
+		<div class="emotion_editor">
+			<textarea class="edit_area js_editorArea" id="js_editorArea" maxlength="30" style="outline:none; border:0; width:398px; overflow-y: auto; overflow-x: hidden;" onkeyup="check_lenght(30,'name_text',this);"></textarea>
+			<div class="editor_toolbar">      
+				<!--<p class="editor_tip opr_tips">按下Shift+Enter键换行</p>-->
+				<p class="editor_tip js_editorTip" id="name_text">还可以输入<em>30</em>字</p>
+			</div>
+		</div>
+		<div class="tool_area"><p class="tips">输入回车可添加多个关键字，每个关键字少于30个字符</p></div>
+		<ul class="overview_keywords_list" id="Js_editorKeywordList"></ul>
+	</div>
+</script>
+<!-- 选择的卡券信息 -->
+<script type="text/html" id="cardresp">
+<dd style="margin-top:15px" class="{{goods_id}} {{id}}" data-id="0">
+    <p class="adward_title">
+        <strong class="cardtitle">{{title}}</strong>
+        <em class="type1" title="" style="float:right; margin-left:10px;" data-gettitle="微信卡券领取后可在微信钱包中查看" alt="">微信卡券</em>
+        <span>
+        <a href="javascript:void(0)" class="addStorage editCard" id="editCard">编辑</a>
+        <a href="javascript:void(0)" class="ml10 delWard"  id="delWard">删除</a>
+        </span>
+        <!--样式：type1==卡券,type2==积分,type3==定额红包,-->
+    </p>
+    <div class="adShow">
+        <div class="adShow_l shinfo">
+            <img src="__URL_UPLOAD__/{{goods_image}}">
+        </div>
+        <div class="adShow_r">
+            <span class="Astatic">总投入数量<em class="totalNum">{{cardCount}}</em></span>
+            <span class="Astatic">剩余数量<em class="remainNum">{{cardCount}}</em></span>
+        </div>
+        <div class="cl pt5"></div>
+        <p class="AstaticDate tip pt5"><span></span></p>
+    </div>
+    <input type="hidden" value="{{card_id}}" name="cardId[]" id="cardId">
+    <input type="hidden" value="{{goods_id}}" name="goodsId[]" id="goodsId">
+    <input type="hidden" value="{{source}}" name="source[]" id="source">
+    <input type="hidden" value="{{title}}" name="goodsName[]" id="goodsName">
+    <input type="hidden" value="{{cardCount}}" name="cardCount[]" id="cardCount">
+    <input type="hidden" value="{{sendType}}" name="sendType[]" id="sendType">
+    <input type="hidden" value="{{dayLimit}}" name="dayLimit[]" id="dayLimit">
+    <input type="hidden" value="{{respContent}}" name="respContent[]" id="respContent">
+    <input type="hidden" value="2" name="batchId[]" id='batchId'/>
+</dd>
+</script>
+<script type="text/html" id="hongbaoresp">
+<dd style="margin-top:15px" class="{{goods_id}}" data-id="0">
+    <p class="adward_title">
+        <strong class="cardtitle">{{goods_name}}</strong>
+        <em class="type3" style="float:right; margin-left:10px;" title="" data-gettitle="" alt="">微信红包</em>
+        <span style="float:right">
+            <a href="javascript:void(0)" class="addStorage" id="editCard">编辑</a>
+            <a href="javascript:void(0)" class="ml10 delWard" id="delWard">删除</a>
+        </span>
+    </p>
+    <div class="adShow">
+        <div class="adShow_l shinfo">
+            <img src="__PUBLIC__/Image/weixin2/wxIcon.png">
+        </div>
+        <div class="adShow_r">
+            <span class="Astatic">总投入数量<em class="totalNum">{{cardCount}}</em></span>
+            <span class="Astatic">剩余数量<em class="remainNum">{{cardCount}}</em></span>
+        </div>
+        <div class="cl pt5"></div>
+		<p class="AstaticDate tip" style="height:25px"></p>
+    </div>
+    <input type="hidden" value="{{goods_id}}" name="goodsId[]" id="goodsId">
+    <input type="hidden" value="{{goods_id}}" name="cardId[]">
+    <input type="hidden" value="{{source}}" name="source[]" id="source">
+    <input type="hidden" value="{{goods_name}}" name="goodsName[]" id="goodsName">
+    <input type="hidden" value="{{cardCount}}" name="cardCount[]" id="cardCount">
+    <input type="hidden" value="{{sendType}}" name="sendType[]" id="sendType">
+    <input type="hidden" value="{{dayLimit}}" name="dayLimit[]" id="dayLimit">
+    <input type="hidden" value="{{respContent}}" name="respContent[]" id="respContent">
+    <input type="hidden" value="2" name="batchId[]" id='batchId'/>
+</dd>
+</script>
+</body>
+</html>

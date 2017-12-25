@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$fb_wap_title}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<load href="__PUBLIC__/Label/Css/wap_Csyd.css"/>
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/masonry/jquery.masonry.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/masonry/jquery.infinitescroll.min.js?v=__VR__"/>
+<script>
+$(document).ready(function() {
+	$(".subnav-con").click(function(){
+		if($(".subnav").hasClass("subnavanimate")){
+			$(".subnavbg").hide();
+			$(".subnav-li2").show();
+			$(".subnav").removeClass("subnavanimate").addClass("subnavanimateover");
+			return false;
+		}
+		event.stopPropagation();
+		$(".subnavbg").show();
+		$(".subnav").removeClass("subnavanimateover").addClass("subnavanimate");
+	})
+	
+	//点击分组以外区域隐藏分组
+	$(".subnavbg").click(function(){
+		if($(".subnav").hasClass("subnavanimate")){
+			$(".subnavbg").hide();
+			$(".subnav-li2").show();
+			$(".subnav").removeClass("subnavanimate").addClass("subnavanimateover");
+		}
+	});
+});
+function link_to(url){
+	setTimeout(function(){
+		$('#loadingBox').show();
+	},1);
+	setTimeout(function(){
+		if(typeof url == 'string'){
+			location.href=url;
+		}
+		if(typeof url == 'function'){
+			url();
+		}
+	},300);
+	setTimeout(function(){$('#loadingBox').hide();},6000);
+}
+
+</script>
+</head>
+
+<body>
+	<div id="wrapper" class="bggray">
+    	<div id="header" class="fn">
+        	<div class="header-Back" onclick="javascript:history.go(-1);">返回</div>
+        	<div class="header-opr" <?php if(!$is_dz){?>onclick="dz()" <?php }?> id="ydz"><?php echo $is_dz  ? '已赞':'<i></i>赞';?></div>
+        </div>
+    	<div id="container">
+            <div id="main" class="sOne-mainbg">
+                
+                <div class="moreList">
+                	<div class="moreList-bg">
+                        <div class="moreList-img">
+                        <?php if($list['up_img']){?>
+                            <img src="__UPLOAD__/<?php echo 'FbUpload/'.$list['up_img']?>" />
+                          <?php }?>
+                        </div>
+        				<div class="moreList-title"><?php echo $list['title'];?></div>
+                        <div class="moreList-text"><?php echo $list['content'];?></div>
+                        <div class="moreList-msg fn">
+                            <p class="l"><?php echo date('Y-m-d H:i',strtotime($list['add_time']));?></p>
+                            <p class="r"><span id="dz_count"><?php echo $list['dz_count'];?></span>人已赞</p>
+                        </div>
+                    </div>
+                </div>
+               <include file="Vip:menu"/>
+            </div>
+        </div>
+    </div>
+
+<section style="display: none;" class="loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>
+
+<script>
+ var _one_sub = false;
+function dz(){
+		if($("#ydz").text() =="已赞")
+			return false;
+		if(_one_sub)
+            return false;
+        _one_sub = true;
+        $.post("{:U('Label/Vip/dz')}",{"msg_id":<?php echo $list['id'];?>,"id":'<?php echo $id;?>'},function(data){
+        	_one_sub = false;
+            if(data.status=='1'){
+        		$("#ydz").text("已赞");
+				$("#dz_count").html(parseInt($("#dz_count").html())+1);
+            	if(data.data == 'iscj'){
+					popForm('恭喜您获取一个抽奖机会！,请点击抽奖 ','true');
+				}
+				
+            }
+        },"json");
+}
+
+
+ var _one_sub_2 = false;
+function choujiang(){
+		if(_one_sub_2)
+            return false;
+        _one_sub_2 = true;
+        $.post("{:U('Label/Vip/dzCj')}",{"msg_id":<?php echo $list['id'];?>,"id":'<?php echo $id;?>'},function(data){
+        	_one_sub_2 = false;
+            if(data.status=='1'){
+            	if(data.data== 'success'){
+            		popForm('恭喜你中奖了！ ');
+            	}else if(data.data== 'error'){
+            		popForm('很遗憾未中奖！ ');
+            	}
+				
+            }
+        },"json");
+}
+
+//消息提示
+function popForm(msg,iscj,msg_id) {
+	$("#AjaxWrapper").remove();
+	var Wrapperclose="$('#AjaxWrapper').fadeOut(300)";
+	var html=[
+	'<div id="AjaxWrapper" class="dn">',
+		'<div class="cjWrapper">',
+			'<div class="cjWrapper-close"><a href="javascript:void(0)" onclick="javascript:'+Wrapperclose+'">+</a></div>',
+			'<div class="cjCon pb10 dn" id="popMsg">',
+				'<div class="cjText">',
+					'<div class="cjText-con">',
+						'<div class="cjText-text">'+msg+'</div>',
+					'</div>',
+				'</div>',
+				'<div class="cjBtn">',
+					'<a href="javascript:void(0)" onclick="javascript:'+Wrapperclose+'">返回</a>',
+				'</div>',
+			'</div>',
+		'</div>',
+	'</div>'].join('');
+	$("body").append(html);
+    $("#AjaxWrapper").fadeIn(300);
+	$("#popMsg").show();
+	$("#popMsg .cjText-text").html(msg);
+	if(iscj=="true"){
+        $(".cjBtn").html('<a href="javascript:void(0)" id="cj_button" onclick="choujiang()">抽奖</a>')
+    }
+   
+}
+$(document).ready(function(e){
+    var $container = $('#masonry');
+    $container.imagesLoaded( function(){
+      $container.masonry({
+        itemSelector : '.box'
+      });
+    });
+    $container.infinitescroll({
+        navSelector  : '#page-nav',    // selector for the paged navigation 
+        nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
+        itemSelector : '.box',     // selector for all items you'll retrieve
+        loading: {
+            finishedMsg: '没有更多活动了',
+            img: '__PUBLIC__/Label/Image/Item/loading.gif'
+          }
+        },
+        // trigger Masonry as a callback
+        function( newElements ) {
+          // hide new items while they are loading
+          var $newElems = $( newElements ).css({ opacity: 0 });
+          // ensure that images load before adding to masonry layout
+          $newElems.imagesLoaded(function(){
+            // show elems now they're ready
+            $newElems.animate({ opacity: 1 });
+            $container.masonry( 'appended', $newElems, true ); 
+          });
+        }
+      );
+});
+</script>

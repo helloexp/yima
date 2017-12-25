@@ -1,0 +1,647 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>{$goodsInfo['batch_name']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO" />
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script>
+var _global_price = {
+		normalTotal:tonumber(<?php echo $goodsInfo['group_price'] * $buycount?>),//商品总价
+		choosePaperHover:0,
+		shippingFee:tonumber({:$shipfee}) ? tonumber({:$shipfee}) : 0 ,//运费
+		totalAmount:tonumber({:$totalAmount}),//合计
+		ruleFeeLimit:tonumber({:$ruleFeeLimit}) ? tonumber({:$ruleFeeLimit}) : 0 ,//限制
+                userPoint:tonumber({:$userPoint}) ? tonumber({:$userPoint}) : 0 ,//用户已有积分
+                canUsePoint:tonumber({:$canUserIntegral}) ? tonumber({:$canUserIntegral}) : 0 ,//本次使用积分
+                pointRule:tonumber({:$exchangeInfo}) ? tonumber({:$exchangeInfo}) : 0 ,//本次使用积分
+		allprice:false
+	};
+$(document).ready(function(e) {
+	if($(".orderFormAddressloading").length>0){
+	var cityInfo = "{:$curAddress['province_code'].$curAddress['city_code'].$curAddress['town_code']}";
+		CityCode({
+            province:$("#province_code"),//省
+            city:$("#city_code"),//市
+            selected:cityInfo,//默认选中的省市区代号
+            url:"{:U('LabelAdmin/AjaxCity/index')}",//数据查询页
+			callback:"adressPopclose"
+        });
+	}else{
+		$(".orderFormAddress").attr("onclick","");
+		$(".orderFormAddress").addClass("noaddress");
+	}
+        //获取积分
+        checkPoint(_global_price.userPoint);
+        checkorderVal();
+        $('#canUsePoint').blur(function(){
+            if($('#canUsePoint').val() > _global_price.userPoint){
+                    $('#canUsePoint').val(_global_price.userPoint);
+            }
+            checkPoint($('#canUsePoint').val())
+            checkorderVal();
+        })
+
+	orderForm();//结算
+	$(".orderFormMsg").each(function(index, element) {
+		var istext = $(this).find("*").length;
+            if(istext==0){$(this).remove();}
+        });
+	$("#cart_check").click(function(){
+        var deli = $('#delivery').val();
+        var isAdressFb = '{$isAdressFb}' ? true : false;  //鱼旨寿司非标
+        var isADBFb = '{$isADBFb}' ? true : false;  //爱蒂宝非标
+        if(deli == 1 || isAdressFb) {
+            if ($("#receive_name").val() == "") {
+                alert("收货人姓名不能为空！");
+                return false;
+            }
+            if($("#province_code").val()==""){
+                    alert("请选择所在省市信息！");
+                    return false;
+            }
+            if($("#city_code").val()==""){
+                    alert("请选择所在城市！");
+                    return false;
+            }
+            if ($("#receive_address").val() == "") {
+                alert("配送地址不能为空！");
+                return false;
+            }
+        }
+        if(isADBFb){
+            var time = $("#memoTime").val() + $("#memoMore").val();
+            $("#memo").val(time);
+        }
+        if ($("#receive_phone").val() == "") {
+            alert("收货人手机号码不能为空！");
+            return false;
+        }
+            
+		if(!$("input[name='payment_type']:radio[checked]").val()){
+			alert("请选择支付方式！");
+			return false;
+		}
+		if($("input[name='payment_type']:radio[checked]").val() == '2'){
+			var order_amt = $("#orderVal").text();
+			if(parseFloat(order_amt) <= 1){
+				alert("订单金额小于等于1元，无法使用联动优势付款，请选择其他付款渠道");
+				return false;
+			}
+		}
+
+		//校验销售员号是否存在
+		var saler_phone = $('#saler_phone').val();
+		if(saler_phone){
+			var dialog;
+			$("#cartform").ajaxSubmit({
+					beforeSubmit:function(){
+						dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在校验您的销售顾问...</div>",fixed: true,padding:0});
+					},
+					url:"{:U('Label/GoodsSale/checkSaler')}",
+					success:function(data){
+							 if(data.status == '1'){
+								dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+								setTimeout(function(){
+									$('#loadingBox').show();
+								},1);
+								$("#cartform").submit();
+							  }else{
+								dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+								$("#saler_phone").val('');
+								return false;
+							  }
+						  },
+					dataType:'json'
+				});
+				return false;
+		}
+		else{
+			setTimeout(function(){
+				$('#loadingBox').show();
+			},1);
+			$("#cartform").submit();
+		}
+		//document.cartform.submit();
+
+	});
+
+
+
+	$(".btn-choosePaper").click(function(){
+		var html = '<div class="choosePaper">'+$("#choosePaper").html()+'</div>';
+		msgPop(html);
+	})
+	
+	$("body").on("click",".choosePaper .btn-ok",function(){
+		var id="";
+		$(".choosePaperready").text($(".choosePaper .choosePaperHover").attr("data-val"));
+		$(this).closest("#choosePaper").find(".choosePaperList.hover").each(function(index, element) {
+			if(id!=""){
+				id+=",";
+			}
+			id=id+$(this).attr("data-id");
+                });
+		$("#bonus_use_id").val(id);
+		$(".choosePaperready").attr("data-id",id);
+		_global_price.choosePaperHover = tonumber($("#choosePaper .choosePaperHover").attr("data-val"));
+		checkorderVal();
+		msgPopclose();
+	})
+        
+        //运费规则读取
+        $('#city_code').change(function(){
+            var cityTmpCode = $("#province_code").val() + $(this).val();
+            var shippingFee = _global_price.shippingFee;
+            var totalFee = _global_price.totalAmount;
+            var feeLimit = _global_price.ruleFeeLimit;
+            var vid = {:$id};
+            if($(this).val()){
+                $.post("{:U('Label/MaShangMai/getCityFee')}", {'city':cityTmpCode,'id':vid},function(resp){
+                    if(2 != feeLimit){
+                        if(resp){
+                             var str = '<span>运费:</span><em>￥</em><b id="cityfee">' + resp + '</b>';
+                            _global_price.shippingFee = resp
+                            checkorderVal();
+                        }
+                        if('0.00' == resp){
+                            _global_price.shippingFee = 0
+                            checkorderVal();
+                        }
+                    }else{
+                        _global_price.shippingFee = 0
+                        checkorderVal();
+                    }      
+                }, 'json');
+            }    
+        })
+        var allprice = $('#orderVal').text()*1;
+        //小于1元不能使用银联
+        if(allprice <= 1)
+            $('#noShowPay').hide();
+        else
+            $('#noShowPay').show();
+});
+function adressPop(msg){
+	$("#address").addClass("open");
+}
+function adressPopclose(){
+	$("#address").removeClass("open");
+	$(".orderFormAddressloading").show();
+	$(".orderFormAddressloading").closest("p").find("span").hide();
+	if($("#user_name").text()==""){
+		$(".orderFormAddressNodata").show();
+		$("#orderFormAddress").hide();
+	}else{
+		$(".orderFormAddressNodata").hide();
+		$("#orderFormAddress").show();
+		$(".orderFormAddressloading").hide();
+		$(".province_code").text($("#province_code").find("option:selected").text());
+		$(".city_code").text($("#city_code").find("option:selected").text());
+		$(".town_code").text($("#town_code").find("option:selected").text());
+		$(".receive_address").text($("#receive_address").val());
+		$(".orderFormAddressloading").closest("p").find("span").show();
+	}
+}
+function checkorderVal(id){
+	var feeLimit = _global_price.ruleFeeLimit;
+	if(2 == feeLimit){
+		_global_price.shippingFee = 0;
+	}
+	var bonusTotal = FloatSub(_global_price.normalTotal,_global_price.choosePaperHover);
+        var needPoint = 0;
+        if(bonusTotal > 0){
+            var intergralPoint = FloatMul(tonumber($('#canUsePoint').val()),_global_price.pointRule); 
+            if(intergralPoint > bonusTotal){
+               needPoint = FloatDiv(tonumber(bonusTotal), _global_price.pointRule);
+            }else{
+               needPoint = tonumber($('#canUsePoint').val());  
+            }
+            var cutMoney = FloatMul(Math.floor(needPoint),_global_price.pointRule);
+            bonusTotal = FloatSub(bonusTotal,cutMoney);
+        }else{
+           $('#canUsePoint').val(0);
+           needPoint = 0;
+           bonusTotal = 0; 
+        }
+		checkPoint(needPoint);
+	_global_price.allprice = FloatAdd(bonusTotal,_global_price.shippingFee);
+        //小于1元不能使用银联
+        if(_global_price.allprice <= 1)
+            $('#noShowPay').hide();
+        else
+            $('#noShowPay').show();
+	$(".choosePaperready").text(toformat(_global_price.choosePaperHover));
+	$("#cityfee").text(toformat(_global_price.shippingFee));
+	$("#orderVal").attr("data-val",_global_price.allprice).text(toformat(_global_price.allprice));
+}
+
+function checkPoint(userPoint){
+    //积分处理
+    userPoint = parseInt(userPoint);
+    if(userPoint > 0){
+        if((_global_price.canUsePoint - userPoint) > 0){
+            $('#canUsePoint').val(userPoint);
+            $('.redIntegrationMsg').html('<p>已使用'+tonumber(userPoint)+'{:L('INTEGRAL_NAME')}</p>');
+            var intergralPoint = userPoint * _global_price.pointRule;    
+            $('.chooseIntergral').html(tonumber(intergralPoint));
+        }else{
+            $('#canUsePoint').val(_global_price.canUsePoint);
+            $('.redIntegrationMsg').html('<p>已使用'+tonumber(_global_price.canUsePoint)+'{:L('INTEGRAL_NAME')}</p>');
+            var intergralPoint = _global_price.canUsePoint * _global_price.pointRule;    
+            $('.chooseIntergral').html(tonumber(intergralPoint));
+        }
+    }else{
+        $('#canUsePoint').val(0);
+        $('.redIntegrationMsg').html('<p>未使用</p>');
+        $('.chooseIntergral').html('0.00');
+    }
+}
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="fn">
+            <div class="back"><i></i></div>
+            <div class="trolley"></div>
+            <div class="title">结算</div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="mainCon fn m0">
+                <div class="orderForm " style="padding-bottom:20px;">
+				 <form name="cartform" id="cartform" action="{:U('Label/GoodsSale/orderInfo')}" method="post">
+				 <input type="hidden" name="id" value="{$id}">
+                                 <input type="hidden" name="buycount" value="{$buycount}">
+				 <input type="hidden" name="delivery" id="delivery" value="{$delivery}">
+				 <input type="hidden" name="bonus_use_id" id="bonus_use_id" value="">
+				 <input type="hidden" name="saler_id" id="saler_id" value="{$saler_id}">
+                 <input type="hidden" name="skuInfo" id="skuInfo" value="{$skuInfo}">
+                 <input type='hidden' name='orderType' value='{$orderType}' />
+                 <input type='hidden' name='deliveryDate' value='{$deliveryDate}' />
+                 <input type="hidden" name="receive_name" id="receive_name" value="<?php echo $curAddress['user_name']?>"/>
+                 <input type="hidden" name="receive_phone" id="receive_phone" placeholder="收货人手机号码" maxlength="11" value="<?php echo $curAddress['phone_no']?>"/>
+                	                    <?php
+                       if($delivery == 1 || $isAdressFb == true){	
+                    ?>
+                    <div class="orderFormAddress" onClick="adressPop()">
+                    	<div class="orderFormAddressNodata dn"><img src="__PUBLIC__/Label/Image/icon_tan.png" class="l"><p>请先填写收货人信息</p></div>
+                    	<div id="orderFormAddress">
+                            <p><span id="user_name"><?php echo $curAddress['user_name']?></span><span id="user_tel"><?php echo $curAddress['phone_no']?></span></p>
+                            <?php
+                            if($delivery == 0){
+                            ?>
+                            <p class="orderFormAddressmsg">温馨提示：商品卡券短信会发送至您手机，可凭该短信在商家可验证门店提领商品。<br />如有商品需要商家寄送，请点击填写收货地址。</p>
+                            <?php }?>
+                            <?php
+                                    if($delivery == 1 || $isAdressFb == true){
+                            ?>
+                            <p><i class="orderFormAddressloading"></i>
+                                <span class="province_code"></span><span class="city_code"></span><span class="town_code"></span><span class="receive_address"></span>
+                                <select id='province_code' name='province_code' class="dn">
+                                    <option>省</option>
+                                </select>
+                                <select id='city_code' name='city_code' class="dn">
+                                    <option>市</option>
+                                </select>
+                                <select id='town_code' name="town_code" class="dn">
+                                    <option>区</option>
+                                </select>
+                                <input type="hidden" name="receive_address" id="receive_address" class="input-address" value="<?php echo $curAddress['address']?>"/>
+                            </p>
+                        </div>
+                    </div>
+                    <?php }?>
+                    
+                    <div class="orderFormMsg">
+                        
+                    <if condition="$isADBFb eq true">
+                            <dl>
+                                <dt>配送时间（请选择12月23-31日，上午/下午）</dt>
+                                <dd>
+                                    <ul class="fn">
+                                        <li>
+                                        <select id='memoTime' name="memoTime" class="w3">
+                                            <option value="2015-12-23">2015-12-23</option>
+                                            <option value="2015-12-24">2015-12-24</option>
+                                            <option value="2015-12-25" selected>2015-12-25</option>
+                                            <option value="2015-12-26">2015-12-26</option>
+                                            <option value="2015-12-27">2015-12-27</option>
+                                            <option value="2015-12-28">2015-12-28</option>
+                                            <option value="2015-12-29">2015-12-29</option>
+                                            <option value="2015-12-30">2015-12-30</option>
+                                            <option value="2015-12-31">2015-12-31</option>
+                                        </select> 
+                                        <select id='memoMore' name="memoMore" class="w3">
+                                            <option value="上午">上午</option>
+                                            <option value="下午" selected>下午</option>
+                                        </select>
+                                        <input type="text" name="memo" id="memo" placeholder="" value="" maxlength="100">
+                                        </li>
+                                    </ul>
+                                </dd>
+                            </dl>
+                        </if>
+                        <?php
+                                }else{
+                        ?>
+                        <if condition="$isADBFb eq true">
+                            <dl>
+                                <dt>自提时间（请选择12月23-31日，上午/下午）</dt>
+                                <dd>
+                                    <ul class="fn">
+                                        <li>
+                                        <select id='memoTime' name="memoTime" class="w3">
+                                            <option value="2015-12-23">2015-12-23</option>
+                                            <option value="2015-12-24">2015-12-24</option>
+                                            <option value="2015-12-25" selected>2015-12-25</option>
+                                            <option value="2015-12-26">2015-12-26</option>
+                                            <option value="2015-12-27">2015-12-27</option>
+                                            <option value="2015-12-28">2015-12-28</option>
+                                            <option value="2015-12-29">2015-12-29</option>
+                                            <option value="2015-12-30">2015-12-30</option>
+                                            <option value="2015-12-31">2015-12-31</option>
+                                        </select> 
+                                        <select id='memoMore' name="memoMore" class="w3">
+                                            <option value="上午">上午</option>
+                                            <option value="下午" selected>下午</option>
+                                        </select>
+                                        <input type="text" name="memo" id="memo" placeholder="" value="" maxlength="100">
+                                        </li>
+                                    </ul>
+                                </dd>
+                            </dl>                        
+                        </if>        
+                        <?php        
+                            }		
+                        ?>
+                        </div>
+                        <div class="orderFormMsg">
+                        <dl>
+                            <dt>商品信息</dt>
+                            <dd>
+                                <ul class="orderPro">
+                                <li class="fn proInfo">
+                                    <div class="img"><img src="__UPLOAD__/{$goodsInfo['goods_image']}"></div>
+                                    <div class="text">
+                                        <div class="textInfo">
+                                            <p><?php echo $goodsInfo['batch_name']?></p>
+                                            <p><?php if($goodsInfo['sku_name'] !=  ''){ ?><?php echo "[" . $goodsInfo['sku_name'] . "]";?><?php } ?></p>
+                                            <p><span class="price">￥<?php echo $goodsInfo['group_price']?></span><span class="num">X{$buycount}</span></p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <div class="orderFormPrice">
+                                        <span>商品总价:</span><em>￥</em><b><?php echo number_format($goodsInfo['group_price'] * $buycount,2);?></b>
+                                </div>
+                                </ul>
+                            </dd>
+                            <if condition="$isADBFb neq true">
+                            <dd class="leaveMessage"><span>给商家留言</span><p><input type="text" name="memo" id="memo" placeholder="可填写您和商家达成一致的要求"></p></dd>
+                            </if>
+                        </dl>
+                    </div>
+						<eq name="errcode" value="0">
+                    <div class="orderFormMsg">
+						<dl>
+                            <notempty name="salerInfo">
+                                <if condition="$salerInfo['showSalerName'] eq '1'"><dt>您的销售顾问</dt></if>
+                             <else />
+                             <dt>您的销售顾问</dt>
+                            </notempty>
+                            <dd>
+                                <ul class="fn">
+								<empty name="salerInfo">
+                                    <li><input type="text" name="saler_phone" id="saler_phone" placeholder="" value="" maxlength="100" ></li>
+								<else />
+                                                                <if condition="$salerInfo['showSalerName'] eq '1'"><li><input type="text" value="{$salerInfo['custom_no']}{$salerInfo['name']}" maxlength="100" readonly ></li></if>
+								</empty>
+                                </ul>
+                            </dd>
+                        </dl>
+                    </div>
+						</eq>
+                            <div class="orderFormMsg">
+                                <dt>选择支付方式</dt>
+                                <dd>
+                                    <ul class="fn">
+                                        <eq name="hasPayChannel" value="0">
+                                            <li><label>无有效支付方式</label></li>
+                                        <else />
+                                            <eq name="wx_flag" value="1">
+                                                <eq name="payChannelInfo.3" value="1"><li><label onclick="javascript:$('.bonus').show();$('#cart_check').text('马上支付');"><input type="radio"  name="payment_type" value="3" checked/><img src="__PUBLIC__/Label/Image/Shop/logo-wpay.png" class="paylogo" /></label></li></eq>
+                                            </eq>
+                                            <eq name="payChannelInfo.1" value="1"><li><label onclick="javascript:$('.bonus').show();$('#cart_check').text('马上支付');"><input type="radio"  name="payment_type" value="1" <if condition="($payChannelInfo[3] eq 2) or (($payChannelInfo[3] eq 1) and ($wx_flag neq 1))">checked</if> /><img src="__PUBLIC__/Label/Image/Shop/logo-alipay.png" class="paylogo"/></label></li></eq>
+                                            <eq name="payChannelInfo.2" value="1"><li id="noShowPay"><label onclick="javascript:$('.bonus').show();$('#cart_check').text('马上支付');"><input type="radio"  name="payment_type" value="2" <if condition="(($payChannelInfo[3] eq 2) and ($payChannelInfo[1] eq 2)) or (($payChannelInfo[1] eq 2) and ($wx_flag neq 1))">checked</if> /><img src="__PUBLIC__/Label/Image/Shop/logo-upay.png" class="paylogo" /></label></li></eq>
+                                        </eq>
+                                        <if condition="($delivery eq 1) and ($goodsInfo['deli_pay_flag'] eq 1)">
+                                            <li><label onclick="javascript:$('.bonus').hide();$('#cart_check').text('马上下单');"><input type="radio"  name="payment_type" value="4" /><img src="__PUBLIC__/Label/Image/Shop/logo-logistics.png" class="paylogo" /></label></li>
+                                        </if>
+                                    </ul>
+                                </dd>
+                            </div>
+                    
+                    <div class="orderFormMsg">
+                        <?php
+                        if(($userBonus>0) && $userBounsList){					
+                        ?>
+                        <if condition="$ruleType neq '0'">
+                    	<div class="redPaper">
+                        	<div class="redPaperCon">
+                            	<p>红包</p>
+                                <if condition="$ruleType neq '1'">
+                                	<span>可用<em><?php echo $userBonus;?></em>元</span>
+                                </if>
+                            </div>
+                            <div class="redPaperMsg"><p>已抵用<span class="choosePaperready">0.00</span>元</p></div>
+                        </div>
+                        </if>
+                        <?php }?>
+                        <if condition='$goodsInfo.integral_flag neq 0'>
+                            <if condition='$intergralType neq 0'>
+                            <div class="redIntegration">
+                                    <div class="redIntegrationCon"><p>{:L('INTEGRAL_NAME')}</p><span>可抵<em>{$userIntegral}</em>元</span></div>
+                                <div class="redIntegrationMsg"><p>未使用</p></div>
+                            </div>
+                            <div class="redIntegrationInput">
+                                <p>本次使用{:L('INTEGRAL_NAME')}<input type="tel" name="usePoint" id="canUsePoint" value="200"></p>
+                                <p>共{$userPoint}{:L('INTEGRAL_NAME')}，最高可用{$canUserIntegral}{:L('INTEGRAL_NAME')}，抵￥{$userIntegral}</p>
+                            </div>
+                            </if>
+                        </if>
+                    </div>
+                    <div class="orderFormMsg">
+                    	<div class="orderPrice"><p class="priceName">商品金额</p><p class="priceNum">￥<span><?php echo number_format($goodsInfo['group_price'] * $buycount,2);?></span></p></div>
+                        <neq name="ruleType" value="0"><if condition="$userBonus gt 0"><div class="orderPrice"><p class="priceName">红包抵用</p><p class="priceNum">-&nbsp;￥<span class="choosePaperready">0.00</span></p></div></if></neq>
+                        <if condition="$goodsInfo.integral_flag neq 0"><div class="orderPrice selectIntergral"><p class="priceName">{:L('INTEGRAL_NAME')}抵用</p><p class="priceNum">-&nbsp;￥<span class="chooseIntergral">0.00</span></p></div></if>
+                    	<!--<div class="orderPrice"><p class="priceName">满减优惠</p><p class="priceNum">-&nbsp;￥<span>5.00</span></p></div> -->
+                        <?php 
+                            if($delivery == 1){
+                    		?>
+                    		<div class="orderPrice">
+                            <p class="priceName">运费</p>
+                        	<?php if($shipfee>0){?>
+                            <p class="priceNum">+&nbsp;￥<span id="cityfee"><?php echo $shipfee; ?></span></p>
+                            <?php }else{?>
+                            <p class="priceNum">免运费</p>
+                        	<?php }?>
+                            </div>
+                        <?php }?>
+                    </div>
+                    
+                 </div>
+                 </form>
+                </div>
+            </div>
+        </div>
+    </div>
+	<div class="proNav fn headerTrolley">
+        <p class="l">订单结算</p>
+        <p class="r allPrice">实付款:<span id="orderVal" data-val="<?php echo $totalAmount;?>"><?php echo $totalAmount;?></span>元	
+        <eq name="hasPayChannel" value="1">			
+        <a href="javascript:void(0);" id="cart_check">马上支付</a>	
+        </eq>	
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+<div id="choosePaper" class="sideCon">
+    <div class="sideConHeader fn">
+        <div class="close"><i></i></div>
+        <div class="title">选择红包</div>
+    </div>
+    <div class="sideConMsg">
+        <if condition="$ruleType neq '1'">
+            <p>本次可抵用红包<span>￥<em class="choosePaperNum" data-val="<?php echo $userBonus;?>"><?php echo $userBonus;?></em></span>；
+        </if>
+        您已选择<span>￥<em class="choosePaperHover" data-val="0">0.00</em></span>，超出部分无效</p>
+    </div>
+    <div class="sideConList">
+    	<?php 
+        	if(!empty($userBounsList)){
+            foreach($userBounsList as $k=>$val){
+                $i=$k+1;
+        ?>
+        <div class="choosePaperList" data-val="<?php echo $val['amount'];?>" data-id="<?php echo $val['id'];?>">
+				<i></i>
+            <p><em>红包</em><span><b>￥</b><b><?php echo $val['amount'];?></b></span></p>
+				<p>有效期至：<?php echo date('Y-m-d H:i:s', strtotime($val['bonus_end_time']));?></p>
+			</div>
+			<?php
+				}
+			}else{
+			?>
+        <div class="choosenodate">
+        	<img src="__PUBLIC__/Label/Image/Shop/noRecord.png">
+            <p>您还没有红包~</p>
+        </div>
+        <?php }?>
+        <div class="btn"><a href="javascript:void(0)" class="btn-choose js-okchoosePaper">确定</a></div>
+    </div>
+</div>
+<div id="address" class="sideCon">
+    <div class="sideConHeader fn">
+        <div class="close"><i></i></div>
+        <div class="title">更换地址</div>
+    </div>
+    <div class="sideConList">
+    	<?php
+            if(!empty($selectddres)){
+            foreach($selectddres as $k=>$l){
+        ?>
+        <div class="chooseAddressList <?php if($k==0){?>hover<?php }?>" data-id="<?php echo $l['id']?>" data-tel="<?php echo $l['phone_no']?>" data-name="<?php echo $l['user_name']?>" data-province="<?php echo $l['province_code']?>" data-city="<?php echo $l['city_code']?>" data-town="<?php echo $l['town_code']?>" data-address="<?php echo $l['address']?>">
+        	<i></i>
+            <p><em>地址<?php echo $k+1?></em><span><b>手机号:</b><b><?php echo $l['phone_no']?></b></span></p>
+            <p>姓名：<?php echo $l['user_name']?></p>
+            <p>地址：<?php echo $l['province'] . $l['city'] . $l['town'] . $l['address']?></p>
+        </div>
+        <?php
+				}
+			}else{
+			?>
+        <div class="choosenodate">
+        	<img src="__PUBLIC__/Label/Image/Shop/noRecord.png">
+            <p>无其他地址信息</p>
+        </div>
+        <?php }?>
+        <div class="btn"><a href="{:U('Label/MyAddress/addNewAddr')}&seq={$seq}" class="btn-choose">新增地址</a></div>
+    </div>
+</div>
+</body>
+</html>
+<eq name="show_menu" value="1">
+<include file="Label/Public/_hideWxMenu"/>
+</eq>
+<script>
+$(document).ready(function(e) {
+    $("body").on("click",".redPaper",function(){
+		$("#choosePaper").addClass("open");
+	});
+    $("body").on("click",".close",function(){
+		$(".sideCon").removeClass("open");
+	});
+    $("body").on("click",".redIntegration",function(){
+		$(this).toggleClass("open");
+	});
+    $("body").on("click",".choosePaperList",function(){
+		var _this = $(this);
+		var _ismax = $(".choosePaperNum");
+		var maxval = _ismax.length>=1 ? tonumber(_ismax.attr("data-val")) : 100000;
+		_this.hasClass("hover") ? _this.removeClass("hover") : _this.addClass("hover");
+		var hasval=0;
+		var choval=0;
+		_this.closest(".sideConList").find(".choosePaperList.hover").each(function(index, element){
+			var val = tonumber($(this).attr("data-val"));
+			hasval+=val;
+			choval+=val;
+		});
+		hasval>maxval && (hasval = maxval);
+		$(".choosePaperHover").text(choval).attr("data-val",hasval);
+	});
+    $("body").on("click",".js-okchoosePaper",function(){
+		var id="";
+		$(".choosePaperready").text($("#choosePaper .choosePaperHover").attr("data-val"));
+		$(this).closest("#choosePaper").find(".choosePaperList.hover").each(function(index, element) {
+			if(id!=""){
+				id+=",";
+			}
+			id=id+$(this).attr("data-id");
+                });
+		$("#bonus_use_id").val(id);
+		$(".choosePaperready").attr("data-id",id);
+		_global_price.choosePaperHover = tonumber($("#choosePaper .choosePaperHover").attr("data-val"));
+		checkorderVal();
+		$("#choosePaper").removeClass("open");
+	});
+	
+    $("body").on("click",".chooseAddressList",function(){
+		$(".chooseAddressList").removeClass('hover');
+        $(this).addClass('hover');
+		var _this = $(".chooseAddressList.hover");
+        $("#receive_name").val(_this.attr("data-name"));
+        $("#receive_phone").val(_this.attr("data-tel"));
+        $("#receive_address").val(_this.attr("data-address"));
+		$("#user_name").text(_this.attr("data-name"));
+		$("#user_tel").text(_this.attr("data-tel"));
+        //省市区初始化
+        var province = _this.attr("data-province");
+        var city = _this.attr("data-city");
+        var town = _this.attr("data-town");
+        var cityInfo = province + city + town;  
+        CityCode({
+            province:$("#province_code"),//省
+            city:$("#city_code"),//市
+            selected:cityInfo,//默认选中的省市区代号
+            url:"{:U('LabelAdmin/AjaxCity/index')}",//数据查询页
+			callback:"adressPopclose"
+        });
+	});
+});
+</script>

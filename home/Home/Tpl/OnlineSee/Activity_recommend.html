@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>评价计划_营销活动中心_翼码旺财</title>
+        <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wmarketing.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__" />
+        <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__" />
+        <js href="__PUBLIC__/Js/global.js?v=__VR__" />
+        <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+        <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+    </head>
+
+    <body>
+        <div id="wrapper">
+            <include file="./Home/Tpl/Public/Public_header.html" />
+
+            <include file="OnlineSee/nav" navmenuid="Navact"/>
+
+            <div id="container" class="bgfff">
+                <div id="main" class="rel">
+                    <div class="mt20">
+                        <div class=""></div>
+                        <div class="main-name fn">
+                            <h4 class="bd-b-565656">
+                                <a href="{:U('OnlineSee/Activity/item/')}" id="item" class="l"><h3>评价项管理</h3></a>
+                                <a href="{:U('OnlineSee/Activity/recommend/')}" id="recommend"><h3 class="ml150">推荐值管理</h3></a>
+                            </h4>
+                        </div>
+                        <div class="shopCon">
+                            <table cellpadding="0" cellspacing="0" class="shopTable">
+                                <tr>
+                                    <th class="first" style="width:80px;">推荐分值</th>
+                                    <th>评推荐分值对应文字内容(50字以内)</th>
+                                    <th class="last">是否启用</th>
+                                </tr>
+                                <php>for($i=0;$i<=10;$i++){</php>
+                                <tr class="info ">
+                                    <td>{$i}</td>
+                                    <td class="caname">{$label[$i]}</td>
+                                    <td class="last">
+                                        <div class="Uswitch dib ml15" data-rel="{$status[$i]}" data-value="{$i}">
+                                            <div class="Uswitch-off"></div>
+                                            <div class="Uswitch-on" <php>if($status[$i]==0){</php> style="display:none;" <php>}</php>></div>
+                                            <i class="Uswitch-i-on" style="left:29px;"></i>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <php>}</php>
+                            </table>
+                        </div>
+                        <div class="shopPage fn">
+                            <?php echo $page;?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html" />
+        </div>
+        <div class="service"></div>
+    </body>
+    <script language="javascript">
+        $(function () {
+            //获取class为caname的元素 
+            $(".caname").click(function () {
+                var td = $(this);
+                var txt = td.text();
+                var input = $("<input type='text'value='" + txt + "' maxlength='50' class='validate[required]'/>");
+                td.html(input);
+                input.click(function () {
+                    return false;
+                });
+                //获取焦点 
+                input.trigger("focus");
+                //文本框失去焦点后提交内容，重新变为文本 
+                input.blur(function () {
+                    var newtxt = $(this).val();
+                    if (newtxt == '')
+                    {
+                        alert("标签不能为空！");
+                        return false;
+                    }
+                    if (newtxt.length > 50)
+                    {
+                        alert("标签长度不能超过50！");
+                        return false;
+                    }
+                    //判断文本有没有修改 
+                    if (newtxt != txt) {
+
+                        td.html(newtxt);
+                        var id = $.trim(td.prev().text());
+                        //ajax异步更改数据库,加参数date是解决缓存问题 
+                        var url = "{:U('OnlineSee/Activity/recommend_save/')}&label=" + newtxt + "&value=" + id;
+                        //使用get()方法打开一个一般处理程序，data接受返回的参数（在一般处理程序中返回参数的方法 context.Response.Write("要返回的参数");） 
+                        //数据库的修改就在一般处理程序中完成 
+                        $.get(url, function (data) {
+                            if (data == "1")
+                            {
+                                alert("该标签已存在！");
+                                td.html(txt);
+                                return;
+                            }
+                            //alert(data); 
+                            td.html(newtxt);
+                        });
+
+                    }
+                    else
+                    {
+                        td.html(newtxt);
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        $(function () {
+            //开关 开启表示从关闭状态到开始状态 关闭表示从开启状态转到关闭状态
+            $(".Uswitch").click(function () {
+                /*if ($(this).find("#enableTime").val() == 1 && $(this).attr("data-rel") == "0") {
+                 art.dialog({title: "提示", content: "<p>活动已结束，请编辑活动时间后重新开启。</p>", fixed: true, lock: true, okVal: "确认", ok: true});
+                 return false;
+                 }*/
+                var dialog = art.dialog({title: false, content: "<div class='msg-all-succeed'>正在提交</div>", fixed: true, padding: 0, lock: true});
+                var uthis = $(this);
+                if ($(this).attr("data-rel") == "0") {
+                    $(this).find(".Uswitch-on").fadeIn(200);
+                    $(this).attr("data-rel", "1");
+                    var value_id = $(this).attr("data-value");
+                    $(this).find("i").animate({left: 29}, 200, function () {
+                        //此处提交数据的函数
+                        $.post("{:U('OnlineSee/Activity/recommend_status/')}", {'status': '1', 'value': value_id}, function (data) {
+                            if (data.status) {
+                                uthis.parent().parent().find("i.icon-off").attr("class", "icon-on");
+                                dialog.time(1).content("<div class='msg-all-succeed'>开启成功</div>");
+                            } else {
+                                dialog.time(1).content("<div class='msg-all-error'>开启失败</div>");
+                            }
+                        }, 'json');
+                    });
+                } else {
+                    $(this).find(".Uswitch-on").fadeOut(200);
+                    $(this).attr("data-rel", "0");
+
+                    var value_id = $(this).attr("data-value");
+
+                    $(this).find("i").animate({left: 0}, 200, function () {
+                        //此处提交数据的函数 
+                        $.post("{:U('OnlineSee/Activity/recommend_status/')}", {'status': '0', 'value': value_id}, function (data) {
+                            if (data.status) {
+                                uthis.parent().parent().find("i.icon-on").attr("class", "icon-off");
+                                dialog.time(1).content("<div class='msg-all-succeed'>关闭成功</div>");
+                            } else {
+                                dialog.time(1).content("<div class='msg-all-error'>关闭失败</div>");
+                            }
+                        }, 'json');
+                    });
+                }
+            });
+        });
+    </script>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>积分商城</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<style>
+.shopNameedit { width:465px; margin:0 auto; padding-top:20px;}
+</style>
+</head>
+<body class="no">
+<div class="shopNameedit">
+ <form method="post" action="<?php echo U('Ecshop/Index/editpagename_post');?>" id="theform">
+    <div class="shopForm fn">
+        <ul class="shopFormU">
+            <li class="shopFormN">*&nbsp;模板名称：</li>
+            <li class="shopFormI">
+                <input name="page_name" id="page_name" type="text" class="textbox" maxlength="8" value="<?php echo $pageInfo['page_name'];?>" data-view="1"><span class="maxTips forInput" data-max="8">0/8</span>
+                <span class="txtTips">模板名称，便于区分模板</span>
+            </li>
+        </ul>
+        <ul class="shopFormU">
+            <li class="shopFormN">&nbsp;模板截图：</li>
+            <li class="shopFormI">
+                <a href="javascript:void(0)" class="btn-up btn-upIcon vm" id="page_pic_btn">选择图片</a>
+                <input type="hidden" name="page_pic" id="page_pic" value="<?php echo $pageInfo['page_pic'];?>">               
+                <input type="hidden" name="page_id" id="page_id" value="<?php echo $pageInfo['id'];?>">
+                <img name="img" id="imgview" src="<?php echo $pageInfo['page_pic'];?>" width="28" height="28" class="vm ml10 <?php if($pageInfo['page_pic']==''){?>dn<?php }?>" id="share_pic_show">
+                <span class="txtTips">建议大小:190*290px,便于区分模板</span>
+            </li>
+        </ul>
+        <ul class="shopFormU">
+            <li class="shopFormN">&nbsp;</li>
+            <li class="shopFormI">
+				<a href="javascript:void(0)" class="btn-all ml30 w110" onClick="updata()">保存</a>
+            </li>
+        </ul>
+    </div>
+	</form>
+</div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+
+	//新校验字符长度
+	$(".shopFormI").on("keyup","input,textarea",function(){
+		var maxLength = $(this).next("span.maxTips").attr("data-max");
+		var text = $(this).is('div') ? $(this).html() : $(this).val();
+		if(text==""){text = $(this).text()};
+		if(text.length <= maxLength){
+			$(this).next("span.maxTips").removeClass("erro").html(text.length+"/"+maxLength);
+		}else{
+			$(this).next("span.maxTips").addClass("erro").html(text.length+"/"+maxLength);
+		}
+	})
+
+	//模板截图
+	
+	$("#page_pic_btn").click(function(){       
+        var opt = [, "uploadUrl={:urlencode(U('ImgResize/Resize/uploadFile','','','',true))}", "cropPresets=190x290", "callback=uploadPagePic", "menuType=1"].join('&'); 
+		openUploaderMeitu("{:U('ImgResize/Meitu/index')}&" + opt);
+		
+    });
+});
+function uploadPagePic(data){
+
+	//alert(data.absolutepath);
+	$("#imgview").attr("src",data.absolutepath).show();
+	$("#page_pic").val(data.absolutepath);
+
+}
+
+//调用上传图片
+function openUploaderMeitu(url) {
+    var win_width = 700;
+
+    art.dialog.open(url, {
+        lock: true,
+        title: "上传图片",
+        width: win_width,
+        height: win_width / 1.6,
+        id: 'art_upload'
+    });
+}
+function updata(){
+
+
+	var pagename=$("#page_name").val();
+	
+	if(pagename==""){
+		alert("模板名称不能为空！");
+		return false;
+	}
+
+	 $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){				
+                 if(data.status == '1'){ 					
+                   dialog.time(3).content("<div class='msg-all-succeed'>修改成功！</div>");
+					 window.parent.location.reload();
+                  }else{
+                       dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                  }
+            },
+                dataType:'json'
+         });
+
+}
+</script>

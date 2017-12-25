@@ -1,0 +1,376 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>订单确认</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_jfyxShop.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_jfyxShop.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<style type="text/css">
+    .headerTrolley p.allPrice a {
+        float: none;
+        margin: 0 10px;
+        width: auto;
+        height: 46px;
+        display: block;
+        color: #fff;
+        background: #d10a0a;
+        border-radius: 2px;
+        font-size: 16px;
+        text-align: center;
+
+    }
+    #header .trolley { display: none;}
+    .orderFormPrice ul { position: relative;}
+    .orderFormPrice li { float: left;}
+    .orderFormPrice li.name { width: 60px; height: 36px; line-height: 36px; position: absolute; left: 0; top: 0;}
+    .orderFormPrice li.input { width: 100%; height: 36px;}
+    .orderFormPrice li.input .textbox { margin-right: 10px; float: left; width: 150px; line-height: 34px;}
+    .orderFormPrice li.input .btn-input { padding: 0 20px; float: right; line-height: 34px; color: #ed3f41; border: 1px #ed3f41 solid; border-radius: 20px;}
+
+    .aui_content .textbox { width: 100px;}
+    .aui_content .textbox,.aui_content .name { padding: 3px 6px; line-height: 20px;}
+    .cc_style li{float: left;margin: 5px;}
+    .orderAddress { height: 300px; overflow-y: auto;}
+    
+    .msgPopCon { padding-bottom: 0;}
+    .msgPopCon .title {
+    	height: 28px;
+	    line-height: 32px;
+	    padding: 5px 28px 5px 10px;
+	    text-shadow: 0 1px 0 rgba(255, 255, 255, .7);
+	    background-color: #eaeaea;
+	    font-weight: bold;
+	    font-family: Tahoma, Arial/9!important;
+	    background: #eaeaea;
+	    border-bottom: 1px solid #c2c2c2;
+	    border-radius: 4px 4px 0 0;
+	    font-size: 14px;
+	    text-align: left;
+	}
+	.msgPopCon a.close { font-size: 24px; right: 5px; top: 5px;}
+	.cj-input-button {
+		margin: 0 7.5px;
+	    cursor: pointer;
+	    display: inline-block;
+	    text-align: center;
+	    line-height: 30px;
+	    width: 100px;
+	    color: #ffffff;
+	    border: solid 1px #ed3f41;
+	    border-radius: 3px;
+	    background-color: #ed3f41;
+	    font-size: 14px;
+    }
+	.msgPopCon .pop_buttons {
+		padding: 12px;
+	    text-align: center;
+	    white-space: nowrap;
+	    background-color: #F6F6F6;
+	    font-size: 0px;
+	    border-radius: 0 0 3px 3px;
+    }
+</style>
+
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="fn">
+            <div class="goback"><i></i></div>
+            <div class="trolley"></div>
+            <div class="title">结算</div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="mainCon fn">
+                <div class="orderForm" style="padding-bottom:20px;">
+                <form name="theForm" id="theForm" action="{:U('Label/IntegralShop/subOrder',array('id'=>$label_id))}" method="post">
+                <input type="hidden" name="id" value="<?php echo session('id');?>">
+                <input type="hidden" name="sku_info" id="sku_info" value="{$sku_info}">
+                <input type="hidden" name="integral_id" id="integral_id" value="{$integral_id}">
+                <input type="hidden" name="market_price" id="market_price" value="{$market_price}" />
+                <input type="hidden" name="delivery" id="delivery" value="{$delivery}" />
+                <input type="hidden" name="citycode" id="citycode" value="{$address[0]['path']}" />
+                    <div class="orderFormMsg">
+                        <dl>
+                            <dt>收货人信息设置
+                        <?php if ($delivery == '1') { ?>
+                            <a id="oadd" href="javascript:;" class="r">选择其他地址</a>
+                        <?php } ?>
+                            </dt>
+                        </dl>
+                        <dl>
+                            <dd>
+                            <?php if ($delivery == '1') { ?>
+                                <ul class="fn">
+                                    <li><input type="text" name="receive_name" id="receive_name" placeholder="收货人姓名" value="<?php echo $address[0]['user_name']; ?>"/></li>
+                                    <li>
+                                        <input type="tel" class="sOne-loginInput-half" name="or_phone" id="or_phone" placeholder="收货人手机号码" maxlength="11" value="<?php echo $address[0]['phone_no']; ?>"/>
+                                        <br>
+                                    </li>
+                                    <li ><select id='province_code' name='province_code' class="w3">
+                                            <option>省</option>
+                                        </select>
+                                        <select id='city_code' name='city_code' class="w3">
+                                            <option>市</option>
+                                        </select>
+                                        <select id='town_code' name="town_code" class="w3">
+                                            <option>区</option>
+                                        </select>
+                                        <div class="cl"></div>
+                                        <input type="text" name="receive_address" id="receive_address" placeholder="请输入详细地址" class="input-address" value="<?php echo $address[0]['address']?>"/></li></li>
+                                </ul>
+                                <?php }else{ ?>
+                                <ul class="fn">
+                                    <li>
+                                    <input type="text" name="or_phone" id="or_phone" placeholder="" value="{$wx_info.phone_no}" maxlength="11">
+                                    <li>
+                                </ul>
+                                <?php   } ?>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>备注信息</dt>
+                            <dd>
+                                <ul class="fn">
+                                    <li><input type="text" name="memo" id="memo" placeholder="" value="" maxlength="100"></li>
+                                </ul>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>商品信息</dt>
+                            <dd>
+                                <ul class="orderPro">
+                                    <li class="fn" >{$goods_name}
+                                    <?php if ($sku_info_list != null) { ?>
+                                    (<volist name="sku_info_list" id="vo">
+                                    {$vo.sku_id}:{$vo.sku_detail_name}.
+                                    </volist>)
+                                    <?php } ?>
+                                    </li>
+                                    <div class="orderFormPrice">
+                                        <span>{:L('INTEGRAL_NAME')}:</span>{$market_price}
+                                    </div>
+                                </ul>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="orderFormPrice noFee">   
+                        <span>您的{:L('INTEGRAL_NAME')}:</span><em></em><b id="cityfee"></b>
+                        <b>{$wx_info['point']}</b>
+                    </div>
+                        <input type="hidden" class="sOne-loginInput-half" name="phone" id="phone" placeholder="下单手机号码" maxlength="11" value="{$wx_info['phone_no']}"/>
+                        <input name="check_code" type="hidden" id="verify" maxlength="4" class="cc_check_code textbox half validate[required]" placeholder="&nbsp;获取验证码" data-rel="" value=''>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="proNav fn headerTrolley">
+        <p class="l">订单结算</p>
+        <p class="r allPrice">
+        <?php if ($point_flag == '1') { ?>
+        <a style="background:#DDD;color:#999;">{:L('INTEGRAL_NAME')}不足</a>  
+        <?php }else{ ?>
+        <a href="javascript:void(0);" id="next_step">下一步</a>
+        <?php } ?>
+    </p>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+<div id="address" class="adressPop dn">
+    <div class="adressPopCon">
+        <a href="javascript:void(0)" class="close" onclick="adressPopclose()">+</a>
+        <ul class="orderAddress">            
+            <?php
+                if(!empty($address)){
+                    foreach($address as $k=>$l){
+            ?>
+            <li data-path="<?php echo $address[$k]['path']; ?>" <?php  if($k==0){?>class='hover'<?php }?>data-id="<?php echo $l['id']?>" data-tel="<?php echo $l['phone_no']?>" data-name="<?php echo $l['user_name']?>" data-province="<?php echo $l['province_code']?>" data-city="<?php echo $l['city_code']?>" data-town="<?php echo $l['town_code']?>" data-address="<?php echo $l['address']?>"><p>手机号:<?php echo $l['phone_no']?></p><p>姓名:<?php echo $l['user_name']?></p><p>地址:<?php echo $l['province'] . $l['city'] . $l['town'] . $l['address']?></p></li>
+            <?php
+                }
+            }else{
+            ?>
+            <li>无其他地址信息</li>
+            <?php
+            }
+            ?>
+        </ul>
+    </div>
+</div>
+
+<div id="msg" class="adressPop dn">
+    <div class="adressPopCon">
+        <a href="javascript:void(0)" class="close" onclick="adressPopclose()">+</a>
+        <span></span>
+    </div>
+</div>
+</body>
+<script>
+$(function(){
+    $("#next_step").click(function(){
+        if($("#receive_name").val()==""){
+            checkLog('收货人姓名不能为空！');
+            return false;
+        }
+        if($("#or_phone").val()==""){
+            checkLog('收货人手机号码不能为空！');
+            return false;
+        }
+        if($("#province_code").val()==""){
+            checkLog('请选择所在省市信息！');
+            return false;
+        }
+        if($("#city_code").val()==""){
+            checkLog('请选择所在城市！');
+            return false;
+        }
+        if($("#town_code").val()==""){
+            checkLog('请选择所在区信息！');
+            return false;
+        }
+        if($("#receive_address").val()==""){
+            checkLog('配送地址不能为空！');
+            return false;
+        }
+
+        $("#phone_err").html("");
+        var phone = $("#phone").val();
+        var node_id = {$node_id};
+        var id = "{$label_id}";
+        Util_tools.ui.loading('处理中...');
+        $.post("{:U('Label/IntegralShop/sendCheckCode')}",{"id":id,"phone":phone,"node_id":node_id},function(data){
+            if(data.status=='1'){
+            Util_tools.ui.loading(false);
+            }else{
+                $("#phone_err").html(data.info).show();
+                Util_tools.ui.loading(false);
+            }
+        },"json");
+
+        var goods_name = "<?php echo $goods_name; if ($sku_info_list != null) { echo '(';foreach ($sku_info_list as $key => $vo) { echo $vo['sku_id'].':'.$vo['sku_detail_name'].')';}} ?>";
+        var price = "<?php echo $market_price; ?>";
+        var integral_name = "<?php echo L('INTEGRAL_NAME'); ?>";
+     var msg = "<div style=' margin-top:-7%;margin-left:-3.5%;width:107%;'><div style='background:#DDD;height:25px;' class='title'>提示</div><div style='width:90%;margin:0 auto;margin-top:4%;'><p style='text-align: justify;'>"+goods_name+" 将从您的账户中扣除"+integral_name+"<span style='color:red;' class='red'>"+price+"</span>,请输入短信验证码</p></div><ul class='cc_style fn' style='width: 200px; margin: 0 auto;'><li class='name l w55' style='padding: 3px 0;line-height: 24px;'>短信验证码</li><li class='input l'> <input name='check_code' style='width: 100px; padding: 3px 6px; line-height: 20px;' type='text' id='verify' maxlength='4' class='cc_check_code1 textbox half validate[required]' placeholder='&nbsp;请输入验证码' /></li><li class='input l'><span style='display:block;color:red;' id='pass_err'></span> <span style='color:red;display:block;' id='phone_err'></span></li><br></ul><div class='pop_buttons'><input type='button' id='loginBd' value='确定' class='cj-input-button' /></div></div>"; 
+     msgPop(msg);
+    });
+});
+    $("#loginBd").live("click",function(){
+                var cc_check_code = $('.cc_check_code1').val();
+                $('.cc_check_code').val(cc_check_code);
+                Util_tools.ui.loading('处理中...');
+        $("#theForm").ajaxSubmit({ 
+                    success:function(data){ 
+                      Util_tools.ui.loading(false);
+                        if(data.status == '5'){
+                            if(data.type == 'phone'){
+                                $("#phone_err").html(data.info);
+                                $("#pass_err").html('');
+                                return false;
+                            }
+                            if(data.type == 'pass'){
+                                $("#pass_err").html(data.info);
+                                $("#phone_err").html('');
+                                return false;
+                            }
+                        }
+                        if(data['status'] == '1'){
+                            msgPopclose();
+                            checkLog(data['msg']);
+                            var node_id = "{$node_id}";
+                            var url = "{:U('Label/Member/integralChangeDetail')}&node_id="+node_id;
+                            setTimeout(function(){
+                                window.location.href = url;
+                            },3000);
+                        }else{
+                            msgPopclose();
+                            checkLog(data['msg']);
+                        }
+                    },
+        dataType:'json' 
+    }); 
+    });
+function adressPop(msg){
+    $("#address").fadeIn(300);
+}
+
+function adressPopclose(){
+    $("#address").hide();
+}
+
+//提示框
+function checkLog(msg){
+    $('.adressPopCon').html(msg);
+    $("#msg").fadeIn(300);
+    setTimeout(function() {
+        $("#msg").hide();
+    }, 3000);
+    return false;
+}
+
+
+$(document).ready(function(e) {
+    var Int;
+    $("#next_step").live("click",function(){
+        
+    });
+    var time = "{$expiresTime}";
+    var checkTime = function(){
+        $("input[name='getpasscode']").val("已发送,"+time+"秒");
+        if(time==0){
+            $("input[name='getpasscode']").val("获取验证码");
+            $("input[name='getpasscode']").attr("id","getpasscode");
+            time = "{$expiresTime}";
+            clearInterval(Int);
+            return false;
+        }
+        time--;
+    }
+
+    $("#oadd").click(function(event) {
+            adressPop();
+    });
+
+    $(".orderAddress li").click(function() {
+        var _id = $(this).attr("data-id");
+        $(".orderAddress li").removeClass('hover');
+        $(".orderAddress li[data-id="+_id+"]").addClass('hover');
+        $("#receive_name").val($(this).attr("data-name"));
+        $("#or_phone").val($(this).attr("data-tel"));
+        $("#receive_address").val($(this).attr("data-address"));
+        //省市区初始化
+        var province = $(this).attr("data-province");
+        var city = $(this).attr("data-city");
+        var path = $(this).attr("data-path");
+        var cityInfo = path;  
+        CityCode({
+            province:$("#province_code"),//省
+            city:$("#city_code"),//市
+            selected:cityInfo,//默认选中的省市区代号
+            url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+        });
+        $('#citycode').val(cityInfo);
+        adressPopclose();
+    });
+
+    CityCode({
+        province:$("#province_code"),//省
+        city:$("#city_code"),//市
+        town:$("#town_code"),//区
+        selected:"<?php echo $address[0]['path'] ?>",//默认选中的省市区代号
+        url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+    });
+});
+
+</script>
+</html>

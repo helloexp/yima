@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>导入会员</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Whygl.css" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<style type="text/css">
+	.mark { display: none;}
+	.Wcanal-tab .Wcanal-tab-title { margin-bottom: 15px;}
+	.Wcanal-tab .Wcanal-tab-title .Wcanal-tab-hover, .Wcanal-tab .Wcanal-tab-title .Wcanal-tab-hover:hover { border-top: 3px #ed1c24 solid;}
+	.userHeader-inner>img { float:left;/* margin-left:20px;*/ width:56px; height:56px; border-radius:50%; border:solid 2px #fff;}
+	.userHeader-inner>p {/* padding:5px 0;*/ line-height:20px; font-size: 15px; font-weight: bold; text-align:left; text-indent:8px; color: #333333;}
+	.userHeader-inner>p span {font-size: 14px; color: #666666; font-weight: normal;}
+	.popupList,.steps { margin: 0 0 15px 0;}
+	.popupList li { border: 1px #e8e8e8 solid; border-width: 0 1px 1px 1px; width: 49%; float: left;}
+	.popupList li label { background: #f7f7f7; border-right: 1px #e8e8e8 solid;}
+	.popupList li label,.popupList li span { display: inline-block; width: 49%; line-height: 40px; height: 40px; vertical-align: top; font-size: 16px; text-align: center;}
+	.mb1 { width: 136px; height: 36px; line-height: 36px; text-align: center; font-size: 15px;}
+	.sweet_tips i { float: left; display: inline-block; width: 18px; height: 18px; vertical-align: middle; margin: 5px 5px 0 0; background: url(__PUBLIC__/Image/icon-dia.png) 0 0 no-repeat;}
+	.sweet_tips { margin: 0 auto 20px auto; border: none; padding: 10px 15px; color: #666666; background: #fef7ee; font-size: 12px; line-height: 24px;}
+	.sweet_tips p { width: 95%; float: left;}
+	.sweet_tips_top { position: absolute; top: 0; left: 0; padding: 10px 30px;}
+	.Gform .Ginput .Gbtn-papers { top: 0px; right: -58px;}
+</style>
+<script type="text/javascript">
+	$(function(){
+		
+		$(".mark").eq(0).show();
+		$("body").on("click",".Gform .switch .newRadio span",function(){
+			var $index = $(this).index();
+			$(".mark").hide();
+			$(".mark").eq($index).show();
+		});
+	});
+	
+	$(function(){
+		Gform();
+		
+		$("#smb").click(function(){
+		var dialog;
+		if($("form").validationEngine('validate')){
+			$("form").ajaxSubmit({
+				beforeSubmit:function(){
+					dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+				},
+				success:function(data){
+					 if(data.status == '1'){
+						   dialog.time(20).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+							// var win = art.dialog.open.origin;
+							// win.location.href = win.location.href;
+					  }else{
+						   dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+					  }
+				},
+				dataType:'json'
+			});
+			return false;
+		}
+		
+	});
+	
+	});
+</script>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab db" id="Wcanal-tabon">
+	<div class="sweet_tips sweet_tips_top"><i></i><p>批量导入您已有的会员信息，请使用模板文件导入。<br />注意：① 每次导入数据限<span class="red">1000</span>条以内   ② 手机号码为必填项，其它数据为选填   ③ 如手机号码在会员列表中已存在，则该行数据不会被导入</p></div>
+    
+    <div class="Gform" style="margin: 80px -15px 30px 0; width: 100%;">
+		<form id="theform" action="{:U('uploadMembers')}" method="POST" name="form">
+			<ul>
+				<li class="Gname">所属会员卡</li>
+				<li class="Ginput">
+					<select class="textbox w100" name="card_id">
+                        <volist name="cardsData" id="vo">
+                        <option value="{$vo.id}">{$vo.card_name}</option>
+                		</volist>
+					</select>
+				</li>
+			</ul>
+			<ul>
+				<li class="Gname">上传文件</li>
+				<li class="Ginput">
+					<div class="Gadd" data-min="1" data-max="5" style="width: 240px;">
+                        <input name="file_show" type="text" id="file_show" value="">
+                        <input type="file" id="import_file" name="import_file" style="width: 298px; top: 0; left: 0; z-index: 100;" class="upload_file" onchange="document.getElementById('file_show').value=this.value">
+                        <a href="javascript:void(0)" class="Gbtn-papers"><i></i></a>
+                    </div>
+				</li>
+				<li class="Ginput">
+                    <a href="__PUBLIC__/tmpDownload/member.csv">【模板下载】</a>
+				</li>
+			</ul>
+			<!-- <div class="sweet_tips" style="margin-top: 30px;"><i style="background: url(__PUBLIC__/Image/start_icon.png) no-repeat; background-size: 100%;"></i>导入成功，共导入2345个会员！<br /><span class="red"> 文件中的34、56行数据无法导入，错误原因：手机号码已存在</span></div> -->
+            <div class="DiabtnCon">
+	            <a href="javascript:void(0)" class="Diabtn-all" id="smb">确定</a>
+	            <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">关闭</a>
+	        </div>
+        </form>
+    </div>
+</div>
+</div>
+</body>
+</html>

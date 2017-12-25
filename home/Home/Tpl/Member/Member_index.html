@@ -1,0 +1,553 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>粉丝筐_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<link href="__PUBLIC__/Css/member.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msguser.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/member.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script type="text/javascript">
+$(document).ready(function(e){
+	$("#group_submit").click(function(){
+        var group_id = $("#group_id").val();
+        var dialog;
+        if($("#group_form").validationEngine('validate')){
+            $("#group_form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                           setTimeout("window.location.reload();",1000);
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                              }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+
+    var url = '{:U("Member/Member/importAdd/")}';
+	$('.mem-updatego').click(function(){
+            
+        art.dialog.open(url,{
+			lock: true,
+			title:"批量添加粉丝",
+			width:600,
+			height:400,
+            id:'div'
+        });
+                    
+	});
+	$('.mem-addgo,.mem-add').click(function(){
+		art.dialog.open("{:U('Member/Member/add/')}",{
+			lock: true,
+			title:"添加粉丝",
+			width:600,
+			height:400
+        });
+	});
+	
+	$("#add_group").click(function(){
+		$("#group_id,#group_name").val('');
+	    art.dialog({
+	        title:"添加分组",
+	        id:"group_info",
+	        content:document.getElementById("group_info"),
+	        width:300,
+	        lock:true
+	    });
+	});
+	
+	$("#member_group").change(function(){
+		var check_box = $("[name='id[]']:checked");
+        if(check_box.length==0){
+            art.dialog({title:false,content:"<div class='msg-all-error'>请选择要添加的会员</div>",fixed: true,padding:0,time:1});
+            $("#member_group option:first").attr("selected","selected");
+            return false;
+        }
+        var group_id = $("#member_group").val();
+        var member_str = '';
+        $(check_box).each(function(){
+            var id = $(this).val();
+            member_str += id+','; 
+        });
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+        $.post("{:U('Member/Member/memberGroupAdd')}",{"group_id":group_id,"member_str":member_str},function(data){
+        	if(data.status==1){
+        		dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                //var jump_url = "window.location.href='/index.php?g=Member&m=Regulation&a=index&show="+show_id+"'";
+                //setTimeout(jump_url,500);
+           }else{
+        	   dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+           }
+        	
+        },"json");
+	});
+	
+	$("#checkAll").change(function(){
+        if(this.checked){ 
+            $("input[name='id[]']").each(function(){this.checked=true;}); 
+      }else{ 
+            $("input[name='id[]']").each(function(){this.checked=false;}); 
+      } 
+    });
+	
+	
+}); 
+
+function edit(id){
+	$.get("{:U('Member/Member/ajaxGroup')}",{"group_id":id},function(datas){
+        var data = datas.data;
+        if(datas.status==1){
+            $("#group_name").val(data.name);
+            $("#group_id").val(data.id);
+            art.dialog({
+                title:"编辑分组",
+                id:"group_info",
+                content:document.getElementById("group_info"),
+                width:300,
+                lock:true
+            });
+        }else{
+            art.dialog({title:false,time:3,content:"<div class='msg-all-error'>"+datas.info+"</div>",fixed:true,padding:0});
+        }
+    },"json");
+}
+function del(id){
+    $.get("{:U('Member/Member/delGroup')}",{"group_id":id},function(datas){
+        var data = datas.data;
+        if(datas.status==1){
+        	 art.dialog({title:false,time:3,content:"<div class='msg-all-succeed'>"+datas.info+"</div>",fixed:true,padding:0});
+        	 setTimeout("window.location.reload();",1000);
+        }else{
+            art.dialog({title:false,time:3,content:"<div class='msg-all-error'>"+datas.info+"</div>",fixed:true,padding:0});
+        }
+    },"json");
+}
+
+$(document).ready(function(){
+	$(".frm_checkbox_label").css("margin-right","0");
+	//点击全选
+	$("#alluserGroups .icon_checkbox").click(function(){
+		if ($(this).closest(".frm_checkbox_label").hasClass("selected")){
+			$(".frm_checkbox_label").removeClass("selected");
+			$("#userGroups .frm_checkbox_label").find(".frm_checkbox").attr("checked",false);
+		}else{
+			$(".frm_checkbox_label").removeClass("selected").addClass("selected");
+			$("#userGroups .frm_checkbox_label").find(".frm_checkbox").attr("checked",true);
+		}
+		if($("#userGroups .selected").length>=1){
+			$(".dropdown_wrp").removeClass("disabled");
+		}else{
+			$(".dropdown_wrp").addClass("disabled");
+		}
+	});
+	//点击单个input
+	$("#userGroups .icon_checkbox").click(function(){
+		
+    	$(this).closest(".frm_checkbox_label").toggleClass("selected");
+		if($("#userGroups .selected").length>=1){
+			$(".dropdown_wrp").removeClass("disabled");
+		}else{
+			$(".dropdown_wrp").addClass("disabled");
+		}
+	});
+	//点击分组显示分组
+	$(".dropdown_menu").live("click",function(event){
+		event.stopPropagation();
+		if($(this).hasClass("disabled")){return false;};
+		$(this).addClass("open");
+		$(this).find(".dropdown_data_list").show();
+	});
+	//点击修改分组
+	$(".edit_gray").click(function(){
+		$(this).closest(".inner_menu_item").addClass("editing")
+	})
+	$(".enter_gray").click(function(){
+        var group_id=$(this).closest(".frm_input_box").attr("data-gid");
+        var group_name=$(this).closest(".frm_input_box").find("input[name=group_name]").val();
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+        $.post("{:U('Member/Member/groupSave')}",{"group_id":group_id,"group_name":group_name},function(data){
+            if(data.status==1){
+                dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                setTimeout("window.location.reload();",1000);
+           }else{
+               dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+           }
+            
+        },"json");
+		
+	})
+	$(".del_gray").click(function(){
+        var group_id=$(this).attr("data-value");
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+        $.post("{:U('Member/Member/delGroup')}",{"group_id":group_id},function(data){
+            if(data.status==1){
+                dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                setTimeout("window.location.reload();",1000);
+           }else{
+               dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+           }
+            
+        },"json");
+	})
+	//点击添加分组
+	$("#js_groupAdd").click(function(){
+		$("#js_groupAddCon").show();
+	})
+	//鼠标移到头像上出现详细信息
+	$(".js_msgSenderAvatar").mouseover(function(){
+		$(".buddyRichInfo").fadeOut(200);
+		$(this).closest(".user_info").find(".buddyRichInfo").fadeIn(200);
+	})
+	$(".table_cell").mouseleave(function(){
+		$(".buddyRichInfo").fadeOut(200);
+	})
+	//点击分组以外区域隐藏分组
+	$("body").live("click",function(){
+		$(".dropdown_menu").removeClass("open").find(".dropdown_data_list").hide();
+	});
+	
+	//单条点击分组提交
+	$(".js_selectArea .jsDropdownItem").click(function(){
+	    var group_id = $(this).attr("data-value");
+	    var member_str=$(this).closest(".js_selectArea").attr("data-fid");
+	    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+        $.post("{:U('Member/Member/memberGroupAdd')}",{"group_id":group_id,"member_str":member_str+','},function(data){
+            if(data.status==1){
+                dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                setTimeout("window.location.reload();",1000);
+           }else{
+               dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+           }
+            
+        },"json");
+	})
+    //群添加组
+    $("#allGroup .jsDropdownItem").click(function(){
+
+        var check_box = $("[name='id[]']:checked");
+        if(check_box.length==0){
+            art.dialog({title:false,content:"<div class='msg-all-error'>请选择要添加的会员</div>",fixed: true,padding:0,time:1});
+            $("#member_group option:first").attr("selected","selected");
+            return false;
+        }
+        var group_id = $(this).attr("data-value");
+        var member_str = '';
+        $(check_box).each(function(){
+            var id = $(this).val();
+            member_str += id+','; 
+        });
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+        $.post("{:U('Member/Member/memberGroupAdd')}",{"group_id":group_id,"member_str":member_str},function(data){
+            if(data.status==1){
+                dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                setTimeout("window.location.reload();",1000);
+           }else{
+               dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+           }
+            
+        },"json");
+    })
+});
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            	<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p>粉丝筐</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="Member/Member/leftMenu" leftmenuid="fszx"/>
+                </div>
+                <div class="mt30 dn subcon2">
+                </div>
+                <div class="subcon fn subcon1">
+                    <div class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover"><a href="{:U('Member/Member/index')}">粉丝列表</a></p>
+                            <p><a href="{:U('Member/Member/batchInfo')}">批量添加记录</a></p>
+                            <a href="javascript:void(0);" class="mem-addgo r w70 ml20">添加粉丝</a>
+                            <a href="javascript:void(0);" class="mem-updatego r w110">批量添加粉丝</a>
+                        </div>
+                        <div class="Wcanal-tab-list" style="display:block; clear:both; margin-top:15px;">
+                        
+                        <div class="inner_container_box side_r split">
+                    	<!--右侧用户分类管理-->
+                        <div class="inner_side">
+                            <!-- 
+                        	<a href="{:U('LabelAdmin/Feedback/index')}" class="btn-all w165 mt15">我要回馈粉丝</a>
+                             -->
+                            <div class="bd mt15">
+                                <div class="group_list">
+                                    <div class="inner_menu_box" id="groupsList">
+                                    	<dl class="inner_menu">
+                                            <dt class="inner_menu_item">
+                                                <a href="{:U('Member/Member/index')}" class="inner_menu_link">
+                                                    <strong>互动粉丝</strong><em class="num">({$memberNum})</em>
+                                                </a>
+                                            </dt>
+                                            <volist name="groupList" id="vo">
+                                            <dd class="inner_menu_item " id="group100">
+                                                <a href="{:U('Member/Member/index',array('group_id'=>$vo['id']))}" class="inner_menu_link"><strong>{$vo['name']}</strong><em class="num">({$vo['num']})</em></a>
+                                                <neq name="vo.id" value="1">
+                                                <span class="frm_input_box append" id="groupInput100" data-gid="{$vo['id']}" data-gname="{$vo['name']}" data-gnum="{$vo['id']}">
+                                                    <input name="group_name" type="text" value="{$vo['name']}" class="frm_input js_groupInput">
+                                                    <a href="javascript:void(0);" class="frm_input_append icon16_common enter_gray js_groupNameEnter">确定</a>
+                                                </span>
+                                                <span class="menu_opr">
+                                                    <a data-gid="100" href="javascript:void(0);" class="icon16_common edit_gray no_extra js_iconEdit">编辑</a>
+                                                    <a data-gid="100" href="javascript:void(0);" class="icon16_common del_gray js_iconDel" data-value="{$vo['id']}">删除</a>
+                                                </span>
+                                                </neq>
+                                            </dd>
+                                            </volist>
+                                        </dl>
+                                        <div class="inner_menu_item editing dn" id="js_groupAddCon">
+                                        	<span class="frm_input_box append">
+                                            	<input name="group_name" type="text" class="frm_input" id="groupNew">
+                                                <a href="javascript:void(0);" class="frm_input_append icon16_common enter_gray js_enter">确定</a>
+                                            </span>
+                                        </div>
+                                        <div class="inner_menu_item extra" id="js_groupAdd">
+                                            <a href="javascript:void(0);" class="inner_menu_link"><i class="icon14_common add_gray"></i><strong>新建分组</strong></a>
+                                        </div>
+                                        <dl class="inner_menu no_extra">
+                                            <dt class="inner_menu_item selected"></dt>
+                                        </dl>
+                                        <!-- 权益卡 -->
+                                        <dl class="inner_menu mt15">
+                                            <dt class="inner_menu_item">
+                                                <a href="{:U('Member/Member/index')}" class="inner_menu_link">
+                                                    <strong>粉丝权益</strong>
+                                                </a>
+                                            </dt>
+                                            <dd class="inner_menu_item ">
+                                                <a href="{:U('Member/Member/index',array('batch_no'=>0))}" class="inner_menu_link"><strong>未绑定权益</strong><em class="num">({$memberNum - $batchNum})</em></a>
+                                            </dd>
+                                            <volist name="batchList" id="vo">
+                                            <dd class="inner_menu_item ">
+                                                <a href="{:U('Member/Member/index',array('batch_no'=>$vo['batch_no']))}" class="inner_menu_link"><strong>{$vo['level_name']}</strong><em class="num">({$vo['num']})</em></a>
+                                            </dd>
+                                            </volist>
+                                        </dl>
+                                        <dl class="inner_menu no_extra">
+                                            <dt class="inner_menu_item selected"></dt>
+                                        </dl>
+                                        <!-- 权益卡 -->
+                                      <dl class="fn tl ptb20 plr20">
+                                        	在所有与您企业互动的用户中，旺财平台将所有提供过手机号的用户记录下来，并通过手机号对应到这些粉丝在您所有渠道中的互动分布，您可以将列表中的粉丝数据分组管理做营销参考。
+                                      </dl>
+                                    </div>                    
+                                </div>
+                            </div>
+                        </div>
+                        <!--右侧用户分类管理-->
+                        
+                        <!--左侧用户信息-->
+                        <div class="inner_main">
+                        	<div class="SearchArea fn c_bd_e1 mt15">
+                        	<form action="{:U('Member/Member/index/')}" method="post" name="theform" id="theform">
+                            	<div class="SearchAreaLeft" style="width:500px;">
+                                	<label>
+                                     <span>首次来源渠道</span>
+                                     <select name="channel_id">
+                                           <option value="">请选择</option>
+                                           <option value="0" <if condition="$post['channel_id'] heq '0'">selected="selected"</if>>手动添加</option>
+                                           <option value="-1" <if condition="$post['channel_id'] heq '-1'">selected="selected"</if>>列表模板</option>
+                                           <volist name="channelList" id="vo">
+                                            <option value="{$vo['id']}" <if condition="$vo['id'] eq $post['channel_id']">selected="selected"</if>>{$vo['name']}</option>
+                                           </volist>
+                                       </select>
+                                     </label>
+                                     <label>
+                                     <span>手机号</span>
+                                     <input name="phone_no" type="text" value="{$post.phone_no}" />
+                                     </label>
+
+                                     <label>
+                                     <span>互动粉丝分组</span>
+                                     <select name="group_id">
+                                           <option value="">全部</option>
+                                           <volist name="groupList" id="vo">
+                                            <option value="{$vo['id']}" <if condition="$vo['id'] eq $post['group_id']">selected="selected"</if>>{$vo['name']}</option>
+                                           </volist>
+                                       </select>
+                                     </label>
+                                     <label>
+                                     <label>
+                                     <span>登记时间</span>
+                                     <input name="begin_add_date" type="text" value="{$post.begin_add_date}" onClick="WdatePicker()" />
+                                     -
+                                     <input name="end_add_date" type="text" value="{$post.end_add_date}" onClick="WdatePicker()" />
+                                     </label>
+                                     
+                                     <label>
+                                     <span>参与次数</span>
+                                     <input name="begin_join_num" type="text" value="{$post.begin_join_num}" />
+                                     -
+                                     <input name="end_join_num" type="text" class="textbox w80" value="{$post.end_join_num}" />
+                                     </label>
+
+                                     
+                                     
+                                     <span>粉丝权益</span>
+                                     <select name="batch_no">
+                                           <option value="">全部</option>
+                                           <option value="0" <if condition="$post['batch_no'] heq '0'">selected="selected"</if>>未绑定</option>
+                                           <volist name="batchList" id="vo">
+                                            <option value="{$vo['batch_no']}" <if condition="$vo['batch_no'] eq $post['batch_no']">selected="selected"</if>>{$vo['level_name']}</option>
+                                           </volist>
+                                       </select>
+                                     </label>
+                                 </div>
+                              	 <div class="SearchAreaRight">
+                                 <a href="javascript:void(0);" onclick="return $('#theform').submit();" id="sub_button" class="searchBtn">筛选</a>
+                                 <a href="javascript:void(0);" id='tg' class="more-filter">更多筛选</a>
+                                 </div>
+                                 </form>
+                            </div>
+                          <div class="bd mt15">
+                            	<div class="sub_title_bar default">
+                                    <div class="group_select">
+                                    	<div id="allGroup" class="dropdown_wrp dropdown_menu disabled">
+                                        	<a href="javascript:;" class="btn dropdown_switch jsDropdownBt"><label class="jsBtLabel">添加到</label><i class="arrow"></i></a>
+                                            <ul class="dropdown_data_list jsDropdownList" style="display: none;">
+                                                <volist name="groupList" id="vo">
+                                                <li class="dropdown_data_item">
+                                                    <a href="javascript:;" class="jsDropdownItem" data-value="{$vo['id']}" data-index="{$vo['id']}" data-name="{$vo['name']}">{$vo['name']}</a>
+                                                </li>
+                                                </volist>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table_wrp user_list">
+                                    <table class="table W-table" cellspacing="0" style="border:none;">
+                                    	<thead>
+                                            <tr>
+                                                <th class="user no_extra" id="alluserGroups" style="width:22px;">
+                                                    <label for="selectAll" class="frm_checkbox_label l ml5"><i class="icon_checkbox"></i><input type="checkbox" class="frm_checkbox" id="selectAll"></label><!--label的for="check1194585121"要对应-->
+                                                </th>
+                                                <th class="tc" style="width:98px;">手机号码</th>
+                                                <th class="tc" style="width:115px;">首次来源</th>
+                                                <th class="tc" style="width:66px;">参与次数</th>
+                                                <th class="tc" style="width:92px;">登记日期</th>
+                                                <th class="tc">分组</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="userGroups">
+                                        <notempty name='query_list'>
+										<script>
+										$(function(){
+										productIntroduce(2,"fsk","{:U('Member/Member/index')}");})
+										</script>
+
+                                                <?php
+                                                foreach($query_list as $k=>$v)
+                                                {
+                                                ?>
+                                            <tr>
+                                            	<td>
+                                                <label for="id<?php echo $v['id'];?>" class="frm_checkbox_label l ml5"><i class="icon_checkbox"></i><input class="frm_checkbox js_select" type="checkbox" name="id[]" value="<?php echo $v['id'];?>" id="id<?php echo $v['id'];?>"></label>
+                                                </td><!--label的for="check1194585121"要对应-->
+                                                <td><a href="{:U('Member/Member/view')}&id=<?php echo $v['id']?>"><?php echo $v['phone_no'];?></a></td>
+                                                <td><?php if(!empty($v['channel_name']) && $v['sns_type'] == 42){echo '列表模板';}elseif(!empty($v['channel_name']) && $v['sns_type'] != 42){echo $v['channel_name'];}else{echo '手动添加';}?></td>
+                                                <td><?php echo $v['join_num']?></td>
+                                                <td><?php echo dateformat($v['add_time'],'Y-m-d');?></td>
+                                                <td>
+                                                	<div id="selectArea<?php echo $v['id'];?>" class="js_selectArea dropdown_menu" data-gid="0" data-fid="<?php echo $v['id'];?>">
+                                                        
+                                                        
+                                                        <a href="javascript:;" class="btn dropdown_switch jsDropdownBt">
+                                                            <label class="jsBtLabel"><?php echo $v['group_name'];?></label><i class="arrow"></i>
+                                                        </a>
+                                                        
+                                                        <ul class="dropdown_data_list jsDropdownList" style="display: none;">
+                                                        	<volist name="groupList" id="vo">
+                                                            <li class="dropdown_data_item">
+                                                                <a href="javascript:;" class="jsDropdownItem" data-value="{$vo['id']}" data-index="{$vo['id']}" data-name="{$vo['name']}" style=" color:#666;">{$vo['name']}</a>
+                                                            </li>
+                                                            </volist>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <?php
+                                                }
+                                                ?>
+                                                <else />
+                                                <?php if($_REQUEST){?>
+                                                <tr>
+                                                            <td colspan="9">
+                                                                <div class="nonedata"></div>
+                                                            </td>
+                                                        </tr> 
+                                                <?php }else{?>
+                                                        <tr>
+                                                        <td colspan="9">
+                                                          <script>
+										$(function(){
+										productIntroduce(4,"fsk","javascript:void(0)");})
+										</script>
+                                                        </td>
+                                                        </tr>
+                                                <?php }?>
+                                            </notempty>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="page">{$page}</div>
+                            </div>
+                        </div>
+                        <!--左侧用户信息-->
+                    </div>
+                    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

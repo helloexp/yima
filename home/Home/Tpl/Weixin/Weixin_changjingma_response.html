@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_设置响应动作_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script>
+	var response_type = "{$info['response_class']}";
+    var selectcallback = function(mid){
+        var dialog = art.dialog({title:false,lock:true});
+        var data = {material_id:mid};
+        $("#material_id_selected").val(mid);
+        $.post("{:U('Weixin/WeixinResp/showMaterialById')}",data,function(d){
+            dialog.close();
+			$(".msg-item-wrapper[data-material-id='"+mid+"']").click();
+			$(".msg-item-wrapper[data-material-id='"+mid+"']").addClass("selected");
+            //$(".tab_appmsg").addClass("selected");
+            windowheight();
+        });
+    }
+
+
+    $(function(){
+        $(document).ready(function(e){
+			msglistchoose(); //选择
+			if(response_type==""){
+				response_type=1;
+				$(".vallast").click();
+			}
+            if(response_type == 1)
+			{
+				$("#reply_content_0").val("");
+			}
+			
+            $('#goUrl').click(function(){
+                parent.location.href="{:U('Weixin/Weixin/materialImgTxtManage')}";
+            })
+
+            $(".Diabtn-all").click(function(){
+                //获取来源页面
+                //var win = art.dialog.open.origin;
+                var material_id = $("#material_id_selected").val();
+                var selectcallback = "selectcallback";
+                var material_data = {};
+                try{
+                    material_data = eval("("+$("#data-json-"+material_id).html()+")");
+                }catch(e){}
+                //调用来源页面的回调函数
+                win[selectcallback](material_id,material_data);
+                art.dialog.close();
+            });
+            $("#btn_cancel").click(function(){
+                art.dialog.close();
+            });
+        });
+
+        //确定按钮事件
+        $(".Diabtn-all").click(function(){
+            var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+            if($("#material_type").val()==1){
+                var data = {
+                    response_info:$("#material_id_selected").val(),
+                    respType:4,
+                    respClass:1,
+                };
+                $.post("{:U('Weixin/Weixin/followSubmit')}&id={$_GET['id']}",data,function(d){
+                    dialog.time(3).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                    parent.location.reload();
+                    parent.art.dialog.list['setAct'].close();
+
+                },'json');
+            }else if($("#material_type").val()==0){
+                var reply_text = $("#reply_content_0").val();
+
+                var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+                var data = {
+                    response_info:reply_text,
+                    respType:4,
+                    respClass:0,
+                };
+                $.post("{:U('Weixin/Weixin/followSubmit')}&id={$_GET['id']}",data,function(d){
+                    dialog.time(3).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                    parent.location.reload();
+                    parent.art.dialog.list['setAct'].close();
+                },'json');
+            }
+        });
+        selectcallback($("#material_id_selected").val());
+
+    });
+</script>
+<style>
+.Gform .Ginput .switch.hover .newRadio-input{ float:none}
+</style>
+</head>
+<body>
+<div class="popupWin">
+    <div class="DiatipsCon">设置的响应事件，即关注的粉丝拍码后，系统自动推送的消息。</div>
+    <div class="Gform w1" style="margin-bottom:70px">
+        <ul>
+            <li class="Gname">响应的消息类型</li>
+            <li class="Ginput">
+                <div class="switch">
+                    <input type="radio" value="{$info['response_class']}" checked="checked" id="material_type">
+                    <div class="newRadio">
+                        <span class="valfirst" data-val="0">文字</span>
+                        <span class="vallast" data-val="1">图文</span>
+                    </div>
+                    <div class="cl mt10"></div>
+                    <div class="newRadio-default">
+                        <textarea id="reply_content_0" maxlength="600" class="validate[required]" style="width:570px; height:180px;">{$info['response_info']}</textarea>
+                    </div>
+                    <div class="newRadio-input">
+                        <php>if(!$flagImageNews){</php>
+                        <div class="no-material">
+                            <img src="__PUBLIC__/Image/member/nodata.gif">
+                            <p class="txtTip">未添加图文消息，您可以<a id="goUrl" href="javascript:void(0)">马上创建图文消息</a></p>
+                            <p class="txtTip tc"></p>
+                        </div>
+                        <php>}</php>
+                        <div class="richImg" style="padding-top:10px; height:320px; overflow-x:hidden;overflow-y:auto">
+                        	<input type="hidden" id="material_id_selected" value="{$info['response_info']}" />
+                            <div id="first_col" class="msg-col">
+                                <assign name="materialInfo" value="$materialGroupArr[0]"/>
+                                <volist name="materialInfo" id="vo">
+
+                                    <if condition="$vo['material_type'] eq '2'">
+                                        <!--多图文信息-->
+                                        <div class="msg-item-wrapper" data-material-id="{$vo['id']}">
+                                            <script type="text/html" id="data-json-{$vo['id']}">{:json_encode($vo)}</script>
+                                            <div class="msg-item multi-msg">
+                                                <div id="appmsgItem1" class="appmsgItem">
+                                                    <p class="msg-meta"><span class="msg-date">{$vo.add_time|dateformat='Y-m-d'}</span></p>
+                                                    <div class="cover">
+                                                        <h5 class="msg-t"><a href="{$vo.material_link}" class="i-title" target="_blank">{$vo.material_title}</a></h5>
+                                                        <img src="{$vo.img_url}" class="i-img">
+                                                    </div>
+                                                </div>
+                                                <volist name="vo['sub_material']" id="vv">
+                                                    <div class="relative sub-msg-item appmsgItem" id="appmsgItem2">
+                                                        <span class="thumb"><img src="{$vv.img_url}" class="i-img"></span>
+                                                        <h5 class="msg-t"><a href="javascript:void(0);" target="_blank" class="i-title">{$vv.material_title}</a></h5>
+                                                    </div>
+                                                </volist>
+                                            </div>
+                                            <div class="msg-hover-mask"></div>
+                                        </div>
+                                        <!--多图文信息结束-->
+                                        <elseif condition="$vo['material_type'] eq '1'" />
+                                        <!--单图文信息-->
+                                        <div class="msg-item-wrapper" data-material-id="{$vo['id']}">
+                                            <script type="text/html" id="data-json-{$vo['id']}">{:json_encode($vo)}</script>
+                                            <div id="appmsgItem1" class="msg-item appmsgItem">
+                                                <h5 class="msg-t"><a href="javascript:void(0);" class="i-title">{$vo.material_title}</a></h5>
+                                                <p class="msg-meta"><span class="msg-date">{$vo.add_time|dateformat='Y-m-d'}</span></p>
+                                                <div class="cover"><img src="{$vo.img_url}" class="i-img" style=""></div>
+                                                <p class="msg-text">{$vo.material_summary}</p>
+                                            </div>
+                                            <div class="msg-hover-mask"></div>
+                                        </div>
+                                        <!--单图文信息结束-->
+                                    </if>
+                                </volist>
+                            </div>
+                            <!--左边列表结束-->
+                            <!--右边列表 判断ID为双数的列表-->
+                            <div id="second_col" class="msg-col">
+                                <assign name="materialInfo" value="$materialGroupArr[1]"/>
+                                <volist name="materialInfo" id="vo">
+
+                                    <if condition="$vo['material_type'] eq '2'">
+                                        <!--多图文信息-->
+                                        <div class="msg-item-wrapper" data-material-id="{$vo['id']}">
+                                            <script type="text/html" id="data-json-{$vo['id']}">{:json_encode($vo)}</script>
+                                            <div class="msg-item multi-msg">
+                                                <div id="appmsgItem1" class="appmsgItem">
+                                                    <p class="msg-meta"><span class="msg-date">{$vo.add_time|dateformat='Y-m-d'}</span></p>
+                                                    <div class="cover">
+                                                        <h5 class="msg-t"><a href="{$vo.material_link}" class="i-title" target="_blank">{$vo.material_title}</a></h5>
+                                                        <img src="{$vo.img_url}" class="i-img">
+                                                    </div>
+                                                </div>
+                                                <volist name="vo['sub_material']" id="vv">
+                                                    <div class="relative sub-msg-item appmsgItem" id="appmsgItem2">
+                                                        <span class="thumb"><img src="{$vv.img_url}" class="i-img"></span>
+                                                        <h5 class="msg-t"><a href="javascript:void(0);" target="_blank" class="i-title">{$vv.material_title}</a></h5>
+                                                    </div>
+                                                </volist>
+                                            </div>
+                                            <div class="msg-hover-mask"></div>
+                                        </div>
+                                        <!--多图文信息结束-->
+                                        <elseif condition="$vo['material_type'] eq '1'" />
+                                        <!--单图文信息-->
+                                        <div class="msg-item-wrapper" data-material-id="{$vo['id']}">
+                                            <script type="text/html" id="data-json-{$vo['id']}">{:json_encode($vo)}</script>
+                                            <div id="appmsgItem1" class="msg-item appmsgItem">
+                                                <h5 class="msg-t"><a href="javascript:void(0);" class="i-title">{$vo.material_title}</a></h5>
+                                                <p class="msg-meta"><span class="msg-date">{$vo.add_time|dateformat='Y-m-d'}</span></p>
+                                                <div class="cover"><img src="{$vo.img_url}" class="i-img" style=""></div>
+                                                <p class="msg-text">{$vo.material_summary}</p>
+                                            </div>
+                                            <div class="msg-hover-mask"></div>
+                                        </div>
+                                        <!--单图文信息结束-->
+                                    </if>
+                                </volist>
+                            </div>
+                            <!--右边列表结束-->
+                        </div>
+                        <div class="page mini">
+                            {$pageShow}
+                        </div>
+                    </div>
+                    <div class="cl db"></div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="DiabtnCon">
+    <a href="javascript:void(0)" class="Diabtn-all">确定</a><a href="javascript:art.dialog.close()" class="Diabtn-all-del">取消</a>
+</div>
+</body>
+</html>

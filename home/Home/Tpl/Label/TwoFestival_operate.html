@@ -1,0 +1,659 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$marketInfo['name']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20151224.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) {
+	var loadImg = 0;
+	var imgNum = $(".loadimg").length-1;
+	$(".loadimg").one('load', function () {
+		loadImg++;
+		if (loadImg == imgNum) {
+			$("#loading").hide();
+			$("#wrapper").addClass("begin");
+		}
+	}).each(function () {
+		if (this.complete) $(this).load();
+	});
+});
+</script>
+</head>
+<body>
+<div id="loading">
+    <div class="loadingbox">
+        <h4>{$marketInfo['node_name']}</h4>
+        <div><i></i>
+            <img src="__PUBLIC__/Label/Image/defaultlogo-sTwo.png" />
+        </div>
+        <h5>Loading...</h5>
+        <h6>{$marketInfo['name']}</h6>
+    </div>
+    <img src="__PUBLIC__/Label/Image/20151224/bg.jpg" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/microphone2.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/microphone2-1.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/microphone2-2.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/rateIcon1.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/rateIcon1-1.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/rateIcon3.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/rateText1.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/rateText2.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/rateText3.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/rateIcon1-2.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151224/msgBg.png" class="loadimg" />
+</div>
+<div id="game">
+    <div class="microphoneCon">
+    	<img src="__PUBLIC__/Label/Image/20151224/text1.png" class="text1">
+    	<div class="microphoneBg">
+        	<div class="microphoneBorder">
+            	<img src="__PUBLIC__/Label/Image/20151224/microphone2.png">
+                <div class="microphone2"></div>
+            </div>
+        </div>
+    </div>
+    <div class="microbtnCon">
+    	<div class="rateLine">
+        	<div class="rateLineLeft"></div>
+        </div>
+        <div class="rateBtn">
+        	<div class="rateBtn1"><div class="rateBtn"><a href="javascript:void(0)" class="btn btn-play erro"><i></i></a></div><p class="rateText1"></p></div>
+        	<div class="rateBtn2"><div class="border"></div><div class="rateBtn"><a href="javascript:void(0)" class="btn btn-transcribe"><i></i></a></div><p class="rateText2"></p></div>
+        	<div class="rateBtn3"><div class="rateBtn"><a href="javascript:void(0)" class="btn btn-update erro"><i></i></a></div><p class="rateText3"></p></div>
+        </div>
+    </div>
+</div>
+<div class="out-box" onClick="$(this).hide();">
+	<img src="__PUBLIC__/Label/Image/tip-share.png?v=__VR__" class="img">
+</div>
+</body>
+</html>
+
+<script>
+//todo
+//url要控制一下，没有奖品的不抽奖，自己的活动第二次录语音不抽奖，帮忙祝福的人不抽奖
+var id = "{$id}";
+var member_reg_label_id = '{$member_reg_label_id}';
+var member_reg_url = '{$member_reg_url}';
+var blessUrl = "{:U('blessWall', array('id' => $id, toOpenId => $toOpenId))}";
+var isNeedRedirect = "{$isNeedRedirect}";
+var _global = {
+		onsub:false,
+		g:true,
+        isgocj: true,
+        id:id,
+        mobile:"",
+        url: {
+            cjSubmit: "{:U('Label/TwoFestival/cjSubmit', array('id' => $id))}"
+        },
+    };
+var isbegin = true;
+var Int,Intplay,voiceId;
+var isSupportTouch = "ontouchend" in document ? true : false;
+var touchstart = "mousedown";
+var touchend = "mouseup";
+if(isSupportTouch){touchstart = "touchstart";touchend = "touchend";};
+var time = 0;
+var width = 0;
+var autostop = true;
+$(document).ready(function(e) {
+	$("#game").on("touchstart touchmove",function(e){
+		e.preventDefault();
+	});
+	$(".microphoneBg").height($(".microphoneBg").width());
+	$("body").on(touchstart,".btn-transcribe",function(){
+		if(!isbegin){return false;}
+		autostop = true;
+		time = 0;
+		isbegin = false;
+		Int = setInterval(rateLineLeft,200);
+		wx.startRecord();
+		$(".rateBtn2").addClass("on");
+		$(".microphoneBorder").addClass("on");
+	});
+	$("body").on(touchend,".btn-transcribe",function(){
+		if(autostop){
+			isbegin = true;
+			clearInterval(Int);
+			$(".btn-play").removeClass("erro");
+			$(".btn-update").removeClass("erro");
+			$(".rateBtn2").removeClass("on");
+			$(".microphoneBorder").removeClass("on");
+			$(".rateLineLeft").width(0);
+			width = 0;
+			autostop = true;
+			wx.stopRecord({
+			success: function (res) {
+				//alert(JSON.stringify(res));
+					voiceId = res.localId;
+				}
+			});
+		}
+	});
+	$("body").on(touchstart,".btn-play:not('.erro,.stop')",function(){
+		$(this).addClass("stop");
+		isbegin = false;
+		Intplay = setInterval(rateLineplay,200);
+		wx.playVoice({
+			localId: voiceId
+		});
+	});
+	$("body").on(touchstart,".btn-play.stop",function(){
+		$(this).removeClass("stop");
+		isbegin = true;
+		wx.stopVoice({
+			localId: voiceId
+		});
+	});
+	$("body").on(touchstart,".btn-update:not('.erro')",function(){
+		//goCj();return;
+		$(this).addClass("erro");
+		//alert('localid=' + voiceId);
+		if(time<=10){
+			cj.content({
+				msg:"<p>对不起，您录的时间太短了，请重新录制</p>"
+			});
+			return false;
+		}
+		cj.tip('上传中……');
+		wx.uploadVoice({
+		    localId: voiceId, // 需要上传的音频的本地ID，由stopRecord接口获得
+		    isShowProgressTips: 0, // 默认为1，显示进度提示
+		        success: function (res) {
+		        var serverId = res.serverId; // 返回音频的(微信的)服务器端ID
+		        var data = {serverId:serverId, time:time/5};
+		        $.post('{:U('Label/TwoFestival/upload', array('id' => $id, 'fromOpenId' => $fromOpenId, 'toOpenId' => $toOpenId))}', data, function(resp){
+					cj.tip(1);
+					if(resp.status=='1'){
+						if (isNeedRedirect == 1) {
+			            	//var newTab1 = window.open('about:blank');
+			        		//newTab1.location.href = blessUrl;
+			        		//wx.showOptionMenu();
+							location.href = blessUrl;
+							return;
+						}
+						//抽奖弹框
+						goCj();
+					} else {
+						uploadErro();
+					}
+				}, 'json');
+		    }
+		});
+	});
+	var rateLineLeft = function(){
+		if(isbegin){clearInterval(Int);return false;}
+		if(width>=96){
+			time = 100;
+			width = 0;
+			isbegin = true;
+			$(".rateLineLeft").width(width+"%");
+			autostop = false;
+			if(!autostop){
+				$(".btn-play").removeClass("erro");
+				$(".btn-update").removeClass("erro");
+				$(".rateBtn2").removeClass("on");
+				$(".microphoneBorder").removeClass("on");
+				$(".rateLineLeft").width(0);
+				width = 0;
+				wx.stopRecord({
+					success: function (res) {
+						voiceId = res.localId;
+					}
+				});
+			}
+			clearInterval(Int);
+		}else{
+			width += 1;
+			time ++;
+			$(".rateLineLeft").width(width+"%");
+		}
+	}
+	var rateLineplay = function(){
+		if(isbegin){clearInterval(Intplay);return false;}
+		if(width>=96){
+			width = 0;
+			isbegin = true;
+			autostop = true;
+			$(".rateLineLeft").width(width+"%");
+				$(".btn-play").removeClass("erro");
+				$(".btn-play").removeClass("stop");
+				$(".btn-update").removeClass("erro");
+				$(".rateBtn2").removeClass("on");
+				$(".microphoneBorder").removeClass("on");
+				$(".rateLineLeft").width(0);
+			clearInterval(Intplay);
+		}else{
+			autostop = false;
+			width += 100/time;
+			$(".rateLineLeft").width(width+"%");
+		}
+	}
+	
+	$('body').on("keyup", "#mobile", function () { //修改手机号 显示验证码
+	    if($(this).val()!=_global.mobile){
+	        $(this).closest("li").next("li").show();
+	    }else{
+	        $(this).closest("li").next("li").hide();
+	    }
+	});
+	
+	//goCj();//弹抽奖窗口
+	//uploadErro();//上传失败
+	//prize();//恭喜中奖
+});
+
+function cjSubmit() {
+    var regex = /(^1[0-9]{10}$)/;
+    var phone = $('#mobile').val();
+    var verify = $('#verify').val();
+	if (!verify) {
+		$("#verify").addClass("erro");
+		//cj.show();
+		_global.onsub = false;
+		return false;
+	}
+    if (!regex.test(phone)) { //手机号验证失败
+        $("#mobile").addClass("erro");
+        //cj.show();
+        _global.onsub = false;
+        return false;
+    }
+    //if (_global.onsub)return false;
+    _global.onsub = true;
+    update({
+        url: _global.url.cjSubmit,
+        data: $('#theform').serialize()
+    });
+};
+
+function uploadErro(){
+	var html = template("js-tmpl-uploadErro");
+	cj.content({
+		msg:html
+	});
+}
+function goCj(){
+	var html = template("js-tmpl-form", _global);
+	cj.content({
+		msg:html,
+		btn:false
+	});
+}
+function prize(data){
+	var html = template("js-tmpl-prize", data);
+	cj.content({
+		msg:html,
+		btn:[
+				{
+					text:"确认",//按钮文字
+					url:blessUrl,//按钮链接
+				}
+			],
+		after:function(){
+			window.location.href=blessUrl;
+		}
+	});
+}
+
+
+
+var cj = {
+	basic:function(msg){
+		if(cj.isnew){cj.close();}
+		if(!msg.title){var notitle="notitle";msg.title="";}else{var notitle="hastitle"}
+		if(msg.isclose){var closehtml = '<a href="javascript:void(0)" class="close-msgPop"><i><span>+</span></i></a>'}else{var closehtml = "";}
+		var html = ['<div class="msgPop bg" id="'+msg.id+'">',
+			'<div class="msgBg bg2">',
+			'<div class="msgTitle '+notitle+'">'+msg.title+closehtml+'</div>',
+			'<div class="msgCon">'+msg.html+'</div>',
+			'</div>',
+			'</div>'].join('');
+		$("body").append(html);
+		if(typeof(msg.start) == 'string'){
+			window[msg.start].call(this,$(this));
+		}else if(typeof(msg.start) == 'function'){
+			msg.start.call(this,$(this));
+		}
+		$("body").find(".msgBg",html).on("click",".cjBtn-back",function(){
+			var index = $(this).index();
+			if(typeof(msg.btn[index].callback) == 'string'){
+				window[msg.btn[index].callback].call(this,$(this));
+			}else if(typeof(msg.btn[index].callback) == 'function'){
+				msg.btn[index].callback.call(this,$(this));
+			}else{
+				msg.repeat ? (cj.close(),cj.login({repeat:msg.repeat})) : cj.close();
+				if($(this).attr("href")!="javascript:void(0)"){
+					window.location.href = $(this).attr("href");
+				}
+			}
+		});
+		$("body").find(".msgBg",html).on("click",".close-msgPop",function(){
+			if(typeof(msg.after) == 'string'){
+				window[msg.after].call(this,$(this));
+			}else if(typeof(msg.after) == 'function'){
+				msg.after.call(this,$(this));
+			}
+			msg["_this"] = $(this);
+			msg.repeat ? (cj.remove(msg),cj.login({repeat:msg.repeat})) : cj.remove(msg);
+		});
+		$("body").on("click","input",msg.html,function(){
+			$(this).removeClass("erro");
+		});
+	},
+	tip:function(msg){
+		$(".cjTip").remove();
+		var txt = ["正在提交，只需要几秒~"];
+		var codeRandom = Math.floor(Math.random()*txt.length);
+		if(!msg){msg = txt[codeRandom]};
+		if(msg==1){return false;}
+		var html = '<div class="cjTip"><div class="cjTipTxt"><i></i><p>'+msg+'</p></div><div class="cjTipbg"></div></div>';
+		$("body").append(html);
+	},
+	content:function(msg){
+		msg = $.extend(true, {}, cj.msg,msg);
+		msg.html = template("js-tmpl-msg",msg);
+		cj.basic(msg);
+	},
+	remove:function(msg){
+		_global.g = true;
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		$(".gameCon").removeClass("end");
+		if(msg.isnew){
+			msg._this.closest(".msgPop").remove();
+		}else{
+			$(".msgPop").remove();
+		}
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	close:function(msg){
+		_global.g = true;
+		$(".gameCon").removeClass("end");
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		$(".msgPop").not("[id!='']").remove();
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	msg:{
+		id:"",
+		title:false,//标题
+		html:false,//内容
+		refurbish:false,//是否刷新
+		msg:"未知错误",//内容
+		icon:false,//图标
+		repeat:false,//重新填出登陆框
+		btn:[
+			{
+				text:"返回",//按钮文字
+				url:"javascript:void(0)",//按钮链接
+				callback:function(){
+					cj.close();
+				}
+			}
+		],
+		isnew:false,
+		isclose:true,
+		start:false,//弹出之后callback
+		after:false//关闭之后callback
+	}
+}
+
+var cjpasscodeObj = null;
+var modifyCjpasscodeLeftTimes;//当前剩余秒数
+var modifyCjpasscodeTotalTimes = '{$verifyCodeExpireTime}';
+var modifyCjpasscodeTimeInter;
+var cjpasscodeStyle = null;
+
+function disableCjpasscodeObj()
+{
+    if (cjpasscodeObj == null) {
+        cjpasscodeObj = $("#cjpasscode-btn");
+        cjpasscodeStyle = cjpasscodeObj.attr('style');
+        cjpasscodeObj.attr('style', 'with:100px;background:grey none repeat scroll 0 0');
+        cjpasscodeObj.attr('disabled', true);
+        cjpasscodeObj.attr('id', '');
+    }
+}
+
+function enableCjpasscodeObj()
+{
+    if (cjpasscodeObj != null) {
+        cjpasscodeObj.attr('id', 'cjpasscode-btn');
+        cjpasscodeObj.attr("style",cjpasscodeStyle);
+        cjpasscodeObj.removeAttr('disabled');
+        cjpasscodeObj.val('获取验证码');
+        clearInterval(modifyCjpasscodeTimeInter);
+        cjpasscodeObj = null;
+    }
+}
+
+function modifyCjpasscodeBtn()
+{
+    disableCjpasscodeObj();
+    modifyCjpasscodeLeftTimes = modifyCjpasscodeTotalTimes;
+    modifyCjpasscodeTimeInter = setInterval(function() {
+        if (modifyCjpasscodeLeftTimes == 0) {
+            enableCjpasscodeObj();
+        } else {
+            modifyCjpasscodeLeftTimes--;
+            cjpasscodeObj.val('剩余' + modifyCjpasscodeLeftTimes + '秒');
+        }
+    }, 1000);
+}
+
+function verifyPhoneno() {
+    var regex = /(^1[0-9]{10}$)/;
+    var phone = $('#mobile').val();
+    return regex.test(phone);
+}
+
+
+
+function sendCheckCode() {
+    $('#cjpasscode-btn').attr('disabled', true);
+    var phone_no = $("#mobile").val();
+    var id = $("#id").val();
+    phone_no = phone_no.trim();
+    if (verifyPhoneno()) {
+        disableCjpasscodeObj();
+        cjpasscodeObj.val("正在发送..");
+        $.post("{:U('Label/TwoFestival/sendCheckCode')}", {
+            "id": id,
+            "phone_no": phone_no
+        }, function (data) {
+        	console.log(data.info);
+            if (data.status == '1') {
+            	//记录发送验证码时的手机号
+                _global.mobile = phone_no;
+                modifyCjpasscodeBtn();
+            } else {
+                cjpasscodeObj.val(data.info);
+            }
+        }, "json");
+    } else {
+        $('#cjpasscode-btn').attr('disabled', false);
+        $("#mobile").addClass("erro");
+    }
+}
+
+
+/**
+ * 提交抽奖
+ * */
+function update(data) {
+    cj.tip('请稍后');
+    cjajax({
+        url: data.url,
+        data: data.data
+    });
+}
+
+var query_url;
+var i = 1;
+/**
+ * 抽奖
+ * */
+function cjajax(postdata, repost) {
+    var url = postdata.url;
+    var data = postdata.data;
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: data,
+        timeout: 10000,
+        dataType: "json",
+        success: function (data) {
+            //data = convertRes(data);
+            //data.code = +data.code;
+			console.log(data);
+			var data = data.info;
+			if(data.code != -1035){cj.close();}
+            cj.tip(1);
+            if (data.code == 1011 && member_reg_label_id > 0) { //(该抽奖活动只有会员才可以参与 且设置了会员招募引导页)不是会员 引导至会员招募页面
+                cj.content({
+                    msg: "该抽奖活动只有会员才可以参与",
+                    btn: [{
+                        text: "前去注册",
+                        //url:_global.member_registration
+                        url:"http://www.baidu.com"
+                    }]
+                });
+            } else if (data.code == -1048) { //预览渠道不能抽奖
+                //直接跳转到祝福墙
+                location.href = blessUrl;
+                //var newTab1 = window.open('about:blank');
+        		//newTab1.location.href = blessUrl;
+            } else if (data.code == -1035) { //手机号验证错误
+				$("#verify").addClass("erro");
+				return false;
+                //cj.close();
+                //$("#mobile").addClass("erro");
+                //_global.onsub = false;
+            } else if (data.code == -1040) { //没有抽奖次数
+            	//直接跳转到祝福墙
+            	location.href = blessUrl;
+            	//var newTab1 = window.open('about:blank');
+        		//newTab1.location.href = blessUrl;
+            } else if (data.code == -1066) {
+            	//活动不可用
+            	cj.content({
+                    msg: data.msg,
+                });
+            }
+            //else if (data.code == -1007 || data.code == -1009 || data.code == -1010) { //手机验证码错误,-1007验证码错,-1009验证码错，-1010验证码过期
+            //    cj.login();
+            //    $("#verify").addClass("erro");
+            //    _global.onsub = false;
+            //    return false;
+            //} 
+            else if (data.code == 0) { //抽奖成功 展示奖品信息
+            	prize(data);
+            } else { //没有中奖
+            	cj.content({
+                    msg: data.msg,
+                    btn: [{
+                        text: "确定",
+                        url: blessUrl,
+                    }],
+					after:function(){
+						window.location.href=blessUrl;
+					}
+                });
+            }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) { //请求出错
+            if (textStatus == "timeout") {
+                cj.tip("链接超时,请查看您的网络连接");
+            } else {
+                cj.tip("请求失败,请刷新页面重试");
+            }
+            _global.onsub = false;
+            setTimeout(function () {
+                cj.tip(1);
+            }, 8000);
+        }
+    });
+}
+</script>
+<script type="text/html" id="js-tmpl-msg">
+<div class="cjText">
+	{{if !html}}
+	<div class="cjText-con">
+		{{if !icon}}
+			<div class="cjText-text noicon">{{#msg}}</div>
+		{{else}}
+			<div class="cjText-text">{{#msg}}</div>
+			<div class="cjText-img">
+				{{if icon==1}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-6.png" width="64">
+				{{else}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-19-{{icon}}.png" width="100">
+				{{/if}}
+			</div>
+		{{/if}}
+	</div>
+	{{else}}
+	{{#html}}
+	{{/if}}
+</div>
+<div class="cjBtn">
+{{each btn as value i}}
+	<a href="{{value.url}}" class="cjBtn-back {{if btn.length>1}}{{if i==0}}sm{{/if}}{{/if}}">{{value.text}}</a>
+{{/each}}
+</div>
+</script>
+<script type="text/html" id="js-tmpl-form">
+<div class="msgConTitle"><img src="__PUBLIC__/Label/Image/20151224/msgTitle1.png" class="img"></div>
+<p style="color:#666;">请正确填写您的手机号码，以领取奖品。</p>
+<div class="cjForm" id="popForm">
+	<form id="theform" action="{{url.cjSubmit}}" method="post" name="theform">
+		<input type="hidden" id="id" name="id" value="{{id}}"/>
+		<ul class="sOne-cjForm">
+			<li><input type="tel" name="mobile" id="mobile" placeholder="&nbsp;&nbsp;请填写您的手机号码" maxlength="11" value="{{mobile}}" /><div class="formError">手机号错误</div></li>
+			<li>
+				<input type="tel" name="code" id="verify" placeholder="&nbsp;&nbsp;请输入手机验证码" class="textbox half validate[required]">
+				<div class="formError">验证码错误</div>
+				<input type="button" value="获取验证码" onclick="sendCheckCode();" id="cjpasscode-btn" class="sOne-cjpasscode-btn" style="width: 100px;">
+			</li>
+		</ul>
+	</form>
+</div>
+<div class="cjBtn">
+	<a href="javascript:void(0)" onclick="cjSubmit()" class="cjBtn-ok">确定</a>
+</div>
+</script>
+<script type="text/html" id="js-tmpl-uploadErro">
+<div class="msgConTitle"><img src="__PUBLIC__/Label/Image/20151224/msgTitle2.png" class="img"></div>
+</script>
+
+<script type="text/html" id="js-tmpl-prize">
+<div class="msgConTitle"><img src="__PUBLIC__/Label/Image/20151224/msgTitle3.png" class="img"></div>
+<p>您获得了<span>{{goods_name}}</span></p>
+<p>中奖凭证将自动下发至您的手机</p>
+<p>请注意查收</p>
+<img src="{{batch_img}}" class="prizeimg">
+</script>
+<script>
+var wxShareData = {:json_encode($shareData);};
+</script>
+<include file="Label/Public/_shareWx"/>

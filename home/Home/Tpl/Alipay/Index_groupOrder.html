@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>翼码卡券_翼码旺财</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Walipay.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+    <script>
+    $(function(){
+        var isAgree = "{$groupHave}";
+        if(!isAgree){
+            var content = template("checkAgree", {});
+            art.dialog({
+                title:"团购卡券核销功能开通须知",
+                content:content,
+                width:800,
+                ok:function(){
+                    var isCheck = $("#agreeItem").prop("checked");
+                    if(isCheck){
+                        $.post("{:U('Alipay/Index/checked')}", {'check':isCheck}, function (data) {
+                            //处理
+                        });
+                    }else{
+                        Diaerror("开通团购卡券核销功能需要勾选”我已同意上述协议“选项");
+                        return false;
+                    }
+                },
+                okVal:"确认",
+                cancel:false
+            })
+        }
+    })
+    </script>
+</head>
+<body>
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <div class="shopNav">
+        <include file="./Home/Tpl/Alipay/Alipay_public_header.html" topmenuid="alipay"/>
+    </div>
+    <div id="container">
+        <div id="main" class="rel bgfff">
+            <div class="sidenav">
+                <include file="./Home/Tpl/Alipay/Index_left_menuNew.html" leftmenuid="groupOrder"/>
+            </div>
+            <div class="subcon fn">
+                <div class="main-name fn">
+                    <h4>团购收单台<a class="btn-down first" href="{:U('Alipay/Index/downLoadGroupOrder')}"><i></i>下载列表</a></h4>
+                </div>
+                <div class="Wcanal-tab" id="Wcanal-tabon">
+                    <div class="Wcanal-tab-title fn">
+                        <p class="Wcanal-tab-hover"><a href="{:U('Alipay/Index/groupOrder')}">验证明细</a></p>
+                        <p class=""><a href="{:U('Alipay/Index/groupShop')}">按商品统计</a></p>
+                        <p class=""><a href="{:U('Alipay/Index/groupDate')}">按日期统计</a></p>
+                        <p class=""><a href="{:U('Alipay/Index/groupStore')}">按门店统计</a></p>
+                    </div>
+                    <div class="Wcanal-tab-list mt15">
+                        <div class="SearchArea fn">
+                            <form method="post" action="">
+                                <div class="SearchAreaLeft">
+
+                                    <label>
+                                        <span>所属平台</span>
+                                        <select name="groupTo" id="from_type">
+                                            <if condition="$verify eq 1">
+                                                <option value="">百度糯米</option>
+                                                <else />
+                                                <option value="">全部</option>
+                                                {:show_arr_opt($groupToArr,$groupTo_)}
+                                            </if>
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>商品名称</span>
+                                        <input name="shopName" type="text" value="{$shopName_}"/>
+                                    </label>
+                                    <!--<label>
+                                        <span>商品状态</span>
+                                        <select name="shopStatus">
+                                            {:show_arr_opt($shopStatus,$shopStatus_)}
+                                        </select>
+                                    </label>-->
+                                    <label>
+                                        <span>验证时间</span>
+                                        <input style='width:152px' value="{$badd_time_}" id="badd_time" name="badd_time" type="text" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\\'eadd_time\\')}',startDate:'%y-%M-%d 00:00:00'})" /> - <input id="eadd_time"  value="{$eadd_time_}" name="eadd_time" type="text" style='width:152px' onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',startDate:'%y-%M-%d 23:59:59',minDate:'#F{$dp.$D(\\'badd_time\\')}'})" />
+                                    </label>
+                                    <label>
+                                        <span>验证门店</span>
+                                        <select name="storeName">
+                                            {:show_arr_opt($storeInfo,$storeOpt_)}
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <div class="SearchAreaRight">
+                                    <a class="searchBtn" id="search" href="javascript:;" onclick="document.forms[0].submit()">查询</a>
+                                    <a class="more-filter" href="javascript:void(0);">更多筛选</a>
+                                </div>
+
+                            </form>
+                        </div>
+                        <div class="Wcanal-tab fn">
+                            <table cellpadding="0" cellspacing="0" class="W-table">
+                                <tr>
+                                    <th nowrap="nowrap">券号</th>
+                                    <th nowrap="nowrap">商品名称</th>
+                                    <th nowrap="nowrap">所属团购平台</th>
+                                    <th nowrap="nowrap">验证时间</th>
+                                    <th nowrap="nowrap">验证门店</th>
+                                </tr>
+                                <volist name="info" id="vo">
+                                    <tr>
+                                            <td>{$vo.ticket_number}</td>
+                                            <td>{$vo.goods_name}</td>
+                                            <td>{$vo.code_type}</td>
+                                            <td>{$vo.trans_time}</td>
+                                            <td>{$vo.store_name}</td>
+                                    </tr>
+                                </volist>
+                                <empty name="info">
+                                    <tr>
+                                        <td colspan="9">
+                                            <div class="nonedata"></div>
+                                        </td>
+                                    </tr>
+                                </empty>
+                            </table>
+                            <div class="page">{$page}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+<div class="service"></div>
+</body>
+
+<script>
+    function node_open(id){
+
+        art.dialog.open("<?php echo U('Alipay/Index/node_open'); ?>&id="+id,{
+            id:'ooxxjjwwqq',
+            title:'交易详情',
+            width:'800px'
+        })
+
+    }
+
+</script>
+<script type="text/html" id="checkAgree">
+<div class="docs">
+    <h2 class="center">团购卡券核销功能开通须知</h2></dt>
+    <p>1. 团购卡券核销功能，是指在翼码科技布放的终端上实现对团购卡券的核销。</p>
+    <p>2. 您必须首先是旺财平台的注册客户，方可申请并开通该功能权限。</p>
+    <p>3. 申请并开通该功能权限，即表明您已经认真阅读并同意接受本须知的所有内容。</p>
+    <p>4. 关于资费：</p>
+    <div class="subp">
+    <p>4.1 每验证核销一条团购卡券，您须向翼码科技支付0.5元。</p>
+    <p>4.2 如您与翼码科技签有纸质合同且合同对团购卡券核销的收费另有约定的，按合同执行。</p>
+    </div>
+    <p>5. 结算与付款：</p>
+    <div class="subp">
+    <p>5.1 您必须登录旺财平台，按提示完成预付费的支付。完成预付费支付后方可开通该功能权限，而且一旦欠费，该功能权限将被关闭，完成续费后方可重新开通。</p>
+    <p class="subp">5.2 如您与翼码科技签有纸质合同且合同对结算付款时间方式另有约定的，按合同执行。</p>
+    </div>
+    <p>6. 发票：</p>
+    <div class="subp">
+    <p>6.1 您如需要发票，需拨打上海翼码客服热线 4008827770。</p>
+    <p>6.2 如您与翼码科技签有纸质合同且合同对发票另有约定的，按合同执行。</p>
+    </div>
+    <p>7. 在不违反法律法规的情况下，本须知条款翼码科技享有最终解释权。</p>
+    <p class="mt30"><input type="checkbox" name="agreeItem" id="agreeItem" checked /> 我已同意上述协议</p>
+</div>
+</script>
+</html>

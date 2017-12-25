@@ -1,0 +1,404 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加奖品</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+var isopencusMsg = "{$startUp}"; //1：设置了短信内容自定义 0：未设置自定义
+var goods_type = "{$goodInfo['goods_type']}";
+$(function(){
+    if(isopencusMsg==1){
+        if(goods_type==0 || goods_type==1 || goods_type==2 || goods_type==3){
+            $(".nocusMsg").hide();
+            $(".cusMsg").show();
+            $('.imvBox-show').show();
+            $("#phone").show();
+        }else{
+            $(".nocusMsg").hide();
+            $(".cusMsg").hide();
+            $("#phone").hide();
+            $(".prizeConfig_usage").addClass("dn");
+            $(".showSendtype.cusMsg").addClass("dn");
+        }
+    }else{
+        if(goods_type==0 || goods_type==1 || goods_type==2 || goods_type==3){
+            $(".nocusMsg").show();
+            $(".cusMsg").hide();
+            $('.imvBox-show').show();
+            $("#phone").show();
+        }else{
+            $(".nocusMsg").hide();
+            $(".cusMsg").hide();
+            $("#phone").hide();
+            $(".prizeConfig_usage").addClass("dn");
+            $(".showSendtype.cusMsg").addClass("dn");
+        }
+    }
+
+	if(goods_type == 7 || goods_type == 8){
+		$(".nocusMsg").hide();
+		$(".cusMsg").hide();
+		$("#phone").hide();
+		$(".prizeConfig_usage").addClass("dn");
+        //$(".showSendtype.cusMsg")
+	}else{
+		if(isopencusMsg==1){
+			$(".nocusMsg").hide();
+			$(".cusMsg").show();
+		}else{
+			$(".nocusMsg").show();
+			$(".cusMsg").hide();
+		}
+	}
+    //编辑的时候
+    var isEdit = "{$isEdit}";
+    if(isEdit){
+        var win = art.dialog.open.origin;
+        $('#goodName').val(win.$("#goodName").val());
+        $('#prizeId').val(win.$("#goods_id").val());
+        $('#goodsType').val(win.$("#goods_type").val());
+        $('#useExplain').val(win.$("#caixin_content").val());
+        $('#goodsNum').val(win.$("#goodsNum").val());
+        $(".remain_num").html(win.$("#goodsNum").val());
+        $('#goodImg').val(win.$("#goodImg").val());
+        $('#timeType').val(win.$("#time_type").val());
+        if(win.$("#time_type").val() == 1){
+            $('#isDay').click();
+        }
+        $('#verify_begin_date').val(win.$("#use_start_time").val());
+        $('#verify_end_date').val(win.$("#use_end_time").val());
+        $('#dataAmountStart').val(win.$("#later_start_time").val());
+        $('#dataAmountEnd').val(win.$("#later_end_time").val());
+        $('#smsContent').html(win.$("#smsContent").val());
+        //短信内容
+        //alert("cusMsg:"+win.$("#cusMsg").val());
+        $('#cusMsg').html(win.$("#cusMsg").val());
+        $(".Gshow-cusMsg").html(win.$("#cusMsg").val());
+    }
+        
+	$("#prizeSetForm").validationEngine({binded:true});
+	$(".et_list ul li").click(function(e) {
+	var is_exit = $(this).children("p.date").children("mark").text();
+	var is_selected=$(this).hasClass("selected")
+	if(is_exit!="无库存"){
+		if(is_selected == true)
+		{
+			$(this).removeClass("selected");
+		}
+		else
+		{
+			$(".et_list ul li").removeClass("selected");
+			$(this).addClass("selected");
+		}
+	}
+	else
+	{
+		$(this).removeClass("selected");
+	}
+	});
+	
+	$(".et_list ul li").mouseover(function(e) {
+        $(this).children("div.details").show();
+		getAbsTop($(".details"));
+    });
+	
+	$(".et_list ul li").mouseout(function(e) {
+        $(this).children("div.details").hide();
+    });
+	$('#smb').click(function(){
+		if($("#prizeSetForm").validationEngine('validate')){
+			var win = art.dialog.opener;
+            var goodsNum = '不限';
+            if($('#goodsNum').val() != -1){
+                goodsNum = $('#goodsNum').val();
+            }
+			data = {
+				prizeId : $('#prizeId').val(),
+				timeType : $('#timeType').val(),
+				verify_begin_date : $('#verify_begin_date').val(),
+				verify_end_date : $('#verify_end_date').val(),
+				dataAmountStart : $('#dataAmountStart').val(),
+				dataAmountEnd : $('#dataAmountEnd').val(),
+				goodName : $('#goodName').val(),
+				goodsNum : goodsNum,
+				goodsType : $('#goodsType').val(),
+				goodImg : $('#goodImg').val(),
+                useExplain : $('#useExplain').val(),
+				smsContent : $('#smsContent').html()
+
+			}
+            if(isopencusMsg == 1){
+                if($("#cusMsg").val() == ''){
+                    alert('短信内容不能空');
+                }else{
+                    data.cusMsg = $("#cusMsg").val();
+                }
+            }else{
+                data.cusMsg = '';
+            }
+			win['cardresp'].call(this, data);
+	        art.dialog.close();
+	        return ; 
+		}
+	});
+})
+Date.prototype.Format = function(fmt)   
+{  
+  var o = {   
+    "M+" : this.getMonth()+1,                 
+    "d+" : this.getDate(),                    
+    "h+" : this.getHours(),                   
+    "m+" : this.getMinutes(),                
+    "s+" : this.getSeconds(),                 
+    "q+" : Math.floor((this.getMonth()+3)/3), 
+    "S"  : this.getMilliseconds()             
+  };   
+  if(/(y+)/.test(fmt))   
+    fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));   
+  for(var k in o)   
+    if(new RegExp("("+ k +")").test(fmt))   
+  fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));   
+  return fmt;   
+}
+
+function createDatePickerWithLimit() {
+	var	min_date = '%y-%M-%d';
+	var obj = new Object();
+	obj.minDate = min_date;
+	WdatePicker(obj);
+}
+function createDatePickerWithLimitEnd() {
+	var verifyBeginDate = $('#verify_begin_date').val();
+	var min_date = $('#activity_end_time').val();
+	min_date = min_date.substr(0, 8);
+	if (verifyBeginDate > min_date) {
+		min_date = verifyBeginDate;
+	}
+	var year = min_date.substr(0, 4);
+	var month = min_date.substr(4, 2);
+	var day = min_date.substr(6, 2);
+	min_date = year + '-' + month + '-' + day;
+	var obj = new Object();
+	obj.minDate = min_date;
+	WdatePicker(obj);
+}
+function checkSendDay(field, rules, i, options) {
+	var beginTime = parseInt($('.Gtime1 [name="verify_begin_days"]').val());
+	var endTime = parseInt($('.Gtime1 [name="verify_end_days"]').val());
+	if (beginTime > endTime) {
+		return "使用开始时间不能大于使用结束时间";
+	}
+}
+
+</script>
+</head>
+<body>
+<div class="imvBox" style="float:left">
+    <div class="imvBox-edit">
+        <div id="Wform" class="Gform">
+        <form name="prizeSetForm" id="prizeSetForm" action="" method="post">
+        <input type="hidden" id="prizeId" name="prizeId" <if condition="empty($prizeId)">value=""<else />value="{$prizeId}"</if> />
+        <input type="hidden" id="goodName" name="goodName" value="{$goodInfo['goods_name']}">
+        <input type="hidden" id="goodsNum" name="goodsNum" value="{$goods_remain_num}"/>
+        <input type="hidden" id="goodsType" name="goodsType" value="{$goodInfo['goods_type']}">
+        <input type="hidden" id="goodImg" name="goodImg" value="{$goodInfo['goods_image']}"/>
+        
+        <input type="hidden" id="begin_date" name="begin_date" value="{$verify_begin_date}"/>
+        <input type="hidden" id="end_date" name="end_date" value="{$verify_end_date}"/>
+        <input type="hidden" id="b_id" name="b_id" <if condition="empty($b_id)">value=""<else />value="{$b_id}"</if> />
+        <input type="hidden" id="cj_batch_id" name="cj_batch_id" value='<notempty name="cj_batch_id">{$cj_batch_id}</notempty>'/>
+        <input type="hidden" id="activity_end_time" name="activity_end_time" value="{$activity_end_time}">
+        <ul>
+            <li class="Gname"><span>*</span>&nbsp;卡券数量</li>
+            <li class="Ginput">
+                <span class="txtTips">您的库存为:<span class="remain_num red"><neq name="goods_remain_num" value="-1">{$goods_remain_num}<else />不限</neq></span></span>
+            </li>
+        </ul>
+        <ul id="ul_select_send_type" class="<notempty name="b_id">dn</notempty>">
+            <li class="Gname"><span>*</span>&nbsp;卡券发送形式</li>
+            <li class="Ginput">
+                <div class="switch">
+                    <div class="newRadio">
+                        <span data-val="短信" class="hover" >短信</span>
+                    </div>
+                    <div class="cl"></div>
+                    <!-- <p class="txtTips sendType" id="tipStr">{$tipStr}</p> -->
+                </div>
+                <input type="hidden" value="{$goodsCardId}"  name="card_id">
+            </li>
+        </ul>
+        <ul class="showSendtype cusMsg dn">
+                        <li class="Gname"><span>*</span>&nbsp;短信内容</li>
+                        <li class="Ginput">
+                            <textarea maxlength="40" name="cusMsg" id="cusMsg"  class="validate[required,maxSize[40]] Gview-cusMsg" placeholder="您收到哈根达斯100元代金券">{$batchInfo['sms_text']}</textarea>
+                            <span class="maxTips forArea" data-max="40">0/40</span>
+                        </li>
+                    </ul>
+        <ul class="showSendtype usgexplain">
+            <li class="Gname"><span>*</span>&nbsp;使用说明</li>
+            <li class="Ginput">
+                <textarea maxlength="100" <?php if($goodsInfo['goods_type'] == 7 || $goodsInfo['goods_type'] == 8){echo "readonly='readonly'";}?> name="useExplain" id="useExplain" class="validate[required,maxSize[100]]" >{$txtContent}</textarea>
+                <span class="maxTips forArea" data-max="100">0/100</span>
+                <span class="txtTips">使用说明将显示在短信详情页面</span>
+            </li>
+        </ul>
+        
+        
+        <ul id="ul_prize_time">
+            <li class="Gname"><span>*</span>&nbsp;使用时间</li>
+            <li class="Ginput">
+                <div class='switch '>
+                    <input type="radio" value="0" checked="checked" name="verify_time_type" id='timeType'>
+                    <div class="newRadio fn db w100p">
+                        <span class='valfirst' data-val="0">按日期设置</span>
+                        <span class='vallast' data-val="1" id="isDay">按天数设置</span>
+                    </div>
+                    <div class="newRadio-default fl db mt10" id="time_div">
+                        <div class="Gtime2 fn">
+                            <input type="text" class="validate[required]" id="verify_begin_date" name="verify_begin_date" style="width:99px;padding-right: 30px;" value="" onclick="createDatePickerWithLimit();" />
+                            <em>至</em>
+                            <input type="text" class="validate[required]" id="verify_end_date" name="verify_end_date" style="width:99px;padding-right: 30px;" value='' onclick="createDatePickerWithLimitEnd();">
+                        </div>
+                    </div>
+                    <div class="cl"></div>
+                    <div class="newRadio-input fn">
+                        <div class="Gtime1 fn special mt10">
+                            <em class="em1">发送卡券后</em>
+                            <input type="text" class="validate[required,funcCall[checkSendDay]]" id='dataAmountStart' name="verify_begin_days" value=''/>
+                            <em class="em2">天开始使用</em>
+                        </div>
+                        <div class="Gtime1 fn special mt10">
+                            <em class="em1">发送卡券后</em>
+                            <input type="text" class="validate[required,funcCall[checkSendDay]]" id='dataAmountEnd' name="verify_end_days" value="">
+                            <em class="em2">天结束使用</em>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <div class="DiabtnCon">
+            <empty name="b_id"><a href="{:U('WangcaiPc/NumGoods/choiceCard')}" title="返回" class="Diabtn-all-del js_back">上一步</a></empty>
+            <a href="javascript:void(0);" title="确认" id="smb" class="Diabtn-all">确定</a>
+        </div>
+        </form>
+        </div>
+    </div>
+    <div class="imvBox-show" style="margin-top:15px; height:528px">
+        <div id="phone" style="background:#FFF">
+        <div class="phonetop"></div>
+        <div id="phoneCon">
+            <div class="wx-show">
+                <img src="__PUBLIC__/Image/shortMsg-top.png">
+                <div class="wx-sc-content" style=" font-size:13px; line-height:18px; color:#000; margin:0 10px; padding:0 8px; background:#e5e5ea; width:204px;">
+                    <div class="nocusMsg">
+                    <p>【翼码科技】辅助码：00000000000000</p>
+                    <p>您收到<span class="shname" id="sample">{$smsContent}</span></p>
+                    </div>
+                    <div class="cusMsg">
+                    <p>【翼码科技】<span class="Gshow-cusMsg" style="word-break:break-all">{$batchInfo['sms_text']}</span></p>
+                    </div>
+                    <p>详见<a href="">ym06.cn/fln3Qb</a>【翼码科技】</p>
+                </div>
+                <img src="__PUBLIC__/Image/shortMsg-bottom.png">
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+<img src="__PUBLIC__/Image/prizeConfig_usage.png" class="prizeConfig_usage dn" style="position: relative; float:left; left:0px; top:15px;">    
+</body>
+</html>
+<script>
+$(function(){
+    $("#useExplain").focus(function(){
+
+            if(goods_type==7 || goods_type==8){
+                $("#phone").hide();
+                $(".prizeConfig_usage").addClass("dn");
+            }else{
+                $("#phone").hide();
+                $(".prizeConfig_usage").removeClass("dn");
+            }
+        })
+        
+        $("#useExplain").blur(function(){
+            if(goods_type==7 || goods_type==8){
+                $("#phone").hide();
+            }else{
+                $(".prizeConfig_usage").addClass("dn");
+                $("#phone").show();
+            }
+        })
+        
+        $("#shortMsg_config").focus(function(){
+            if(goods_type==7 || goods_type==8){
+                $("#phone").hide();
+                $(".prizeConfig_usage").addClass("dn");
+            }else{
+                $(".prizeConfig_usage").removeClass("dn");
+                $("#phone").show();
+            }
+        })
+
+        $("#shortMsg_config").blur(function(){
+            if(goods_type==7 || goods_type==8){
+                $("#phone").hide();
+            }else{
+                $(".prizeConfig_usage").addClass("dn");
+                $("#phone").show();
+            }
+        })
+  //   $("#shortMsg_config").focus(function(){
+		// $("#phone").hide();
+		// if(goods_type == 7 || goods_type==8){
+		// 	$(".prizeConfig_usage").addClass("dn");
+		// }else
+		// {
+		// 	$(".prizeConfig_usage").removeClass("dn");
+		// }  
+  //   })
+	
+	
+  //   $("#shortMsg_config").blur(function(){
+		// if(goods_type == 7 || goods_type==8){
+		// 	$(".prizeConfig_usage").addClass("dn");
+		// }else
+		// {
+		// 	$(".prizeConfig_usage").removeClass("dn");
+		// } 
+  //   })
+
+  //   $("#usage_config").focus(function(){		
+		// $("#phone").hide();
+		// if(goods_type == 7 || goods_type==8){
+		// 	$(".prizeConfig_usage").addClass("dn");
+		// }else
+		// {
+		// 	$(".prizeConfig_usage").removeClass("dn");
+		// }
+  //   })
+  //   $("#usage_config").blur(function(){
+		// if(goods_type == 7 || goods_type==8){
+		// 	$("#phone").hide();
+		// 	$(".prizeConfig_usage").addClass("dn");
+		// }else
+		// {
+		// 	$("#phone").show();
+		// 	$(".prizeConfig_usage").addClass("dn");
+		// }
+		
+  //   })
+})
+</script>

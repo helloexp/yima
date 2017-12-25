@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>个人专用</title>
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+	$(function(e){
+		$("input[checked]").parent().find("span").css('color','red');
+		$("body").on("click","#sub_addone",function(){
+			var dialog;
+            $("#addoneform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        dialog.time(2).content("<div class='msg-all-succeed'>" + data.info + "</div>");
+                        window.location.reload();
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json'
+            });
+            return false;
+		});
+		$("body").on("click","#sub_addcols",function(){
+			var dialog;
+            $("#addcolsform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        dialog.time(2).content("<div class='msg-all-succeed'>" + data.info + "</div>");
+                        window.location.reload();
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json'
+            });
+            return false;
+		});
+		$("body").on("click","#sub_delcols",function(){
+			var dialog;
+            $("#delcolsform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        dialog.time(2).content("<div class='msg-all-succeed'>" + data.info + "</div>");
+                        window.location.reload();
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json'
+            });
+            return false;
+		});
+	})
+function addOne(k){
+	$(".addone h5").html("正在给第"+k+"列添加模块");
+	$(".addone input[name=cols]").val(k);
+	art.dialog({
+    	id:'addone',
+		title:'添加模块',
+		width:'200px',
+		content:'<div class="dialog-addone" style="display:block">'+ $(".addone").html() +'</div>'
+	});
+}
+function addCols(){
+	art.dialog({
+    	id:'addcols',
+		title:'添加空列',
+		width:'200px',
+		content:'<div class="dialog-addcols" style="display:block">'+ $(".addcols").html() +'</div>'
+	});
+}
+function delCols(){
+	art.dialog({
+    	id:'delcols',
+		title:'删除空列',
+		width:'200px',
+		content:'<div class="dialog-delcols" style="display:block">'+ $(".delcols").html() +'</div>'
+	});
+}
+</script>
+</head>
+<body>
+<h3 style="margin-left:550px;">旺财活动发布权限</h1>
+<form action="" method="post">
+	<input type="button" style="margin-left:523px;" onClick="submit()" value="保存全部" />
+	<input type="button" onClick="addCols()" value="添加空列" />
+	<input type="button" onClick="delCols()" value="删除空列" />
+	<table border="1" cellpadding="2" cellspacing="0">
+		<tr>
+			<th></th>
+			<php>foreach($basicArr as $k=>$v){</php>
+			<th width="90">
+				<span style="align:center;">{$k}列</span>&nbsp;
+				<input type="button" onClick="addOne({$k})" value="添加" />
+			</th>
+			<php>}</php>
+		</tr>
+		<volist name="wcPowerArr" id="wpa">
+		<tr>
+			<td>{$key}</td>
+			<php>foreach($basicArr as $k=>$v){</php>
+			<td>
+				<php>foreach($v as $kk=>$vv){if($key == 'v0.5'){$key = 'v05';}</php>
+				<div style=" width:90px;white-space:nowrap; overflow:hidden;text-overflow:ellipsis;">
+				<input type="checkbox" name="{$key}_{$k}[]" value="{$kk}" <if condition="in_array($vv,$wpa[$k])">checked="checked"</if> /><span title="{$vv}">{$vv}</span><br/>
+				</div>
+				<php>}</php>
+			</td>
+			<php>}</php>
+		</tr>
+		</volist>
+	</table>
+</form>
+<div class="addone" style="display:none;">
+	<form action="" method="post" id="addoneform">
+		<h5 style="margin-left:10px;"></h5>
+		<input type="hidden" value="a1" name="subtype" />
+		<input type="hidden" value="" name="cols" />
+		请选择旺财版本<br/>
+		<volist name="wcPowerArr" id="wpa">
+			<div style="float:left"><input type="checkbox" name="wcversion[]" value="{$key}"/>{$key}&nbsp;&nbsp;</div>
+		</volist>
+		<div style="clear:both;"></div>
+		<br/>请输入BatchType<br/><input type="text" value="" name="batch_type" /><br/><br/>
+		<input type="button" id="sub_addone" style="margin-left:65px;" value="添加" />
+	</form>
+</div>
+<div class="addcols" style="display:none;">
+	<form action="" method="post" id="addcolsform">
+		<input type="hidden" value="a2" name="subtype" />
+		请选择列位置(2选1)<br/>
+		<div style="float:left;"><input type="text" name="startcols" style="width:30px;"/>后 - <input type="text" name="endcols" style="width:30px;" />前</div>
+		<div style="clear:both;"></div><br/>
+		<input type="button" id="sub_addcols" style="margin-left:40px;" value="添加" />
+	</form>
+</div>
+<div class="delcols" style="display:none;">
+	<form action="" method="post" id="delcolsform">
+		<input type="hidden" value="a3" name="subtype" />
+		请选择空白的列<br/>
+		<div style="float:left;"><input type="text" name="curcols" style="width:80px;"/></div>
+		<div style="clear:both;"></div><br/>
+		<input type="button" id="sub_delcols" style="margin-left:30px;" value="删除" />
+	</form>
+</div>	
+</body>
+</html>

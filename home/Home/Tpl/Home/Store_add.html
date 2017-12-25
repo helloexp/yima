@@ -1,0 +1,388 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-添加门店</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=WRzAu3DNewWB4oeOELaczjsM"></script>
+
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script>
+$(function(){
+
+	//省市区初始化
+	CityCode({
+		province:$("#province_code"),//省
+		city:$("#city_code"),//市
+		town:$("#town_code"),//区
+		business:$("#business_code"),//商圈
+		selected:"{:$info['province_code'].$info['city_code'].$info['town_code'].$info['business_code']}",//默认选中的省市区代号
+		url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+	});
+
+
+    // $("#smb").click(function(){
+	//  	//alert('1');
+	// 	if($("#storeAdd").validationEngine('validate')){
+	//       $("#storeAdd").submit();
+	// 	}
+	// });
+	function subclick(){
+		   //$("#smbmit").attr('id','noSub');
+	       if($("#storeAdd").validationEngine('validate')){
+	    	  $('#smb').unbind('click',subclick);
+		      $.post("<?php echo U('Home/Store/add');?>",$("#storeAdd").serialize(),function(d){
+			       // alert(d.status+d.info);
+				   if(d.status =='0'){
+				      result_(d.info);
+				   }else{
+				     success(d.info);
+				   }
+				   $('#smb').bind('click',subclick);
+			  },'json');
+		  }
+		}
+    $("#smb").click(subclick);
+	
+   $("#reset").click(function(){
+   
+   });
+})
+
+function result_(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'error',
+				lock:true,
+				ok:function(){
+				   //art.dialog.close();
+				}
+			})
+   }
+   
+function success(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+                  window.location.href="index.php?g=Home&m=Store&a=index";
+				}
+			})
+   }
+</script>
+<style type="text/css">
+.Gform.eTicket .Ginput input[type=text]::-webkit-input-placeholder {
+color: #a8a8a8; font-size:12px; 
+}
+.Gform.eTicket .Ginput input[type=text]::-moz-placeholder {
+color: #a8a8a8; font-size:12px; 
+}
+.Gform.eTicket .Ginput input[type=text]::-moz-placeholder {
+color: #a8a8a8; font-size:12px; 
+}
+.Gform.eTicket .Ginput input[type=text]::-ms-input-placeholder {
+color: #a8a8a8; font-size:12px; 
+}
+</style>
+</head>
+<body>
+    <div id="wrapper"> 
+    	<include file="./Home/Tpl/Public/Public_header.html" /> 
+         
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav">
+                    <include file="Store:sidenav" leftmenuid="mdlb"/>      
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>录入新门店</h4>
+                    </div>
+			<form method="" action="" id="storeAdd">
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                    <div class="steps">基本信息</div>
+                    <div class="eTicket_form">
+                    	
+                            <div id="Wform" class="Gform w1">
+                            <!--    <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;门店名称</li>
+                                    <li class="Ginput"><input name="store_name" id="store_name" type="text" onkeyup="check_lenght(50,'name_text',this);" class="validate[required,maxSize[50]] textbox w380" placeholder="最多50个字，连锁门店可以用()标识，如金汉斯（国展店）"/>
+                                    <p class="font-12-cc" style="font-size:12px;">最多50个字，如果是连锁品牌饭店，建议用（）标识，如金汉斯（国展疱）</p>
+                                    </li>
+                                </ul>-->
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;门店简称</li>
+                                    <li class="Ginput"><input name="store_short_name" id="store_short_name" type="text" onkeyup="check_lenght(10,'name_text',this);" class="validate[required,maxSize[10]] textbox w380" placeholder="最多10个字，会显示在核验终端验证卡券的打印小票中"/>
+                                    <!--<p class="font-12-cc" style="font-size:12px;">简称将显示在核销验证后的小票内容内，最多12个字</p>-->
+                                    </li>
+                                </ul>
+                                <if condition="$fjcbcFlag">
+                                    <ul>
+                                        <li class="Gname"><span>*</span>&nbsp;门店详称</li>
+                                        <li class="Ginput"><input name="store_name" id="store_name" type="text" onkeyup="check_lenght(30,'name_text',this);" class="validate[required,maxSize[30]] textbox w380" placeholder="最多30个字，会在建行定制导航页面中展现"/>
+                                        </li>
+                                    </ul>
+                                </if>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;门店所属区域</li>
+                                    <li class="Ginput">
+                                        <select class="n3 validate[required]" name="province_code" id="province_code">
+                                            <option value="">选择省</option>
+                                        </select><select class="n3 validate[required] ml5" name="city_code" id="city_code">
+                                            <option value="">选择市</option>
+                                        </select><select class="n3 validate[required] ml5"name="town_code" id="town_code">
+                                            <option value="">选择区</option>
+                                        </select>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;门店详细地址</li>
+                                    <li class="Ginput"><input name="address" id="address" type="text" onkeyup="check_lenght(50,'name_text',this);" class="validate[required,maxSize[50]] textbox w380" placeholder="指引消费者到店，如“昌平路653号”"/>
+                                    <!--<p class="font-12-cc" style="font-size:12px;">用于指引消费者到店,需填写门店详细地址，精确到门牌号，如“昌平路653号”</p>-->
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;门店联系电话</li>
+                                    <li class="Ginput"><input name="store_phone" id="store_phone" type="text"   placeholder="便于消费者联系门店咨询，如'021-51970599'"/>
+                                    <!--<p class="font-12-cc" style="font-size:12px;">用于消费者联系门店咨询，请填写区号，如“021-51970599”</p>-->
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;门店所属商圈</li>
+                                    <li class="Ginput">
+                                        <select class="selectbox" style="width:313px" name="business_code" id="business_code">
+                                            <option value="">选择</option>
+                                        </select>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">&nbsp;门店分组</li>
+                                    <li class="Ginput">
+                                        <select class="n2" name="groupId" id="classify">
+                                        <option value="">请选择</option>
+                                        <?php foreach($storeGroup as $key => $value):?>
+                                            <option value="{$value['id']}">{$value['group_name']}（{$value['num']}）</option>
+                                        <?php endforeach;?>
+                                        </select>
+                                        <a href="javascript:void(0);" class="btn_inner js_addGroup">新建分组</a>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname">
+                                        门店图片
+                                    </li>
+                                    <li class="Ginput">
+                                        <div class="Gchoose Gview-img">
+                                            <empty name="marketingInfo['log_img']">
+                                            <empty name="store_pic">
+                                            <input type="text" name="store_pic" value="http://test.wangcaio2o.com/Home/Public/Image/defilt.png" />
+                                            <else/>
+                                            <input type="text" name="store_pic" value="{store_pic}" />
+                                            </empty>
+                                            <else/>
+                                            <input type="text" name="store_pic" value="{$marketingInfo['log_img']}" />
+                                            </empty>
+                                            <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:200,height:200}"><i></i></a>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <php>if($nodeInfo['node_id']==C('df.node_id')){</php>
+                                <ul>
+                                    <li class="Gname">门店介绍</li>
+                                    <li class="Ginput"><textarea name="store_introduce" id="store_desc" onkeyup="check_lenght(500,'name_text',this);" class="validate[maxSize[500]] textbox w380" style="height: 120px;"></textarea>
+                                        <!--<p class="font-12-cc" style="font-size:12px;">用于指引消费者到店,需填写门店详细地址，精确到门牌号，如“昌平路653号”</p>-->
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name Gname"><span>*</span>&nbsp;商品图片</li>
+                                    <li>
+                                        <div id="logo-upload2" class="vm dib ml10 Ginput">
+                                            <div class="rel l">
+                                                <a href="javascript:void(0);" title="上传" class="btn-all w60 " onclick="log_add()">上传</a>
+                                                <input type="text" value="" name="store_pic" id="goods_img" class="" style="width:1px;height: 1px;border-style:none" />
+                                            </div>
+                                        </div>
+                                        <div class="cl"></div>
+                                        <img id="img_logo_show" class="mt5 w80 dn Ginput" src="{:get_upload_url($node_logo)}" style="margin-left: 10px;"/>
+                                        <input type="hidden" name="previewimgis_logo" vale="0" />
+                                    </li>
+                                    <script>
+                                        $(document).ready(function(e) {
+                                            $("input[name='is_log_img']").change(function() {
+                                                var t = $(this).val();
+                                                showimg(t)
+                                            })
+                                            //初始化页面logo
+                                            function startaction(){
+                                                $('#img_logo_show').show();
+                                                //previewuploadimg('{:get_upload_url($node_logo)}', "logo");
+                                                //$('#goods_img').val('{$node_logo}');
+                                                $("#img_logo_show").hide();
+                                                $('#reset_logo').val(1);
+                                            }
+                                            //调用初始化页面logo
+                                            startaction();
+                                        });
+                                        function showimg(t) {
+                                            if (t == 0) {
+                                                $('#img_logo_show').hide('');
+                                                $('#logo-upload2').hide();
+                                                $(".Preview-mainCon").addClass("noLogo");
+                                                var i = $("[name='node_name_radio']:checked").val();
+                                                if (i == 0) {
+                                                    $(".Preview-mainCon").addClass("noTitle");
+                                                } else {
+                                                    $(".Preview-mainCon").removeClass("noTitle");
+                                                }
+                                            } else {
+                                                $('#logo-upload2').show();
+                                                $(".Preview-mainCon").removeClass("noLogo");
+                                                $(".Preview-mainCon").removeClass("noTitle");
+                                                $('#img_logo_show').show();
+                                                if ('{$node_logo}' != '' && $('input[name="previewimgis_logo"]').val() == 0) {
+                                                    previewuploadimg('{:get_upload_url($node_logo)}', "logo");
+                                                    $('#goods_img').val('{$node_logo}');
+                                                    $('#reset_logo').val(1);
+                                                }
+                                            }
+                                        }
+                                        function log_add() {
+                                            var opt = {
+                                                obj: $("#img_resp_show"),
+                                                height: 80,
+                                                width: 80,
+                                                cropPresets:false,
+                                                callback: function(data) {
+                                                    console.log(data);
+                                                    $('#img_logo_show').attr('src', data['src']);
+                                                    $('#img_logo_show').show();
+                                                    $('#goods_img').val(data['savename']);
+                                                    $('#reset_logo').val(1);
+                                                    $('input[name="previewimgis_logo"]').val(1);
+                                                }
+                                            };
+                                            open_img_uploader(opt);
+                                        }
+                                        function openUploaderMeitu_log(url) {
+                                            var win_width = 700;
+                                            art.dialog.open(url, {
+                                                lock: true,
+                                                title: "上传LOGO图片",
+                                                width: win_width,
+                                                height: win_width / 1.6,
+                                                id: 'art_upload'
+                                            });
+                                        }
+                                    </script>
+                                </ul>
+                                <php>}</php>
+                                <div class="steps mt20" >负责人信息</div>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;姓名</li>
+                                    <li class="Ginput"><input name="principal_name" id="principal_name" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[24]] textbox w380" placeholder="请填写门店负责人姓名"/>
+                                    </li>
+                                </ul>
+                                
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;手机</li>
+                                    <li class="Ginput"><input name="principal_phone" id="principal_tel" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,minSize[11],maxSize[11]] textbox w380" placeholder="请填写门店负责人手机号码"/>
+                                    </li>
+                                </ul>
+                                
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;邮箱</li>
+                                    <li class="Ginput"><input name="principal_email" id="principal_email" type="text" onkeyup="check_lenght(50,'name_text',this);" class="validate[required,minSize[4],maxSize[50]] textbox w380" placeholder="请填写门店负责人邮箱，将接收EPOS核验终端的登录信息"/>
+                                    <p class="font-12-cc" style="font-size:12px;"><a href="{:U('Home/Help/helpArt',array('news_id'=>1304))}"  target="_blank">什么是EPOS?</a></p>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"></li>
+                                    <li class="Ginput mt5">
+                                    <a href="javascript:void(0);" title="确认" id="smb"   class="btn-all w110">确定</a>
+                                    <a href="javascript:history.go(-1);" title="取消" id="reset" class="btn-all-del w110 ml10">取消</a>
+                                    </li>
+                                </ul> 
+                                </div>
+                        </form>
+                    </div>
+                    </div>
+                    
+                
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+    $(".js_addGroup").click(function(){
+        var html='<div class="Gform"><form method="post" id="groupAdd" action=""><ul><li class="Gname"><span>*</span>&nbsp;分组名称</li><li class="Ginput"><input type="text" name="new_classifyName" id="new_classifyName" maxlength="14" class="validate[required,minSize[1],maxSize[14]]" /><span class="maxTips forInput" data-max="14">1/14</span></li></ul></form></div>';
+        
+        art.dialog({
+            title: '添加分组',
+            id: 'new_classify',
+            content: html,
+            padding:0,
+            width:500,
+            ok: function () {
+                if($("#groupAdd").validationEngine('validate')){
+                var dialog;
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                var req_data = {
+                    groupName: $('#new_classifyName').val()
+                }
+                // dialog.time(2).content("<div class='msg-all-succeed'>正在提交</div>");
+                $.post("{:U('Home/Store/addGroupName')}", req_data, function(data){
+                    if(typeof data == 'number'){
+                        /*
+                        $("<option value="+data+">"+$('#new_classifyName').val()+"（0）</option>").children().appendTo("#classify");
+                        */
+                        dialog.time(1).content("<div class='msg-all-succeed'>添加成功</div>");
+                        $('#classify').append('<option value="'+data+'" selected="selected" >'+$('#new_classifyName').val()+'（0）</option>');
+                        setTimeout(function(){
+                            art.dialog.list['new_classify'].close();
+                        }, 1000);
+                    }
+                    else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                }, 'json');
+
+                return false;
+            }else
+            {
+                return false;
+            }
+            },
+            cancel: true
+        }); 
+    })
+})
+</script>

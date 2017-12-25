@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加模块_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/Wactlist.css?v=__VR__" />
+
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Common.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/Wactlist.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"/>
+
+<script type="text/javascript">
+$(document).ready(function(e){
+	addactlist();
+    <?php if(!empty($list_id)){?>
+    $('#add-url-linkText').click();
+    <?php }?>
+    //保存
+	var _is_sub = false;
+    $('#save').click(function(){
+        if($('#name').val() == ''){
+            art.dialog('标题不能为空！');
+            return false;
+        }
+        if($('#input_i-url_type').val() == '1'){
+            if($('#batch_type').val() == '' ||  $('#batch_id').val()==''){
+                art.dialog('请选择互动模块');
+                return false;
+            }
+        }else{
+            if($('#url').val()==''){
+                art.dialog('请输入url');
+                return false;
+            }
+            var resp = checkrule_url($('#url').val());
+            if(resp !==true){
+                art.dialog(resp);
+                return false;
+            }    
+        }
+		if(_is_sub)
+            return false;
+        _is_sub = true;
+		
+        $.post(
+            '<?php if(empty($list_id)){ echo U('LabelAdmin/List/addList');}else{echo U('LabelAdmin/List/editList');}?>',
+            $('#theform').serialize(),
+            function(data){
+            if(data.status == '1'){
+               window.parent.location.reload();
+            }else{
+                art.dialog('保存失败！'+data.info);
+            }
+            },
+            'json'
+	       ); 
+        
+    });
+    
+    //选择模块
+    $('#add-url-link_').click(function(){
+          art.dialog.open("{:U('LabelAdmin/SelectBatches/index',array('filterType'=>'zhyx'))}",{
+			lock: true,
+			title:"选择互动模块",
+			width:800,
+			height:600
+			});
+        
+    });
+   
+    
+}); 
+
+//打开窗口的回调函数
+var selectActivityCallback = function(d){
+    $('#url-block-choose').html(d.info);
+    $('#batch_type').val(d.batch_type);
+    $('#batch_id').val(d.batch_id);
+   
+}
+
+//表单校验函数
+
+function checkrule_url(str){
+	if(!str) return true;
+
+	if(str.indexOf("http://") != 0 && str.indexOf("https://") != 0)
+		return "链接格式不正确";
+
+	return true;
+
+}
+
+</script>
+</head>
+<form  method="post" id="theform">
+<input type="hidden"  value="1" name="url_type" id="input_i-url_type"/>
+<input type="hidden"  name="batch_id" id="batch_id" value="<?php echo $result['batch_id'];?>"/>
+<input type="hidden" name="batch_type" id="batch_type" value="<?php echo $result['batch_type'];?>"/>
+<input type="hidden"  value="<?php echo $id;?>"  name="id" id="id"/>
+<input type="hidden"  value="<?php echo $list_id;?>"  name="list_id" id="list_id"/>
+<body class="bgfff" style="height:400px; min-height:400px">
+    <div class="msg-edit-area" id="msgEditArea" data-item-index="0">
+			<div class="rel msg-editer-wrapper">
+				<div class="msg-editer">
+					<label>标题</label>
+					<input type="text" class="msg-input" id="name" name="name" maxlength="50" value="<?php echo $result['name'];?>">
+					<label><span id="upload-tip" class="upload-tip r">大图片建议尺寸：150像素 * 150像素</span>缩略图</label>
+				   <div class="cover-area">
+				   <img id="img_logo_show" class="mt5 w80" src="<?php if($result['pic'] != ''){echo get_upload_url($result['pic']);}?>"/>
+						 <br />
+						 <!-- X:150 Y:150-->
+						<a href="javascript:void(0);" title="上传" class="btn-all w60 "
+                               onclick="message_file()">上传</a>
+            <input type="hidden"  name="up_img" id="up_img" value="<?php echo $result['pic'];?>"/>
+            <input type="hidden" id="reset_img" name="reset_img" value="0"/>
+					</div>
+          <p class="fn mt10"><span class="l mt15 mr10" style="font-size:14px;" >是否显示时间:</span><label class="l mr15" for="yes"><input name="addtime_show_flag" class="mr5" id="yes" type="radio" <?php if($result['addtime_show_flag']=='1'||is_null($result['addtime_show_flag'])){echo "checked='checked'"; }?> value="1"/>是</label><label class="l" for="no"><input name="addtime_show_flag" <?php if($result['addtime_show_flag']=='0'){echo "checked='checked'"; }?> class="mr5" id="no" type="radio" value="0"/>否</label></p>
+					<label>摘要</label>
+					<input type="text" class="msg-txta" id="short_note"  name="short_note" maxlength="100" placeholder="100字以内" maxlength="100" value="<?php echo $result['short_note'];?>" />
+	
+					<div id="url-block">
+						<a href="javascript:void(0)" class="url-choose l url-hover" id="add-url-linkAct">快速选择互动模块</a>
+						<a href="javascript:void(0)" class="url-text ml10 l" id="add-url-linkText">手动输入</a>
+						<div class="url-block-con1">
+							<div class="url-block-choose" id="url-block-choose">
+							</div>
+							<a  class="ml10 l" id="add-url-link_">选择互动模块</a>
+							<div class="cl"></div>
+							<p class="tl" id="url-block-href"><?php echo $result['url'];?></p>
+						</div>
+						<div class="url-block-con2">
+							<input type="text" class="msg-input" id="url" name="url" value="<?php echo $result['url'];?>" placeholder="http://"   /><!--链接地址返回值存放此处-->
+						</div>
+						<div class="cl"></div>
+						<div class="fn tc pt10">
+							<a href="javascript:void(0)" class="btn-all w90" id="save">保存</a>
+							<a href="javascript:void(0)" class="btn-all-del btn-all-del-act w90 ml20" onclick="art.dialog.close();" >取消</a>
+						</div>
+					</div>
+				</div>
+				<div class="oh z shadow">
+					<span class="l ls"></span><span class="r rs"></span>
+				</div>
+			</div>
+		</div>
+</body>
+</form>
+</html>
+<script>
+//文件上传
+	function ajaxFileUpload(imgid,hiddenid,showid,url){
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.ajaxFileUpload
+		({
+			url:url,
+			secureuri:false,
+			fileElementId:imgid,
+			dataType: 'json',
+			data:{name:'logan', id:'id'},
+			success: function (data, status)
+			{
+				if(typeof(data.error) != 'undefined')
+				{
+					if(data.error != '')
+					{
+						dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+					}else{
+
+						var resp = data.msg;
+						if(resp != '0000'){
+							dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+							return false;
+						}else{
+							dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+						}
+						$('#'+hiddenid).val(data.imgurl);
+						
+					}
+				}
+			},
+			error: function (data, status, e)
+			{
+
+				dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+			}
+		})
+
+		return false;
+	}
+</script>
+
+
+
+<script>
+function message_file()
+{
+        function uploadCallback_message(data) {
+            $('#img_logo_show').attr('src',data.src);
+            //上传用
+            $('#up_img').val(data.savename);
+            //显示预览
+            $('#reset_img').val(1);
+        }
+        var opt = {
+            cropPresets:'150x150',
+            callback:uploadCallback_message
+        };
+        open_img_uploader(opt);
+ }
+  /*获取图片路径中的图片名*/
+function base_name_logo(url){
+    var urlList = url.split('/');
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+</script>

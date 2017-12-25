@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>开展新营销活动_审核列表_{:C('SITE_TITLE')}</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Windex.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+
+
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wyhb.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+
+
+
+<script type="text/javascript">
+$(function(){
+  
+    //开关 开启表示从关闭状态到开始状态 关闭表示从开启状态转到关闭状态
+    $(".Uswitch").click(function(){
+        if($(this).find("#enableTime").val() == 1 && $(this).attr("data-rel") == "0"){
+			art.dialog({title:"提示",content:"<p>活动已结束，请编辑活动时间后重新开启。</p>",fixed: true,lock:true,okVal:"确认",ok:true});
+            return false;
+        }
+        var dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交</div>",fixed: true,padding:0,lock:true});
+        var uthis = $(this);
+        if($(this).attr("data-rel")=="0"){
+            $(this).find(".Uswitch-on").fadeIn(200);
+            $(this).attr("data-rel","1");
+            $(this).find("[name='flag']").val('1');
+            var batch_id = $(this).find('.batch_id').val();
+            var actionName = $(this).find('.actionName').val();
+            
+            $(this).find("i").animate({left:29},200,function(){
+            //此处提交数据的函数
+                $.post("index.php?g=Yhb&m="+actionName+"&a=editStatus", {'status':'1', 'batch_id':batch_id}, function(data){
+                    if (data.status) { 
+                        uthis.parent().parent().find("i.icon-off").attr("class","icon-on");
+                        dialog.time(1).content("<div class='msg-all-succeed'>修改成功</div>");
+                       
+                    } else {
+                        dialog.time(1).content("<div class='msg-all-error'>修改失败</div>");
+                    }
+                }, 'json');
+            });
+        }else{
+            $(this).find(".Uswitch-on").fadeOut(200);
+            $(this).attr("data-rel","0");
+            $(this).find("[name='flag']").val('2');
+            var batch_id = $(this).find('.batch_id').val();
+            var actionName = $(this).find('.actionName').val();
+            $(this).find("i").animate({left:0},200,function(){
+            //此处提交数据的函数 
+                $.post("index.php?g=Yhb&m="+actionName+"&a=editStatus", {'status':'2', 'batch_id':batch_id}, function(data){
+                    if (data.status) {
+                        uthis.parent().parent().find("i.icon-on").attr("class","icon-off");
+                        dialog.time(1).content("<div class='msg-all-succeed'>修改成功</div>");
+                       
+                    } else {
+                        dialog.time(1).content("<div class='msg-all-error'>修改失败</div>");
+                    }
+                }, 'json');
+            });
+        }
+    });
+});
+</script>
+<style type="text/css">
+    .actList .actList-opr li a.btn-namelist{  display: block;
+  padding: 0 10px;
+  width: 100px;
+  line-height: 35px;
+  background: #f8f8f8;
+  color: #666;
+margin-top: 11px;
+margin-top: 0px;
+}
+
+.Gsearch select[name='pub_status']{
+    width:105px;
+}
+
+</style>
+</head>
+<body>
+    <div id="wrapper" class="bgeee"> 
+    <div id="headerTwo" style="z-index: 999">
+                <include file="Login:loginHeader"/>
+            </div>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            <div class="sidenav">
+                        <include file="Store:Yhb_menu" leftmenuid="listcheck"/>
+                    </div>
+                <div class="subcon">
+                    <div class="fn">
+                		<!--[if IE]><div class="IEmsgerro">您的浏览器部分内容不能正常显示,请使用<span>Chrome谷歌浏览器</span>或切换至<span>极速模式</span>/<span>高速模式</span>进行操作</div><![endif]-->
+                        <div class="main-name fn pb0">
+                            <h4>活动审核列表</h4>
+                        </div>
+                
+                        <div class="fn ">
+                        	<div class="Gsearch fn SearchArea">
+                                <form action="{:U('Yhb/MarketActive/listCheck')}" method="POST" name="theform" id="theform">
+                                	<div class="SearchAreaLeft">
+                                    <label><span>活动名称</span><input type="text" name="key" value="{$batch_name}"></label>
+                                    <label><span>商户名称</span><input type="text" name="nickname" value="{$nickname}"></label>
+                                    <label><span>活动创建日期</span>
+                                					<input type="text" name="start_time" id="start_time" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$start_time}">
+                                        	<em>至</em>
+                                        	<input type="text" name="end_time" id="end_time" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$end_time}">
+                                    </label>
+                                    <label><span>审核状态</span>
+	                                    <select name="pub_status" >
+	                                        <option  value=''>全部</option>
+	                                       <volist name="apply_status" id="vo">
+	                                        <php>$selected=$key===$pub_status?"selected":""</php>
+	                                        <option value="{$key}" {$selected}>{$vo}</option>
+	                                       </volist>
+	                                    </select>
+                                    </label>
+                                    <label><span>活动类型</span>
+                                					<select name="batchtype" id="batchtype" style="width:95px;">
+		                                        <option value="">请选择</option>
+		                                        <volist name="batchInfo" id="vi">
+		                                        <option 
+		                                        <eq name="batchType" value="$vi">selected="selected"</eq> 
+		                                        value="{$vi}">{$batch_type_name[$vi]}</option>
+		                                        </volist>
+		                                    	</select>
+                                    </label>
+                                    		<if condition="$liststyle neq '2'">
+                                    <label><span>活动状态</span>
+                                					<select name="status" id="status">
+		                                        <option value="" selected="selected">全部</option>
+		                                        <option 
+		                                        <eq name="status" value="1">selected="selected"</eq>
+		                                        value="1">未开始</option>
+		                                        <option 
+		                                        <eq name="status" value="2">selected="selected"</eq>
+		                                        value="2">进行中</option>
+			                                    </select>
+			                                    <select name="_status" id="status">
+		                                        <option value="" selected="selected">全部</option>
+				                                        <option 
+		                                        <eq name="_status" value="2">selected="selected"</eq>
+		                                        value="2">已启用</option>
+				                                        <option 
+		                                        <eq name="_status" value="1">selected="selected"</eq>
+		                                        value="1">已停止</option>
+		                                    	</select>
+                                    </label>
+                                    		</if>  
+                                </div>
+                            		<div class="SearchAreaRight">
+                                	<a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                                </div>              
+                                </form>
+                            </div>
+                            <if condition="!empty($batchlist)">
+                            <!--循环开始-->
+                            <volist name="batchlist" id="vo" >
+                            <div class="actList <eq name="vo['batch_type']" value="8">actgroup</eq> fn">
+                                <div class="actList-status">
+
+                                 <if condition="$vo['status'] eq '1' and $vo['end_time'] gt date('YmdHis') and $vo['p_status'] eq 2">
+                                    <i class="icon-on"></i>
+                                <else />
+                                    <i class="icon-off"></i>
+                                </if>
+
+                                </div>
+                                <div class="actList-title">
+                                	{$vo.name} 
+                                    <if condition="$vo['is_use'] eq 0">
+                                        <span class="red">- {$vo.merchant_name} 被禁用</span>
+                                    <else/>
+                                         - {$vo.merchant_name}
+                                    <if condition="$vo['p_status'] eq 2 and $vo['end_time'] gt date('YmdHis')">
+                                      <div class="Uswitch dib ml20" <eq name="vo['status']" value="2">data-rel="0"<else />data-rel="1"</eq> >
+                                    <div class="Uswitch-off"></div>
+                                    <div class="Uswitch-on" <eq name="vo['status']" value="2">style="display:none"</eq> ></div>
+                                    <i class="Uswitch-i-on" <eq name="vo['status']" value="2">style="left: 0px;"<else />style="left:29px;"</eq> ></i>
+                                    <input type="hidden" id="flag" name="flag" value="{$vo.status}">
+                                    <input type="hidden" name="batch_id" class="batch_id" value="{$vo.id}">
+                                    <input type="hidden" name="actionName" class="actionName" value="{$vo.actionName}">
+                                    <input type="hidden" id="enableTime" <if condition="$vo['end_time'] lt date('YmdHis')"> value="1" <else/> value="2" </if> />
+                                </div>
+                                        </if>
+                                </if>
+                                </div>
+                                <div class="actList-r">
+                                    <div class="actList-con fn">
+                                        <if condition="$vo['batch_type'] neq '8'">
+                                        <div class="actList-time">
+                                        <if condition="$vo['end_time'] lt date('YmdHis')" >
+                                            <h3 class="erro">已结束</h3>
+                                        <else />
+                                        <if condition="$vo['is_publish'] eq 1 and $vo['p_status'] eq 2">
+                                            <h3>剩余天数<br /><span>{$vo['leave_time']}天</span></h3>
+                                           <else/>
+                                            <h3 class="publish">{$apply_status[$vo['p_status']]}</h3>
+                                         </if>
+                                        </if>
+                                            <h4>活动结束时间</h4>
+                                            <h5>{$vo['end_time']|strtotime|date='Y-m-d',###}</h5>
+                                        </div>
+                                        <else />
+                                         <div class="actList-time">
+                                            <h4>所属商户：<?php echo D('node')->getNodeName($vo['node_id']);?></h4>
+                                           <h5>创建时间：<?php echo date('Y-m-d',strtotime($vo['add_time']));?></h5>
+                                           </div>
+                                        </if>
+                                        
+                                        <div class="actList-date">
+                                        <table cellpadding="0" cellspacing="0" class="W-table">
+                                            <tr>
+                                                <th>活动类型</th>
+                                                <th>访问量</th>
+                                                <th>中奖数</th>
+                                            </tr>
+                                            <tr>
+                                                <td style="color:red;">{$batch_type_name[$vo['batch_type']]}</td>
+                                                <td><a href="javascript:void(0)" onclick="viewClickCount({$vo['id']},{$vo['batch_type']},'{$vo['name']}')">{$vo['click_count']}</a></td>
+                                                <td><a href="javascript:void(0)" onclick="viewClickCount({$vo['id']},{$vo['batch_type']},'{$vo['name']}')">{$vo['send_count']}</a></td>
+                                            </tr>
+                                        </table>
+                                        </div>
+                                        <div class="actList-opr">
+                                            <ul class="fn">
+                                            <li></li><li></li><li></li><li></li><li></li><li></li>
+                                            <li><a target="_blank" href="{$vo['check_url']}" class="btn-edit"><i></i>审核</a></li>
+                                        
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </volist>
+                              <else/>
+                            <div class="nonedata"></div>
+                            </if>
+                            <!--结束-->
+                            <div class="fn tc pt20">
+                                <div class="pageBase-sm dib">
+                                    <ul class="pageul">
+                                        {$page}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    $('#sub_button').click(function(){
+        $("#theform").submit();
+    });
+
+
+  
+});
+
+
+function viewClickCount(batch_id,batch_type,batch_name){
+    var transUrl = "index.php?g=LabelAdmin&m=Chart&a=clickChart&batch_id="+batch_id+"&batch_type="+batch_type;
+    art.dialog.open(transUrl,{
+        width:800, 
+		lock:true,
+        title:batch_name+'-活动报表'
+    });
+}
+function viewChannel(batch_id,batch_type,batch_name){
+    var transUrl = "index.php?g=LabelAdmin&m=Chart&a=channelChart&batch_id="+batch_id+"&batch_type="+batch_type;
+    art.dialog.open(transUrl,{
+        width:800, 
+		lock:true,
+        title:batch_name+'-渠道分析'
+    });
+}
+function diaoyan(batch_type,batch_id){
+    if(batch_type == '3'){
+        window.open('index.php?g=Yhb&m=Bm&a=info&batch_id='+batch_id);
+    }
+    if(batch_type == '10'){
+        window.open('index.php?g=Yhb&m=Answers&a=info&batch_id='+batch_id);
+    }
+    if(batch_type == '20'){
+        window.open('index.php?g=Yhb&m=Vote&a=info&batch_id='+batch_id);
+    }
+}
+
+function batchCheck(id,type){
+    var url="{:U('Yhb/Apply/check')}",msg;
+    if(type=='passed'){
+        msg='您确定审核通过该活动吗？';
+    }else if(type=='notpass'){
+        msg="<h4>您确定审核拒绝该活动吗？</h4><h5>拒绝原因</h5><textarea id='memo-msg' cols=30 row=10></textarea>";
+    }else{
+        return false;
+    }
+
+
+     art.dialog({
+            title:"提示",
+            content:msg,
+            fixed: true,
+            lock:true,
+            okVal:"确认",
+            ok:function(){
+                var memo=$('#memo-msg').val();
+                $.post(url,{id:id,type:type,memo:memo},function(data){
+                    data=JSON.parse(data);
+                    art.dialog({
+                        title:"提示",
+                        content:data.info,
+                        fixed: true,
+                        lock:true,
+                        okVal:"确认",
+                        ok:true,
+                        close:function(){
+                             window.location.reload();
+                            return true;
+                        },
+                    },'json');
+                });
+            },
+            cancel:true,
+            cancelVal: '取消',
+            close:true,
+        });
+     return false;
+}
+
+</script>

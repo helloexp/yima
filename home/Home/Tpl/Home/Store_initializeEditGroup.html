@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-门店分组-新增门店分组</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<style>
+.Gform .Ginput input[type=text], .Gform .Ginput input[type=password] {
+    padding-right: 50px;
+}
+.shoplist li{ margin-right:14px;}
+</style>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" /> 
+          
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav"> 
+                    <include file="Store:sidenav" leftmenuid="mdfz"/>               
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <?php if ($newAdd == 'false'):?>
+                            <h4>添加门店分组</h4>
+                        <?php else:?>
+                            <h4>编辑门店分组</h4>
+                        <?php endif;?>
+                    </div>
+                    <div class="Gform w1">
+                        <ul class="Gtitle first">基本设置</ul>
+                        <ul>
+                            <li class="Gname">分组名称</li>
+                            <li class="Ginput">
+                                <input type="text" name="groupName" id="groupName" value="{$groupName}" maxlength = "14" />
+                                <span class="maxTips forInput" data-max="14">0/14</span>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="Gname">添加门店</li>
+                            <li class="Ginput">
+                                    <div class="switch">
+                                        <input type="radio" value="1" checked="checked" id="checktype">
+                                        <div class="newRadio">
+                                            <span class="valfirst" data-val="0" id="getAllStores">所有门店</span>
+                                            <span class="vallast" data-val="1" id="selectShop">指定门店</span>
+                                        </div>
+                                        <div class="cl fn"></div>
+                                        <div class="newRadio-input">
+                                            <div class="sweet_tips2" id="htmlss">您总共选择了<span id="number">0</span>家门店&nbsp;&nbsp;<a href="javascript:void()" id="editStore"  name="choose_shop">点击查看</a></div>
+                                        </div>
+                                    </div>
+                                </li>
+                        </ul>
+                    <?php if ($newAdd != 'false'):?>
+                        <ul>
+                            <li class="Gname">已添加门店</li>
+                            <li class="Ginput">
+                                    <p>（<span class="redfont">{$countStores}</span>）<span class="extend extendspan"><a href="javascript:void(0);" class='afblue js_extend_one'>查看全部<i></i></a></span></p>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="Ginput">
+                                <div class="added">
+                                <div class="notice" style="margin:0">点击门店名称，可将其从门店分组中移除。<i class="js_close"></i></div>
+                                <div style="width:100%; overflow:hidden">
+                                    <?php if ($nowInGroup):?>
+                                        <ul class="shoplist" style="margin-right:-100px">
+                                        <?php foreach ($nowInGroup as $key => $value):?>
+                                            <li class="notCheck" title="{$value['province_name']} {$value['city_name']} {$value['town_name']}">
+                                            {$value['store_name']}
+                                            <input type="checkbox" name="storeCheckStatus[]" class="storeCheckStatus" value="{$value['store_id']}" style="display:none;" checked="checked">
+                                            </li>
+                                        <?php endforeach;?>
+                                        </ul>
+                                    <?php endif;?>
+                                </div>
+                                </div>
+                            </li>
+                        </ul>
+                        <input type="hidden" id="closeStores" name="closeStores" value=""/>
+                    <?php endif;?>
+                        <input type="hidden" id="openStores" name="openStores" value=""/>
+                        <input type="hidden" id="notice" name="notice" value=""/>
+                        
+                        <ul>
+                            <li class="Ginput">
+                            <a class="btn-all" id="submitData" href="javascript:void(0);">保存</a>
+                            <a class="btn-all-del" href="{:U('Home/Store/group')}">取消</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+$(function(){
+    
+    $("#selectShop").click(function(e){
+        var isGetAllStore = $('#openStores').val();
+        if (isGetAllStore == 'allStores') {
+            $('#openStores').val('');
+            $('#number').text(0);
+        }
+        art.dialog.open("{:U('Home/Store/noGroupStore')}",{
+            title: '选择门店',
+            width:'800px'
+        });
+    });
+    
+    $("#editStore").click(function(){
+        var isGetAllStore = $('#openStores').val();
+        if (isGetAllStore == 'allStores') {
+            $('#openStores').val('');
+            $('#number').text(0);
+        }
+        art.dialog.open("{:U('Home/Store/noGroupStore')}",{
+            title: '选择门店',
+            width:'800px'
+        });
+    }); 
+    $('#submitData').click(function(e){
+
+        var gid        = "{$groupId}";
+        var groupName  = $('#groupName').val(); 
+        var addStoreId = $('#openStores').val();
+        var delStoreId = $('#closeStores').val();
+        var notice     = $('#notice').val();
+        var newAdd     = "{$newAdd}";
+
+        if (groupName == '') {
+            art.dialog({title:false,content:"<div class='msg-all-error'>分组名称不能为空</div>",fixed: true,padding:0}).time(3);
+            return false;
+        }
+        if (newAdd == 'false') {
+            gid = newAdd;
+        }
+
+        $.post("{:U('Home/Store/editGroup')}",{'gid':gid,'groupName':groupName,'addStoreId':addStoreId,'delStoreId':delStoreId,'notice':notice},
+            function(data){
+            if (data.status != '1') {
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0}).time(3);
+                var win = art.dialog.open.origin;
+                win.location.reload();
+            }else{
+                window.location.href = "{:U('Home/Store/group')}";
+            }
+            
+        },'JSON')
+
+    })
+})
+</script>
+
+<script type="text/javascript">
+    //小提示
+    $(function(){
+        var notice = "{$noticeGroup}";
+
+        if(notice){
+            $('.notice').remove();
+        }
+        $("body").on("click",".js_close",function(){
+            $(this).parent().remove();
+            $('#notice').val('true');
+        })
+    })
+</script>
+
+<script>
+$(function(){
+    $('#openStores').val('');
+    $('#closeStores').val('');
+    $('#number').text(0);
+    $('#notice').val('');
+    if(($(".shoplist").height()<76)||($(".shoplist li").length<5)){
+        $(".extend").hide();
+    }
+    
+    var stores_is = '';
+    var countStores = "{$countStores}";
+    $('#getAllStores').click(function(){
+        $('#openStores').val('allStores');
+    })
+
+    if(countStores <= 0){
+        $('#getAllStores').click(); 
+        $('#openStores').val('allStores');    
+    }
+
+    $(".frm_checkbox_label").click(function(){
+        if ($(this).hasClass("selected"))
+        {
+            $(this).removeClass("selected");
+            $(this).find(".frm_checkbox").attr("checked",false);
+            $(".shoplist li").removeClass("selected");
+            $(".notCheck").children(":checkbox").attr("checked",false);
+        }else{
+            $(this).removeClass("selected").addClass("selected");
+            $(this).find(".frm_checkbox").attr("checked",true);
+            $(".shoplist li").addClass("selected");
+            $(".notCheck").children(":checkbox").attr("checked",'checked');
+        }
+    }); 
+    
+    $(".shoplist li").hover(function(){
+        $(this).addClass("hover");
+        $(this).children("div.tip").show();
+    },function(){
+        $(this).removeClass("hover");
+        $(this).children("div.tip").hide();
+    });
+    
+    $(".js_extend_one").click(function(e) {
+        var isactive = $(".js_extend_one i").hasClass("active");
+        if(isactive){
+            $(".js_extend_one i").removeClass("active");
+            $(".shoplist").css("height","76px");
+            $(".js_extend_one").html("查看全部<i></i>");
+            
+        }else
+        {
+            $(".shoplist").css("height","auto");
+            $(".js_extend_one").html("收起<i></i>");
+            $(".js_extend_one i").addClass("active");
+            windowheight();
+        }
+        if($(".shoplist").height()>300)
+        {
+            $(".btngp").addClass("fixBtn");
+        }
+        else{
+            $(".btngp").removeClass("fixBtn");
+        }
+    });
+    
+    $(".notCheck").click(function(){
+        stores_is += ','+$(this).find('input:hidden').val();
+        $("#closeStores").val(stores_is.substring(1,stores_is.length));
+        var storeNum = parseInt($('.redfont').text());
+        $('.redfont').text(storeNum-1);
+        $(this).remove();
+    });
+})
+
+</script>

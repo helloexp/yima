@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+        <meta content="telephone=no" name="format-detection" />
+        <meta content="email=no" name="format-detection" />
+        <meta name="apple-touch-fullscreen" content="NO">
+        <title>选择商品</title>
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_wfx.css?v=__VR__">
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/jquery.Spinner.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+    </head>
+    <style>
+        .dn{display:none;}
+    </style>
+    <body>
+        <div id="wrapper">
+            <include file="Wfx:top"/>
+            <div id="main">
+                <div class="bgGray bgbe5e5e5">
+                    <div class="txtTips">选择商品规格，填写订购数量</div>
+                </div>
+                <div class="proList order">
+                    <ul>
+                        <li>
+                            <div class="proImg"><img src="{:get_upload_url($goodsDetail['goods_img'])}"></div>
+                            <div class="proContent">
+                                <h2 class="protitle">{$goodsDetail['name']}</h2>
+                                <p class="proprice">
+                                    <em>￥</em><span class='sys_item_price'>{$goodsDetail['group_price']}</span>
+                                    <span class="storage">库存<if condition="$goodsDetail['storage_num'] eq '-1' "> 不限量<else />{$goodsDetail['storage_num']}</if></span>
+                                </p>
+                            </div>
+                        </li>
+                        <li style="height:auto">
+                            <div class="sys_item_spec">
+                                <if condition="$goodsDetail['is_sku'] eq '1' ">
+                                    <volist name="skuArray" id="item" key="key">
+                                        <dl class="clearfix iteminfo_parameter sys_item_specpara" data-sid="1">
+                                            <dt>{$key}</dt>
+                                            <dd>
+                                                <ul class="sys_spec_text">
+                                                    <volist name="item" id="skuDetail" key='k'>
+                                                        <li data-aid="{$skuDetail['id']}" <if condition="$k eq '1' ">class='selected itemClass'</if> >
+                                                            <a href="javascript:;" title="{$skuDetail['sku_name']}">{$skuDetail['sku_name']}</a><i></i>
+                                                        </li>
+                                                    </volist>
+                                                </ul>
+
+                                            </dd>
+                                        </dl>
+                                    </volist>
+                                </if>
+                                <dl class="clearfix iteminfo_parameter sys_item_specpara" data-sid="2">
+                                    <dt>订购数量</dt>
+                                    <dd>
+                                        <div id="account" class="Spinner"></div> 
+                                    </dd>
+                                </dl>
+                            </div>
+                        </li>
+                    </ul>
+                    <input type='hidden' name='goods_id' value="{$goodsDetail['id']}" />
+                    <input type='hidden' name='goods_type' value="{$goodsDetail['batch_type']}"/>
+                </div>
+                <div class="cl btnGroup">
+                    <a href="javascripr:void(0);" class="btnAdd">加入订货单</a>
+                    <a href="{:U('Label/WfxShop/showBookOrderList')}" <if condition="$goods eq 'no' ">class="btnView mt15 dn"<else />class="btnView mt15"</if> id='finishButton'>完成并查看</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+            function login_to(url) {
+                link_to(url);
+            }
+        //价格json
+        var sys_item = {
+            "price": "{$goodsDetail['group_price']}",
+            "sys_attrprice":{$priceStr}
+        };
+        var defaultstats = '{$goodsDetail['is_sku']}';
+        
+        $(function () {
+            $("#account").Spinner();
+            $('.back').click(function () {
+                history.go(-1);
+            });
+
+            //商品规格选择
+            $(".sys_item_spec .sys_item_specpara").each(function () {
+                var i = $(this);
+                var p = i.find("ul>li");
+                p.click(function () {
+                    if (!!$(this).hasClass("selected")) {
+                        $(this).removeClass("selected");
+                    } else {
+                        $(this).addClass("selected").siblings("li").removeClass("selected");
+                    }
+                    getattrprice() //输出价格
+                })
+            });
+            
+            function getSelectedClass(){
+                var _val = '';
+                $(".selected").each(function () {
+                    var v = $(this).attr("data-aid");
+                    if (v) {
+                        _val += _val != "" ? "#" : "";
+                        _val += v;
+                    }
+                });
+                return _val;
+            }
+
+            //获取对应属性的价格
+            function getattrprice() {
+                var _val = '';
+                _val = getSelectedClass();
+                if (defaultstats == '1') {
+                    _price = sys_item['sys_attrprice'][_val]['price'];
+                } else {
+                    _price = sys_item['price'];
+                }
+                //输出价格
+                $('.sys_item_price').text(_price);
+                var storageText = '库存';
+                if(sys_item['sys_attrprice'][_val]['storage'] == '-1'){
+                    storageText += '不限量';
+                }else if(sys_item['sys_attrprice'][_val]['storage'] == '0'){
+                    storageText += '已售完';
+                }else{
+                    storageText += sys_item['sys_attrprice'][_val]['storage']+'件'
+                }
+                
+                $('.storage').text(storageText);
+            }
+            if(defaultstats == '1'){
+                getattrprice();
+            }
+            
+            $('.btnAdd').click(function(){
+                var classType = getSelectedClass();
+                var goodsId = $('input[name=goods_id]').val();
+                var count = parseInt($('input[name=count]').val());
+                var goodsType = $('input[name=goods_type]').val();
+                if(defaultstats == '1'){
+                    if(sys_item['sys_attrprice'][classType]['storage'] != '-1'){
+                        if(count > sys_item['sys_attrprice'][classType]['storage']){
+                            art.dialog({
+                                title : '添加状态',
+                                width : '300px',
+                                content : '购买数量大于库存',
+                                time:2
+                            });
+                            return false;
+                        }
+                    }
+                }else{
+                    if({$goodsDetail['storage_num']}!= '-1'){
+                        if(count > {$goodsDetail['storage_num']}){
+                            art.dialog({
+                                title : '添加状态',
+                                width : '300px',
+                                content : '购买数量大于库存',
+                                time:2
+                            });
+                            return false;
+                        }
+                    }
+                }
+                
+                $.post("{:U('Label/WfxShop/addBookOrder')}",{'classType':classType, 'goodsId':goodsId, 'count':count, 'goodsType':goodsType}, function(data){
+                    data = eval('('+data+')');
+                    art.dialog({
+                        title : '添加状态',
+                        width : '300px',
+                        content : data['msg'],
+                        time:2
+                    });
+                    
+                    if(data['error'] != '0'){
+                        window.location.href = "{:U('Label/WfxShop/showBookOrderList')}";
+                    }else{
+                        $('#finishButton').removeClass('dn');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
+<script type="text/javascript">
+    (function ($) {
+        $.fn.Spinner = function (opts) {
+
+            var defaults = {value: 1, min: 1, len: 3, max: 99}
+            var options = $.extend(defaults, opts)
+            var keyCodes = {up: 38, down: 40}
+            return this.each(function () {
+
+                var a = $('<a></a>');
+                f(a, 0, "Decrease", "-");
+                var c = $('<a></a>');
+                f(c, 0, "Increase", "+");
+                var b = $('<input name="count" />');
+                f(b, 1, "Amount");
+                cv(0);
+
+                $(this).append(a).append(b).append(c);
+                a.click(function () {
+                    cv(-1)
+                });
+                b.keyup(function () {
+                    cv(0)
+                });
+                c.click(function () {
+                    cv(+1)
+                });
+                b.bind('keyup paste change', function (e) {
+                    e.keyCode == keyCodes.up && cv(+1);
+                    e.keyCode == keyCodes.down && cv(-1);
+                });
+
+                function cv(n) {
+                    b.val(b.val().replace(/[^\d]/g, ''));
+                    bv = parseInt(b.val() || options.min) + n;
+                    bv >= options.min && bv <= options.max && b.val(bv);
+                    if (bv <= options.min) {
+                        b.val(options.min);
+                        f(a, 2, "DisDe", "Decrease");
+                    } else {
+                        f(a, 2, "Decrease", "DisDe");
+                    }
+                    if (bv >= options.max) {
+                        b.val(options.max);
+                        f(c, 2, "DisIn", "Increase");
+                    } else {
+                        f(c, 2, "Increase", "DisIn");
+                    }
+                }
+            });
+
+            function f(o, t, c, s) {
+                t == 0 && o.addClass(c).attr("href", "javascript:void(0)").append("<i></i>").find("i").append(s);
+                t == 1 && o.addClass(c).attr({"value": options.value, "autocomplete": "on", "maxlength": options.len});
+                t == 2 && o.addClass(c).removeClass(s);
+            }
+        }
+
+    })(jQuery);
+</script>

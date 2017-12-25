@@ -1,0 +1,352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>二维码标签渠道_营销推广渠道_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WchannelNew.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<load href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Wcanal.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script>
+$(function(){
+    //弹窗
+    $.get("<?php echo U('Popchannel/open_pop'); ?>","",function(d){
+	  if(d==0){
+	     art.dialog.open("{:U('LabelAdmin/Popchannel/open_channel')}",{
+		        id:'udufcom',
+                title: '提示',
+                width:500
+            });
+	  }
+	});
+  $("#uduf").on('click',function(event) {
+        event.preventDefault(); 
+        art.dialog.open("{:U('LabelAdmin/Channel/add')}&type="+<?php if($type==''){echo '21';}else{echo $type;}?>,{
+		        id:'uduf',
+                title: '创建新渠道',
+                width:500
+        });
+    });
+	
+	$("#seachcc").click(function(){
+		$("#theone").submit();
+	});
+	
+	//业务介绍
+	
+});
+function bind(channel_id){
+    var w = 800;     //宽度
+     var h = 650;   //高度
+     var t = (screen.height-h)/2; //离顶部距离
+     var l = (screen.width-w)/2; //离左边距离
+    window.open("<?php echo U('Sns/authorize','channel_id=');?>"+channel_id,'_blank',"width="+w+",height="+h+",scrollbars=no,location=no,top="+t+",left="+l);
+}
+function edit(id){
+    var name = $("#input_"+id).val();
+	Dialoading("正在提交...");
+    $.post("{:U('LabelAdmin/Channel/edit')}",{"name":name,"id":id},function(data){
+		Dialoading();
+        if(data.status==1){
+        	$("#span_"+id).html(name).closest("span").show();
+            $("#input_"+id).closest("span").hide();
+            $("#icon_"+id).css("visibility","hidden");
+        }else{
+            Diaerror(data.info);
+        }
+    },"json");
+};
+//更改状态
+function statusChange(id,status){
+	//现在只有停用没有启用
+	if(status==1){
+        var title="您确认启用该渠道？";
+    }else{
+        var title="您确认删除改渠道？删除后该渠道将失效";
+    }
+	art.dialog.confirm(title,function(){
+		Dialoading("正在提交...");
+		$.post("{:U('LabelAdmin/Channel/changeStatus')}",{"id":id,"status":status},function(data){
+			Dialoading();
+            if(data.status==1){
+				Diasucceed("更新成功");
+                window.location.reload();
+            }else{
+                Diaerror(data.info);
+            }
+        },"json");
+	});
+};
+//解除活动绑定
+function unBind(obj){
+	var jqObj = $(obj);
+	//console.log(jqObj.attr('data-channelId') + ';' + jqObj.attr('data-mId'));
+	//如果是解除外联绑定没有attr('data-mId')
+	var postData = {
+		id:jqObj.attr('data-channelId'),
+		mId:jqObj.attr('data-mId')
+	};
+	var title="您确认解除活动绑定吗？";
+	art.dialog.confirm(title,function(){
+		$.post("{:U('LabelAdmin/Channel/unBind')}",postData,function(data){
+            if(data.status==1){
+                Diasucceed("更新成功");
+                window.location.reload();
+            }else{
+                Diaerror(data.info);
+            }
+        },"json");
+	});
+}
+
+    //设置二维码
+   function set_code(id){
+          art.dialog.open("{:U('LabelAdmin/EditCode/index?id=')}"+id,{
+				title: '设置二维码',
+				width:800
+			});
+        
+    }
+     //查看历史活动
+   function historya(id){
+          art.dialog.open("{:U('LabelAdmin/ChannelBatchList/index?id=')}"+id,{
+				title: '查看渠道数据',
+				width:800
+			});
+    }
+
+    //活动数据
+    function batchStat(obj){
+    	var jqObj = $(obj);
+    	var	id = jqObj.attr('data-channelId');
+    	var mId = jqObj.attr('data-mId');
+        art.dialog.open("{:U('LabelAdmin/ChannelBatchList/batchStat?id=')}"+id + '&mId=' + mId,{
+				title: '活动数据',
+				width:500,
+			cancel:true
+		});
+    }
+    
+     //更改活动
+     function changeBatch(id){
+         art.dialog.open("{:U('LabelAdmin/SelectBatches/index?id=')}"+id,{
+			title:"选择互动模块",
+			width:800
+			});  
+     }
+     
+//添加模块
+function addActivity(obj) {
+	var jqObj = $(obj);
+	var	id = jqObj.attr('data-channelId');
+	var	url = jqObj.attr('data-url');
+	if (url != '') {
+		art.dialog.open("{:U('LabelAdmin/SelectBatches/editUrl')}&id="+id,{
+			title:"编辑活动连接",
+			width:800
+		});
+	} else {
+		var unbinded = jqObj.attr('data-unbinded') ? jqObj.attr('data-unbinded') : false;
+		var canchange = unbinded ? true : false;
+		var _artdata = {
+				type:unbinded,
+				canchange:canchange
+			};
+		art.dialog.data('_artdata',_artdata);
+		art.dialog.open("{:U('LabelAdmin/SelectBatches/index?id=')}"+id + '&addMoreActivity=1',{
+			title:"添加模块",
+			width:800,
+			id:"selected"
+		});
+		
+		/*art.dialog.open("{:U('LabelAdmin/SelectBatches/editUrl')}&id="+id,{
+			title:title,
+			width:800,
+			id:"selected"
+		});*/
+	}
+}
+
+function openDialog(obj) {
+	var jqObj = $(obj);
+	var url = jqObj.attr('data-url');
+	var d = art.dialog.get("selected");
+	d.open(url);
+}
+
+function addActivityCallback(d){
+	var link = d.editUrl;
+	var title = d.title + '<a href="'+link+'" target="_blank" class="r mr10">编辑活动信息</a>';
+	/*添加绑定互动模块的时候这个值为空，修改的时候这个值为1*/
+	var isChange = '';
+	if (typeof(d.isChange)!="undefined") {
+		isChange = '&isChange=' + d.isChange;
+	}
+	art.dialog.open("{:U('LabelAdmin/SelectBatches/editShowTime')}&channel_id="+d.channel_id + '&m_id=' + d.m_id + isChange,{
+		title:title,
+		width:500
+	});
+}
+
+function editUrlCallBack(d){
+	Diasucceed("编辑成功");
+    window.location.reload();
+}
+
+function changeBatchTime(channelId, obj) {
+	var jqObj = $(obj);
+	var mName = jqObj.attr('data-activityName');
+	var mId = jqObj.attr('data-mId');
+	var editUrl = jqObj.attr('data-editUrl');
+	var data = {
+			editUrl:editUrl,
+			title:mName,
+			channel_id:channelId,
+			m_id:mId,
+			isChange:1
+	};
+	addActivityCallback(data);
+}
+</script>
+<style>
+.offline-con {width: 760px; float: left;}
+</style>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="2vm11"/>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+					<include file="LabelAdmin/Channel/leftMenu" leftmenuid="2vm"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name">
+                        <h4>二维码标签<a class="btn-add first" href="javascript:void(0);" id="uduf"><i></i>创建二维码</a></h4>	
+                    </div>
+                    <div class="tipNormal mb15">为渠道创建一个专用的二维码标签。你可以绑定不同的活动和外链。</div>
+                    <div class="SearchArea  fn">
+                        <form method="get" action="?" id="theone">
+                            <input type="hidden" name="g" value="LabelAdmin">
+                            <input type="hidden" name="m" value="Channel">
+                            <input type="hidden" name="a" value="offlineCancel">
+                            <input type="hidden" name="htmlid" value="<?php echo $htmlid; ?>" />
+                            <input type="hidden" name="sns_type" value="<?php echo $type; ?>" />
+                            <div class="SearchAreaLeft">
+                            <label><span>渠道名称</span><input type="text" name="c_name" value="{$map['c_name']}" /></label>
+                            <label><span>创建日期</span><input type="text" name="start_time" id="start_time" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="" />-<input type="text" name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="" /></label>
+                            </div>
+                            <div class="SearchAreaRight">
+                                <a href="javascript:void(0);" id="seachcc" class="searchBtn">查询</a>
+                            </div>
+                        </form>
+                        </div>
+                        
+                        <div class="qrCodeList">
+                        	<?php 
+                            if(!empty($query_list)){ ?>
+                            <script>
+                                    $(function(){
+                                    productIntroduce(5,"qd-<?php echo $htmlid; ?>","javascript:void(0)");})
+                                    </script>
+    
+                            <?php foreach($query_list as $v){
+                             //if($v['status']==2) continue;
+                            ?>
+                        	<dl>
+                            	<dd class="QR_block">
+                                    <img src="<?php echo U('LabelAdmin/ChannelSetCode/code',array('id'=>$v['id']));?>" />
+                                    <div class="shade-wrapper">
+                                        <a href="javascript:void(0)" onclick="set_code('<?php echo $v['id'];?>')" class="show"><div class="shade"></div></a>
+                                    </div>
+                                </dd>
+                                <dd class="Info_block">
+                                	<div class="clTitle"><h2><a href=""><?php echo $v['name'];?></a></h2><span><a href="<?php echo U('LabelAdmin/ChannelSetCode/code',array('id'=>$v['id'],'isdown'=>'1'));?>">下载</a><a href="javascript:void(0)" onclick="historya('<?php echo $v['id'];?>')">查看历史活动</a><a href="javascript:void(0);" data="{$vo['labe_id']}" data-rel="{:U('Label/Label/index',array('id'=>$vo['labe_id']),'','',true)}" id="clip2Board{$vo['labe_id']}" class="clip2Board">复制链接</a><a href="javascript:void(0)"  onclick="statusChange('<?php echo $v['id'];?>','2')">删除</a></span></div>
+                                    <div class="clother">创建时间：<?php echo date('Y-m-d',strtotime($v['add_time']));?>       访问量：<?php echo $v['click_count'];?></div>
+                                    <div class="clStatus">
+                                    	<a href=""><i></i>进行中活动</a>
+                                        <div class="clStatus_show">
+                                            <ul>
+                                            <?php if(!empty($v['binded'])){?>
+                                            <volist name="v['binded']" id="binded">
+                                            <li>
+                                                <h3><?php echo $binded['info']['name'];?></h3>
+                                                <p>活动时间：<?php if($binded['batch_type']==29){?> 永久有效<?php 
+									} else {
+									?><?php echo date('Y-m-d',strtotime($binded['start_time']));?>&nbsp;到&nbsp;<?php echo date('Y-m-d',strtotime($binded['end_time']));?><?php }?></p>
+                                                <p><a href="javascript:void(0)" class="mr10" 
+                                        data-mId="{$binded['info']['id']}" data-channelId="{$v['id']}" onclick="batchStat(this)">活动数据</a>|<a href="javascript:void(0)" class="change-activity ml10 mr10" onclick="changeBatchTime('<?php echo $v['id'];?>', this)" 
+                                        data-activityName="{$binded['info']['name']}" data-mId="{$binded['info']['id']}" data-editUrl="{$binded['editUrl']}">更改活动时间</a>|<a target="_blank" href="<?php echo $binded['editUrl'];?>" class="ml10 mr10">编辑活动信息</a>|<a href="javascript:void(0)" onclick="unBind(this);" data-mId="{$binded['info']['id']}" data-channelId="{$v['id']}" class="ml10 mr10">解除活动绑定</a></p> 
+                                            </li>
+                                            </volist>
+                                            <li class="addActivity"><a href="javascript:void(0)" data-channelId="{$v['id']}" data-url="{$v['go_url']}"
+                                    	onclick="addActivity(this)"><i></i>添加活动</a></li>
+                                            <?php }else{?>
+                                            <empty name="v['go_url']">
+                                            <li class="addActivity"><a href="javascript:void(0)" data-channelId="{$v['id']}" data-url="{$v['go_url']}"
+                                    	onclick="addActivity(this)"><i></i>添加活动</a><span class="noneTips">您还未绑定营销活动到渠道</span></li>
+                                            <else />
+                                            <li class="addActivity"><a href="javascript:void(0)" data-channelId="{$v['id']}" data-url="{$v['go_url']}"
+                                    	onclick="addActivity(this)"><i></i>添加活动</a><span class="noneTips">您还未绑定营销活动到渠道</span></li>
+                                            </empty>
+                                            <?php }?>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </dd>
+                            </dl>
+                            <?php }}else{
+                            if(!$_POST){
+                            ?>	
+                            
+                            <?php }else{?>
+                            <div class="nonedata"></div>
+                            <?php }}?>
+                            <div class="page"><?php echo $page;?></div>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>
+<script src="__PUBLIC__/Js/ZeroClipboard.js"></script>
+<script language="JavaScript">
+$(function(){
+	$(".clip2Board").each(function(i){
+			var id = $(this).attr('data');
+			var clip=null;
+			clip = new ZeroClipboard.Client();
+			ZeroClipboard.setMoviePath( './Home/Public/Js/ZeroClipboard.swf' );  //和html不在同一目录需设置setMoviePath
+			ZeroClipboard.setMoviePath( './Home/Public/Js/ZeroClipboard.swf' );
+			clip.setHandCursor( true );
+			clip.setText( $("#clip2Board"+id).attr("data-rel"));
+			clip.addEventListener('complete', function (client, text) {
+				Diasucceed("链接已保存至剪贴板","",2)
+			});
+			clip.glue( 'clip2Board'+id);
+	  });		
+})
+
+</script>
+<script type="text/javascript">
+	$(function(){
+		
+	})
+</script>

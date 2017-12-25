@@ -1,0 +1,659 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>我的小店_多宝电商</title>
+	<link rel="stylesheet" href="__PUBLIC__/Css/main.css?v=__VR__" />
+	<link rel="stylesheet" href="__PUBLIC__/Css/module.css?v=__VR__" />
+	<link rel="stylesheet" href="__PUBLIC__/Css/layout.css?v=__VR__" />
+	<link rel="stylesheet" href="__PUBLIC__/Css/Wshop.css?v=__VR__" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+</head>
+<script>
+$(function(){
+	$('#logo_sub').click(function(){
+		$("#logo_form").submit();
+	});
+	$('#ban_sub').click(function(){
+		$("#ban_form").submit();
+	});
+	$('#product_sub').click(function(){
+		$("#product_form").submit();
+	});
+
+	$('#logo_cancel').click(function(){
+		location.href = '{:U('Ecshop/ShopOption/index', array('tab'=>0))}';
+		//$("#logo_form")[0].reset();
+	});
+	$('#ban_cancel').click(function(){
+		location.href = '{:U('Ecshop/ShopOption/index', array('tab'=>1))}';
+//		$("#ban_form")[0].reset();
+	});
+	$('#product_cancel').click(function(){
+		location.href = '{:U('Ecshop/ShopOption/index', array('tab'=>2))}';
+//		$("#product_form")[0].reset();
+	});
+
+})
+/*获取图片路径中的图片名*/
+	function base_name_bg(url){
+		var urlList = url.split('/'); 
+		var a = urlList[urlList.length-1];
+		return a;
+	}
+
+	 /**
+ * 打开图片上传地址
+ * 格式如下：
+ * {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+ * rationX 图片宽度
+ * rationY 图片长度
+ * 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+ *     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+ * */
+
+function uploadImg_bg(cropPresets,callback) {
+    var opt = {
+        cropPresets:cropPresets,
+        callback:callback
+    };
+    open_img_uploader(opt);
+}
+    //选择商品的回调函数
+function selectGoodsCallback(d) {
+        if(d.id==1 || d.id==2 || d.id==3)
+			_selectGoodsCallback(d);
+		else if(d.id==11 || d.id==12 || d.id==13 || d.id==14)
+			_selectGoodsCallback2(d);
+    }
+function _selectGoodsCallback(d) {
+        $('#ecshop-goods-choose'+d.id).html(d.info);
+        $('#batch_type'+d.id).val(d.batch_type);
+        $('#batch_id'+d.id).val(d.batch_id);
+    }
+function _selectGoodsCallback2(d) {
+        $('#e-product-text'+d.id).text(d.info);
+		$('#commend_goods'+d.id).val(d.batch_id);
+    }
+
+    //选择互动模块的回调函数
+function selectActivityCallback(d) {
+        if(d.rid == 1 || d.rid == 2 || d.rid == 3)
+			_selectActivityCallback(d);
+    }
+function _selectActivityCallback(d) {
+        $('#batch-no-choose'+d.rid).html(d.info);
+        $('#batch_type'+d.rid).val(d.batch_type);
+        $('#batch_id'+d.rid).val(d.batch_id);
+    }
+//logo回调函数
+function elogoCallback(d) {
+	//填充缩略图
+	$('#e_logo_show').attr('src', d.absolutepath);
+	$('#e_logo_showscreen').attr('src', d.absolutepath);
+	//上传用
+	$('#e_logo_img').val(base_name_bg(d.absolutepath));
+}
+
+
+//背景图片回调函数
+function ebanCallback1(d) {
+	//填充缩略图
+	$('#e_ban_show1').attr('src', d.src);
+	$('#e_ban_showscreen1').attr('src', d.src);
+	//上传用
+	$('#e_ban_img1').val(d.savename);
+}
+//背景图片回调函数
+function ebanCallback2(d) {
+	//填充缩略图
+	$('#e_ban_show2').attr('src', d.src);
+	$('#e_ban_showscreen2').attr('src', d.src);
+	//上传用
+	$('#e_ban_img2').val(d.savename);
+}
+//背景图片回调函数
+function ebanCallback3(d) {
+	//填充缩略图
+	$('#e_ban_show3').attr('src', d.src);
+	$('#e_ban_showscreen3').attr('src', d.src);
+	//上传用
+	$('#e_ban_img3').val(d.savename);
+}
+</script>
+<body>
+	 <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+		<!--开始引入头部菜单-->                   
+        <include file="Shop/nav" navmenuid="Navshop"/>
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="Shop/menu" leftmenuid="dpzy"/>
+                </div>
+                <div class="subcon">
+					<div class="main-name fn">
+                        <h4>默认模版</h4>
+                    </div>
+						<div class="shoppro-tab">
+							<a href="javascript:void(0)" class="btn-oprlist edit-banner hover w100 ml10">幻灯片设置</a>
+							<a href="javascript:void(0)" class="btn-oprlist edit-pro w100 ml10">推荐商品设置</a>
+						</div>
+                            <div class="edit-area fn">
+                                <div class="phone">
+                                    <div class="screen">
+                                        <div class="logo">
+                                            <div class="box dn"></div>
+                                            <div class="edit-word dn"></div>
+                                            <a href="javascript:void(0)">
+											<?php if($logoInfo['img_url'] != NULL){?>
+													<img class="img" src="<?php echo get_upload_url($logoInfo['img_url'])?>" alt="" id="e_logo_showscreen"/>
+												<?php }else{ ?>
+													<img class="img" src="__PUBLIC__/Image/shop/ym-logo.png" alt="11" id="e_logo_showscreen"/>
+												<?php } ?>
+											</a>
+                                            <i class="cart"></i>
+                                        </div>
+                                        <div class="banner mt10">
+                                            <div class="box dn"></div>
+                                            <div class="edit-word dn"></div>
+											<?php if($banInfo[0]['img_url'] != NULL){?>
+												<img src="<?php echo get_upload_url($banInfo[0]['img_url'])?>" alt="" id="e_ban_showscreen1" />
+											<?php }else{ ?>
+												<img src="__PUBLIC__/Image/shop/banner1.png" alt="" id="e_ban_showscreen1" />
+											<?php } ?>
+											<?php if($banInfo[1]['img_url'] != NULL){?>	
+												<img src="<?php echo get_upload_url($banInfo[1]['img_url'])?>" alt="" id="e_ban_showscreen2"/>
+											<?php }else{ ?>
+												<img src="__PUBLIC__/Image/shop/banner1.png" alt="" id="e_ban_showscreen2"/>
+											<?php } ?>
+											<?php if($banInfo[2]['img_url'] != NULL){?>
+												<img src="<?php echo get_upload_url($banInfo[2]['img_url'])?>" alt="" id="e_ban_showscreen3"/>
+											<?php }else{ ?>
+												<img src="__PUBLIC__/Image/shop/banner1.png" alt="" id="e_ban_showscreen3"/>
+											<?php } ?>
+                                            <ul>
+                                                <li>●</li>
+                                                <li>●</li>
+                                                <li>●</li>
+                                            </ul>
+                                        </div>
+                                        <div class="search">
+                                            <input class="in-text" type="text" placeholder="搜索您喜欢的商品" />
+                                            <a class="btn" href="javascript:void(0)"></a>
+                                            <i class="cato-btn"></i>
+                                        </div>
+                                        <div class="goods fn">
+                                            <div class="box dn"></div>
+                                            <div class="edit-word dn"></div>
+                                            <div class="product">
+											<?php if($proInfo[1]['id'] != NULL){?>
+												<img width="140" src="<?php echo get_upload_url($proInfo[1]['batch_img'])?>" alt="" />
+                                                <div class="p-name"><p><?php echo $proInfo[1]['m_name']?></p></div>
+											<?php }else{?>
+                                                <img src="__PUBLIC__/Image/shop/product1.png" alt="" />
+                                                <div class="p-name"><p>推荐商品1</p></div>
+											<?php }?>
+                                            </div>
+                                            <div class="product">
+                                                <?php if($proInfo[2]['id'] != NULL){?>
+												<img width="140" src="<?php echo get_upload_url($proInfo[2]['batch_img'])?>" alt="" />
+                                                <div class="p-name"><p><?php echo $proInfo[2]['m_name']?></p></div>
+											<?php }else{?>
+                                                <img src="__PUBLIC__/Image/shop/product1.png" alt="" />
+                                                <div class="p-name"><p>推荐商品2</p></div>
+											<?php }?>
+                                            </div>
+                                            <div class="product">
+                                               <?php if($proInfo[3]['id'] != NULL){?>
+												<img width="140" src="<?php echo get_upload_url($proInfo[3]['batch_img'])?>" alt="" />
+                                                <div class="p-name"><p><?php echo $proInfo[3]['m_name']?></p></div>
+											<?php }else{?>
+                                                <img src="__PUBLIC__/Image/shop/product1.png" alt="" />
+                                                <div class="p-name"><p>推荐商品3</p></div>
+											<?php }?>
+                                            </div>
+                                            <div class="product">
+                                               <?php if($proInfo[4]['id'] != NULL){?>
+												<img width="140" src="<?php echo get_upload_url($proInfo[4]['batch_img'])?>" alt="" />
+                                                <div class="p-name"><p><?php echo $proInfo[4]['m_name']?></p></div>
+											<?php }else{?>
+                                                <img src="__PUBLIC__/Image/shop/product1.png" alt="" />
+                                                <div class="p-name"><p>推荐商品4</p></div>
+											<?php }?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="e-right">
+                                    <div class="e-ban edit-box">
+                                            <form action="{:U('Ecshop/ShopOption/ban_add')}" method="POST" name="ban_form" id="ban_form" enctype="multipart/form-data">
+											<input type="hidden" name="m_id" id="m_id" value="{$m_id}">
+											<input type="hidden" name="batch_type1" id="batch_type1" value="{$banInfo[0][link_batch_type]}">
+											<input type="hidden" name="batch_id1" id="batch_id1" value="{$banInfo[0][link_batch_no]}">
+											<input type="hidden" name="batch_type2" id="batch_type2" value="{$banInfo[1][link_batch_type]}">
+											<input type="hidden" name="batch_id2" id="batch_id2" value="{$banInfo[1][link_batch_no]}">
+											<input type="hidden" name="batch_type3" id="batch_type3" value="{$banInfo[2][link_batch_type]}">
+											<input type="hidden" name="batch_id3" id="batch_id3" value="{$banInfo[2][link_batch_no]}">
+                                            <ul>
+                                                <h1 class="title mb20">幻灯片</h1>
+                                                <li class="mb30 fn">
+												<if condition="$banInfo[0]['id'] neq null">
+													<div class="del"><i class="icon-delother j-e-ban" link_url="{:U('Ecshop/ShopOption/ban_del',array('id'=>$banInfo[0]['id'],'m_id'=>$m_id))}"></i></div>
+												</if>
+                                                    <div class="pic l">
+													<?php if($banInfo[0]['img_url'] != NULL){?>
+														<img class="img" src="<?php echo get_upload_url($banInfo[0]['img_url'])?>" id="e_ban_show1"/>
+													<?php }else{ ?>
+														<img class="img" src="__PUBLIC__/Image/shop/no-head.png" id="e_ban_show1"/>
+													<?php } ?>
+                                                        <a class="btn" href="javascript:void(0)" onclick="return uploadImg_bg('640x320','ebanCallback1');">上传图片</a>
+														<input type="hidden" value="{$banInfo[0]['img_url']}" name="e_ban_img1" id="e_ban_img1" />
+                                                    </div>
+                                                    <div class="select l">
+                                                        <h2 class="se-tit">设置广告链接</h2>
+                                                        <p><label><input name="ad_link1" class="rad" type="radio" value="1" radorder="1" <if condition="($banInfo[0][link_batch_type] eq 31) and ($banInfo[0][link_type] eq 2)">checked="checked"</if>/>小店商品</label>　<a class="ad-sg" href="javascript:void(0)">选择商品</a></p>
+														
+														<div class="ecshop-goods-choose1" id="ecshop-goods-choose1">
+														<if condition="$banInfo[0][link_batch_type] eq 31">
+															 <notempty name="banInfo[0][link_batch_no]">{$type_name_arr[$banInfo[0][link_batch_type]]} > {$banInfo[0][link_batch_name]}
+															</notempty>
+														</if>
+														</div>
+                                                        <p><label><input name="ad_link1" class="rad choose_goods" type="radio" value="2" radorder="1" <if condition="($banInfo[0][link_batch_type] neq 31) and ($banInfo[0][link_type] eq 2)">checked="checked"</if>/>互动模块</label>　<a class="ad-yx" href="javascript:void(0)">选择卡券</a></p>
+														
+														<div class="batch-no-choose1" id="batch-no-choose1">
+														<if condition="$banInfo[0][link_batch_type] neq 31">
+															 <notempty name="banInfo[0][link_batch_no]">{$type_name_arr[$banInfo[0][link_batch_type]]} > {$banInfo[0][link_batch_name]}
+															</notempty></if>
+														</div>
+														
+                                                        <p><label><input name="ad_link1" class="rad ipbms" type="radio" value="3" radorder="1" <if condition="$banInfo[0][link_type] eq 1">checked="checked"</if>/>手动输入</label></p>
+                                                        <input class="in-url"  type="text" placeholder="请输入正确的URL" id="link_url1" name="link_url1" value="{$banInfo[0][link_url]}" <if condition="$banInfo[0]['link_type'] neq 1">style="display:none;"</if>/>
+                                                    </div>
+                                                </li>
+                                                <li class="mb30 fn">
+												<if condition="$banInfo[1]['id'] neq null">
+													<div class="del"><i class="icon-delother j-e-ban" link_url="{:U('Ecshop/ShopOption/ban_del',array('id'=>$banInfo[1]['id'],'m_id'=>$m_id))}"></i></div>
+												</if>
+                                                    <div class="pic l">
+                                                    <?php if($banInfo[1]['img_url'] != NULL){?>
+															<img class="img" src="<?php echo get_upload_url($banInfo[1]['img_url'])?>" id="e_ban_show2"/>
+													<?php }else{ ?>
+															<img class="img" src="__PUBLIC__/Image/shop/no-head.png" id="e_ban_show2"/>
+													<?php } ?>
+                                                        <a class="btn" href="javascript:void(0)" onclick="return uploadImg_bg('640x320','ebanCallback2');">上传图片</a>
+														<input type="hidden" value="{$banInfo[1]['img_url']}" name="e_ban_img2" id="e_ban_img2" />
+                                                    </div>
+                                                    <div class="select l">
+                                                        <h2 class="se-tit">设置广告链接</h2>
+                                                        <p><label><input name="ad_link2" class="rad" type="radio" value="1" radorder="2" <if condition="($banInfo[1][link_batch_type] eq 31) and ($banInfo[1][link_type] eq 2)">checked="checked"</if> />小店商品</label>　<a class="ad-sg" href="javascript:void(0)">选择商品</a></p>
+														
+														<div class="ecshop-goods-choose2" id="ecshop-goods-choose2">
+														<if condition="$banInfo[1][link_batch_type] eq 31">
+															<notempty name="banInfo[1][link_batch_no]">{$type_name_arr[$banInfo[1][link_batch_type]]} > {$banInfo[1][link_batch_name]}
+															</notempty></if>
+														</div>
+														
+                                                        <p><label><input name="ad_link2" class="rad choose_goods" type="radio" value="2" radorder="2" <if condition="($banInfo[1][link_batch_type] neq 31) and ($banInfo[1][link_type] eq 2)">checked="checked"</if>/>互动模块</label>　<a class="ad-yx" href="javascript:void(0)">选择卡券</a></p>
+														
+														<div class="batch-no-choose2" id="batch-no-choose2">
+														<if condition="$banInfo[1][link_batch_type] neq 31">
+															 <notempty name="banInfo[1][link_batch_no]">{$type_name_arr[$banInfo[1][link_batch_type]]} > {$banInfo[1][link_batch_name]}
+															</notempty>
+															</if>
+														</div>
+														
+                                                        <p><label><input name="ad_link2" class="rad ipbms" type="radio" value="3" radorder="2" <if condition="$banInfo[1][link_type] eq 1">checked="checked"</if>/>手动输入</label></p>
+                                                        <input class="in-url" type="text" placeholder="请输入正确的URL" id="link_url2" name="link_url2" value="{$banInfo[1][link_url]}" <if condition="$banInfo[1]['link_type'] neq 1">style="display:none;"</if>/>
+                                                    </div>
+                                                </li>
+                                                <li class="mb30 fn">
+												<if condition="$banInfo[2]['id'] neq null">
+													<div class="del"><i class="icon-delother j-e-ban" link_url="{:U('Ecshop/ShopOption/ban_del',array('id'=>$banInfo[2]['id'],'m_id'=>$m_id))}"></i></div>
+												</if>
+                                                    <div class="pic l">
+                                                    <?php if($banInfo[2]['img_url'] != NULL){?>
+														<img class="img" src="<?php echo get_upload_url($banInfo[2]['img_url'])?>" id="e_ban_show3"/>
+													<?php }else{ ?>
+														<img class="img" src="__PUBLIC__/Image/shop/no-head.png" id="e_ban_show3"/>
+													<?php } ?>
+                                                        <a class="btn" href="javascript:void(0)" onclick="return uploadImg_bg('640x320','ebanCallback3');">上传图片</a>
+														<input type="hidden" value="{$banInfo[2]['img_url']}" name="e_ban_img3" id="e_ban_img3" />
+                                                    </div>
+                                                    <div class="select l">
+                                                        <h2 class="se-tit">设置广告链接</h2>
+                                                        <p><label><input name="ad_link3" class="rad" type="radio" value="1" radorder="3" <if condition="($banInfo[2][link_batch_type] eq 31) and ($banInfo[2][link_type] eq 2)">checked="checked"</if> />小店商品</label>　<a class="ad-sg" href="javascript:void(0)">选择商品</a></p>
+														
+														<div class="ecshop-goods-choose3" id="ecshop-goods-choose3">
+														<if condition="$banInfo[2][link_batch_type] eq 31">
+															 <notempty name="banInfo[0][link_batch_no]">{$type_name_arr[$banInfo[2][link_batch_type]]} > {$banInfo[2][link_batch_name]}
+															</notempty>
+															</if>
+														</div>
+														
+                                                        <p><label><input name="ad_link3" class="rad choose_goods" type="radio" value="2" radorder="3" <if condition="($banInfo[2][link_batch_type] neq 31) and ($banInfo[2][link_type] eq 2)">checked="checked"</if>/>互动模块</label>　<a class="ad-yx" href="javascript:void(0)">选择卡券</a></p>
+														
+														<div class="batch-no-choose3" id="batch-no-choose3">
+														<if condition="$banInfo[2][link_batch_type] neq 31">
+															 <notempty name="banInfo[2][link_batch_no]">{$type_name_arr[$banInfo[2][link_batch_type]]} > {$banInfo[2][link_batch_name]}
+															</notempty>
+															</if>
+														</div>
+														
+                                                        <p><label><input name="ad_link3" class="rad ipbms" type="radio" value="3" radorder="3" <if condition="$banInfo[2][link_type] eq 1">checked="checked"</if>/>手动输入</label></p>
+                                                        <input class="in-url" type="text" placeholder="请输入正确的URL" id="link_url3" name="link_url3"  value="{$banInfo[2][link_url]}" <if condition="$banInfo[2]['link_type'] neq 1">style="display:none;"</if>/>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                            <div class="tr fn pt20">
+                                                <a href="javascript:void(0);" class="btn-all w80" id="ban_sub">确定</a>
+                                                <a href="javascript:void(0);" class="btn-all-del w80 ml10" id="ban_cancel">取消</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="e-product edit-box dn">
+                                        <form action="{:U('Ecshop/ShopOption/product_add')}" method="POST" name="product_form" id="product_form" enctype="multipart/form-data">
+										<input type="hidden" name="m_id" id="m_id" value="{$m_id}">
+										<input type="hidden" name="commend_goods11" id="commend_goods11" value="">
+										<input type="hidden" name="commend_goods12" id="commend_goods12" value="">
+										<input type="hidden" name="commend_goods13" id="commend_goods13" value="">
+										<input type="hidden" name="commend_goods14" id="commend_goods14" value="">
+                                            <div class="s-pro bt fn">
+                                                <p class="title l">推荐商品 1</p><a class="c-good" href="javascript:void(0)" gid="11" id="e-product-text11"><if condition="$proInfo[1]['id'] neq null">{$proInfo[1]['m_name']}<else />选择商品</if></a>
+											<if condition="$proInfo[1]['id'] neq null">
+												<i class="icon-delother j-e-product" data-id="11" link_url="{:U('Ecshop/ShopOption/product_del',array('id'=>$proInfo[1]['id']))}"></i>
+											</if>
+                                            </div>
+                                            <div class="s-pro fn">
+                                                <p class="title l">推荐商品 2</p><a class="c-good" href="javascript:void(0)" gid="12" id="e-product-text12"><if condition="$proInfo[2]['id'] neq null">{$proInfo[2]['m_name']}<else />选择商品</if></a>
+											<if condition="$proInfo[2]['id'] neq null">
+												<i class="icon-delother j-e-product" data-id="12" link_url="{:U('Ecshop/ShopOption/product_del',array('id'=>$proInfo[2]['id']))}"></i>
+												</if>
+                                            </div>
+                                            <div class="s-pro fn">
+                                                <p class="title l">推荐商品 3</p><a class="c-good" href="javascript:void(0)" gid="13" id="e-product-text13"><if condition="$proInfo[3]['id'] neq null">{$proInfo[3]['m_name']}<else />选择商品</if></a>
+											<if condition="$proInfo[3]['id'] neq null">
+												<i class="icon-delother j-e-product" data-id="13" link_url="{:U('Ecshop/ShopOption/product_del',array('id'=>$proInfo[3]['id']))}"></i>
+												</if>
+                                            </div>
+                                            <div class="s-pro fn">
+                                                <p class="title l">推荐商品 4</p><a class="c-good" href="javascript:void(0)" gid="14" id="e-product-text14"><if condition="$proInfo[4]['id'] neq null">{$proInfo[4]['m_name']}<else />选择商品</if></a>
+											<if condition="$proInfo[4]['id'] neq null">
+												<i class="icon-delother j-e-product" data-id="14" link_url="{:U('Ecshop/ShopOption/product_del',array('id'=>$proInfo[4]['id']))}"></i>
+											</if>
+                                            </div>
+                                            <div class="tr fn pt20">
+                                                <a href="javascript:void(0)" class="btn-all w80" id="product_sub">确定</a>
+                                                <a href="javascript:void(0);" class="btn-all-del w80 ml10" id="product_cancel">取消</a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>                                   	
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+</body>
+<div class="service"></div>
+{$_GET['tab']}
+</html>
+<script>
+window.check_change = 0 ;
+
+    $(document).ready(function(){
+		$(".j-e-ban").click(function(){
+		var openUrl = $(this).attr('link_url');
+		art.dialog.msg({
+                    content: "是否删除该BANNER？",
+                    ok: function () {
+                        this.close();
+                        var loading = art.dialog();
+                        $.get(openUrl, function (obj) {
+                            loading.close();
+                            var ret = JSON.parse(obj);
+                            if (ret['status'] == '1') {
+                                //删除成功
+                                window.parent.location.reload();
+                            } else {
+                                alert(ret['info']);
+                            }
+                        });
+                        return false;
+                    },
+                    cancel:true
+                });
+		})
+		$(".j-e-product").click(function(){
+		var openUrl = $(this).attr('link_url');
+		art.dialog.msg({
+                    content: "是否删除该推荐商品？",
+                    ok: function () {
+                        this.close();
+                        var loading = art.dialog();
+                        $.get(openUrl, function (obj) {
+                            loading.close();
+                            var ret = JSON.parse(obj);
+                            if (ret['status'] == '1') {
+                                //删除成功
+                                window.parent.location.reload();
+                            } else {
+                                alert(ret['info']);
+                            }
+                        });
+                        return false;
+                    },
+                    cancel:true
+                });
+		})
+		$("[name='m_name'],[name='e_logo_img']").change(function(){
+			check_change = 1;
+		})
+		$("[name='e_ban_img1'],[name='e_ban_img2'],[name='e_ban_img3'],[name='ad_link1'],[name='ad_link2'],[name='ad_link3'],[name='batch_type1'],[name='batch_type2'],[name='batch_type3'],[name='batch_id1'],[name='batch_id2'],[name='batch_id3'],[name='link_url1'],[name='link_url2'],[name='link_url3']").change(function(){
+			check_change = 2;
+		})
+		$("[name='commend_goods11'],[name='commend_goods12'],[name='commend_goods13'],[name='commend_goods14']").change(function(){
+			check_change = 3;
+		})
+		
+        /*点击编辑*/
+        $(".screen .logo").mouseover(function(event) {
+            $(".logo .edit-word").show();
+            $(".logo .box").show();
+        });
+		$(".logo .edit-word,.edit-logo").on('click',function(event) {
+			checkchange(window.check_change,1);//判断是否有数据改变
+			check_change=0;
+			event.preventDefault();
+		});
+        $(".screen .logo").mouseout(function(event) {
+            $(".logo .box").hide();
+            $(".logo .edit-word").hide();
+        });
+
+        $(".screen .banner").mouseover(function(event) {
+            $(".banner .box").show();
+            $(".banner .edit-word").show();
+        });
+		$(".banner .edit-word,.edit-banner").on('click',function(event) {
+			checkchange(window.check_change,2);//判断是否有数据改变
+			check_change=0;
+			event.preventDefault();
+		});
+        $(".screen .banner").mouseout(function(event) {
+            $(".banner .box").hide();
+            $(".banner .edit-word").hide();
+        });
+
+        $(".screen .goods").mouseover(function(event) {
+            $(".goods .box").show();
+            $(".goods .edit-word").show();
+        });
+		$(".goods .edit-word,.edit-pro").on('click',function(event) {
+			checkchange(window.check_change,3);//判断是否有数据改变
+			check_change=0;
+			event.preventDefault();
+		});
+        $(".screen .goods").mouseout(function(event) {
+            $(".goods .box").hide();
+            $(".goods .edit-word").hide();
+        });
+
+        // 选择商品
+        $(".e-product .c-good").on('click', function(event) {
+            event.preventDefault();
+			var gid = $(this).attr('gid');
+            art.dialog.open("{:U('LabelAdmin/SelectEcshopGoods/index')}"+"&id="+gid,
+                            {
+                                width:800,
+                                title:'选择商品'
+                            }
+                )
+        });
+
+        // 设置banner链接
+        $(".e-ban .select .rad").on('click', function(event) {
+            var f_rad=$(this).parents('.select').find('.rad')[0];
+            var s_rad=$(this).parents('.select').find('.rad')[1];
+            var t_rad=$(this).parents('.select').find('.rad')[2];
+            var v_id = $(this).attr('radorder');
+
+            if($(t_rad).attr('checked')){
+                $(t_rad).parents('.select').find('.in-url').show();
+            }else{
+                 $(t_rad).parents('.select').find('.in-url').hide();
+            }
+            if($(f_rad).attr('checked')){
+				
+            	art.dialog.open("{:U('LabelAdmin/SelectEcshopGoods/index')}"+"&id="+v_id,{
+                                width:800,
+                                title:'选择上架商品'
+                            })
+                $(f_rad).parents('.select').find('.ecshop-goods-choose'+v_id).show();
+            }else{
+                $(f_rad).parents('.select').find('.ecshop-goods-choose'+v_id).hide();
+            }
+            if($(s_rad).attr('checked')){
+            	art.dialog.open("{:U('LabelAdmin/SelectBatches/index')}"+"&rid="+v_id,{
+                                width:800,
+                                title:'选择互动模块'
+                            })
+                $(s_rad).parents('.select').find('.batch-no-choose'+v_id).show();
+            }else{
+                $(s_rad).parents('.select').find('.batch-no-choose'+v_id).hide();
+            }
+        });
+
+        function changePic(){
+
+            $('#banner img').css('display','none');
+            $('#banner img').eq(0).css('display','block');
+            $('#banner ul li').eq(0).css('color','orange');
+
+            var banner_index=1;
+            var banner_timer=setInterval(banner_fn,3000);
+
+            function banner(obj){
+                $('.banner img').css('display','none');
+                $('.banner img').eq($(obj).index()).css('display','block');
+                $('.banner ul li').css('color','#eee');
+                $(obj).eq($(this).index()).css('color','orange');
+            }	
+
+            function banner_fn(){
+                if(banner_index>=$('.banner ul li').length) banner_index=0;
+                banner($('.banner ul li').eq(banner_index).first());
+                banner_index++;
+            }
+        }
+        changePic();
+
+		<php>if($_GET['tab'] != ''){</php>
+		$('.shoppro-tab a:eq({$_GET['tab']})').trigger('click');
+		<php>}</php>
+    })
+function checkchange(check_change,con){
+	if(check_change!=0){
+		var html,btn,action ;
+		switch(check_change){
+			case 1:
+			  html = '<p style="font-size:14px;">您的LOGO设置有变动，是否保存？</p>' ;
+			  btn = '#logo_form' ;
+			  break;
+			case 2:
+			  html = '<p style="font-size:14px;">您的幻灯片设置有变动，是否保存？</p>' ;
+			  btn = '#ban_form' ;
+			  break;
+			case 3:
+			  html = '<p style="font-size:14px;">您的推荐商品位置有变动，是否保存？</p>' ;
+			  btn = '#product_form' ;
+			  break;
+		};
+		switch(con){
+			case 1:
+				action = function() {
+					$(".edit-box").hide();
+					$(".e-logo").fadeIn(200);
+					$(".btn-oprlist").removeClass("hover");
+					$(".edit-logo").addClass("hover");
+					check_change=0;
+				}
+			  break;
+			case 2:
+				action = function() {
+					$(".edit-box").hide();
+					$(".e-ban").fadeIn(200);
+					$(".btn-oprlist").removeClass("hover");
+					$(".edit-banner").addClass("hover");
+					check_change=0;
+				}
+			  break;
+			case 3:
+				action = function() {
+					$(".edit-box").hide();
+					$(".e-product").fadeIn(200);
+					$(".btn-oprlist").removeClass("hover");
+					$(".edit-pro").addClass("hover");
+					check_change=0;
+				}
+			  break;
+		}	
+		art.dialog.msg({
+			content: html ,
+			okVal:"保存",
+			cancelVal:"不保存",
+			ok: function(){
+				$(btn).submit();
+			},
+			cancel: action
+		});
+	}else{
+		switch(con){
+			case 1:
+			  $(".edit-box").hide();
+			  $(".e-logo").fadeIn(200);
+			  $(".btn-oprlist").removeClass("hover");
+			  $(".edit-logo").addClass("hover");
+			  break;
+			case 2:
+			  $(".edit-box").hide();
+			  $(".e-ban").fadeIn(200);
+			  $(".btn-oprlist").removeClass("hover");
+			  $(".edit-banner").addClass("hover");
+			  break;
+			case 3:
+			  $(".edit-box").hide();
+			  $(".e-product").fadeIn(200);
+			  $(".btn-oprlist").removeClass("hover");
+			  $(".edit-pro").addClass("hover");
+			  break;
+		}
+	}
+}
+</script>

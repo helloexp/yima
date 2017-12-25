@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信多客服自动回复</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script src="__PUBLIC__/Js/weixin2/jq-emotion.js" type="text/javascript"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<style type="text/css">
+	.msg_tree .msg_tree_list a { display: block; padding: 10px 30px 10px 20px; border-bottom: 1px solid #e7e7eb; font-size: 14px; line-height: 20px; color: #333333;}
+	.msg_tree .msg_tree_list a span { line-height: 20px;}
+	.msg_tree .msg_tree_list a i { font-size: 18px; font-style: normal; right: 10px; font-weight: bold; line-height: 20px; color: #999999;}
+	.msg_sender_con { padding: 20px; border-left: 1px solid #e7e7eb;}
+	.msg_sender_con .texttextarea { width: 100%;}
+	.orderNumber { display: inline-block; padding: 5px 10px; font-size: 14px; background: #eee; border: 1px #ccc solid; border-radius: 2px;}
+	.conclusionTips .text,.tips { font-size: 16px;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(e){
+	//确定按钮事件
+	$("#btn_submit").click(function(){
+		//alert($("#material_id_selected").val());
+        var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+        if($("#material_id_selected").val()!="" && $("#material_id_selected").val()!="img" && $("#material_id_selected").val()!="card" && $("#material_id_selected").val()!="activity"){
+            var data = {
+                response_info:$("#material_id_selected").val(),
+                respType:0,
+                respClass:1
+            };
+
+            $.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+                dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                location.reload();
+            },'json');
+        }else if($("#material_id_selected").val()==""){
+    		var reply_text = $("#reply_content_0").html();
+                reply_text=reply_text.replace(/\n/g, "\\n");
+                reply_text=reply_text.replace(/<br\/?[^>]*>/g, "\n");
+                reply_text=reply_text.replace(/\&nbsp\;/g, ' ');
+                reply_text=reply_text.replace(/\&lt;/g, '<'); 
+                reply_text=reply_text.replace(/\&gt;/g, '>');
+    		if(reply_text.length == 0){
+                Diaerror('请输入回复内容！');
+                dialog.close();
+                return ;
+            }
+            var text = $('#reply_content_0').text();
+    	    var imglength = $('#reply_content_0').find("img");
+    	    if(imglength.length*3+text.length > 600){
+    	        Diaerror('不能超过600字');
+                return ;
+    	    }
+    		var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+    		var data = {
+    			response_info:reply_text,
+    			respType:0,
+    			respClass:0
+    		};
+    		$.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+    			dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+    			location.reload();
+    		},'json');
+        }else if($("#material_id_selected").val()=="img"){
+			var src = $("#material_src").val();
+            var data ={
+                response_info:src,
+                respType:0,
+                respClass:3
+            }
+            $.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+                dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                location.reload();
+            },'json');
+        }else if($("#material_id_selected").val()=="card"){
+			var cardid = $("#cardid").val();
+            var data ={
+                response_info:cardid,
+                respType:0,
+                respClass:4
+            }
+            $.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+                dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                location.reload();
+            },'json');
+        }
+		else if($("#material_id_selected").val()=="activity"){
+			var activityid = $("#activityid").val();
+            var data ={
+                response_info:activityid,
+                respType:0,
+                respClass:5
+            }
+            $.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+                dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                location.reload();
+            },'json');
+        }
+	});
+	
+	//添加标签
+	$(".guideTips").delegate(".btn_inner","click",function(){
+		$(this).parents("ul").remove();
+	});
+	$(".btnDiv").delegate("#addMark","click",function(){
+		var html = '<ul class="mb10"><li><span class="orderNumber mr5">1</span><input type="text" class="txtInput w200 mr5" placeholder="请输入回复内容" /><select class="mr5"><option value="0">请选择客服标签</option></select><a href="javascript:;" class="btn_inner disable">删除</a></li></ul>';
+		$("#addMark").before(html);
+	});
+});
+
+</script>
+</head>
+<body>
+<div id="wrapper" >
+<include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu_pingan.html" topmenuid="gongzhonghao"/>
+<div id="container">
+<div id="main" class="rel">
+<div class="sidenav">
+    <!--开始载入左菜单-->
+    <php>
+    if($respType == '0'){
+        $leftmenuid = 'btjzdhh';
+    }
+    else{
+        $leftmenuid = 'xxzdhh';
+    }
+    </php>
+    <include file="LabelAdmin/Batch/WleftMenu_pingan" leftmenuid="zdhf"/>
+</div>
+<div class="subcon fn">
+    <div class="main-name fn">
+    <h4>多客服自动回复<a href="http://www.wangcaio2o.com/index.php?m=Help&a=helpDetails&newsId=1256&classId=45" class="r" target="_blank"><span style="font-size:14px ;"><i class="allAsk mr5" style="margin-top:0;"></i>自动回复帮助说明</span></a></h4>
+    </div>
+	<!--<?php var_dump($respText)?>-->
+    <div class="msg-libs">
+        <div class="content_wrap global_mod">
+            <div class="section_tab">
+            <ul class="tab_navs">
+            <li class="tab_nav"><a href="{:U('Pingan/WeixinResp/index')}">被添加自动回复</a></li>
+            <li class="tab_nav"><a href="{:U('Pingan/WeixinResp/msg')}">消息自动回复</a></li>
+            <li class="tab_nav"><a href="{:U('Pingan/WeixinResp/keywords')}">关键词自动回复</a></li>
+            <li class="tab_nav no_extra selected"><a href="{:U('Pingan/WeixinResp/duokefu')}">多客服自动回复</a></li>
+            </ul>
+            </div>
+			<style type="text/css">
+			.msg_sender{ margin:0 auto;}
+			.tab_navs{ margin-left:0; padding-left:0}
+			.content_wrap{ margin:0 auto;}
+			ul, ol{ margin-left:0;}
+            </style>
+            <div class="content_wrap" id="div_replyContent" style=" position:relative">
+                <!--<p>当系统进入多客服自动回复，其他自动回复设置无效，需退出多客服自动回复。</p>-->
+                <form id="form" method="" action="">
+	                <div class="msg_content fn">
+	                	<div class="msg_sender fn">
+		                	<div class="msg_tree l">
+		                		<div class="msg_tree_list">
+		                			<a href="javascript:;" class="rel part-1"><span>0&nbsp;自动回复菜单</span></a>
+		                			<div class="msg_tree_list">
+		                				<a href="javascript:;" class="rel part-2"><span class="ml10">1&nbsp;第二级回复</span></a>
+		                				<div class="msg_tree_list">
+			                				<a href="javascript:;" class="rel part-3"><span class="ml20">2&nbsp;第三级回复</span></a>
+			                			</div>
+		                			</div>
+		                		</div>
+		                	</div>
+		                	<div class="msg_sender_con l">
+		                		<div class="guideTips mb30">
+		                			<textarea placeholder="请输入引导语信息，最多200字" class="texttextarea mb10"></textarea>
+		                			<ul class="mb10">
+		                				<li>
+		                					<span class="orderNumber mr5">1</span><input type="text" class="txtInput w200 mr5" placeholder="请输入回复内容" /><select class="mr5"><option value="0">请选择客服标签</option></select><a href="javascript:;" class="btn_inner disable">删除</a>
+		                				</li>
+		                			</ul>
+		                			<div class="btnDiv">
+		                				<a href="javascript:;" class="btn_inner" id="addMark">添加</a>
+		                			</div>
+		                		</div>
+		                		<div class="conclusionTips mb10">
+		                			<textarea placeholder="请输入结束语信息，最多200字" class="texttextarea mb10"></textarea>
+		                			<ul>
+		                				<li>
+		                					<span class="text">退出关键词</span>
+		                					<input type="text" class="txtInput w100" placeholder="请输入关键词" />
+		                					<input type="text" class="txtInput w200" placeholder="退出提示语设置" />
+		                				</li>
+		                			</ul>
+		                		</div>
+		                		<p class="tips">用户回复信息错误时，默认推送0自动回复菜单内容</p>
+	                		</div>
+	                	</div>
+	                </div>
+                </form>
+            </div>
+            <div class="tool_bar tc">
+                <span id="btn_submit"><a href="javascript:void(0);" class="btn-all" title="">保存</a></span>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<include file="./Home/Tpl/Public/Public_footer_pingan.html" />
+</div>
+<div class="service"></div>
+
+</body>
+</html>

@@ -1,0 +1,1630 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>自定义菜单_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.css?v=__VR__" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2_menu.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/check_form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Common.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<style>
+.Gform .Gname{ width:90px;}
+.Gform .Ginput{ padding-left:105px;}
+.Gform .Ginput .switch .newRadio{ float:none; margin-bottom:10px;}
+.Gform .Ginput .switch .newRadio-default,.Gform .Ginput .switch.hover .newRadio-input{ float:none}
+.Gform .Ginput .switch.events .newRadio-default,.Gform .Ginput .switch.events .newRadio-input{display: none;}
+.Gform .Ginput .newRadio-events{display: none;}
+.Gform .Ginput .switch.events .newRadio-events{display: block;float:none;}
+.Gform .Ginput .switch .newRadio#eventsRaido{padding: 20px;}
+.tab_navs{ margin-bottom:0;}
+.tab_panel{ min-height: inherit}
+.menu_form_area .msg_sender .emotion_editor .edit_area{ border:none; height:300px; padding:10px;}
+.menu_form_area .msg_sender .emotion_editor .edit_area:after{ content:""; clear:both; display:block;}
+.emotion_editor .edit_area{ padding:0;}
+#editTxt{ outline:none; border:none;/* width:515px;*/ width:97%; height:256px; }
+.msg_sender .emotion_editor {    border-width: 0; height: 322px;}
+.editArea .msg-item-wrapper{ width:320px;}
+.mask {position: fixed;display: none;top: 0;left: 0;width: 100%;height: 100%;filter: alpha(opacity = 75);-moz-opacity: .75;-khtml-opacity: .75;opacity: .75;background-color: #000;z-index: 9998;}
+#reply_content_2 img{ width:200px;}
+</style>
+
+<script type="text/javascript">
+//图文选择后的回调函数
+var selectcallback = function(mid){
+	var dialog = art.dialog({title:false,lock:true});
+	var data = {material_id:mid};
+	$.post("{:U('Weixin/WeixinResp/showMaterialById')}",data,function(d){
+		dialog.close();
+		$(".edit_area").hide();
+		$("#reply_content_1").show();
+		$("#reply_content_1").html(d);
+		$("#type").val(0);
+		$("#response_class").val(1);
+		$("#response_info").val(mid);
+		windowheight();
+	});
+}
+
+$(function(){
+	var account_type = "{$account_type}";
+	
+	//初始化菜单是否显示
+	var flag = parseInt("{$flag}");
+	if(flag == 1 ){
+		//true表示尚未菜单项， false表示已有菜单项
+		$(".js_editBox").hide();
+		$(".js_startMenuBox").show();
+	}else{
+		$(".js_editBox").show();
+		$(".js_startMenuBox").remove();
+		var nodeMemberUrl = "{:U('Wmember/Member/personCenterShowSet')}";
+		var data = {url:nodeMemberUrl};
+		var errorTips = template('memberTips',data);
+		if(!$.cookie('member_tip')){
+			art.dialog({
+	            content:errorTips,
+	            width:400,
+	            cancel:function(){
+	                var isTip = $("input[name='istip']").is(":checked");
+	                if(isTip){
+	                    $.cookie('member_tip','1',{expires:100}); 
+	                }
+	            },
+	            cancelVal:"关闭",
+				fixed:true
+	        })
+		}
+	}
+	$("body").on("click",".js_openMenu",function(){
+		$(".js_editBox").show(),$(".js_startMenuBox").remove()
+	})
+
+	//设置菜单内容
+	$(".tab_nav").click(function(e) {
+		var dataType = parseInt($(this).attr("data-type"));
+		if((account_type==1 || account_type== 3)&&dataType == 2){
+		  Diaerror("未认证的公众号，跳转链接输入框无法编辑，请先去认证！");
+		  return false;
+		}else{
+			$(".tab_nav").removeClass("selected");
+			$(this).addClass("selected");
+			$("#response_class").val(dataType);
+			$("#response_info").val("");
+			switch(dataType)
+			{
+			case 0:
+			  $(".edit_area").hide();
+			  $("#reply_content_0").show().find("#editTxt").focus();
+			  addTxt();
+			  break;
+			case 1:
+			  $(".edit_area").hide();
+			  $("#reply_content_1").show().html("");
+			  addMaterial("{:U('Weixin/WeixinResp/selectImgTxt')}&callback=selectcallback");
+			  break;
+			case 5:
+			  $(".edit_area").hide();
+			  $("#reply_content_2").show().find("img").attr("src","");
+			  addImg();
+			  break;
+			case 4:
+			  $(".edit_area").hide();
+			  $("#reply_content_3").show().html("");
+			  addCard("{:U('Common/SelectJp/index')}&callback=cardresp&show_source=3&store_mode=2");
+			  break;
+			case 6:
+			  $(".edit_area").hide();
+			  $("#reply_content_4").show().html("");
+			  addActivity("{:U('LabelAdmin/SelectBatches/index')}&callback=selectActivityCallback");
+			  break;
+			case 2:
+			  $(".edit_area").hide();
+			  $("#reply_content_5").show();
+			  addLink();
+			  break;
+			case 7:
+			  $(".edit_area").hide();
+			  $("#reply_content_6").show().find("#urlmemberText").val("");
+			  addLink2();
+			  break;
+		}
+		}
+		
+	});
+})
+
+</script>
+</head>
+<body>
+    <div id="wrapper" >
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+        <div id="container" >
+            <div id="main" class="rel">            	
+                <div class="sidenav">
+					<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="zdycd"/>
+                </div>
+                <div class="subcon">
+                	<div class="main-name fn">
+                        <h4>自定义菜单</h4>     
+                    </div>
+                    <div class="tipNormal">
+                        编辑中的菜单不会马上被用户看到，点击发布后，会在24小时后在手机端同步显示，粉丝不会收到更新提示，若多次编辑，以最后一次保存为准。如果为新粉丝，则可马上看到更新后的菜单。
+                    </div>
+
+                    <form action="{:U('WeixinMenu/menuSubmit')}" method="post" id="theform">
+                    <!--未创建菜单时显示-->
+                    <div class="menu_initial_box js_startMenuBox" style="">
+                        <p class="" style="font-size:14px; line-height:44px; color:#666">你尚未添加任何菜单</p>
+                        <a class="btn-add js_openMenu" href="javascript:void(0);"><i></i> 添加菜单</a>
+                    </div>
+                    <!--手机预览界面begin-->
+                    <div class="mobile_preview" id="mobileDiv" style="display: none;">
+                    <div class="mobile_preview_hd">
+                    <strong class="nickname">上海新大陆翼码营销部</strong>
+                    </div>
+                    <div class="mobile_preview_bd">
+                    <ul id="viewShow" class="show_list">
+                    <volist name="v['sub_menu']" id="v2">
+                    	<li>{$v2.title}</li>
+                    </volist>
+                    </ul>
+                    </div>
+                    <div class="mobile_preview_ft">
+                        <ul class="pre_menu_list" id="viewList">
+                        <volist name="menuArr" id="vv">
+                        <li class="pre_menu_item size1of3 jsViewLi">
+                            <a href="javascript:void(0);" class="jsView pre_menu_link" title="{$v.title}"><i class="icon_menu_dot"></i>{$vv.title}</a>
+                            <div class="sub_pre_menu_box jsSubViewDiv" style="display:none">
+                                <volist name="vv['sub_menu']" id="vv2">
+                                <ul class="sub_pre_menu_list">
+                                   <li id="subMenu_menu_0_0"><a href="javascript:void(0);" class="jsSubView" title="二级菜单">{$vv2.title}</a></li>
+                                </ul>
+                                <i class="arrow arrow_out"></i>
+                                <i class="arrow arrow_in"></i>
+                                </volist>
+                            </div>
+                        </li>
+                        </volist>
+                        </ul>
+                    </div>
+                    <!--<a href="javascript:void(0);" class="mobile_preview_closed" id="viewClose">关闭</a>-->
+                    <a href="javascript:void(0);" class="mobile_preview_closed btn btn_default" id="viewClose">退出预览</a>
+                    </div>
+                    <div class="mask"></div>
+                    <!--手机预览界面end-->
+                    
+                    <!--开始创建菜单时显示-->
+                
+                    <div class="menu_setting_area js_editBox">                    
+                        <div class="menu_preview_area">
+                            <div class="mobile_menu_preview">
+                                <div class="mobile_hd tc">翼码科技</div>
+                                <div class="mobile_bd">
+                                    <ul class="pre_menu_list grid_line" id='menuList'>
+                                    <volist name="menuArr" id="v">
+                                    
+                                    <li class="jsMenu pre_menu_item jslevel1 ui-sortable ui-sortable-disabled  jsViewLi" id="{$v.id}">
+                                    <a href="javascript:void(0);" class="jsView pre_menu_link"  draggable="false">
+                                    <i class="icon_menu_dot dn"></i>
+                                    <i class="icon20_common sort_gray"></i>
+                                    <span class="js_addMenuTips">{$v.title}</span>
+                                    </a>
+                                    <div class="form_appmsgItem" style="display:none" >
+                                    <input type="text" value="1"  name="level" />    
+                                    <input type="text" value="{$v.sort_id}"  name="sort_id" />
+                                    <input type="text" value="{$v.id}"  name="itemid" />
+                                    <input type="text" value="0"  name="parent_id" />
+                                    <input type="text" value="{$v.title}"  name="title" />
+                                    <input type="text" value="{$v.type}"  name="type" />
+                                    <input type="text" value="{$v.response_class}"  name="response_class" />
+                                    <input type="text" value="{$v.response_type}"  name="response_type" />
+                                    <input type="text" value="{$v.response_info}"  name="response_info" />
+                                    </div>
+                                    
+                                    <div class="sub_pre_menu_box jsSubViewDiv" style="display:none">
+                                        <ul class="sub_pre_menu_list">
+                                        	<volist name="v['sub_menu']" id="v2">
+                                            <li id="{$v2.id}" class="jslevel2">
+                                            <a href="javascript:void(0);" class="jsSubView " draggable="false">
+                                                <span class="sub_pre_menu_inner js_sub_pre_menu_inner">
+                                                    <i class="icon20_common sort_gray"></i>
+                                                    <span class="js_l2Title js_addMenuTips">{$v2.title}</span>
+                                                </span>
+                                            </a>
+                                            <div class="form_appmsgItem" style="display:none" >
+                                            <input type="text" value="2"  name="level" />
+                                            <input type="text" value="{$v2.id}"  name="itemid" />
+                                            <input type="text" value="{$v.id}"  name="parent_id" />
+                                            <input type="text" value="{$v2.title}"  name="title" />
+                                            <input type="text" value="{$v2.type}"  name="type" />      
+                                            <input type="text" value="{$v2.response_class}"  name="response_class" />
+                                            <input type="text" value="{$v2.response_type}"  name="response_type" />
+                                            <input type="text" value="{$v2.response_info}"  name="response_info" />
+                                            <input type="text" value="{$v2.sort_id}"  name="sort_id" />
+                                        	</div>
+                                            </li>
+                                            </volist>
+                                            <li class="js_addSubMenuBox">
+                                                <a href="javascript:void(0);" class="jsSubView js_addL2Btn" draggable="false">
+                                                    <span class="sub_pre_menu_inner js_sub_pre_menu_inner">
+                                                    <i class="icon14_menu_add"></i>
+                                                    <span class="js_l2Title"></span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <i class="arrow arrow_out"></i>
+                                        <i class="arrow arrow_in"></i>
+                                    </div>
+                                    
+                                    </li>
+                                    </volist>
+                                    <li class="js_addMenuBox pre_menu_item grid_line size1of1 no_extra">
+                                        <a href="javascript:void(0);" class="js_addL1Btn" draggable="false">
+                                            <i class="icon14_menu_add"></i>
+                                            <span class="js_addMenuTips"> 添加菜单</span>
+                                        </a>
+                                    </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="sort_btn_wrp">
+                                <a id='orderBt' class="btn btn_default" style="display:none" href="javascript:void(0);">菜单排序</a>
+                                <span id='orderDis' class='dn btn btn_disabled'>菜单排序</span>
+                                <a id='finishBt' href="javascript:void(0);" class='dn btn btn_default' style="display:none">完成</a>
+                            </div>
+                        </div>
+                        <div class="actionTip dn">
+                        	<p style="display:block; line-height:500px; text-align:center">点击左侧菜单进行编辑操作</p>
+                        </div>
+                        <div class="menu_form_area">
+                            <div id='js_none' class="menu_initial_tips tips_global" style="display:none;"></div>
+                            <div id='js_rightBox' class="portable_editor to_left" style="display:block;">
+                                <div class="editor_inner">
+                                    <div class="global_mod float_layout menu_form_hd js_second_title_bar">
+                                        <h4 class="global_info" style="display:table; float:left">菜单名称</h4>
+                                        <div class="global_extra" style=" display:table; float:right">
+                                            <a href="javascript:void(0);" id='jsDelBt'>删除菜单</a>
+                                        </div>
+                                        <div class="cl"></div>
+                                    </div>
+                                    <div class="menu_form_bd" id='view'>
+                                        <div id='js_innerNone' style='display:none;' class="msg_sender_tips tips_global"></div>
+            
+                                        <div class="frm_control_group js_setNameBox Gform w1 l">
+                                            <ul>
+                                            <li class="Gname js_menuTitle">菜单名称</li>
+                                            <li class="Ginput">
+                                            	<input type="text" class="js_menu_name" name="title" id="title" />
+                                                <span class="txtTips">字数不超过5个汉字或16个字母</span>
+                                            </ul>
+                                            
+                                            <ul class="contents">
+                                            <li class="Gname js_menuContent">菜单内容</li>
+                                            <li class="Ginput">
+                                            	<div class="switch">
+                                                    <input type="radio" value="0" name="type" id="type" />
+                                                    <div class="newRadio">
+                                                        <span class="valfirst hover" data-val="0">发送消息</span> <!-- 微信菜单其他事件 -->
+                                                        <notempty name="events_list">
+                                                        <span class="valevents" data-val="2">选择事件</span>
+                                                        </notempty>
+                                                        <span class="vallast" data-val="1">发布平台活动</span>
+                                                       
+                                                    </div>
+                                                    <input type="hidden" value="" name="response_class" id="response_class" />
+                                                    <input type="hidden" value="" name="response_info" id="response_info" />
+
+                                                    <div class="newRadio-default">
+                                                    	<div class="content_wrap" id="div_replyContent" style=" position:relative">
+                                                        <div class="msg_sender" id="js_msgSender">
+                                                            <div class="msg_tab">
+                                                                <ul class="tab_navs">
+                                                                        <li class="tab_nav tab_text selected" data-type="0" data-rel=""><a href="javascript:void(0);">&nbsp;<i class="icon_msg_sender"></i>文字</a></li>
+                                                                        <li class="tab_nav tab_appmsg" data-type="1" data-rel="{:U('Weixin/WeixinResp/selectImgTxt')}&callback=selectcallback"><a href="javascript:void(0);" class="libraryArea-add" >&nbsp;<i class="icon_msg_sender" ></i>图文</a></li>
+                                                                        <li class="tab_nav tab_img" data-type="5" data-rel=""><a href="javascript:void(0);" id ="uploadMeitu">&nbsp;<i class="icon_msg_sender" ></i>图片</a></li>
+                                                                </ul>
+                                                                <div class="tab_panel">
+                                                                    <div class="tab_content">
+                                                                        <div class="js_textArea inner no_extra">
+                                                                            <div class="emotion_editor">
+                                                                                <div class="edit_area js_editorArea editArea" id="reply_content_0" style="padding:0">
+                                                                                	<textarea name="editTxt" id="editTxt"></textarea>
+                                                                                    <div class="editor_toolbar tr"><span id="inputcounter">0</span>/600</div>
+                                                                                </div>
+                                                                                <div class="edit_area js_editorArea editArea dn" id="reply_content_1" style="overflow-y: auto; overflow-x: hidden; border:0px;">
+                                                                                <!--显示图文内容-->
+                                                                                </div>
+
+                                                                                <div class="edit_area js_editorArea editArea dn" id="reply_content_2" style="overflow-y: auto; overflow-x: hidden; border:0px;">
+                                                                                <!--显示图片内容-->
+                                                                                <img src="" /></div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                										</div>
+                                                    </div>
+                                                    <div class="newRadio-input">
+                                                    	<div class="content_wrap" id="div_replyContent" style=" position:relative">
+                                                        <div class="msg_sender" id="js_msgSender">
+                                                            <div class="msg_tab">
+                                                                <ul class="tab_navs">
+                                                                        
+                                                                        <li class="tab_nav tab_activity" data-type="6" data-rel="{:U('LabelAdmin/SelectBatches/index')}&callback=selectActivityCallback"><a href="javascript:void(0);" id ="addActivity">&nbsp;<i class="icon_msg_sender" ></i>营销活动</a></li>
+                                                                        <li class="tab_nav tab_member_link" data-type="7" data-rel=""><a href="javascript:void(0);" id ="gomemberLink">&nbsp;<i class="icon_msg_sender" ></i>会员中心</a></li>
+                                                                        <li class="tab_nav tab_link" data-type="2" data-rel=""><a href="javascript:void(0);" id ="goLink">&nbsp;<i class="icon_msg_sender" ></i>跳转链接</a></li>
+                                                                </ul>
+                                                                <div class="tab_panel">
+                                                                    <div class="tab_content">
+                                                                        <div class="js_textArea inner no_extra">
+                                                                            <div class="emotion_editor">
+                                                                                <div class="edit_area js_editorArea editArea" id="reply_content_3" style="overflow-y: auto; overflow-x: hidden; border:0px;">
+                                                                                <!--显示卡券内容-->
+                                                                                <div class="award_list">
+                                                                                <dl>
+                                                                                <dd>
+                                                                                    <p class="adward_title">
+                                                                                        <strong class="cardtitle">{$respText.goods_name}</strong>
+                                                                                        <span>
+                                                                                        <a href="javascript:void(0)" class="addStorage">补充库存</a>
+                                                                                        </span>
+                                                                                    </p>
+                                                                                    <div class="adShow">
+                                                                                        <div class="adShow_l shinfo">
+                                                                                            <img src="{$respText.logo_url}">
+                                                                                        </div>
+                                                                                        <div class="adShow_r">
+                                                                                            <span class="Astatic">总投入数量 <em class="totalNum">{$respText.quantity}</em></span>
+                                                                                            <span class="Astatic">剩余数量 <em class="remainNum">{$respText['quantity'] - $respText['card_get_num']}</em></span>
+                                                                                        </div>
+                                                                                        <div class="cl pt5"></div>
+                                                                                        <p class="AstaticDate tip" style="text-align:left">有效期：{$respText.time}</p>
+                                                                                    </div>
+                                                                                    <input type="hidden" id="material_id_selected" value="card" />
+                                                                                    <input type="hidden" value="{$respText['card_id']}" name="cardid" id="cardid" />
+                                                                                    <input type="hidden" value="{$respText['id']}" name="respid" id="respid" />
+                                                                                </dd>
+                                                                                </dl>
+                                                                                </div>
+                                                                                </div>
+                                                                                <div class="edit_area js_editorArea editArea dn" id="reply_content_4" style="overflow-y: auto; overflow-x: hidden; border:0px;">
+                                                                                <!--显示营销活动内容-->
+                                                                                <div class="actAdded">
+                                                                                    <div class="actTitle">{$respText[0]}</div>
+                                                                                    <div class="actOpr"><a href="">点击参与</a></div>
+                                                                                </div>
+                                                                                </div>
+                                                                                <div class="edit_area js_editorArea editArea dn" id="reply_content_6" style="overflow-y: auto; overflow-x: hidden; border:0px;"><p class="mt5 mb5">订阅者点击该菜单会跳到以下链接</p><input type="text" placeholder="http://" style=" width:90%; padding-right:10px;" class="frm_input" id="urlmemberText" name="urlmemberText" value="" disabled="disabled" /><p class="cl mt5 db"><a class="editMemberInfo" href="{:U('Wmember/Member/personCenterShowSet')}" target="_blank">编辑我的会员中心</a></p></div>
+                                                                                <div class="edit_area js_editorArea editArea dn" id="reply_content_5" style="overflow-y: auto; overflow-x: hidden; border:0px;"><p class="mt5 mb5">订阅者点击该菜单会跳到以下链接</p><input type="text" placeholder="http://" style=" width:90%; padding-right:10px; float:none" class="frm_input" id="urlText" name="urlText" />
+                                                                                
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                										</div>
+                                                    </div>
+                                                    <notempty name="events_list">
+                                                    <div class="newRadio-events">
+                                                            <div class="content_wrap" id="" style=" position:relative">
+                                                        <div class="msg_sender" id="">
+                                                            <div class="msg_tab">
+                                                                <div class="tab_panel">
+                                                                    <div class="tab_content">
+                                                                        <div class="js_textArea inner no_extra">
+                                                                            <div class="emotion_editor">
+                                                                                <div class="newRadio" id="eventsRaido">
+                                                                                    <volist name="events_list"  id="vo">
+                                                                                    <span class=""  data-val="{$vo.response_class}">{$vo.name}</span>
+                                                                                    </volist>
+                                                                                   
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        </div>    
+                                                    </div>
+                                                    </notempty>
+                                                </div>
+                                            </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="editor_arrow_wrp">
+                                    <i class="editor_arrow editor_arrow_out"></i>
+                                    <i class="editor_arrow editor_arrow_in"></i>
+                                </span>
+                            </div>
+                            <div class="cl fn db"></div>
+                            <div class="tc">
+                                <a href="javascript:void(0);" class="btn-all" id="pubBt">保存并发布</a>
+                                <a href="javascript:void(0);" class="btn-all-del" id="viewBt">预览</a>
+                            </div>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+    
+    <div id="content"></div>
+    
+    
+</body>
+</html>
+<script type="text/html" id="viewTpl">
+	<li class="jsMenu pre_menu_item jslevel1 ui-sortable ui-sortable-disabled  jsViewLi  current" id="">
+    <a href="javascript:void(0);" class="jsView pre_menu_link"  draggable="false">
+    <i class="icon_menu_dot dn"></i>
+	<i class="icon20_common sort_gray"></i>
+	<span class="js_addMenuTips">菜单名称</span>
+    </a>
+	<div class="form_appmsgItem" style="display:none" >
+	<input type="text" value="1"  name="level" />
+	<input type="text" value=""  name="itemid" />
+	<input type="text" value="0"  name="parent_id" />
+	<input type="text" value="菜单名称"  name="title" />
+	<input type="text" value="1"  name="type" />      
+	<input type="text" value=""  name="response_class" />
+	<input type="text" value=""  name="response_type" />
+	<input type="text" value=""  name="response_info" />
+	<input type="text" value=""  name="sort_id" />
+	</div>
+    <div class="sub_pre_menu_box jsSubViewDiv" style="display:none">
+        <ul class="sub_pre_menu_list">
+			<li class="js_addSubMenuBox">
+				<a href="javascript:void(0);" class="jsSubView js_addL2Btn" draggable="false">
+					<span class="sub_pre_menu_inner js_sub_pre_menu_inner">
+					<i class="icon14_menu_add"></i>
+					<span class="js_l2Title"></span>
+					</span>
+				</a>
+			</li>
+        </ul>
+        <i class="arrow arrow_out"></i>
+        <i class="arrow arrow_in"></i>
+    </div>
+	
+    </li>
+</script>
+
+<script type="text/html" id="viewsubTpl">
+	<li id="{{id}}" class="jslevel2 current">
+	<a href="javascript:void(0);" class="jsSubView" draggable="false">
+		<span class="sub_pre_menu_inner js_sub_pre_menu_inner">
+			<i class="icon20_common sort_gray"></i>
+			<span class="js_addMenuTips">子菜单名称</span>
+		</span>
+	</a>
+	<div class="form_appmsgItem" style="display:none" >
+	<input type="text" value="2"  name="level" />
+	<input type="text" value=""  name="itemid" />
+	<input type="text" value=""  name="parent_id" />
+	<input type="text" value="子菜单名称"  name="title" />
+	<input type="text" value="1"  name="type" />      
+	<input type="text" value="0"  name="response_class" />
+	<input type="text" value="0"  name="response_type" />
+	<input type="text" value=""  name="response_info" />
+	<input type="text" value=""  name="sort_id" />
+	</div>
+	</li>
+</script>
+
+<script type="text/html" id="cardresp">
+<div class="award_list">
+<dl>
+<dd>
+	<p class="adward_title">
+		<strong class="cardtitle">{{goods_name}}</strong>
+		<span>
+		<a href="javascript:void(0)" class="addStorage">补充库存</a>
+		</span>
+	</p>
+	<div class="adShow">
+		<div class="adShow_l shinfo">
+			<img src="{{logo_url}}">
+		</div>
+		<div class="adShow_r">
+			<span class="Astatic">总投入数量<em class="totalNum">{{quantity}}</em></span>
+			<span class="Astatic">剩余数量<em class="remainNum">{{remain_num}}</em></span>
+		</div>
+		<div class="cl pt5"></div>
+		<p class="AstaticDate tip" style="text-align:left">有效期：{{$respText['time']}}</p>
+	</div>
+	<input type="hidden" value="{{card_id}}" name="cardid" id="cardid">
+	<input type="hidden" value="{{id}}" name="respid" id="respid">
+</dd>
+</dl>
+</div>
+</script>
+
+<script type="text/html" id="activityresp">
+<div class="actAdded">
+	<div class="actTitle">{$respText['smallname']}</div>
+	<div class="actOpr"><a href="">点击参与</a></div>
+</div>
+</script>
+
+<script type="text/html" id="confirm">
+<div class='loadTip'>
+	<div class='loadStatus tip'>
+	<dl>
+	<dt>子菜单确认</dt>
+	<dd>添加子菜单后，一级菜单的内容将被清除。</dd>
+	<dd>确定添加子菜单？</dd>
+	</dl>
+	</div>
+</div>
+</script>
+
+<script type="text/html" id="confirmdel">
+<div class='loadTip'>
+	<div class='loadStatus tip'>
+	<dl>
+	<dt>删除确认</dt>
+	<dd>删除后“菜单名称”菜单下设置的内容将被删除</dd>
+	</dl>
+	</div>
+</div>
+</script>
+
+<script type="text/html" id="memberTips">
+<div class='loadTip'>
+	<div class='loadStatus tip line24'>
+	<dl>
+	<dt>旺财建议您在菜单中添加会员中心入口，方便粉丝查看订单、福利等信息！</dt>
+	<dd class="pt5"><a href="{{url}}" target="_blank">编辑会员中心</a></dd>
+	<dd class="pt10 c999"><label><input type="checkbox" name="istip" />&nbsp;&nbsp;不再提示此信息</label></dd>
+	</dl>
+	</div>
+</div>
+</script>
+<script type="text/javascript">
+function send_add_upt_msg(){
+	var id = $(".current .form_appmsgItem:eq(0)").children("input[name=itemid]").val();
+	var title = $(".current .form_appmsgItem:eq(0)").children("input[name=title]").val();
+	var level = $(".current .form_appmsgItem:eq(0)").children("input[name=level]").val();
+	var parent_id = $(".current .form_appmsgItem:eq(0)").children("input[name=parent_id]").val();
+	var response_class = $(".current .form_appmsgItem:eq(0)").children("input[name=response_class]").val();
+	var response_type = $(".current .form_appmsgItem:eq(0)").children("input[name=response_type]").val();
+	var response_info = $(".current .form_appmsgItem:eq(0)").children("input[name=response_info]").val();
+	var sort_id = $(".current .form_appmsgItem:eq(0)").children("input[name=sort_id]").val();
+	var type = $(".current .form_appmsgItem:eq(0)").children("input[name=type]").val();
+	var context = $(".current");
+	if (level == "2" && parent_id == "") {
+		// 重新获取parent_id
+		parent_id = $(".current").closest(".jslevel1").find("input[name=itemid]:eq(0)").val();
+		if (parent_id == "") {
+			return 0;
+		}
+			
+	}else if(level == "1"){
+		if(title.length>5){
+			Diaerror("一级菜单名称不能超过5个汉字");
+		}	
+	}else if(level == "2"){
+		if(title.length>13){
+			Diaerror("二级菜单名称不能超过13个汉字");
+		}
+	}
+	var reqData = {
+		id : id,
+		title : title,
+		level : level,
+		parent_id : parent_id,
+		response_class : response_class,
+		response_type : response_type,
+		response_info : response_info,
+		sort_id : sort_id,
+		type : type
+		};
+    if(response_class == 2){
+        reqData.response_info = $('#urlText').val();
+    }
+	$.ajax({
+		type: "POST",
+		url:"{:U('Weixin/WeixinMenu/menuSubmit')}",
+		data:reqData,
+		dataType:'json',
+		success: function(data) {
+			// 1. 获取服务器端返回结果中的id和sort_id
+			var id = data.data.id;
+			var sort_id = data.data.sort_id;
+			var empty_menu_id = data.data.isNullId;
+			var empty_menu_parentid = data.data.parentId;
+			// 2. 更新id和sort_id到对应input中
+			context.children(".form_appmsgItem").children("input[name=itemid]").val(id);
+			context.children(".form_appmsgItem").children("input[name=sort_id]").val(sort_id);
+			//menu_pub(empty_menu_id,empty_menu_parentid)
+		}
+	});
+}
+
+function send_del_msg(){
+	var id = $(".current .form_appmsgItem:eq(0)").children("input[name=itemid]").val();
+	if (id == "") {
+		return 0;
+	}
+	var reqData = {
+		id : id
+		};
+	$.ajax({
+		type: "POST",
+		url:"{:U('Weixin/WeixinMenu/menuDelete')}",
+		data:reqData,
+		dataType:'json',
+		success: function(data) {
+			Diasucceed("删除成功！");
+			$(".actionTip").removeClass("dn");
+			$(".menu_form_area").hide();
+		}
+	});
+}
+
+function menu_pub(empty_menu_id,empty_menu_parent_id){
+		var reqData = {};
+		$.ajax({
+			type: "POST",
+			url:"{:U('Weixin/WeixinMenu/publicWx')}",
+			data:reqData,
+			async: false,
+			dataType:'json',
+			success: function(data) {
+				var results = data.status;
+				if(results == 0){
+					Diaerror(data.info);
+				}else if(results == 1){
+					Diasucceed(data.info);
+					window.location.reload();
+				}
+			}
+		});
+}
+
+
+
+$(function(){
+$(".Gform .Ginput .switch .newRadio span.valevents").click(function(){
+    $(".Gform .Ginput .switch .newRadio span").removeClass('hover');
+    $(this).addClass('hover');
+    var response_class=0;
+   var cpc= $('.Gform .Ginput .switch .newRadio#eventsRaido span[data-val="'+response_class+'"]');
+   if(cpc.length > 0){
+    cpc.addClass('hover');
+   }else{
+    $('.Gform .Ginput .switch .newRadio#eventsRaido span:first').addClass('hover');
+   }
+   response_class=$('.Gform .Ginput .switch .newRadio#eventsRaido span.hover').data("val");
+    $("#response_class").val(response_class);
+    $("#response_info").val("-");
+    $(this).parents(".switch").addClass('events');
+    return false;
+});
+
+
+$('.Gform .Ginput .switch .newRadio#eventsRaido span').click(function(){
+    $('.Gform .Ginput .switch .newRadio#eventsRaido span').removeClass('hover');
+    $(this).addClass("hover");
+    $("#response_class").val($(this).data('val'));
+    $("#response_info").val();
+    return false;
+});
+
+$(".Gform .Ginput .switch .newRadio span").click(function(){
+    if(!$(this).hasClass('valevents') && $(this).parent().attr('id') != "eventsRaido"){
+        $(this).parents(".switch").removeClass('events');
+    }
+});
+
+
+$("#editTxt").change(function(e) {
+	$(".edit_area").hide();
+	$("#reply_content_0").show();
+	$("#editTxt").show();
+	$("#editTxt").focus();
+	$("#type").val(0);
+	$("#response_class").val(0);
+	var response_info = $("#editTxt").val();
+	response_info = response_info.replace(/\n/g,'<br>');
+	$("#response_info").val(response_info);
+});
+
+
+$("input[name=urlText]").change(function(e) {
+	var urlText = $("input[name=urlText]").val();      
+	$("#response_info").val(urlText);
+});
+	
+	$("body").on("click",".addStorage",function(e) {
+		var card_num = $(".remainNum").html();
+        var remainNums =100000 - card_num;
+		var id= $("#respid").val();
+        art.dialog({
+            title: '补充库存',
+            content: "<div class='popupWin'><p class='DiaTitle'>请输入卡券增加的库存量（还能添加<em class='remainNums redfont'>"+remainNums+"</em>张）</p><input type='text' maxlength='6' name='Storage' id='addStorage' class='DiaInput' /></div>",
+            id: 'art_addnum',
+            ok: function() {
+                var addNum = $('#addStorage').val();
+                var totalNum = parseInt($(".totalNum").html()) + parseInt($(".DiaInput").val());
+                var remainNum = parseInt($(".remainNum").html()) + parseInt($(".DiaInput").val());
+                if((addNum > remainNums) || (!/^[1-9]{1}[0-9]{0,5}$/.test(addNum))){
+                    Diaerror('数量格式错误！区间为1至'+remainNums);
+                    return false;
+                }
+                $.post("{:U('Weixin/WeixinCard/addStorageNum')}", {
+                    id: id,
+                    addNum: addNum
+                }, function(resp) {
+                    //库存添加成功
+                    if (resp.status == 1) {
+                       Diasucceed("库存变更成功！");
+                       $(".totalNum").html(totalNum);
+                       $(".remainNum").html(remainNum);
+                    }else{
+                        Diasucceed(resp.info);
+                    }
+                }, 'json');
+            },
+            cancel: true,
+            lock: true,
+            width: 400
+        });
+	});
+	//菜单排序
+	$("body").on("click","#orderBt",function(){
+		show_menu(false);
+		var level = $(".current .form_appmsgItem:eq(0)").children("input[name=level]").val();
+		var parentobj;
+		if (level == "1") {
+			parentobj = $(".current").find("ul.sub_pre_menu_list");
+		} else {
+			parentobj = $(".current").closest("ul.sub_pre_menu_list");
+		}
+		show_sub_menu(parentobj, false);
+		$("#finishBt").show();
+		$("#orderBt").hide();
+		$(".pre_menu_link").attr("draggable",true);
+		$(".icon_menu_dot").css("display","none");
+		$(".sort_gray").css("display","inline-block");
+		$("#menuList").sortable({
+			disabled: false,
+			stop: function( event, ui ){
+					// 遍历菜单，发送消息给服务器端
+					var menus = $("#menuList").find(".jslevel1");
+					menus.each(function(index, menu) {
+						var id = $(this).children(".form_appmsgItem:eq(0)").children("input[name=itemid]").val();
+						var sort_id = index + 1;
+						// post msg
+						if (id == "") {
+							return 0;
+						}
+						var reqData = {
+							id : id,
+							sort_id:sort_id
+							};
+						$.ajax({
+							type: "POST",
+							url:"{:U('Weixin/WeixinMenu/menuSort')}",
+							data:reqData,
+							dataType:'json'
+						});
+					})
+				}
+		});
+		$("ul.sub_pre_menu_list").sortable({
+			disabled: false,
+			stop: function( event, ui ){
+					// 遍历菜单，发送消息给服务器端
+					var menus = $("#menuList").find(".jslevel2");
+					menus.each(function(index, menu) {
+						var id = $(this).children(".form_appmsgItem:eq(0)").children("input[name=itemid]").val();
+						var sort_id = index + 1;
+						// post msg
+						if (id == "") {
+							return 0;
+						}
+						var reqData = {
+							id : id,
+							sort_id:sort_id
+							};
+						$.ajax({
+							type: "POST",
+							url:"{:U('Weixin/WeixinMenu/menuSort')}",
+							data:reqData,
+							dataType:'json'
+						});
+					})
+				}
+		});
+	})	
+})
+
+function show_menu_content() {
+	var contentCallback = function(){
+		var response_class = $(".current .form_appmsgItem:eq(0)").children("input[name=response_class]").val();
+		var response_info = $(".current .form_appmsgItem:eq(0)").children("input[name=response_info]").val();
+		var type = $(".current .form_appmsgItem:eq(0)").children("input[name=type]").val();
+		$("#response_class").val(response_class);
+		$("#response_info").val(response_info);
+		$("#type").val(type);
+		if(response_class != 8 && (response_info == "" || response_class==0 || response_class=="") ){
+			$("#type").val(0);
+			$(".Gform .Ginput .switch .newRadio span:first").click();
+			$(".tab_nav").removeClass("selected");
+			$(".tab_text").addClass("selected");
+			$(".edit_area").hide();
+			$("#reply_content_0").show();
+			$("#editTxt").text("");
+			response_class = 0;
+			$("#inputcounter").text(0);
+		}
+		// 根据response_class显示类型及内容
+		switch(parseInt(response_class))
+		{
+			
+			case 0:
+			$("#type").val(0);
+			$(".Gform .Ginput .switch .newRadio span:first").click();
+			$(".tab_nav").removeClass("selected");
+			$(".tab_text").addClass("selected");
+			$(".edit_area").hide();
+			$("#reply_content_0").show();
+			$("#editTxt").val(response_info.replace(/<br\s*\/?>/gi,'\r\n'));
+			var inputcounter = response_info.length; 
+			response_info = response_info.replace(/<br\s*\/?>/gi,'\r\n');
+			$("#inputcounter").text(inputcounter);
+			$("#urlText").val("");
+			break;
+			
+			case 1:
+			$("#type").val(0);
+			$(".Gform .Ginput .switch .newRadio span:first").click();
+			$(".tab_nav").removeClass("selected");
+			$(".tab_appmsg").addClass("selected");
+			$(".edit_area").hide();
+			$("#urlText").val("");
+			$("#reply_content_1").show();
+			var data = {material_id:response_info};
+			var dialog = art.dialog({title:false,lock:true});
+			$.post("{:U('Weixin/WeixinResp/showMaterialById')}",data,function(d){
+				dialog.close();
+				$(".edit_area").hide();
+				$("#reply_content_1").show();
+				$("#reply_content_1").html(d);
+				$("#type").val(0);
+				$("#response_class").val(1);
+				$("#response_info").val(response_info);
+				windowheight();
+			});
+			break;
+			
+			case 2:
+			$("#type").val(1);
+			$(".Gform .Ginput .switch .newRadio span:last").click();
+			$(".edit_area").hide();
+			$(".tab_nav").removeClass("selected");
+			$(".tab_link").addClass("selected");
+			$("#reply_content_5").show();
+			$("#urlText").val(response_info);
+			break;
+			
+			case 4:
+			$("#type").val(1);
+			$(".Gform .Ginput .switch .newRadio span:last").click();
+			$(".edit_area").hide();
+			$("#urlText").val("");
+			$("#reply_content_3").show();
+			$(".tab_nav").removeClass("selected");
+			$(".tab_card").addClass("selected");
+			var datas = {card_id:response_info};
+			var dialog = art.dialog({title:false,lock:true});
+			$.post("{:U('Weixin/WeixinMenu/getCardInfo')}",datas,function(d){
+				dialog.close();
+				$(".cardtitle").html(d.goods_name);
+				$(".adShow_l img").attr("src",d.logo_url);
+				$(".totalNum").html(d.quantity);
+				$(".remainNum").html(parseInt(d.quantity - d.card_get_num));
+				$(".AstaticDate ").html("有效期：" + d.time);
+				$("#cardid").val(d.card_id);
+				$("#respid").val(d.id);
+			},'json');
+			break;
+			
+			case 5:
+			$("#type").val(0);
+			$("#urlText").val("");
+			$(".Gform .Ginput .switch .newRadio span:first").click();
+			$(".tab_nav").removeClass("selected");
+			$(".tab_img").addClass("selected");
+			$(".edit_area").hide();
+			$("#reply_content_2").show();
+			$("#reply_content_2 img").attr("src",response_info);
+			break;
+			
+			case 6:
+			$("#type").val(1);
+			$("#urlText").val("");
+			$(".Gform .Ginput .switch .newRadio span:last").click();
+			$(".tab_nav").removeClass("selected");
+			$(".tab_activity").addClass("selected");
+			$(".edit_area").hide();
+			$("#reply_content_4").show();
+			//$("#urlText").val(response_info);
+			var datas = {batch_id:response_info};
+			var dialog = art.dialog({title:false,lock:true});
+			$.post("{:U('Weixin/WeixinMenu/getBatchInfo')}",datas,function(d){
+				dialog.close();
+				$(".actTitle").html(d.name);
+			},'json');
+			break;
+			
+			case 7:
+			$("#type").val(1);
+			$("#urlText").val("");
+			$(".Gform .Ginput .switch .newRadio span:last").click();
+			$(".edit_area").hide();
+			$(".tab_nav").removeClass("selected");
+			$(".tab_member_link").addClass("selected");
+			$("#reply_content_6").show();
+			$("#urlmemberText").val(response_info);
+			break;
+
+            case 8:
+                $("#type").val(0);
+                $("#urlText").val("");
+                $(".Gform .Ginput .switch .newRadio span.valevents").click();
+                $(".edit_area").hide();
+                $(".tab_nav").removeClass("selected");
+                $(".tab_member_link").addClass("selected");
+                $("#reply_content_6").hide();
+                //$("#urlmemberText").val(response_info);
+            break;
+			
+			default:
+			$("#type").val(0);
+			$("#urlText").val("");
+			$(".Gform .Ginput .switch .newRadio span:first").click();
+			$(".tab_nav").removeClass("selected");
+			$(".tab_text").addClass("selected");
+			$(".edit_area").hide();
+			$("#reply_content_0").show();
+			$("#editTxt").empty().show();
+			break;
+		}
+	}
+	setTimeout(contentCallback,200);
+}
+</script>
+<script type="text/javascript">
+$(function(){
+	var hasCurrent = $(".current").length;
+	if(hasCurrent < 1){
+		$(".actionTip").removeClass("dn");
+		$(".menu_form_area").hide();
+	}
+	var hasMenu = $("#menuList").children(".jslevel1").length;
+	if(hasMenu <1){
+		$(".actionTip").removeClass("dn");
+		$(".menu_form_area").hide();
+	}
+	var menunum = $(".jslevel1").length;
+	var submenunum = $(".jslevel1 .sub_pre_menu_box li").length;
+	if(menunum >= 3){
+		//$(".js_addMenuBox").remove();
+		$("#orderDis").hide();
+		$("#orderBt").show();
+	}
+	if(submenunum>=5){
+		//$(".js_addSubMenuBox").remove();
+		$("#orderDis").hide();
+		$("#orderBt").show();
+	}
+	$(".jslevel1").addClass("size1of" + menunum);
+	show_menu(true);
+	
+	//检查多行文本框字数
+	$("#editTxt").keyup(function(){
+	   var len = $(this).val().replace(/\n/g,'<br>').length;
+	   $("#inputcounter").text(len);
+	   if(len > 600){
+		   Diaerror("输入字数超过600个字，请做适当调整！")
+		   $("#inputcounter").text(len);
+		   $(this).focus();
+		   return false;
+	   }
+	});
+	//添加一级菜单
+	$("body").on("click",".js_addL1Btn",function(){
+		$(".actionTip").addClass("dn");
+		$(".menu_form_area").show();
+		var L1num = $("#menuList").find(".jslevel1").length;
+		if(L1num>0){
+			$("#orderDis").hide();
+			$("#orderBt").show();
+		}
+		if(L1num>= 3){
+			Diaerror("最多只能添加三个主菜单，当前已达设置上限");
+			return false;
+		}
+		var menuCount = $("#menuList").children("li").length;
+		var data ={};
+		var html = template('viewTpl', data);
+		$(".current").removeClass("current");
+		if(L1num>3){
+			$(this).closest("li.js_addMenuBox").detach();
+			return false;
+		}else
+		{
+			$(this).closest("li.js_addMenuBox").before(html);
+			$(".pre_menu_item").removeClass("size1of1").removeClass("size1of2").removeClass("size1of3").removeClass("size1of4");
+			$(".pre_menu_item").addClass("size1of"+(L1num+2));
+			var title = $(".current").find(".js_addMenuTips").html();
+			var id = "menu_" + (new Date).getTime();
+			
+			$(".current").attr("id", id);
+			show_menu_content();
+			$(".js_menu_name").val(title);
+			set_new_sort_id();
+			if(L1num==2){
+				$(".pre_menu_item").removeClass("size1of1").removeClass("size1of2").removeClass("size1of3").removeClass("size1of4");
+				$(".pre_menu_item").addClass("size1of3");
+				$(this).closest("li.js_addMenuBox").detach();
+			}
+			if(L1num>2){
+				$("#orderDis").hide();
+				$("#orderBt").show();
+			}
+			send_add_upt_msg();
+		}
+	})
+	
+	//删除菜单
+	$("body").on("click","#jsDelBt",function(){
+		var data={};
+		var confrimcontent = template("confirmdel",data);
+		art.dialog({
+			content:confrimcontent,
+			title:"删除菜单",
+			width:400,
+			ok:function(){
+				// 1. 向服务器端发送消息
+				send_del_msg();
+				// 2. 在界面删除菜单
+				var level = $(".current .form_appmsgItem:eq(0)").children("input[name=level]").val();
+				if (level == "1") {
+					$(".current").detach();
+					show_menu(true);
+				} else if (level == "2") {
+					var parentobj = $(".current").closest("ul.sub_pre_menu_list");
+					// 删除子菜单
+					$(".current").detach();
+					show_sub_menu(parentobj, true);
+				}
+			},
+			okVal:"确定",
+			cancel:function(){
+				art.dialog.close();
+			},
+			cancelVal:"取消"
+		})
+	})
+	
+	//显示子菜单
+	$("body").on("click",".jslevel1>a",function(){
+		$(".actionTip").addClass("dn");
+		$(".menu_form_area").show();
+		$("#menuList li").removeClass("current");
+		$(this).closest("li").addClass("current");
+		var title = $(this).find(".js_addMenuTips").html();
+		$(".js_menu_name:visible").val(title);
+		$(".sub_pre_menu_box").hide();
+		var t = $(this);
+		t.closest("li").find("div.sub_pre_menu_box").css("display","block");
+		var submenuNum = t.closest("li").find("li.jslevel2").length;
+		if(submenuNum<1){
+			$(".contents").show();
+		}else{
+			$(".contents").hide();
+		}
+		$(".txtTips").html("字数不超过5个汉字");
+		var parentobj = $(".current").find("ul.sub_pre_menu_list");
+		
+		if(submenuNum == 0) {
+			show_menu_content();
+		}else{
+			show_sub_menu(parentobj, true);
+		}
+	})
+	
+	//点击子菜单
+	$("body").on("click",".jslevel2>a",function(){
+		$(".actionTip").addClass("dn");
+		$(".menu_form_area").show();
+		$(".contents").show();
+		var title = $(this).find(".js_addMenuTips").html();
+		$(".js_menu_name:visible").val(title);
+		$("#menuList li").removeClass("current");
+		$(this).closest("li").addClass("current");
+		$(".txtTips").html("字数不超过13个汉字");
+		show_menu_content();
+	})
+	//添加子菜单
+	$("body").on("click",".js_addL2Btn",function(){
+		var _this = $(this);
+		$("#menuList li").removeClass("current");
+		var menuCount = _this.closest("ul.sub_pre_menu_list").children("li.jslevel2").length;
+		if(menuCount<=0){
+			var data={};
+			var confrimcontent = template("confirm",data);
+			art.dialog({
+				content:confrimcontent,
+				title:"添加子菜单",
+				width:400,
+				ok:function(){
+					var data = {};
+					var html = template('viewsubTpl', data);
+					if(menuCount>5){
+						$(this).closest("li").detach();
+						return false;
+					}else
+					{
+						_this.closest(".js_addSubMenuBox").before(html);
+						$(".js_menu_name").val("子菜单名称");
+						var id = "submenu_" + (new Date).getTime();
+						$(".current").attr("id", id);
+						var parent_id = _this.closest("li.jslevel1").children(".form_appmsgItem:eq(0)").children("input[name=itemid]").val();
+						$(".current").find("input[name=parent_id]").val(parent_id);
+						set_new_sort_id();
+						if(menuCount==5){
+							_this.closest("li").detach();
+						}
+						send_add_upt_msg();
+						show_menu_content();
+					}	
+				},
+				okVal:"确定",
+				cancel:function(){
+					art.dialog.close();	
+				},
+				cancelVal:"取消"
+			});
+		}else{
+			var data = {};
+			var html = template('viewsubTpl', data);
+			if(menuCount>4){
+				$(this).closest("li").detach();
+				return false;
+			}else
+			{
+				_this.closest(".js_addSubMenuBox").before(html);
+				$(".js_menu_name").val("子菜单名称");
+				var id = "submenu_" + (new Date).getTime();
+				$(".current").attr("id", id);
+				var parent_id = _this.closest("li.jslevel1").children(".form_appmsgItem:eq(0)").children("input[name=itemid]").val();
+				$(".current").find("input[name=parent_id]").val(parent_id);
+				set_new_sort_id();
+				if(menuCount==5){
+					_this.closest("li").detach();
+				}
+				send_add_upt_msg();
+				show_menu_content();
+			}	
+		}
+		
+	})
+	
+	//改变菜单名称
+	$("body").on("input propertychange",".js_menu_name",function(){
+		var thisTitle = $(this).val();
+		$(this).focus(function(e) {
+           $(this).removeClass("error"); 
+        });
+		var level = $(".current .form_appmsgItem:eq(0)").children("input[name=level]").val();
+		if(level == '1'){
+			$(this).attr("maxlength",5);
+			$(".current .js_addMenuTips:eq(0)").html(thisTitle);
+		    $(".current").children(".form_appmsgItem").children("input[name=title]").val(thisTitle.substring(0,5));
+		}else if(level=='2'){
+			$(this).attr("maxlength",13);
+			$(".current .js_addMenuTips:eq(0)").html(thisTitle);
+		    $(".current").children(".form_appmsgItem").children("input[name=title]").val(thisTitle.substring(0,13));
+		}
+		$(".current .form_appmsgItem:eq(0)").children("input[name=response_class]").val($("#response_class").val());
+		send_add_upt_msg();
+		
+	})
+	
+	//改变菜单内容
+	$("body").on("input propertychange","#response_info",function(){
+		var response_info = $(this).val();	
+	})
+	
+	$("body").on("click",".js_l2Title",function(){
+		$(this).closest("li").addClass("current");
+	})
+	
+	$("body").click(function(e) {
+        $(".msg_sender").removeClass("error");
+    });
+	$("#pubBt").click(function(e) {
+		var isLevel1 = $(".contents:visible").length;
+		if(isLevel1>0){
+			// 更新内容到input
+			var response_class = $("#response_class").val();
+			var response_info = $("#response_info").val();
+			//alert(response_info);
+			if( response_info == "" ){
+				Diaerror("请设置菜单内容");
+				$(".msg_sender").addClass("error");
+				return false;
+			}
+			if( response_class == 0 && response_info.length >600 ){
+				Diaerror("文本内容超过600字，请修改到合适的字数！");
+				$(".msg_sender").addClass("error");
+				return false;
+			}
+		}
+		var type = $("#type").val();
+		$(".current .form_appmsgItem:eq(0)").children("input[name=type]").val(type);
+		if(response_class != 0){
+			$(".current .form_appmsgItem:eq(0)").children("input[name=response_info]").val(response_info);
+		}else{
+			response_info = response_info;
+			$(".current .form_appmsgItem:eq(0)").children("input[name=response_info]").val(response_info);
+		}
+		$(".current .form_appmsgItem:eq(0)").children("input[name=response_class]").val(response_class);
+		// 从input中获取数据发送到服务器端，保存子菜单内容
+		send_add_upt_msg();
+		art.dialog.msg({
+			content:"发布成功后会覆盖原版本，且将在24小时内对所有用户生效，确认发布？",
+			ok:function(){
+				menu_pub();
+			},
+			okVal:"确定",
+			width:500,
+			cancel:true,
+			cancelVal:"取消"
+		})
+	});	
+
+	
+	$("body").on("click","#finishBt",function(){
+		show_menu(true);
+		var level = $(".current .form_appmsgItem:eq(0)").children("input[name=level]").val();
+		var parentobj;
+		if (level == "1") {
+			parentobj = $(".current").find("ul.sub_pre_menu_list");
+		} else {
+			parentobj = $(".current").closest("ul.sub_pre_menu_list");
+		}
+		show_sub_menu(parentobj, true);
+		$("#finishBt").hide();
+		$("#orderBt").show();
+		$(".pre_menu_link").attr("draggable",false);
+		$(".icon_menu_dot").css("display","inline-block");
+		$(".sort_gray").css("display","none");
+		$("#menuList").sortable({disabled: true});
+		parentobj.sortable({
+			disabled: true
+		});
+		art.dialog.msg({
+			content:"发布成功后会覆盖原版本，且将在24小时内对所有用户生效，确认发布？",
+			ok:function(){
+				menu_pub();
+			},
+			okVal:"确定",
+			width:500,
+			cancel:true,
+			cancelVal:"取消"
+		})
+	})
+})
+
+//菜单内容-文字
+function addTxt(){
+	$(".edit_area").hide();
+	$("#reply_content_0").show();
+	$("#editTxt").show();
+	$("#editTxt").focus();
+	$("#type").val(0);
+	$("#response_class").val(0);
+	$("#editTxt").change(function(e) {
+		$(".edit_area").hide();
+		$("#reply_content_0").show();
+		$("#editTxt").show();
+		$("#editTxt").focus();
+		$("#type").val(0);
+		$("#response_class").val(0);
+		var response_info = $("#editTxt").val().replace(/\n/g,'<br>');
+		$("#response_info").val(response_info);
+    });
+}
+//菜单内容-图文
+function addMaterial(url){
+	art.dialog.open(url,{
+		title:"选择图文信息",
+		width:800
+	});
+}
+//菜单内容-图片
+function addImg(){
+	var opt = {
+		cropPresets:'720x400',
+		callback:function(data){
+			$(".edit_area").hide();
+			$("#reply_content_2").show().find("img").show().attr("src",data.src);
+			$("#type").val(0);
+			$("#response_class").val(5);
+			$("#response_info").val(data.src);
+		}
+	};
+	open_img_uploader(opt);
+}
+//菜单内容-卡券
+function addCard(url){
+	var isopen = 1; //0：未开通微信卡包业务，1：已开通微信卡包业务
+	if(isopen == 0)
+	{
+		art.dialog.msg({
+			content:"您的微信公众号未开通微信卡包业务",
+			ok:function(){
+				window.open("https://mp.weixin.qq.com");
+			},
+			okVal:"去开通",
+			width:400
+		})
+	}
+	else
+	{
+	art.dialog.open(url,{
+		title: '添加卡券',
+		width:800
+	});
+	}
+}
+//菜单内容-活动
+function addActivity(url){
+	art.dialog.open(url,{
+		title: '添加互动模块',
+		width:800
+	});
+}
+//选择卡券的回调
+var cardresp = function(d){
+	$("#material_id_selected").val("card");
+	var html2 = template('cardresp', d);
+	$(".edit_area").hide();
+	$("#reply_content_3").html(html2);
+	$("#reply_content_3").show();
+	$(".cardInfo").css("background",d.cardbg);
+	$(".cardInfo span").html(d.shopname);
+	$('.adShow_l img').attr("src",d.logo_url);
+	$('.cardtitle').html(d.goods_name);
+    if(d.date_type == 1){
+        var da = new Date(d.date_begin_timestamp*1000);
+        var year = da.getFullYear();
+        var month = da.getMonth()+1;
+        var date = da.getDate();
+        var da2 = new Date(d.date_end_timestamp*1000);
+        var year2 = da2.getFullYear();
+        var month2 = da2.getMonth()+1;
+        var date2 = da2.getDate();
+        var html = '有效期：'+[year,month,date].join('-')+'至'+[year2,month2,date2].join('-')
+    }else{
+        var html = '发送卡券后'+d.date_fixed_begin_timestamp+'天开始使用-发送卡券后'+d.date_fixed_timestamp+'天结束使用'
+    }
+	$('.AstaticDate').html(html);
+	$("#cardid").val(d.card_id);
+	$("#respid").val(d.id);
+	$(".totalNum").html(d.quantity);
+	$(".remainNum").html(d.quantity - d.card_get_num);
+	var card_num = parseInt(d.quantity - d.card_get_num);
+	var cid = d.id;
+	
+	$("#type").val(1);
+	$("#response_class").val(4);
+	$("#response_info").val(d.card_id);
+}
+
+//选择互动模块的回调
+var selectActivityCallback = function(d){
+	var html3 = template('activityresp', d);
+	$(".edit_area").hide();
+	$("#reply_content_4").show();
+	$("#reply_content_4").html(html3);
+	
+	$(".actTitle").html(d.name);
+	$("#material_id_selected").val("activity");
+	$("#activityid").val(d.batch_id);
+	
+	$("#type").val(1);
+	$("#response_class").val(6);
+	$("#response_info").val(d.batch_id);
+
+}
+
+//菜单内容-链接
+function addLink(){
+	$(".edit_area").hide();
+	$("#reply_content_5").show();
+	$("#type").val(1);
+	$("#response_class").val(2);
+	$("#response_info").val($("input[name=urlText]").val());
+}
+
+//菜单内容-会员中心
+function addLink2(){
+	$(".edit_area").hide();
+	$("#reply_content_6").show();
+	$("#type").val(1);
+	$("#response_class").val(7);
+	var memberUrl = "http://" + window.location.host + "{:U('Label/Member/index', array('node_id' => $nodeId))}";
+	$("#urlmemberText").val(memberUrl);
+	$("#response_info").val(memberUrl);
+}
+
+//检查字符数（汉字和字符区别统计）
+function check_input_length(value, byteLength, title, attribute) {
+       var newvalue = value.replace(/[^\x00-\xff]/g, "**"); 
+       var length = newvalue.length; 
+  
+       //当填写的字节数小于设置的字节数 
+      if (length * 1 <=byteLength * 1){ 
+            return; 
+      } 
+      var limitDate = newvalue.substr(0, byteLength); 
+      var count = 0; 
+      var limitvalue = ""; 
+     for (var i = 0; i < limitDate.length; i++) { 
+		var flat = limitDate.substr(i, 1); 
+		if (flat == "*") { 
+			  count++; 
+		} 
+     } 
+     var size = 0; 
+     var istar = newvalue.substr(byteLength * 1 - 1, 1); 
+     if (count % 2 == 0) { 
+		//当为偶数时 
+		size = count / 2 + (byteLength * 1 - count); 
+		limitvalue = value.substr(0, size); 
+    } else { 
+		//当为奇数时 
+		size = (count - 1) / 2 + (byteLength * 1 - count); 
+		limitvalue = value.substr(0, size); 
+    } 
+   Diaerror(title + "不能超过" + byteLength + "个字节（"+byteLength /2+"个汉字）！"); 
+   document.getElementById(attribute).value = limitvalue; 
+   return; 	
+}
+
+function show_menu(is_show_add_menu) {
+	var L1num = parseInt($("#menuList").find(".jslevel1").length);
+	$(".pre_menu_item").removeClass("size1of1").removeClass("size1of2").removeClass("size1of3").removeClass("size1of4");
+	$("#menuList").children(".js_addMenuBox").remove();
+	if (is_show_add_menu) {
+		if (L1num < 3) {
+		  var add_menu_btn = '<li class="js_addMenuBox pre_menu_item grid_line no_extra"><a href="javascript:void(0);" class="js_addL1Btn" draggable="false"><i class="icon14_menu_add"></i><span class="js_addMenuTips"> 添加菜单</span></a></li>';
+		  $("#menuList").append(add_menu_btn);
+		}
+		switch(L1num)
+		{
+		case 0:
+		  $(".pre_menu_item").addClass("size1of1");
+		  break;
+		case 1:
+		  $(".pre_menu_item").addClass("size1of2");
+		  break;
+		case 2:
+		  $(".pre_menu_item").addClass("size1of3");
+		  break;
+		case 3:
+		  $(".pre_menu_item").addClass("size1of3");
+		  break;
+		default:
+		  Diaerror("菜单出错");
+		}
+	} else {
+		switch(L1num)
+		{
+		case 0:
+		  break;
+		case 1:
+		  $(".pre_menu_item").addClass("size1of1");
+		  break;
+		case 2:
+		  $(".pre_menu_item").addClass("size1of2");
+		  break;
+		case 3:
+		  $(".pre_menu_item").addClass("size1of3");
+		  break;
+		default:
+		  Diaerror("菜单出错");
+		}
+	}
+}
+
+function show_sub_menu(parentobj, is_show_add_menu) {	
+	var menuCount = parentobj.children("li.jslevel2").length;
+	parentobj.children(".js_addSubMenuBox").detach();
+	if (is_show_add_menu && menuCount < 5) {
+		// 增加添加子菜单按钮
+		var add_sub_menu_btn = '<li class="js_addSubMenuBox"><a href="javascript:void(0);" class="jsSubView js_addL2Btn" draggable="false"><span class="sub_pre_menu_inner js_sub_pre_menu_inner"><i class="icon14_menu_add"></i><span class="js_l2Title"></span></span></a></li>'
+		parentobj.append(add_sub_menu_btn);
+	}
+}
+
+function set_new_sort_id() {
+	var max_sort_id = 0;
+	$("input[name=sort_id]").each(function(index, element) {
+        var sort_id = $(element).val();
+		if (sort_id && parseInt(sort_id) > max_sort_id) {
+			max_sort_id = parseInt(sort_id);
+		}
+    });
+	$(".current .form_appmsgItem:eq(0)").children("input[name=sort_id]").val(max_sort_id + 1);
+}
+
+
+
+function show_sub_menu_by_id(id) {
+	$(".current").removeClass("current");
+	$("input[name=itemid]").each(function(index, element) {
+        var this_id = $(element).val();
+		if (this_id && parseInt(this_id) == parseInt(id)) {
+			var sub_menu = $(element).closest("li.jslevel2");
+			sub_menu.closest("li").addClass("current");
+			var parentobj = sub_menu.closest("ul.sub_pre_menu_list");
+			$("div.sub_pre_menu_box").css("display","none");
+			parentobj.closest("li").find("div.sub_pre_menu_box").css("display","block");
+			show_sub_menu(parentobj, true);
+			show_menu_content();
+			return false;
+		}
+		return false;
+    });
+}
+</script>
+
+<script type="text/javascript">
+$(function(){
+	//手机预览
+	$("#viewBt").click(function(){
+		$("#mobileDiv").css("display","block");
+		$(".mask").css("display","block");
+		});
+	$("#viewClose").click(function(){
+		$("#mobileDiv").css("display","none");
+		$(".mask").css("display","none");
+		});
+
+	$(".jsView").click(function(){
+		$(".jsSubViewDiv").css("display","none");
+		$(this).parents("li").find(".jsSubViewDiv").css("display","block");
+    });	
+})
+</script>

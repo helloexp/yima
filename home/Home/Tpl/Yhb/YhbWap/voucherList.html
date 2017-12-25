@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>我的卡券_会员中心</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_yhb.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.new.js?v=__VR__"></script>
+<style type="text/css">
+	.exgratia .box { margin-left: 0;}
+</style>
+</head>
+<body>
+<div id="wrapper" class="exgratia">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+            <div class="goback"><a href="javascript:history.go(-1);"><i ></i></a></div>
+            <div class="logo"><span>我的卡券</span></div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="bgf0efed">
+                <div class="tabList">
+                    <ul class="fn list4">
+
+                        <li <?php if ($type === '') { ?>
+                            class="hover"
+                        <?php } ?> ><a href="{:U('Yhb/YhbWap/voucherlist')}">全部</a></li>
+                        <li <?php if ($type == '0') { ?>
+                            class="hover"
+                        <?php } ?>><a href="{:U('Yhb/YhbWap/voucherlist',array('type'=>0))}">未使用</a></li>
+                        <li<?php if ($type == '2') { ?>
+                            class="hover"
+                        <?php } ?>><a href="{:U('Yhb/YhbWap/voucherlist',array('type'=>2))}">已使用</a></li>
+                        <li<?php if ($type == '3') { ?>
+                            class="hover"
+                        <?php } ?>><a href="{:U('Yhb/YhbWap/voucherlist',array('type'=>3))}">已过期</a></li>
+                    </ul>
+                </div>
+                <div id="userCode">
+                <div class="box">
+                    <!--循环-->
+                    <include file="voucher_goods"/>
+                    <!--循环-->
+                    </div>
+                </div>
+                <div class="get-more" data-url="{$nextUrl}"><i></i><a href="javascript:;">往上拉查看更多</a></div>
+                
+                <nav id="page-nav">
+                    <a href="javascript:;"></a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+<script type="text/javascript">
+    _street_list = {};
+    _in_ajax = false;
+    _load_over = false;
+    $(document).ready(function() {
+        var loadhtml = '<div id="infscr-loading" style="text-align: center; display:none;"><img src="__PUBLIC__/Label/Image/Item/loading.gif"><div><em>加载中...</em></div></div>';
+        $("#userCode").append(loadhtml);
+        $("body").append("<div id='masonry2' style='display:none;'></div>");
+        $(window).scroll(function () {
+            setTimeout(function(){
+                if ($(document).scrollTop() + $(window).height() >= $(document).height()) {
+                    if (_in_ajax) return ;
+                    if(_load_over){
+                        $("#infscr-loading").show();
+                        $("#infscr-loading em").text("没有更多数据了");
+                        $("#infscr-loading img").hide();
+                        setTimeout(function(){
+                            $("#infscr-loading").hide();
+                        },2000);
+                        return ;
+                    }
+                    _in_ajax = true;
+                    if($("masonry2").hasClass("erro")){return false;}
+                    $("masonry2").addClass("erro");
+                    var url = $('.get-more').attr("data-url");
+                    $("#infscr-loading").show();
+                    $('#masonry2').load(url + ' ' + ".box", null, function(data,status){
+                        var l = $("#masonry2 .box").length;
+                        if (l == 0) {
+                            _load_over = true;
+                            $("#infscr-loading em").text("没有更多数据了");
+                            $("#infscr-loading img").hide();
+                            setTimeout(function(){
+                                $("#infscr-loading").hide();
+                            },2000);
+                            $('.get-more').hide();
+                        }else{
+                            $('#userCode').append($('#masonry2').html());
+                            $("#infscr-loading").fadeOut(500);
+                        }
+                        var newpath = newPath(url);
+                        $(".get-more").attr("data-url",newpath);
+                        $("masonry2").removeClass("erro");
+
+                        _in_ajax = false;
+                    });
+                };
+            },500);
+        });
+});
+
+    function newPath(path){
+        path = path.split("p=");
+        var p = path[1]*1+1;
+        newpath = path[0]+"p="+p;
+        return newpath;
+    };
+</script>
+
+</html>

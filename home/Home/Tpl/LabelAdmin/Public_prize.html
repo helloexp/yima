@@ -1,0 +1,117 @@
+<volist name="cj_cate_arr" id="cate_list">
+<dl class="sort_for">
+   	<dt>
+       <strong id="{$cate_list['id']}">{$cate_list['name']}</strong>
+       <span>
+       	<a href="javascript:void(0)" class="pl20 js_edit" data-cate="{$cate_list['id']}">编辑</a>
+       	<empty name="jp_arr[$cate_list['id']]">
+       	<a href="javascript:void(0)" class="ml10" onclick="delCate({$cate_list['id']})">删除</a>
+    	</empty>
+    </span>
+    <select name="cj_cate_to_sort[{$cate_list['id']}]" onchange="reEditSort(this);" data-origin="{$cate_list['sort']}">
+    	<volist name="cj_cate_arr" id="cate_list_sort">
+    	<option value="{$cate_list_sort['sort']}"  <if condition="$cate_list_sort['id'] eq $cate_list['id']">selected="selected"</if> >序列{$cate_list_sort['sort']}</option>
+    	</volist>
+    </select>
+    </dt>
+    <notempty name="jp_arr[$cate_list['id']]">
+    <volist name="jp_arr[$cate_list['id']]" id="prize">
+    <dd>
+    	<p class="adward_title">
+            <strong>{$prize['batch_name']}</strong>
+            <span>
+            <a href="javascript:void(0)" onclick="editPrize({$cate_list['id']}, {$prize['b_id']})">编辑</a>
+            <a href="javascript:void(0)" class="ml10" onclick="setPrizeStatus({$m_id}, {$prize['id']}, {$prize['status']},{$prize['remain_num']})">
+            	<eq name="prize['status']" value="1">停用<else />启用 <a href="javascript:void(0);" onclick="prize_back('{$prize['id']}')" class="ml10 rollback">回退</a></eq>
+            </a>
+            <input name="prizeStatus[{$prize['id']}]" value="{$prize['status']}" type="hidden" />
+            </span>
+            <if condition="$prize['goods_type'] eq 14">
+            <em class="type2" title="积分会自动添加到会员账户中">积分</em>
+            <elseif condition="$prize['goods_type'] eq 12" />
+            <em class="type3" title="红包用于抵扣消费者在线购物<br>金额，可在个人中心查看">定额红包</em>
+            <elseif condition="$prize['source'] eq 6 or $prize['source'] eq 7" />
+            <em class="type3" title="微信红包领取后可在微信钱包中查看">微信红包</em>
+            <else />
+            <em class="type1" title="<eq name="prize['send_type']" value="1">卡券领取后可在微信卡包中查看<else />卡券通过短信形式下发</eq>">卡券</em>
+            </if>
+            <!--样式：type1==卡券,type2==积分,type3==定额红包,-->
+        </p>
+        <div class="adShow">
+        	<div class="adShow_l" style="background-image:url({:get_upload_url($prize['batch_img'])})"></div>
+            <div class="adShow_r">
+                <span class="Astatic">总投入数量<em>{$prize['storage_num']}</em></span>
+                <span class="Astatic">剩余数量<em>{$prize['remain_num']}</em></span>
+            </div>
+            <div class="cl pt5"></div>
+            <if condition="$prize['goods_type'] neq 14 and $prize['goods_type'] neq 12">
+            <p class="AstaticDate tip"><span>发送形式:</span>
+            <if condition="$prize['send_type'] eq 1 or $prize['source'] eq 6 or $prize['source'] eq 7" >
+            <i title="以微信卡券形式发送" class="icon-eticket3"></i>
+            <else />
+            <i title="以短信形式发送" class="icon-eticket4"></i>
+            </if>
+            </p>
+            </if>
+            <notempty name="prize['available_time_txt']">
+            <p class="AstaticDate tip">有效期：{$prize['available_time_txt']}</p>
+            </notempty>
+        </div>
+    </dd>
+    </volist>
+    </notempty>
+    <dd class="blank">
+    	<p class="btn_area">
+        <a href="javascript:void(0)" class="addAward_btn"><i>✚</i> 添加奖品</a>
+        <input name="prizeCateId" value="{$cate_list['id']}" type="hidden"/>
+        </p>
+    </dd>
+</dl>
+</volist>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript">
+function prize_back(p_id){
+	art.dialog.confirm("您确定要将该卡券回退到库存？", function(){
+        var m_id = '{$m_id}';
+        $.post("{:U('LabelAdmin/CjSet/prizeBack')}",{"m_id":m_id,"p_id":p_id}, function(data) {
+            if (data.status == 1) {
+            	var data={"backNum":data.info};
+                var html = template("rollbackResult",data);
+                art.dialog({
+                    title: '卡券回退',
+                    width:"400px",
+                    content:html,
+                    cancel:function(){
+                        //art.dialog.list['PrizeBack'].close();
+                        var win = art.dialog.open.origin;
+                        win.location.reload();
+                    },
+                    cancelVal:"关闭"
+                })
+            }else{
+            	Diaerror(data.info);
+            }
+        }, 'json');
+    })
+}
+</script>
+<script type="text/html" id="rollbackResult">
+<div class='loadTip'>
+	<div class='loadStatus ok'>
+	<dl>
+	<dt>奖品回退成功！</dt>
+    <dd>您已成功回退<span class='redfont'>{{backNum}}</span>份奖品！</dd>
+	</dl>
+	</div>
+</div>
+</script>
+<script type="text/html" id="noremainTip">
+<div class='loadTip'>
+	<div class='loadStatus tip'>
+	<dl>
+	<dt>提示</dt>
+	<dd>该卡券奖品剩余数量为<span class='redfont'>{{remain_num}}</span>，重新启用后别忘了添加库存，以免影响活动正常进行！</dd>
+	</dl>
+	</div>
+</div>
+</script>

@@ -1,0 +1,665 @@
+<?php
+
+/**
+ * 百度直达号
+ */
+class IndexAction extends BaseAction {
+
+    public $UPLOAD_DIR;
+
+    public $IMG_LOG;
+    // 直达号渠道
+    const CHANNEL_TYPE = 5;
+
+    const CHANNEL_SNS_TYPE = 52;
+
+    const BATCH_TYPE_MICROWEB = 13;
+    // 1.创建直达号API
+    private $setNumberUrl = "https://openapi.baidu.com/rest/2.0/devapi/v1/lightapp/query/create";
+    // 2.直达号状态查询API
+    private $getStatusUrl = "https://openapi.baidu.com/rest/2.0/devapi/v1/lightapp/query/status/get";
+    // 3.查询query是否已被线上占用查询
+    private $getQueryUrl = "https://openapi.baidu.com/rest/2.0/devapi/v1/lightapp/query/isonline";
+
+    public $token;
+
+    public function _initialize() {
+        parent::_initialize();
+        /**
+         * 以下获取百度token的账号（生产、测试环境基于同一个帐号），为了不影响生产环境，测试完成，关闭该功能 $newgettoken =
+         * D('Getbaidutoken','Service'); $this->token=$newgettoken->gettoken();
+         */
+        $this->UPLOAD_DIR = APP_PATH . 'Upload/LogoImg/';
+        $this->IMG_LOG = APP_PATH . '/Upload/MicroWebImg/' . $this->node_id . '/';
+        $nodetype = $this->node_type_name;
+        $this->assign('nodetype', $nodetype);
+    }
+
+    public function index() {
+        $model = M('tbd_wail');
+        $row = $model->where(
+            array(
+                'node_id' => $this->node_id))->find();
+        // dump($row);
+        if ($row) {
+            $click_count = M('tchannel')->where(
+                array(
+                    'node_id' => $this->node_id, 
+                    'sns_type' => '52'))
+                ->order("id desc")
+                ->getField('click_count');
+            $model1 = M('Tdaystat');
+            $mode3 = M('tmarketing_info');
+            $map3 = array(
+                'node_id' => $this->node_id, 
+                'batch_type' => self::BATCH_TYPE_MICROWEB);
+            $tchannel = M('tchannel');
+            $res_tchannel = $tchannel->where(
+                array(
+                    'node_id' => $this->node_id, 
+                    'status' => '1', 
+                    'sns_type' => self::CHANNEL_SNS_TYPE))
+                ->order("id desc")
+                ->find();
+            
+            $tid = $mode3->where($map3)->find();
+            $batch_type = '13';
+            $batch_id = $tid['id'];
+            $channel_id = $res_tchannel['id'];
+            
+            $map = array(
+                'batch_type' => '13', 
+                'batch_id' => $batch_id);
+            $map['channel_id'] = $channel_id;
+            $map['day'] = date('Ymd', strtotime("-1 days"));
+            $query_arr = $model1->where($map)->getField("click_count");
+            
+            if ($row['url_type'] == '1') {
+                $model2 = M('tmicroweb_tpl_cfg');
+                $map = array(
+                    'node_id' => $this->node_id, 
+                    'field_type' => '0');
+                $tmicroweb = $model2->field('title,appdesc,image_name')
+                    ->where($map)
+                    ->find();
+                // $logo="Home/Upload/MicroWebImg/".$this->node_id.'/'.$tmicroweb['image_name'];
+                $logo = $this->_getUploadUrl($tmicroweb['image_name'], 
+                    "./Home/Upload/MicroWebImg/" . $this->node_id . '/');
+                $name = $tmicroweb['title'];
+                $desc = $tmicroweb['appdesc'];
+            } else {
+                $ecshopInfo = $mode3->field('id,name')
+                    ->where(
+                    array(
+                        'node_id' => $this->node_id, 
+                        'batch_type' => '29'))
+                    ->order("id desc")
+                    ->find();
+                
+                $logoInfo = M('tecshop_banner')->field('img_url')
+                    ->where(
+                    array(
+                        'node_id' => $this->node_id, 
+                        'm_id' => $ecshopInfo['id'], 
+                        'ban_type' => 1))
+                    ->order("id desc")
+                    ->find();
+                
+                $descInfo = M('tecshop_banner')->field('memo')
+                    ->where(
+                    array(
+                        'node_id' => $this->node_id, 
+                        'm_id' => $ecshopInfo['id'], 
+                        'ban_type' => 3))
+                    ->order("id desc")
+                    ->find();
+                // $logo="Home/Upload/".$logoInfo['img_url'];
+                $logo = $this->_getUploadUrl($logoInfo['img_url'], 
+                    './Home/Upload/');
+                $name = $ecshopInfo['name'];
+                $desc = $descInfo['memo'];
+            }
+            
+            $this->assign('logo', $logo);
+            $this->assign('name', $name);
+            $this->assign('desc', $desc);
+        }
+        
+        $this->assign('row', $row);
+        $this->assign('click_count', $click_count);
+        $this->assign('query_arr', $query_arr);
+        $this->display();
+    }
+    // 修改LOGO
+    public function logo() {
+        $model = M('tmicroweb_tpl_cfg');
+        $title = $model->where(
+            array(
+                'node_id' => $this->node_id, 
+                'field_type' => '0'))->getfield('title');
+        $appdesc = $model->where(
+            array(
+                'node_id' => $this->node_id, 
+                'field_type' => '0'))->find();
+        $imglogo = $model->where(
+            array(
+                'node_id' => $this->node_id, 
+                'field_type' => '0'))->find();
+        $this->assign('title', $title);
+        $this->assign('appdesc', $appdesc['appdesc']);
+        $this->assign('image_name', $imglogo['image_name']);
+        $this->assign('wayimg', $this->IMG_LOG);
+        $this->display();
+    }
+
+    public function edit_logo() {
+        // if($this->nodetype==
+        // 'c0')$this->ajaxReturn($this->nodetype,"您尚未上传企业资质或企业资质未通过审批！",0);
+        // $model=M('tbd_wail');
+        $model = M('tmicroweb_tpl_cfg');
+        $modelname = M('tmarketing_info');
+        $data = I('post.');
+        $arr = array();
+        $arr['title'] = $data['petname'];
+        $arr['image_name'] = $data['newlogo'];
+        $arr['appdesc'] = $data['appdesc'];
+        
+        $row = $model->where(
+            array(
+                'node_id' => $this->node_id, 
+                'field_type' => '0'))->select();
+        if ($row) {
+            $res = $this->move_image_log($data['newlogo']);
+            if ($res != true)
+                $this->ajaxReturn($res, $res, 0);
+            $outcome = $model->where(
+                array(
+                    'node_id' => $this->node_id, 
+                    'field_type' => '0'))->save($arr);
+            $modelname->where(
+                array(
+                    'node_id' => $this->node_id, 
+                    'batch_type' => '13'))->save(
+                array(
+                    'name' => $data['petname']));
+            // echo M()->getLastSql();
+        } else {
+            $this->ajaxReturn($row, "您还没有设置微官网", 0);
+        }
+        if ($outcome === false) {
+            $this->ajaxReturn($outcome, "编辑失败", 0);
+        } else {
+            $this->ajaxReturn($outcome, "编辑成功", 1);
+        }
+    }
+    // 关键字
+    public function query() {
+        $model = M('tbd_wail');
+        $row = $model->where(
+            array(
+                'node_id' => $this->node_id))->find();
+        $this->assign('row', $row);
+        $this->display();
+    }
+
+    public function submit_query() {
+        // 判断企业资质
+        if ($this->nodetype == 'c0')
+            $this->ajaxReturn($this->nodetype, "您尚未上传企业资质或企业资质未通过审批！", 1);
+        $textquery = I('post.newquery');
+        $url_type = I('post.rad_name');
+        $arr1 = array();
+        preg_match('/^[a-zA-Z0-9]+$/', $textquery, $arr1);
+        if (! empty($arr1)) {
+            $length = strlen($arr1[0]);
+            if ($length < 5 || $length > 20) {
+                $this->ajaxReturn(1, "关键字长度不符!!!", 1);
+            }
+        } else {
+            $res = check_str($textquery, 
+                array(
+                    'maxlen_cn' => 10, 
+                    'minlen_cn' => 3));
+            if ($res === false)
+                $this->ajaxReturn(1, "关键字长度不符!!!", 1);
+        }
+        // 判断字符长度
+        /*
+         * $res=check_str($textquery,array('maxlen_cn'=>20,'minlen_cn'=>3));
+         * if($res=== false)$this->ajaxReturn($len,"关键字长度不符!!!",1);
+         */
+        
+        // 判断是否已经创建过直达号
+        $model = M('tbd_wail');
+        $row = $model->where(
+            array(
+                'node_id' => $this->node_id))->find();
+        // if(!$row)$this->ajaxReturn($row,"信息不完善!!!",1);
+        if ($row['status'] == '1' || $row['status'] == '2')
+            $this->ajaxReturn($row['status'], "非法操作0.0", 1);
+            
+            // 判断配置是否完整
+        $mode3 = M('tmarketing_info');
+        if ($url_type == '2') {
+            $ecshopInfo = $mode3->field('id,name')
+                ->where(
+                array(
+                    'node_id' => $this->node_id, 
+                    'batch_type' => '29'))
+                ->order("id desc")
+                ->find();
+            
+            if (empty($ecshopInfo['id']) || empty($ecshopInfo['name']))
+                $this->ajaxReturn('错误', "您没有配置旺财小店", 1);
+            $logoInfo = M('tecshop_banner')->field('img_url')
+                ->where(
+                array(
+                    'node_id' => $this->node_id, 
+                    'm_id' => $ecshopInfo['id'], 
+                    'ban_type' => 1))
+                ->order("id desc")
+                ->find();
+            
+            if (empty($logoInfo))
+                $this->ajaxReturn('错误', "您没有配置旺财小店LOGO图片", 1);
+            $descInfo = M('tecshop_banner')->field('memo')
+                ->where(
+                array(
+                    'node_id' => $this->node_id, 
+                    'm_id' => $ecshopInfo['id'], 
+                    'ban_type' => 3))
+                ->order("id desc")
+                ->find();
+            
+            if (empty($descInfo))
+                $this->ajaxReturn('错误', "您没有配置旺财小店的简介", 1);
+            $batch_id = $ecshopInfo['id'];
+            $batch_type = '29';
+            $app_name = $ecshopInfo['name'];
+            $app_logo = $logoInfo['img_url'];
+            $app_desc = $descInfo['memo'];
+        } else if ($url_type == '1') {
+            
+            $model2 = M('tmicroweb_tpl_cfg');
+            $map = array(
+                'node_id' => $this->node_id, 
+                'field_type' => '0');
+            $tmicroweb = $model2->field('title,appdesc,image_name')
+                ->where($map)
+                ->find();
+            
+            $map3 = array(
+                'node_id' => $this->node_id, 
+                'batch_type' => self::BATCH_TYPE_MICROWEB);
+            $tid = $mode3->where($map3)->find();
+            if ($tmicroweb['title'] == '' || $tmicroweb['appdesc'] == '' ||
+                 $tmicroweb['image_name'] == '')
+                $this->ajaxReturn($row, "您的微官网信息不完善1,请完善!!!", 1);
+            if (! $tid)
+                $this->ajaxReturn($row, "您的微官网信息不完善2!!!", 1);
+            $batch_id = $tid['id'];
+            $batch_type = self::BATCH_TYPE_MICROWEB;
+            $app_name = $tmicroweb['title'];
+            $app_logo = $tmicroweb['image_name'];
+            $app_desc = $tmicroweb['appdesc'];
+        } else {
+            $this->ajaxReturn($url_type, "未知错误6!!!", 1);
+        }
+        
+        $app_name_ck = check_str($app_name, 
+            array(
+                'maxlen_cn' => 14, 
+                'minlen_cn' => 2));
+        if ($app_name_ck === false)
+            $this->ajaxReturn($len, "微官网或小店的名称长度不符!!!", 1);
+        
+        $app_desc_ck = check_str($app_desc, 
+            array(
+                'maxlen_cn' => 199, 
+                'minlen_cn' => 21));
+        if ($app_desc_ck === false)
+            $this->ajaxReturn($len, "微官网或小店的简介长度不符!!!", 1);
+            
+            // 活动号是否存在
+        if ($batch_id == '')
+            $this->ajaxReturn($url_type, "未知错误8!!!", 1);
+            
+            // 调用接口，查询关键字有没有被占用
+        /**
+         * 以下获取百度token的账号（生产、测试环境基于同一个帐号），为了不影响生产环境，测试完成，关闭该功能
+         * $textzi=$this->CheckQuery($textquery);
+         * if($textzi['status']=='1')$this->ajaxReturn($textzi,"关键字已经被占用!!!",1);
+         * if($textzi['status'] != '0')$this->ajaxReturn($textzi,"未知错误5!!!",1);
+         */
+            
+        // 判断渠道（即轻应用的URL）是否存在
+        $tchannel = M('tchannel');
+        $tbatch_channel = M('tbatch_channel');
+        $res_tchannel = $tchannel->where(
+            array(
+                'node_id' => $this->node_id, 
+                'status' => '1', 
+                'sns_type' => self::CHANNEL_SNS_TYPE))
+            ->order("id desc")
+            ->find();
+        
+        $res_tbatch_channel = $tbatch_channel->where(
+            array(
+                'batch_type' => $batch_type, 
+                'batch_id' => $batch_id, 
+                'channel_id' => $res_tchannel['id'], 
+                'status' => '1', 
+                'node_id' => $this->node_id))
+            ->order("id desc")
+            ->find();
+        
+        if (empty($res_tchannel)) {
+            // 创建直达号渠道
+            $data_arr = array();
+            $data_arr['name'] = '百度直达号';
+            $data_arr['type'] = self::CHANNEL_TYPE;
+            $data_arr['sns_type'] = self::CHANNEL_SNS_TYPE;
+            $data_arr['add_time'] = date('YmdHis');
+            $data_arr['node_id'] = $this->node_id;
+            $data_arr['status'] = '1';
+            $execute = $tchannel->add($data_arr);
+            if (! $execute)
+                $this->ajaxReturn('错误', "未知错误1", 1);
+        }
+        // 判断渠道是否绑定
+        if (empty($res_tbatch_channel)) {
+            $arr_channel = array(
+                'batch_type' => $batch_type,  // 活动类型
+                'batch_id' => $batch_id,  // 活动ID
+                'add_time' => date('YmdHis'), 
+                'node_id' => $this->node_id, 
+                'status' => '1');
+            if (empty($res_tchannel)) {
+                $arr_channel['channel_id'] = $execute;
+            } else {
+                $arr_channel['channel_id'] = $res_tchannel['id'];
+            }
+            // 直达号绑定渠道
+            $res_id = $tbatch_channel->add($arr_channel);
+            if (! $res_id)
+                $this->ajaxReturn('错误', "未知错误2", 1);
+        } else {
+            $res_id = $res_tbatch_channel['id'];
+        }
+        if (! $res_id)
+            $this->ajaxReturn('错误', "未知错误3", 1);
+            // $url=U('Label/Label/index@'.$_SERVER['HTTP_HOST'],array('id'=>$res_id));
+            
+        // 调用接口开始
+            // $custom_id=rand(10000,99999);
+            // $data_info=array(
+            // 'access_token'=>$this->token,
+            // 'app_name'=>$tmicroweb['title'],
+            // 'app_logo'=>"http://www.wangcaio2o.com/Home/Upload/MicroWebImg/".$this->node_id.'/'.$tmicroweb['image_name'],
+            // 'app_query'=>$textquery,
+            // 'app_url'=>$url,
+            // 'custom_id'=>$custom_id,//暂不确定
+            // 'app_desc'=>$tmicroweb['appdesc'],
+            // 'email'=>'mayy@imageco.com.cn',
+            // 'phone'=>'15901710669',
+            // );
+            // $post_cul=$this->send($this->setNumberUrl,1,$data_info);
+            
+        // if($post_cul['app_id'] != ''){
+            // $culexe=$model
+            // ->where(array('node_id'=>$this->node_id))
+            // ->save(array('app_id'=>$curlres['app_id'],'app_query'=>$textquery,'status'=>'1'));
+        if ($row['status'] == '3') {
+            $model->where(
+                array(
+                    'node_id' => $this->node_id, 
+                    'status' => '3'))->delete();
+        }
+        $culexe = $model->add(
+            array(
+                'node_id' => $this->node_id, 
+                'url_type' => $url_type, 
+                'app_query' => $textquery, 
+                'status' => '1', 
+                'add_time' => date('YmdHis'), 
+                'check_status' => '1', 
+                'url_dizhi' => $res_id));
+        if ($culexe) {
+            $this->ajaxReturn('成功', "提交成功，请耐心等待审核！！！", 0);
+        } else {
+            $this->ajaxReturn('失败', "提交失败，请检查原因后重新提交！！！", 1);
+        }
+    }
+
+    /**
+     * 判断@关键字是否被占用
+     */
+    public function CheckQuery($textquery) {
+        $url = $this->getQueryUrl . "?access_token=" . $this->token . "&keyword=" .
+             $textquery;
+        // echo $url;die;
+        $newgettoken = D('Getbaidutoken', 'Service');
+        $result = $newgettoken->send($url);
+        return $result;
+    }
+
+    /**
+     * 上传商户Logo
+     */
+    public function uploadFile() {
+        import('ORG.Net.UploadFile');
+        $upload = new UploadFile();
+        $upload->maxSize = 300 * 1024;
+        $upload->allowExts = array(
+            'jpg', 
+            'gif', 
+            'png', 
+            'jpeg');
+        $upload->savePath = $this->UPLOAD_DIR;
+        if (! $upload->upload()) {
+            exit(
+                json_encode(
+                    array(
+                        'info' => $upload->getErrorMsg(), 
+                        'status' => 1)));
+        } else {
+            $info = $upload->getUploadFileInfo();
+            if ($info)
+                $info = $info[0];
+            if (! $info) {
+                exit(
+                    json_encode(
+                        array(
+                            'info' => "系统正忙", 
+                            'status' => 1)));
+            }
+            exit(
+                json_encode(
+                    array(
+                        'info' => array(
+                            'fileId' => $result, 
+                            'imgName' => $info['savename'], 
+                            'imgUrl' => $this->_getImgUrl($info['savename']), 
+                            'imgWay' => $this->UPLOAD_DIR), 
+                        'status' => 0)));
+        }
+    }
+
+    private function _getImgUrl($imgname) {
+        return $this->uploadPath . $imgname;
+    }
+
+    /**
+     * 接口请求： 网络协议是https
+     */
+    public function send($url, $type = 0, $data = '') {
+        $url = urldecode($url);
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_HEADER, false);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, $type);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+        
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false); // https
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 1); // https
+        $data = curl_exec($curl);
+        curl_close($curl);
+        
+        Log::write("百度直达号请求：" . $url);
+        
+        $arr = @json_decode($data, true);
+        Log::write("百度直达号返回：" . print_r($arr, true));
+        
+        return $arr;
+    }
+
+    public function clickChartEasy() {
+        $mode3 = M('tmarketing_info');
+        $map3 = array(
+            'node_id' => $this->node_id, 
+            'batch_type' => self::BATCH_TYPE_MICROWEB);
+        $tchannel = M('tchannel');
+        $res_tchannel = $tchannel->where(
+            array(
+                'node_id' => $this->node_id, 
+                'status' => '1', 
+                'sns_type' => self::CHANNEL_SNS_TYPE))
+            ->order("id desc")
+            ->find();
+        $tid = $mode3->where($map3)->find();
+        $batch_type = '13';
+        $batch_id = $tid['id'];
+        $channel_id = $res_tchannel['id'];
+        
+        $_get = I('get.');
+        // 查询
+        $_get['begin_date'] = $begin_date = I('begin_date', 
+            dateformat("-30 days", 'Ymd'));
+        $_get['end_date'] = $end_date = I('end_date', 
+            dateformat("0 days", 'Ymd'));
+        // 获取活动名
+        $batch_name = M('tmarketing_info')->where(
+            "id='" . $batch_id . "' and batch_type='" . $batch_type . "'")->getField(
+            'name');
+        // echo M('tmarketing_info')->getlASTSql();
+        $model = M('Tdaystat');
+        $map = array(
+            'batch_type' => $batch_type, 
+            'batch_id' => $batch_id);
+        if ($channel_id != '') {
+            $map['channel_id'] = $channel_id;
+        }
+        
+        // 查询日期
+        $map['day'] = array();
+        if ($begin_date != '') {
+            $map['day'][] = array(
+                'EGT', 
+                $begin_date);
+        }
+        if ($end_date != '') {
+            $map['day'][] = array(
+                'ELT', 
+                $end_date);
+        }
+        $query_arr = $model->where($map)
+            ->field(
+            "sum(uv_count) uv_count,batch_type,batch_id,day,sum(click_count) click_count,sum(send_count) send_count")
+            ->group("day")
+            ->select();
+        
+        foreach ($query_arr as &$vo) {
+            if ($vo['batch_type'] == '26' || $vo['batch_type'] == '27') {
+                $count = M('ttg_order_info')->where(
+                    array(
+                        'batch_no' => $vo['batch_id'], 
+                        'add_time' => array(
+                            'like', 
+                            "%{$vo['day']}%"), 
+                        'pay_status' => '2', 
+                        'order_status' => '0'))->sum('buy_num');
+                if ($count)
+                    $vo['send_count'] = $count;
+            }
+        }
+        // 计算出JS值
+        $jsChartDataClick = array();
+        $jsChartDataSend = array();
+        foreach ($query_arr as $v) {
+            $jsChartDataClick[] = array(
+                $v['day'], 
+                $v['click_count'] * 1);
+            $jsChartDataSend[] = array(
+                $v['day'], 
+                $v['send_count'] * 1);
+        }
+        $this->assign('_get', $_get);
+        $this->assign('jsChartDataClick', json_encode($jsChartDataClick));
+        $this->assign('jsChartDataSend', json_encode($jsChartDataSend));
+        $this->assign('batch_type', $batch_type);
+        $this->assign('query_list', $query_arr);
+        $this->assign('batch_name', $batch_name);
+        
+        $this->display();
+    }
+
+    /**
+     * 移动图片
+     */
+    private function move_image_log($image_name) {
+        if (! $image_name) {
+            return "需上传图片";
+        }
+        if (! is_dir(APP_PATH . '/Upload/MicroWebImg/' . $this->node_id)) {
+            mkdir(APP_PATH . '/Upload/MicroWebImg/' . $this->node_id, 0777);
+        }
+        $old_image_url = APP_PATH . '/Upload/LogoImg/' . basename($image_name);
+        $new_image_url = APP_PATH . '/Upload/MicroWebImg/' . $this->node_id . '/' .
+             basename($image_name);
+        $flag = rename($old_image_url, $new_image_url);
+        if ($flag) {
+            return true;
+        } else {
+            return "图片路径非法" . $old_image_url . "==" . $new_image_url;
+        }
+    }
+
+    /**
+     * @@@ 获取直达号Token @@@ 注意：不可频繁调用
+     */
+    public function getToken() {
+        $data = array(
+            'grant_type' => 'client_credentials', 
+            'client_id' => 'NIMhAtANqtpisqE8TwWnXOcp', 
+            'client_secret' => 'PsIpBWylEaS9LSO6oKOuUORwBI4spNz8');
+        $url = "https://openapi.baidu.com/oauth/2.0/token";
+        $newgettoken = D('Getbaidutoken', 'Service');
+        $res = $newgettoken->send($url, 1, $data);
+        S('refresh_token', $res['refresh_token']);
+        echo $res['refresh_token'];
+        dump($res);
+    }
+
+    /**
+     * 测试关键字是否占用接口
+     */
+    public function test() {
+        // 24.e1e637583bc7bbff09eaef22d6c2865b.2592000.1418192636.282335-4457194
+        // echo S('refresh_token').'88';
+        $textquery = "海底捞";
+        $a = $this->CheckQuery($textquery);
+        dump($a);
+    }
+    
+    // 获取图片路径
+    protected function _getUploadUrl($imgname, $upload_path) {
+        $img_upload_path = $upload_path;
+        // 旧版
+        if (basename($imgname) == $imgname) {
+            return $img_upload_path . $imgname;
+        } else {
+            return get_upload_url($imgname);
+        }
+    }
+}

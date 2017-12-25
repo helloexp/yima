@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>微信订单支付</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<load href="__PUBLIC__/Label/Css/wap_Purchase.css"/>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jweixin-1.0.0.js?v=__VR__"></script>
+<style>
+.msg-all-error { border:solid 1px #ff8080; background:#fff2f2; padding:10px 60px; text-align:center; font-size:12px; font-weight:bold; color:#444;} 
+.msg-all-succeed { border:solid 1px #4dbf00; background:#f0ffe5; padding:10px 60px; text-align:center; font-size:12px; font-weight:bold; color:#444;}
+</style>
+<script>
+$(document).ready(function(e){
+	$("#sub_button").click(function(){
+		callpay();
+	})
+});
+
+function onBridgeReady(){
+   WeixinJSBridge.invoke(
+       'getBrandWCPayRequest', {
+           "appId"	  :"<?php echo $bridgeArr['appId']; ?>",     //公众号名称，由商户传入     
+           "timeStamp":"<?php echo $bridgeArr['timeStamp']; ?>",         //时间戳，自1970年以来的秒数     
+           "nonceStr" :"<?php echo $bridgeArr['nonceStr']; ?>", //随机串     
+           "package"  :"<?php echo $bridgeArr['package']; ?>",     
+           "signType" :"<?php echo $bridgeArr['signType']; ?>",         //微信签名方式:     
+           "paySign"  :"<?php echo $bridgeArr['paySign']; ?>" //微信签名 
+       },
+       function(res){
+		   //alert(res.err_msg);
+		   //return false;
+		   if(res.err_msg == "get_brand_wcpay_request:cancel" ) {
+			   return false;
+		   }
+           else if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+				location.href = "{:U('Label/PayWeixin/verifyReturn',array('orderId'=>$orderInfo['order_id'],'status'=>'1'))}";
+		   }     // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 
+		   else
+				location.href = "{:U('Label/PayWeixin/verifyReturn',array('orderId'=>$orderInfo['order_id'],'status'=>'2'))}";
+
+       }
+   ); 
+}
+function callpay()
+{
+	if (typeof WeixinJSBridge == "undefined"){
+	   if( document.addEventListener ){
+		   document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+	   }else if (document.attachEvent){
+		   document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+		   document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+	   }
+	}else{
+	   onBridgeReady();
+	}
+}
+</script>
+</head>
+<body>
+<div id="wrapper" style="background:#eee;">
+    <div id="container">
+        <div id="main">
+                <div class="orderForm">
+                    <div class="orderForm-title">订单信息</div>
+                    <div class="orderForm-msg fn">
+                        <li class="fn"><p class="l">商品名称</p><p class="text">{$orderInfo['group_goods_name']}</p></li><!--最多11个字-->
+                        <li class="fn"><p class="l">购买数量</p><p class="text">{$orderInfo['buy_num']}</p></li>
+                        <li class="fn"><p class="l">运费</p><p class="text"><span>￥</span><span id="totalPrice">{$orderInfo['freight']}</span><span>元</span></p></li>
+                        <li class="fn"><p class="l">订单总价</p><p class="text"><span>￥</span><span id="totalPrice">{$orderInfo['order_amt']}</span><span>元</span></p></li>			
+						
+                    </div>
+					<!--
+					<div class="orderForm-title">收货人手机号<span>（很重要）</span></div>
+                    <div class="orderForm-msg">
+                        <li class="fn"><input type="tel" class="orderInput" name="consignee_phone" id="consignee_phone" placeholder="收货人手机号" value="{$curAddress['phone_no']}"></li>
+                    </div>
+					<div class="orderForm-title">收货方式<span>（很重要）</span></div>
+                    <div class="orderForm-msg">
+                        <li class="fn">
+                            <select class="orderSelect" name="receiverType" id="receiverType">
+								{:show_delivery_opt($goodsInfo['defined_one_name'])}
+                            </select>
+                        </li>
+                    </div>
+					<div class="receiver_info <if condition="$goodsInfo['defined_one_name'] neq '1'">dn</if>">
+						<div class="orderForm-title">收货人姓名<span>（很重要）</span><a id="oadd" href="javascript:;" class="r">选择其他地址</a></div>
+						<div class="orderForm-msg">
+							<li class="fn"><input type="text" class="orderInput" name="receiver_name" id="receiver_name" placeholder="收货人姓名" value="{$curAddress['user_name']}"></li>
+						</div>
+						<div class="orderForm-title">收货地址<span>（很重要）</span></div>
+						<div class="orderForm-msg">
+							<li class="fn"><input type="text" class="orderInput" name="receiver_addr" id="receiver_addr" placeholder="收货地址" value="{$curAddress['address']}"></li>
+						</div>
+						<div class="orderForm-title">备注</div>
+						<div class="orderForm-msg">
+							<li class="fn"><input type="text" class="orderInput" name="memo" id="memo" placeholder="备注" value="" maxlength="100"></li>
+						</div>
+					</div>
+					<if condition=" $tongbaozhai_flag eq 1">
+						<div class="orderForm-title">销售人员ID<span>（填写可包邮，未填写邮费需货到付款）</span></div>
+						<div class="orderForm-msg">
+							<li class="fn"><input type="text" class="orderInput" name="parm1" id="parm1" placeholder="销售人员ID" value="" maxlength="100"></li>
+						</div>
+					</if>
+					-->
+                    <div class="orderForm-update">
+                        <input type="button" id="sub_button" class="orderBtn" value="确认支付" />
+                    </div>
+                </div>
+			</div>
+    </div>
+</div>
+<div class="dn-bg dn"></div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>

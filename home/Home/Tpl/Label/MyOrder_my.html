@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+        <meta content="telephone=no" name="format-detection" />
+        <meta content="email=no" name="format-detection" />
+        <meta name="apple-touch-fullscreen" content="NO">
+        <title>个人中心</title>
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/idangerous.swiper.min.js?v=__VR__"></script>
+    </head>
+    <body>
+        <div id="wrapper" class="bgf5f5f5">
+            <div id="container">
+                <include file="Wfx:top"/>
+                <div id="main">
+                    <div id="mainCon" class="mainCon fn m0">
+                        <div class="userHeader">
+                            <if condition="$_SESSION.twfxRole neq '' ">
+                                <div class="msgArea" onClick="link_to('{:U('Label/MyOrder/newsMsg', array('node_id'=>$node_id))}')">
+                                    <span style='width:{$width}px;'>{$unReadNewsMsgCount}</span>
+                                </div>
+                            </if>
+                            <empty name="wxuser">
+                                <img src="__PUBLIC__/Label/Image/doge.png">
+                                <else />
+                                <img src="{$wxuser['headimgurl']}">
+                            </empty>
+                            <p>{$wxuser['nickname']}</p>
+                            <p>{$cPhone}</p>
+                            <a href="javascript:void(0)" id="change-phone" style='margin-right:12px;'>更换手机号</a>
+                        </div>
+                        <div class="m-center">
+                            <ul style="border-image:none;">
+                                <if condition="$salerInfo['role'] eq '2' ">
+                                <li onClick="link_to('{:U('Label/MyOrder/myCommission', array('node_id'=>$node_id))}')">
+                                    <section class="list fn">
+                                        <i class="icon icon1"></i>
+                                        <p>我是经销商</p>
+                                        <i class="left-arrow"></i>
+                                    </section>
+                                </li>
+                                <elseif condition="$salerInfo['role'] eq '1' " />
+                                <li onClick="link_to('{:U('Label/MyOrder/myCommission', array('node_id'=>$node_id))}')">
+                                    <section class="list fn">
+                                        <i class="icon icon1"></i>
+                                        <p>我是销售员</p>
+                                        <i class="left-arrow"></i>
+                                    </section>
+                                </li>
+                                </if>
+                                <if condition="$only neq 'onlyWithdraw' ">
+                                <li onClick="link_to('{:U('Label/MyOrder/showOrderList', array('node_id'=>$node_id, 'type'=>'normal'))}')">
+                                    <section class="list fn">
+                                        <i class="icon icon1"></i>
+                                        <p>我的订单</p>
+                                        <span>
+                                            <if condition="$orderCount eq 0">
+                                                查看列表
+                                            <else />
+                                                <em>{$orderCount}个</em>未付款订单
+                                            </if>
+                                        </span>
+                                        <i class="left-arrow"></i>
+                                    </section>
+                                </li>
+                                </if>
+                                    <li onClick="link_to('{:U('Label/MyOrder/showOrderList', array('node_id'=>$node_id, 'type'=>'book'))}')">
+                                        <section class="list fn">
+                                            <i class="icon icon11"></i>
+                                            <p>我的订购</p>
+                                            <span><em>{$bookOrderCount}个</em>订购</span>
+                                            <i class="left-arrow"></i>
+                                        </section>
+                                    </li>
+                                <li onClick="link_to('{:U('Label/MyOrder/unusedCode', array('node_id'=>$node_id))}')">
+                                    <section class="list fn">
+                                        <i class="icon icon2"></i>
+                                        <p>我的卡券</p>
+                                        <span><em>{$barcodeCount}张</em>有效</span>
+                                        <i class="left-arrow"></i>
+                                    </section>
+                                </li>
+                                <if condition="$only neq 'onlyWithdraw' ">
+                                <li onClick="link_to('{:U('Label/MyOrder/myBonus', array('node_id'=>$node_id))}')">
+                                    <section class="list fn">
+                                        <i class="icon icon3"></i>
+                                        <p>我的红包</p>
+                                        <span><em>{$bonusAmount}元</em>可用</span>
+                                        <i class="left-arrow"></i>
+                                    </section>
+                                </li>
+                                </if>
+                                <li onClick="link_to('{:U('Label/MyAddress/viewAddressList', array('node_id'=>$node_id))}')" style="border-image: none;">
+                                    <section class="list fn">
+                                        <i class="icon icon2"></i>
+                                        <p>我的收货地址</p>
+                                        <i class="left-arrow"></i>
+                                    </section>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="myHistory">
+                        	<p><i></i></p>
+                        	<p>查看最近浏览商品</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <include file="Store:nav"/>
+    <div id="myHistory">
+        <div class="swiper-container">
+    		<h5></h5>
+            <div class="swiper-wrapper">
+            </div>
+        </div>
+        <div class="myHistorybg"></div>
+    </div>
+</body>
+</html>
+<script type='text/javascript'>
+$(document).ready(function(e) {
+    $("#change-phone").click(function(){
+    var msg = '<div class="cjCon" id="popForm">'
+            + '<form id="theform_login" action="" method="post" name="theform_login">'
+            + '<input type="hidden" id="node_id" name="node_id" value="{$node_id}" />'
+            + '<div class="cjForm">'
+            + '<ul class="sOne-cjForm">'
+            + '<li><p>手机号:</p><input type="tel" name="change_phone" id="change_phone" class="sOne-cjInput from_mobile" placeholder="请输入手机号" maxlength="11" /></li>'
+            + '<li>'
+            + '<p>验证码:</p>'
+            + '<input type="tel" class="sOne-cjInput-half" name="check_code" id="check_code" maxlength="4" placeholder="验证码" >'
+            + '<input type="button" class="sOne-cjgetpasscode l" value="获取验证码" id="getpasscode" name="getpasscode" data-href="">'
+            + '</li>'
+            + '<li class="tips"><span id="error_msg"></span></li>'
+            + '<li class="pt20"><input type="button" id="loginBd" value="确定" class="cj-input-button" /></li>'
+            + '</ul>'
+            + '</div>'
+            + '</form>'
+            + '</div>';
+            msgPop(msg);
+    });
+    
+    var Int;
+    $(document).on("click", "#getpasscode", function(){
+        $(this).val("正在发送..");
+        var phone = $("#change_phone").val();
+        var id = $("#id").val();
+        var verify = $("#check_code").val();
+        var node_id = $("#node_id").val();
+        $.post("index.php?g=Label&m=MyOrder&a=sendChangeCode", {"id":id, "change_phone":phone, "check_code":verify, "node_id":node_id}, function(data){
+            if (data.status == '1'){
+            $("#getpasscode").attr("id", "noSend");
+                    Int = setInterval(checkTime, 1000);
+            } else{
+            $("#getpasscode").val("获取验证码");
+                alert(data.info);
+            }
+        }, "json");
+    });
+            var time = {$expiresTime};
+            var checkTime = function(){
+                $("input[name='getpasscode']").val("已发送," + time + "秒");
+                if (time == 0){
+                    $("input[name='getpasscode']").val("获取验证码");
+                    $("input[name='getpasscode']").attr("id", "getpasscode");
+                    time = 90;
+                    clearInterval(Int);
+                    return false;
+                }
+                time--;
+            };
+            //登录
+            var _is_login = false;
+            $(document).on("click", "#loginBd", function(){
+            if (_is_login)
+            return false;
+            _is_login = true;
+            $.post(
+                    "{:U('Label/MyOrder/updateChangePhone')}",
+                    $('#theform_login').serialize(),
+                    function(data) {
+                    _is_login = false;
+                            if (data.status == '1'){
+                    location.reload();
+                    } else{
+                    alert(data.info);
+                    }
+                    },
+                    'json'
+                    );
+    });
+	
+	mySwiper = new Swiper('.swiper-container',{
+		centeredSlides:true,
+		slidesPerView: 3,
+		watchActiveIndex: true,
+		onInit: function(swiper){
+			var index = swiper.activeIndex+1;
+			$("#myHistory h5").text("最近浏览"+index+"/"+swiper.slides.length)
+		},
+		onTouchEnd: function(swiper){
+			var index = swiper.activeIndex+1;
+			$("#myHistory h5").text("最近浏览"+index+"/"+swiper.slides.length)
+		}
+	})
+	$(".myHistorybg").click(function(){
+		$("#myHistory").removeClass("show");
+		isscroll=0;
+	});
+});
+
+var mySwiper;
+var isscroll = 0;
+$(window).scroll(function(){
+    if($(document).scrollTop() >= ($(document).height() - $(window).height()) ){
+        isscroll++;
+        if(isscroll>=1){
+            var myhistorydata = {$recentGoods};
+            var html = '';
+            for(var i=0;i<myhistorydata.length;i++){
+				var url = "'"+myhistorydata[i].url+"'"
+                html = html+'<div class="swiper-slide" onClick="link_to('+url+')"><div class="myHistorylist"><img src="'+myhistorydata[i].src+'"><p>'+myhistorydata[i].name+'</p><p><span>￥'+myhistorydata[i].price+'</span></p></div></div>';
+            }
+            $("#myHistory .swiper-wrapper").html(html);
+            mySwiper.reInit();
+            mySwiper.swipeTo(1);
+            $("#myHistory").addClass("show");
+        }
+    }else{
+        $("#myHistory").removeClass("show");
+    }
+});
+</script>

@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>自定义来源</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<!-- <link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" /> -->
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<!-- <script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script> -->
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<style>
+    form{margin: 20px;}
+    form p{padding: 10px 16px;font-size: 14px;line-height: 20px;}
+    ul{float: left;}
+    ul li{float: left;padding: 10px 0 4px 30px;}
+    ul li.name{width:100px;text-align: right;}
+    ul li input{width: 300px;border: 1px #aaa solid;}
+    form ul li{font-size: 16px;}
+</style>
+<script>
+        //$(".btn-next").click(function(event) {
+          // $(".showsaloonForm1").hide();
+          // $(".showsaloonForm2").show();
+        //});
+		$(document).ready(function(e){
+
+			$("#save_next").click(function(){					
+				var dialog;
+				if($("form").validationEngine('validate')){
+					
+					 $("form").ajaxSubmit({
+							beforeSubmit:function(){
+								dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,time:1});
+							},
+							success:function(data){
+								if(data.status == '1'){                        
+									
+									var node_id=$("#node_id").val();
+									var pid=$("#pid").val();
+									//跳转到重新授权
+									window.location.href="index.php?g=LabelAdmin&m=Weibo&a=show_auth&node_id="+node_id+"&pid="+pid;
+									return false;
+								}else{
+									dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+									$('#msg').html(data.info);
+								}
+							},
+							dataType:'json'
+					});
+					
+					
+					//提交表单
+					//alert("xxxxxxxx");
+					//document.theform.submit();
+
+
+				};
+			});
+	  });
+    </script>
+</head>
+
+<body class="bgfff">
+    <form method="post" action="{:U('LabelAdmin/Weibo/modify_weibo_post')}" name="theform" id="theform">
+	<input type="hidden" name="pid" id="pid" value="<?php echo $pid;?>">
+	<input type="hidden" name="node_id" id="node_id" value="<?php echo $node_id;?>">
+        <div class="showsaloonForm1">     
+            <p style="text-indent: 2em;">自定义来源可以使您通过微动发布的内容显示您自己的来源。要使用自定义来源，必须拥有一个新浪网站接入应用。并在开发者后台找到相关信息填入下方表单中。</p>
+            <ul>
+                <li class="name">应用名称：</li>
+                <li><input type="text" value="<?php echo $account_info['app_name'];?>" name="app_name" class="validate[required,maxSize[20]]" /></li>
+            </ul>
+            <ul>
+                <li class="name">App Key：</li>
+                <li><input type="text" value="<?php echo $account_info['app_key'];?>" name="app_key" class="validate[required,maxSize[50]]"/></li>
+            </ul>
+             <ul>
+                <li class="name">App Secret：</li>
+                <li><input type="text" value="<?php echo $account_info['app_secret'];?>" name="app_secret" class="validate[required,maxSize[50]]"/></li>
+            </ul>
+            <ul>
+                <li class="name">应用域名：</li>
+                <li><input type="text" value="<?php echo $account_info['app_domain'];?>" name="app_domain" class="validate[required,maxSize[200]]"/> 带http://</li>
+            </ul>
+            <div class="DiabtnCon">
+                <a href="javascript:void(0)" class="Diabtn-all" id="save_next">下一步</a>
+                <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+            </div>
+        </div>
+
+        <div class="showsaloonForm2 dn">
+            <p>由于来源被修改，您必须重新使用 xx 的账号进行授权，点击下方授权按钮进行授权。</p>
+            <a href="javascript:void(0)" class="btn-all" style="display:block;width:140px;;margin:30px auto;">通过新浪微博授权</a>
+            <p  style="margin-bottom:30px;">并在授权完成后，将自动跳转后的网址填入下方文本框内。</p>
+            <ul>
+                <li>授权后网址：</li>
+                <li><input type="text" value="" name="" /></li>
+            </ul>
+            <div class="DiabtnCon">
+                <a href="javascript:void(0)" class="Diabtn-all" id="save">保存</a>
+                <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+            </div>
+             <div class="mt30" style="text-align: center;">
+                <a href="javascript:void(0)" style="margin-top: 20px;" class="btn-all w120" >保存</a>
+                <a href="javascript:void(0)"  style="margin-top: 20px;" class="ml20 btn-all w120 wb-cancel" style="background:gray;">取消</a>
+            </div>
+        </div>
+    </form>
+    
+</body>

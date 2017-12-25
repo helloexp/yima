@@ -1,0 +1,414 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no,"/>
+        <meta name="format-detection"  content="telephone=no"/>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <title>创建云名片</title>
+        <link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/wap_ebc_201504.css?v=__VR__" />
+        <script src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" src="./Home/Public/Js/citycode.js?v=__VR__"></script>
+		<script type="text/javascript" src="./Home/Public/Js/citycode.js?v=__VR__"></script>
+        <script>
+            jQuery(document).ready(function($) {
+                $(".add_more").click(function(e) {
+                    if (!$(this).hasClass("close")) {
+                        $(".show_more").show();
+                        $(this).text("收起更多信息");
+                        $(this).addClass("close");
+                    } else {
+                        $(".show_more").hide();
+                        $(this).text("添加更多信息");
+                        $(this).removeClass("close");
+                    }
+                });
+				
+				$(".colgroup label").click(function(e) {
+                    $('#select_type').addClass('is-visible');
+                    $(this).addClass("current");
+                });
+
+                $(".js_select").click(function(e) {
+                    var from_txt = $(this).text();
+                    var type = $(this).attr('rel');
+                    $('.current').next('input').attr('name', type);
+                    $('.current').next("input").removeAttr('maxlength');
+                    $('.current').next("input[name='mobile']").attr('maxlength', 11);
+					$('.current').next("input").removeAttr('maxlength');
+                    $('.current').next("input[name='mobile[]']").attr('maxlength',11);
+                    $(".current").text(from_txt);
+                    $('.current').removeClass('current');
+                    $('#select_type').removeClass('is-visible');
+                });
+
+                $(".del").click(function() {
+                    $(this).parent().remove()
+					$('.js_add_tel').css('display', 'block');
+                })
+                //open popup
+                //event.preventDefault();
+
+                //close popup
+                $('#select_type').on('click', function(event) {
+                    if ($(event.target).is('.cd-popup-close') || $(event.target).is('#select_type')) {
+                        event.preventDefault();
+                        $(this).removeClass('is-visible');
+                    }
+                });
+                //close popup when clicking the esc keyboard button
+                $(document).keyup(function(event) {
+                    if (event.which == '27') {
+                        $('#select_type').removeClass('is-visible');
+                    }
+                });
+
+                $('.header').click(function() {
+                    history.go(-1)
+                });
+            });
+        </script>
+        <style type="text/css">
+            .show_more{ display:none}
+            .cd-popup-container dl{ margin:0; padding:0; list-style:none;background:#FFF; color:#666; font-size:14px; width:100%; border-radius:4px;}
+            .cd-popup-container dl dt{font-size:14px; font-weight:bold; color:#fff; background:#1088cc; text-align-last:left; display:block; padding:10px; border-top-left-radius:4px; border-top-right-radius:4px;}
+            .cd-popup-container dl dd{ border-bottom:1px #ededed solid; line-height:24px; text-align:left; padding:10px; background:#FFF}
+            .cd-popup-container dl dd:hover{ background:#1088cc}
+            .cd-popup-container dl dd:hover a{ color:#FFF}
+            .cd-popup-container dl dd a{line-height:24px; color:#666; display:block;}
+            .only_phone{border-bottom: 1px #ebebeb solid;  display: block;border: 0;padding: 3px 5px;}
+            .submit{border-radius:0px; background-color:#1088cc;color:#FFF;border:none;font-size: 14px;height: 45px;width:100%}
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="header">
+                <div class="back_btn"><a href="javascript:void(0)"></a></div>
+                <h1>我的名片</h1>
+            </div>
+            <form action="{:U('Wap/Vcard/editsubmit')}" method="post" id="qrcode_data">
+                <div class="content">
+                    <div class="message_area added" style="padding-bottom:0;">
+                        <div class="avatar_area">
+                            <div class="avatar">
+                                <if condition="$is_wechat eq 'y' ">
+                                    <img id="head_img" src="{$wechat_user_info.headimgurl}" />
+                                    <else/>
+                                    <img id="head_img" <if condition="$data['gender'] eq 'male'">src="__PUBLIC__/Label/Image/wap_ebc/a_man.png?v=__VR__" <else/>src="__PUBLIC__/Label/Image/wap_ebc/a_woman.png?v=__VR__"</if>/>
+                                </if>
+                            </div>
+                            <dl class="info">
+                                <dd class="colgroup edit"><label>姓名</label>
+                                    <input type="text" placeholder="姓名" name="name" id="name" value='{$data.name}' maxlength="30"/>
+                                </dd>
+                                <dd class="colgroup edit"><label style="position:relative; bottom:5px;">性别</label>
+                                    <input id="gender" name="gender" type="hidden" value='{$data.gender}' />
+                                    <input type='hidden' name='head_img' value="{$wechat_user_info.headimgurl}"/>
+                                    <span>
+                                        <ul class="sex" style="position: relative; bottom:-3px;">
+                                            <li id="gender_man" title="男" <if condition="$data['gender'] eq 'male' ">class="men_active"<else/>class="men_normal"</if>>男</li>
+                                            <li id="gender_woman" title="女" <if condition="$data['gender'] eq 'female' ">class="woman_active"<else/>class="woman_normal"</if>>女</li>
+                                        </ul>
+                                    </span>	
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="message_area added">
+                        <dl class="info">
+                            <dt>
+                            <label>手机号码</label>
+                            <input type="tel" placeholder="电话" name="only_phone" id="tel" maxlength="11" value="{$data.only_phone}" <if condition="$is_wechat neq 'y' ">readonly="readonly"</if> />
+                            <if condition="($data['homeTel'] neq '')&&($data['phone'] neq '')&&($data['fax'] neq '')&&($data['mobile'] neq '')"></if>
+                            <a href="javascript:void(0);" class="add_btn js_add_tel" <if condition="($data['homeTel'] neq '')||($data['phone'] neq '')||($data['fax'] neq '')||($data['mobile'] neq '')">style="display:none"</if>></a>
+
+                            </dt>
+                            <if condition="$data['mobile'] neq '' ">
+                                <volist name="data['mobile']" id='item'>
+                                    <dd class="colgroup edit"><label>手机</label>
+                                        <input type="text" name="mobile[]" id="homeTel" value="{$item}" maxlength="11" />
+                                        <i class="del"></i>
+                                    </dd>
+                                </volist>
+                            </if>
+                            <if condition="$data['homeTel'] neq '' ">
+                                <volist name="data['homeTel']" id='item'>
+                                    <dd class="colgroup edit"><label>住宅</label>
+                                        <input type="text" name="homeTel[]" id="homeTel" value="{$item}" maxlength="11" />
+                                        <i class="del"></i>
+                                    </dd>
+                                </volist>
+                            </if>
+                            <if condition="$data['phone'] neq '' ">
+                                <volist name="data['phone']" id='item'>
+                                    <dd class="colgroup edit"><label>电话</label>
+                                        <input type="text" name="phone[]" id="homeTel" value="{$item}" maxlength="11" />
+                                        <i class="del"></i>
+                                    </dd>
+                                </volist>
+                            </if>
+                            <if condition="$data['fax'] neq '' ">
+                                <volist name="data['fax']" id='item'>
+                                    <dd class="colgroup edit"><label>传真</label>
+                                        <input type="text" name="fax[]" id="homeTel" value="{$item}" maxlength="20" />
+                                        <i class="del"></i>
+                                    </dd>
+                                </volist>
+                            </if>
+                        </dl>
+                    </div>
+					
+                    <div class="message_area added">
+                        <dl class="info">
+                            <dt><label>电子邮箱</label><input type="email" placeholder="电子邮箱" name="email" id="email" maxlength="30" value='{$data.email}' /></dt>
+                            <if condition="$data['other_email'] neq '' ">
+                                <volist name="data['other_email']" id='item'>
+                                    <dd class='only_phone edit'><label>其他</label>
+                                        <input type='text' name='other_email[]' id='email' value="{$item}" /><i class='del'></i>
+                                    </dd>
+                                </volist>
+                            </if>
+                        </dl>
+                    </div>
+					
+					 <div class="message_area added">
+                        <dl class="info">
+                        	<dt><label>公司名称</label><input type="text" placeholder="公司名称" name="company_name" maxlength="60" value='{$data.company_name}' /></dt>
+                        </dl>
+                    </div>
+
+                    <div class="message_area added">
+                        <dl class="info">
+                            <dt><label>公司名称</label><input type="text" placeholder="公司名称" name="company_name" maxlength="60" value='{$data.company_name}' /></dt>
+                        </dl>
+                    </div>
+
+                    <div class="message_area added">
+                        <dl class="info">
+                            <dt  class="clearfix">
+                            <label  class="lg">公司地址</label>
+                            <select name="province" id="province" class="address-select" onChange="$(this).css('color', '#333')">
+                                <option value="">省</option>
+                            </select>
+                            <select name="city" id="city" class="address-select" onChange="$(this).css('color', '#333')">
+                                <option value="{$data.city}">市</option>
+                            </select>
+                            <textarea type="text" name="addr" placeholder="请填写公司详细地址">{$data.addr}</textarea>
+                            </dt>
+
+                            <!-- <dd class="only_phone edit"><label></label><input type="text" name="addr" value='{$data.addr}'></dd> -->
+							
+                            <div class="show_more" <if condition="$data['position'] neq '' || $data['home_page'] neq '' || $data['addr'] neq '' || $data['remark'] neq '' ">style="display:block" </if>>
+                                <dd class="only_phone edit"><label>职位</label><input type="text" placeholder="职位" name="position" value='{$data.position}' /></dd>
+                                <dd class="only_phone edit"><label>备注</label><input type="text" placeholder="请输入QQ号或微信号" name="remark" maxlength="40" value='{$data.remark}' /></dd>
+                                <dd class="only_phone edit"><label>个人首页</label><input type="email" placeholder="个人首页" name="home_page" maxlength="100" value='{$data.home_page}' /></dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="message_area added"><a href="javascript:void(0);" class="add_more <if condition="$data['position'] neq '' || $data['home_page'] neq '' || $data['addr'] neq '' || $data['remark'] neq '' ">close</if>"><if condition="$data['position'] neq '' || $data['home_page'] neq '' || $data['addr'] neq '' || $data['remark'] neq '' ">收起<else />添加</if>更多信息</a></div>
+                    <p style='text-align: center;font-size: 14px;'>当前已输入<span id='wordLen' style='color: #1088cc'>0</span>/240个字符</p>
+                    <p class='txt' style="font-size:12px;color:#D3D3D3;">1个汉字=3个字符 1个英文字母或数字=1个字符</p>
+                    <div class="message_area"><button class="submit" type="button" id="create_qrcode">生成云名片</button></div>
+                    <input type='hidden' name="id" value='{$mark}' />
+                </div>
+            </form>
+        </div>
+        <div class="cd-popup" role="alert" id="select_type">
+            <div class="cd-popup-container">
+                <dl>
+                    <dt>请选择标签</dt>
+                    <dd><a href="javascript:void(0)" class="js_select" rel="mobile">手机</a></dd>
+                    <dd><a href="javascript:void(0)" class="js_select" rel="phone">电话</a></dd>
+                    <dd><a href="javascript:void(0)" class="js_select" rel="homeTel">住宅</a></dd>
+                    <dd><a href="javascript:void(0)" class="js_select" rel="fax">传真</a></dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="cd-popup" id="error" role="alert">
+            <div class="cd-popup-container" id="label_content">
+            </div>
+        </div>
+    <include file="Public:footer"/>
+    <script type="text/javascript">
+        $(function() {
+            CityCode({
+                province: $("#province"), //省
+                city: $("#city"), //市
+                town: $("#town"), //区
+                selected: "{$data.province}{$data.city}", //默认选中的省市区代号
+                //url:"index.php?g=Home&m=AjaxCity&a=index"//数据查询页
+                url: "{:U('Home/AjaxCity/index')}"
+            });
+
+            $('#gender_man').click(function() {
+                $(this).removeClass('men_normal');
+                $('#gender_woman').removeClass('woman_active');
+                $('#gender_woman').addClass('woman_normal');
+                $(this).addClass('men_active');
+                $('#gender').val('male');
+                if ('{$is_wechat}' != 'y') {
+                    $('#head_img').attr('src', '')
+                    $('#head_img').attr('src', "__PUBLIC__/Label/Image/wap_ebc/a_man.png");
+                    $('input[name=head_img]').val('__PUBLIC__/Label/Image/wap_ebc/a_man.png');
+                }
+            });
+
+            $('#gender_woman').click(function() {
+                $(this).removeClass('woman_normal');
+                $('#gender_man').removeClass('men_active');
+                $('#gender_man').addClass('men_normal');
+                $(this).addClass('woman_active');
+                $('#gender').val('female');
+                if ('{$is_wechat}' != 'y') {
+                    $('#head_img').attr('src', '')
+                    $('#head_img').attr('src', "__PUBLIC__/Label/Image/wap_ebc/a_woman.png");
+                    $('input[name=head_img]').val('__PUBLIC__/Label/Image/wap_ebc/a_woman.png');
+                }
+            });
+
+            $('.header').click(function() {
+                history.go(-1)
+            });
+
+            function getUrlParam(name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+                var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+                if (r != null) {
+                    return unescape(r[2]);
+                } else {
+                    return null;
+                } //返回参数值
+            }
+
+            $('#create_qrcode').click(function() {
+                var data = $('#qrcode_data').serialize();
+                var phone = $('input[name=only_phone]').val();
+                $.post('index.php?g=Wap&m=Vcard&a=editsubmit', data, function(result) {
+                    var reg = /^{"error":/;
+                    if (reg.test(result)) {
+                        result = eval("(" + result + ")");
+                        $('#error').addClass('is-visible');
+                        var content = '<dl><dt>提示</dt><dd style="text-align:center;"><a href="javascript:void(0)" rel="mobile">' + result['msg'] + '</a></dd></dl>';
+                        $('#label_content').append(content);
+                        $('#error').click(function() {
+                            $('#label_content').empty();
+                            $('#error').removeClass('is-visible');
+                        });
+                    } else {
+                        $.post('index.php?g=Wap&m=Vcard&a=getPic', {'type': 'user', 'phone': phone, 'style': 'add'}, function(imgResult) {
+                            var reg = /^{"error":/;
+                            if (reg.test(imgResult)) {
+                                result = eval("(" + imgResult + ")");
+                                $('#error').addClass('is-visible');
+                                var content = '<dl><dt>提示</dt><dd style="text-align:center;"><a href="javascript:void(0)" rel="mobile">' + imgResult['msg'] + '</a></dd></dl>';
+                                $('#label_content').append(content);
+                                $('#error').click(function() {
+                                    $('#label_content').empty();
+                                    $('#error').removeClass('is-visible');
+                                });
+                            } else {
+                                var openid = getUrlParam('openid');
+                                window.location.href = 'index.php?g=Wap&m=Vcard&a=viewUser&mobile=' + phone + '&openid=' + openid;
+                            }
+                        });
+                    }
+                });
+            });
+
+            function GetLength(str) {
+                var realLength = 0, len = str.length, charCode = -1;
+                for (var i = 0; i < len; i++) {
+                    charCode = str.charCodeAt(i);
+                    if (charCode >= 0 && charCode <= 128) {
+                        realLength += 1;
+                    } else {
+                        realLength += 3;
+                    }
+                }
+                return realLength;
+            }
+            ;
+
+            function strLen() {
+                var data = $('#name').val();
+                data += $('input[name=only_phone]').val();
+                data += $('#email').val();
+                data += $('#company_name').val();
+                var province = $('#province option:selected').text();
+                if (province.indexOf('选择') == -1) {
+                    data += province;
+                }
+                var city = $('#city option:selected').text();
+                if (city.indexOf('选择') == -1) {
+                    data += city;
+                }
+                var address = $('textarea[name=addr]').val();
+                data += address;
+                data += $('input[name=position]').val();
+                data += $('input[name=remark]').val();
+                data += $('input[name=home_page]').val();
+                var phone = $('input[name=phone]').val();
+                if (typeof (phone) != 'undefined') {
+                    data += phone;
+                }
+                var mobile = $('input[name=mobile]').val();
+                if (typeof (mobile) != 'undefined') {
+                    data += mobile;
+                }
+                var homeTel = $('input[name=homeTel]').val();
+                if (typeof (homeTel) != 'undefined') {
+                    data += homeTel;
+                }
+                var fax = $('input[name=fax]').val();
+                if (typeof (fax) != 'undefined') {
+                    data += fax;
+                }
+
+                var lenth = GetLength(data);
+                $('#wordLen').text(lenth);
+            }
+
+            $('input').keyup(function() {
+                strLen();
+            });
+            
+            $('textarea[name=addr]').keyup(function(){
+                strLen();
+            });
+
+            $('#province').change(function(){
+                strLen();
+            });
+
+            $('#city').change(function(){
+                strLen();
+            });
+            
+            
+            $(".js_add_tel").click(function(e) {
+                $(this).parent("dt").parent("dl").append("<dd class='colgroup edit'><label>电话</label><input type='tel' placeholder='电话' name='phone' id='tel' rel='1' /><i class='del'></i></dd>");
+
+                $(".colgroup label").click(function(e) {
+                    $('#select_type').addClass('is-visible');
+                    $(this).addClass("current");
+                });
+
+                $(".del").click(function() {
+                    $(this).parent().remove();
+                    $('.js_add_tel').css('display', 'block');
+                })
+
+                $(this).css('display', 'none');
+                $('input').keyup(function() {
+                    strLen();
+                });
+            });
+        })
+    </script>
+</body>
+</html>
+
+

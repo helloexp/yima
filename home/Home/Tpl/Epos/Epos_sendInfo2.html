@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+<title>翼码旺财</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="__PUBLIC__/Label/Js/require.js"></script>
+<link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/Epos_css.css" />
+</head>
+<body>
+<!-- <div id="header">
+    <h1>数据明细</h1>
+    <i class="icon-home r"><a href="<?php echo C('INDEX_URL')?>" class="a-hide loginOut"></a></i>
+</div>
+<div id="wrapper"> -->
+    <div id="main">
+    	<div class="dateNav">
+        	<ul>
+                <li><a href="<?php echo C('LISTTRANS_URL')?>">总览</a></li>
+                <li><a href="{:U('sendList',array('sid'=>$sid))}" class="hover">发码</a></li>
+                <li><a href="<?php echo C('LISTTRANSPOS_URL')?>">核销</a></li>
+                <li><a href="<?php echo C('LISTTRANSPAY_URL')?>">收单</a></li>
+                <li><a href="<?php echo C('LISTTRANSREVERSE_URL')?>">撤销</a></li>
+            </ul>
+        </div>
+        <div class="dateList">
+        	<dl>
+            	<dt>发码详情</dt>
+            </dl>
+        </div>
+        <div class="Iform lg">
+            <dl>
+                <dt>卡券名称</dt>
+                <dd><p>{$data['batch_short_name']}</p></dd>
+            </dl>
+            <dl>
+                <dt>交易类型</dt>
+                <dd><p>发码</p></dd>
+            </dl>
+            <dl>
+                <dt>交易流水号</dt>
+                <dd><p>{$data['req_seq']}</p></dd>
+            </dl>
+            <dl>
+                <dt>交易时间</dt>
+                <dd><p>{$data['trans_time']}</p></dd>
+            </dl>
+            <dl>
+                <dt>交易状态</dt>
+                <dd><p id="status">{$data['status']}</p></dd>
+            </dl>
+            <dl>
+                <dt>手机号</dt>
+                <dd><p>{$data['phone_no']}</p></dd>
+            </dl>
+            <dl>
+                <dt>操作员</dt>
+                <dd><p>{$data['epos_acount']}</p></dd>
+            </dl>
+        </div>
+        <if condition="$data['status'] eq '成功'">
+		<div class="btn">
+			<a class="btn-all w2" id="resend" >重发</a>
+			<a class="btn-all w2 btn-cx" id="cancel">撤销</a>
+		</div>
+		<else />
+		<div class="btn" style="text-align:center"><a href="{:U('sendList',array('sid'=>$sid))}" class="btn-all">返回</a></div>
+		</if>
+
+    </div>
+</div>
+</body>
+<script>
+var pos_id = '{$pos_id}';
+var req_seq = '{$data['req_seq']}';
+var epos_acount = '{$data['epos_acount']}';
+requirejs(['jquery','zDialog01'], function($,zDialog01) {
+	$(document).ready(function(e) {
+		$("#resend").click(function(){
+			var diag = new Dialog();
+			//diag.Title = "提示";
+			diag.Width=300;
+    	    diag.Height=120;
+			diag.ShowButtonRow = true;
+			diag.ShowcancelButton=true;
+			diag.OKEvent = function () {
+				diag.close();
+				$.post('{:U('resend')}',{'pos_id':pos_id,'req_seq':req_seq,'epos_acount':epos_acount},function(result){
+					result = eval("("+result+")");
+					var diag = new Dialog();
+					//diag.Title = result;
+					diag.Width=300;
+    	            diag.Height=120;
+					diag.ShowButtonRow = true;
+					diag.ShowcancelButton=true;
+					diag.OKEvent = function () {
+						diag.close();
+					}
+					diag.InnerHtml ='<div class="rjpop"><dl><dt>'+result+'</dt><dd></dd></dl></div>';
+					diag.show();
+				})
+			};
+			diag.CancelEvent = function () {
+				diag.close();
+			};
+			diag.InnerHtml = '<div class="rjpop"><dl><dt>是否重发？</dt><dd></dd></dl></div>';
+			diag.show();
+		});
+		
+		$("#cancel").click(function(){
+			var diag = new Dialog();
+			//diag.Title = "提示";
+			diag.Width=300;
+    	    diag.Height=120;
+			diag.ShowButtonRow = true;
+			diag.ShowcancelButton=true;
+			diag.OKEvent = function () {
+				diag.close();
+				$.post('{:U('cancel')}',{'pos_id':pos_id,'req_seq':req_seq,'epos_acount':epos_acount},function(result){
+					result = eval("("+result+")");
+					var diag = new Dialog();
+					//diag.Title = result;
+					diag.Width=300;
+    	            diag.Height=120;
+					diag.ShowButtonRow = true;
+					diag.ShowcancelButton=true;
+					diag.OKEvent = function () {
+						diag.close();
+						window.location.reload();
+					};
+					diag.CancelEvent = function () {
+						diag.close();
+						window.location.reload();
+					};
+					diag.InnerHtml ='<div class="rjpop"><dl><dt>'+result+'</dt><dd></dd></dl></div>';
+					diag.show();
+				})
+			};
+			diag.CancelEvent = function () {
+				diag.close();
+			};
+			diag.InnerHtml = '<div class="rjpop"><dl><dt>是否撤销？</dt><dd></dd></dl></div>';
+			diag.show();
+		});
+	});
+});
+</script>
+</html>
+

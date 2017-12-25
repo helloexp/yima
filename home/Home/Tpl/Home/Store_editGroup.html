@@ -1,0 +1,327 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>选择门店</title>
+
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script>
+        var shopList ={$dataList};
+        var oldStore ={$oldStore};
+        $(function(){
+            var shopArray = new Array();
+            //所有未被分组的门店
+            if(shopList){
+                $.each(shopList, function(key, val) {
+                    $("<li data-value='"+key+"' stores_id='"+shopList[key].store_id+"'store_id='"+key+"'data-code='"+shopList[key].province_code+"-"+shopList[key].city_code+"-"+shopList[key].town_code+"'title='"+shopList[key].province_name+" "+shopList[key].city_name+" "+shopList[key].town_name+"'>"+shopList[key].store_name+"</li>").appendTo("#refer_a");
+                });
+            }else{
+                shopList = new Array();
+                $("<span class='notShop'>暂无门店</span>").appendTo("#refer_a");
+            }
+
+            //现有门店
+            if (oldStore) {
+                $.each(oldStore, function(key, val) {
+                    $("<li data-value='"+key+"' stores_id='"+oldStore[key].store_id+"'store_id='"+key+"'data-code='"+oldStore[key].province_code+"-"+oldStore[key].city_code+"-"+oldStore[key].town_code+"'title='"+oldStore[key].province_name+" "+oldStore[key].city_name+" "+oldStore[key].town_name+"'>"+oldStore[key].store_name+"</li>").appendTo("#shop_seleted");
+                });
+                //原效果(添加选择状态)
+                var allStore = $('#refer_a li');
+                $.each(oldStore,function(key,val){
+                    $.each(allStore,function(key2,val2){
+                        if(val.store_id == $(val2).attr('stores_id')) {
+                            $(allStore[key2]).addClass("selected");
+                            shopArray.push(oldStore[key]);
+                        }
+                    })
+                });
+                //已选门店的数量
+                $("#number").text(oldStore.length);
+                $("#number1").text(oldStore.length);
+            }else{
+                oldStore = new Array();
+                $("<span class='notShop'>暂无门店</span>").appendTo("#shop_seleted");
+            }
+            $('.shoplist').on('click','li', function(){
+                //
+                var sel_true = $(this).hasClass("selected");
+                var sel_val = $(this).attr("stores_id");
+                var store_id = $(this).attr("store_id");
+                if(sel_true == false) {
+                    $(this).addClass("selected");
+                    $.each(shopList, function(key, val) {
+                        if (val.store_id == sel_val) {
+                            oldStore.push(val);
+                        };
+                    });
+                } else {
+                    $(this).removeClass("selected");
+                    $.each(oldStore, function(key, val) {
+                        if(val.store_id == sel_val) {
+                            oldStore.splice(key, 1);
+                            return false;
+                        }
+                    });
+                }
+                $("#number").text(oldStore.length);
+                $("#number1").text(oldStore.length);
+                $("#shop_seleted").empty();     //清空所有节点
+                $.each(oldStore, function(key, val) {
+                    $("<li data-value='"+key+"' stores_id='"+oldStore[key].store_id+"'store_id='"+key+"'data-code='"+oldStore[key].province_code+"-"+oldStore[key].city_code+"-"+oldStore[key].town_code+"'title='"+oldStore[key].province_name+" "+oldStore[key].city_name+" "+oldStore[key].town_name+"'>"+oldStore[key].store_name+"</li>").appendTo("#shop_seleted");
+                });
+            });
+            //已选中的门店
+            $('.storelist').on('click','li', function(){
+                var sel_val = $(this).attr("stores_id");
+                $(".shoplist li[stores_id='"+sel_val+"']").removeClass("selected");
+                var list = $('#refer_a li');
+                var isOk = '';
+                $.each(list, function(key3,val3){
+                    isOk += $(val3).attr('stores_id')+',';
+                })
+                var nub = isOk.indexOf(sel_val);
+                if(nub == '-1'){
+                    $("#refer_a .notShop").remove();
+                    $.each(oldStore, function(key, val) {
+                        if(val.store_id == sel_val) {
+                            shopList.push(val);
+                            return false;
+                        }
+                    });
+                    $(this).appendTo("#refer_a");
+                }
+                $.each(oldStore, function(key, val) {
+                    if(val.store_id == sel_val) {
+                        oldStore.splice(key, 1);
+                        return false;
+                    }
+                });
+                $("#number").text(oldStore.length);
+                $("#number1").text(oldStore.length);
+
+                $("#shop_seleted").empty();
+                $.each(oldStore, function(key, val) {
+                    $("<li data-value='"+key+"' stores_id='"+oldStore[key].store_id+"'store_id='"+key+"'data-code='"+oldStore[key].province_code+"-"+oldStore[key].city_code+"-"+oldStore[key].town_code+"'title='"+oldStore[key].province_name+" "+oldStore[key].city_name+" "+oldStore[key].town_name+"'>"+oldStore[key].store_name+"</li>").appendTo("#shop_seleted");
+                });
+            });
+            $(".hidelayer .shoplist li").click(function(){
+                $(this).removeClass("selected");
+            });
+
+            $(".js_extend_one").toggle(function(e){
+                $(this).parent().children(".hidelayer1").slideToggle("slow");
+                $(".js_extend_one").html("收起<i></i>");
+                $(".js_extend_one i").addClass("active");
+            },function(e){
+                $(".js_extend_one i").removeClass("active");
+                $(this).parent().children(".hidelayer1").slideToggle("slow");
+                $(".js_extend_one").html("展开<i></i>");
+            });
+
+            $(".js_extend").toggle(function(e){
+                $(this).parent().children(".hidelayer").slideToggle("slow");
+                $(".js_extend").html("收起<i></i>");
+                $(".js_extend i").addClass("active");
+            },function(e){
+                $(".js_extend").removeClass("active");
+                $(this).parent().children(".hidelayer").slideToggle("slow");
+                $(".js_extend").html("展开<i></i>");
+            });
+            /*
+             $(".shoplist li").mouseover(function(){
+             $(this).children("div.tip").show();
+             });
+
+             $(".shoplist li").mouseout(function(){
+             $(this).children("div.tip").hide();
+             });
+             */
+            $('input:checkbox.js_selectall').click(function() {
+                var check = $(this).attr("checked");
+                if(check == 'checked') {
+                    $(".firstlay li").addClass("selected");
+                    var sNum = 0;
+                    shopIdStr = "";
+                    $.each(shopList, function(key, val) {
+                        oldStore[sNum] = val;
+                        if(shopIdStr == "") {
+                            shopIdStr = val.store_id;
+                        } else {
+                            shopIdStr += ","+val.store_id;
+                        }
+                        sNum++;
+                    });
+                    $("#name").val("");
+                } else {
+                    $(".firstlay li").removeClass("selected");
+                    oldStore = [];
+                    shopIdStr = "";
+                }
+                $("#number").text(oldStore.length);
+                $("#number1").text(oldStore.length);
+
+                $("#shop_seleted").empty();
+                $.each(oldStore, function(key, val) {
+                    $("<li data-value='"+key+"' stores_id='"+oldStore[key].store_id+"'store_id='"+key+"'data-code='"+oldStore[key].province_code+"-"+oldStore[key].city_code+"-"+oldStore[key].town_code+"'title='"+oldStore[key].province_name+" "+oldStore[key].city_name+" "+oldStore[key].town_name+"'>"+oldStore[key].store_name+"</li>").appendTo("#shop_seleted");
+                });
+            });
+
+            $("#select").click(function(){
+                var posId = '';
+                var selId = $('#shop_seleted li');
+                $.each(selId,function(key,val){
+                    posId += $(val).attr('stores_id')+',';
+                })
+                var groupId = "{$groupId}";
+                $.post("{:U('Home/Store/editGroup')}",{'store_id':posId,'groupId':groupId},function(data){
+                    if ((typeof data) == 'string') {
+                        art.dialog({title:false,content:"<div class='msg-all-error'>"+data+"</div>",fixed: true,padding:0}).time(3);
+                    }else{
+                        var win = art.dialog.open.origin;
+                        win.location.reload();
+                    }
+
+                },'JSON')
+            });
+
+            $("#sel_button").click(function() {
+                var pStr = "";
+                var province = $("#province").val();
+                if(province != "") {
+                    pStr = province;
+                }
+                var city = $("#city").val();
+                if(city != "") {
+                    pStr += "-"+city;
+                }
+                var town = $("#town").val();
+                if(town != "") {
+                    pStr += "-"+town;
+                }
+                if(pStr != '') {
+                    $("#refer_a").children().hide();
+                    $("li [data-code^='"+pStr+"']").show();
+                } else {
+                    $(".shoplist li").show();
+                }
+
+                var flag = false;
+                $(".firstlay li").each(function() {
+                    var disb = $(this).css("display");
+                    if(disb == "block") {
+                        flag = true;
+                        return false;
+                    }
+                });
+                if(!flag) {
+                    $("<span class='notShop'>没有门店</span>").appendTo("#refer_a");
+                } else {
+                    $("#refer_a .notShop").remove();
+                }
+            });
+
+            //省市区初始化
+            CityCode({
+                province:$("#province"),//省
+                city:$("#city"),//市
+                town:$("#town"),//区
+                selected:"{:$_REQUEST['province'].$_REQUEST['city'].$_REQUEST['town']}",//默认选中的省市区代号
+                url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+            });
+        });
+
+    </script>
+</head>
+<body>
+<div class="popupWin oh">
+    <div class="Wcanal-tab" id="Wcanal-tabon">
+        <div class="global-input6 fn">
+            <div id="Wform" class="Gform eTicket" style="margin:0">
+                <ul style="overflow:visible;">
+                    <li class="Ginput" style="padding-left:0;overflow:visible;">
+                        <div class="switch">
+
+                            <style type="text/css">
+                                .Gform .Ginput .switch.hover .newRadio-input{ float:none;}
+                                .Gform .Ginput .switch .newRadio-input{ display:block}
+                                .hidelayer{ display:none;}
+                                .tip{ display:none; background-color:#fff; position: absolute; z-index:9999; margin-left:-19px; margin-top:15px; box-shadow: 1px 1px 1px 0px #ccc; border: 1px #ccc solid; padding:10px;}
+                                .tip::before{position: absolute;left: 10%;margin-left: 15px;top: -10px;width: 18px;height: 10px;background:url(__PUBLIC__/Image/icon-shop2.png) no-repeat -60px 0;content: "";}
+                                .hidelayer1{ display:none;}
+                                .sweet_tips2{ clear:both; border:0; margin:0; padding:0; padding-top:10px; background-color:transparent; color:#F00}
+                                .hidelayer .shoplist li{border: 1px #ccc solid;}
+                                .js_extend_one,.js_extend{font-size: 14px;font-weight: bold;color: #ff8a00; margin-top:5px;}
+                                .js_extend_one i,.js_extend i{background: url(__PUBLIC__/Image/icon-form.png) -363px 0 no-repeat; font-size: 14px;font-weight: bold;color: #ff8a00;width: 11px;height: 6px; position: absolute;  top: 6px; right:-15px;}
+                                .js_extend_one i.active,.js_extend i.active{background:url(__PUBLIC__/Image/icon-form.png) -363px -10px no-repeat;}
+
+                                .storelist li:hover{ background:url(__PUBLIC__/Image/eTicket/corner-right_close.png) right bottom no-repeat;}
+                            </style>
+                            <div class="newRadio-input">
+                                <div class="sweet_tips2">您总共选择了<span id="number">0</span>家门店</div>
+                                <div class="shop-search fn" style=" margin-top:10px; z-index:-1;">
+                                    <input type="hidden" name="type" value="{$Think.request.type}"/>
+                                    <p>门店地址</p>
+                                    <p>
+                                        <select name="province" id="province" class="textbox w80">
+                                            <option value="">省</option>
+                                        </select>
+                                        <select name="city" id="city" class="textbox w80">
+                                            <option value="">市</option>
+                                        </select>
+                                        <select name="town" id="town" class="textbox w80">
+                                            <option value="">区</option>
+                                        </select>
+                                    </p>
+                                    <p><a href="javascript:void(0);" class="searchBtn" id="sel_button">查询</a></p>
+                                    <p class="ml20 vm"><input type="checkbox" class="vm js_selectall" id="selectall" name="selectall">全选</input></p>
+                                </div>
+                                <ul class="shoplist firstlay" id='refer_a' name='refer_a' style='height:70px;overflow:hidden'>
+                                </ul>
+                                <a href="javascript:void();" onclick='slideDiv("refer_a",70);return false;' class='afblue js_extend_one' style="float:left; position: relative;">查看全部<i></i></a>
+                                <script>
+                                    function slideDiv(divID,height){
+                                        var obj=document.getElementById(divID).style;
+                                        if(obj.height==""){
+                                            obj.height=height+"px";
+                                            obj.overflow="hidden";
+                                        }else{
+                                            obj.height="";
+                                            obj.overflow="";
+                                        }
+                                    }
+                                </script>
+
+                            </div>
+                        </div>
+            </div>
+            </li>
+            </ul>
+        </div>
+    </div>
+    <div class="steps mt20">已选择门店(<span id="number1">0</span>)</div>
+    <a href="javascript:void();" class="js_extend" style="float:left; position:absolute; left:150px; margin-top:-24px">展开<i></i></a>
+    <div class="hidelayer dn" style=" padding:7px 0;clear:both">
+        <div class="newRadio-input">
+            <ul class="storelist" id="shop_seleted" name="shop_seleted" style="text-align:left; overflow:visible">
+            </ul>
+        </div>
+    </div>
+
+    <a class="Diabtn-all" id="select" href="javascript:void(0);">确定</a>
+    <a href="javascript:art.dialog.close();" title="取消" class="Diabtn-all-del">取消</a>
+</div>
+</div>
+</body>
+</html>

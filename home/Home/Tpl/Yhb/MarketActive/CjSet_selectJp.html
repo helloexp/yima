@@ -1,0 +1,494 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>抽奖</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wprize.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wyhb.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<style>
+  .Gform .Ginput .Gtime1.special input[type=text] {
+    padding-left: 100px;
+    padding-right: 73px;
+  }
+  .Gform .Ginput .Gtime1.special em.em1, .Gform .Ginput .Gtime1.special em.em2 {
+    width: 95px;
+  }
+  .Gform .Ginput .switch .newRadio {
+	  width: 100%;
+   }
+	.Gform .Ginput .switch .judgeCon2{
+		display: none;
+	}
+	.Gform .Ginput a {
+		color:#fff;
+	}
+</style>
+<script>
+	var _hbtpybx_flag = <?php echo $hbtpybx_flag ? 'true' : 'false';?>;
+//选择卡券
+
+
+$(function(){
+	Gform();
+	$("#form4").validationEngine({binded:true});
+	var isedit = $('#cj_batch_id').val();
+	var card_id = '{$jp_arr['card_id']}';
+	var subHref = "{:U('Common/SelectJp/jpAdd')}";
+	if(card_id != ''){
+		$('.source').hide();
+	}
+	var batch_class = '{$jp_arr['batch_class']}';
+	if(batch_class == '12'){
+		$('.source').hide();
+	}
+	if(isedit!=''){
+		sourceV = "{$jp_arr['source']}";
+		if(sourceV == '2'){
+			$(".source input").attr("disabled","disabled");
+ 			$(".source textarea").attr("disabled","disabled");
+		}
+		subHref = "{:U('Common/SelectJp/jpEdit')}";
+		var verify_begin_type = "{$jp_arr['verify_begin_type']}";
+		if(verify_begin_type == '1'){
+			$('#date_type_1').trigger('click');
+		}
+		/*if(verify_begin_type == '1'){
+			$("input[name=verify_time_type]:eq(1)").attr("checked",'checked');
+			$('.judgeCon2').show();
+			$('.judgeCon1').hide();
+			$('#verify_begin_date').val('');
+			$('#verify_end_date').val('');
+
+		}else{
+			$("input[name=verify_time_type]:eq(0)").attr("checked",'checked');
+			$('.judgeCon1').show();
+			$('.judgeCon2').hide();
+			$('#verify_begin_days').val('');
+			$('#verify_end_days').val('');
+
+
+		}*/
+	}
+	//添加奖项
+	 $("#prizetype").on("click",".Gform .switch .newRadio span",function(){
+		 $(this).attr("data-val")==0 ? $("#newprizetype").show() : $("#newprizetype").hide();
+	 });
+	 //选择抽奖
+	    $('#bind_cj').click(function(){
+            var  name = "&callback=selectJpcallback&batch_id={$batch_id}&show_source={:I('show_source')}";
+    	    art.dialog.open("{:U('Yhb/SelectJp/index')}"+name,{
+    	    	id: 'closeJp',
+    	    	width: 800,
+    	    	height: 600,
+    	    	title:'选择卡券',
+    	    	lock: true
+    	    })
+        });
+
+        //奖品设置
+        $('#btn4').click(function(){
+        	if($("#form4").validationEngine('validate')){
+
+        	var verify_time_type = 0;
+        	if($("input[name='verify_time_type']:checked").val() == '1'){
+        		 verify_time_type = 1;
+        	}
+        	if(parseInt($('#day_count').val()) >parseInt($('#goods_count').val())){
+        		art.dialog({width:"200px",title:"提示",lock:true,content:'每日奖品限量不能大于奖品总数!',okVal: '确认',});
+        		return false;
+        	}
+        	if(isedit == ''){
+	        	if(!confirm('奖品添加过后不可删除！请确认？')){
+	        			return false;
+	        	}
+        	}
+
+			var data = {
+				js_cate_id : $('#js_cate_id').val(),
+				cj_batch_id : $('#cj_batch_id', '#form4').val(),
+				goods_id : $('#goods_id', '#form4').val(),
+				day_count : $('#day_count', '#form4').val(),
+				goods_count : $('#goods_count', '#form4').val(),
+				verify_time_type : verify_time_type,
+				mms_title :'翼蕙宝',
+				mms_text : '翼蕙宝',
+				verify_begin_date : $('#verify_begin_date', '#form4').val(),
+				verify_end_date : $('#verify_end_date', '#form4').val(),
+				verify_begin_days : $('#verify_begin_days', '#form4').val(),
+				verify_end_days : $('#verify_end_days', '#form4').val(),
+				batch_id : $('#batch_id', '#form4').val(),
+				jp_type : $('#jp_type').val(),
+				wx_card_id : $('#wx_card_id').val(),
+				cate_name : $('#cate_name').val(),
+				version : 3
+			}
+
+			if(_hbtpybx_flag){
+				data.send_type = $('#send_type').val();
+			}
+
+			dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,lock:true});
+			$.post(subHref, data, function(resp){
+                if(resp.status=='1'){
+					obj = {data:resp.data};
+                	window.parent.refresh_jp(obj);
+            	}
+            	dialog.close();
+				art.dialog({width:"200px",title:"提示",lock:true,content:resp.info,
+					okVal: '确认',
+					ok: function () {
+						if(resp.status=='1'){
+							art.dialog.close();
+						}
+					}
+				});
+			}, 'json');
+		  };
+		});
+
+
+
+	$('#js_cate_id').val($('#prizetype span:eq(0)').data('val'));
+	$('#prizetype span:eq(0)').trigger('click');
+
+
+ $('#form2').hide();
+ $('#form1').show();
+ //初始化时判断是否要disable
+ initDisableCount();
+ 
+});
+
+function initDisableCount() {
+	if ($('#goods_name').val() == '' || $('#bonus_name').val() == '') {
+		$('#goods_count').attr('disabled', 'disabled');
+		$('#day_count').attr('disabled', 'disabled');
+	}
+}
+//打开窗口的回调函数
+var selectJpcallback = function (d) {
+	var bt = d.begin_time, et = d.end_time;
+
+
+	$('#begin_time').val(bt.substring(0, 8));
+	$('#end_time').val(et.substring(0, 8));
+	$('#goods_desc').val(d.goods_desc);
+	$('#goods_id').val(d.goods_id);
+	$('#goods_name').val(d.goods_name);
+	$('#goods_name_a').text(d.goods_name);
+	$('#bonus_name').val(d.goods_name);
+	$('#bonus_name_a').text(d.goods_name);
+	//$('#goods_type').val(d.goods_type);
+	$('#goods_count').removeAttr('disabled').val('');
+	$('#day_count').removeAttr('disabled').val('');
+	
+	if(d.goods_type == 7){
+		var note = "您已获得"+d.goods_amt+"元手机话费，点击[#GET_URL]，提交待充值手机号，即可领取！领取截止时间：[#END_DATE]。";
+		$('#mms_text').val(note);
+		$('#mms_title').val(d.goods_amt+"元手机话费");
+		$('#mms_text').attr("readonly","readonly");
+		$('#mms_title').attr("readonly","readonly");
+	}
+	else if(d.goods_type == 8){
+		var note = "您已获得"+d.goods_amt+"元Q币，点击[#GET_URL],即可领取！领取截止时间：[#END_DATE]。";
+		$('#mms_text').val(note);
+		$('#mms_title').val(d.goods_amt+"元Q币");
+		$('#mms_text').attr("readonly","readonly");
+		$('#mms_title').attr("readonly","readonly");
+	}
+	else if(d.goods_type == 12){
+		$('.source').hide();
+	}
+	else{
+		$('#mms_text').val(d.mms_text);
+		$('#mms_title').val(d.mms_title);
+	}
+
+	if (d.storage_type == '1') {
+		$(".remain_num").html(d.remain_num);
+		$('#goods_count').attr('class', 'validate[required,custom[integer],max['+d.remain_num+']]');
+		$('#day_count').attr('class', 'validate[required,custom[integer],max['+d.remain_num+']]');
+	} else {
+		$(".remain_num").html('不限');
+		$('#goods_count').attr('class', 'validate[required,custom[integer]');
+		$('#day_count').attr('class', 'validate[required,custom[integer]');
+	}
+
+
+	if (d.source == '3') {
+		$('#jp_type').val(1);
+		$('#wx_card_id').val(d.card_id);
+		$('.source').hide();
+	}
+	else if(d.goods_type == 12){
+		$('.source').hide();
+	}
+	else {
+		$('.source').show();
+		$('#jp_type').val(0);
+		$('#wx_card_id').val('');
+		if (d.source == '2') {
+			$(".source input").attr("disabled", "disabled");
+			$(".source textarea").attr("disabled", "disabled");
+		}
+
+		$('#verify_time_type').val(d.verify_time_type);
+		if (d.verify_time_type == '1') {
+			$('#verify_begin_days').val(d.verify_begin_date);
+			$('#verify_end_days').val(d.verify_end_date);
+			$('#verify_begin_date').val('');
+			$('#verify_end_date').val('');
+			$("input[name=verify_time_type]:eq(1)").attr("checked", 'checked');
+			$('.judgeCon2').show();
+			$('.judgeCon1').hide();
+			$('#date_type_1').parent('div').find('.valfirst').removeClass('hover');
+			$('#date_type_1').addClass('hover');
+		} else {
+			var bd = d.verify_begin_date, ed = d.verify_end_date;
+			$('#verify_begin_days').val('');
+			$('#verify_end_days').val('');
+			$('#verify_begin_date').val(bd.substring(0, 8));
+			$('#verify_end_date').val(ed.substring(0, 8));
+			$("input[name=verify_time_type]:eq(0)").attr("checked", 'checked');
+			$('.judgeCon1').show();
+			$('.judgeCon2').hide();
+			$('#date_type_1').parent('div').find('.valfirst').addClass('hover');
+			$('#date_type_1').removeClass('hover');
+		}
+
+
+
+		art.dialog({id: 'closeJp'}).close();
+		check_lenght(10, 'title_text', $('#mms_title'));
+		check_lenght(100, 'text', $('#mms_text'));
+	}
+}
+function cjtype(t){
+	var val = t.attr("data-val");
+	if(val==0){
+		$(".source").show();
+	}else{
+		$(".source").hide();
+	}
+}
+
+$(function(){
+	$('.verify_time').find('span').click(function(){return false});
+});
+</script>
+</head>
+<body>
+<div class="fn" id="one_div">
+	<div class="cl"></div>
+
+	<div id="" class="fn" style="padding-left:20px;">
+	<div class="Gform fn">
+		<!--旺财卡券表单1-->
+		<div id="Wform">
+			<ul>
+				<li class="Gnmae">*&nbsp;设置奖项：</li>
+				<li class="Ginput">
+					<div id="prizetype" class="switch auto">
+						<php>if($cj_batch_id){</php>
+						<div class="newRadio">
+							<span class="hover">{$cate_arr[$jp_arr['cj_cate_id']]}</span>
+						</div>
+						<php>}else{</php>
+						<input type="radio" id="js_cate_id" value="0">
+						<div class="newRadio">
+							<php>$i = 0;</php>
+							<foreach name="cate_arr" item="vo" key="k">
+								<php>
+									if($jp_arr){
+									$hover = $k == $jp_arr['cj_cate_id'] ? 'hover' : '';
+									}
+									else{
+									$hover = $i == 0 ? 'hover' : '';
+									}
+									$i++;
+								</php>
+								<span class="{$hover}" data-val="{$k}">{$vo}</span>
+							</foreach>
+							<span class="" data-val="0">新奖项</span>
+						</div>
+						<php>}</php>
+					</div>
+				</li>
+			</ul>
+			<ul id="newprizetype" class="dn">
+				<li class="Gnmae">&nbsp;</li>
+				<li class="Ginput">
+					<input type="text" name="cate_name" id="cate_name" class="validate[required]" maxlength="6" placeholder="新奖项名称，如：一等奖" /><span class="maxTips forInput" data-max="6">0/6</span>
+				</li>
+			</ul>
+		</div>
+	</div>
+	</div>
+	<div class="cl"></div>
+	<div id="form1" class="fn" style="padding-left:20px;">
+		<form method="post" id="form4">
+		<input type="hidden" id="goods_id"/>
+		<input type="hidden" id="begin_time"/>
+		<input type="hidden" id="end_time"/>
+		<input type="hidden" id="cj_batch_id" value="{$cj_batch_id}"/>
+		<input type="hidden" id="batch_id" value="{$batch_id}"/>
+		<!-- <input type="hidden" id="js_cate_id" value="{$cj_cate_id}"/> -->
+		<input type="hidden" id="jp_type"/>
+		<input type="hidden" id="wx_card_id"/>
+			<div class="Gform fn">
+	            <!--旺财卡券表单1-->
+	            <div id="Wform">
+					<php>if($hbtpybx_flag){</php>
+					<ul>
+						<li class="Gnmae">&nbsp;是否下发凭证：</li>
+						<li class="Ginput">
+							<div class="switch" data-show="ul_jointype_0_0">
+								<input type="radio" value="{$jp_arr['send_type']}" checked="checked" name="send_type" id="send_type">
+								<div class="newRadio">
+									<span class="valfirst" data-val="0">下发</span>
+									<span class="vallast" data-val="1">不下发</span>
+								</div>
+								<span class="txtTips important" id="ul_jointype_0_0">不下发，活动仅有中奖记录</span>
+							</div>
+						</li>
+					</ul>
+					<php>}</php>
+	            	<ul>
+	            		<li class="Gnmae">*&nbsp;选择奖品：</li>
+	            		<li class="Ginput">
+                        	<div class="switch <notempty name="cj_batch_id">disabled</notempty>" data-callback="cjtype">
+                                <input type="radio" name="" value="<eq name="jp_arr.batch_class" value="12">1<else/>0</eq>" checked="checked">
+                                <div class="newRadio" style="width:auto">
+                                    <span class="valfirst" data-val="0">卡券</span>
+                                </div>
+                                <div class="newRadio-default">
+                                    <div class="Gchoose" style="width:130px;">
+                                        <input type="text" class="validate[required]" id="goods_name" readonly="readonly" value="{$jp_arr['batch_name']}" />
+                                        <a href="javascript:void(0)" id="goods_name_a">{$jp_arr['batch_name']}</a>
+                                        <?php if(!$cj_batch_id){?>
+                                        <a href="javascript:void(0)" id="bind_cj" class="Gbtn-card" title="选择卡券"><i></i></a>
+                                        <?php }?>
+                                    </div>
+                                </div>
+                            </div>
+	            		</li>
+	            	</ul>
+	               	<ul>
+	                    <li class="Gnmae">*奖品总数：</li>
+	                    <li class="Ginput">
+                        	<input type="text" class="validate[required,custom[integer]<if condition="$jp_arr['goods_remain_num'] neq '-1'">,max[{:($jp_arr['goods_remain_num']+$jp_arr['total_count'])}]</if>]" id="goods_count" value="{$jp_arr['total_count']}">
+                            <span class="txtTips">您的库存为:<span class="remain_num red"><present name="jp_arr['storage_num']"><if condition="$jp_arr['storage_num'] neq '-1'">{$jp_arr['goods_remain_num']}<else />不限</if></present></span></span>
+                        </li>
+	                </ul>
+	               	<ul>
+	                    <li class="Gnmae">*每日奖品限量：</li>
+	                    <li class="Ginput"><input type="text" class="validate[required,custom[integer]<if condition="$jp_arr['goods_remain_num'] neq '-1'">,max[{:($jp_arr['goods_remain_num']+$jp_arr['total_count'])}]</if>]" id="day_count" value="{$jp_arr['day_count']}"></li>
+	                </ul>
+	                <ul class="source verify_time">
+	                    <li class="Gnmae">*卡券使用时间：</li>
+	                    <li class="Ginput">
+	                    	<php>
+	                    	$time_flag = $jp_arr['verify_begin_type'] == '0';
+	                    	</php>
+                        	<div class="switch">
+                                <input type="radio" id="verify_time_type" name="verify_time_type" value="{$jp_arr['verify_begin_type']}" checked="checked">
+                                <div class="newRadio">
+                                    <span class="valfirst hover" data-val="0">按日期设置</span>
+                                    <span class="vallast {$hover2}" data-val="1" id="date_type_1">按天数设置</span>
+                                </div>
+
+                                <php>
+                                $begin_date = $end_date = '';
+                                if($time_flag){
+									$begin_date = dateformat($jp_arr['verify_begin_date'],'Ymd');
+									$end_date = dateformat($jp_arr['verify_end_date'],'Ymd');
+                                }
+                                </php>
+                                <div class="newRadio-default judgeCon1">
+                                    <div class="Gtime1 fn special mt10">
+                                        <em class="em1">使用开始时间</em>
+                                        <input type="text" name="verify_begin_date" id="verify_begin_date"  class="validate[required,condRequired[verify_begin_type1]]" readonly="readonly" value="{$begin_date}" maxlength="8" style="width:145px;">
+                                    </div>
+                                    <div class="Gtime1 fn special mt10">
+                                        <em class="em1">使用结束时间</em>
+                                        <input type="text" name="verify_end_date" id="verify_end_date"  class="validate[required,condRequired[verify_begin_type1]]" readonly="readonly"  value="{$end_date}" style="width:145px;">
+                                    </div>
+                                    <span class="txtTips important">自定义验码开始的日期,如:"4月1号至6月1号"</span>
+                                </div>
+                                <php>
+								$begin_day = $end_day = '';
+                                if(!$time_flag){
+									$begin_day = $jp_arr['verify_begin_date'];
+									$end_day = $jp_arr['verify_end_date'];
+                                }
+                                </php>
+                                <div class="newRadio-default judgeCon2">
+                                   <div class="Gtime1 fn special mt10">
+                                        <em class="em1">发送卡券后</em>
+                                        <input name="verify_begin_days" id="verify_begin_days" type="text" class="validate[required,custom[integer],condRequired[verify_begin_type2]]" readonly="readonly"  value="{$begin_day}" style="width:145px;">
+                                        <em class="em2">天开始使用</em>
+                                    </div>
+                                    <div class="Gtime1 fn special mt10">
+                                        <em class="em1">发送卡券后</em>
+                                        <input name="verify_end_days" id="verify_end_days" type="text" class="validate[required,custom[integer],condRequired[verify_begin_type2]]" readonly="readonly"  value="{$end_day}" style="width:145px;">
+                                        <em class="em2">天结束使用</em>
+                                    </div>
+                                    <span class="txtTips important">自定义验码时间,如:"发送卡券后3天开始使用,5天结束使用"</span>
+                                </div>
+                            </div>
+	                    </li>
+	                </ul>
+	                <ul>
+	                    <li class="Gnmae"></li>
+	                    <li class="Ginput">
+	                    <a href="javascript:void(0);" title="确认" id="btn4" class="btn-all w110 ml10">确定</a>
+	                    </li>
+	                </ul>
+	        	</div>
+	        </div>
+		</form>
+	</div>
+	<div id="form2" class="fn" style="padding-left:20px;">
+		<form method="post" id="form42">
+			<div class="Gform fn">
+	            <!--旺财卡券表单1-->
+	            <div id="Wform">
+	            	<ul>
+	                    <li class="Gnmae">*平安币：</li>
+	                    <li class="Ginput"><input type="text" class="validate[required]" id="batch_amt" value="{$jp_arr['batch_amt']}"></li>
+	                </ul>
+	            	
+	               	<ul>
+	                    <li class="Gnmae">*每日奖品限量：</li>
+	                    <li class="Ginput"><input type="text" class="validate[required,custom[integer],min[1]]" id="day_count2" value="{$jp_arr['day_count']}"></li>
+	                </ul>
+	               	<ul>
+	                    <li class="Gnmae">*奖品总数：</li>
+	                    <li class="Ginput"><input type="text" class="validate[required,custom[integer],min[1]]" id="goods_count2" value="{$jp_arr['total_count']}">&nbsp;<span class="remain_num"></span></li>
+	                </ul>
+	                <ul>
+	                    <li class="Gnmae"></li>
+	                    <li class="Ginput">
+	                    <a href="javascript:void(0);" title="确认" id="btn42" class="btn-all w110 ml10">确定</a>
+	                    </li>
+	                </ul>
+	              
+	        	</div>
+	        </div>
+		</form>
+	</div>
+</div>
+</body>
+</html>

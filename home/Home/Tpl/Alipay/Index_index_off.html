@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>条码支付_翼码旺财</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msgdata.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Walipay.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/highcharts.js?v=20150113"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.highchartTable.js?v=20150113"></script>
+
+<script type="text/javascript">
+	$(document).ready(function(e){
+		$(".close_btn").click(function(){
+			$(".s-tips1-ok").css("display","none");
+			$(".data").css("marginTop",0);
+		})
+	})
+</script>
+
+<script>
+$(document).ready(function() {
+	$("table.J_highchart")
+	.bind('highchartTable.beforeRender', function(event, highChartConfig) {
+		highChartConfig.xAxis.minTickInterval=2;
+	})
+  .highchartTable();
+  //时间控件
+  $("#b_trans_date").bind('click',function(){
+	WdatePicker({ maxDate:'#F{ $dp.$D(\'e_trans_date\'); }',minDate:'#F{ $dp.$D(\'e_trans_date\',{d:-30}); }',skin:"whyGreen"});
+  });
+  $("#e_trans_date").bind('click',function(){
+	WdatePicker({skin:"whyGreen",maxDate:'%y-%M-{%d-1}',minDate:'#F{ $dp.$D(\'b_trans_date\'); }'});
+  });
+});
+function msgshow(days,type){
+	if(days == 0)
+		var v_days = $('#chart_days').val();
+	else{
+		var v_days = days;
+		$('#chart_days').val(v_days);	
+	}
+
+	if(type == 9)
+		var v_type = $('#chart_type').val();
+	else{
+		var v_type = type;
+		$('#chart_type').val(v_type);
+	}
+		
+	if(v_type == 0)
+		var xArr = '支付宝和微信';
+	else if(v_type == 1)
+		var xArr = '支付宝';
+	else if(v_type == 2)
+		var xArr = '微信';
+
+	$.post(
+		'{:U(getChartInfo)}',
+		{"days":v_days,"type":v_type},
+		function(data){
+			var begin_t = data['begin'];
+			var end_t = data['end'];
+			var info_t = data['info'];
+			var chart = $('#amtChart').highcharts();
+			var begin_tmp = begin_t.substr(0,4)+'-'+begin_t.substr(4,2)+'-'+begin_t.substr(6,2);
+			var end_tmp = end_t.substr(0,4)+'-'+end_t.substr(4,2)+'-'+end_t.substr(6,2);
+			chart.series[0].setData(info_t);
+			chart.setTitle({text:begin_tmp+'至'+end_tmp});
+			chart.xAxis[0].setTitle({text:xArr});
+		},
+		'json'
+	);
+}
+</script>
+
+<script type="text/javascript">
+$(function () {
+var jsChartDataAmt = {$jsChartDataAmt};
+ $('#amtChart').highcharts({
+            chart: {
+                type: 'line',
+                marginRight: 130,
+                marginBottom: 100
+            },
+            title: {
+                text: '{$begin|dateformat='Y-m-d'}至{$end|dateformat='Y-m-d'}',
+                x: -20 //center
+            },
+            subtitle: {
+                text: '',
+                x: -20
+            },
+            xAxis: {
+				title: {
+                    text: '{$x_arr[$type]}',
+					style:{
+						fontSize:'16px'
+					}
+                },
+				
+                categories: [{$nodeDate}],
+                labels: {
+                    rotation: -45,
+                    align: 'right'
+               }
+            },
+            yAxis: {
+                title: {
+                    text: '单位(元)'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }],
+                min: 0
+            },
+            tooltip: {
+                valueSuffix: '元'
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'top',
+                x: -10,
+                y: 100,
+                borderWidth: 0
+            },
+            series: [{
+                name: '验证金额',
+                data: jsChartDataAmt
+            }]
+        });
+        $("#search").click(function(){
+            $("form").submit();
+        });
+    });
+    
+</script>
+</head>
+<body>
+<div id="wrapper">
+
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <div class="shopNav">
+    <include file="./Home/Tpl/Alipay/Alipay_public_header.html" topmenuid="zhifu"/>
+    </div>    
+    <div id="container">
+        <div id="main" class="rel bgfff">
+    		 <div class="sidenav">
+             <include file="./Home/Tpl/Alipay/Index_left_menuNew2.html" leftmenuid="ywgk"/>
+             </div>
+               <div class="subcon fn">
+               <div class="main-name fn">
+                    <h4>支付收单台</h4>
+                </div>
+                
+                <div class="Wcanal-tab" id="Wcanal-tabon">
+                    <div class="Wcanal-tab-title fn">
+                        <p class="Wcanal-tab-hover"><a href="{:U('Alipay/Index/index')}">概况</a></p>
+                        <p class=""><a href="{:U('Alipay/Index/pos_trace')}">交易明细</a></p>
+                        <p class="userLimited"><a href="javascript:void(0)" data-rel="{:U('Alipay/Index/day_stat',array('sttype'=>1))}">按门店统计</a></p>
+                        <p class="userLimited"><a href="javascript:void(0)" data-rel="{:U('Alipay/Index/day_stat',array('sttype'=>2))}">按日期统计</a></p>
+                        <p class="userLimited"><a href="javascript:void(0)" data-rel="{:U('Alipay/Index/day_stat',array('sttype'=>3))}">按门店分组统计</a></p>
+                        <p class="userLimited"><a href="javascript:void(0)" data-rel="{:U('Alipay/Index/day_stat',array('sttype'=>4))}">按交易方式统计</a></p>
+                    </div>
+                    <div class="Wcanal-tab-list">
+                        <div class="intro" style="margin-top:15px;"><h1><span style="font-size:18px;">交易数据对比</span></h1></div>
+                		<div class="alipay mt15">
+                        <div class="info">
+                        <input type="hidden" name="chart_days" id="chart_days" value="7"/>
+                        <input type="hidden" name="chart_type" id="chart_type" value="0"/>
+                            <div class="data mb35 fn" style="margin-top:0;">
+                                <div class="data-box">
+                                    <p class="up">
+                                        <i class="icon1 mr5"></i>
+                                        <span>{$count}</span>
+                                    </p>
+                                    <p class="down mt10">交易总笔数（次）</p>
+                                </div>
+                                <div class="data-box">
+                                    <p class="up">
+                                        <i class="icon2 mr5"></i>
+                                        <span><?php echo $count_; ?></span>
+                                    </p>
+                                    <p class="down mt10">交易总金额（元）</p>
+                                </div>
+                                
+                                <div class="data-box">
+                                    <p class="up">
+                                        <i class="icon1 mr5"></i>
+                                        <span><?php echo $cancel_cnt; ?></span>
+                                    </p>
+                                    <p class="down mt10">退款总笔数（次）</p>
+                                </div>
+                                <div class="data-box">
+                                    <p class="up">
+                                        <i class="icon2 mr5"></i>
+                                        <span><?php echo $cancel_amt; ?></span>
+                                    </p>
+                                    <p class="down mt10">退款总金额（元）</p>
+                                </div>
+                                
+                            </div>
+                            
+                            
+                        </div>
+                        
+                        <!--重用部分-->
+                        <div class="intro fn">
+                            <h1><span style="float:left; font-size:18px;" class="mb15">交易数据对比</span><span style="float:right; font-size:14px;" class="mb15">该统计数据，截止日期为：<?php echo date('Y-m-d',strtotime('-1 days')); ?><a href="{:U('Alipay/Index/day_stat')}" class="ml10">更多数据</a></span></h1>
+                            <div class="cl fn"></div>
+                            <div class="static">
+                                <div class="static_measure fn">
+                                    <div class="static_measure1 fn">
+                                        <dl>
+                                            <dt>时间</dt>
+                                            <dd id="div_item_tabs"><a class="current" id="tab_1" href="javascript:;" onclick="msgshow(7,9)">7天</a></dd><dd><a id="tab_2" href="javascript:;" onclick="msgshow(14,9)">14天</a></dd><dd><a id="tab_3" href="javascript:;" onclick="msgshow(30,9)">30天</a></dd>
+                                        </dl>
+                                    </div>
+                                    <div class="static_measure1 fn">
+                                        <dl>
+                                            <dt>交易类型</dt>
+                                            <dd><a id="tab_4" href="javascript:;" onclick="msgshow(0,0)">全部</a></dd><dd><a id="tab_5" href="javascript:;" onclick="msgshow(0,1)">支付宝</a></dd><dd><a id="tab_6" href="javascript:;" onclick="msgshow(0,2)">微信</a></dd>
+                                            <dd><a id="tab_6" href="javascript:;" onclick="msgshow(0,3)">翼支付</a></dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                                <div class="static_content">
+                                <h4 class="sub_title">趋势图</h4>
+                                    <div class="J_container" id="amtChart"></div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>        
+        </div>
+        </div>
+    </div>
+<include file="./Home/Tpl/Public/Public_footer.html" />
+<div class="service"></div>
+</div>
+</body>
+
+</html>
+<script>
+$(function(){
+  $("#ooxxjjww").click(function(){  
+       art.dialog.open("<?php echo U('Alipay/Index/info'); ?>",{
+	   		id:'ooxxjjww',
+	        title:'账户详情',
+            width:900,
+            height:700,
+            //lock:true
+       }) 
+	})
+	
+	
+	
+})
+</script>
+
+
+
+
+

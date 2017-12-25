@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$node_short_name}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<load href="__PUBLIC__/Label/Css/wap_Purchase.css"/>
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<script>
+$(function(){
+    $("#load_more").live("click",function(){
+        var p = $(this).data('p');
+        var id = '{$id}';
+        setTimeout(function(){
+            $('#loadingBox').show();
+        },1);
+        $.get("{:U('Label/GoodsSale/showBatchList')}",{"id":id,"p":p,"ajax":1},function(data){
+            if(data == ''){
+                $("#load_more").html('无更多码上买活动');
+            }else{
+                $("#lode_content").append(data);
+                $("#load_more").data('p',p+1);
+            }
+            $('#loadingBox').hide();
+        },'html');
+        
+    });
+});
+function link_to(url,fun){
+    setTimeout(function(){
+        $('#loadingBox').show();
+    },1);
+    setTimeout(function(){
+    if(typeof url == 'string'){
+    location.href=url;
+    }
+    if(typeof url == 'function'){
+    url();
+    }
+    },500);
+    setTimeout(function(){$('#loadingBox').hide();},6000);
+    if(typeof fun == 'string'){
+    var jscode = new Function('return function(){'+fun+'}')();
+        jscode();
+    }else if(typeof fun == 'function'){
+        fun();
+    }
+}
+</script>
+</head>
+<body>
+<div id="wrapper" class="bgf3f3f3">
+    <div id="container">
+        <div id="main">
+            <div class="headerTitle">码上买</div>
+            <div class="commodityList" id="lode_content">
+            <volist name="goodsList" id="vo">
+                <a href="javascript:link_to('{:U('Label/MaShangMai/index',array('id'=>$vo['url_id']))}');">
+                <li>
+                    <div class="commodityList-img"><img src="__UPLOAD__/<?php echo $vo['goods_image']?>" /></div>
+                    <div class="commodityList-con">
+                        <div class="commodityList-title">{$vo['name']}</div>
+                        <div class="commodityList-time"><i class="icon-time"></i>{$vo['goods_time']}</div>
+                        <div class="commodityList-time"><i class="icon-number"></i><p><if condition="$vo['storage_num'] neq -1">仅剩<span>{$vo['remain_num']}份</span><else />剩余数量不限</if></p></div>
+                        <div class="commodityList-price"><p>销售价￥{$vo['group_price']}元</p><if condition="$vo['market_price'] neq 0"><s>市场价￥{$vo['market_price']}元</s></if></div>
+                    </div>
+                </li>
+                </a>
+            </volist> 
+            </div>  
+            <div class="readMore"><a href="javascript:void(0);" id="load_more" data-p='2'>查看更多码上买活动</a></div> 
+        </div>
+    </div>
+</div>
+<div class="dn-bg dn"></div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>
+<eq name="show_menu" value="1">
+<script>
+var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Public/_hideWxMenu"/>
+</eq>

@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$row['wap_title']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,圣诞节活动" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20141224.css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.new.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) {
+    $("#order1").click(function(){
+		$("#order2").addClass("erro");
+		$("#order1").removeClass("erro");
+		$("#orderList2").hide();
+		$("#orderList1").show();
+	});
+    $("#order2").click(function(){
+		$("#order1").addClass("erro");
+		$("#order2").removeClass("erro");
+		$("#orderList1").hide();
+		$("#orderList2").show();
+	});
+});
+</script>
+</head>
+<body>
+<div id="wrapper" ontouchstart="autoaudio()">
+    <div id="container">
+    	<div id="main">
+        	<include file="Label/SnowBall/header"/>
+            <div class="page1">
+            	<h3><span>排行榜</span></h3>
+            	<div class="bddashed"><p>累计金币：<a>{$myranking['score']}</a>枚</p><p>排名：第<a>{$myranking['ranking']}</a>名</p></div>
+					<p>排名统计方法及奖品：</p>
+					<p>活动期间，每个参与圣诞雪球大战的微信玩家累计获得的金币数都会计入排行榜，进行排名。</p>
+					<p>活动结束后，按最终排名，第1名可获华为Mate8一台</p>
+            </div>
+            <div class="page1 mt20">
+            	<h3><span>活动奖品</span></h3>
+                <div class="flash">
+                	<ul class="swiper-wrapper">
+                        <li class="swiper-slide"><h2>特等奖</h2><img src="__PUBLIC__/Label/Image/20141224/snow-prize1.png" /><h3>华为Mate8</h3></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="page1">
+            	<h3><span id="order1">排行榜</span></h3>
+                <div id="orderList1" class="orderList">
+                	<ul id="masonry">
+                	<?php if($result){
+                		$i = 0;
+                		foreach($result as $ranking){
+                		$i++;
+                		?>
+                        <li class="box"><span class="one"><?php echo ($nowpage-1)*10+$i;?></span><img src="<?php echo $ranking['headimgurl'];?>" /><p class="l"><?php echo $ranking['nickname'];?></p><p class="r"><a><?php echo $ranking['score'];?></a>金币</p></li>
+                       <?php }}?>
+                    </ul>
+	                <nav id="page-nav">
+	                	<a href="<?php echo $nextUrl;?>" class="btn-more load">加载更多好友</a>
+	                </nav>
+                </div>
+            </div>
+             <!--分享-->
+			<include file="Label/SnowBall/public"/>
+			<!--分享-->
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/idangerous.swiper.min.js"></script>
+<script>
+$(document).ready(function(e) {
+    init();
+    $('#masonry').infinitescroll({
+        navSelector  : '#page-nav',    // selector for the paged navigation 
+        nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
+        itemSelector : '.box',     // selector for all items you'll retrieve
+		loadingImg   : '__PUBLIC__/Label/Image/Item/loading.gif',
+        loading: {
+            	finishedMsg: '没有更多数据了',
+            	loadingImg: '__PUBLIC__/Label/Image/Item/loading.gif',
+			}
+	});
+	$(window).unbind('.infscr');
+	$('a.btn-more').click(function(){
+		$(document).trigger('retrieve.infscr');
+		return false;
+	});
+	$(document).ajaxError(function(e,xhr,opt){
+		if(xhr.status==404)$('a.btn-more').remove();
+	});
+});
+window.onload = function() {
+	$(".swiper-slide:eq(1)").addClass("next");
+	var	flashSwiper = new Swiper('.flash',{
+		slidesPerView:"auto",
+		moveStartThreshold: 30,
+		centeredSlides: true,
+		watchActiveIndex: true,
+		onTouchEnd:function(){
+			var _this = $(".swiper-slide-active");
+			var index = _this.index();
+			var prev = index-1;
+			var next = index+1;
+			$(".swiper-slide").removeClass("prev").removeClass("next");
+			$(".swiper-slide:eq("+prev+")").addClass("prev");
+			$(".swiper-slide:eq("+next+")").addClass("next");
+		},
+		onFirstInit:function(){
+			$(".swiper-wrapper").height($(".swiper-slide").height());
+		}
+	})
+}
+
+function init(){
+	var windowwidth=$("#wrapper").width();
+	var scale=windowwidth/640;
+	$(".flash li").css({
+		width:207*scale
+	})
+	$(".flash li img").css({
+		width:205*scale,
+		height:152*scale
+	})
+}
+</script>
+<include file="Label/SnowBall/share"/>

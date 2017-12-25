@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>客户查询_账户中心_翼码旺财</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css"/>
+    <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+    <js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+    <js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+    <js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+</head>
+	<style>
+		#ffkh{width: 50px;margin-left: 15px;}
+		.Diabody .SearchAreaLeft{
+			width: auto;
+		}
+		input[type=radio] {
+			margin-right: 5px;
+			
+		}
+        .Ws-table {
+            text-align: center;
+            width: 100%;
+            border-collapse: collapse;
+            font: normal 14px/2em "microsoft yahei";
+            border: 1px solid #e1e1e1;
+        }
+        .Ws-table th{
+            text-align: center;
+        }
+	</style>
+<body>
+<div  class="rel" style="width:800px;height:350px;">
+	<div class="SearchArea fn">
+	                    <div class="SearchAreaLeft">
+                            <form name="ajaxForm" method="post" id="ajaxForm">
+	                    	<label>
+		                    	<span>预约门店</span>
+								<select name="merchant_id" id="merchant_id" class="selectbox w100" >
+                                    <option value="" class="">全部</option>
+                                    <volist name="merchant" id="vv">
+                                    <option value="{$vv['id']}">{$vv['store_short_name']}</option>
+                                    </volist>
+                                </select>
+		                    </label>
+	                    	 <label>
+		                    	<span>预约人姓名</span>
+								<input name="s_name" id="s_name" type="text" class="textbox w100"/>
+		                    </label>
+		                     <label>
+		                    	<span>预约手机号</span>
+								<input name="mobile" id="mobile" type="text" class="textbox w100"/>
+		                    </label> 
+                            </form>  
+	                    </div>
+	                    <div class="SearchAreaRight">
+	                    	<a href="javascript:void(0);" class="searchBtn" id="subform">查询</a>
+	                    	
+	                    </div>
+	                    </div>
+    					      <div style="width: auto;" class="alone">
+                            </div>
+                            <div class="DiabtnCon">
+                                        <a class="Diabtn-all btn-next" id="next_step">确定</a>       
+                                        <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>  
+                            </div>
+                            <script id="storeinfo" type="text/html">
+                                <table cellpadding="0" cellspacing="0" class="W-table">
+                                    <tr>
+                                        <th>预约门店</th>
+                                        <th>预约人姓名</th>
+                                        <th>预约手机号</th>
+                                    </tr>
+                                    {{if list}}
+                                        {{each list as value }}
+                                    <tr data-merchant_id="{{value.merchant_id}}" data-name="{{value.name}}" data-mobile="{{value.mobile}}" class="merchant_info">    
+                                        <td><input name="id" type="radio" value="{{value.id}}">{{value.store_short_name}}</td>
+                                        <td>{{value.name}}</td>
+                                        <td>{{value.mobile}}</td>     
+                                    </tr>
+                                        {{/each}}
+                                    {{/if}}
+                                </table>
+                                <div class="page">{{#page}}</div>
+                            </script>
+</div>
+</body>
+<script>
+    $(function(){
+        
+        function loadData(href){
+            var dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>"+"等待加载"+"</div>",fixed: true,padding:0});
+            $.ajax({
+                type:"post",
+                url:href,
+                dataType:'json',
+                data: $('#ajaxForm').serialize(),
+                success:function(data)
+                {
+                    var addinfo = template('storeinfo', data);
+                    $('.alone').html(addinfo);
+                    dialog.close();
+                }
+            })
+        }
+        $('.alone').on('click', '.page a', function(){
+            if($(this).hasClass('gobtns')){
+                var href = $(this).data('href');
+                var gop = $(this).prev('input').val();
+                href = href.replace("__PAGE__",gop);
+            }else{
+                var href = $(this).data('href');
+            }
+            if(href !='' && href !=undefined){
+                loadData(href);
+            }
+        })    
+
+
+        $('#next_step').click(function(){
+            var id=$("input[type='radio']:checked").val();
+            if(id==''||id==undefined){
+                var dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>"+"请选择预约客户"+"</div>",fixed: true,padding:0});
+                return false;
+            }
+            $.ajax({
+                    url:"{:U('GpEye/Customer/treatmentCustomerInfo')}",
+                    type:'post',
+                    data:'id='+id,
+                    dataType:'json',
+                    success:function(re){
+                        if(re.status==0){
+                            var dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>"+"re['info']"+"</div>",fixed: true,padding:0});
+                        }else{
+                            top.location.href = re['url'];
+                            art.dialog.close();
+                        }
+                    }
+
+                });
+        })
+        $('#subform').click(function(){
+           loadData("{:U('GpEye/Customer/appointmentReturn')}");
+        }).trigger('click');
+
+
+    });
+</script>
+</html>

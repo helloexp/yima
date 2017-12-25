@@ -1,0 +1,655 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>自定义菜单_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.css?v=__VR__" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2_menu.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/check_form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Common.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<style>
+.Gform .Gname{ width:90px;}
+.Gform .Ginput{ padding-left:105px;}
+.Gform .Ginput .switch .newRadio{ float:none; margin-bottom:10px;}
+.Gform .Ginput .switch .newRadio-default,.Gform .Ginput .switch.hover .newRadio-input{ float:none}
+.tab_navs{ margin-bottom:0;}
+.tab_panel{ min-height: inherit}
+.menu_form_area .msg_sender .emotion_editor .edit_area{ border:none; height:300px; padding:10px;}
+.menu_form_area .msg_sender .emotion_editor .edit_area:after{ content:""; clear:both; display:block;}
+.emotion_editor .edit_area{ padding:0;}
+#editTxt{ outline:none; border:none;/* width:515px;*/ width:97%; height:256px; }
+
+.msg_sender .emotion_editor {
+    border-width: 0; height: 320px;
+}
+.editArea .msg-item-wrapper{ width:320px;}
+</style>
+
+<script type="text/javascript">
+//图文选择后的回调函数
+var selectcallback = function(mid){
+	var dialog = art.dialog({title:false,lock:true});
+	var data = {material_id:mid};
+	$.post("{:U('Pingan/WeixinResp/showMaterialById')}",data,function(d){
+		dialog.close();
+		$(".edit_area").hide();
+		$("#reply_content_1").show();
+		$("#reply_content_1").html(d);
+		$("#type").val(0);
+		$("#response_class").val(1);
+	    $("#response_info").val(mid);
+		windowheight();
+	});
+}
+
+$(function(){
+	//初始化菜单是否显示
+	var flag = parseInt("{$flag}");
+	if(flag == 1 ){
+		//true表示尚未菜单项， false表示已有菜单项
+		$(".js_editBox").hide();
+		$(".js_startMenuBox").show();
+	}else{
+		$(".js_editBox").show();
+		$(".js_startMenuBox").remove();
+	}
+	$("body").on("click",".js_openMenu",function(){
+		$(".js_editBox").show(),$(".js_startMenuBox").remove()
+	})
+
+	//设置菜单内容
+	$(".tab_nav").click(function(e) {
+		$(".tab_nav").removeClass("selected");
+		$(this).addClass("selected");
+		var dataType = parseInt($(this).attr("data-type"));
+		//alert(dataType);
+		$("input[name=response_class]").val(dataType);
+		switch(dataType)
+		{
+		case 0:
+		  addTxt();
+		  break;
+		case 1:
+		  addMaterial("{:U('Pingan/WeixinResp/selectImgTxt')}&callback=selectcallback");
+		  break;
+		case 5:
+		  addImg();
+		  break;
+		case 4:
+		  addCard("{:U('Common/SelectJp/index')}&callback=cardresp&show_source=3&store_mode=2");
+		  break;
+		case 6:
+		  addActivity("{:U('LabelAdmin/SelectBatches/index')}&callback=selectActivityCallback");
+		  break;
+		case 2:
+		  addLink();
+		  break;
+	}
+	});
+
+	
+	
+})
+
+</script>
+</head>
+<body>
+    <div id="wrapper" >
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu_pingan.html" topmenuid="gongzhonghao"/>
+        <div id="container" >
+            <div id="main" class="rel">            	
+                <div class="sidenav">
+					<include file="LabelAdmin/Batch/WleftMenu_pingan" leftmenuid="zdycd"/>
+                </div>
+                <div class="subcon">
+                	<div class="main-name fn">
+                        <h4>自定义菜单</h4>     
+                    </div>
+                    <div class="tipNormal">
+                        编辑中的菜单不会马上被用户看到，点击发布后，会在24小时后在手机端同步显示，粉丝不会收到更新提示，若多次编辑，以最后一次保存为准。如果为新粉丝，则可马上看到更新后的菜单。
+                    </div>
+
+                    <form action="{:U('PinganMenu/menuSubmit')}" method="post" id="theform">
+                    <!--未创建菜单时显示-->
+                    <div class="menu_initial_box js_startMenuBox" style="">
+                        <p class="" style="font-size:14px; line-height:44px; color:#666">你尚未添加任何菜单</p>
+                        <a class="btn-add js_openMenu" href="javascript:void(0);"><i></i>添加菜单</a>
+                    </div>
+                    
+                    <!--开始创建菜单时显示-->
+                    <div class="menu_setting_area js_editBox">                    
+                        <div class="menu_preview_area">
+                            <div class="mobile_menu_preview">
+                                <div class="mobile_hd tc">翼码科技</div>
+                                <div class="mobile_bd">
+                                    <ul class="pre_menu_list grid_line" id='menuList'>
+                                    <volist name="menuArr" id="v">
+                                    
+                                    <li class="jsMenu pre_menu_item jslevel1 ui-sortable ui-sortable-disabled  jsViewLi" id="{$v.id}">
+                                    <a href="javascript:void(0);" class="jsView pre_menu_link"  draggable="false">
+                                    <i class="icon_menu_dot dn"></i>
+                                    <i class="icon20_common sort_gray"></i>
+                                    <span class="js_addMenuTips">{$v.title}</span>
+                                    </a>
+                                    <div class="form_appmsgItem" style="display:none" >
+                                    <input type="text" value="1"  name="level" />    
+                                    <input type="text" value="{$v.sort_id}"  name="sort_id" />
+                                    <input type="text" value="{$v.id}"  name="itemid" />
+                                    <input type="text" value="0"  name="parent_id" />
+                                    <input type="text" value="{$v.title}"  name="title" />
+                                    <input type="text" value="{$v.type}"  name="type" />
+                                    <input type="text" value="{$v.response_class}"  name="response_class" />
+                                    <input type="text" value="{$v.response_type}"  name="response_type" />
+                                    <input type="text" value="{$v.response_info}"  name="response_info" />
+                                    </div>
+                                    
+                                    <div class="sub_pre_menu_box jsSubViewDiv" style="display:none">
+                                        <ul class="sub_pre_menu_list">
+                                        	<volist name="v['sub_menu']" id="v2">
+                                            <li id="{$v2.id}" class="jslevel2">
+                                            <a href="javascript:void(0);" class="jsSubView " draggable="false">
+                                                <span class="sub_pre_menu_inner js_sub_pre_menu_inner">
+                                                    <i class="icon20_common sort_gray"></i>
+                                                    <span class="js_l2Title js_addMenuTips">{$v2.title}</span>
+                                                </span>
+                                            </a>
+                                            <div class="form_appmsgItem" style="display:none" >
+                                            <input type="text" value="2"  name="level" />
+                                            <input type="text" value="{$v2.id}"  name="itemid" />
+                                            <input type="text" value="{$v.id}"  name="parent_id" />
+                                            <input type="text" value="{$v2.title}"  name="title" />
+                                            <input type="text" value="{$v2.type}"  name="type" />      
+                                            <input type="text" value="{$v2.response_class}"  name="response_class" />
+                                            <input type="text" value="{$v2.response_type}"  name="response_type" />
+                                            <input type="text" value="{$v2.response_info}"  name="response_info" />
+                                            <input type="text" value="{$v2.sort_id}"  name="sort_id" />
+                                        	</div>
+                                            </li>
+                                            </volist>
+                                            <li class="js_addSubMenuBox">
+                                                <a href="javascript:void(0);" class="jsSubView js_addL2Btn" draggable="false">
+                                                    <span class="sub_pre_menu_inner js_sub_pre_menu_inner">
+                                                    <i class="icon14_menu_add"></i>
+                                                    <span class="js_l2Title"></span>
+                                                    </span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <i class="arrow arrow_out"></i>
+                                        <i class="arrow arrow_in"></i>
+                                    </div>
+                                    
+                                    </li>
+                                    </volist>
+                                    <li class="js_addMenuBox pre_menu_item grid_line size1of1 no_extra">
+                                        <a href="javascript:void(0);" class="js_addL1Btn" draggable="false">
+                                            <i class="icon14_menu_add"></i>
+                                            <span class="js_addMenuTips">添加菜单</span>
+                                        </a>
+                                    </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="sort_btn_wrp">
+                                <a id='orderBt' class="btn btn_default" style="display:none" href="javascript:void(0);">菜单排序</a>
+                                <span id='orderDis' class='dn btn btn_disabled'>菜单排序</span>
+                                <a id='finishBt' href="javascript:void(0);" class='dn btn btn_default' style="display:none">完成</a>
+                            </div>
+                        </div>
+                        <div class="actionTip dn">
+                        	<p style="display:block; line-height:500px; text-align:center">点击左侧菜单进行编辑操作</p>
+                        </div>
+                        <div class="menu_form_area">
+                            <div id='js_none' class="menu_initial_tips tips_global" style="display:none;"></div>
+                            <div id='js_rightBox' class="portable_editor to_left" style="display:block;">
+                                <div class="editor_inner">
+                                    <div class="global_mod float_layout menu_form_hd js_second_title_bar">
+                                        <h4 class="global_info" style="display:table; float:left">菜单名称</h4>
+                                        <div class="global_extra" style=" display:table; float:right">
+                                            <a href="javascript:void(0);" id='jsDelBt'>删除菜单</a>
+                                        </div>
+                                        <div class="cl"></div>
+                                    </div>
+                                    <div class="menu_form_bd" id='view'>
+                                        <div id='js_innerNone' style='display:none;' class="msg_sender_tips tips_global"></div>
+            
+                                        <div class="frm_control_group js_setNameBox Gform l">
+                                            <ul>
+                                            <li class="Gname js_menuTitle">菜单名称</li>
+                                            <li class="Ginput">
+                                            	<input type="text" class="js_menu_name" name="title" id="title">
+                                                <span class="txtTips">字数不超过5个汉字或16个字母</span>
+                                            </ul>
+                                            
+                                            <ul class="contents">
+                                            <li class="Gname js_menuContent">菜单内容</li>
+                                            <li class="Ginput">
+                                            	<div class="switch">
+                                                    <input type="radio" value="0" name="type" id="type">
+                                                    <div class="newRadio">
+                                                        <span class="valfirst hover" data-val="0">发送消息</span>
+                                                        <span class="vallast" data-val="1">发布平台活动</span>
+                                                    </div>
+                                                    <input type="hidden" value="" name="response_class" id="response_class">
+                                                    <input type="hidden" value="" name="response_info" id="response_info">
+
+                                                    <div class="newRadio-default">
+                                                    	<div class="content_wrap" id="div_replyContent" style=" position:relative">
+                                                        <div class="msg_sender" id="js_msgSender">
+                                                            <div class="msg_tab">
+                                                                <ul class="tab_navs">
+                                                                        <li class="tab_nav tab_text" data-type="0" title="文字"><a href="javascript:void(0);">&nbsp;<i class="icon_msg_sender"></i>文字</a></li>
+                                                                        <li class="tab_nav tab_appmsg" data-type="1" title="图文消息"><a href="javascript:void(0);" class="libraryArea-add" >&nbsp;<i class="icon_msg_sender" ></i>图文</a></li>
+                                                                        <li class="tab_nav tab_img" data-type="5" title="图片消息"><a href="javascript:void(0);" id ="uploadMeitu">&nbsp;<i class="icon_msg_sender" ></i>图片</a></li>
+                                                                </ul>
+                                                                <div class="tab_panel">
+                                                                    <div class="tab_content">
+                                                                        <div class="js_textArea inner no_extra">
+                                                                            <div class="emotion_editor">
+                                                                                <div class="edit_area js_editorArea editArea" id="reply_content_0" style="padding:0">
+                                                                                	<textarea name="editTxt" id="editTxt" maxlength="600"></textarea>
+                                                                                    <div class="editor_toolbar tr"><span id="inputcounter">0</span>/600</div>
+                                                                                </div>
+                                                                                <div class="edit_area js_editorArea editArea dn" id="reply_content_1" style="overflow-y: auto; overflow-x: hidden; border:0px;">
+                                                                                <!--显示图文内容-->
+                                                                                </div>
+
+                                                                                <div class="edit_area js_editorArea editArea dn" id="reply_content_2" style="overflow-y: auto; overflow-x: hidden; border:0px;">
+                                                                                <!--显示图片内容-->
+                                                                                <img src="" /></div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                										</div>
+                                                    </div>
+                                                    <div class="newRadio-input">
+                                                    	<div class="content_wrap" id="div_replyContent" style=" position:relative">
+                                                        <div class="msg_sender" id="js_msgSender">
+                                                            <div class="msg_tab">
+                                                                <ul class="tab_navs">
+                                                                        
+                                                                        <li class="tab_nav tab_card" data-type="4" title="卡券"><a href="javascript:void(0);" id ="addCard">&nbsp;<i class="icon_msg_sender" ></i>卡券</a></li>
+                                                                        <li class="tab_nav tab_activity" data-type="6" title="营销活动"><a href="javascript:void(0);" id ="addActivity">&nbsp;<i class="icon_msg_sender" ></i>营销活动</a></li>
+                                                                        <li class="tab_nav tab_link" data-type="2" title="跳转链接"><a href="javascript:void(0);" id ="goLink">&nbsp;<i class="icon_msg_sender" ></i>跳转链接</a></li>
+                                                                </ul>
+                                                                <div class="tab_panel">
+                                                                    <div class="tab_content">
+                                                                        <div class="js_textArea inner no_extra">
+                                                                            <div class="emotion_editor">
+                                                                                <div class="edit_area js_editorArea editArea" id="reply_content_3"  contenteditable="true" style="overflow-y: auto; overflow-x: hidden; border:0px;">
+                                                                                <!--显示卡券内容-->
+                                                                                <div class="award_list">
+                                                                                <dl>
+                                                                                <dd>
+                                                                                    <p class="adward_title">
+                                                                                        <strong class="cardtitle">{$respText.goods_name}</strong>
+                                                                                        <span>
+                                                                                        <a href="javascript:void(0)" class="addStorage">补充库存</a>
+                                                                                        </span>
+                                                                                    </p>
+                                                                                    <div class="adShow">
+                                                                                        <div class="adShow_l shinfo">
+                                                                                            <img src="{$respText.logo_url}">
+                                                                                        </div>
+                                                                                        <div class="adShow_r">
+                                                                                            <span class="Astatic">总投入数量 <em class="totalNum">{$respText.quantity}</em></span>
+                                                                                            <span class="Astatic">剩余数量 <em class="remainNum">{$respText['quantity'] - $respText['card_get_num']}</em></span>
+                                                                                        </div>
+                                                                                        <div class="cl pt5"></div>
+                                                                                        <p class="AstaticDate tip" style="text-align:left">有效期：{$respText.time}</p>
+                                                                                    </div>
+                                                                                    <input type="hidden" id="material_id_selected" value="card">
+                                                                                    <input type="hidden" value="{$respText['card_id']}" name="cardid" id="cardid">
+                                                                                    <input type="hidden" value="{$respText['id']}" name="respid" id="respid">
+                                                                                </dd>
+                                                                                </dl>
+                                                                                </div>
+                                                                                </div>
+                                                                                <div class="edit_area js_editorArea editArea dn" id="reply_content_4" style="overflow-y: auto; overflow-x: hidden; border:0px;">
+                                                                                <!--显示营销活动内容-->
+                                                                                <div class="actAdded">
+                                                                                    <div class="actTitle">{$respText[0]}</div>
+                                                                                    <div class="actOpr">{$respText[1]}</div>
+                                                                                </div>
+                                                                                </div>
+                                                                                <div class="edit_area js_editorArea editArea dn" id="reply_content_5" style="overflow-y: auto; overflow-x: hidden; border:0px;"><input type="text" placeholder="http://" style=" width:90%; padding-right:10px;" class="frm_input" id="urlText" name="urlText"></div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                										</div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="editor_arrow_wrp">
+                                    <i class="editor_arrow editor_arrow_out"></i>
+                                    <i class="editor_arrow editor_arrow_in"></i>
+                                </span>
+                            </div>
+                            <div class="cl fn db"></div>
+                            <div class="tc">
+                                <a href="javascript:void(0);" class="btn-all" id="pubBt">保存并发布</a>
+                                <a href="javascript:void(0);" class="btn-all-del" id="viewBt">预览</a>
+                            </div>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer_pingan.html" />
+    </div>
+    <div class="service"></div>
+    
+    <div id="content"></div>
+</body>
+</html>
+<script type="text/javascript" src="__PUBLIC__/Js/MenuAction.js"></script>
+<script type="html/text" id="viewTpl">
+	<li class="jsMenu pre_menu_item jslevel1 ui-sortable ui-sortable-disabled  jsViewLi current" id="">
+    <a href="javascript:void(0);" class="jsView pre_menu_link"  draggable="false">
+    <i class="icon_menu_dot dn"></i>
+	<i class="icon20_common sort_gray"></i>
+	<span class="js_addMenuTips">菜单名称</span>
+    </a>
+	<div class="form_appmsgItem" style="display:none" >
+	<input type="text" value="1"  name="level" />
+	<input type="text" value=""  name="itemid" />
+	<input type="text" value="0"  name="parent_id" />
+	<input type="text" value="菜单名称"  name="title" />
+	<input type="text" value="1"  name="type" />      
+	<input type="text" value=""  name="response_class" />
+	<input type="text" value=""  name="response_type" />
+	<input type="text" value=""  name="response_info" />
+	<input type="text" value=""  name="sort_id" />
+	</div>
+    <div class="sub_pre_menu_box jsSubViewDiv" style="display:none">
+        <ul class="sub_pre_menu_list">
+			<li class="js_addSubMenuBox">
+				<a href="javascript:void(0);" class="jsSubView js_addL2Btn" draggable="false">
+					<span class="sub_pre_menu_inner js_sub_pre_menu_inner">
+					<i class="icon14_menu_add"></i>
+					<span class="js_l2Title"></span>
+					</span>
+				</a>
+			</li>
+        </ul>
+        <i class="arrow arrow_out"></i>
+        <i class="arrow arrow_in"></i>
+    </div>
+	
+    </li>
+</script>
+
+<script type="html/text" id="viewsubTpl">
+	<li id="{{id}}" class="jslevel2 current">
+	<a href="javascript:void(0);" class="jsSubView" draggable="false">
+		<span class="sub_pre_menu_inner js_sub_pre_menu_inner">
+			<i class="icon20_common sort_gray"></i>
+			<span class="js_addMenuTips">子菜单名称</span>
+		</span>
+	</a>
+	<div class="form_appmsgItem" style="display:none" >
+	<input type="text" value="2"  name="level" />
+	<input type="text" value=""  name="itemid" />
+	<input type="text" value=""  name="parent_id" />
+	<input type="text" value="子菜单名称"  name="title" />
+	<input type="text" value="1"  name="type" />      
+	<input type="text" value=""  name="response_class" />
+	<input type="text" value=""  name="response_type" />
+	<input type="text" value=""  name="response_info" />
+	<input type="text" value=""  name="sort_id" />
+	</div>
+	</li>
+</script>
+
+<script type="text/html" id="cardresp">
+<div class="award_list">
+<dl>
+<dd>
+	<p class="adward_title">
+		<strong class="cardtitle">{{goods_name}}</strong>
+		<span>
+		<a href="javascript:void(0)" class="addStorage">补充库存</a>
+		</span>
+	</p>
+	<div class="adShow">
+		<div class="adShow_l shinfo">
+			<img src="{{logo_url}}">
+		</div>
+		<div class="adShow_r">
+			<span class="Astatic">总投入数量<em class="totalNum">{{quantity}}</em></span>
+			<span class="Astatic">剩余数量<em class="remainNum">{{remain_num}}</em></span>
+		</div>
+		<div class="cl pt5"></div>
+		<p class="AstaticDate tip" style="text-align:left">有效期：{{$respText['time']}}</p>
+	</div>
+</dd>
+</dl>
+</div>
+</script>
+
+<script type="text/html" id="activityresp">
+<div class="actAdded">
+	<div class="actTitle">{$respText['smallname']}</div>
+	<div class="actOpr"><a href="">点击参与</a></div>
+</div>
+</script>
+
+<script type="text/javascript">
+function send_add_upt_msg(){
+	//alert("{:U('PinganMenu/menuSubmit')}");
+	var id = $(".current .form_appmsgItem:eq(0)").children("input[name=itemid]").val();
+	var title = $(".current .form_appmsgItem:eq(0)").children("input[name=title]").val();
+	var level = $(".current .form_appmsgItem:eq(0)").children("input[name=level]").val();
+	var parent_id = $(".current .form_appmsgItem:eq(0)").children("input[name=parent_id]").val();
+	var response_class = $(".current .form_appmsgItem:eq(0)").children("input[name=response_class]").val();
+	var response_type = $(".current .form_appmsgItem:eq(0)").children("input[name=response_type]").val();
+	var response_info = $(".current .form_appmsgItem:eq(0)").children("input[name=response_info]").val();
+	var sort_id = $(".current .form_appmsgItem:eq(0)").children("input[name=sort_id]").val();
+	var type = $(".current .form_appmsgItem:eq(0)").children("input[name=type]").val();
+	var context = $(".current");
+	if (level == "2" && parent_id == "") {
+		// 重新获取parent_id
+		parent_id = $(".current").closest(".jslevel1").find("input[name=itemid]:eq(0)").val();
+		//alert(parent_id);
+		if (parent_id == "") {
+			return 0;
+		}
+	}
+	var reqData = {
+		id : id,
+		title : title,
+		level : level,
+		parent_id : parent_id,
+		response_class : response_class,
+		response_type : response_type,
+		response_info : response_info,
+		sort_id : sort_id,
+		type : type
+		};
+		
+	$.ajax({
+		type: "POST",
+		url:"{:U('Pingan/WeixinMenu/menuSubmit')}",
+		data:reqData,
+		dataType:'json',
+		success: function(data) {
+			// 1. 获取服务器端返回结果中的id和sort_id
+			//alert(data.id);
+			var id = data.data.id;
+			var sort_id = data.data.sort_id;
+			// 2. 更新id和sort_id到对应input中
+			context.children(".form_appmsgItem").children("input[name=itemid]").val(id);
+			context.children(".form_appmsgItem").children("input[name=sort_id]").val(sort_id);
+		}
+	});
+}
+
+function send_del_msg(){
+	
+	var id = $(".current .form_appmsgItem:eq(0)").children("input[name=itemid]").val();
+	//alert(id);
+	if (id == "") {
+		return 0;
+	}
+	var reqData = {
+		id : id
+		};
+	confirm("删除确认,删除后“菜单名称”菜单下设置的内容将被删除")
+	$.ajax({
+		type: "POST",
+		url:"{:U('Pingan/WeixinMenu/menuDelete')}",
+		data:reqData,
+		dataType:'json',
+		success: function(data) {
+			Diasucceed("删除成功！");
+		}
+	});
+}
+
+function menu_pub(){
+	var reqData = {};
+	$.ajax({
+		type: "POST",
+		url:"{:U('Pingan/WeixinMenu/publicWx')}",
+		data:reqData,
+		dataType:'json',
+		success: function(data) {
+			Diasucceed("发布成功！");
+		}
+	});
+}
+
+
+
+$(function(){
+	
+	$("body").on("click",".addStorage",function(e) {
+		var card_num = $(".remainNum").html();
+        var remainNums =100000 - card_num;
+		var id= $("#respid").val();
+        art.dialog({
+            title: '补充库存',
+            content: "<div class='popupWin'><p class='DiaTitle'>请输入卡券增加的库存量（还能添加<em class='remainNums redfont'>"+remainNums+"</em>张）</p><input type='text' maxlength='6' name='Storage' id='addStorage' class='DiaInput'></div>",
+            id: 'art_addnum',
+            ok: function() {
+                var addNum = $('#addStorage').val();
+                var totalNum = parseInt($(".totalNum").html()) + parseInt($(".DiaInput").val());
+                var remainNum = parseInt($(".remainNum").html()) + parseInt($(".DiaInput").val());
+                if((addNum > remainNums) || (!/^[1-9]{1}[0-9]{0,5}$/.test(addNum))){
+                    Diaerror('数量格式错误！区间为1至'+remainNums);
+                    return false;
+                }
+                $.post("{:U('Pingan/WeixinCard/addStorageNum')}", {
+                    id: id,
+                    addNum: addNum
+                }, function(resp) {
+                    //库存添加成功
+                    if (resp.status == 1) {
+                       Diasucceed("库存变更成功！");
+                       $(".totalNum").html(totalNum);
+                       $(".remainNum").html(remainNum);
+                    }else{
+                        Diasucceed(resp.info);
+                    }
+                }, 'json');
+            },
+            cancel: true,
+            lock: true,
+            width: 400
+        });
+	});
+	//菜单排序
+	$("body").on("click","#orderBt",function(){
+		show_menu(false);
+		var level = $(".current .form_appmsgItem:eq(0)").children("input[name=level]").val();
+		var parentobj;
+		if (level == "1") {
+			parentobj = $(".current").find("ul.sub_pre_menu_list");
+		} else {
+			parentobj = $(".current").closest("ul.sub_pre_menu_list");
+		}
+		show_sub_menu(parentobj, false);
+		$("#finishBt").show();
+		$("#orderBt").hide();
+		$(".pre_menu_link").attr("draggable",true);
+		$(".icon_menu_dot").css("display","none");
+		$(".sort_gray").css("display","inline-block");
+		$("#menuList").sortable({
+			disabled: false,
+			stop: function( event, ui ){
+					// 遍历菜单，发送消息给服务器端
+					var menus = $("#menuList").find(".jslevel1");
+					menus.each(function(index, menu) {
+						var id = $(this).children(".form_appmsgItem:eq(0)").children("input[name=itemid]").val();
+						//var title = $(this).children(".form_appmsgItem:eq(0)").children("input[name=title]").val();
+						var sort_id = index + 1;
+						// post msg
+						if (id == "") {
+							return 0;
+						}
+						var reqData = {
+							id : id,
+							sort_id:sort_id
+							};
+						$.ajax({
+							type: "POST",
+							url:"{:U('Pingan/WeixinMenu/menuSort')}",
+							data:reqData,
+							dataType:'json'
+						});
+					})
+				}
+		});
+		parentobj.sortable({
+			disabled: false,
+			stop: function( event, ui ){
+					// 遍历菜单，发送消息给服务器端
+					var menus = $("#menuList").find(".jslevel2");
+					menus.each(function(index, menu) {
+						var id = $(this).children(".form_appmsgItem:eq(0)").children("input[name=itemid]").val();
+						//var title = $(this).children(".form_appmsgItem:eq(0)").children("input[name=title]").val();
+						var sort_id = index + 1;
+						// post msg
+						if (id == "") {
+							return 0;
+						}
+						var reqData = {
+							id : id,
+							sort_id:sort_id
+							};
+						$.ajax({
+							type: "POST",
+							url:"{:U('Pingan/WeixinMenu/menuSort')}",
+							data:reqData,
+							dataType:'json'
+						});
+					})
+				}
+		});
+	})	
+})
+</script>

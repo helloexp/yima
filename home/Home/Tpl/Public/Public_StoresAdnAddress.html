@@ -1,0 +1,382 @@
+
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+var shopArray = new Array(); 
+var shopArray2show = new Array();  //选择后显示的数组            
+var groupArray = new Array();
+setArr = function(arr1, arr2, type){
+    var ret = new Array;
+    if(type == 1){
+        ret = $.merge(
+            $.grep(arr1, function(v){
+                return $.inArray(v, arr2) == -1;
+            }), 
+            $.grep(arr2, function(v){
+                return $.inArray(v, arr1) == -1;
+            })
+        );
+    }
+    if(type == 2){
+        ret = $.grep(arr1, function(v){
+                return $.inArray(v, arr2) != -1;
+            });
+    }
+    if(type == 3){
+        ret = $.grep(arr1, function(v){
+                return $.inArray(v, arr2) == -1;
+            })
+    }
+    if(type == 4){
+        ret = $.grep(arr2, function(v){
+                return $.inArray(v, arr1) == -1;
+            })
+    }
+    if(type == 5){
+        ret = $.merge(
+            $.merge(
+                $.grep(arr1, function(v){
+                    return $.inArray(v, arr2) == -1;
+                }),
+                $.grep(arr2, function(v){
+                    return $.inArray(v, arr1) == -1;
+                })
+            ), 
+            $.grep(arr1, function(v){
+                return $.inArray(v, arr2) != -1;
+            })
+        );
+    }
+    return ret;
+};
+$(function() {
+	isMultiselect();
+    //部分门店不支持分组选项
+    var html = ['<p class="Wcanal-tab-hover"><a href="javascript:void(0);">按地址选择</a></p>',
+                '<p class=""><a href="javascript:void(0);">按分组选择</a></p>'
+                ];
+    var parentUrl = window.parent.document.URL;
+    var listArray = ['&a=initializeEditGroup&','&a=offlineCancel&','&a=index&batch_type','&m=Weixin&a=changjingma'];
+    var isOk = -1;
+    $.each(listArray,function(key,value){
+        isOk = parentUrl.indexOf(value);
+        if (isOk !== -1){
+            $('#isChoice').remove();
+            return false;
+        }
+    })
+    
+    var sourceUrl= window.location.href;
+     //省市区初始化
+     CityCode({
+         province: $("#province"),//省
+         city: $("#city"),//市
+         town: $("#town"),//区
+         selected: "{:$_REQUEST['province'].$_REQUEST['city'].$_REQUEST['town']}",//默认选中的省市区代号
+         url: sourceUrl //获取有门店的省市区
+
+     });
+     var adb=$("#adb_flag").val();
+     if(adb=='1'){
+        $('#isChoice').remove();
+            return false;
+     }
+
+    $('#goStore').click(function(){
+        window.open("{:U('Home/Store/index')}&noLocation=true");
+        $(this).closest(".DiatipsCon").html('定位好了，<a href="{:U('Home/Store/toActivity')}">点击刷新数据</a>');
+    });
+});
+
+</script>
+<style>
+.shuipai .shoplist li{ width:166px; /*white-space:nowrap; overflow: hidden; text-overflow:ellipsis;*/}
+.Diabody .Gform.eTicket .Ginput select.n3{width: 96.33px;}
+.Diabody .Gform.eTicket .Ginput .SearchArea {width: 580px;}
+</style>
+    <div class="Wcanal-tab inPop" id="Wcanal-tabon2">
+        <if condition="$type eq 9 ">
+            <div class="DiatipsCon">
+                <div>您有{$nonGPS}个门店无定位信息，无法加入门店导航。</div>
+                <div>请到门店列表中选择“导航定位”操作，为门店设置经纬度信息。
+                    <a href="javascript:void(0);" id="goStore">马上去定位>></a>
+                </div>
+            </div>
+        </if>
+
+        <div class="Wcanal-tab-title fn" id="isChoice">
+            <p class="Wcanal-tab-hover"><a href="javascript:void(0);">按地址选择</a></p>
+            <p class=""><a href="javascript:void(0);">按分组选择</a></p>
+        </div>
+        <div class="Wcanal-tab-list" style="display:block">
+            <div class="SearchArea fn">
+                <form id="theform" action="" method="post">
+                <input type="hidden" name="type" value="{$Think.request.type}"/>
+                <div class="SearchAreaLeft">
+                    <label>
+                        <span>门店地址</span>
+                        <select name="province" class="n3" id="province">
+                            <option value="">省</option>
+                        </select>&nbsp;&nbsp;
+                        <select name="city" class="n3" id="city">
+                            <option value="">市</option>
+                        </select>&nbsp;&nbsp;
+                        <select name="town" class="n3" id="town" >
+                            <option value="">区</option>
+                        </select>
+                    </label>
+                    <input type="hidden" id="nonGPS" name="nonGPS" value="{$nonGPS}"/>
+                </div>
+                <div class="SearchAreaRight">
+                <a href="javascript:void(0);" class="searchBtn" id="sel_button">查询</a>
+                </div>
+                </form>
+            </div>
+            <?php if($allStores):?>
+            <div>
+            <div class="shopHide dn"></div>
+            <p style="margin-bottom:1px">
+                 <label for="selectAll" class="group_select_label frm_checkbox_label">
+                 <i class="icon_checkbox"></i><input type="checkbox" class="frm_checkbox js_selectall">全选</label>
+                 <span class="sweet_tips2">您总共选择了<span id="number">{:count($OpenedStores)}</span>家门店</span>
+             </p>
+            <input type = hidden id="openStores" value="{$OpenedStoresStr}">
+            <div style="width:100%;">
+                <ul class="shoplist" id="shoplist" style="margin-right:-100px; text-align:left; padding-top:10px;">
+                    <?php foreach ($allStores as $key => $value):?>
+                        <li class='notCheck ' data-code="{$value['province_code']}-{$value['city_code']}-{$value['town_code']}" data-name="{$value['store_name']}" title="{$value['province']} {$value['city']} {$value['town']} {$value['address']}" data-search="{$value['province']}{$value['city']}{$value['town']}{$value['address']}" data-pos="{$value['ispos']}">
+                        {$value['store_name']}
+                        <input type="checkbox" name="storeId" class="storeCheckStatus" value="{$value['store_id']}" style="display:none;" checked="checked">
+                        </li>
+                    <?php endforeach;?>
+                </ul>
+                <div class="extend">
+                <label for="selectAll" class="group_select_label frm_checkbox_label dn">
+                 <i class="icon_checkbox"></i><input type="checkbox" class="frm_checkbox js_selectall">全选</label>
+                <a href="javascript:void();" class='afblue js_extend_one'>查看全部<i></i></a></div>
+            </div>
+            </div>
+            <?php else:?>
+            <div class="nodata">
+                <img src="__PUBLIC__/Image/member/nodata.gif" style="border:0">
+                <p>未查询到门店数据</p>
+            </div>
+            <?php endif;?>
+        </div>
+        <div class="Wcanal-tab-list" style="display:none">
+            <div class="SearchArea fn">
+                <form id="theform" action="" method="post">
+                <input type="hidden" name="type" value="{$Think.request.type}"/>
+                <div class="SearchAreaLeft">
+                    <label>
+                        <span>分组名</span>
+                        <input type="text" id = 'searchName' class="groupName" value="" />
+                    </label>
+                </div>
+                <div class="SearchAreaRight">
+                <a href="javascript:void(0);" class="searchBtn" id="sel_button2">查询</a>
+                </div>
+                </form>
+            </div>
+            <?php if(!empty($storeGroup)):?>
+                <div style="width:100%;">
+                    <ul class="shoplist" id="groupList" style="margin-right:-100px; height:auto; text-align:left; padding-top:0px;">
+                    <?php foreach ($storeGroup as $key => $value):?>
+                        <li class="notCheck" data-code="" data-storeid="{$value['storeid']}" data-storename="{$value['storename']}" data-search="{$value['search']}" title="{$value['group_name']}" data-searc="{$value['group_name']}">
+                        {$value['group_name']}(<span class="redfont">{$value['num']}</span>)
+                        <input type="checkbox" name="storeId" class="storeCheckStatus" value="{$value['storeid']}" style="display:none;" checked="checked">
+                        </li>
+                    <?php endforeach;?>
+                    </ul>
+                    
+                </div>
+            <?php else:?>
+                <div class="nodata">
+                    <img src="__PUBLIC__/Image/member/nodata.gif" style="border:0">
+                    <p>未查询到门店数据</p>
+                </div>
+            <?php endif;?>
+        </div>
+    </div>
+<script>
+	function init() {
+		function keydownFn(e) {
+			if(e.which===13){
+				e.preventDefault();
+			}
+		}
+		var $f = document.getElementById('searchName');
+		$f.addEventListener('keydown', keydownFn);
+	}
+	init();
+</script>  
+<script>
+$(function(){
+//省市区JS查询
+$("#sel_button").click(function() {
+        var pStr = "";
+        var province = $("#province").val();
+        if(province != "") {
+            pStr = province;
+        }
+        var city = $("#city").val();
+        if(city != "") {
+            pStr += "-"+city;
+        }
+        var town = $("#town").val();
+        if(town != "") {
+            pStr += "-"+town;
+        }
+
+        var allStore = $("#shoplist li");
+
+        if(pStr != '') {
+			$("#shoplist").children().appendTo("div.shopHide");
+            $($("li[data-code^='"+pStr+"']")).appendTo("#shoplist");
+        } else {
+            $("div.shopHide").children().appendTo($("#shoplist"));
+        }
+		
+		if(($("#shoplist li").length)<=6)
+		{
+			$(".extend").hide();
+		}else
+		{
+			$(".extend").show();
+		}
+		
+		var selctlng = $("#shoplist li.selected").length; //选中的li
+		var alllng = $("#shoplist li").length; //所有的li
+		if(selctlng != alllng)
+		{
+			//如果不是全选
+			$(".frm_checkbox_label").removeClass("selected");
+			$(".frm_checkbox").attr("checked",false);
+			//$(".extend").show();
+			
+		}
+		else
+		{
+			//如果是全选
+			$(".frm_checkbox_label").removeClass("selected").addClass("selected");
+			$(".frm_checkbox").attr("checked",true);
+			
+		}
+		
+    });
+
+	if(($("#shoplist").height()<76)||($("#shoplist li").length<7)){
+		$(".extend").hide();
+	}
+//分组搜索显示
+    $('#sel_button2').click(function(){
+        var searchName = $('#searchName').val();
+        var groupList = $('#groupList li');
+        $("#groupList li").hide();
+        $.each(groupList,function(key,value){
+            var nameV = $(value).attr('data-searc');
+            var isOk = nameV.indexOf(searchName);
+            if(isOk != -1){
+                $(this).show();
+            }
+        })
+    })
+   
+//全选 |  全不选
+    $(".frm_checkbox_label").click(function(){
+        //获取当前显示出来的门店storeId值
+        var newArr = new Array;
+        $.each($("#shoplist li"), function(key, val) {
+            newArr.push($(val).find('input').val());
+        })
+		if ($(this).hasClass("selected"))
+		{
+			$(".frm_checkbox_label").removeClass("selected");
+			$(".frm_checkbox").attr("checked",false);
+			$("#shoplist li").removeClass("selected");
+			$("#shoplist li").children(":checkbox").attr("checked",false);
+            shopArray = setArr(shopArray, newArr, 3);
+			$('#number').text(shopArray.length);
+		}else{
+			$(".frm_checkbox_label").removeClass("selected").addClass("selected");
+			$(".frm_checkbox").attr("checked",true);
+			$("#shoplist li").addClass("selected");
+			$("#shoplist li").children(":checkbox").attr("checked",'checked');
+            if(groupArray.length > 0){
+                $('#number').text('0');
+                shopArray = [];
+                groupArray = [];
+                $('#groupList li').removeClass("selected");
+                $('#groupList li').children(":checkbox").attr("checked",'checked');
+            }
+                
+            if (shopArray.length == 0) {
+                shopArray = newArr;
+            }else{
+                shopArray = setArr(shopArray, newArr, 5);
+            }
+			$('#number').text(shopArray.length);
+		}
+    }); 
+
+
+    //点选分组
+    $('#groupList li').click(function(){
+        if($(this).hasClass("selected")){
+            $(this).removeClass("selected");
+            $(this).children(":checkbox").attr("checked",'checked');
+            var groupNum = $(this).find('span').text();
+            var storeNum = parseInt($('#number').text());
+            $('#number').text(storeNum-groupNum);
+            var snm = $(this).find('input:hidden').val();
+            $.each(groupArray, function(key, val) {
+                if(snm == val){
+                    shopArray.splice(key, 1);
+                    groupArray.splice(key, 1);
+                }
+            })
+        }else{
+            $(this).addClass("selected");
+            $(this).children(":checkbox").attr("checked",'checked');
+            if(groupArray.length == 0){
+                shopArray = [];
+                $('#number').text('0');
+                $('#shoplist li').removeClass("selected");
+                $('#shoplist li').children(":checkbox").attr("checked",'checked');
+                $(".frm_checkbox_label").removeClass("selected");
+                $(".frm_checkbox").attr("checked",false);
+                
+            }
+            var storeNum = parseInt($('#number').text());
+            var groupNum = $(this).find('span').text();
+            $('#number').text(parseInt(storeNum)+parseInt(groupNum));
+
+            if($(this).find('input').val() != ''){
+                shopArray.push($(this).find('input').val());
+                groupArray.push($(this).find('input').val());
+            }
+                
+        }
+
+    })
+
+    $("#shoplist li").hover(function(){
+        $(this).children("div.tip").show();
+        },function(){
+            $(this).children("div.tip").hide();
+    });
+
+    $(".js_extend_one").toggle(function(e){
+        $("#shoplist").css("height","auto");
+        $(".js_extend_one").html("收起<i></i>");
+        $(".extend .frm_checkbox_label").removeClass("dn");
+        $(".js_extend_one i").addClass("active");
+    },function(e){
+        $(".js_extend_one i").removeClass("active");
+        $("#shoplist").css("height","76px");
+        $(".extend .frm_checkbox_label").addClass("dn");
+        $(".js_extend_one").html("查看全部<i></i>");
+    });
+});
+</script>

@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>订购订单 - 配送执行计划表 </title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css"/>
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__PUBLIC__/Css/Wshop.css?v=__VR__" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script>
+function printme()
+{   document.body.innerHTML=document.getElementById('print_area').innerHTML;
+    window.print();
+}
+$(document).ready(function (e) {
+    $(".UpdateDelivery").on("click", function () {
+            var orderId = $(this).attr("data-o");
+            var id = $(this).attr("receiveId");
+            var dst = $(this).attr("data-d");
+            var dsd = $(this).attr("data-dd");
+            var dsn = $(this).attr("data-n");
+            var dsc = $(this).attr("data-c");
+            var expressName = '{$usedExpress}';
+            var optionv = '';
+
+            var udata = {
+                "status": $(this).attr("data-d"),
+                "optionv": optionv,
+                "dst": dst,
+                "dsd": dsd,
+                "dsn": dsn,
+                "dsc": dsc,
+                experess: [{$expressStr}]
+            };
+
+            var uhtml = template("inputDeliveryInfo", udata);
+
+            art.dialog({
+                title: '编辑物流',
+                width: 500,
+                padding: 0,
+                content: uhtml,
+                okVal: "提交",
+                ok: function () {
+                    var delivery_company = $('#delivery_company').val();
+                    var delivery_number = $('#delivery_number').val();
+                    if (delivery_company == '') {
+                        alert('请您输入物流公司后再提交');
+                        return false;
+                    }
+                    if (delivery_number == '') {
+                        alert('请您输入物流单号后再提交');
+                        return false;
+                    }
+                    Dialoading("正在提交...");
+                    $.post("{:U('OrderList/singleUpdate')}",
+                            {
+                                "id": id,
+                                "delivery_status": '3', "delivery_company": delivery_company,
+                                "delivery_number": delivery_number, "order_id": orderId
+                            },
+                            function (cdata) {
+                                Dialoading();
+                                var c_status = cdata.status;
+                                if (c_status == 1) {
+                                    Diasucceed(cdata.info, function () {
+                                        top.location.reload();
+                                    });
+                                } else {
+                                    Diaerror(cdata.info);
+                                }
+                            }, 'JSON');
+                },
+                cancel: true
+            });
+            var receiveNum = $(this).attr('receiveNum');
+            var receiveName = $(this).attr('receiveName');
+            $('#orderNum').empty();
+            $('#orderNum').html(orderId);
+            $('#receiveNum').empty();
+            $('#receiveNum').html(receiveNum);
+            $('#receiveName').empty();
+            $('#receiveName').html(receiveName);
+            if (dsc != '') {
+                $('#delivery_company').val(dsc);
+            } else if (expressName != '') {
+                $('#delivery_company').val(expressName);
+            }
+
+
+            $('.recentExpress').click(function () {
+                var expressName = $(this).html();
+                $('#delivery_company').val(expressName);
+            });
+
+        });   
+});
+</script>
+<style>
+.wx_head{ width:35px; height:35px; margin-right:5px; border-radius:35px; vertical-align:middle}
+.redfont{ color:#d10a0a; padding:0 3px;}
+</style>
+</head>
+
+<body class="no">
+	<div style=" width:100%; border:solid 1px #cacaca;" id="print_area">
+    	<div style=" margin:20px; padding-top:5px; border-bottom:dashed 1px #cacaca; padding-bottom:15px;">
+            <h1 style="font-size:14px; font-weight:bold; color:#000; padding-bottom:5px;">订单信息</h1>
+            <p style="font-size:12px; color:#333; margin:0; line-height:25px;">订单号:{$orderInfo['order_id']}</p>
+                <p style="font-size:12px; color:#333; margin:0; line-height:25px;">订购周期:{$orderInfo['cycle_info']}</p>
+                <p style="font-size:12px; color:#333; margin:0; line-height:25px;">订购人手机号:{$orderInfo['order_phone']}</p>
+                <p style="font-size:12px; color:#333; margin:0; line-height:25px;">备注:{$orderInfo['memo']}</p>
+        </div>
+    	<div style=" margin:20px; padding-top:5px;padding-bottom:15px;">
+        	<h1 style="font-size:14px; font-weight:bold; color:#000; padding-bottom:5px;">商品清单</h1>
+            <table cellpadding="0" cellspacing="0" width="100%" style="border: 1px solid #e1e1e1;border-collapse: collapse;">
+            	<tr>
+                    <th style="height:38px;text-align: center;background-color: #f7f7f7;border-bottom: 1px solid #e1e1e1;color: #404040;">收货人姓名</th>
+                    <th style="height:38px;text-align: center;background-color: #f7f7f7;border-bottom: 1px solid #e1e1e1;color: #404040;">收货人手机</th>
+                    <th style="height:38px;text-align: center;background-color: #f7f7f7;border-bottom: 1px solid #e1e1e1;color: #404040;">计划配送日期</th>
+                    <th style="height:38px;text-align: center;background-color: #f7f7f7;border-bottom: 1px solid #e1e1e1;color: #404040;">快递单日期</th>
+                    <th style="height:38px;text-align: center;background-color: #f7f7f7;border-bottom: 1px solid #e1e1e1;color: #404040;">收货地址</th>
+                    <th style="height:38px;text-align: center;background-color: #f7f7f7;border-bottom: 1px solid #e1e1e1;color: #404040;">快递单号</th>
+		</tr>
+		<volist name="orderInfoExList" id="v">
+                    <tr>
+                        <td style="font-size:12px; border-collapse: collapse;vertical-align: middle;text-align: center;height:35px;border-bottom: solid 1px #e1e1e1;">{$v['receiver_name']}</td>
+                        <td style="font-size:12px; border-collapse: collapse;vertical-align: middle;text-align: center;height:35px;border-bottom: solid 1px #e1e1e1;">{$v['receiver_tel']}</td>
+                        <td style="font-size:12px; border-collapse: collapse;vertical-align: middle;text-align: center;height:35px;border-bottom: solid 1px #e1e1e1;">{$v['dispatching_date']}</td>
+                        <td style="font-size:12px; border-collapse: collapse;vertical-align: middle;text-align: center;height:35px;border-bottom: solid 1px #e1e1e1;"><if condition="$v['delivery_time'] eq ''">未配送<else />{$v['delivery_time']|dateformat='Ymd'}</if></td>
+                        <td style="font-size:12px; border-collapse: collapse;vertical-align: middle;text-align: center;height:35px;border-bottom: solid 1px #e1e1e1;">{$v['receiver_citycode']|city_text=###,''}{$v['receiver_addr']}</td>
+                        <td style="font-size:12px; border-collapse: collapse;vertical-align: middle;text-align: center;height:35px;border-bottom: solid 1px #e1e1e1;"><a class="UpdateDelivery" href="javascript:void(0)" receiveId ="{$v.id}" receiveName ="{$v.receiver_name}" receiveNum = "{$v.receiver_tel}" data-o="{$v.order_id}" data-d="{$v.delivery_status}" data-c="{$v.delivery_company}" data-n="{$v.delivery_number}" data-dd="{$v.delivery_date}"><if condition="$v['delivery_number'] eq ''">录入订单<else />{$v['delivery_number']}</if></a></td>
+                    </tr>
+		</volist>
+            </table>
+        </div>
+        <h1 style="font-size:14px; font-weight:bold; color:#000; padding-bottom:5px;padding-left: 20px;">订购详情({$goodsCount}个商品)</h1>
+        <div style=" margin:20px; padding-top:5px; border-bottom:dashed 1px #cacaca; padding-bottom:2px">
+        </div> 
+        <div style=" margin:20px; padding-top:5px; border-bottom:dashed 1px #cacaca; padding-bottom:2px">
+            <p style="margin-left:20px;font-size:12px; color:#333; margin:0; line-height:25px;">商品总金额<span style="font-size:12px; color:red;padding-right:25px;float:right;">￥ {$countPrice}</span></p>
+            <p style="margin-left:20px;font-size:12px; color:#333; margin:0; line-height:25px;">红包抵用<span style="font-size:12px; color:red;padding-right:25px;float:right;">-￥ {$bonusInfo|default_nvl='0.00'}</span></p>
+            <p style="margin-left:20px;font-size:12px; color:#333; margin:0; line-height:25px;">{:L('INTEGRAL_NAME')}抵用<span style="font-size:12px; color:red;padding-right:25px;float:right;">-￥ {$orderInfo['point_use_amt']|default_nvl='0.00'}</span></p>
+            <!--<p style="font-size:12px; color:#333; margin:0; line-height:25px;">满减优惠</p>-->
+            <p style="margin-left:20px;font-size:12px; color:#333; margin:0; line-height:25px;">运费<span style="font-size:12px; color:red;padding-right:25px;float:right;">+￥ {$orderInfo['freight']|default_nvl='0.00'}</span></p>
+        </div> 
+        <div style=" margin:20px;">
+        <h1 style="font-size:14px; font-weight:bold; color:#000; padding-bottom:5px;">实收<span style="font-size:12px; color:red;padding-right:25px;float:right;">￥ {$orderInfo['order_amt']|default_nvl='0.00'}</span></h1>
+        </div>
+	</div>
+    <div class="DiabtnCon">
+        <a href="javascript:art.dialog.close();" class="Diabtn-all" id="print">关闭</a>
+    </div>
+</body>
+</html>
+<script id="inputDeliveryInfo" type="text/html">
+    <div class="tipNormal Diagray">
+        <p>订单号<span id="orderNum" class="ml10">{{orderName}}</span></p>
+
+        <p>收货人手机号码<span id="receiveNum" class="ml10">{{receiveName}}</span></p>
+
+        <p>收货人姓名<span id="receiveName" class="ml10">{{receiveNum}}</span></p>
+    </div>
+    <h6 class="pl30 mt10">运单信息</h6>
+    <div class="Gform fn pb30">
+        <ul>
+            <li class="Gname"><span>*</span>物流公司：</li>
+            <li class="Ginput">
+                <input type="text" name="experess" id='delivery_company' value="{$usedExpress}"
+                       class="validate[required]"/>
+
+                <div class="bankList dn">
+                    <ul>
+                        {{each experess}}
+                        <li class="dn">{{value}}</li>
+                        {{/each}}
+                        <li class="erro dn" rel="error">抱歉，没有找到该快递公司</li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+        <ul>
+            <li class="Gname"><span>*</span>物流单号：</li>
+            <li class="Ginput"><input type="text" class="validate[required]" maxlength="50" name="delivery_number"
+                                      id="delivery_number" value="{{dsn}}"/></li>
+        </ul>
+    </div>
+</script>
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        $("body").on("click", "[name='experess']", function (e) {
+            e.stopPropagation();
+            var val = $(this).val();
+            if (val != "") {
+                var erro = 0;
+                $(".bankList").show();
+                $(".bankList>ul>li").each(function (index, element) {
+                    var text = $(this).text();
+                    if (text.indexOf(val) >= 0) {
+                        $(this).removeClass("hover");
+                        if (index == 0) {
+                            $(this).addClass("hover");
+                        }
+                        $(this).removeClass("dn");
+                        erro++;
+                    } else {
+                        $(this).removeClass("hover");
+                        $(this).addClass("dn");
+                    }
+                });
+                erro == 0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+            } else {
+                $(".bankList").show();
+                $(".bankList>ul>li").each(function (index, element) {
+                    if (index == 0) {
+                        $(this).addClass("hover");
+                    }
+                    var hasErrorClass = $(this).attr('rel');
+                    if (hasErrorClass != 'error') {
+                        $(this).removeClass("dn");
+                    }
+                });
+            }
+        });
+        $("body").on("keyup", "[name='experess']", function (e) {
+            if (e.keyCode != 38 && e.keyCode != 40) {
+                var val = $(this).val();
+                var erro = 0;
+                $(".bankList").show();
+                $(".bankList>ul>li").each(function (index, element) {
+                    var text = $(this).text();
+                    if (text.indexOf(val) >= 0) {
+                        $(this).removeClass("dn");
+                        erro++;
+                    } else {
+                        $(this).addClass("dn");
+                    }
+                });
+                $(".bankList>ul>li").removeClass("hover");
+                $(".bankList li:not(.dn):first").addClass("hover");
+                erro == 0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+            }
+            if (e.keyCode == 13) {
+                if ($(".bankList li.hover:not(.dn)").length >= 1) {
+                    var v = $(".bankList li.hover").attr("data-city");
+                    var key = $(".bankList li.hover").attr("data-key");
+                    return false;
+                } else {
+                    alert("输入的快递不存在")
+                }
+            }
+            if (e.keyCode == 38) {
+                var t = $(".bankList li.hover");
+                var tnext = t.prevAll("li:not(.dn):first");
+                if (tnext.length > 0) {
+                    tnext.addClass("hover");
+                    t.removeClass("hover");
+                    if (t.nextAll("li:not(.dn)").index() > 4) {
+                        $(".bankList ul").scrollTop($(".bankList ul").scrollTop() - 30);
+                    }
+                    var text = $(".bankList li.hover").text();
+                    $(this).val(text);
+                }
+            }
+            if (e.keyCode == 40) {
+                var t = $(".bankList li.hover");
+                var tnext = t.nextAll("li:not(.dn):first");
+                if (tnext.length > 0) {
+                    if (tnext.hasClass("erro")) {
+                        return false;
+                    }
+                    tnext.addClass("hover");
+                    t.removeClass("hover");
+                    if (tnext.index() > 4) {
+                        $(".bankList ul").scrollTop($(".bankList ul").scrollTop() + 30);
+                    }
+                    var text = $(".bankList li.hover").text();
+                    $(this).val(text);
+                }
+            }
+        });
+        $("body").on('focus', '#delivery_company', function (e) {
+            $('.bankList ul').css('display', 'block');
+        });
+        $("body").on("click", ".bankList ul li:not('.erro')", function (e) {
+            e.stopPropagation();
+            var val = $(this).text();
+            $("[name='experess']").val(val);
+            $(".bankList").addClass("dn");
+            $('.bankList ul').css('display', 'none');
+        })
+        //点击以外区域隐藏分组
+        $("body").on("click", function () {
+            $(".bankList").hide();
+        });
+    });
+    document.onkeypress = function (e) {
+        if (e.keyCode == 13) {
+            return false;
+        }
+        if (e.keyCode == 38) {
+            return false;
+        }
+        if (e.keyCode == 40) {
+            return false;
+        }
+    }
+</script>

@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_发红包_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcard.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/sumoselect.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.sumoselect.js?v=__VR__"></script>
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript">
+	$(document).ready(function () {
+		window.test = $('.testsel').SumoSelect({okCancelInMulti:false, selectAll:true,captionFormat:'{0}个群发对象'});
+		
+		$("body").on("click",".closebtn",function(){
+			var t = $(this);
+			var tli= t.closest("li");
+			var tVal = tli.attr("data-val");
+			var tselectV = $(".options").children("li.selected");
+			
+			tselectV.each(function(index, element) {
+                if($(this).attr("data-val") == tVal){
+					$(this).click();
+				}
+            });	
+		})
+
+	});
+</script>
+
+<script type="text/javascript">
+/*红包回调*/
+var selectJpcallback = function (d) {
+		console.log(d);
+		var viewContent = template('hongbaoresp', d);
+		$(".showPrise").html(viewContent);
+		$('#goods_id').val(d.goods_id);
+		$('.goods_name').val(d.goods_name);
+		$('.goods_storage').text(d.remain_num);
+		$('.goods_value').text(d.goods_amt);
+		windowheight();
+}
+$(function(){
+	/*添加红包*/
+	$(".addPrise").click(function(e) {
+        var  name = '&callback=selectJpcallback&show_type=0&show_source=6';
+        art.dialog.open("/index.php?g=Common&m=SelectJp&a=index"+name,{
+            id: 'closeJp',
+            width: 800,
+            title:'选择微信红包'
+        })
+
+	});
+	
+	/*删除红包*/
+	$("body").on("click",".delBtn",function(){
+		$(this).closest("div.weChathb").detach();
+	})
+	
+	/*筛选粉丝*/
+	$('#search-btn').click(function(){
+        $('#search-btn').attr('disabled', true);
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在查询...</div>",fixed: true,padding:0});
+        var group_id = $('[name="group_id[]"]').val();
+        var sex = $('[name="sex"]').val();
+        var nickname = $('[name="nickname"]').val();
+        var province = $('[name="province"]').val();
+        var city = $('[name="city"]').val();
+        var keywords = $('[name="keywords"]').val();
+        var scene = $('[name="scene"]').val();
+
+        var data = {
+            group_id : group_id,
+            nickname : nickname,
+            sex :sex,
+            province : province,
+            city : city,
+            keywords : keywords,
+            scene : scene
+        };
+
+        $.post("{:U('Weixin/Weixin/batch_send_count')}", data, function(data){
+            if(data.status ==1){
+                $('#count').html(data.info +'您已准备向 ' + data.data.countTotal + ' 位粉丝发放红包！');
+                dialog.time(2).close();
+            }else{
+                $('#count').html(data.info);
+                dialog.time(2).close();
+            }
+
+        },'json');
+        
+	});
+})
+</script>
+<style>
+.form-search p{ line-height:normal; padding-bottom:0;}
+.SearchArea{ margin-bottom:10px;}
+</style>
+</head>
+<body>
+	<div id="wrapper" >
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+        <div id="container" >
+            <div id="main" class="rel">
+              <div class="sidenav">
+					<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="hongbao"/>
+                </div>
+
+                <div class="subcon">
+                	<div class="main-name fn">
+                        <h4>发红包  <a href="http://www.wangcaio2o.com/index.php?g=Home&m=Help&a=helpDetails&newsId=1521&classId=71" class="f14 r" target="_blank">发红包帮助说明</a></h4>
+                    </div>
+                    <div class="tipNormal">
+                        <span>使用公众号助手发红包前，请确认您已在旺财创建了微信红包。&nbsp;<a href="{:U('WangcaiPc/NumGoods/weChatFile')}" target="_blank">前去创建</a></span>
+                    </div>
+                    <form action="{:U(bonus_send)}" method="POST" name="theform" id="theform">
+                    
+                    <div class="Wcanal-tab mt15" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover"><a href="{:U('Weixin/Weixin/hongbao')}">活动配置</a></p>
+                            <p class=""><a href="{:U('Weixin/Weixin/hongbao_toSend')}">待发送红包</a></p>
+                            <p class=""><a href="{:U('Weixin/Weixin/hongbao_static')}">发送记录</a></p>
+                        </div>
+                        
+                        <div class="form-search fn mt15">
+                            <div class="SearchArea fn extendMode">
+                            <div class="SearchAreaLeft" style="margin-bottom:0;">
+                            <label>
+                            <span>粉丝昵称</span>
+                            <input type="text" name="nickname" style="width:100px;">
+                            </label>
+                            <label>
+                            <span>性别</span>
+                            <select name="sex" style="width:70px;" id="sex">
+                                <option value="">全部</option>
+                                <option value="1" class="">男</option>
+                                <option value="2" class="">女</option>
+                            </select>
+                            </label>
+                            <label>
+                            <span>粉丝来源</span>
+                            <input type="text" name="scene" style="width:100px;"><i style="margin-top:0; margin-left:10px" class="allAsk" title="粉丝拍码关注后，系统会自动对该粉丝进行标记，以此知道粉丝是通过什么来源关注的公众号。"></i>
+                            </label>
+                            <label>
+                            <span>地区</span>
+                            <select name="province" class="n3" style="width:80px;" id="province" >
+                                <option value="">省</option>
+                           </select><select name="city" class="n3 ml10" style="width:80px;" id="city">
+                                <option value="">市</option>
+                            </select>
+                            </label>
+                            <label>
+                            <div class="multiSelect" style="width:800px;">
+                            <select multiple="multiple" name="group_id[]" id="group_id" placeholder="选择群发对象"  class="testsel">
+                                    {:show_arr_opt($group_list)}
+                            </select>
+                            <div class="show"></div>
+                            </div>
+                            </label>  
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="search-btn">查询</a>
+                            <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+                            </div>
+                            </div>
+                            <div style="display:block; float:left;"><p class="mass_send_tips mb15" id="count"></p></div>
+                        </div>
+                        <div class="Wcanal-tab-list">
+                        	<div class="Gform w1 l">
+                            	<h3>创建活动</h3>
+                                <ul>
+                                	<li class="Gname"><span>*</span>&nbsp;活动名称</li>
+                                    <li class="Ginput">
+                                         <input type="text" name="zfb_account" value="" maxlength="10" class="validate[required]">
+                                         <span class="maxTips forInput" data-max="10">0/10</span> 
+                                 	</li>
+                                </ul>
+                               
+                                <ul>
+                                	<li class="Gname"><span>*</span>&nbsp;选择红包</li>
+                                    <li class="Ginput">
+                                    	<div class="addPrise mr10"><a href="javascript:void(0);" class="addPriseBtn"><i></i>添加红包</a></div>
+                                        <span class="txtTips">最多添加1个红包</span>
+                                        <div class="showPrise">
+                                        	<div class="weChathb dn mt15">
+                                                <div class="weChathb-list">
+                                                    <dl>
+                                                        <dt><span title="{$vo['goods_name']}">10元红包</span><a href="javascript:void(0)" title="删除红包" class="delBtn r">删除</a></dt>
+                                                        <p class="Stock" data-val="{$vo['goods_id']}">剩余库存：<span class="red">100</span></p>
+                                                        <a href="{:U('WangcaiPc/NumGoods/weChatInfo',array('goods_id'=>$vo['goods_id']))}" target="_blank">
+                                                        <dd>
+                                                        <h5>￥<span>22.00</span></h5>
+                                                        <p>10元红包</p>
+                                                        </dd>
+                                                        </a>
+                                                    </dl>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;发放时间</li>
+                                    <li class="Ginput">
+                                        <div class="switch">
+                                            <input name="send_mode" type="radio" value="1" checked="checked">
+                                            <div class="newRadio l">
+                                                <span class="valfirst hover" data-val="1">立即发放</span>
+                                                <span class="vallast" data-val="2">定时发放</span>
+                                            </div>
+                                            <div class="newRadio-input l">
+                                                <div class="Gtime2">
+                                                    <input type="text" name="send_timing" style="width:150px;" id="send_timing" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d %H:%m:%s'})" value="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                	<li class="Gname"></li>
+                                    <li class="Ginput">
+                                    	<a href="javascript:void(0);" class="btn-all" id="js_submit">保存</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<!-- 选择的卡券信息 -->
+<script type="text/html" id="hongbaoresp">
+    <div class="weChathb mt15">
+		<div class="weChathb-list">
+			<dl>
+				<dt><span class="goods_name" title="{$vo['goods_name']}">{{goods_name}}</span><a href="javascript:void(0)" title="删除红包" class="delBtn r">删除</a></dt>
+				<p class="Stock" data-val="{$vo['goods_id']}">剩余库存：<span class="red goods_stock">{{remain_num}}</span></p>
+				<a href="{:U('WangcaiPc/NumGoods/weChatInfo')}&goods_id={{goods_id}}" target="_blank">
+				<dd>
+				<h5>￥<span class="goods_account">{{goods_amt}}</span></h5>
+				<p class="goods_name">{{print_text}}</p>
+				</dd>
+				</a>
+				<input type="hidden" value="{{goods_id}}" name="goods_id" class="goods_id">
+				<input type="hidden" value="{{remain_num}}" name="remain_num" class="goods_id">
+			</dl>
+		</div>
+	</div>
+</script>
+<script type="text/javascript">
+$(function(){
+	CityCode({
+		province:$("#province"),//省
+		city:$("#city"),//市
+		town:$("#town"),//区
+		selected:"",//默认选中的省市区代号
+		url:"index.php?g=Weixin&m=AjaxCity&a=index"//数据查询页
+	});
+    
+    $("#js_submit").click(function(e) {
+        if($("input[name=goods_id]").length == 0){
+            Diaerror("请选择红包")
+            return false;
+        }
+        
+        if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if (data.status == 1){
+                        dialog.close();
+                        Diasucceed("活动创建成功",reload(),5)
+                    } else {
+                        dialog.close();
+                        Diaerror(data.info)
+                    }
+                },
+                url:"",
+                dataType:'json'
+            });
+            return false;
+		  }
+    });
+})
+</script>

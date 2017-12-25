@@ -1,0 +1,270 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>我的卡券</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_qj.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/idangerous.swiper.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js"></script>
+<script>
+$(document).ready(function(e) {
+	var loadImg = 0;
+	var imgNum = $(".loadimg").length-1;
+	$(".loadimg").one('load', function () {
+		loadImg++;
+		if (loadImg == imgNum) {
+			$("#loading").hide();
+			$("#wrapper").addClass("begin");
+		}
+	}).each(function () {
+		if (this.complete) $(this).load();
+	});
+});
+</script>
+</head>
+<body>
+<div id="loading">
+    <div class="loadingbox">
+        <h4>仟吉</h4>
+        <div><i></i>
+            <img src="__PUBLIC__/Label/Image/qianji/Item/qj-logo.png?v=__VR__" />
+        </div>
+        <h5>Loading...</h5>
+        <h6>粽礼仟寻</h6>
+    </div>
+    <img src="__PUBLIC__/Label/Image/qianji/Item/qj-4.jpg" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/qianji/Item/qj-5.png?v=__VR__" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/qianji/Item/qj-6.png" class="loadimg" />
+</div>
+<div id="wrapper">
+    <div id="container">
+    	<div id="main">
+        	<div class="headertext">
+            	<h3>可领取礼品券</h3>
+                <p>礼品券领取后可到微信卡包内查看</p>
+            </div>
+            <div class="prizeList bd">
+            	<dl>
+                    <volist name="card_list" id="vo">
+                    <dd>
+                    	<div class="img"><img src="__UPLOAD__/<?php echo $vo['batch_img'];?>" style="margin:7px 0;"></div>
+                        <p>{$vo.batch_short_name}</p>
+                        <php>if($vo['status'] == 2){</php>
+                        <a href="javascript:void(0)" class="erro btnget hasok">已经领取</a>
+                        <php>}else{</php>
+                        <a href="javascript:getWxCard2('{$vo.card_id}','{$vo.card_batch_id}')" class="btnget">立即领取</a>
+                         <php>}</php>
+                    </dd>
+                    </volist>
+                    <!--<dd>-->
+                    	<!--<div class="img"><img src="__PUBLIC__/Label/Image/qianji/Item/qj-4.png" style="margin:7px 0;"></div>-->
+                        <!--<p>179元粽子礼盒兑换券</p>-->
+                        <!--<a href="javascript:void(0)" class="erro btnget">立即领取</a>-->
+                    <!--</dd>-->
+                    <!--<dd>-->
+                    	<!--<div class="img"><img src="__PUBLIC__/Label/Image/qianji/Item/qj-6.png" style="margin:7px 0;"></div>-->
+                        <!--<p>139元粽子礼盒兑换券</p>-->
+                        <!--<a href="javascript:void(0)" class="btnget &lt;!&ndash;erro&ndash;&gt;">立即领取</a>-->
+                    <!--</dd>-->
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="proNav">
+	<a href="{:U('Label/DuanWu/playGame',array('id'=>$id))}" class="btn-ok">继续寻粽礼</a>
+    <a href="{:U('Label/DuanWu/foodlist',array('id'=>$id))}" class="btn-ok">我的食材</a>
+</div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    $(".hasok").click(function(){
+			cj.content({
+				msg:"<p>您已经领取了该<br>礼品。赶快去摇一摇继续获取吧！</p>"
+			})
+	})
+});
+function getWxCard2(card_id,card_batch_id){
+  //领取微信卡券
+    $.ajax({
+        url: "{:U('Label/DuanWu/get_card_ext',array('id'=>$id))}",
+        type: "POST",
+        data: {card_batch_id:card_batch_id},
+        dataType: "json",
+        success: function (data) {
+            if(data.status==1){
+                //获取成功card_ext，开始转微信领取
+                getWxCard(card_id,data.info);
+            }else{
+                cj.content({
+                    msg:"<p>"+data.info+"</p>"
+                })
+            }
+        }
+    })
+}
+document.addEventListener('WeixinJSBridgeReady', function(){
+    window['getWxCard'] = function(card_id,card_ext){
+        //todo debug
+        if(typeof(WeixinJSBridge) == 'undefined'){
+            alert('wait...');
+            return;
+        }
+        /*alert(data.card_id);
+         alert(data.card_ext);*/
+        WeixinJSBridge.invoke('batchAddCard', {
+            "card_list": [{
+                "card_id": card_id,
+                "card_ext": card_ext
+            }]
+        },function(res){
+            /*for(var i in res){
+             alert(res[i]);
+             }*/
+        });
+    }
+}, false);
+</script>
+<!--公共-->
+<script>
+var cj = {
+	basic:function(msg){
+		cj.close();
+		if(!msg.title){var notitle="notitle";msg.title="";}
+		if(msg.isclose){var closehtml = '<a href="javascript:void(0)" class="close-msgPop"><i><span>+</span></i></a>'}else{var closehtml = "";}
+		var html = ['<div class="msgPop bg" id="'+msg.id+'">',
+			'<div class="msgBg">',
+			'<div class="msgTitle '+notitle+'">'+msg.title+closehtml+'</div>',
+			'<div class="msgCon">'+msg.html+'</div>',
+			'</div>',
+			'</div>'].join('');
+		$("body").append(html);
+		if(typeof(msg.start) == 'string'){
+			window[msg.start].call(this,$(this));
+		}else if(typeof(msg.start) == 'function'){
+			msg.start.call(this,$(this));
+		}
+		$("body").find(".msgBg",html).on("click",".cjBtn-back",function(){
+			var index = $(this).index();
+			if(typeof(msg.btn[index].callback) == 'string'){
+				window[msg.btn[index].callback].call(this,$(this));
+			}else if(typeof(msg.btn[index].callback) == 'function'){
+				msg.btn[index].callback.call(this,$(this));
+			}else{
+				msg.repeat ? (cj.close(),cj.login({repeat:msg.repeat})) : cj.close();
+				if($(this).attr("href")!="javascript:void(0)"){
+					window.location.href = $(this).attr("href");
+				}
+			}
+		});
+		$("body").find(".msgBg",html).on("click",".close-msgPop",function(){
+			if(typeof(msg.after) == 'string'){
+				window[msg.after].call(this,$(this));
+			}else if(typeof(msg.after) == 'function'){
+				msg.after.call(this,$(this));
+			}
+			msg.repeat ? (cj.remove(),cj.login({repeat:msg.repeat})) : cj.remove();
+		});
+		$("body").on("click","input",msg.html,function(){
+			$(this).removeClass("erro");
+		});
+	},
+	tip:function(msg){
+		$(".cjTip").remove();
+		var txt = ["每天都有3次机会,记得回来呦~","随机可摇出：粽子食材、现金券、179粽子礼盒兑换券","记得晒一晒战绩，让小伙伴也一起来战","有几率可直接获得179元粽子礼盒兑换券"];
+		var codeRandom = Math.floor(Math.random()*txt.length);
+		if(!msg){msg = txt[codeRandom]};
+		if(msg==1){return false;}
+		var html = '<div class="cjTip"><div class="cjTipTxt"><i></i><p>'+msg+'</p></div><div class="cjTipbg"></div></div>';
+		$("body").append(html);
+	},
+	content:function(msg){
+		msg = $.extend(true, {}, cj.msg,msg);
+		msg.html = template("js-tmpl-msg",msg);
+		cj.basic(msg);
+	},
+	remove:function(msg){
+		$(".msgPop").remove();
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	close:function(msg){
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		$(".msgPop").not("[id!='']").remove();
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	msg:{
+		id:"",
+		title:false,//标题
+		html:false,//内容
+		refurbish:false,//是否刷新
+		msg:"未知错误",//内容
+		icon:false,//图标
+		repeat:false,//重新填出登陆框
+		btn:[
+			{
+				text:"返回",//按钮文字
+				url:"javascript:void(0)",//按钮链接
+				callback:function(){
+					cj.close();
+				}
+			}
+		],
+		isclose:true,
+		start:false,//弹出之后callback
+		after:false//关闭之后callback
+	}
+}
+</script>
+
+
+<script type="text/html" id="js-tmpl-msg">
+<div class="cjText">
+	{{if !html}}
+	<div class="cjText-con">
+		{{if !icon}}
+			<div class="cjText-text noicon">{{#msg}}</div>
+		{{else}}
+			<div class="cjText-text">{{#msg}}</div>
+			<div class="cjText-img">
+				{{if icon==1}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-6.png" width="64">
+				{{else}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-19-{{icon}}.png" width="100">
+				{{/if}}
+			</div>
+		{{/if}}
+	</div>
+	{{else}}
+	{{#html}}
+	{{/if}}
+</div>
+<div class="cjBtn">
+{{each btn as value i}}
+	<a href="{{value.url}}" class="cjBtn-back {{if btn.length>1}}{{if i==0}}sm{{/if}}{{/if}}">{{value.text}}</a>
+{{/each}}
+</div>
+</script>
+<script>
+    var wxShareData = <?php echo json_encode($shareData);?>;
+</script>
+<include file="Label/Public/_shareWx"/>

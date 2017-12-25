@@ -1,0 +1,506 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$marketInfo['name']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20151001.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js"></script>
+<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script>
+        var wxShareData = <?php echo json_encode($shareData['config']);?>;;
+        if(wxShareData) {
+            wx.config({
+                //debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: wxShareData.appId,  //必填，公众号的唯一标识
+                timestamp: wxShareData.timestamp, // 必填，生成签名的时间戳
+                nonceStr: wxShareData.nonceStr, // 必填，生成签名的随机串
+                signature: wxShareData.signature,// 必填，签名，见附录1
+                jsApiList: [
+                    'onMenuShareTimeline',
+                    'onMenuShareAppMessage'
+                ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+            });
+        }
+        $(document).ready(function(e) {
+            wx.ready(function () {
+                wx.showOptionMenu();
+                var title = "{$shareData['desc']}";
+                var link = "{$shareData['link']}";
+                var imgUrl = "{$shareData['imgUrl']}";
+                wx.onMenuShareTimeline({
+                    title: title, // 分享标题
+                    link: link, // 分享链接
+                    imgUrl: imgUrl // 分享图标
+                });
+                wx.onMenuShareAppMessage({
+                    title: "{$shareData['title']}", // 分享标题
+                    desc: "{$shareData['desc']}", // 分享描述
+                    link: "{$shareData['link']}", // 分享链接
+                    imgUrl: "{$shareData['imgUrl']}"// 分享图标
+                });
+            });
+        });
+</script>
+</head>
+<body>
+<div class="fixedIntroduce"><p><i></i>请猛戳红旗来升旗</p><a href="javascript:void(0)" class="btn-fixedIntroduce">我知道了</a></div>
+<div id="game">
+    <div id="header">
+        <div class="logo rel"><div class="logoimg">
+            <?php if ($marketInfo['log_img']) { ?>
+            <img src="{$marketInfo['log_img']}" />
+            <?php } else{ ?>
+            <img src="__PUBLIC__/Label/Image/defaultlogo-sTwo.png">
+            <?php } ?></div><p>{$nodeName}</p></div>
+        <div class="gameTimes"><i>x</i><span id="gameTime">{$gameTimes}</span></div>
+        <!--<div class="gameTimes"><i>x</i><span id="gameTime">1000</span></div>-->
+    </div>
+    <div class="game">
+    	<div class="time dn">倒计时:<span>15</span>秒</div>
+        <div class="flagpole"></div>
+        <div class="gameFlag"></div>
+    </div>
+    <img src="__PUBLIC__/Label/Image/20151001/students.png" class="students" />
+    <div class="cloud"></div>
+    <div class="ready dn">
+        <span>3</span>
+    </div>
+</div>
+</body>
+<script>
+var flagtop=50,Int;
+var isbegin = true;
+var time = 14;
+var istrue = true;
+var isSupportTouch = "ontouchend" in document ? true : false;
+var touchstart = "click";
+var touchend = "mouseup";
+var iswait = false;
+var isflagstart = false;
+if(isSupportTouch){touchstart = "touchstart";touchend = "touchend";};
+function gameTimes(){
+    var test=$("#gameTime").text()-1;
+    $("#gameTime").html(test);
+}
+$(document).ready(function(e) {
+    $("body").on("touchstart",function(e){
+		e.preventDefault();
+	});
+    $("body").on("touchmove",function(e){
+		e.preventDefault();
+	});
+    $(".end .btn-opr a").on("touchstart",function(e){
+		e.stopPropagation();
+	});
+	$(".btn-fixedIntroduce").on(touchstart,function(e){
+        checkTimes();
+        if($("#gameTime").text()>0){
+            begin();
+        }
+	});
+	$(".gameFlag").on(touchstart,function(e){
+		flagtop = flagtop-3;
+		flagstart();
+	});
+	var checkTop = function(){
+		if(isbegin){return false;}
+		if(flagtop<=0){
+			flagtop=0;
+		}else if(flagtop>=50){
+			flagtop=50;
+		}else{
+			flagtop++;
+		}
+		flagstart();
+	}
+	Int = setInterval(checkTop,500);
+});
+function begin(){
+	isbegin = false;
+	$(".fixedIntroduce").hide();
+	$(".ready").show();
+	setTimeout(function(){
+		$(".ready span").text("2");
+	},1000);
+	setTimeout(function(){
+		$(".ready span").text("1");
+	},2000);
+	setTimeout(function(){
+		$(".ready span").text("0");
+		$(".ready").hide();
+		$(".ready span").text("3");
+		
+		$(".time").show();
+		if(istrue){
+			istrue = false;
+			var checkTime = function(){
+				if(isbegin){$(".time").hide();$(".time span").text("18");time=17;return false;};
+				$(".time span").text(time);
+				if(time==0){
+					isbegin = true;
+					$(".time").hide();
+					$(".time span").text("18");
+                    checkTimes();
+                    if($("#gameTime").text()>0){
+                        cjajax(2);
+                    }
+					return false;
+				}
+				time--;
+			}
+			Int = setInterval(checkTime,1000);
+		};
+	},3000);
+	flagtop=50;
+	flagstart();
+};
+function checkTimes(){
+    if($("#gameTime").text()==0){
+        var html_1 = "<p>很抱歉，今日已经参与三次<br>请明日早点来参与</p>";
+        cj.content({
+            msg:html_1,
+            btn:[{
+                text:"我的材料",
+                callback:function(){
+                   window.location.href="{:U('Label/NationDay/foodList',array('id'=>$id))}";
+                }
+            }]
+        });
+        return false;
+    }
+}
+function flagstart(){
+	if(flagtop<=50 && flagtop>=40){
+		$(".gameFlag").removeClass("flag2").removeClass("flag3").removeClass("flag4");
+		$(".gameFlag").addClass("flag1");
+	}else if(flagtop<40 && flagtop>=20){
+		$(".gameFlag").removeClass("flag1").removeClass("flag3").removeClass("flag4");
+		$(".gameFlag").addClass("flag2");
+	}else if(flagtop<20 && flagtop>0){
+		$(".gameFlag").removeClass("flag1").removeClass("flag2").removeClass("flag4");
+		$(".gameFlag").addClass("flag3");
+	}else if(flagtop<=0){
+		if(isflagstart){return false;}
+		isflagstart = true;
+		flagtop=0;
+		isbegin = true;
+		var wait = 2;
+		var waitTime = function(){
+			if(wait==0){
+				iswait = true;
+				return false;
+			}
+			wait--;
+		}
+		IntwaitTime = setInterval(waitTime,1000);
+		setTimeout(function(){
+			$(".gameFlag").removeClass("flag1").removeClass("flag2").removeClass("flag3");
+			$(".gameFlag").addClass("flag4");
+			if(_global.g==false){
+				return false;
+			}
+			cjajax(1);
+		},2000);
+	}
+	$(".gameFlag").css({top:flagtop+"%"});
+}
+</script>
+
+<script>
+var _global = {
+		onsub:false,
+		g:true
+	}
+$(document).ready(function(e) {
+	$(".btn-get:not('.erro')").click(function(){
+		cj.login();
+	});
+	$("body").on("click","#subcj",function(){
+		var html = "<p>很抱歉，今日奖品已发完。<br>请明日早点来领取。</p>";
+		var html2 = "<div class='prizebg'><div class='prizetitle'>恭喜您获得了<span>数字2</span>！</div><div class='img'><img src='http://static.wangcaio2o.com/Home/Upload/NumGoods/00046366/5502ab7980c97.jpg'><p>哈根达斯优惠 哈根达斯</p></div></div>";
+		cj.content({
+			msg:html2,
+			btn:[{
+				text:"确定",
+				url:"{:U('Label/NationDay/foodList',array('id'=>$id))}"
+			}]
+		});
+	});
+	//验证码
+	var Int;
+	$("body").on("click","#getpasscode",function(){
+        $(this).val("正在发送..");
+        var phone = $("#phone").val();
+        var id = $("#id").val();
+		var verify =$("#verify").val();
+        $.post("index.php?g=Label&m=ShareBatch&a=sendCheckCode",{"id":id,"phone":phone,"verify":verify},function(data){
+            if(data.status=='1'){
+                $("#getpasscode").attr("disabled",true);
+                Int = setInterval(checkTime,1000);
+            }else{
+                 popForm('popMsg',data.info,data.status);
+                $("#getpasscode").val("获取验证码");
+            }
+        },"json");
+    });
+    var time = 90;
+    var checkTime = function(){
+        $("input[name='getpasscode']").val("已发送,"+time+"秒");
+        if(time==0){
+            $("input[name='getpasscode']").val("获取验证码");
+            $("input[name='getpasscode']").attr("disabled",false);
+            time = 90;
+            clearInterval(Int);
+            return false;
+        }
+        time--;
+    }
+});
+var cj = {
+	basic:function(msg){
+		cj.close();
+		if(!msg.title){var notitle="notitle";msg.title="";}else{var notitle="hastitle"}
+		if(msg.isclose){var closehtml = '<a href="javascript:void(0)" class="close-msgPop"><i><span>+</span></i></a>'}else{var closehtml = "";}
+		var html = ['<div class="msgPop bg '+notitle+'" id="'+msg.id+'">',
+			'<div class="msgBg">',
+			'<div class="msgTitle '+notitle+'">'+msg.title+closehtml+'</div>',
+			'<div class="msgCon">'+msg.html+'</div>',
+			'</div>',
+			'</div>'].join('');
+		$("body").append(html);
+		if(typeof(msg.start) == 'string'){
+			window[msg.start].call(this,$(this));
+		}else if(typeof(msg.start) == 'function'){
+			msg.start.call(this,$(this));
+		}
+		$("body").find(".msgBg",html).on(touchstart,".cjBtn-back",function(){
+			var index = $(this).index();
+			if(typeof(msg.btn[index].callback) == 'string'){
+				window[msg.btn[index].callback].call(this,$(this));
+			}else if(typeof(msg.btn[index].callback) == 'function'){
+				msg.btn[index].callback.call(this,$(this));
+			}else{
+				msg.repeat ? (cj.close(),cj.login({repeat:msg.repeat})) : cj.close();
+				if($(this).attr("href")!="javascript:void(0)"){
+					window.location.href = $(this).attr("href");
+				}
+			}
+		});
+		$("body").find(".msgBg",html).on(touchstart,".close-msgPop",function(){
+			if(typeof(msg.after) == 'string'){
+				window[msg.after].call(this,$(this));
+			}else if(typeof(msg.after) == 'function'){
+				msg.after.call(this,$(this));
+			}
+			msg.repeat ? (cj.remove(),cj.login({repeat:msg.repeat})) : cj.remove();
+		});
+		$("body").on(touchstart,"input",msg.html,function(){
+			$(this).removeClass("erro");
+		});
+	},
+	tip:function(msg){
+		$(".cjTip").remove();
+		var txt = ["10秒钟内点的越多，砍掉的价格越高"];
+		var codeRandom = Math.floor(Math.random()*txt.length);
+		if(!msg){msg = txt[codeRandom]};
+		if(msg==1){return false;}
+		var html = '<div class="cjTip"><div class="cjTipTxt"><i></i><p>'+msg+'</p></div><div class="cjTipbg"></div></div>';
+		$("body").append(html);
+	},
+	login: function (msg) {
+		var html = template("js-tmpl-popForm", _global);
+		msg = $.extend(true, {}, cj.msg, msg);
+		msg.html = html;
+		cj.basic(msg);
+	},
+	content:function(msg){
+		msg = $.extend(true, {}, cj.msg,msg);
+		msg.html = template("js-tmpl-msg",msg);
+		cj.basic(msg);
+	},
+	remove:function(msg){
+		_global.g = true;
+		$(".gameCon").removeClass("end");
+		$(".msgPop").remove();
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	close:function(msg){
+		_global.g = true;
+		$(".gameCon").removeClass("end");
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		$(".msgPop").not("[id!='']").remove();
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	msg:{
+		id:"",
+		title:false,//标题
+		html:false,//内容
+		refurbish:false,//是否刷新
+		msg:"未知错误",//内容
+		icon:false,//图标
+		repeat:false,//重新填出登陆框
+		btn:[
+			{
+				text:"返回",//按钮文字
+				url:"javascript:void(0)",//按钮链接
+				callback:function(){
+					cj.close();
+				}
+			}
+		],
+		isclose:true,
+		start:false,//弹出之后callback
+		after:false//关闭之后callback
+	}
+}
+function cjajax(type){
+    var url="{:U('Label/NationDay/NationDayCj',array('id'=>$id))}";
+    _global.g=false;
+    $.ajax({
+        url:url,
+        type:"POST",
+        data:{type:type},
+        timeout:10000,
+        dataType:"json",
+        success:function(resp, textStatus){
+			isflagstart = false;
+            _global.g=true;
+            if(resp.status==1){
+                gameTimes();
+                var html = "<div class='prizebg'><div class='prizetitle'>恭喜您获得了<span>数字"+resp.info+"</span>！</div><div class='img2'><img src='__PUBLIC__/Label/Image/20151001/icon-get"+resp.info+".png'></div></div>";
+                if($("#gameTime").text()==0){
+                    cj.content({
+                        msg:html,
+                        btn:[{
+                            text:"我的材料",
+                            callback:function(){
+								if(iswait){
+									nationLocation();
+									cj.close();
+								}
+                            }
+                        }]
+                    });
+                    return false;
+                }else{
+                    cj.content({
+                        msg:html,
+                        btn:[{
+                            text:"再升一次",
+                            callback:function(){
+								if(iswait){
+									clearInterval(IntwaitTime);
+									begin();
+									cj.close();
+								}
+                            }
+                        },{
+                            text:"我的材料",
+                            url:"{:U('Label/NationDay/foodList',array('id'=>$id))}"
+                        }]
+                    });
+                    return false;
+                }
+            }else if(resp.status==0){
+                var html = "<p>"+resp.info+"</p>";
+                cj.content({
+                    msg:html,
+                    btn:[{
+                        text:"我的材料",
+                        callback:function(){
+                            nationLocation();
+                            cj.close();
+                        }
+                    }]
+                });
+                return false;
+            }else{
+                gameTimes();
+                var html = "<p>"+resp.info+"</p>";
+            }
+            if($("#gameTime").text()==0){
+                var html_1 = "<p>"+resp.info+"</p>";
+                cj.content({
+                    msg:html_1,
+                    btn:[{
+                        text:"我的材料",
+                        callback:function(){
+                            nationLocation();
+                            cj.close();
+                        }
+                    }]
+                });
+                return false;
+            }else{
+                cj.content({
+                    msg:html,
+                    btn:[{
+                        text:"再升一次",
+                        callback:function(){
+                            begin();
+                            cj.close();
+                        }
+                    },{
+                        text:"我的材料",
+                        url:"{:U('Label/NationDay/foodList',array('id'=>$id))}"
+                    }]
+                });
+            }
+        }
+    });
+}
+    function nationLocation(){
+        window.location.href="{:U('Label/NationDay/foodList',array('id'=>$id))}";
+    }
+</script>
+<script type="text/html" id="js-tmpl-msg">
+<div class="cjText">
+	{{if !html}}
+	<div class="cjText-con">
+		{{if !icon}}
+			<div class="cjText-text noicon">{{#msg}}</div>
+		{{else}}
+			<div class="cjText-text">{{#msg}}</div>
+			<div class="cjText-img">
+				{{if icon==1}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-6.png" width="64">
+				{{else}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-19-{{icon}}.png" width="100">
+				{{/if}}
+			</div>
+		{{/if}}
+	</div>
+	{{else}}
+	{{#html}}
+	{{/if}}
+</div>
+<div class="cjBtn">
+{{each btn as value i}}
+	<a href="{{value.url}}" class="cjBtn-back {{if btn.length>1}}{{if i==0}}sm{{/if}}{{/if}}">{{value.text}}</a>
+{{/each}}
+</div>
+</script>
+<script>
+    var wxShareData = <?php echo json_encode($shareData);?>;
+</script>
+<include file="Label/Public/_shareWx"/>
+</html>

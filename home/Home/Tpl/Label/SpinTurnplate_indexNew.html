@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$row['wap_title']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,抽奖" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<js href="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"/>
+<?php if($row['page_style'] == '1'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_a.css"/>
+<?php }elseif($row['page_style'] == '2'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_b.css"/>
+<?php }elseif($row['page_style'] == '3'){?>
+<load href="__PUBLIC__/Label/Css/wap_main_c.css"/>
+<?php }else{?>
+<load href="__PUBLIC__/Label/Css/wap_main_d.css"/>
+<?php }?>
+<load href="__PUBLIC__/Label/Css/wap_News.css"/>
+</head>
+<body>
+<include file="Public:file"/>
+<div id="wrapper">
+    <!--输手机号-->
+    <include file="Public:popNew"/>
+    <!--输手机号-->
+    <div id="container">
+        <div id="main">
+            <div class="mainTop">
+                <div class="top-img">
+                    <?php if($row['bg_style'] == '1'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sOne.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style'] == '2'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sTwo.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style']== '4'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sThree.png"  class="vip-img" />
+                    <?php }elseif($row['bg_style']== '3'){?>
+                    <img src="<?php echo get_upload_url($row['bg_pic']);?>"  class="vip-img" />
+                     <?php }elseif($row['bg_style']== '5'){?>
+                    <img src="__PUBLIC__/Label/Image/topbg-sFour.png"  class="vip-img" />
+                    <?php }?>
+                </div>
+            </div>
+            <div id="mainCon" class="mainCon fn <?php if($row['log_img']==''){?> noLogo <?php }?> <?php if($row['node_name']== ''){?> noTitle <?php }?> ">
+            	<div class="top-title">{$row['node_name']}</div>
+                	<?php
+                	if($row['log_img']!= ''){?>
+                <div class="logo-bg">
+                    <div class="logo-con"><img src="<?php echo get_upload_url($row['log_img']);?>"  class="vip-img" /></div>
+                </div>
+                	<?php }?>
+                
+                <div class="multimedia">
+					<?php if($row['music'] != ''){?>
+                    <audio src="<?php echo get_upload_url($row['music']);?>" autoplay="true" loop id="audio" style="display:none; width:0; height:0; overflow:hidden;"></audio>
+                	<div class="voice_button"><a href="javascript:void(0)" class="a-hide" onClick="audio()">音乐</a></div>
+					<script>
+                        function audio(){
+                            var audio = document.getElementById('audio');
+                                if(audio.paused){
+                                    audio.play();
+									$(".voice_button").css("background","url(__PUBLIC__/Label/Image/voice_button.png)");
+									$(".voice_button").css("background-size","100%");
+                                }else{
+                                    audio.pause();
+									$(".voice_button").css("background","url(__PUBLIC__/Label/Image/stop_button.png)");
+									$(".voice_button").css("background-size","100%");
+                                }
+                            }
+                    </script>
+                    <?php }?>
+                	<?php if($row['video_url'] != ''){?>
+                	<div class="video_button"><a href="{$row['video_url']}" class="a-hide" target="_blank">视频</a></div>
+                    <?php }?>
+                </div>
+                <div class="mainCon-contenter">
+                    <div class="mainCon-title">{$row['wap_title']}</div>
+                	<div class="mainCon-contenter-bg">
+                        <div class="moreContenter">
+                            <?php echo $row['wap_info']?>
+                        </div>
+                            <?php if( $row['is_cj'] == '1'){?>
+                        <div class="content_button fn">
+                            <input type="button"  value="<?php echo $cj_text==''?'点击抽奖':$cj_text;?>" class="input_button" id="sub_button"/>
+                            <input type="hidden" name="is_vcard_activity" value="{$activityType;}" />
+                        </div>
+                            <?php
+                            //todo 鱼旨的查看奖品
+                            if($wxCardInfo){?>
+                                <script>
+                                    var wx_card_data = <?php echo $wxCardInfo;?>;
+                                    function getWxCard2(data){
+                                        getWxCard(data);
+                                    }
+                                </script>
+                                <div class="content_button fn">
+                                    <input type="button" value="查看未领卡券" class="input_button" style="background-color:green" onclick="javascript:getWxCard2(wx_card_data);"/>
+                                </div>
+                            <?php
+                            }
+                            ?>
+                        <?php  }?>
+                	</div>
+                </div>
+            </div>
+      		<include file="Public:share"/>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+</div>
+<div class="specialCj"></div>
+
+<script>
+    $(document).ready(function(e) {
+        //判断字符
+        $("hr:eq(0)").hide();
+        var fData=$(".top-title").text();
+        var intLength=0;
+        for (var i=0;i<fData.length;i++){
+			fData.charCodeAt(i) < 0 || fData.charCodeAt(i) > 255 ? intLength=intLength+2 : intLength=intLength+1;
+        }
+		intLength<=20 ? $(".top-title").css("font-size","20px") : $(".top-title").css("font-size","18px");
+        //图片链接
+        var openimg=$(".moreContenter img").length;
+        if(openimg!=0){
+            var img=$(".moreContenter img");
+            var imgurl;
+            $(".moreContenter img").each(function() {
+                if($(this).closest("a").length=="0"){
+                    imgurl="<?php echo U('Label/Img/index');?>"+'&url='+$(this).attr("src");
+                    $(this).wrapAll("<a href='"+imgurl+"'></a>");
+                };
+            });
+        }
+    });
+</script>
+</body>
+</html>
+<eq name="show_menu" value="1">
+<script>
+var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Public/_hideWxMenu"/>
+</eq>

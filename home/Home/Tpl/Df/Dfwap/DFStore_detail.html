@@ -1,0 +1,260 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>商品详情_DF积分商城</title>
+    <meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+    <meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+    <meta content="telephone=no" name="format-detection"/>
+    <meta content="email=no" name="format-detection"/>
+    <meta name="apple-touch-fullscreen" content="NO">
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_df.css?v=__VR__">
+    <link href="__PUBLIC__/Js/artDialog6/ui-dialog.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Image/df/Item/wap_df.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+    <script src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js"></script>
+    <script src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/idangerous.swiper.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.masonry.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script>
+        $(document).ready(function(e) {
+            //图片链接
+            var openimg=$(".proInfo img").length;
+            if(openimg!=0){
+                var img=$(".proInfo img");
+                var imgurl;
+                $(".proInfo img").each(function() {
+                    if($(this).closest("a").length=="0"){
+                        imgurl="<?php echo U('Label/Img/index');?>"+'&url='+$(this).attr("src");
+                        $(this).wrapAll("<a href='"+imgurl+"'></a>");
+                    };
+                });
+            }
+        });
+        $(function () {
+            $("#get").click(function () {
+                var end=$("#get").attr("data-end");
+                var data_start=$("#get").attr("data-start");
+                if(end){
+                    art.dialog.alert("活动已经结束！");
+                    return false;
+                }
+                if(data_start){
+                    art.dialog.alert("活动还未开始！");
+                     return false;
+                }else{
+                    $.post(
+                            "index.php?&g=Df&m=DFStore&a=is_point",
+                            {id:<?php echo $id;?>},
+                            function (data) {
+                                if (data.status == '0') {
+                                    art.dialog.alert(data.info);
+                                }else if(data.status == '1'){
+                                    //如果为1的时候，直接跳转到会员注册页面
+                                    var title=data.info;
+                                    art.dialog.confirm(title,function(){
+                                        window.location.href = "/index.php?&g=Df&m=DfWap&a=DfLogin_index";
+                                    });
+                                }else if(data.status == '2'){
+                                    //如果为1的时候，直接跳转到会员注册页面
+                                    window.location.href = 'index.php?&g=Df&m=DFStore&a=Dforder_isok&id=' + "{$id}";
+                                }
+                            },
+                            'json'
+                    );
+//                    window.location.href = 'index.php?&g=Df&m=DFStore&a=Dforder_isok&id=' + "{$id}";
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+            <div class="goback"><i></i></div>
+            <div class="logo"><span>商品详情_DF积分商城</span></div>
+        </div>
+        <div id="main">
+            <div class="mainTop">
+                <div class="flash">
+                    <div class="flash-img">
+                        <div class="swiper-wrapper">
+                            <?php
+								if($goodsInfo['show_picture1']){
+							?>
+                            <div class="swiper-slide"><a><img src="__UPLOAD__/{$goodsInfo['show_picture1']}" /></a></div>
+                            <?php
+								}
+							?>
+                            <?php
+								if($goodsInfo['show_picture2']){
+							?>
+                            <div class="swiper-slide"><a><img src="__UPLOAD__/{$goodsInfo['show_picture2']}" /></a></div>
+                            <?php
+								}
+							?>
+                            <?php
+								if($goodsInfo['show_picture3']){
+							?>
+                            <div class="swiper-slide"><a><img src="__UPLOAD__/{$goodsInfo['show_picture3']}" /></a></div>
+                            <?php
+								}
+							?>
+                        </div>
+                        <div class="pagination"></div>
+                        <php>
+                            $purchase_time_limit = $goodsInfo['purchase_time_limit'];
+                            if($purchase_time_limit){
+                            $js_begin_time = strtotime($goodsInfo['begin_time'])*1000;
+                            $js_end_time = strtotime($goodsInfo['end_time'])*1000;
+                            $notice = '';
+                            if(date('YmdHis') < $goodsInfo['begin_time']){
+                            $notice = '开始';
+                            }
+                            else if(date('YmdHis') > $goodsInfo['begin_time'] && date('YmdHis') < $goodsInfo['end_time']){
+                            $notice = '结束';
+                            }
+                            else{
+                            $purchase_time_limit = 0;
+                            }
+                            }
+                        </php>
+                        <php>if($purchase_time_limit && $goodsInfo['status'] == 0){</php>
+                        <div id="countdown" class="hd abs dn">
+                            <div class="floatleft clock">
+                                <span>距离{$notice}还剩：</span>
+                                <em id="emD"></em><strong>天</strong>
+                                <em id="emH"></em><strong>时</strong>
+                                <em id="emM"></em><strong>分</strong>
+                                <em id="emS"></em><strong>秒</strong>
+                            </div>
+                        </div>
+                        <php>}</php>
+                    </div>
+                </div>
+            </div>
+            <div class="mainTop detail">
+                <div class="detailBox">
+                    <dl>
+                        <form method="post" action="" id="form">
+                            <!--<dt><img src="__PUBLIC__/Label/Image/DF/Item/df-img4.jpg" width="100%" height="auto" /></dt>-->
+                            <dt></dt>
+                            <php>if($goodsInfo['storage_num'] == -1){</php>
+                            <dd class="fn title"><span class="l">{$goodsInfo.batch_name}</span><span class="r">不限</span>
+                            </dd>
+                            <php>}else{</php>
+                            <dd class="fn title"><span class="l">{$goodsInfo.batch_name}</span><span class="r">剩余{$goodsInfo.remain_num}件</span>
+                            </dd>
+                            <php>}</php>
+                            <dd class="fn point">
+                                <span class="l">积分价格：{$batch_amt}分</span>
+                                <php>if($goodsInfo['market_show']==1){</php>
+                                <span class="r">市场价值：<em>{$goodsInfo.market_price}元</em></span>
+                                <php>}</php>
+                            </dd>
+                            <dd>
+                                <php>
+                                    $nowtime=date('YmdHis');
+                                    if($nowtime < $goodsInfo['begin_time']){
+                                </php>
+                                <a href="javascript:;" class="btn" id="get" data-time="" data-start="start">敬请期待</a>
+                                <php>}elseif($nowtime>$goodsInfo['begin_time'] && $nowtime<$goodsInfo['end_time']){</php>
+                                <a href="javascript:;" class="btn" id="get" data-time="" data-start="">积分兑换</a>
+                                <php>}else{</php>
+                                <a href="javascript:;" class="btn" id="get" data-time="" data-end="end">活动结束</a>
+                                <php>}</php>
+                            </dd>
+                            <dd>
+                                <label>商品描述详情：</label>
+                                <div class="point_yy">
+                                    <?php echo htmlspecialchars_decode($goodsInfo['wap_info']);?>
+                                </div>
+                            </dd>
+                        </form>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+    var mySwiper = new Swiper('.flash-img', {
+        pagination: '.pagination',
+        loop: true,
+        grabCursor: true,
+        paginationClickable: true
+    })
+</script>
+<php>if($purchase_time_limit && $goodsInfo['status'] == '0'){</php>
+<script>
+    $(function(){
+        (function(){
+            var js_begin_time = {:sprintf("%.0f",$js_begin_time)};
+            var js_end_time = {:sprintf("%.0f",$js_end_time)};
+
+    $.post("{:U('Common/Empty/stime')}", function(stime){
+        var s_time = +stime;
+        var next_end_time = 0, _nowtime = new Date().getTime(), _status = 0, _time_diff = _nowtime - s_time;
+//			$('.proInfo').html($('.proInfo').html() + _time_diff);
+        function get_real_time(time){
+            return time - _time_diff;
+        }
+        if(get_real_time(_nowtime) < js_begin_time){
+            next_end_time = js_begin_time;
+        }
+        else if(get_real_time(_nowtime) > js_begin_time && get_real_time(_nowtime) < js_end_time){
+            next_end_time = js_end_time;
+            _status = 1;
+        }
+
+        function fresh() {
+            var endtime = next_end_time;
+            var nowtime = new Date().getTime();
+            var leftsecond = parseInt((endtime - get_real_time(nowtime)) / 1000);
+            //距离开始还剩余多长时间
+            var startsecond=parseInt(("{$goodsInfo['begin_time']}" - get_real_time(nowtime)) / 1000);
+            d = parseInt(leftsecond / 3600 / 24);
+            h = parseInt((leftsecond / 3600) % 24);
+            m = parseInt((leftsecond / 60) % 60);
+            s = parseInt(leftsecond % 60);
+            var td = d * 24 + h;
+            $("#emD").html(d);
+            $("#emH").html(h);
+            $("#emM").html(m);
+            $("#emS").html(s);
+                if (leftsecond <= 0) {
+                    if (_status == 0) {
+                        _status = 1;
+                        next_end_time = js_end_time;
+                        $('#emD').prev().html("距离结束时间:");
+                        $("#get").attr("data-start","");
+                        $("#get").text("积分兑换");
+                        return;
+                    }
+                    if (_status == 1) {
+                        $("#emD").parent().parent().remove();
+                        $('#emD').prev().html("距离开始时间:");
+                        $("#get").attr("data-end","end");
+                        $("#get").text("活动结束");
+                        clearInterval(sh);
+                    }
+                }
+        }
+        fresh();
+        var sh;
+        sh = setInterval(fresh, 1000);
+        $("#countdown").show();
+    });
+    })();
+    });
+</script>
+<php>}</php>

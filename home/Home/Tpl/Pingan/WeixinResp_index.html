@@ -1,0 +1,581 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信被添加自动回复</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script src="__PUBLIC__/Js/weixin2/jq-emotion.js" type="text/javascript"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<script type="text/javascript">
+var selectActivityCallback = function(d){
+	//选择互动模块的回调
+	//console.dir(d);
+	var html3 = template('activityresp', d);
+	$("#reply_content_4").html(html3);
+	$("#reply_content_0").hide();
+	$("#reply_content_1").hide();
+	$("#reply_content_2").hide();
+	$("#reply_content_3").hide();
+	$("#reply_content_4").show();
+	
+	$(".actTitle").html(d.name);
+	$("#material_id_selected").val("activity");
+	$("#activityid").val(d.batch_id);
+}
+
+//选择卡券的回调
+var cardresp = function(d){
+	$("#material_id_selected").val("card");
+	var html2 = template('cardresp', d);
+	$("#reply_content_3").html(html2);
+	$("#reply_content_0").hide();
+	$("#reply_content_1").hide();
+	$("#reply_content_2").hide();
+	$("#reply_content_3").show();
+	$("#reply_content_4").hide();
+	$(".cardInfo").css("background",d.cardbg);
+	$(".cardInfo span").html(d.shopname);
+	$('.adShow_l img').attr("src",d.logo_url);
+	$('.cardtitle').html(d.goods_name);
+    if(d.date_type == 1){
+        var da = new Date(d.date_begin_timestamp*1000);
+        var year = da.getFullYear();
+        var month = da.getMonth()+1;
+        var date = da.getDate();
+        var da2 = new Date(d.date_end_timestamp*1000);
+        var year2 = da2.getFullYear();
+        var month2 = da2.getMonth()+1;
+        var date2 = da2.getDate();
+        var html = '有效期：'+[year,month,date].join('-')+'至'+[year2,month2,date2].join('-')
+    }else{
+        var html = '发送卡券后'+d.date_fixed_begin_timestamp+'天开始使用-发送卡券后'+d.date_fixed_timestamp+'天结束使用'
+    }
+	$('.AstaticDate').html(html);
+	$("#cardid").val(d.card_id);
+	$("#respid").val(d.id);
+	$(".totalNum").html(d.quantity);
+	$(".remainNum").html(d.quantity - d.card_get_num);
+	var card_num = parseInt(d.quantity - d.card_get_num);
+	var cid = d.id;
+	
+	$(".delcard").click(function(e) {
+		$("#reply_content_3").html('');
+		Diasucceed("删除成功");
+	});
+}
+
+
+
+//图文选择后的回调函数
+var selectcallback = function(mid){
+	//alert(mid)
+	if(mid=="") {return false};
+	if(mid=="img"){
+		$(".tab_img").addClass("selected");
+        $("#reply_content_0").hide();
+        $("#reply_content_1").hide();
+        $("#reply_content_2").show();
+		$("#reply_content_3").hide();
+		$("#reply_content_4").hide();
+		$("#reply_content_2").focus();
+		return false;
+	};
+
+	var dialog = art.dialog({title:false,lock:true});
+	var data = {material_id:mid};
+	$("#material_id_selected").val(mid);
+	$.post("{:U('Pingan/WeixinResp/showMaterialById')}",data,function(d){
+		dialog.close();
+		$(".tab_appmsg").addClass("selected");
+        $("#reply_content_0").hide();
+        $("#reply_content_1").show();
+        $("#reply_content_0").html("");
+		$("#reply_content_1").html(d);
+        $("#reply_content_2").hide();
+		$("#reply_content_4").hide();
+		windowheight();
+	});
+}
+$(document).ready(function(e){
+	$(".tab_appmsg").click(function(){
+        art.dialog.open("{:U('Pingan/WeixinResp/selectImgTxt', array('callback'=>'selectcallback'))}",{
+            title:"选择多图文信息",
+            width:800
+        });
+    });
+	
+	$("body").on("click",".addStorage",function(e) {
+		var card_num = $(".remainNum").html();
+        var remainNums =100000 - card_num;
+		var id= $("#respid").val();
+        art.dialog({
+            title: '补充库存',
+            content: "<div class='popupWin'><p class='DiaTitle'>请输入卡券增加的库存量（还能添加<em class='remainNums redfont'>"+remainNums+"</em>张）</p><input type='text' maxlength='6' name='Storage' id='addStorage' class='DiaInput'></div>",
+            id: 'art_addnum',
+            ok: function() {
+                var addNum = $('#addStorage').val();
+                var totalNum = parseInt($(".totalNum").html()) + parseInt($(".DiaInput").val());
+                var remainNum = parseInt($(".remainNum").html()) + parseInt($(".DiaInput").val());
+                if((addNum > remainNums) || (!/^[1-9]{1}[0-9]{0,5}$/.test(addNum))){
+                    Diaerror('数量格式错误！区间为1至'+remainNums);
+                    return false;
+                }
+                $.post("{:U('Pingan/WeixinCard/addStorageNum')}", {
+                    id: id,
+                    addNum: addNum
+                }, function(resp) {
+                    //库存添加成功
+                    if (resp.status == 1) {
+                       Diasucceed("库存变更成功！");
+                       $(".totalNum").html(totalNum);
+                       $(".remainNum").html(remainNum);
+                    }else{
+                        Diasucceed(resp.info);
+                    }
+                }, 'json');
+            },
+            cancel: true,
+            lock: true,
+            width: 400
+        });
+	});
+
+	//初始化被选中的素材
+	$("#div_replyContent .tab_nav").removeClass("selected");
+	var msgId = "{$response_class}";
+ 	//alert(msgId);
+   //var msgId = $("#material_id_selected").val();
+    if(msgId=="0"){
+		$("#div_replyContent .tab_nav").removeClass("selected");
+        $("#material_id_selected").val('')
+		$(".tab_text").addClass("selected");
+		$("#reply_content_0").show();
+		$("#reply_content_1").hide();
+		$("#reply_content_2").hide();
+		$("#reply_content_3").hide();
+		$("#reply_content_4").hide();
+		var html = $("#reply_content_0").html();
+		html = html.replace(/\n/g,"<br>");
+		$("#reply_content_0").html(html);
+		check_lenght_weixin(600,"js_editorTip0","#reply_content_0");
+		$("#message_face").jqfaceedit("reply_content_0");
+		//editArea();
+    }else if(msgId=="3"){
+		$("#div_replyContent .tab_nav").removeClass("selected");
+        $("#material_id_selected").val('img');
+		$(".tab_img").addClass("selected");
+		$("#reply_content_0").hide();
+		$("#reply_content_1").hide();
+		$("#reply_content_2").show();
+		$("#reply_content_3").hide();
+		$("#reply_content_4").hide();
+    }else if(msgId=="4"){
+		$("#div_replyContent .tab_nav").removeClass("selected");
+        $("#material_id_selected").val('card');
+		$(".tab_card").addClass("selected");
+		$("#reply_content_0").hide();
+		$("#reply_content_1").hide();
+		$("#reply_content_2").hide();
+		$("#reply_content_3").show();
+		$("#reply_content_4").hide();
+    }else if(msgId=="5"){
+		$("#div_replyContent .tab_nav").removeClass("selected");
+        $("#material_id_selected").val('activity');
+		$(".tab_activity").addClass("selected");
+		$("#reply_content_0").hide();
+		$("#reply_content_1").hide();
+		$("#reply_content_2").hide();
+		$("#reply_content_3").hide();
+		$("#reply_content_4").show();
+    }else{
+		$("#div_replyContent .tab_nav").removeClass("selected");
+		$(".tab_appmsg").addClass("selected");
+		$("#reply_content_0").hide();
+		$("#reply_content_1").show();
+		$("#reply_content_2").hide();
+		$("#reply_content_3").hide();
+		$("#reply_content_4").hide();
+		selectcallback($("#material_id_selected").val());
+    }
+	
+ 	
+   
+
+	$(".tab_text").click(function(){
+        $("#div_replyContent .tab_nav").removeClass("selected");
+        $(".tab_text").addClass("selected");
+        $("#reply_content_0").show();
+        $("#reply_content_1").hide();
+        $("#reply_content_2").hide();
+		$("#reply_content_3").hide();
+		$("#reply_content_4").hide();
+        $("#material_id_selected").val("");
+        $("#reply_content_0").focus();
+    });
+
+    $(".tab_appmsg").click(function(){
+		//alert("点图文");
+        $("#div_replyContent .tab_nav").removeClass("selected");
+        $(".tab_appmsg").addClass("selected");
+	    $("#reply_content_0").hide();
+        $("#reply_content_1").show();
+        $("#reply_content_2").hide();
+		$("#reply_content_3").hide();
+		$("#reply_content_4").hide();
+		$("#reply_content_1").focus();
+    });
+	
+	$(".tab_img").click(function(){
+        $("#div_replyContent .tab_nav").removeClass("selected");
+        $(".tab_img").addClass("selected");
+		$("#reply_content_0").hide();
+        $("#reply_content_1").hide();
+        $("#reply_content_2").show();
+		$("#reply_content_3").hide();
+		$("#reply_content_4").hide();
+		$("#reply_content_3").focus();
+    });
+	
+	$(".tab_card").click(function(){
+        $("#div_replyContent .tab_nav").removeClass("selected");
+        $(".tab_card").addClass("selected");
+		$("#reply_content_0").hide();
+        $("#reply_content_1").hide();
+        $("#reply_content_2").hide();
+		$("#reply_content_4").hide();
+		$("#reply_content_3").focus();
+    });
+	
+	$(".tab_activity").click(function(){
+        $("#div_replyContent .tab_nav").removeClass("selected");
+        $(".tab_activity").addClass("selected");
+		$("#reply_content_0").hide();
+        $("#reply_content_1").hide();
+        $("#reply_content_2").hide();
+		$("#reply_content_3").hide();
+		$("#reply_content_4").hide();
+		$("#reply_content_4").focus();
+    });
+	
+	//确定按钮事件
+	$("#btn_submit").click(function(){
+		//alert($("#material_id_selected").val());
+        var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+        if($("#material_id_selected").val()!="" && $("#material_id_selected").val()!="img" && $("#material_id_selected").val()!="card" && $("#material_id_selected").val()!="activity"){
+            var data = {
+                response_info:$("#material_id_selected").val(),
+                respType:0,
+                respClass:1
+            };
+
+            $.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+                dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                location.reload();
+            },'json');
+        }else if($("#material_id_selected").val()==""){
+    		var reply_text = $("#reply_content_0").html();
+                reply_text=reply_text.replace(/\n/g, "\\n");
+                reply_text=reply_text.replace(/<br\/?[^>]*>/g, "\n");
+                reply_text=reply_text.replace(/\&nbsp\;/g, ' ');
+                reply_text=reply_text.replace(/\&lt;/g, '<'); 
+                reply_text=reply_text.replace(/\&gt;/g, '>');
+    		if(reply_text.length == 0){
+                Diaerror('请输入回复内容！');
+                dialog.close();
+                return ;
+            }
+            var text = $('#reply_content_0').text();
+    	    var imglength = $('#reply_content_0').find("img");
+    	    if(imglength.length*3+text.length > 600){
+    	        Diaerror('不能超过600字');
+                return ;
+    	    }
+    		var dialog = art.dialog({title:false,fixed: true,padding:0,lock:true});
+    		var data = {
+    			response_info:reply_text,
+    			respType:0,
+    			respClass:0
+    		};
+    		$.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+    			dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+    			location.reload();
+    		},'json');
+        }else if($("#material_id_selected").val()=="img"){
+			var src = $("#material_src").val();
+            var data ={
+                response_info:src,
+                respType:0,
+                respClass:3
+            }
+            $.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+                dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                location.reload();
+            },'json');
+        }else if($("#material_id_selected").val()=="card"){
+			var cardid = $("#cardid").val();
+            var data ={
+                response_info:cardid,
+                respType:0,
+                respClass:4
+            }
+            $.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+                dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                location.reload();
+            },'json');
+        }
+		else if($("#material_id_selected").val()=="activity"){
+			var activityid = $("#activityid").val();
+            var data ={
+                response_info:activityid,
+                respType:0,
+                respClass:5
+            }
+            $.post("{:U('Pingan/WeixinResp/followSubmit')}",data,function(d){
+                dialog.time(1).content("<div class='msg-all-succeed'>"+d.info+"</div>");
+                location.reload();
+            },'json');
+        }
+	});
+});
+
+$(function(){
+    $("#uploadMeitu").click(function(){
+        $("#div_replyContent .tab_nav").removeClass("selected");
+        $(".tab_img").addClass("selected");
+        var opt = {
+            cropPresets:'720x400',
+            callback:function(data){
+				$("#reply_content_0").hide();
+				$("#reply_content_1").hide();
+				$("#reply_content_2").show().find("img").show().attr("src",data.src);
+				$("#reply_content_0").html("");
+				$("#reply_content_1").html("");
+				$("#material_id_selected").val("img");
+				$("#material_src").val(data.src);
+				$("#reply_content_2 a").show();
+            }
+        };
+        open_img_uploader(opt);
+    });
+	$("#reply_content_2 a").click(function(){
+		$(this).hide();
+		$("#reply_content_2").find("img").hide().attr("src","");
+		$("#material_src").val("");
+	})
+	
+	$("#addCard").click(function(e) {
+		var isopen = 1; //0：未开通微信卡包业务，1：已开通微信卡包业务
+		if(isopen == 0)
+		{
+			art.dialog.msg({
+				content:"您的微信公众号未开通微信卡包业务",
+				ok:function(){
+					window.open("https://mp.weixin.qq.com");
+				},
+				okVal:"去开通",
+				width:400
+			})
+		}
+		else
+		{
+        art.dialog.open("{:U('Common/SelectJp/index')}&callback=cardresp&show_source=3&store_mode=2",{
+			title: '添加卡券',
+			width:800
+		});
+		}
+    });
+	$("#addActivityYhb").click(function(e) {
+        art.dialog.open("{:U('Yhb/SelectBatch/index')}&callback=selectActivityCallback",{
+            title: '添加互动模块',
+            width:800
+        });
+    });
+
+	$("#addActivity").click(function(e) {
+        art.dialog.open("{:U('LabelAdmin/SelectBatches/index')}&callback=selectActivityCallback",{
+			title: '添加互动模块',
+			width:800
+		});
+    });
+    
+});
+
+</script>
+</head>
+<body>
+<div id="wrapper" >
+<include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu_pingan.html" topmenuid="gongzhonghao"/>
+<div id="container" >
+<div id="main" class="rel">
+<div class="sidenav">
+    <!--开始载入左菜单-->
+    <php>
+    if($respType == '0'){
+        $leftmenuid = 'btjzdhh';
+    }
+    else{
+        $leftmenuid = 'xxzdhh';
+    }
+    </php>
+    <include file="LabelAdmin/Batch/WleftMenu_pingan" leftmenuid="zdhf"/>
+</div>
+<div class="subcon fn">
+    <div class="main-name fn">
+    <h4>被添加自动回复<a href="http://www.wangcaio2o.com/index.php?m=Help&a=helpDetails&newsId=1256&classId=45" class="r" target="_blank"><span style="font-size:14px ;"><i class="allAsk mr5" style="margin-top:0;"></i>自动回复帮助说明</span></a></h4>
+    </div>
+	<!--<?php var_dump($respText)?>-->
+    <div class="msg-libs">
+        <div class="content_wrap global_mod">
+            <div class="section_tab">
+            <ul class="tab_navs">
+            <li class="tab_nav selected"><a href="{:U('Pingan/WeixinResp/index')}">被添加自动回复</a></li>
+            <li class="tab_nav"><a href="{:U('Pingan/WeixinResp/msg')}">消息自动回复</a></li>
+            <li class="tab_nav"><a href="{:U('Pingan/WeixinResp/keywords')}">关键词自动回复</a></li>
+            <li class="tab_nav no_extra"><a href="{:U('Pingan/WeixinResp/duokefu')}">多客服自动回复</a></li>
+            </ul>
+            </div>
+			<style type="text/css">
+			.msg_sender{ margin:0 auto;}
+			.tab_navs{ margin-left:0; padding-left:0}
+			.content_wrap{ margin:0 auto;}
+			ul, ol{ margin-left:0;}
+            </style>
+            <div class="content_wrap" id="div_replyContent" style=" position:relative">
+                <div class="msg_sender" id="js_msgSender">
+                <div class="msg_tab">
+                    <ul class="tab_navs">
+                            <li class="tab_nav tab_text" data-type="1" data-tab=".js_textArea" data-tooltip="文字"><a href="javascript:void(0);">&nbsp;<i class="icon_msg_sender"></i>文字</a></li>
+                            <li class="tab_nav tab_appmsg" data-type="10" data-tab=".js_appmsgArea" data-tooltip="图文消息"><a href="javascript:void(0);" class="libraryArea-add" >&nbsp;<i class="icon_msg_sender" ></i>图文</a></li>
+                            <li class="tab_nav tab_img" data-type="10" data-tab=".js_appmsgArea" data-tooltip="图片消息"><a href="javascript:void(0);" id ="uploadMeitu">&nbsp;<i class="icon_msg_sender" ></i>图片</a></li>
+                    </ul>
+                    <div class="tab_panel">
+                        <div class="tab_content">
+                            <div class="js_textArea inner no_extra">
+                                <div class="emotion_editor">
+                                    <php>if(3 != $response_class){</php>
+                                    <div class="edit_area js_editorArea editArea" id="reply_content_0"  contenteditable="true" style="overflow-y: auto; overflow-x: hidden; border:0px;" onkeydown="check_lenght_onkeydown(this)" onkeyup="check_lenght_weixin(600,'js_editorTip0',this);"><eq name="response_class" value="0">{$respText}</eq></div>
+                                    <div class="edit_area js_editorArea editArea dn" id="reply_content_1" style="overflow-y: auto; overflow-x: hidden; border:0px;">
+                                    </div>
+                                    <input type="hidden" id="material_id_selected" value="{$imgId}">
+                                    <php>}else{</php>
+                                    <div class="edit_area js_editorArea editArea" id="reply_content_0"  contenteditable="true" style="overflow-y: auto; overflow-x: hidden; border:0px;" onkeydown="check_lenght_onkeydown(this)" onkeyup="check_lenght_weixin(600,'js_editorTip0',this);"></div>
+                                    <div class="edit_area js_editorArea editArea dn" id="reply_content_1" style="overflow-y: auto; overflow-x: hidden; border:0px;"><input type="hidden" id="material_id_selected" value="img"></div>
+                                    <php>}</php>
+
+                                    <div class="edit_area js_editorArea editArea dn" id="reply_content_2" style="overflow-y: auto; min-height:188px; height:auto; overflow-x: hidden; border:0px; text-align:center;"><img src="{$respText}" /><br /><br />
+                                    <input type="hidden" id="material_src" value="{$respText}" /></div>
+                                    <div class="edit_area js_editorArea editArea dn" id="reply_content_3" style="overflow-y: auto; min-height:188px; height:auto; overflow-x: hidden; border:0px; text-align:center;">
+                                    <div class="award_list">
+                                    <dl>
+                                    <dd>
+                                        <p class="adward_title">
+                                            <strong class="cardtitle">{$respText.goods_name}</strong>
+                                            <span>
+                                            <a href="javascript:void(0)" class="addStorage">补充库存</a>
+                                            </span>
+                                        </p>
+                                        <div class="adShow">
+                                            <div class="adShow_l shinfo">
+                                                <img src="{$respText.logo_url}">
+                                            </div>
+                                            <div class="adShow_r">
+                                                <span class="Astatic">总投入数量 <em class="totalNum">{$respText.quantity}</em></span>
+                                                <span class="Astatic">剩余数量 <em class="remainNum">{$respText['quantity'] - $respText['card_get_num']}</em></span>
+                                            </div>
+                                            <div class="cl pt5"></div>
+                                            <p class="AstaticDate tip" style="text-align:left">有效期：{$respText.time}</p>
+                                        </div>
+                                        <input type="hidden" id="material_id_selected" value="card">
+                                        <input type="hidden" value="{$respText['card_id']}" name="cardid" id="cardid">
+                                        <input type="hidden" value="{$respText['id']}" name="respid" id="respid">
+                                    </dd>
+                                    </dl>
+                                    </div>
+
+                                    </div>
+                                    <div class="edit_area js_editorArea editArea" id="reply_content_4" style="overflow-y: auto; min-height:188px; height:auto; overflow-x: hidden; border:0px; text-align:center;">
+                                    <div class="actAdded">
+                                    	<div class="actTitle">{$respText[0]}</div>
+                                        <div class="actOpr">{$respText[1]}</div>
+                                    </div>
+                                    <input type="hidden" id="material_id_selected" value="activity">
+                                    <input type="hidden" value="{$respText['batch_id']}" name="activityid" id="activityid">
+                                    <!-- <a href="javascript:void(0)" class="js_delActivity">删除</a> -->
+                                    </div>
+                                    <div class="editor_toolbar">
+                                        <a href="javascript:void(0);" class="icon_emotion emotion_switch js_switch" id="message_face"><i></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <div class="tool_bar tc">
+                <span id="btn_submit"><a href="javascript:void(0);" class="btn-all" title="确认">保存</a></span>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<include file="./Home/Tpl/Public/Public_footer_pingan.html" />
+</div>
+<div class="service"></div>
+
+</body>
+</html>
+
+
+<script type="text/html" id="cardresp">
+<div class="award_list">
+<dl>
+<dd>
+	<p class="adward_title">
+		<strong class="cardtitle">{{goods_name}}</strong>
+		<span>
+		<a href="javascript:void(0)" class="addStorage">补充库存</a>
+		</span>
+	</p>
+	<div class="adShow">
+		<div class="adShow_l shinfo">
+			<img src="{{logo_url}}">
+		</div>
+		<div class="adShow_r">
+			<span class="Astatic">总投入数量<em class="totalNum">{{quantity}}</em></span>
+			<span class="Astatic">剩余数量<em class="remainNum">{{remain_num}}</em></span>
+		</div>
+		<div class="cl pt5"></div>
+		<p class="AstaticDate tip" style="text-align:left">有效期：{{$respText['time']}}</p>
+	</div>
+	<input type="hidden" id="material_id_selected" value="card">
+	<input type="hidden" value="{{card_id}}" name="cardid" id="cardid">
+	<input type="hidden" value="{{id}}" name="respid" id="respid">
+</dd>
+</dl>
+</div>
+</script>
+
+<script type="text/html" id="activityresp">
+<div class="actAdded">
+	<div class="actTitle">{$respText['smallname']}</div>
+	<div class="actOpr"><a href="">点击参与</a></div>
+</div>
+<input type="hidden" id="material_id_selected" value="activity">
+<input type="hidden" value="" name="activityid" id="activityid">
+</script>

@@ -1,0 +1,201 @@
+<!doctype html>
+<html ng-app="app"  ng-controller="pictxt">
+<head>
+<meta charset="utf-8">
+<title ng-bind="basicData.title"></title>
+<meta name="viewport" content="width=320, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link href="__PUBLIC__/Label/Css/wap_newpictext.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Label/Js/pace.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/angularjs/angular.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/angularjs/angular-sanitize.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.qrcode.min.js"></script>
+</head>
+<?php if($number != ""){ ?> 
+<script type="text/javascript" name="baidu-tc-cerfication" data-appid="<?php echo $number; ?>" src="http://apps.bdimg.com/cloudaapi/lightapp.js"></script>
+
+<script type="text/javascript">
+(function(){
+		var script = document.createElement("script");
+		script.type = "text/javascript";
+		script.charset = "utf-8";
+		var date = new Date();
+		var version = date.getFullYear()+""+date.getMonth()+""+date.getDate()+""+date.getHours();
+		script.src = "http://m.baidu.com/static/search/siteapp/lego/seed.js?t="+version;
+		script.setAttribute("data-appid","<?php echo $number; ?>");
+		document.head.appendChild(script);
+	})();
+</script>
+<?php } ?>
+<body ng-cloak>
+<img src="__PUBLIC__/Image/poster/loading2.png" class="dn">
+<div id="phone">
+    <div class="phonetitle"><span class="pagetitle">{{basicData.title}}</span></div>
+	<div id="wrapper" ontouchstart="autoaudio()">
+	    <div id="container">
+	        <div id="main">
+	        	<div class="shopBoxView opacity">
+	                <div ng-if="basicData.music" class="music on" onClick="audio()"><span></span><i></i><em></em></div>
+	                <audio ng-if="basicData.music" ng-src="{{basicData.music}}" autoplay="true" loop id="audio" style="display:none; width:0; height:0; overflow:hidden;"></audio>
+	                <div class="ModCon">
+	                    <div class="marketList">
+                            <div ng-repeat="value in pages.temp" class="tpl_item">
+                                <div ng-include="value.url" ng-model="value"></div>
+                            </div>
+                        </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+    <!--div class="rightopr">
+		<a href="javascript:void(0)" class="btn-prev">上<br>一<br>页</a>
+		<a href="javascript:void(0)" class="btn-next">下<br>一<br>页</a>
+    </div-->
+</div>
+<div id="viewCon">
+    <div id="phoneSide">
+    	<h3>扫一扫预览手机展示效果</h3>
+        <div id="qrcode"></div>
+        <a href="{:U('MarketActive/NewPictext/index')}" class="btn-all">我也要创建</a>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script type="text/javascript">
+var isView = true;
+var app = angular.module('app', ['ngSanitize',"ui.temp","ui.style","back.img"]).config(["$sceProvider",function($sceProvider){
+    $sceProvider.enabled(false);
+}]);
+app.controller('pictxt',['$scope','$timeout','$templateCache', function($scope,$timeout,$templateCache) {
+	$scope.basicData = {$info};
+	$scope.pages = {$content};
+    $scope.FontConfig = {
+    	defaultColor:$scope.pages.color
+    };
+}]);
+angular.module('ui.temp',[]).directive('uiTemp',['$timeout','$compile',function($timeout,compile){
+	return{
+		restrict: "A",
+		require: '?^ngModel',
+		compile:function(element,attr,transclude){
+			if(attr.uiTemp.indexOf("img")!=-1){
+				var index = attr.uiTempIndex ? attr.uiTempIndex : 0;
+				var uiType = attr.uiStyle;
+				if(element.is("img")){
+					element.attr("ng-src","{{value.img["+index+"].img}}");
+				}else{
+					element.attr("ng-style","{'background-image':'url('+value.img["+index+"].img+')','background-position':'center center','background-repeat':'no-repeat','background-size':'cover'}");
+				}
+			}
+			element.removeAttr("ui-temp");
+			return function(scope, element, attr,ngModel){
+				$timeout(function() {
+					var index = attr.uiTempIndex ? attr.uiTempIndex : 0;
+					var newelement = element.find("[ui-text]").length==0 ? element : element.find("[ui-text]");
+					if(ngModel.$viewValue.uiEdit && !element.is("img")){
+						newelement.attr("ui-edit","");
+						newelement.attr("ng-model","value.text["+index+"]");
+					}else if(ngModel.$viewValue.uiEdit && element.is("img")){
+						newelement.attr("ui-edit","");
+						newelement.attr("ng-model","value.img["+index+"]");
+					}
+					newelement.attr("ng-bind-html","value.text["+index+"].text | toHtml");
+					compile(element)(scope)
+		        },10);
+			}
+		}
+	};
+}]);
+angular.module('ui.style',[]).directive('uiStyle',['$timeout','$compile',function($timeout,compile){
+	return{
+		restrict: "A",
+		require: '?^ngModel',
+		compile:function(element,attr,transclude){
+			var index = attr.uiTempIndex ? attr.uiTempIndex : 0;
+			var uiType = attr.uiStyle;
+			element.removeAttr("ui-style");
+			return function(scope, element, attr,ngModel){
+				$timeout(function() {
+					var defaultColor = ngModel.$modelValue.text[index].edit.defaultColor ? ngModel.$modelValue.text[index].edit.defaultColor : ngModel.$modelValue.defaultColor;
+					var edit = ngModel.$modelValue.text[index].edit || [];
+					var text = ngModel.$modelValue.text[index].text || [];
+					var ngStyle = "";
+					$.each(edit,function(i,n){
+						var newname = i.replace(/[A-Z]/,function($1,inx){return "-"+$1.toLowerCase();});
+						var islast = i!=edit.length-1 ? "," : "";
+						if(n=="defaultColor"){
+							if(ngModel.$modelValue.uiEdit){
+								edit["defaultColor"] = defaultColor || angular.copy(scope.$parent.$parent.FontConfig.defaultColor);
+								ngStyle += "'"+newname+"'"+":value.text["+index+"].edit.defaultColor || 'inherit'" + islast
+							}else{
+								ngStyle += "'"+newname+"'"+":"+"value.defaultColor" + islast
+							}
+						}else{
+							if(newname!="background-image"){
+								ngStyle += "'"+newname+"'"+":value.text["+index+"].edit."+i+" || 'inherit'" + islast
+							}else{
+								ngStyle += "'"+newname+"'"+":'url('+value.text["+index+"].edit."+i+"+')' || 'none','background-position':'center center','background-repeat':'no-repeat','background-size':'cover'" + islast
+							}
+						}
+					})
+					var newelement = element.find("[ui-text]").length==0 ? element : element.find("[ui-text]");
+					newelement.attr("ng-style","{"+ngStyle+"}");
+					scope.$apply(function() {
+						ngModel.$modelValue;
+					});
+					compile(element)(scope)
+		        },0);
+			}
+		}
+	};
+}]);
+angular.module('back.img',[]).directive('backImg',[function(){
+    return function(scope, element, attrs){
+        if(attrs.backImg){
+        	element.css({'background-image': 'url(' + attrs.backImg +')'});
+        };
+    };
+}]);
+app.filter('toHtml', ['$sce', function ($sce) {
+	return function (text) {
+		return $sce.trustAsHtml(text);
+	};
+}]);
+function audio(){
+	var audio = document.getElementById('audio');
+	audio.paused ? (audio.play(),$(".music").addClass("on")) : (audio.pause(),$(".music").removeClass("on"));
+}
+var m = true;
+function autoaudio(){
+	if(m){
+		var audio = document.getElementById('audio');
+		if(audio){
+			if(audio.paused){
+				audio.play();
+				$(".music").addClass("on");
+			}
+		}
+		m = false;
+	}
+}
+
+$(function(){
+	$('#qrcode').qrcode({width:210,height:210,text:window.location.href});
+	//判断是否第一次访问
+	if(isView == true){
+	    isView = false;
+	    $.get("{:U('Label/NewPoster/logVisit', array('id'=>$id))}", function(data){});
+	}
+});
+</script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wpictxtdata.js?v=__VR__"></script>
+<script>
+var wxShareData = {:json_encode($shareData)};
+</script>
+<include file="Label/Public/_shareWx"/>

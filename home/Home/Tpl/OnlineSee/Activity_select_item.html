@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>选择员工</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+    <js href="__PUBLIC__/Js/global.js?v=__VR__" />
+    <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+    <js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+    <js href="__PUBLIC__/Js/Datejs/date-zh-CN.js?v=__VR__" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="bgfff">
+    <div class="Wcanal-tab showsaloonForm1">
+        <div class="Wcanal-tab-title fn">
+        </div>
+        <div class="Wcanal-tab-list" id='member'>
+            <div class="form-search  fn">
+                        <form action="{:U('OnlineSee/Activity/select_item/')}" method="POST" name="theform" id="theform">
+                            <p>评价项编号</p>
+                            <p>
+                                <input type="text" name="id" class="textbox w100" value="{$Think.request.id}" />
+                            </p>
+                            <p>评价项内容</p>
+                            <p>
+                                <input type="text" name="item_content" class="textbox w100" value="{$Think.request.item_content}" />
+                            </p>
+                            <a href="javascript:void(0);" class="btn-all w110 r" id="sub_button">查询</a>
+                        </form>
+                    </div>
+            <div class="fn">
+                <table cellpadding="0" cellspacing="0" class="W-table">
+                    <tr>
+                        <th class="first w100"><input type="checkbox" class="frm_checkbox" onclick="select_all();" id='select_but' />全选</th>
+                        <th class="w120">评价项编号</th>
+                        <th>评分项内容</th>
+                    </tr>
+                    <?php if(!empty($list)){ foreach($list as $v){ ?>
+                    <tr>
+                        <td>
+                            <input type="checkbox" value="<?php echo $v['id']?>" id="checkbox_{$v['id']}" name="id" data-json='<?php echo json_encode($v); ?>' onclick='push_value(this, <?php echo json_encode($v); ?>,true)' />
+                        </td>
+                        <td>
+                            <?php echo $v[ 'id'];?>
+                        </td>
+                        <td>
+                            <?php echo $v[ 'item_content'];?>
+                        </td>
+                    </tr>
+                    <?php }}else{?>
+                    <td colspan="3">无数据</td>
+                    <?php }?>
+                </table>
+            </div>
+            <table width="100%">
+                <tr>
+                    <td style="text-align: center;"><a class="btn-all w100" href="javascript:/*artDialog*/;" onclick="artDialog.close();flush_all_item_tpl();">确定</a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
+<script language="javascript">
+    $(document).ready(function(e) {
+        $("#sub_button").click(function() {
+            $("#theform").attr("action", "{:U('OnlineSee/Activity/select_item')}").submit();
+        });
+    });
+function push_value(obj, data,flush_item_tpl) {
+    var win = art.dialog.opener;
+    if ($(obj).attr("checked") == "checked") {
+        win['update_data_for_item'].call(this, data, 'add',flush_item_tpl);
+    } else {
+        win['update_data_for_item'].call(this, data, 'del',flush_item_tpl);
+    }
+}
+function flush_all_item_tpl()
+{
+    var win = art.dialog.opener;
+    win['flush_all_item_tpl'].call(this);
+}
+function select_all()
+{
+    $("#select_but").attr('onclick','cancel_select_all();');
+    $("[name='id']").each(function(){
+        //$(this).trigger('click');
+        id=$(this).val();
+        data_json=$(this).data("json");
+        $("[id='checkbox_"+id+"']").attr("checked",true);
+        push_value($(this),data_json,false);
+        //console.log($(this).data("json"));
+    });
+}
+function cancel_select_all()
+{
+    $("#select_but").attr('onclick','select_all();');
+    $("[name='id']").each(function(){
+        //$(this).trigger('click');
+        id=$(this).val();
+        data_json=$(this).data("json");
+        $("[id='checkbox_"+id+"']").attr("checked",false);
+        push_value($(this),data_json);
+        //console.log($(this).data("json"));
+    });
+}
+$(document).ready(function() {
+
+    var data_str = $("#item_id", parent.document).val();
+    var obj = eval(data_str);
+    $(obj).each(function(index) {
+        var val = obj[index];
+        $("input:checkbox[value=" + val + "]").attr('checked', 'true');
+    });
+});
+</script>

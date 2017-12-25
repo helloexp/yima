@@ -1,0 +1,89 @@
+<ul>
+    <li class="global-input2-name"><?php if($tbatch_type!='35'){echo '活动页面Logo上传';}else{echo '商户LOGO';}?>：</li>
+    <li class="global-input2-input">
+		<?php if($batchTv == '16'){?>
+        <div class="dn">
+        <label><input name="is_log_img" id="is_log_img"  type="radio" value="0" <?php if($row['log_img'] == ''){?> checked="checked" <?php }?> />否</label>
+        <label class="ml10"><input name="is_log_img" id="is_log_img"  type="radio" value="1" <?php if($row['log_img'] != ''){?> checked="checked" <?php }?> />是</label>
+        </div>
+        <?php }else{?>
+        <label><input name="is_log_img" id="is_log_img"  type="radio" value="0" <?php if($row['log_img'] == ''){?> checked="checked" <?php }?> />否</label>
+        
+        <label class="ml10"><input name="is_log_img" id="is_log_img"  type="radio" value="1" <?php if($row['log_img'] != ''){?> checked="checked" <?php }?> />是</label>
+        <?php }?>
+       
+        <div id="logo-upload2" class="vm dib ml10" <?php if($row['log_img'] != ''){?> style="display:inline-block;*display:inline;*zoom:1;" <?php } else{?> style="display:none;" <?php }?>>
+            <div class="rel l">
+                <a href="javascript:void(0);" title="上传" class="btn_inner w60" onclick="log_edit()">上传</a>
+                <input type="text" name="resp_log_img" id="resp_log_img" value="<?php if($row['log_img'] != ''){echo $row['log_img'];}else{echo $node_logo;}?>" class="validate[required,condRequired[logo-false],funcCall[checkActLogo]]]" style="width:1px;height: 1px;border-style:none"/>
+                <input type="hidden" id="reset_logo" name="reset_logo" value="0" />
+            </div>
+        </div>
+        <div class="cl"></div>
+        <img id="img_logo_show" class="mt5 w80 <?php if($row['log_img'] == ''){echo 'dn';}?>" <if condition="$row['log_img'] neq ''">src="<?php echo get_upload_url($row['log_img']);?>"<elseif condition="$head_photo neq '' "/>src="{$head_photo}"<else />src="{:get_upload_url($node_logo)}"</if> />
+        
+    </li>
+</ul>
+<input type="hidden" name="previewimgis_logo" vale="0" />
+<script>
+$(document).ready(function(e) {
+	var is_log_img = $("input[name='is_log_img']:checked").val();
+	showimg(is_log_img);
+    $("input[name='is_log_img']").change(function(){
+		var t = $(this).val();
+		showimg(t)
+	})
+});
+function showimg(t){
+	if(t==0){
+            $('#img_logo_show').hide('');
+            $('#logo-upload2').hide();
+            $(".Preview-mainCon").addClass("noLogo");
+            var i = $("[name='node_name_radio']:checked").val();
+            if(i==0){
+                $(".Preview-mainCon").addClass("noTitle");
+            }else{
+                $(".Preview-mainCon").removeClass("noTitle");
+            }
+	}else{
+            $('#logo-upload2').show();
+            $(".Preview-mainCon").removeClass("noLogo");
+            $(".Preview-mainCon").removeClass("noTitle");
+            $('#img_logo_show').show();
+            if('{$head_photo}' != '' && $('input[name="previewimgis_logo"]').val() == 0){
+                previewuploadimg('{$head_photo}',"logo");
+                $('#resp_log_img').val('{$node_logo}');
+                $('#reset_logo').val(1);
+            }
+
+	}
+}
+
+function log_edit(){
+    var opt = {
+        obj: $("#img_resp_show"),
+        height:160,
+        width:160,
+        callback:function(data){
+            $('#img_logo_show').attr('src',data['src']);
+            $('#img_logo_show').show();
+            $('#resp_log_img').val(data['savename']);
+            $('#reset_logo').val(1);
+            $('input[name="previewimgis_logo"]').val(1);
+            previewuploadimg(data['src'],"logo");
+        }
+    };
+    open_img_uploader(opt);
+ }
+  
+function openUploaderMeitu_log_edit(url) {
+    var win_width = 700;
+    art.dialog.open(url, {
+        lock: true,
+        title: "上传LOGO图片",
+        width: win_width,
+        height: win_width / 1.6,
+        id: 'art_upload'
+    });
+} 
+</script>

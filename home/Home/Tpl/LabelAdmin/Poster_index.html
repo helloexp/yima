@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>电子海报_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wposter.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+$(function(){
+    $('#sub_button').click(function(){
+        $('#theform').submit();
+    });
+    $("#down").click(function(){
+        $("form").attr("action","{:U('Poster/export')}").submit();
+    });
+})
+function viewChannel(batch_id,batch_type,batch_name){
+    var transUrl = "index.php?g=LabelAdmin&m=Chart&a=channelChart&batch_id="+batch_id+"&batch_type="+batch_type;
+    art.dialog.open(transUrl,{
+        width:800, 
+		lock:true,
+        title:batch_name+'-渠道分析'
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        
+        <div id="container" class="w1100">
+        	<!--[if IE]><div class="IEmsgerro">您的浏览器无法使用该模块功能,请使用<span>Chrome谷歌浏览器</span>或切换至<span>极速模式</span>/<span>高速模式</span>进行操作</div><![endif]-->
+        	<div id="main" class="rel">
+                <div class="main-name fn">
+                    <h4>电子海报
+                        <a href="javascript:void(0);" class="btn-down" id="down"><i></i>下载列表</a>
+                    </h4>
+                </div>
+                <div class="Gsearch fn rel">
+                    <form action="{:U('MarketActive/NewPoster/index')}" method="POST" name="theform" id="theform">
+                        <p class="ml20">活动名称</p>
+                        <p><input type="text" name="key" value="{$Think.request.key}" /></p>
+                        <p class="ml20">创建日期</p>
+                        <p><input type="text" name="start_time" id="start_time" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$Think.request.start_time}" />
+                           -
+                           <input type="text" name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time}" /></p>
+                        <p class="ml20">活动状态</p>
+                        <p>
+                        <select name="status" id="status">
+                            <option value="" <?php if($_REQUEST['status'] == ''){?> selected="selected" <?php }?> >请选择</option>
+                            <option value="1" <?php if($_REQUEST['status'] == '1'){?> selected="selected" <?php }?> >正常</option>
+                            <option value="2" <?php if($_REQUEST['status'] == '2'){?> selected="selected" <?php }?> >停用</option>
+                        </select>
+                        </p>
+                        <p class="ml20">所属商户</p>
+                        <p>
+                            <select name="node_id" id="select" class="selectbox" >
+                                <option value="" class="">全部</option>
+                                
+                                <volist name="nodeList" id="vo">
+                                <option value="{$vo['node_id']}"  <if condition="$vo['node_id'] eq $_REQUEST['node_id']">selected="selected"</if>>{$vo['node_name']}</option>
+                                </volist>
+                                
+                            </select>
+                        </p>
+                        <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                    </form>
+                </div>
+                <div class="submain">
+                    <div class="posterList fn">
+                    	<!--循环-->
+                        <if condition="$query_list neq '' "> 
+                    	<volist name="query_list" id="v" >
+                    	<div class="posterItem">
+                        	<div class="img">
+                            	<img src="{$v['cover_img']}" />
+                                <span>{$v['name']}</span>
+                                <p></p>
+                                <!-- <i></i> -->
+                            </div>
+                        	<div class="opr">
+                            	<div class="opr-view"><i></i><span title="4"><a href="{:U('LabelAdmin/Chart/clickChart',array('batch_id'=>$v['id'],'batch_type'=>37))}">{$v['click_count']}</a></span></div>
+                            	<div class="opr-open">
+                                	<div class="switch <?php echo $v['status'] != '1'?'hover':'';?>" <?php if($v['is_halt'] == '1'){?>onclick="art.dialog('您的活动内容不符合规范，已被强制停止，如有疑问，请联系客服400-882-7770！')" <?php }?>>
+                                        <div class="newRadio" id="m_id_{$v['id']}">
+                                            <span class="valfirst <?php echo $v['status'] == '1'?'hover':'';?> " data-val="0">开启</span>
+                                            <span class="vallast <?php echo $v['status'] != '1'?'hover':'';?>" data-val="1">停用</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="opr-other">
+                                	<i></i>
+                                    <div class="opr-list">
+                                    	<em></em>
+                                    	<ul class="fn">
+                                        	<li><if condition="$userInfo['node_id'] eq $v['node_id'] "><a href="<?php echo U('LabelAdmin/BindChannel/index','batch_type=37&batch_id='.$v['id']);?>">发布海报</a></if></li>
+                                        	<li><if condition="$userInfo['node_id'] eq $v['node_id'] "><a href="{:U('LabelAdmin/Poster/add',array('id'=>$v['id']))}">编辑海报</a></if></li>
+                                        	<li><a href="javascript:viewChannel({$v['id']},'37','{$v['name']}');">渠道分析</a></li>
+                                        </ul>
+                                        <div class="opr-listbg"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    	<!--循环-->
+                        </volist>
+                        <else/>
+                             <div class="nonedata"></div>
+                        </if>
+                    </div>
+                    <div class="page"><?php echo $page;?></div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+	$(".opr-other i").click(function(){
+		var o = $(this).next(".opr-list");
+		o.addClass("show").show();
+		o.animate({opacity:1,top:30},200);
+	})
+	$(".opr-listbg").click(function(){
+		var o = $(this).closest(".opr-list");
+		o.animate({opacity:0,top:20},200,function(){
+			o.removeClass("show").hide();
+		});
+	});
+	$(".switch span.valfirst").click(function(){
+		if($(this).hasClass("hover")){return false;}
+		var m_id = $(this).parent().attr('id');
+		m_id = m_id.substr(5);
+		statusChange(m_id,'1',$(this))
+	})
+	$(".switch span.vallast").click(function(){
+		if($(this).hasClass("hover")){return false;}
+		var m_id = $(this).parent().attr('id');
+		m_id = m_id.substr(5);
+		statusChange(m_id,'2',$(this))
+	})
+});
+function statusChange(batch_id,status,obj){
+	var t = obj,title;
+	status==1 ? title="您确认启用该活动？" : title="您确认停止该活动？" ;
+    art.dialog.confirm(title,function(){
+        $.post("{:U('LabelAdmin/Poster/editBatchStatus')}",{"batch_id":batch_id,"status":status},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>更新成功</div>",fixed: true,padding:0,time:2});
+				status==1 ? (t.next(".vallast").removeClass("hover"),t.addClass("hover")) : (t.prev(".valfirst").removeClass("hover"),t.addClass("hover")) ;
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+</script>

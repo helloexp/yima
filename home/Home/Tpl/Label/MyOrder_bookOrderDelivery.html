@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+        <meta name="format-detection"  content="telephone=no"/>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <title>配送查询</title>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+    </head>
+    <body>
+        <div id="wrapper" class="bgf5f5f5">
+            <div id="container">
+                <div id="header" class="fn">
+                    <div class="back"><i></i></div>
+                    <neq name="wx_flag" value="1">
+                    <div class="loginout"><a href="index.php?g=Label&m=MyOrder&a=logout&node_id={$_SESSION['node_id']});?>">退出</a></div>
+                    </neq>
+                    <div class="title">配送查询</div>
+                </div>
+                <div id="main">
+                    <div id="mainCon" class="mainCon fn m0">
+                        <div class="myDispatching">
+                            <div class="myDispatchingMsg">
+                                <p>已送货<span>{$sendCount}</span>次，还剩<span>{$remainCount}</span>次</p>
+                                <if condition="$nextDate neq '' ">
+                                    <p>下次送货日期 <span> {$nextDate}</span></p>
+                                </if>
+                            </div>
+                                    <div class="myDispatchingAddress">
+                                        <p>
+                                            <i></i>{$simpleInfo.province}{$simpleInfo.city}{$simpleInfo.town}{$simpleInfo.receiver_addr}
+                                            <a href="{:U('Label/MyAddress/addressList', array('seq'=>$simpleInfo['order_id'], 'type'=>'bookOrder'))}">修改配送地址</a>
+                                        </p>
+                                        <p>{$simpleInfo.receiver_phone}</p>
+                                        <p>配送日期：
+                                            <span>
+                                                <if condition="$deliveryType eq '1' ">每月{$simpleInfo.book_delivery_date}日
+                                                    <elseif condition="$deliveryType eq '2' " />每周周{$simpleInfo.book_delivery_date}
+                                                    <else />每日
+                                                </if>
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <volist name='bookOrderList' id='item'>
+                                    <if condition="$item['delivery_status'] eq '2' ">
+                                    <div class="myOrderList">
+                                        <dl class='{$item.order_id}-{$item.id}'>
+                                            <dt>快递单号：{$item.delivery_number}<span class="erro">配送中</span><p>配送日期：{:dateformat($item['delivery_time'], 'Y-m-d')}</p></dt>
+                                            <dd>
+                                                <a href="javascript:void(0)" class="btn-msg mr5 expressSearch" rel='{$item.order_id}-{$item.id}' status='un' data-num='{$item.delivery_number}' data-com='{$item.delivery_company}' click='0'>快递查询</a>
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                    <else />
+                                    <div class="myOrderList expressSearch" rel='{$item.order_id}-{$item.id}' status='ed' data-num='{$item.delivery_number}' data-com='{$item.delivery_company}' click='0'>
+                                        <dl class='{$item.order_id}-{$item.id}'>
+                                            <dt>快递单号：{$item.delivery_number}<span>已完成</span><p>配送日期：{:dateformat($item['delivery_time'], 'Y-m-d')}</p></dt>
+                                        </dl>
+                                    </div>
+                                </if>
+                            </volist>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <include file="Store:nav"/>
+</body>
+</html>
+<script type='text/javascript'>
+    $(document).ready(function (e) {
+        //物流查询
+        function expressInfo(data){
+            data = eval("("+data+")");
+            var html = '';
+            if(data != null){
+                var dataCountNum = data.length;
+                for(var i=0; i<dataCountNum; i++){
+                    html += '<span class="span-info"><i>' + data[i]['time'] + '</i><b>' + data[i]['context'] + '</b></span>';
+                }
+                html += '</h3></dd></dl>';
+                return html;
+            }else{
+                return '暂未查到物流信息，请稍候重试';
+            }
+        }
+        
+        $(".expressSearch").click(function () {
+            var clickTime = $(this).attr('click');
+            var condition = $(this).attr('rel');
+            var status = $(this).attr('status');
+            var com = $(this).attr('data-com');
+            var num = $(this).attr('data-num');
+            if(clickTime > 0){
+                return false;
+            }else{
+                $(this).attr('click', '1');
+            }
+            var html = '<dl><dd><h3><span>物流公司：</span>' + com + '</h3><h3><span>物流单号：</span>';
+            html += num + '</h3></dd></if><dd id="expressInfo" <h3><span>物流跟踪：</span>';
+            if(status == 'un'){
+                $.post("{:U('Label/MyOrder/expressInfo')}", {'bookOrder':condition}, function(data){
+                    data = eval("(" + data +")");
+                    if(data['error'] == '0'){
+                        $.post("{:U('Label/MyOrder/bookOrderExpressInfo')}", {'con':condition}, function(data){
+                            html += expressInfo(data);
+                            $('.'+condition).append(html);
+                        });
+                    }
+                });
+            }else{
+                $.post("{:U('Label/MyOrder/bookOrderExpressInfo')}", {'con':condition}, function(data){
+                    html += expressInfo(data);
+                    $('.'+condition).append(html);
+                });
+            }
+        });
+        
+        //订单状态改变
+        $('.sure-payed').click(function(data){
+            var condition = $(this).attr('rel');
+            $.post("{:U('Label/MyOrder/changeBookOrderStatus')}", {'con':condition}, function(data){
+                location.reload();
+            });
+        });
+    });
+</script>

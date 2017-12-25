@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_我的场景码_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript">
+$(document).ready(function(e) {
+	Gform();
+    var count=$("#js_extend_one_").text();
+
+    $("#sub_button").click(function(){
+        $("#theform").submit();
+    });
+
+    $("#sub_list").click(function(){
+        if(shopArray.length==0){
+            Diaerror('请选择可用门店');
+            return false;
+        }
+        if(this.getAttribute('id')=='sub_list') {
+            $.post("{:U('Weixin/Weixin/changjingmaStore')}", {
+                store_id: shopArray.join(",")
+            }, function (d) {
+                if (1 == d.status) {
+                    alert(d.info);
+                    parent.location.reload();
+                    parent.art.dialog.list['uduf'].close();
+                }
+            }, 'json')
+        }
+    });
+	
+	$("#sub_list2").click(function(){
+        var staffCheckStatus=$(".staffCheckStatus").filter(':checked');
+
+        var Arry =[] ;
+        $.each(staffCheckStatus,function(n,v) {
+            Arry.push($(this).val());
+
+        });
+        var checkNumber=Arry.join(",");
+
+        var staffCheckName=$(".staffCheckName").filter(':checked');
+
+        var Arry =[] ;
+        $.each(staffCheckName,function(n,v) {
+            Arry.push($(this).val());
+
+        });
+        var checkName=Arry.join(",");
+
+        if(checkName==''){
+            Diaerror('请选择员工');
+            return false;
+        }
+        if(this.getAttribute('id')=='sub_list2') {
+            $.post("{:U('Weixin/Weixin/changjingmaStaff')}", {
+                channel_id: checkNumber,
+                channel_name: checkName
+            }, function (d) {
+                if (1 == d.status) {
+                    alert(d.info);
+                    parent.location.reload();
+                    parent.art.dialog.list['uduf'].close();
+                }
+            }, 'json')
+        }
+
+        $(this).attr({'id':'none','style':'background:gray'});
+    });
+
+    $("#submit_type1").click(function(){
+        if($("input[name='channel_name']").val()==''){
+            Diaerror('请输入渠道推广码名称');
+            return false;
+        }
+
+        if(this.getAttribute('id')=='submit_type1') {
+            $('#thef1').submit();
+            //parent.location.reload();
+            //parent.art.dialog.list['uduf'].close();
+        }
+        $(this).attr({'id':'none','style':'background:gray'});
+
+    });
+
+
+	$(".js_preview").click(function(e) {
+        $(".preview").fadeIn();
+    });
+	
+	$(".close").click(function(e) {
+        $(".preview").fadeOut();
+    });
+	
+    $("input[name='shop']").change(function(){
+        if($(this).val()==1){
+            $("#chooseShop").css("display","none");
+        }else{
+            $("#chooseShop").css("display","block");
+        }
+    });
+    $("input[name='shop2']").change(function(){
+        if($(this).val()==1){
+            $("#chooseShop2").css("display","none");
+        }else{
+            $("#chooseShop2").css("display","block");
+        }
+    });
+	
+	$("a[name='choose_shop'],a[name='choose_shop2']").click(function(){
+    	var type = '&type=0';
+    	if($(this).attr("name") == "choose_shop"){
+    		type = "&type=1";
+    	}
+        art.dialog.open("{:U('WangcaiPc/NumGoods/shopList')}"+type,{
+            title:"选择门店",
+            width:800
+        });
+    });
+	
+});
+</script>
+
+<style type="text/css">
+.popupWin .Wcanal-tab .Wcanal-tab-title p:first-child{ padding-right:0;border-left: 0px #dfdfdf solid;}
+.popupWin .Wcanal-tab .Wcanal-tab-title p.Wcanal-tab-hover{border-left: 1px #dfdfdf solid;}
+.Wcanal-tab .Wcanal-tab-title{ margin:0}
+.Wcanal-tab{ padding-top: 0px;}
+
+.shoplist2{ text-align:left; padding-top:15px; height:76px; overflow:hidden; font-size:0; line-height:0;}
+.shoplist2 li{ /*display:inline-block; */ float:left; padding:4px 10px; width:210px; border:1px #efefef solid; margin-right:15px; margin-bottom:10px; border-radius:2px; font-size: 14px; line-height:18px; text-align:left; white-space:nowrap; overflow: hidden; text-overflow:ellipsis;}
+.shoplist2 li.selected{ border:1px #ed3f41 solid; background:url(__PUBLIC__/Image/eTicket/corner-right.png) right bottom no-repeat;}
+.shoplist2 li:hover{ border:1px #ed3f41 solid; cursor:pointer}
+
+.frm_radio2, .frm_checkbox2 {  position: absolute;  left: -999em;}
+.frm_radio_label2, .frm_checkbox_label2 { float:left; text-align: left;  cursor: pointer;  margin-right: 20px;}
+.icon_radi2o, .icon_checkbox2 {  margin-right: 3px;  margin-top: -2px;}
+.icon_checkbox2 {  background: url(__PUBLIC__/Image/weixin2/page_login_z20f7ac.png) 0 -55px no-repeat;  width: 16px;  height: 18px;  vertical-align: middle;  display: inline-block;}
+.selected .icon_checkbox2 {  background: url(__PUBLIC__/Image/weixin2/page_login_z20f7ac.png) 0-81px no-repeat;}
+
+</style>
+</head>
+<body>
+<div class="Wcanal-tab inPop" id="Wcanal-tabon">
+    <div class="Wcanal-tab-title fn">
+        <p class='<if condition="$is_search neq 'Y' ">Wcanal-tab-hover</if>'><a href="javascript:void(0);">单个添加</a></p>
+        <p class='<if condition="$is_search eq 'Y' ">Wcanal-tab-hover</if>'><a href="javascript:void(0);">按门店批量添加</a></p>
+        <p class=""><a href="javascript:void(0);">按员工批量添加</a></p>
+    </div>
+    <div class="Wcanal-tab-list" <if condition="$is_search neq 'Y' ">style="display: block;"<else />style="display: none;"</if>>
+        <form action="{:U('Weixin/Weixin/addChannel')}" method="post" id="thef1">
+        <div id="Wform" class="Gform" style="margin-left:-30px;">
+        <ul style="overflow:visible;" class="first">
+            <li class="Gname">场景码名称</li>
+            <li class="Ginput">
+                <input name="channel_name" type="text" value="" />
+            </li>
+        </ul><br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+        </div>
+        <div class="DiabtnCon"><a id="submit_type1" href="javascript:void(0)" class="Diabtn-all">确定</a><a href="javascript:void(0)" class="Diabtn-all-del">取消</a></div>
+        </form>
+    </div>
+
+    <div class="Wcanal-tab-list" <if condition="$is_search neq 'Y' ">style="display: none; padding-top:0"<else />style="display: block;"</if>>
+
+    <include file="./Home/Tpl/Public/Public_StoresAdnAddress.html" />
+    <div class="DiabtnCon">
+        <a href="javascript:void(0);" class="Diabtn-all" id="sub_list">提交</a>
+        <a href="javascript:void(0);" class="Diabtn-all-del">取消</a>
+    </div>
+
+    </div>
+    
+    <div class="Wcanal-tab-list" style="display: none; padding-top:0;">
+        <p>
+             <label for="selectAll" class="group_select_label frm_checkbox_label2">
+                 <i class="icon_checkbox2"></i><input type="checkbox" class="frm_checkbox2 js_selectall">全选
+             </label>
+        </p>
+        <div class="cl db">
+        <form id="theform2" action="" method="post">
+            <div style="width:100%; overflow:hidden">
+            <ul class="shoplist2" style="margin-right:-100px;">
+                <volist name="staffList" id="vo">
+                    <li class="notCheck">
+                        {$vo.name}
+                        <input type="checkbox" name="staffCheckStatus[]" class="staffCheckStatus" value="<?php echo $vo['id']; ?>" style="display:none;"/>
+                        <input type="checkbox" name="staffCheckName[]" class="staffCheckName" value="<?php echo $vo['name']; ?>" style="display:none;"/>
+                    </li>
+                </volist>
+            </ul>
+            <div class="extend">
+                <label for="selectAll" class="group_select_label frm_checkbox_label2 dn">
+                 <i class="icon_checkbox"></i><input type="checkbox" class="frm_checkbox2 js_selectall">全选</label>
+                <a href="javascript:void();" class='afblue js_extend2'>查看全部<i></i></a>
+            </div>
+            </div>
+        </form>
+        </div>
+        <div class="DiabtnCon"><a href="javascript:void(0);" class="Diabtn-all" id="sub_list2">确定</a><a href="javascript:void(0);" class="Diabtn-all-del">取消</a></div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+$(function(){
+	
+		$(".shoplist2 li").click(function(){
+			if($(this).hasClass("selected"))
+			{
+				$(this).removeClass("selected");
+				$(this).children(":checkbox").attr("checked",'checked');
+				var storeNum = parseInt($('#number').text());
+				$('#number').text(storeNum-1);
+				var snm = $(this).find('input:hidden').val();
+				$.each(shopArray, function(key, val) {
+					if(snm == val){
+						shopArray.splice(key, 1);
+					}
+				})
+			}
+			else
+			{
+				if(groupArray.length > 0){
+					$('#number').text('0');
+					shopArray = [];
+					groupArray = [];
+					$('#groupList li').removeClass("selected");
+                	$('#groupList li').children(":checkbox").attr("checked",'checked');
+				}
+				var storeNum = parseInt($('#number').text());
+				$('#number').text(storeNum+1);
+
+				$(this).addClass("selected");
+				$(this).children(":checkbox").attr("checked",'checked');
+
+		        shopArray.push($(this).find('input').val());
+			}
+			
+			var selctlng = $("#shoplist li.selected").length; //选中的li
+			var alllng = $("#shoplist li").length; //所有的li
+			if(selctlng != alllng)
+			{
+				//如果不是全选
+				$(".frm_checkbox_label").removeClass("selected");
+			    $(".frm_checkbox").attr("checked",false);
+				
+			}
+			else
+			{
+				//如果是全选
+				$(".frm_checkbox_label").removeClass("selected").addClass("selected");
+			    $(".frm_checkbox").attr("checked",true);
+				
+			}
+
+		}); 
+	
+	    $(".frm_checkbox_label2").click(function(){
+			if ($(this).hasClass("selected"))
+			{
+				$(this).removeClass("selected");
+				$(this).find(".frm_checkbox2").attr("checked",false);
+				$(this).closest("div").find($(".shoplist2 li")).removeClass("selected");
+				$(this).closest("div").find($(".shoplist2 li")).children(":checkbox").attr("checked",false);
+			}else{
+				$(this).removeClass("selected").addClass("selected");
+				$(this).find(".frm_checkbox").attr("checked",true);
+				$(this).closest("div").find($(".shoplist2 li")).addClass("selected");
+				$(this).closest("div").find($(".shoplist2 li")).children(":checkbox").attr("checked",'checked');
+			}
+		});
+		
+		$(".js_extend2").click(function(e) {
+			var isactive = $(".js_extend2 i").hasClass("active");
+			if(isactive){
+				$(".js_extend2 i").removeClass("active");
+				$(".shoplist2").css("height","76px");
+				$(".js_extend2").html("查看全部<i></i>");
+				
+			}else
+			{
+				$(".shoplist2").css("height","auto");
+				$(".js_extend2").html("收起<i></i>");
+				$(".js_extend2 i").addClass("active");
+				
+			}
+			if($(".shoplist").height()>300)
+			{
+				$(".btngp").addClass("fixBtn");
+			}
+			else{
+				$(".btngp").removeClass("fixBtn");
+			}
+		});
+	
+	$(".Diabtn-all-del").click(function(e) {
+        art.dialog.close();
+    });
+})
+</script>

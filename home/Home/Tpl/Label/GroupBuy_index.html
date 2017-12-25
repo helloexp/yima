@@ -1,0 +1,172 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$goodsInfo['group_goods_name']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<load href="__PUBLIC__/Label/Css/wap_Purchase.css"/>
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+$(function(){
+	$('#login_button').live('click',function(){
+		$("#phone_err,#pass_err").hide();
+	    $("form").ajaxSubmit({
+	        success:function(data){
+	             if(data.status == '1'){
+	            	   $(".dn-bg,.loginForm").hide();
+	            	   var url = $("#jump_url").val();
+	            	   link_to(url);
+	                   return false;
+	              }else{
+	                 var datas = data.data;
+	                 if(datas.type == 'phone'){
+	                	 $("#phone_err").html(data.info).show();
+	                 }else{
+	                	 $("#pass_err").html(data.info).show();
+	                 }
+	              }
+	        },
+	        dataType:'json'
+	    });
+	    return false;
+	});
+	var Int;
+	$("#getpasscode").live("click",function(){
+		$("#phone_err,#pass_err").hide();
+        $(this).val("正在发送..");
+        var phone = $("#phone").val();
+        var id = $("#id").val();
+        $.post("{:U('Label/GroupBuy/sendCheckCode')}",{"id":id,"phone":phone},function(data){
+            if(data.status=='1'){
+                $("#phone_err").html(data.info).show();
+                $("#getpasscode").attr("id","noSend");
+                Int = setInterval(checkTime,1000)
+            }else{
+            	$("#phone_err").html(data.info).show();
+                setTimeout("$('#loadingBox').hide()",2000);
+                $("#getpasscode").val("获取验证码");
+            }
+        },"json");
+    });
+    var time = {$expiresTime};
+    var checkTime = function(){
+        $("input[name='getpasscode']").val("还剩"+time+"秒");
+        if(time==0){
+            $("input[name='getpasscode']").val("获取验证码");
+            $("input[name='getpasscode']").attr("id","getpasscode");
+            time = {$expiresTime};
+            clearInterval(Int);
+            return false;
+        }
+        time--;
+    }
+});
+
+function link_to(url,fun){
+    setTimeout(function(){
+        $('#loadingBox').show();
+    },1);
+    setTimeout(function(){
+    if(typeof url == 'string'){
+    location.href=url;
+    }
+    if(typeof url == 'function'){
+    url();
+    }
+    },500);
+    setTimeout(function(){$('#loadingBox').hide();},6000);
+    if(typeof fun == 'string'){
+    var jscode = new Function('return function(){'+fun+'}')();
+        jscode();
+    }else if(typeof fun == 'function'){
+        fun();
+    }
+}
+function login_to(url){
+	var id={$id};
+	$.post("{:U('Label/GroupBuy/checkPhoneLogin')}",{'id':id},function(data){
+		if(data.status==1){
+			link_to(url);
+		}else{
+			setTimeout(function(){
+	            $('#loadingBox').show();
+	        },1);
+	        setTimeout(function(){$('#loadingBox').hide();},1000);
+	        setTimeout(function(){$(".loginForm").show();},1000);
+	        setTimeout(function(){$(".dn-bg").show();},1000);
+	        $("#jump_url").val(url);
+		}
+	},'json');
+}
+function close_to(){
+    $('.loginForm').hide();
+    $('.dn-bg').hide();
+}
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="header" class="fn">
+        <div class="headerTop">
+            <div class="header-img">
+                <img src="__UPLOAD__/<?php echo $goodsInfo['goods_img']?>" />
+            </div>
+        </div>
+    </div>
+    <div id="container">
+        <div id="main">
+            <div class="mainPrice fn">
+                <li><p>￥{$goodsInfo['group_price']}元</p><s>市场价￥{$goodsInfo['market_price']}元</s></li>
+                <li>
+                <?php if($goodsInfo['goods_num']-$goodsInfo['sell_num'] == 0){?>
+                    <a href="javascript:void(0);" class="btn-nobuy">已售完</a>
+                <?php }else{?>
+                    <a href="javascript:void(0);" class="btn-buy" onclick="login_to('<?php echo U('Label/GroupBuy/orderInfo',array('id'=>$id));?>');">马上购买</a>
+                <?php }?>
+                </li>
+            </div>
+            <div class="mainCon">
+                <div class="mainCon-name">{$goodsInfo['group_goods_name']}</div>
+                <div class="mainCon-con">{$goodsInfo['goods_memo']}</div>
+                <div class="mainCon-msg fn bgf3f3f3"><i class="icon-time"></i><p>距离截止时间仅剩<span>{$day}天{$hour}小时</span></p></div>
+                <div class="mainCon-msg fn bgf3f3f3"><i class="icon-number"></i><p>已售<span>{$goodsInfo['sell_num']}份</span><span class="ml40">&nbsp;</span>仅剩<span>{$goodsInfo['goods_num']-$goodsInfo['sell_num']}份</span></p></div>
+                <div class="mainCon-other"><a href="javascript:void(0);" onClick="link_to('{:U('Label/GroupBuy/showBatchList',array('id'=>$id))}')">查看更多团购内容</a><a href="javascript:void(0);" class="ml40 r" onClick="login_to('{:U('Label/GroupBuy/showOrderInfo',array('id'=>$id))}')">查看历史订单</a></div>
+            </div>
+            
+            <div class="loginForm dn">
+                <form action="{:U('Label/GroupBuy/loginPhone')}" method="post">
+                    <ul class="sOne-loginForm">
+                        <li>
+                            <p>快速登录</p>
+                        </li>
+                        <li>
+                            <input type="text" class="sOne-loginInput-half" name="phone" id="phone" placeholder="请输入您的手机号">
+                            <input type="button" class="sOne-getpasscode" value="获取验证码" id="getpasscode" name='getpasscode' data-href="">
+                            <span style="display: none;" id="phone_err">手机号错误</span>
+                        </li>
+                        <li class="bd-b">
+                            <input type="password" class="sOne-loginInput" name="check_code" placeholder="验证码">
+                            <span style="display: none;" id="pass_err">验证码错误</span>
+                        </li>
+                        <li>
+                            <input type="hidden" value="{$id}" name="id" id="id">
+                            <input type="hidden" name="ajax" value="1"/>
+                            <input type="hidden" id="jump_url" value="{:U('Label/GroupBuy/orderInfo',array('id'=>$id))}"/>
+                            <input type="submit" id="login_button" class="sOne-loginInput-btn" value="快速登录" />
+                        </li>
+                    </ul>
+                    <div class="fn"><a href="javascript:void(0)" class="close-loginForm" onClick="close_to()">+</a></div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<div class="dn-bg dn"></div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>

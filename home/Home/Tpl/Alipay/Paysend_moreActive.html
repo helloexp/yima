@@ -1,0 +1,308 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>活动管理_条码支付_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Walipay.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=20150304"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=20150304"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript">
+$(document).ready(function(e) {
+    Gform();
+});
+$(document).ready(function(e) {
+		$("#sub_button").click(function(){
+			$("#checkForm").submit();
+		});
+        $(".js_view").click(function(){
+        	var mark_id=$(this).attr('mark');
+			art.dialog.open("{:U('Paysend/details')}&channel_id="+mark_id,{
+            id:'details',
+			title: '查看活动详情',
+			width:'500px'
+		});
+		}) 
+    });
+function detailview(a,b,c,d,e){ 
+	var _url="{:U('senddatail')}";
+	if(a=='send'){  
+		art.dialog.open(_url+'&class_type='+e+'&channid='+b+'&batch_type='+d+'&batchid='+c+'&filename=卡券发放明细',{title:'卡券发放明细',width:'900px',ok:true});
+		return ;
+	}
+	else  {
+		var _url="{:U('verifydatail')}";
+		art.dialog.open(_url+'&class_type='+e+'&channid='+b+'&batch_type='+d+'&batchid='+c+'&filename=引流数据明细',{title:'引流数据明细',width:'900px',ok:true}); 	
+	} 
+}
+
+$(function(){
+    //开关 开启表示从关闭状态到开始状态 关闭表示从开启状态转到关闭状态
+    $(".Uswitch").click(function(){
+        if($(this).find("#enableTime").val() == 1 && $(this).attr("data-rel") == "0"){
+			art.dialog.msg({content:"活动已结束"});
+            return false;
+        }
+        Dialoading("正在提交...");
+        var uthis = $(this);
+        if($(this).attr("data-rel")=="0"){ 
+            var batch_id = $(this).find('.batch_id').val();
+            var _this=$(this); 
+            //此处提交数据的函数
+            $.post("index.php?g=Alipay&m=Paysend&a=editStatus", {'status':'1', 'batch_id':batch_id}, function(data){
+					Dialoading();
+                    if (data.status) {
+                    	_this.find(".Uswitch-on").fadeIn(200);
+		                _this.attr("data-rel","1");
+	                    _this.find("[name='flag']").val('1');   
+	                    _this.animate({left:0},200); 
+                    	_this.parents('.act_status').next('.act_content').find('.act_mark').removeClass('off').addClass('on');
+						_this.parents('.act_status').next('.act_content').find('.act_mark	> span').empty().html(_this.parents('.act_status').next('.act_content').find('.act_mark	> span').attr('data-on'));
+                    	_this.parents('.act_status_r').prev('.act_status_l').find('.statusIcon > .off').removeClass('off').addClass('on');
+                        uthis.parent().parent().find("i.icon-off").attr("class","icon-on");
+						Diasucceed("修改成功");
+                    } else {
+						Diaerror(data.info);
+                    }
+                }, 'json');
+            
+        }else{ 
+	            var batch_id = $(this).find('.batch_id').val(); 
+	            var _this=$(this); 
+            //此处提交数据的函数 
+                $.post("index.php?g=Alipay&m=Paysend&a=editStatus", {'status':'2', 'batch_id':batch_id}, function(data){
+					Dialoading();
+                    if (data.status) {
+                    	_this.find(".Uswitch-on").fadeOut(200);
+                    	_this.attr("data-rel","0");
+                        _this.find("[name='flag']").val('2');
+                        _this.animate({left:0},200);  
+                    	_this.parents('.act_status').next('.act_content').find('.act_mark	> span').empty().html(_this.parents('.act_status').next('.act_content').find('.act_mark	> span').attr('data-off'));
+                    	_this.parents('.act_status').next('.act_content').find('.act_mark').removeClass('on').addClass('off');
+                    	_this.parents('.act_status_r').prev('.act_status_l').find('.statusIcon > .on').removeClass('on').addClass('off');
+                         uthis.parent().parent().find("i.icon-on").attr("class","icon-off");
+                        Diasucceed("修改成功");
+                    } else {
+                        Diaerror(data.info);
+                    }
+                }, 'json'); 
+        }
+    });
+}); 
+</script>
+</head>
+<body>
+	<div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        	 
+    
+        <div id="container">
+            <div id="main">
+                 <assign name="part" value="2" />
+               	<include file="./Home/Tpl/Alipay/Index_left_menu.html" leftmenuid="all"/>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                           <h4>活动管理<a  
+                            <if condition="strtotime($fms_chagre['end_time']) lt time()">
+                       			href="javascript:void(0);"	onclick="sendemail()"
+                       			<else/> href="{:U('Alipay/Paysend/addActive')}"
+                        	</if> 
+                           class="btn-add first" style="float:none"><i></i>创建新活动</a></h4>
+                    </div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                    <div class="Wcanal-tab-list" style="display: block;">
+                    <div class="SearchArea fn">
+                    <form id="checkForm" action="{:U('Paysend/moreActive')}" method="post">
+                    <input type="hidden" id="batch_type" name="batch_type" value="{$batch_type}">
+                    <input type="hidden" id="is_new" name="is_new" value="{$is_new}">
+ 
+                    <div class="SearchAreaLeft">
+                    <label><span>活动名称</span><input type="text" name="jg_name" id="jg_name" value="{$post['jg_name']}"></label>
+                    <label><span>参与方式</span>
+                    <select name="join_flag"> 
+                        	<option value="" <if condition="$post['join_flag'] heq strval(0)">selected="selected"</if>>不限</option>
+                            <option value="1" <if condition="$post['join_flag'] heq strval(1)">selected="selected"</if>>条码支付</option>
+                            <option value="2" <if condition="$post['join_flag'] heq strval(2)">selected="selected"</if>>通联支付</option>  
+                            <option value="3" <if condition="$post['join_flag'] heq strval(3)">selected="selected"</if>>现金/银行卡支付</option>  
+                        </select>
+                    </label>
+                    <label><span>状态</span>
+                    <select name="ck_status">
+                    		<option value="" <if condition="$post['ck_status'] heq strval('')">selected="selected"</if>>全部</option>
+                        	<option value="1" <if condition="$post['ck_status'] heq strval(1)">selected="selected"</if>>正常</option>
+                            <option value="2" <if condition="$post['ck_status'] heq strval(2)">selected="selected"</if>>停用</option>
+                        </select>
+                    </label>
+                    
+                    <label><span>有效期</span>
+                    <select name="ck_timeSta">
+                    		<option value="" <if condition="$post['ck_timeSta'] heq strval('')">selected="selected"</if>>全部</option>
+                    		<option value="1" <if condition="$post['ck_timeSta'] heq strval(1)">selected="selected"</if>>开展中</option>
+                        	<option value="2" <if condition="$post['ck_timeSta'] heq strval(2)">selected="selected"</if>>已结束</option>
+                            <option value="3" <if condition="$post['ck_timeSta'] heq strval(3)">selected="selected"</if>>未开始</option>
+                    </select>
+ 
+                    </label>
+                    </div>
+                    <div class="SearchAreaRight">
+                        <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                    </div>
+ 
+                    </form>
+                    </div>
+                    <div class="shopCon"> 
+                    <?php if($channelList){ ?>
+                    <volist name="channelList" id="vo">
+ <div class="act_list">
+                        <div class="act_status">
+                            <div class="act_status_l">
+                                <span class="statusIcon">
+                                <?php
+                                $beginTime = $vo['begin_time'];
+                                $endTime = $vo['end_time'];   
+                                $days = intval((strtotime($endTime) - strtotime('now'))/(24*60*60)) ;
+                                if($day<0) $day=0; 
+								if($vo['status'] ==1 )echo '<i class="on"></i>';else echo '<i class="off"></i>';
+                                ?>
+                                </span>
+                                <span class="title">{$vo['name']}</span>
+                            </div>
+                            <div class="act_status_r">
+                                <span class="act_time">活动结束时间：{$vo['end_time']|dateformat=###,"Y-m-d"}</span>
+                                <span class="act_switchIcon">
+                                    <div class="Uswitch dib ml15" data-rel="<if condition="$vo['status'] eq 1" >1<else/>0</if>">
+                                        <div class="Uswitch-off"></div>
+                                        <div class="Uswitch-on" <eq name="vo['status']" value="2">style="display:none"</eq>></div>
+                                        <i class="Uswitch-i-on"  <eq name="vo['status']" value="2">style="left: 0px;"<else />style="left:29px;"</eq>></i>
+                                        <input type="hidden" id="flag" name="flag"  value="{$vo['status']}"/>
+                                        <input type="hidden" name="batch_id" class="batch_id" value="{$vo['id']}"/>
+                                        <input type="hidden" id="enableTime" value="<if  condition="$endTime elt date('YmdHis')">1<else/>2</if>"/>
+                                    </div>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="act_content">  
+                        <?php
+                            if($vo['status'] ==1 ){
+								 if($beginTime>date("YmdHis")){
+                              		   echo '<div  class="act_mark fms off" ><span data-on="未开始" data-off="已停用">未开始</span></div>'; 
+                                }else {
+                                	if($endTime < date('YmdHis') ){
+                                		  echo '<div   class="act_mark fms off"><span data-on="未开始" data-off="已停用">已结束</span></div>'; 
+                                	}
+                                	else {
+                                	     echo '<div class="act_mark fms on" style="line-height:25px;"><span data-on="剩余天数<strong>'.$days.'天</strong>"   data-off="已停用" >剩余天数<strong>'.$days.'天</strong></span></div>';
+                                	}
+                                }			
+							}else{
+								if($endTime < date('YmdHis') ){
+                                		 	 	$str="已结束 "; 
+                                	}
+                                	else {
+                                	    	$str= '剩余天数<strong>'.$days.'天</strong>';
+                                	}
+                                echo '<div class="act_mark fms off" ><span data-on="'.$str.'"  data-off="已停用">已停用</span></div>'; 
+						    }
+						  ?>
+                            <div class="Data_summery vm">
+                                <dl class="lg3">
+                                <dt>{$vo['click_count']}</dt><dd >活动访问数</dd></dl>
+                               
+                                <dl class="lg3"><dt>
+                                  <if  condition="$vo['send_count'] gt 0 && !empty($vo['tcid'])">
+                          			<a href="javascript:void(0);" onclick="detailview('send','{$vo['id']}','{$vo['batch_id_bak']}', '{$vo['batch_type_bak']}','{$vo['card_class']}')">{$vo['send_count']}</a> 
+                                <else/>
+                              			{$vo['send_count']}
+                                </if>
+                                </dt>
+                                <dd> 
+                              		  卡券发放数
+                                </dd>
+                                </dl>
+                                <dl class="lg3 last">
+                                <dt>
+                                 <if  condition="$vo['verify_count'] gt 0 &&  !empty($vo['tcid'])">
+                          			<a href="javascript:void(0);" onclick="detailview('verify','{$vo['id']}','{$vo['batch_id_bak']}', '{$vo['batch_type_bak']}','{$vo['card_class']}')">{$vo['verify_count']}</a> 
+                                <else/>
+                              			{$vo['verify_count']}
+                                </if>    
+                                </dt>
+                                <dd>
+          						   引流到店数                      
+                               	</dd>
+                                </dl>
+                            </div>
+                            <div class="payMethod">
+                            	<dl>
+                                <dt>
+                                <?php 
+                                if(strpos($vo['join_flag'],'5')!==false || strpos($vo['join_flag'],'1')!==false || strpos($vo['join_flag'],'2')!==false || strpos($vo['join_flag'],'3')!==false ){
+                                    echo "<i class='ialipay' title='条码支付'></i>";
+                                } 
+                                if(strpos($vo['join_flag'],'7')!==false){
+                                    echo "<i class='iweixin' title='现金/银行卡支付'></i>";
+                                }  
+                                if(strpos($vo['join_flag'],'4')!==false){
+                                    echo "<i class='itunion' title='通联支付'></i>";
+                                } 
+                                ?>
+                               </dt>
+                                <dd>参与方式</dd>
+                                </dl>
+                            </div>
+                            <div class="act_control">
+                              	<span style="display: block">
+                              	<a href="javascript:void(0);" class="js_view" mark="{$vo['id']}">查看</a>
+                               </span>
+                                <span style="display: block">
+                                <if condition="$vo['end_time'] egt date('YmdHis')">
+                                    <a  style="cursor: pointer;"
+                                  	<if condition="strtotime($fms_chagre['end_time']) lt time()">
+                       				 	onclick="sendemail()"
+                       				<else/> 
+                       				 class="activeEdit"   href="{:U('Paysend/activeEdit',array('channel_id'=>$vo['id']))}"
+                        			</if> >编辑</a>
+                                <else/>
+                                    <span style="color:#999;">编辑</span>
+                                </if>
+                                </span>
+                            </div>
+                        </div>
+   </div>
+                    </volist>
+                    <?php }else{ ?>
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                    <tr>
+                        <td colspan="10">
+                            <div class="nonedata"></div> 
+                    </td>
+                     </tr>
+                    </table>
+                    <?php } ?>              
+                    <div class="page">{$page}</div>
+                    </div>
+                    </div>
+                    </div>
+                 </div>        
+        		</div>
+    		</div>
+    	<include file="./Home/Tpl/Public/Public_footer.html" />
+		</div> 
+	<div class="service"></div>
+	</div>
+</body>
+</html>

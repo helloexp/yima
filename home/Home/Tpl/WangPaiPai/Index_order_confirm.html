@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>确认收货</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wpaipai20150705.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script>
+$(function(){
+	$(".frm_checkbox_label").click(function(){
+		if ($(this).hasClass("selected")){
+			$(this).removeClass("selected");
+			$(this).find(".frm_checkbox").attr("checked",false);
+		}else{
+			$(this).removeClass("selected").addClass("selected");
+			$(this).find(".frm_checkbox").attr("checked",true);
+		}
+	});
+
+    $("#btnConfirm").click(function(){
+		var isCheck = $(".js_selectall").attr("checked");
+		if(isCheck)
+		{
+			var id = {$_GET['id']};
+			$.post("{:U('WangPaiPai/Index/order_confirm_submit')}",{id:id},function(d){
+				if(1==d.status){
+					art.dialog.alert(d.info);
+					parent.location.href = "{:U('WangPaiPai/Index/lists')}";
+					parent.art.dialog.list['confirm'].close();
+				}else{
+					art.dialog.alert(d.info);
+				}
+			},'json');
+			
+		}
+		else
+		{
+			Diaerror("请先勾选我已确认收到水牌");
+		}
+        
+
+    });
+})
+</script>
+</head>
+<body>
+<div id="content">
+    <div class="newRule">
+        <div class="steps">申请单信息</div>
+        <div class="info">
+        	<ul>
+                <li><strong>申请单单号：</strong>{$info['batch_id2']}</li>
+                <li><strong>提交日期：</strong>{$info['add_time']}</li>
+                <li><strong>水牌类型：</strong>{$info['type2']}</li>
+                <li><strong>水牌数量：</strong>{$info['num']}个</li>
+            </ul>
+        </div>
+        
+        <div class="steps">物流信息</div>
+        <div class="info">
+        	<ul>
+            	<li><strong>物流公司：</strong>{$info['express_company']}</li>
+                <li><strong>物流单号：</strong>{$info['express_order']}</li>
+            </ul>
+        </div>
+        
+        <div class="steps">确认收货</div>
+        <div class="info">
+        	<ul>
+                <volist name="list" id="vo">
+                <li><strong>{$vo.k}</strong>编号{$vo.make_no}</li>
+                </volist>
+            </ul>
+        </div>
+        <div align="center">
+        <label for="selectAll" class="group_select_label frm_checkbox_label">
+        <i class="icon_checkbox"></i><input type="checkbox" name="selectAll" class="frm_checkbox js_selectall"> 我已确认收到水牌</label>
+        </div>
+        <div class="DiabtnCon"><a href="javascript:void(0)" class="Diabtn-all" id="btnConfirm">确认收货</a></div>
+    </div>
+</div>
+</body>
+</html>

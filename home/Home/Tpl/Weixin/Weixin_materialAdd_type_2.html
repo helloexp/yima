@@ -1,0 +1,438 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信素材<empty name="act">创建群发图文<else/>修改群发图文</empty></title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css"  />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/check_form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/json2.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Common.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/msg.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript">
+var selectActivityCallback=function(d){
+	console.log(d);
+	item_parent.find("input[name='input_i-batch_id']").val(d.batch_id);
+	item_parent.find("input[name='input_i-batch_type']").val(d.batch_type);
+	item_parent.find("input[name='input_i-material_desc']").val(d.info);
+	$("#url-block-choose").html(d.info);
+}
+var g_cur_edit_id=1;
+var isMass = true;
+$(document).ready(function(e){
+	preview();    //添加
+	
+	var ue = UE.getEditor('wap_info',{toolbars: [
+            [
+                'source',//源代码
+                'fontsize',//字号
+				'horizontal', //分隔线
+                'drafts',
+				'||',
+                'bold', //加粗
+                'italic', //斜体
+                'underline', //下划线
+                'forecolor', //字体颜色
+                'backcolor','|',//背景色
+                'justifyleft', //居左对齐
+                'justifycenter', //居中对齐
+                'justifyright', //居右对齐
+			]
+        ],
+			wordCount: false, //是否开启字数统计
+	    	imageUrl:"./index.php?g=LabelAdmin&m=Upfile&a=editoImageSave",
+	    	imagePath:"./Home/Upload/",
+	    	catcherUrl:"./index.php?g=LabelAdmin&m=Upfile&a=getRemoteImage",
+	    	catcherPath:"./Home/Upload/",
+	    	initialFrameWidth:480,
+	    	initialFrameHeight:280
+	    });
+		ue.ready(function (editor) {iconEdit(1);});
+	    ue.addListener("contentChange",function(){
+	    	$("#url-block-richtxt").html(this.getContent());
+			var item_parent = $(".appmsgItem").eq(g_cur_edit_id-1);
+			$("#input_i-material_desc_richtxt",item_parent).val(this.getContent());
+	    });
+}); 
+</script>
+
+<script>
+String.prototype.replaceAll = function(reallyDo, replaceWith, ignoreCase) {
+if (!RegExp.prototype.isPrototypeOf(reallyDo)) {
+	return this.replace(new RegExp(reallyDo, (ignoreCase ? "gi": "g")), replaceWith);
+} else {
+	return this.replace(reallyDo, replaceWith);
+}
+};
+
+//表单校验函数
+function checkrule_url(obj){
+	var str = obj.value;
+	if(!str) return true;
+	if(str.indexOf("http://") != 0 && str.indexOf("https://") != 0)
+		return "链接格式不正确";
+	return true;
+}
+$(function(){
+	var act = "{$act}"
+    var postUrl = '';
+    if(act == 'edit'){
+        postUrl = "{:U('Weixin/materialEditSubmit')}";
+    }else{
+        postUrl = "{:U('Weixin/materialAddSubmit')}";
+    }
+    $("#save").click(function(){
+		var dataArr = [];
+		var checkError = false;
+		$(".form_appmsgItem").each(function(){
+			var formData= getFormData(this);
+			dataArr.push(JsonToStr(formData));
+		});
+		if(checkError){
+			return false;
+		}
+		var data = {
+			"dataJson":dataArr,
+			"input_i-type":2,
+			"id":$("#materialId").val(),
+			"preview":$(this).attr('id')
+		};
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.post(postUrl,data,function(d){
+            if(d.status != '1'){
+                dialog.time(2).content("<div class='msg-all-error'>"+(d.info?d.info:d)+"</div>");
+            }else{
+               dialog.close = function(){
+                    window.location.href = "{:U('Weixin/Weixin/materialImgTxtManage')}";
+                };
+                dialog.time(1).content("<div class='msg-all-succeed'>保存成功</div>");
+            }
+           
+		},'json');
+	});
+    
+    $("#preview").click(function(){
+		var dataArr = [];
+		var checkError = false;
+		$(".form_appmsgItem").each(function(){
+			var formData= getFormData(this);
+			dataArr.push(JsonToStr(formData));
+		});
+		if(checkError){
+			return false;
+		}
+		var data = {
+			"dataJson":dataArr,
+			"input_i-type":2,
+			"id":$("#materialId").val(),
+			"preview":$(this).attr('id')
+		};
+        art.dialog({
+            title: '发送预览',
+            content: "<div class='popupWin'><p class='DiaTitle'>请输入微信号，关注公众号后才能接收内容预览</p><input type='text' name='towxname' id='towxname' class='DiaInput'></div>",
+            id: 'art_addnum',
+            ok: function() {
+                var towxname = $('#towxname').val();
+                data['towxname'] = towxname;
+                if(towxname.length<=0){
+                    alert('微信号不能为空');
+                    return false;
+                } 
+                var dialog = art.dialog({title:false,fixed: true,padding:0});
+                $.post(postUrl,data,function(d){
+                    if(d.status != '1'){
+                        dialog.time(2).content("<div class='msg-all-error'>"+(d.info?d.info:d)+"</div>");
+                    }else{
+                        dialog.close = function(){
+                            window.location.href = "{:U('Weixin/Weixin/materialImgTxtManage')}";
+                        };
+                        dialog.time(1).content("<div class='msg-all-succeed'>预览发送成功</div>");
+                    }
+                   
+                },'json');
+            },
+            cancel: true,
+            lock: true
+        });
+        
+        
+		
+	});
+
+	//显示缩图
+	$(".appmsgItem").each(function(){
+		var img = $("#input_i-material_img",this).val();
+		$(".default-tip",this).css("display",(!img?"block":"none"));
+		$(".i-img",this).css("display",(img?"block":"none"));
+	});
+    $(function(){
+        $("#uploadMeitu,#msg-input-imgfile").click(function(){
+            var itemId = $("#msgEditArea").attr("data-item-index")*1;
+            var cropPresets;
+            if(itemId==1){
+                cropPresets = '720x400';
+            }
+            else{
+                cropPresets = '320x320';
+            }
+            
+            var opt = {
+                cropPresets:cropPresets,
+                callback:function(data){
+                    var imgid = 'code_img',
+                            hiddenid='msg-input-imgfile',
+                            showid='show1';
+                    var dialog = art.dialog({title:false,fixed: true,padding:0});
+                    $("#"+imgid).show().val('');
+                    if(!data.src)
+                    {
+                        dialog.time(3).content("<div class='msg-all-error'>错误</div>");
+                    }else{
+                        dialog.time(1).content("<div class='msg-all-succeed'>上传成功</div>");
+                        var imgUrl = data.src.replaceAll('&amp;','&');
+                        $("#"+hiddenid).val(imgUrl).trigger("change");
+                        var editId = $("#msgEditArea").attr("data-item-index");
+                        var editItem = $(".appmsgItem").eq(editId-1);
+                        $("#input_i-material_img",editItem).val(data.savename);
+                    }
+                }
+            };
+            open_img_uploader(opt);
+        });
+    });
+	$('#cancel').click(function(){
+        var id = "{$materialInfo['id']}";
+        var url = "{:U('del_tdraft')}";
+        art.dialog({width:"200px",title:"提示",lock:true,content:'是否放弃本次编辑',
+			okVal: '确认',
+			ok: function () {
+				$.post(url,{'id':id,type:1},function(){
+                    window.location.href = "{:U('Weixin/Weixin/materialImgTxtManage')}";
+                })
+			},
+			cancel: true
+        })
+    })
+});
+
+//每隔5分钟自动保存
+setInterval('autoSave()', 1000*60*5);
+function autoSave(){
+    var dataArr = [];
+    var checkError = false;
+    $(".form_appmsgItem").each(function(){
+        var formData= getFormData(this);
+        dataArr.push(JsonToStr(formData));
+    });
+    $.post("{:U('Weixin/autoSave')}",{data:dataArr,type:1},function(result){
+       if (result) {
+           dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>已自动保存到草稿</div>",fixed: true,padding:0,lock:true,time:2});
+       }
+   },'json')
+}
+
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bge7e8eb">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+        <div id="container" class="bge7e8eb">
+            <div id="main" class="rel">
+				
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+					<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="scgl"/>
+                </div>
+                <div class="subcon">
+                <div class="main-name">
+                <h4><a href="javascript:history.go(-1);" class="back"><i></i> 群发图文消息</a> / <eq name="act" value="edit">编辑<else/>新建</eq>图文消息</h4>
+                </div>
+                    
+                    <div class="tipNormal">该类型可用于群发。关键词、扫码、自定义菜单等回复，请使用“回复图文”。</div>
+                    
+                    <div class="z oh msg-edit pt0">
+                        <div class="l msg-preview">
+                            <div class="msg-item-wrapper" id="appmsg">
+                                <div class="msg-item multi-msg">
+                                    <div class="appmsgItem">
+                                        <p class="msg-meta"><span class="msg-date">{:($materialInfo['add_time']?dateformat($materialInfo['add_time'],'Y-m-d'):date('Y-m-d'))}</span></p>
+                                        <div class="cover">
+                                            <p class="default-tip">封面图片</p>
+                                            <h4 class="msg-t">
+                                                <span class="i-title" >{$materialInfo['material_title']}</span>
+                                            </h4>
+                                            <ul class="sub-msg-opr">
+                                                <li class="sub-msg-opr-item">
+                                                    <a href="javascript:;" class="icon18 iconEdit">编辑</a>
+                                                </li>
+                                            </ul>
+                                            <img class="i-img" style="display:none" src="{$materialInfo['img_url']}"/>
+                                        </div>
+										<div class="msg-summary-text dn">
+											<span class="msg-text">{$materialInfo['material_summary']}</span>
+                                        </div>
+                                <div class="form_appmsgItem" style="display:none" ><!--表单  时间根据当前时间载入-->
+<input type="text" value="{$materialInfo['id']}" id="input_i-id"  name="input_i-id" /><!--ID号-->
+<input type="text" value="{$materialInfo['material_title']}" id="input_i-title"  name="input_i-title" jscheckrule="null=0" jschecktitle="标题"/><!--标题-->
+<input type="text" value="{$materialInfo['material_img']}" id="input_i-material_img" name="input_i-material_img" /><!--图片名-->
+<input type="text" value="{$materialInfo['show_cover_pic']}" id="input_i-material_imgInsert" name="input_i-material_imgInsert" /><!--是否显示封面-->
+<input type="text" value="{$materialInfo['material_link']}" id="input_i-url" name="input_i-url" jscheckrule="call={checkrule_url:[this]}" jschecktitle="原文链接"/><!--原文链接-->
+<input type="text" value="{$materialInfo['material_summary']}" id="input_i-summary" name="input_i-summary" /><!--摘要-->
+<input type="text" value="{$materialInfo['batch_type']}" id="input_i-batch_type" name="input_i-batch_type" /><!--活动类型-->
+<input type="text" value="{$materialInfo['batch_id']}" id="input_i-batch_id" name="input_i-batch_id" /><!--活动ID-->
+<input type="text" value="{$materialInfo['material_desc']|htmlspecialchars}" id="input_i-material_desc" name="input_i-material_desc" /><!--活动详情-->
+<input type="text" value="{$materialInfo['material_desc_richtxt']|htmlspecialchars}" id="input_i-material_desc_richtxt" name="input_i-material_desc_richtxt" /><!--富文本详情-->
+<input type="text" value="{$materialInfo['url_type']}" class="input_i-url_type" name="input_i-url_type" /><!--类型 0 网址 1 互动模块 2富文本-->
+
+                                        </div>
+                                    </div>
+                                    <php>
+                                        $info_sub_material = $materialInfo['sub_material'];
+                                    </php>
+                                    <volist name="materialInfo.sub_material" id="subMetarial">
+                                    <div class="rel sub-msg-item appmsgItem firstAppmsgItem">
+                                        <span class="thumb">
+                                            <span class="default-tip">缩略图</span>
+                                            <img class="i-img" style="display:none;" src="{$subMetarial['img_url']}">
+                                        </span>
+                                        <h5 class="msg-t">
+                                            <span class="i-title">{$subMetarial.material_title}</span>
+                                        </h5>
+                                         <div class="form_appmsgItem" style="display:none" ><!--表单  时间根据当前时间载入-->
+<input type="text" value="{$subMetarial['id']}" id="input_i-id"  name="input_i-id" /><!--ID号-->
+<input type="text" value="{$subMetarial['material_title']}" id="input_i-title"  name="input_i-title"/><!--标题-->
+<input type="text" value="{$subMetarial['material_img']}" id="input_i-material_img" name="input_i-material_img" /><!--图片名-->
+<input type="text" value="{$subMetarial['show_cover_pic']}" id="input_i-material_imgInsert" name="input_i-material_imgInsert" /><!--是否显示封面-->
+
+<input type="text" value="{$subMetarial['material_link']}" id="input_i-url" name="input_i-url" jscheckrule="call={checkrule_url:[this]}" jschecktitle="原文链接"/><!--原文链接-->
+<input type="text" value="{$subMetarial['material_summary']}" id="input_i-summary" name="input_i-summary" /><!--摘要-->
+<input type="text" value="{$subMetarial['batch_type']}" id="input_i-batch_type" name="input_i-batch_type" /><!--活动类型-->
+<input type="text" value="{$subMetarial['batch_id']}" id="input_i-batch_id" name="input_i-batch_id" /><!--活动ID-->
+<input type="text" value="{$subMetarial['material_desc']|htmlspecialchars}" id="input_i-material_desc" name="input_i-material_desc" /><!--活动详情-->
+<input type="text" value="{$subMetarial['material_desc_richtxt']|htmlspecialchars}" id="input_i-material_desc_richtxt" name="input_i-material_desc_richtxt" /><!--富文本详情-->
+<input type="text" value="{$subMetarial['url_type']}"  class="input_i-url_type" name="input_i-url_type" /><!--类型 0 网址 1 互动模块 -->
+
+                                        </div>
+                                        <ul class="abs tc sub-msg-opr">
+                                            <li class="b-dib sub-msg-opr-item">
+                                                <a href="javascript:;" class="icon18 iconEdit">编辑</a>
+                                            </li>
+                                            <li class="b-dib sub-msg-opr-item">
+                                                <a href="javascript:;" class="icon18 iconDel">删除</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    </volist>
+                                    <div class="sub-add">
+                                    <a href="javascript:;" class="sub-add-btn"><span class="sub-add-icon"></span>增加一条</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 编辑区 -->
+                        <div class="msg-edit-area" id="msgEditArea" data-item-index="0">
+                            <div class="rel msg-editer-wrapper">
+                                <div class="msg-editer Gform" style="width:93%">
+                                    <ul>
+                                    <li class="Gname">标题</li>
+                                    <li class="Ginput"><input type="text" class="msg-input" id="msg-input-title" value="" maxlength="60" onkeyup="check_lenght(60,'goods_desc_text',this);" />
+                                    <p class="txtTips"><span id="goods_desc_text">最多可输入60个字</span></p>
+                                    </li>
+                                    </ul>
+                                    <ul>
+                                    <li class="Gname">封面</li>
+                                    <li class="Ginput">
+                                           <input name="" type="text" class="textbox w380" id="msg-input-imgfile" readonly="readonly" /><!--图片上传后在此存放地址-->
+											<a href="javascript:void(0);" title="选择" class="btn-add" id="uploadMeitu">选择</a>
+                                            <p id="imgArea" class="cover-bd" style="display: none;">
+                                            	<img src="" id="img"><a href="javascript:;" class="vb cover-del" id="delImg">删除</a>
+                                            </p>
+                                            <span class="txtTips">大图片建议尺寸：720像素 * 400像素</span>
+                                            <input type="checkbox" name="appendCover" id="appendCover" checked="checked" style="vertical-align:middle">&nbsp;封面图片显示在正文中
+                                        </li>
+                                    </ul>
+									<ul>
+                                    	<li class="Gname">摘要</li>
+                                        <li class="Ginput">
+									<textarea class="msg-txta" id="msg-input-summary" value="" placeholder="120字以内" maxlength="120" onkeyup="check_lenght(120,'goods_desc_text2',this);" style="height:100px; resize:none"></textarea>
+                                    <p class="txtTips"><span id="goods_desc_text2">最多可输入120个字</span></p>
+                                    </li>
+                                    </ul>
+                                    <ul>
+                                    	<li class="Gname">正文</li>
+                                        <li class="Ginput">
+                                        <textarea name="wap_info" id="wap_info"></textarea>
+                                        </li>
+                                    </ul>
+                                    
+                                    <ul id="url-block">
+                                        <li class="Ginput">
+                                        <div class="switch">
+                                            <input type="radio" name="respType" value="0" checked="checked">
+                                            <div class="newRadio" style="float:left">
+                                                <span class="valfirst hover url-choose" data-val="0" id="add-url-linkAct">选择互动模块</span>
+                                                <span class="url-text" data-val="1" id="add-url-linkText">原文链接</span>
+                                            </div>
+                                        </div>
+                                        </li>
+                                    </ul>
+                                    
+                                    <ul>
+                                    	<li class="Ginput" style="padding-top:0;">
+                                            <div class="url-block-con1">
+                                                <!--a href="javascript:void(0)" class="ml10 l" id="add-url-link">添加</a-->
+                                                <div class="url-block-choose" id="url-block-choose">
+                                                    <!--这儿显示互动模块名称-->
+                                                </div>
+                                               <if condition="$userInfo['node_id'] eq C('Yhb.node_id')">
+                                                <a href="{:U('Yhb/SelectBatch/index')}" class=" l" id="add-url-link">选择互动模块</a>
+                                                <else/>
+                                                <a href="{:U('LabelAdmin/SelectBatches/index')}&callback=selectActivityCallback" class="mt10 l" id="add-url-link">选择互动模块</a>
+                                                </if>
+                                                <div class="cl"></div>
+                                                <p class="tl dn" id="url-block-href"><!--这儿显示地址--></p>
+                                                <div class="cl"></div>
+                                                <p class="tl dn" id="url-block-richtxt"><!--这儿富文本--></p>
+                                            </div>
+                                            <div class="url-block-con2">
+                                                <input type="text" class="msg-input" id="msg-input-url" value="" placeholder="http://"><!--链接地址返回值存放此处-->
+                                            </div>
+                                        </li>
+                                    </ul>
+									
+                                </div>
+                                <div class="oh z shadow">
+                                    <span class="l ls"></span><span class="r rs"></span>
+                                </div>
+                                <span class="abs msg-arrow a-out"></span>
+                                <span class="abs msg-arrow a-in"></span>
+                            </div>
+                            <p>
+                                <input type="hidden" id="materialId" name="id" value="{$materialInfo['id']}"/>
+                                <a href="javascript:;" id="save" class="btn-all">完成</a><a href="javascript:;" id="preview" class="btn-all-del">预览</a><a href="javascript:;" id="cancel" class="btn-all-del ml15">取消</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

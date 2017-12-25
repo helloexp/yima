@@ -1,0 +1,200 @@
+<php>
+//账号类型
+$account_type_arr = array(
+'1'=>'未认证订阅号',
+'2'=>'已认证订阅号',
+'3'=>'未认证服务号',
+'4'=>'已认证服务号'
+);
+</php>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wbind.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/weixin2/Clipboard.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+
+<script>
+$(function(){
+	$(".msg-user-opr").click(function(){
+		$(".msg-user-info").hide();
+		$(".msg-user-add").height("auto");
+		var addHeight=$(".msg-user-add").height();
+		$(".msg-user-add").height("28px").show();
+		$(".msg-user-add").animate({height:addHeight},500,function(){$(".msg-user-add").height("auto");});
+	});
+	$(".msg-user-exit,#btn-cancel").click(function(){
+		window.location.href="{:U('Weixin/Weixin/autobind')}";
+	});
+	$(".msg-user-type").change(function(){
+		if($(this).val()=="1"){
+			$(".msg-user-typeDiv").hide();
+		}else{
+			$(".msg-user-typeDiv").show();
+		}
+	})
+	$(".alertmem").click(function(){
+		var tel="<div class='proInt-callus'>您尚未开通此项服务，欢迎拨打业务咨询热线：400-882-7770</div>"
+			art.dialog({
+				title:"马上开通",
+				lock:true,
+				content:tel,
+				id:"pro",
+				width:"830px",
+				padding:0
+			});
+	})
+	
+	$("#theform").submit(function(){
+        var actionUrl = $(this).attr("action");
+        var data = getFormData(this);
+        var dialog = art.dialog({title:false,fixed: true,padding:0});
+        $.post(actionUrl,data,function(d){
+            alert(d.info);
+            if(d.status=='1'){
+                window.location.reload();
+            }
+            dialog.close();
+        },'json');
+        return false;
+
+	});
+
+	$("#btn-generate-token").click(function(){
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		var actionUrl = $(this).attr("data-url");
+		var data = getFormData("#theform");
+		if(!data.weixin_code){
+			alert("账号名不能为空");
+			return false;
+		}
+		$.post(actionUrl,data,function(d){
+			
+			if(d.status=='1'){
+				$("#token","#theform").val(d.info.token);
+				$("#token",window.frames["frame1"].document).val(d.info.token);
+				dialog.close();
+				return;
+			}
+			dialog.close();
+			alert(d.info);
+			
+		},'json');
+	});
+
+	//查看攻略
+    $('#btn-Introduce').click(function(){
+          art.dialog.open("{:U('Home/Introduce/weixin')}",{
+				title: '渠道攻略',
+				width:860,
+                height:'90%'
+			});
+        
+    });
+	//判断初始
+	<eq name="_GET.setting" value="1">
+		$(".msg-user-opr").click();
+	</eq>
+
+    <eq name="configFlag" value="1">
+        productIntroduce(1,"wx","javascript:void(0)");
+    <else/>
+        productIntroduce(2,"wx","javascript:void(0)");
+    </eq>
+	$(".msg-user-type").change();
+
+});
+function iframeVal(){
+	$("#fenx_url").val($(window.frames["frame1"].document).find("#fenx_url").text());
+	$("#token").val($(window.frames["frame1"].document).find("#token").val());
+	if($("#fenx_url").val()=="" || $("#token").val()==""){
+		//alert("获取数据失败");
+		return false;
+	}
+	return true;
+}
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+    	<div id="container" >
+            <div id="main" class="rel">
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+                    <include file="LabelAdmin/Batch/WleftMenu" leftmenuid="zhgk"/>
+                </div>
+                
+               
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>
+                            <p class="dib">账户设置 手动绑定</p>
+                        </h4>
+                    </div>
+                    <div class="highlight_box icon_wrap icon_small border">
+                    <p class="desc">欢迎使用旺财微信营销助手“手动绑定“功能；您只需要在以下输入框中输入 微信原始ID以及账户类型后；将接入URL以及Token复制到微信后台保存后，即可完成旺财与微信的绑定；点击<a target="_blank" href="index.php?g=Home&m=Help&a=helpArt&news_id=1255&leftId=gzhzs&class_name=%E5%85%AC%E4%BC%97%E5%8F%B7%E5%8A%A9%E6%89%8B&type=8" class="ml10">查看如何获取</a></p>
+                    </div>
+                    <div class="global-input1">
+                    <form action="{:U('Weixin/Weixin/bindSubmit')}" method="get" id="theform" >
+                    <ul>
+                    <li class="global-input1-name">*&nbsp;微信账户原始ID：</li>
+                    <li class="global-input1-input"><input name="weixin_code" type="text" class="textbox w200" value="{$info['weixin_code']}"/><p class="font-12-cc ml10">请填写微信公众帐号登陆邮箱</p></li>
+                    </ul>
+                    <ul>
+                    <li class="global-input1-name">*&nbsp;帐号类型：</li>
+                    <li class="global-input1-input">
+                    <select name="account_type" id="account_type" class="selectbox w212 msg-user-type">
+                    <option value="">请选择账号类型</option>
+                    {:show_arr_opt($account_type_arr,$info['account_type'])}
+                    </select>
+                    </li>
+                    </ul>
+                    <input type="hidden" value="{$info['callback_url']}" id="fenx_url">
+                    <input type="hidden" name="token" value="{$info['token']}" id="token">
+                    <iframe frameborder="0" scrolling="no" name="frame1" id="frame1" style=" float:left; padding:20px; width:72%; height:115px; text-align:left; padding:0; margin:0; overflow:hidden" src="{:U('Weixin/Weixin/bind3')}" onLoad="iframeVal()"></iframe>
+ 
+                    <a style="float:left; margin:80px 0 0 0;" href="javascript:void(0)" class="btn-all-del ml10" id="btn-generate-token" data-url="{:U('Weixin/Weixin/generateToken')}">重置</a>
+ 
+                    <div class="msg-user-typeDiv ">
+                    <ul>
+                    <li class="global-input1-name">*&nbsp;应用ID：</li>
+                    <li class="global-input1-input"><input name="app_id" id="app_id" type="text" value="{$info.app_id}" class="textbox w200"><p class="font-12-cc ml10">请输入应用ID<a target="_blank" href="index.php?g=Home&m=Help&a=helpArt&news_id=1248&leftId=gzhzs&class_name=%E5%85%AC%E4%BC%97%E5%8F%B7%E5%8A%A9%E6%89%8B&type=5" class="ml10">查看如何获取</a></p></li>
+                    </ul>
+                    <ul>
+                    <li class="global-input1-name">*&nbsp;应用密钥：</li>
+                    <li class="global-input1-input"><input name="app_secret" id="app_secret" type="text" value="{$info.app_secret}" class="textbox w200"><p class="font-12-cc ml10">请输入应用密钥<a target="_blank" href="index.php?g=Home&m=Help&a=helpArt&news_id=1248&leftId=gzhzs&class_name=%E5%85%AC%E4%BC%97%E5%8F%B7%E5%8A%A9%E6%89%8B&type=5" class="ml10">查看如何获取</a></p></li>
+                    </ul>
+                    </div>
+                    <ul>
+                    <li class="global-input1-name">&nbsp;</li>
+                    <li class="global-input1-input">
+                    <button type="submit" class="btn-all w110 ml20 vt" id="btn-save">保存</button>
+                    <button type="button" class="btn-all-del w110 ml20 vt" id="btn-cancel">取消</button>
+                    </li>
+                    </ul>
+                    </form>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

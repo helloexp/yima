@@ -1,0 +1,491 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN""http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>添加模块_业务中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/Wactlist.css?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Common.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/WactlistMicroWeb.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+
+<style type="text/css">
+    #hidden_img span {
+        display: none;
+        position: fixed;
+        z-index: 20;
+    }
+
+    #hidden_img:hover span {
+        display: block;
+    }
+
+</style>
+<script type="text/javascript">
+    var kIsSubmiting = false;
+    function sumitingStart() {
+        kIsSubmiting = true;
+    }
+    function submitComplete() {
+        kIsSubmiting = false;
+    }
+    function isSubmiting() {
+        return kIsSubmiting;
+    }
+
+
+    $(document).ready(function (e) {
+
+		
+        addactlist();
+        //保存
+        $('#save').click(function () {
+
+
+            if (isSubmiting()) {
+                return;
+            }
+            sumitingStart();
+
+            if (isBlank($('#title').val())) {
+                art.dialog('标题不能为空！');
+                submitComplete();
+                return false;
+            }
+            /*
+             if($('#input_i-url_type').val() == '1'){
+             if($('#batch_type').val() == '' ||  $('#batch_id').val()==''){
+             art.dialog('请选择互动模块');
+             submitComplete();
+             return false;
+             }
+             }else{
+             if($('#url').val()==''){
+             art.dialog('请输入url');
+             submitComplete();
+             return false;
+             }
+             var resp = checkrule_url($('#url').val());
+             if(resp !==true){
+             art.dialog(resp);
+             submitComplete();
+             return false;
+             }
+             }
+             */
+
+            $.post(
+                    "{:U('MicroWeb/Index/Submit');}",
+                    $('#theform').serialize(),
+                    function (data) {
+                        if (data.status == '1') {
+                            window.parent.location.reload();
+                        } else {
+                            submitComplete();
+                            art.dialog('保存失败！' + data.info);
+                        }
+                    },
+                    'json'
+            );
+
+
+            /*
+             $.ajax({
+             type: "POST",
+             url: "{:U('MicroWeb/Index/Submit');}",
+             data: $("#theform").serialize(),
+             success: function(obj){
+             art.dialog(obj);
+             },
+             dataType: 'json'
+             });
+             */
+            /**
+             * 初始化图形
+             */
+
+
+        });
+
+
+        // 选择上传图片
+        $('#add-url-link_').click(function () {
+            art.dialog.open("{:U('LabelAdmin/SelectBatches/index',array('filterType'=>'wgw'))}", {
+                lock: true,
+                title: "选择互动模块",
+                width: 800,
+                height: 600
+            });
+
+        });
+
+    });
+
+
+    //打开窗口的回调函数
+    var selectActivityCallback = function (d) {
+        $('#url-block-choose').html(d.info);
+        $('#batch_type').val(d.batch_type);
+        $('#batch_id').val(d.batch_id);
+
+    }
+
+	
+
+
+    /**
+     * 打开图片上传地址
+     * 格式如下：
+     * {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+     * rationX 图片宽度
+     * rationY 图片长度
+     * 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+     *     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+     * */
+	
+    function uploadImg(cropPresets) {
+        debugger;
+        var opt = {
+            cropPresets:cropPresets,
+            callback:imageInfoCallback
+        };
+        open_img_uploader(opt);
+    }
+    /**
+     * 图片上传后回调
+     * 参数：json
+     * d.msg  0000 代表成功
+     * d.error true / false
+     * d.image_name  裁剪后图片名称
+     * d.origin   裁剪*前*图片完整路径
+     * d.absolutepath 裁剪*后*图片完整路径
+     * d.width  图片宽度
+     * d.height 图片高度
+     */
+    function imageInfoCallback(d) {
+        debugger;
+        //console.log("call back called" + JSON.stringify(d));
+
+        //填充图片
+        $('#hidden_img_tag').attr('src', d.src);
+
+        //调整大小
+        /*
+         var scale = d.width / d.height;
+         var w = 150;
+         var h = w/scale;
+         $('#hidden_img_tag').css('width', w+"px");
+         $('#hidden_img_tag').css('height', h+"px");
+         */
+
+        scaleImage(d.width, d.height, 150, '#hidden_img_tag');
+
+        $('#msg-input-imgfile').val(d.savename);
+        $('#thumb_nail').attr('src', d.src);
+
+    }
+    /**
+     * 调整
+     * @param width
+     * @param height
+     * @param targetWidth 显示的宽度
+     * @param identify 元素id
+     */
+    function scaleImage(width, height, targetWidth, identify) {
+        var scale = width / height;
+        var w = targetWidth;
+        var h = w / scale;
+        $(identify).css('width', w + "px");
+        $(identify).css('height', h + "px");
+    }
+
+    //表单校验函数
+    function checkrule_url(str) {
+        if (!str) return true;
+
+        if (str.indexOf("http://") != 0 && str.indexOf("https://") != 0)
+            return "链接格式不正确";
+
+        return true;
+
+    }
+
+    function isBlank(str) {
+        return (!str || /^\s*$/.test(str));
+    }
+	
+	$(function(){
+		var ue = UE.getEditor('wap_info',{
+		imageUrl:"{:U('MicroWeb/Upfile/editoImageSave')}",
+		imagePath:"__UPLOAD__",
+		catcherUrl:"{:U('MicroWeb/Upfile/getRemoteImage')}",
+		catcherPath:"__UPLOAD__",
+		initialFrameWidth:900,
+		initialFrameHeight:280
+	});
+	});
+</script>
+</head>
+<form method="post" id="theform">
+    <input type="hidden" value="{$list['link_type']}" name="url_type" id="input_i-url_type"/>
+    <input type="hidden" name="node_id" id="node_id" value="{$list['node_id']}"/>
+    <input type="hidden" name="id" id="id" value="{$list['id']}"/>
+    <input type="hidden" name="tpl_id" id="tpl_id" value="{$list['tpl_id']}"/>
+    <input type="hidden" name="field_id" id="field_id" value="{$list['field_id']}"/>
+    <input type="hidden" name="field_type" id="field_type" value="{$list['field_type']}"/>
+    <input type="hidden" name="batch_type" id="batch_type" value="{$list['batch_type']}"/>
+    <input type="hidden" name="batch_id" id="batch_id" value="{$list['batch_id']}"/>
+    <input type="hidden" name="mw_batch_id" id="mw_batch_id" value="{$list['mw_batch_id']}"/>
+	<input type="hidden" name="sns_cfg_flag" id="sns_cfg_flag" value="flag"/>
+
+    <body class="bgfff" style="height:400px; min-height:400px">
+    <div class="msg-edit-area" id="msgEditArea" data-item-index="0">
+
+        <div class="rel msg-editer-wrapper">
+            <div class="msg-editer">
+                <label>标题</label>
+                <input type="text" class="msg-input" id="title" name="title" maxlength="50" value="{$list['title']}">
+				<if condition="!(($list['field_type'] eq '2') and (($list['tpl_id'] eq '3') or ($list['tpl_id'] eq '4') or ($list['tpl_id'] eq '9') or ($list['tpl_id'] eq '10') or ($list['tpl_id'] eq '11') or ($list['tpl_id'] eq '12') ))">
+                <if condition="$list['field_type'] eq '1'">
+                    <label>缩略图</label>
+                    <else/>
+                    <label>缩略图</label>
+                </if>
+				
+                <div class="cover-area2">
+                    <!--hidden_img-->
+                    <div>
+                        <!--hidden_img 分两种尺寸： 顶部图片 非顶部图片-->
+                        <php> if($list['tpl_id']=='15'&& I('is_max_img') && $is_df){</php>
+                        <a href="javascript:void(0);" title="上传" class="btn-all w60"
+                               onclick="return uploadImg('640x1005');">上传</a>
+                        <php> }else{</php>
+                        <if condition="$list['field_id'] eq '1'">
+                                                    <eq name="list['tpl_id']" value="2">
+
+                                                            <a href="javascript:void(0);" title="上传" class="btn-all w60"	
+                                                               onclick="return uploadImg('640x960');">上传</a>
+                                                            <else/>
+                                                            <a href="javascript:void(0);" title="上传" class="btn-all w60"
+                                                               onclick="return uploadImg('640x340');">上传</a>
+                                                    </eq>
+                         <else/>
+                            <a href="javascript:void(0);" title="上传" class="btn-all w60"
+                               onclick="return uploadImg('300x300');">上传</a>
+                        </if>
+                        <php>}</php>
+                    </div>
+                    <input type="hidden" name="image_name" type="text" class="textbox w140" id="msg-input-imgfile"/><!--图片上传后在此存放地址-->
+                    <p id="hidden_img" class="pt10">
+                        <notempty name="list['image_url']">
+                            <img src="{$list['image_url']}" id="thumb_nail" alt="" style=' max-height: 400px; max-width: 400px;'/>
+                        <else />
+                            <img src="__PUBLIC__/Image/preview-goods.png" id="thumb_nail" alt=""/>
+                        </notempty>
+                        <span id="imgArea" class="cover-bd" style="display: none;">
+                            <img src="" id="img"><a href="javascript:;" class="vb cover-del" id="delImg">删除</a>
+                        </span>
+                    </p>
+                </div>
+				</if>
+				 <if condition="($list['field_type'] eq '2') and (($list['tpl_id'] eq '3') or ($list['tpl_id'] eq '4') or ($list['tpl_id'] eq '9') or ($list['tpl_id'] eq '10') or ($list['tpl_id'] eq '11') or ($list['tpl_id'] eq '12') )">
+                <!--第三套模板选择图片及背景色-->
+                <label>选择图标背景色</label>
+                <div class="choose-color fn">
+                	<input value="{$list['field_img_color']}" type="hidden" id="colorVal" name="colorVal" />
+                	<li><div class="choose-color-val colorVal-1 {:$list['field_img_color']=='colorVal-1'?'color-hover':''}" title="富贵黄" data-val="colorVal-1"></div></li>
+                	<li><div class="choose-color-val colorVal-2 {:$list['field_img_color']=='colorVal-2'?'color-hover':''}" title="神秘紫" data-val="colorVal-2"></div></li>
+                	<li><div class="choose-color-val colorVal-3 {:$list['field_img_color']=='colorVal-3'?'color-hover':''}" title="水晶黑" data-val="colorVal-3"></div></li>
+                	<li><div class="choose-color-val colorVal-4 {:$list['field_img_color']=='colorVal-4'?'color-hover':''}" title="天空蓝" data-val="colorVal-4"></div></li>
+                	<li><div class="choose-color-val colorVal-5 {:$list['field_img_color']=='colorVal-5'?'color-hover':''}" title="青草绿" data-val="colorVal-5"></div></li>
+                	<li><div class="choose-color-val colorVal-6 {:$list['field_img_color']=='colorVal-6'?'color-hover':''}" title="蜜桃粉" data-val="colorVal-6"></div></li>
+                	<li><div class="choose-color-val colorVal-7 {:$list['field_img_color']=='colorVal-7'?'color-hover':''}" title="摩卡黑" data-val="colorVal-7"></div></li>
+                	<li><div class="choose-color-val colorVal-8 {:$list['field_img_color']=='colorVal-8'?'color-hover':''}" title="宝石蓝" data-val="colorVal-8"></div></li>
+					<li><div class="choose-color-val colorVal-9 {:$list['field_img_color']=='colorVal-9'?'color-hover':''}" title="" data-val="colorVal-9"></div></li>
+                	<li><div class="choose-color-val colorVal-10 {:$list['field_img_color']=='colorVal-10'?'color-hover':''}" title="" data-val="colorVal-10"></div></li>
+                	<li><div class="choose-color-val colorVal-11 {:$list['field_img_color']=='colorVal-11'?'color-hover':''}" title="" data-val="colorVal-11"></div></li>
+                	<li><div class="choose-color-val colorVal-12 {:$list['field_img_color']=='colorVal-12'?'color-hover':''}" title="" data-val="colorVal-12"></div></li>
+                	<li><div class="choose-color-val colorVal-13 {:$list['field_img_color']=='colorVal-13'?'color-hover':''}" title="" data-val="colorVal-13"></div></li>
+                	<li><div class="choose-color-val colorVal-14 {:$list['field_img_color']=='colorVal-14'?'color-hover':''}" title="" data-val="colorVal-14"></div></li>
+                	<li><div class="choose-color-val colorVal-15 {:$list['field_img_color']=='colorVal-15'?'color-hover':''}" title="" data-val="colorVal-15"></div></li>
+                	<li><div class="choose-color-val colorVal-16 {:$list['field_img_color']=='colorVal-16'?'color-hover':''}" title="" data-val="colorVal-16"></div></li>
+					<li><div class="choose-color-val colorVal-17 {:$list['field_img_color']=='colorVal-17'?'color-hover':''}" title="" data-val="colorVal-17"></div></li>
+                </div>
+				<label style="color:#999; font-size:12px; text-indent:3px;">夏日小清新主题颜色</label>
+                <div class="choose-color fn">
+                	<li><div class="choose-color-val colorVal-18 {:$list['field_img_color']=='colorVal-18'?'color-hover':''}" title="夏日小清新" data-val="colorVal-18"></div></li>
+                	<li><div class="choose-color-val colorVal-19 {:$list['field_img_color']=='colorVal-19'?'color-hover':''}" title="夏日小清新" data-val="colorVal-19"></div></li>
+                	<li><div class="choose-color-val colorVal-20 {:$list['field_img_color']=='colorVal-20'?'color-hover':''}" title="夏日小清新" data-val="colorVal-20"></div></li>
+                	<li><div class="choose-color-val colorVal-21 {:$list['field_img_color']=='colorVal-21'?'color-hover':''}" title="夏日小清新" data-val="colorVal-21"></div></li>
+                	<li><div class="choose-color-val colorVal-22 {:$list['field_img_color']=='colorVal-22'?'color-hover':''}" title="夏日小清新" data-val="colorVal-22"></div></li>
+                	<li><div class="choose-color-val colorVal-23 {:$list['field_img_color']=='colorVal-23'?'color-hover':''}" title="夏日小清新" data-val="colorVal-23"></div></li>
+                	<li><div class="choose-color-val colorVal-24 {:$list['field_img_color']=='colorVal-24'?'color-hover':''}" title="夏日小清新" data-val="colorVal-24"></div></li>
+                	<li><div class="choose-color-val colorVal-25 {:$list['field_img_color']=='colorVal-25'?'color-hover':''}" title="夏日小清新" data-val="colorVal-25"></div></li>
+					<li><div class="choose-color-val colorVal-26 {:$list['field_img_color']=='colorVal-26'?'color-hover':''}" title="" data-val="colorVal-26"></div></li>
+                </div>
+				<neq name="list.tpl_id" value="10">
+                <label>选择图标</label>
+                <div class="choose-icon fn">
+                	<input value="{$list['field_img_name']}" type="hidden" id="iconVal" name="iconVal" />
+                	<li><div class="choose-icon-val iconVal-1 {:$list['field_img_name']=='iconVal-1.png'?'icon-hover':''}" data-val="iconVal-1.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-1.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-2 {:$list['field_img_name']=='iconVal-2.png'?'icon-hover':''}" data-val="iconVal-2.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-2.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-3 {:$list['field_img_name']=='iconVal-3.png'?'icon-hover':''}" data-val="iconVal-3.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-3.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-4 {:$list['field_img_name']=='iconVal-4.png'?'icon-hover':''}" data-val="iconVal-4.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-4.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-5 {:$list['field_img_name']=='iconVal-5.png'?'icon-hover':''}" data-val="iconVal-5.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-5.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-6 {:$list['field_img_name']=='iconVal-6.png'?'icon-hover':''}" data-val="iconVal-6.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-6.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-7 {:$list['field_img_name']=='iconVal-7.png'?'icon-hover':''}" data-val="iconVal-7.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-7.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-8 {:$list['field_img_name']=='iconVal-8.png'?'icon-hover':''}" data-val="iconVal-8.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-8.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-9 {:$list['field_img_name']=='iconVal-9.png'?'icon-hover':''}" data-val="iconVal-9.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-9.png"/></div></li>
+                </div>
+				<label style="color:#999; font-size:12px; text-indent:3px;">夏日小清新主题图标</label>
+                <div class="choose-icon fn">
+                	<li><div class="choose-icon-val iconVal-10 {:$list['field_img_name']=='iconVal-10.png'?'icon-hover':''}" data-val="iconVal-10.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-10.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-11 {:$list['field_img_name']=='iconVal-11.png'?'icon-hover':''}" data-val="iconVal-11.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-11.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-12 {:$list['field_img_name']=='iconVal-12.png'?'icon-hover':''}" data-val="iconVal-12.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-12.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-13 {:$list['field_img_name']=='iconVal-13.png'?'icon-hover':''}" data-val="iconVal-13.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-13.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-14 {:$list['field_img_name']=='iconVal-14.png'?'icon-hover':''}" data-val="iconVal-14.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-14.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-15 {:$list['field_img_name']=='iconVal-15.png'?'icon-hover':''}" data-val="iconVal-15.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-15.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-16 {:$list['field_img_name']=='iconVal-16.png'?'icon-hover':''}" data-val="iconVal-16.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-16.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-17 {:$list['field_img_name']=='iconVal-17.png'?'icon-hover':''}" data-val="iconVal-17.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-17.png"/></div></li>
+                	<li><div class="choose-icon-val iconVal-18 {:$list['field_img_name']=='iconVal-18.png'?'icon-hover':''}" data-val="iconVal-18.png"><img src="__PUBLIC__/Image/wapimg/iconVal/iconVal-18.png"/></div></li>
+                </div>
+
+				</neq>
+                <!--第三套模板选择图片及背景色-->
+				</if>
+                <!---<label class="dn">摘要</label>--->
+                <input type="text" class="msg-txta dn" id="sumary" name="sumary" maxlength="100" placeholder="100字以内"
+                       maxlength="100" value="default"/>
+                <php>if($list['is_fixed']!=1){</php>
+
+                <div id="url-block">
+                    <a href="javascript:void(0)" class="url-choose l url-hover" id="add-url-linkAct">快速选择互动模块</a>
+                    <a href="javascript:void(0)" class="url-text ml10 l " id="add-url-linkText">手动输入</a>
+                    <a href="javascript:void(0)" class="url-context ml10 l" id="add-url-conText">富文本</a>
+
+                    <div class="url-block-con1">
+                        <div class="url-block-choose" id="url-block-choose">
+                            <notempty name="list['batch_type_name']">{$list['batch_type_name']} > {$list['batch_name']}
+                            </notempty>
+                        </div>
+                        <a class="ml10 l" id="add-url-link_">选择互动模块</a>
+
+                        <div class="cl"></div>
+                        <p class="tl" id="url-block-href"></p>
+                    </div>
+                    <div class="url-block-con2">
+                        <input type="text" class="msg-input" id="url" name="link_url" value="{$list['link_url']}"
+                               placeholder="http://"/><!--链接地址返回值存放此处-->
+                    </div>
+                    <div class="url-block-con3">
+						<li class="global-input2-input" id="wap_tip">
+                         <textarea name="content" id="wap_info"><?php echo $list['content'];?></textarea>
+                      </li>
+                    </div>
+                    <div class="cl"></div>
+                    <div class="fn tc pt10">
+                        <a href="javascript:void(0)" class="btn-all w90" id="save">保存</a>
+                        <a href="javascript:void(0)" class="btn-all-del btn-all-del-act w90 ml20"
+                           onclick="art.dialog.close();">取消</a>
+                    </div>
+                </div>
+                <php>}else{</php>
+                <div id="url-block">
+                    <a href="javascript:void(0)" class="url-text ml10 l " id="add-url-linkText">手动输入</a>
+
+                   
+                    <div class="url-block-con2">
+                        <input type="text" class="msg-input" id="url" name="link_url" value="{$list['link_url']}"
+                               placeholder="http://" readonly="readonly"/><!--链接地址返回值存放此处-->
+                    </div>
+                    <div class="cl"></div>
+                    <div class="fn tc pt10">
+                        <a href="javascript:void(0)" class="btn-all w90" id="save">保存</a>
+                        <a href="javascript:void(0)" class="btn-all-del btn-all-del-act w90 ml20"
+                           onclick="art.dialog.close();">取消</a>
+                    </div>
+                </div>
+                <php>}</php>
+            </div>
+            <div class="oh z shadow">
+                <span class="l ls"></span><span class="r rs"></span>
+            </div>
+        </div>
+    </div>
+    </body>
+</form>
+</html>
+<script>
+
+    $('#hidden_img_tag').bind('load', function () {
+        //console.log("hello hidden img");
+        var width = this.width;
+        var height = this.height;
+
+		scaleImage(width, height, 150, '#hidden_img_tag');
+        //console.log(this.width);
+        //console.log(this.height);
+    });
+
+    $('#thumb_nail').bind('load', function () {
+        //console.log("hello thumb_nail img");
+        var width = this.width;
+        var height = this.height;
+		
+        scaleImage(width, height, 50, '#thumb_nail');
+
+        //console.log(this.width);
+        //console.log(this.height);
+    });
+
+
+    //文件上传
+    function ajaxFileUpload(imgid, hiddenid, showid, url) {
+        var dialog = art.dialog({title: false, fixed: true, padding: 0});
+        $.ajaxFileUpload
+        ({
+            url: url,
+            secureuri: false,
+            fileElementId: imgid,
+            dataType: 'json',
+            data: {name: 'image_name', id: 'id'},
+            success: function (data, status) {
+                if (typeof(data.error) != 'undefined') {
+                    if (data.error != '') {
+                        dialog.time(3).content("<div class='msg-all-error'>" + data.error + "</div>");
+                    } else {
+
+                        var resp = data.msg;
+                        if (resp != '0000') {
+                            dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+                            return false;
+                        } else {
+                            dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+                        }
+                        $('#' + hiddenid).val(data.imgurl);
+
+                    }
+                }
+            },
+            error: function (data, status, e) {
+
+                dialog.time(3).content("<div class='msg-all-error'>" + e + "</div>");
+            }
+        })
+
+        return false;
+    }
+</script>

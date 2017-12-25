@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>业务服务-用户添加</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+    <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+    <js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+    <js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script>
+        $(function(){
+            $("#smb").click(function(){
+                var dialog;
+                if($("form").validationEngine('validate')){
+                    $("form").ajaxSubmit({
+                        beforeSubmit:function(){
+                            Dialoading("正在提交...");
+                        },
+                        success:function(data){
+							Dialoading();
+                            if(data.status == '1'){
+                                Diasucceed(data.info);
+                                setTimeout("var win = art.dialog.open.origin;win.location.reload();",500);
+                                return false;
+                            }else{
+                                Diaerror(data.info);
+                            }
+                        },
+                        dataType:'json'
+                    });
+                    return false;
+                }
+
+            });
+        })
+    </script>
+</head>
+<body class="no">
+<div class="fn">
+    <empty name="roleData">
+        <div class="numgoods-info mtb20 mlr20">
+            <li>还没有角色信息,<a href="{:U('Home/NodeUserNew/roleAdd')}">请创建角色</a></li>
+        </div>
+    </empty>
+    <div class="Gform fn w1">
+        <form method="post" action="{:U('Home/NodeUserNew/'.ACTION_NAME)}">
+            <empty name="info.id">
+                <ul>
+                    <li class="Gname">*&nbsp;用户名：</li>
+                    <li class="Ginput">
+                        <input style="display:none">
+                        <input name="user_name" type="text"  class="validate[required,custom[email]] textbox w240" value="{$info.user_name}" autocomplete="off"/>
+                        <br />
+                        <span class="font-12-cc">用户名必须是有效的邮箱格式</span>
+                    </li>
+                </ul>
+                <else/>
+                <ul>
+                    <li class="Gname">*&nbsp;用户名：</li>
+                    <li class="Ginput">
+                        {$info.user_name}
+                        <input style="display:none">
+                        <input type="hidden" name="user_id" type="text" value="{$info.user_id}" autocomplete="off"/>
+                    </li>
+                </ul>
+
+            </empty>
+
+            <ul>
+                <li class="Gname">*&nbsp;姓名：</li>
+                <li class="Ginput">
+                    <input style="display:none">
+                    <input name="true_name" id="true_name" type="text"  class="validate[required,maxSize[10]] textbox w240" maxlength="10" value="{$info.true_name}" autocomplete="off"/>
+                    <br />
+                    <span class="font-12-cc">请输入使用者姓名</span>
+                </li>
+            </ul>
+
+            <empty name="info.id">
+                <ul>
+                    <li class="Gname">*&nbsp;密码：</li>
+                    <li class="Ginput">
+                        <input style="display:none">
+                        <input name="pws1" id="pws1" type="password"  class="validate[required] textbox w240" autocomplete="off"/>
+                        <br />
+                        <span class="font-12-cc">不少于6位，不大于20位</span>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="Gname">*&nbsp;密码确认：</li>
+                    <li class="Ginput">
+                        <input style="display:none">
+                        <input name="pws2" id="pws2" type="password"  class="validate[required,equals[pws1]] textbox w240"/>
+                        <br />
+                        <span class="font-12-cc">请再次输入密码</span>
+                    </li>
+                </ul>
+                <else/>
+                <ul>
+                    <li class="Gname">&nbsp;密码：</li>
+                    <li class="Ginput">
+                        <input style="display:none">
+                        <input name="pws1" id="pws1" type="password"  class="validate[] textbox w240" autocomplete="off"/>
+                        <br />
+                        <span class="font-12-cc">不少于6位，不大于20位</span>
+                    </li>
+                </ul>
+                </empty>
+            <ul>
+                <li class="Gname">*&nbsp;用户角色：</li>
+                <li class="Ginput">
+                    <php>
+                        $curr_node = '';
+                    </php>
+                    <volist name="roleData" id="vo">
+                        <php>
+                            if($curr_node && $curr_node != $vo['node_id']){
+                                echo '<p>专用角色:</p>';
+                            }
+                            $curr_node = $vo['node_id'];
+                        </php>
+                            <label>
+                            <input name="role_id" class=" validate[required]" type="radio" value="{$vo['id']}" {:$info['new_role_id']==$vo['id']?'checked':''}/>
+                            &nbsp;
+                            {$vo['title']}
+                            <span style="color:#999; font-size:12px;">&nbsp;{$vo['memo']}</span>
+                                </label>
+                                <div class="cl"></div>
+                    </volist>
+                    <!--<h4>特殊角色</h4>
+                    <label>
+                    <input name="role_id" type="radio" class=" validate[required]" value="3"  {:$info['new_role_id']==3?'checked':''}/>
+                        </label>
+                    &nbsp;
+                    终端操作员 <span style="color:gray">只允许操作终端</span>
+                    -->
+                </li>
+            </ul>
+            <div class="DiabtnCon">
+                <a href="javascript:void(0)" class="Diabtn-all" id="smb">确定</a>
+                <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

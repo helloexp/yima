@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>员工管理</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e){
+	$("#sub_button").click(function(){
+        $("#theform").submit();
+    });
+});
+</script>
+</head>
+
+<body class="bgfff">
+<div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="new_sidenav">
+                    <include file="./Home/Tpl/ReportManagement/Store_sidenav.html" leftmenuid="mdqd"/>
+                </div>
+                <div id="div_content" class="subcon fn">
+				<div class="shopCon">
+                	<div class="main-name fn">
+                        <h4>员工管理<a href="javascript:void(0);" class="btn-add first"><i></i>添加员工</a></h4>
+                    </div>
+				<div class="SearchArea fn">
+					 <form action="?" method="get" name="theform" id="theform">
+						<input type="hidden" name="g" value="ReportManagement">
+						<input type="hidden" name="m" value="StaffManagement">
+						<input type="hidden" name="a" value="index">
+                        <div class="SearchAreaLeft">
+                            <label>
+                                <span>自定义编号</span>
+                                <input name="custom_number" type="text" class="textbox w90" value="{$custom_number}">
+                            </label>
+                            <label>
+                                <span>姓名</span>
+                                <input name="name" type="text" class="textbox w90" value="{$name}">
+                            </label>
+                            <label><span>分公司</span>
+                            <select class="textbox w100" name="company_id">
+                            <option value="">全部</option>
+                                {:show_arr_opt($companyList,$company_id)}
+                            </select>
+                            </label>
+                        </div>
+                        <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" id="sub_button" class="searchBtn">查找</a>
+                        </div>
+					</form>
+				</div>
+                <div class="fn">
+                    <table cellpadding="0" cellspacing="0" class="W-table" style="width:100%;border-collapse:collapse; border:1px solid #e3e2e2;">
+                        <tr>
+                            <th>员工ID</th>
+                            <th>自定义编号</th>
+                            <th>员工姓名</th>
+                            <th>手机号</th>
+                            <th>微信openid</th>
+                            <th>所属分公司</th>
+                            <th>操作</th>
+                        </tr>
+                        <volist name="memberList" id="vo" empty="$empty">
+                        <tr>
+                            <td>{$vo['id']}</td>
+                            <td>{$vo['custom_number']}</td>
+                            <td>{$vo['name']}</td>
+                            <td>{$vo['mobile']}</td>
+                            <td>{$vo['openid']}</td>
+                            <td>{$companyList[$vo['company_id']]}</td>
+                            <td>
+                                 <a href="javascript:void(0);" onclick="memberSet('{$vo.id}')">&nbsp;设置权限</a>
+                                 <a href="javascript:void(0);" onclick="memberEdit('{$vo.id}')">&nbsp;修改</a>
+                                 <a href="javascript:void(0);"  onclick="memberDel('{$vo.id}')" style="margin-right: 45px;">&nbsp;删除</a>
+                            </td>
+                        </tr>
+                        </volist>
+                        <empty name="memberList" >
+                            <tr class="info">
+                                <td colspan="7" class="last">
+                                    <div class="nonedata"></div>
+                                </td>
+                            </tr>
+                        </empty>
+                    </table>
+                    <div class="page"><?php echo $page;?>&nbsp;&nbsp;</div>
+                </div>
+			</div>
+                </div>
+		</div>
+	</div>
+</div>
+<div class="integralService"></div>
+</body>
+<script type="text/javascript">
+function memberDel(id){
+    var title="您确认要删除该会员吗？";
+    art.dialog.confirm(title,function(){
+        $.post("{:U('ReportManagement/StaffManagement/memberDel')}",{"id":id},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+function memberEdit(id){
+    var title="修改员工信息";
+    art.dialog.open("{:U('ReportManagement/StaffManagement/memberEdit')}&id="+id,{
+        width:600,
+        title:title
+    });
+}
+function memberSet(id){
+    var title="设置权限";
+    art.dialog.open("{:U('ReportManagement/StaffManagement/memberSet')}&id="+id,{
+        width:800,
+        height:500,
+        title:title
+    });
+}
+$(".btn-add").click(function(e) {
+    art.dialog.open("{:U('addMember')}",{
+        id:"EnterpriseNo",
+        title:"导入数据",
+        width:540,
+        height:350
+    });
+});
+</script>

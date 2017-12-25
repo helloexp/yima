@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>客户查询_会员中心_翼码旺财</title>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/main.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/layout.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/module.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__"/>
+        <link href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css"/>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+        <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+        <js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+        <js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    </head>
+    <body>
+        <div id="wrapper" class="bgeee">
+            <include file="./Home/Tpl/Public/Public_header.html" />
+            <div id="container" class="bgfff">
+                <div id="main" class="rel">
+                    <div class="sidenav">
+                        <!--开始引入左菜单-->
+                        <assign name="leftMenuId" value="8"/>
+                        <include file="Member/menu" leftxmenuid="tjhy"/>
+                    </div>
+                    <div class="subcon fn">
+                        <div class="main-name fn">
+                            <h4 class="bd-b-565656">会员添加</h4>
+                        </div>
+                        <form action="{:U()}" method="POST" name="theform" id="theform">
+                            <div class="global-input1 fn">
+                                <ul class="mt10" >
+                                    <li class="global-input1-name">*&nbsp;姓名：</li>
+                                    <li class="global-input1-input"><input name="name" type="text" id="name"  class="textbox w240 validate[required]" value=""/></li>
+                                </ul>
+                                <ul class="mt10" >
+                                    <li class="global-input1-name">*&nbsp;手机：</li>
+                                    <li class="global-input1-input"><input name="mobile" type="text" id="mobile"  class="textbox w240 validate[required,custom[chinamobile]]" value=""/></li>
+                                </ul>
+
+                                <ul class="mt10" >
+                                    <li class="global-input1-name">*&nbsp;生日：</li>
+                                    <li class="global-input1-input"><input name="birthday" type="text" id="birthday"  class="textbox w240 validate[required]" value="" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'birthday\\')}'})"/></li>
+                                </ul>
+                                
+                                <ul class="mt10" >
+                                    <li class="global-input1-name">*&nbsp;积分：</li>
+                                    <li class="global-input1-input"><input name="point" type="text" id="point"  class="textbox w240 validate[required,custom[number]]" value=""/></li>
+                                </ul>
+                                <ul class="mt20">
+                                    <li class="global-input1-name"></li>
+                                    <li class="global-input1-input">
+                                        <a href="javascript:void(0)" title="确认" id="sub_button" class="btn-all w110">确认</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html" />
+        </div>
+        <div class="service"></div>
+    </body>
+    <script>
+        $(function(){
+            $form = $("#theform");
+            $('#vin').change(function(){
+                this.value = $.trim(this.value);
+                $('#exists_vin').hide();
+                $.post("{:U('vin_check')}", {vin:this.value}, function(resp){
+                    if(resp.status == 0){
+                        $('#exists_vin').attr('href', resp.edit_url).show();
+                    }
+                }, 'json');
+            });
+
+
+            $('#sub_button').click(function(){
+                var dialog, btn = $(this);
+                if($form.validationEngine('validate')){
+                    btn.attr('disabled', 'disabled');
+                    $form.ajaxSubmit({
+                        beforeSubmit:function(){
+                            dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                        },
+                        success:function(data){
+                            btn.removeAttr('disabled');
+                            if(data.status == '1'){
+                                dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                                setTimeout(function(){
+                                    location.href = data.list_url;
+                                }, 2000);
+                            }else{
+                                dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                            }
+                        },
+                        dataType:'json'
+                    });
+                    return false;
+                }
+            });
+        });
+    </script>
+</html>

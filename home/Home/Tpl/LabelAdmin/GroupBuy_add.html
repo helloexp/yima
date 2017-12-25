@@ -1,0 +1,543 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>团购活动_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnewsadd.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/Wnewsadd.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jsScroll.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jscolor/jscolor.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+    $('#sub_button').click(function(){
+        var dialog;
+        if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           var datas = data.data;
+                           dialog.close();
+                           $(".text_form").hide();
+                           $(".tip_msg").show();
+                           $("#jump_url").attr("href",datas.url);
+                           $(window).scrollTop(0);
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    }) ;
+        
+})
+
+function checkCodeLogo(){
+    if($("#resp_code_img").val() == '')
+        {
+            return "请上传二维码Logo";
+        }
+}
+function check_goods_img(){
+	if($("#resp_goods_img").val() == '')
+    {
+        return "请上传商品图片";
+    }
+}
+function goods_count(field){
+    var id_value = field.attr("id");
+    var last_str = id_value.substr(id_value.length-1,1);
+    if(!isNaN(last_str) ){
+        var day_goods_count = $("#day_goods_count_"+last_str).val();
+        var goods_count = $("#goods_count_"+last_str).val();
+        if(day_goods_count > goods_count){
+            return "奖品总数要大于或等于每日奖品限量数！";
+        }
+    }else{
+        var day_goods_count = $("#day_goods_count").val();
+        var goods_count = $("#goods_count").val();
+        if(day_goods_count > goods_count){
+            return "奖品总数要大于或等于每日奖品限量数！";
+        }
+    }
+}
+/*获取图片路径中的图片名*/
+function base_name(url){
+    var urlList = url.split('/'); 
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+
+function uploadImg(url) {
+var win_width = 500;
+art.dialog.open(url, {
+    lock: true,
+    title: "上传图片",
+    width: win_width,
+    height: win_width / 1.6,
+    id: 'art_upload'
+});
+}
+
+//背景图片回调函数
+function bgCallback(d) {
+//填充缩略图
+$('#img_resp_show').attr('src', d.absolutepath).show();
+//上传用
+$('#resp_goods_img').val(base_name(d.absolutepath));
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel text_form">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="index.php?g=Home&m=Index&a=marketingShow">营销活动中心</a></p>
+                            <p>></p>
+                            <p>团购活动</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <form action="{:U('LabelAdmin/GroupBuy/add')}" method="post" name="theform" id="theform" enctype="multipart/form-data">
+                                        <div class="global-input2 fn w2 pb30">
+                                        <ul class="newsadd-title">活动基础信息</ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;活动名称：</li>
+                                                <li class="global-input2-input"><input name="name" id="name"  type="text"  class="validate[required,optional,maxSize[20]] textbox w300"  value=""/></li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;活动时间：</li>
+                                                <li class="global-input2-input"><input name="start_time" id="start_time" type="text"  class="validate[required] textbox w130" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" /><span class="mlr10">-</span><input name="end_time" id="end_time" type="text"  class="validate[required] textbox w130"  onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" /></li>
+                                            </ul>
+                                            <ul class="newsadd-title">团购商品设置</ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;商品名称：</li>
+                                                <li class="global-input2-input"><input name="group_goods_name" id="group_goods_name"  type="text"  class="validate[required,optional,maxSize[20]] textbox w300" value=""/></li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;商品图片：</li>
+                                                <li class="global-input2-input">
+                                                    <div class="rel l">
+                                                    <input type="hidden" value="" name="resp_goods_img" id="resp_goods_img"/>
+                                                    <a href="javascript:;" title="上传" onclick="return uploadImg('{:U('ImgResize/Resize/index',array('ratioX'=>229,ratioY=>229,'callback'=>'bgCallback'))}')" class="btn-all w60">上传</a>
+                                                    </div>
+                                                    <div class="cl"></div>
+                                                    <img src="" id="img_resp_show" width="150" class="mt10 dn"/>
+                                                    <div class="cl"></div>
+                                                    <p class="font-12-cc">建议尺寸230px*230px，请上传1M以内的gif,jpg,jpeg,bmp,png图片</p>
+                                                    <div class="cl"></div>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;商品描述：</li>
+                                                <li class="global-input2-input">
+                                                    <textarea name="goods_memo" class="validate[required,optional,maxSize[200]] texttextarea w300 h126"></textarea>
+                                                    <br /><p class="font-12-cc">最多200个字</p>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;商品市场价：</li>
+                                                <li class="global-input2-input"><input name="market_price" id="market_price"  type="text"  class="validate[custom[number],min[0],required] textbox w50" value=""/>&nbsp;元</li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;商品团购价：</li>
+                                                <li class="global-input2-input"><input name="group_price" id="group_price"  type="text"  class="validate[custom[number],min[0],required] textbox w50" value=""/>&nbsp;元</li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;商品总数：</li>
+                                                <li class="global-input2-input"><input name="goods_num" id="goods_num"  type="text"  class="validate[custom[integer],min[0],required] textbox w50" value=""/>&nbsp;份</li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;每人限购量：</li>
+                                                <li class="global-input2-input">
+                                                    <input name="buy_num" id="buy_num"  type="text"  class="validate[custom[integer],min[0],required] textbox w50" value="0"/>&nbsp;份
+                                                    <br /><p class="font-12-cc">0表示不限制</p>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                              <li class="global-input2-name">SNS分享：</li>
+                                              <li class="global-input2-input">
+                                              <?php 
+                                              $sns_arr = C('SNS_ARR');
+                                              foreach($sns_arr as $sns_k=>$sns_v){
+                                              if($sns_k>4) continue;
+                                              ?>
+                                              <input name="sns_type[]" type="checkbox" value="<?php echo $sns_k?>"/><p class="ml5"><?php echo $sns_v?></p>
+                                              <?php }?>
+                                              <br /><p class="font-12-cc">勾选后，允许消费者将您的营销活动分享给他的社交网络好友</p>
+                                              </li>
+                                              
+                                            </ul>
+                                            <ul class="newsadd-title">下发商品短彩信设置</ul>
+                                                <ul>
+                                                    <li class="global-input2-name">*&nbsp;彩信标题：</li>
+                                                    <li class="global-input2-input"><input id="mms_title" name="mms_title" type="text" onkeyup="check_lenght(10,'title_text',this);"  class="validate[required,maxSize[10]] textbox w240"/>
+                                                    <br />
+                                                    <p id="title_text">还可以输入10个字</p>
+                                                    </li>
+                                                </ul>
+                                                <ul>
+                                                    <li class="global-input2-name">*&nbsp;彩信内容：</li>
+                                                    <li class="global-input2-input"><textarea name="using_rules" id="using_rules" onkeyup="check_lenght(100,'text',this);" class="validate[required,maxSize[100]] texttextarea w240"></textarea>
+                                                    <br />
+                                                    <p id="text">还可以输入100个字</p>
+                                                    </li>
+                                                </ul>
+                                            <ul class="newsadd-title">活动卡券配置</ul>
+                                                <ul>
+                                                <li class="global-input2-name">&nbsp;是否抽奖：</li>
+                                                <li class="global-input2-input">
+                                                <input name="is_cj" id="is_cj_false"  type="radio"  value="0"  checked="checked" />
+                                                    <label for="logo-true" class="ml5">否</label>
+                                                    <input name="is_cj" id="is_cj_t"  type="radio"  value="1"  />
+                                                    <label for="logo-true" class="ml5">是</label>
+                                                </li>
+                                            </ul>
+                                            
+                                            <ul id="jp_set" style="display: none;">
+                                                <li class="global-input2-name">&nbsp;奖品设置：</li>
+                                                <li class="global-input2-input">
+                                                    <input name="jp_set_type" id="is_cj_true"  type="radio"  value="1"  class="validate[condRequired[is_cj_t]]" />
+                                                    <label for="logo-true" class="ml5">单奖品</label>
+                                                    <input name="jp_set_type" id="jp_set_true"   type="radio"  value="2"  />
+                                                    <label for="logo-true" class="ml5">多奖品</label>
+                                                </li>
+                                            </ul>
+                                            <ul id="cj_style" style="display:none">
+                                                <li class="global-input2-name">绑定抽奖：</li>
+                                                <li class="global-input2-input c_bd_d1">
+                                                <p class="ml10 mt10">
+                                                <select name="jp_type" id="jp_type"   class="validate[condRequired[is_cj_true]] w248 selectbox">
+                                                
+                                                    <option value="2">旺财卡券</option>
+                                                    <!--<option value="3">无奖品</option> -->
+                                                </select></p>
+                                                
+                                                    <p class="ml10 mt10"  id="wc_style" >
+                                                     <input type="hidden" name="wc_batch_no" id="wc_batch_no" value=""/>
+                                                    <input name="goods_name" id="goods_name" type="text"  class="validate[condRequired[is_cj_true]] textbox w120 ml10" value="" readonly="readonly"/><a href="javascript:void(0)" class="btn-all w90 ml10" id="bind_cj">选择卡券</a> </p>
+                                                    <div class="ml10 mt10 db">*&nbsp;每日奖品限量：<input id="day_goods_count" name="day_goods_count" type="text"  class="validate[condRequired[is_cj_true],custom[integer]] textbox w50" value=""/><span>&nbsp;份/每天</span></div>
+                                                     <div class="ml10 mt10 db">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：<input id="goods_count" name="goods_count" type="text"  class="validate[condRequired[is_cj_true],custom[integer],funcCall[goods_count]] textbox w50" value=""/><span>&nbsp;份</span></div>
+                                                     <div class="ml10 mt10 db">*&nbsp;中&nbsp;&nbsp;奖&nbsp;&nbsp;概&nbsp;&nbsp;&nbsp;率：<input name="chance" type="text"  class="validate[custom[integer],min[0],max[100],condRequired[is_cj_true]] textbox w50" value="" onblur="javascript:if($(this).val()>100 ){alert('不能超过100');}" /><span>&nbsp;%</span></div>
+                                                </li>
+                                            </ul>
+                                            
+                                            
+                                           
+                                            <ul class="more_level" style="display: none;">
+                                                <li class="global-input2-name">*总中奖概率：</li>
+                                                <li class="global-input2-input"><input maxlength="3" name="total_chance" type="text"  class="validate[min[0],max[100],condRequired[jp_set_true],custom[integer]] textbox w50"/>%</li>
+                                            </ul>
+                                            <ul class="more_level"  style="display:none">
+                                                <li class="global-input2-name">一等奖：</li>
+                                                <li class="global-input2-input c_bd_d1">
+                                                <p class="ml10 mt10">
+                                                <select name="jp_type_1" id="jp_type_1"  class="validate[condRequired[jp_set_true]] w248 selectbox">
+                                                
+                                                    <option value="2">旺财卡券</option>
+                                                    <!-- <option value="3">无奖品</option> -->
+                                                </select></p>
+                                                
+                                                    <p class="ml10 mt10"  id="wc_style_1" >
+                                                    <input type="hidden" name="wc_batch_no_1" id="wc_batch_no_1" value=""/>
+                                                    <input name="goods_name_1" id="goods_name_1" type="text"  class="validate[condRequired[jp_set_true]] textbox w120 ml10" value="" readonly="readonly"/><a href="javascript:void(0)" class="btn-all w90 ml10" id="bind_cj_1" onclick="open_wc('1')">选择卡券</a>
+                                                    </p>
+                                                    <div class="ml10 mt10 db">*&nbsp;每日奖品限量：<input id="day_goods_count_1" name="day_goods_count_1" type="text"  class="validate[condRequired[jp_set_true],custom[integer]] textbox w50"/><span>&nbsp;份/每天</span></div>
+                                                     <div class="ml10 mt10 db">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：<input id="goods_count_1" name="goods_count_1" type="text"  class="validate[condRequired[jp_set_true],custom[integer],funcCall[goods_count]] textbox w50" value=""/><span>&nbsp;份</span></div>
+                                                     
+                                                </li>
+                                            </ul>
+                                            
+                                            
+                                            <ul class="more_level"  style="display:none">
+                                                <li class="global-input2-name">二等奖：</li>
+                                                <li class="global-input2-input c_bd_d1">
+                                                <p class="ml10 mt10">
+                                                <select name="jp_type_2" id="jp_type_2"  class="validate[condRequired[jp_set_true]] w248 selectbox">
+                                                
+                                                    <option value="2">旺财卡券</option>
+                                                    <!-- <option value="3">无奖品</option> -->
+                                                </select></p>
+                                            
+                                                    <p class="ml10 mt10"  id="wc_style_2" >
+                                                    <input type="hidden" name="wc_batch_no_2" id="wc_batch_no_2" value=""/>
+                                                    <input name="goods_name_2" id="goods_name_2" type="text"  class="validate[condRequired[jp_set_true]] textbox w120 ml10" value="" readonly="readonly"/><a href="javascript:void(0)" class="btn-all w90 ml10" id="bind_cj_2" onclick="open_wc('2')">选择卡券</a>
+                                                    </p>
+                                                    <div class="ml10 mt10 db">*&nbsp;每日奖品限量：<input id="day_goods_count_2" name="day_goods_count_2" type="text"  class="validate[condRequired[jp_set_true],custom[integer]] textbox w50"/><span>&nbsp;份/每天</span></div>
+                                                     <div class="ml10 mt10 db">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：<input id="goods_count_2" name="goods_count_2" type="text"  class="validate[condRequired[jp_set_true],custom[integer],funcCall[goods_count]] textbox w50" value=""/><span>&nbsp;份</span></div>
+                                                    
+                                                </li>
+                                            </ul>
+                                            
+                                             
+                                            <ul class="more_level"  style="display:none">
+                                                <li class="global-input2-name">三等奖：</li>
+                                                <li class="global-input2-input c_bd_d1">
+                                                <p class="ml10 mt10">
+                                                <select name="jp_type_3" id="jp_type_3"  class=" w248 selectbox">
+                                                
+                                                    <option value="2">旺财卡券</option>
+                                                    <!-- <option value="3">无奖品</option> -->
+                                                </select></p>
+                                                
+                                                    <p class="ml10 mt10"  id="wc_style_3" >
+                                                     <input type="hidden" name="wc_batch_no_3" id="wc_batch_no_3" value=""/>
+                                                    <input name="goods_name_3" id="goods_name_3" type="text"  class="validate[condRequired[jp_set_true]] textbox w120 ml10" value="" readonly="readonly"/><a href="javascript:void(0)" class="btn-all w90 ml10" id="bind_cj_3" onclick="open_wc('3')">选择卡券</a>
+                                                    </p>
+                                                    <div class="ml10 mt10 db">*&nbsp;每日奖品限量：<input id="day_goods_count_3" name="day_goods_count_3" type="text"  class="validate[custom[integer],condRequired[jp_set_true]] textbox w50"/><span>&nbsp;份/每天</span></div>
+                                                     <div class="ml10 mt10 db">*&nbsp;奖&nbsp;&nbsp;品&nbsp;&nbsp;总&nbsp;&nbsp;&nbsp;数：<input id="goods_count_3" name="goods_count_3" type="text"  class="validate[custom[integer],condRequired[jp_set_true],funcCall[goods_count]] textbox w50" value=""/><span>&nbsp;份</span></div>
+                                                     
+                                                </li>
+                                            </ul>
+                                            
+                                            <ul>
+                                                <li class="global-input2-name"></li>
+                                                <li class="global-input2-input">
+                                                <input type="hidden" name="ajax" value="1" />
+                                                <a href="javascript:;" id="sub_button" title="确认" class="btn-all w110">确认</a>
+                                                <a href="javascript:history.go(-1)" title="取消" class="btn-all-del w110 ml10">取消</a></li>
+                                            </ul>
+                                        </div>
+                                        <div  class="activityread_iphone tc mt70">
+                                            <div class="activityread_iphone_con">
+                                                <div id="iphone_bg" class="preview-body">
+                                                    <div id="wap-wrapper">
+                                                        <div id="wap-header" class="fn">
+                                                            <div class="title">{$node_name}会员卡领取</div>
+                                                        </div>
+                                                        <div id="wap-container">
+                                                            <div id="wap-main">
+                                                                <div class="mainTop">
+                                                                    <div class="top-img">
+                                                                        <img src="__PUBLIC__/Label/Img/vip_img.png"  class="vip-img" />
+                                                                    </div>
+                                                                </div>
+                                                                <div class="mainCon">
+                                                                    <div class="mainCon-text">粉丝招募活动说明</div>
+                                                                    <div class="mainCon-bottomBg"></div>
+                                                                    <div class="mainForm">
+                                                                        <div class="loginForm">
+                                                                            <ul class="sOne-loginForm">
+                                                                                <li class="bd-b"><p>手机号码</p><input type="text" class="sOne-loginInput"  placeholder="请输入您的手机号" value=""><span>*</span></li>
+                                                                                <li><p>验证码</p><input type="text" class="sOne-loginInput-half"  placeholder="验证码"><input type="button" class="sOne-getpasscode" value="获取验证码" id="getpasscode" data-href=""></li>
+                                                                                <li><p>姓名</p><input type="text" class="sOne-loginInput"  placeholder="请输入您的姓名" value=""></li>
+                                                                                <li>
+                                                                                    <p>出生日期</p>
+                                                                                    <select  class="data-select"><option value="">请选择</option><option value="2013">2013</option><option value="2012">2012</option><option value="2011">2011</option><option value="2010">2010</option><option value="2009">2009</option><option value="2008">2008</option><option value="2007">2007</option><option value="2006">2006</option><option value="2005">2005</option><option value="2004">2004</option><option value="2003">2003</option><option value="2002">2002</option><option value="2001">2001</option><option value="2000">2000</option><option value="1999">1999</option><option value="1998">1998</option><option value="1997">1997</option><option value="1996">1996</option><option value="1995">1995</option><option value="1994">1994</option><option value="1993">1993</option><option value="1992">1992</option><option value="1991">1991</option><option value="1990">1990</option><option value="1989">1989</option><option value="1988">1988</option><option value="1987">1987</option><option value="1986">1986</option><option value="1985">1985</option><option value="1984">1984</option><option value="1983">1983</option><option value="1982">1982</option><option value="1981">1981</option><option value="1980">1980</option><option value="1979">1979</option><option value="1978">1978</option><option value="1977">1977</option><option value="1976">1976</option><option value="1975">1975</option><option value="1974">1974</option><option value="1973">1973</option><option value="1972">1972</option><option value="1971">1971</option><option value="1970">1970</option><option value="1969">1969</option><option value="1968">1968</option><option value="1967">1967</option><option value="1966">1966</option><option value="1965">1965</option><option value="1964">1964</option><option value="1963">1963</option><option value="1962">1962</option><option value="1961">1961</option><option value="1960">1960</option></select>
+                                                                                    <select  class="data-select"><option value="">请选择</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select>
+                                                                                    <select  class="data-select"><option value="">请选择</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option></select>
+                                                                                </li>
+                                                                                <li><p>性别</p><input type="radio" value="1"  class="sOne-loginRadio ml10" id="sex-boy"/><label for="sex-boy">男</label><input type="radio" value="2" class="sOne-loginRadio ml10" id="sex-girl"/><label for="sex-girl">女</label></li>
+                                                                                <li class="ptb20"><input type="button" class="input_button" value="立即免费领取"></li>
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <script type="text/javascript">
+                                                        jsScroll(document.getElementById('iphone_bg'),11, 27, 'divSrollBar');//个性化滚动条脚本  jsScroll(对象名称, 滚动条宽度, 滑块高度, 滚动条样式名称)
+                                                    </script>
+                                                </div>
+                
+                                            </div>
+                                        </div>
+                    </form>
+            </div>
+            <!-- 添加成功 begin-->
+            <div id="main" class="rel tip_msg dn">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="/index.php?g=Home&amp;m=Index&amp;a=index">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="javascript:void(0)">操作成功！</a></p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:window.location.reload()" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="fn">
+                    <div class="pop-up fn mt40">
+                            <dd class="pop-img tc pt40"><img src="__PUBLIC__/Image/ok_img.png" width="46" height="46" class="mr30" style="vertical-align:middle;">添加成功！</dd>
+                            <dd class="pop-hint"></dd>
+                            <dd class="pop-btn tc mt40">
+                                <a href="{:U('LabelAdmin/GroupBuy/index')}" class="btn-all w110 mr10">团购活动列表</a>
+                                <a class="btn-all w110 mr10" id="jump_url">发布渠道</a>                           
+                            </dd>
+                    </div>
+               </div>
+            </div>
+            <!-- 添加成功 end-->
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>
+<script>
+
+    
+//是否抽奖
+$("input[name=is_cj]").change(function(){
+        if($(this).val() == '1'){
+          $('#jp_set').show();
+            //$('#cj_style').show();
+            //$('#cj_text').show();
+        }else{
+          $('#jp_set').hide();
+            $('#cj_style').hide();
+           // $('#cj_text').hide();
+        }
+    });
+//单奖品多奖品
+$("input[name=jp_set_type]").change(function(){
+        if($(this).val() == '1'){
+            $('#cj_style').show();
+            $('.more_level').hide();
+        }else{
+            $('#cj_style').hide();
+            $('.more_level').show();
+        }
+    });
+
+
+//选择奖品
+$("#jp_type").change(function(){
+        if($(this).val() == '1'){
+            $('#zc_style').show();
+            $('#wc_style').hide();
+        }else if($(this).val() == '2'){
+            $('#zc_style').hide();
+            $('#wc_style').show();
+        }else if($(this).val() == '3'){
+            $('#zc_style').hide();
+            $('#wc_style').hide();
+        }
+    });
+//选择奖品1
+$("#jp_type_1").change(function(){
+        if($(this).val() == '1'){
+            $('#zc_style_1').show();
+            $('#wc_style_1').hide();
+        }else if($(this).val() == '2'){
+            $('#zc_style_1').hide();
+            $('#wc_style_1').show();
+        }
+    });
+//选择奖品2
+$("#jp_type_2").change(function(){
+        if($(this).val() == '1'){
+            $('#zc_style_2').show();
+            $('#wc_style_2').hide();
+        }else if($(this).val() == '2'){
+            $('#zc_style_2').hide();
+            $('#wc_style_2').show();
+        }
+    });
+//选择奖品3
+$("#jp_type_3").change(function(){
+        if($(this).val() == '1'){
+            $('#zc_style_3').show();
+            $('#wc_style_3').hide();
+        }else if($(this).val() == '2'){
+            $('#zc_style_3').hide();
+            $('#wc_style_3').show();
+        }
+    });
+    
+//文件上传
+function ajaxFileUpload(imgid,hiddenid,showid,url){
+var dialog = art.dialog({title:false,fixed: true,padding:0});
+$.ajaxFileUpload
+({
+    url:url,
+    secureuri:false,
+    fileElementId:imgid,
+    dataType: 'json',
+    data:{name:'logan', id:'id'},
+    success: function (data, status)
+    {
+        if(typeof(data.error) != 'undefined')
+        {
+            if(data.error != '')
+            {
+                dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+            }else{
+
+                var resp = data.msg;
+                if(resp != '0000'){
+                    dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+                    return false;
+                }else{
+                    dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+                }
+                $('#'+hiddenid).val(data.imgurl);
+                if(showid == 'showpage1'){
+                    $('#showpic1').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+                    $('#show_jpg').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+                }
+                else if(showid == 'showpage2'){
+                    $('#showpic2').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+                }
+                else if(showid == 'showpage3'){
+                    $('#showpic3').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+                }
+            }
+        }
+    },
+    error: function (data, status, e)
+    {
+
+        dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+    }
+})
+
+return false;
+}
+</script>

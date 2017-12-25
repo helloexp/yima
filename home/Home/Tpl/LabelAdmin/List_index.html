@@ -1,0 +1,173 @@
+<?php
+//列表模板
+$combinlink="&model=event&type=combination&action=create&customer=".$node_type_name;			
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>列表模板_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivities.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script>
+function addactivity(){
+	var html=
+		['<form action="" method="POST" name="theform" id="theform" enctype="multipart/form-data">',
+		'<div class="global-input4 fn"><ul><li class="global-input4-name">列表模板名称：</li>',
+		'<li class="global-input4-input"><input name="name" id="name"  type="text" maxlength="40"/>',
+		'<li class="global-input4-name">显示商户名称：</li>',
+		'<li class="global-input4-input"><input name="webtitle" id="webtitle" type="text" value="{$node_short_name}"/></li>',
+		'</li></ul></div>',
+		'</form>'].join('');
+	art.dialog({
+		title:'添加列表模板',
+		content: html,
+		ok: function () {
+            if($('#name').val() == ''){
+                art.dialog('活动名称不能为空！');
+	            return false;
+            }
+            if($('#name').val().length > 20 ){
+                art.dialog('活动名称长度不能超过20！');
+	            return false;
+            }
+
+    		$.post("{:U('LabelAdmin/List/addSubmit')}",{"name":$('#name').val(),"webtitle":$('#webtitle').val()},function(data){
+                if(data.status==1){
+                    art.dialog({title:false,content:"<div class='msg-all-succeed'>添加成功</div>",fixed: true,padding:0,time:2});
+                   window.location.href="{:U('LabelAdmin/List/edit?id')}"+data.info+"<?php echo $combinlink;?>";
+                }else{
+                    art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+                    return false;
+                }
+            },"json");
+    	   
+		},
+        lock: true,
+		cancelVal: '关闭',
+		cancel: true,
+		width:"400px",
+		fixed:true,
+		padding:"10px"
+	});
+};
+$(function(){
+    $('#sub_button').click(function(){
+        $('#theform').submit();
+    });
+})
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <include file="./Home/Tpl/LabelAdmin/Path_index.html" />
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="LabelAdmin/Batch/leftMenu" leftmenuid="lbhd"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">列表模板						
+                        <a href="javascript:void(0);" class="btn-all w110 r" onclick="addactivity()">添加列表模板</a>
+                        </h4>
+                    </div>
+                    <div class="form-search  fn">
+                        <form action="{:U('LabelAdmin/List/index/')}" method="POST" name="theform" id="theform">
+                        <p>活动名称</p>
+                        <p><input type="text" name="key" class="textbox w100" value="{$Think.request.key}" /></p>
+                        <p class="ml20">创建日期</p>
+                        <p><input type="text" name="start_time" id="start_time" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$Think.request.start_time}" class="textbox w80" />
+                           -
+                           <input type="text" name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time}" class="textbox w80" /></p>
+                        
+                        <a href="javascript:void(0);" class="btn-all w110 r" id="sub_button">查询</a>
+                        <div class="cl mb5"></div>
+                        
+                        </form>
+                    </div>					
+    
+					<if condition="$query_list neq '' "> 
+					   <script>
+										$(function(){
+										productIntroduce(2,"zhyx","javascript:void(0)");})
+										</script>
+                    <volist name="query_list" id="v" >
+                    <div class="activities-list">
+                        <div class="activities-list-wrapper fn">
+                            <div class="activities-list-wrapper-state"><?php echo $v['status'] == '1'?'<i class="icon-on"></i>':'<i class="icon-off"></i>';?></div>
+                            <div class="activities-list-wrapper-con">
+                                <div class="activities-list-wrapper-title fn"><?php echo $v['name'];?> <span class="ml30 font-14-fe"><?php if($v['is_mem_batch'] == 'Y'){echo '粉丝专享';}?></span><?php if($v['is_halt'] == '1'){?><a style="color:#ff0000" href="javascript:void(0)" onclick="art.dialog('您的活动内容不符合规范，已被强制停止，如有疑问，请联系客服400-882-7770！')">强制停止</a><?php }?></div>
+                                <div class="activities-list-wrapper-meta fn">所属商户：<span><?php echo D('node')->getNodeName($v['node_id']);?></span></div>
+                                <div class="activities-list-wrapper-meta fn">创建时间：<span><?php echo date('Y-m-d H:i:s',strtotime($v['add_time']));?></span>
+                                </div>
+                                <div class="activities-list-wrapper-data fn">
+                                    <p>访问量：<span><a href="{:U('LabelAdmin/Chart/clickChart',array('batch_id'=>$v['id'],'batch_type'=>8))}">{$v['click_count']}</a></span></p>
+                                </div>
+                            </div>
+                            <div class="activities-list-wrapper-opr">
+                                <if condition="$userInfo['node_id'] eq $v['node_id'] ">
+                                <a href="<?php echo U('LabelAdmin/BindChannel/index','batch_type=8&batch_id='.$v['id']);?>"><p>发布到渠道</p></a>
+                                </if>
+                            </div>
+                        </div>
+                        <div class="activities-list-opr">
+                            <ul class="fn">
+                                <if condition="$userInfo['node_id'] eq $v['node_id'] ">
+                                <li class="opr-item">
+                                    <a href="<?php echo U('LabelAdmin/List/edit/',array('id'=>$v['id']));?><?php echo $combinlink;?>"><i class="icon-edit"></i><span>编辑列表模板</span></a>
+                                </li>
+                                </if>
+                                
+                                <li class="opr-item">
+                                    <a href="<?php echo U('LabelAdmin/Chart/channelChart',array('batch_type'=>8,'batch_id'=>$v['id']));?>"><i class="icon-data"></i><span>数据分析</span></a>
+                            </ul>
+                        </div>
+                    </div>
+                    </volist>
+                    <else/>
+                    
+                                  
+                    
+                    
+                                    <?php if($_POST){?>
+                        <div class="nonedata"></div>
+                                   
+									 <?php }else{?>
+                                    <script>
+										$(function(){
+										productIntroduce(3,"zhyx","javascript:void(0)");})
+										</script>
+        	                      
+									<?php }?>
+                                    </if>
+                    <div class="page"><?php echo $page;?></div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

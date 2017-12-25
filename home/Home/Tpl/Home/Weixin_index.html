@@ -1,0 +1,272 @@
+<php>
+//账号类型
+$account_type_arr = array(
+'1'=>'未认证订阅号',
+'2'=>'已认证订阅号',
+'3'=>'未认证服务号',
+'4'=>'已认证服务号'
+);
+</php>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script>
+$(function(){
+	$(".msg-user-opr").click(function(){
+		$(".msg-user-info").hide();
+		$(".msg-user-add").height("auto");
+		var addHeight=$(".msg-user-add").height();
+		$(".msg-user-add").height("28px").show();
+		$(".msg-user-add").animate({height:addHeight},500,function(){$(".msg-user-add").height("auto");});
+	});
+	$(".msg-user-exit,#btn-cancel").click(function(){
+		$(".msg-user-add").animate({height:28},500,function(){
+			$(".msg-user-add").hide();
+			$(".msg-user-info").show();
+		});
+	});
+	$(".msg-user-type").change(function(){
+		if($(this).val()=="1"){
+			$(".msg-user-typeDiv").hide();
+		}else{
+			$(".msg-user-typeDiv").show();
+		}
+	})
+	$(".alertmem").click(function(){
+		var tel="<div class='proInt-callus'>您尚未开通此项服务，欢迎拨打业务咨询热线：400-882-7770</div>"
+			art.dialog({
+				title:"马上开通",
+				lock:true,
+				content:tel,
+				id:"pro",
+				width:"830px",
+				padding:0
+			});
+	})
+	
+	$("#theform").submit(function(){
+		var actionUrl = $(this).attr("action");
+		var data = getFormData(this);
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.post(actionUrl,data,function(d){
+			alert(d.info);
+			if(d.status=='1'){
+				window.location.reload();
+			}
+			dialog.close();
+		},'json');
+		return false;
+	});
+
+	$("#btn-generate-token").click(function(){
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		var actionUrl = $(this).attr("data-url");
+		var data = getFormData("#theform");
+		if(!data.weixin_code){
+			alert("账号名不能为空");
+			return false;
+		}
+		$.post(actionUrl,data,function(d){
+			
+			if(d.status=='1'){
+				$("#token","#theform").val(d.info.token);
+				dialog.close();
+				return;
+			}
+			dialog.close();
+			alert(d.info);
+			
+		},'json');
+	});
+
+	//查看攻略
+    $('#btn-Introduce').click(function(){
+          art.dialog.open("{:U('Home/Introduce/weixin')}",{
+				title: '渠道攻略',
+				width:860,
+                height:'90%'
+			});
+        
+    });
+
+	//判断初始
+	<eq name="_GET.setting" value="1">
+		$(".msg-user-opr").click();
+	</eq>
+
+    <eq name="configFlag" value="1">
+        productIntroduce(1,"wx","javascript:void(0)");
+    <else/>
+        productIntroduce(2,"wx","javascript:void(0)");
+    </eq>
+	$(".msg-user-type").change();
+
+});
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+    	<div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>&gt;</p>
+                            <p>微信助手</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+					<include file="LabelAdmin/Batch/leftMenu" leftmenuid="wxzs"/>
+                </div>
+                
+                
+				<div class="subcon">
+                    <div class="msg-user fn">
+                    	<ul class="msg-user-info">
+                        	<li>绑定微信公众账号</li>
+                            <li>帐号名：{$info['weixin_code']|default_nvl='未指定'}</li>
+                            <li>账号类型：{:show_defined_text($info['account_type'],$account_type_arr)}</li>
+                            <li class="last"><a href="javascript:void(0)" class="btn_inner r msg-user-opr">设置</a></li>
+                        </ul>
+                        <ul class="msg-user-add dn">
+                        	<table cellpadding="0" cellspacing="0" class="W-table">
+                                <tr>
+                                    <th>
+                                        <a href="javascript:void(0)" class="btn_inner r mt5 mr10 msg-user-exit">收起</a>
+                                        绑定微信公众帐号
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="global-input1">
+										 <form action="{:U('Home/Weixin/bindSubmit')}" method="get" id="theform" >
+                                            <ul>
+                                                <li class="global-input1-name">*&nbsp;帐号名：</li>
+                                                <li class="global-input1-input"><input name="weixin_code" type="text" class="textbox w200" value="{$info['weixin_code']}"/><p class="font-12-cc ml10">请填写微信公众帐号登陆邮箱</p></li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input1-name">*&nbsp;帐号类型：</li>
+                                                <li class="global-input1-input">
+                                                	<select name="account_type" id="account_type" class="selectbox w212 msg-user-type">
+                                                    	<option value="">请选择账号类型</option>
+														{:show_arr_opt($account_type_arr,$info['account_type'])}
+                                                    </select>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input1-name">*&nbsp;接入URL：</li>
+                                                <li class="global-input1-input"><p>{$info['callback_url']}</p></li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input1-name">*&nbsp;Token：</li>
+                                                <li class="global-input1-input">
+													<input name="token" type="text" class="textbox w300" value="{$info['token']}" id="token" readonly/>
+													<a href="javascript:void(0)" class="btn_inner w110 ml20" id="btn-generate-token" data-url="{:U('Home/Weixin/generateToken')}">
+													重置</a>
+                                                    <br /><p class="font-12-cc">请到“<a href="http://mp.weixin.qq.com" target="_blank">微信公众平台</a>”绑定接入URL及Token<a href="javascript:void(0)" class="ml10" id="btn-Introduce">查看配置教程</a></p>
+                                                </li>
+                                            </ul>
+                                            <div class="msg-user-typeDiv ">
+                                                <ul>
+                                                    <li class="global-input1-name">*&nbsp;应用ID：</li>
+                                                    <li class="global-input1-input"><input name="app_id" id="app_id" type="text" value="{$info.app_id}" class="textbox w200"><p class="font-12-cc ml10">请输入应用ID<a href="javascript:void(0)" class="ml10">查看如何获取</a></p></li>
+                                                </ul>
+                                                <ul>
+                                                    <li class="global-input1-name">*&nbsp;应用密钥：</li>
+                                                    <li class="global-input1-input"><input name="app_secret" id="app_secret" type="text" value="{$info.app_secret}" class="textbox w200"><p class="font-12-cc ml10">请输入应用密钥<a href="javascript:void(0)" class="ml10">查看如何获取</a></p></li>
+                                                </ul>
+                                            </div>
+                                            <ul>
+                                                <li class="global-input1-name">&nbsp;</li>
+                                                <li class="global-input1-input">
+													<button type="submit" class="btn-all w110 ml20 vt" id="btn-save">保存</button>
+													<button type="button" class="btn-all-del w110 ml20 vt" id="btn-cancel">取消</button>
+                                                </li>
+                                            </ul>
+										 </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </ul>
+                    </div>
+                    <div class="msg-slideNav mt20">
+                    	<div class="msg-slideNav-title">微信交互配置</div>
+                        <div class="msg-slideNav-list fn">
+                        	<ul>
+                            	<li><a href="{:U('Home/Weixin/materialImgTxtManage')}"><i class="icon-msg-1"></i><p>素材配置</p></a></li>
+                                <li><a href="{:U('Home/WeixinResp/keywords')}"><i class="icon-msg-2"></i><p>关键字回复配置</p></a></li>
+                                <li><a href="{:U('Home/WeixinResp/follow',array('respType'=>0))}"><i class="icon-msg-3"></i><p>被添加回复配置</p></a></li>
+                                <li><a href="{:U('Home/WeixinResp/follow',array('respType'=>1))}"><i class="icon-msg-4"></i><p>消息自动回复配置</p></a></li>
+                                <li><a href="{:U('Home/WeixinMenu/index')}"><i class="icon-msg-5"></i><p>自定义菜单配置</p></a></li>
+                                <li><a href="{:U('Home/WeixinLocation/index')}"><i class="icon-msg-6"></i><p>地理位置配置</p></a></li>
+								 <li><a href="{:U('WeixinChannel/index')}"><i class="icon-msg-15"></i><p>微信推广码</p></a></li>
+
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="msg-slideNav mt20">
+                    	<div class="msg-slideNav-title">微信管理</div>
+                        <div class="msg-slideNav-list fn">
+                        	<ul>
+							<!--
+								<li><a href="{:U('LabelAdmin/MemberRegistration/weiXinIndex')}"><i class="icon-msg-7"></i><p>粉丝招募</p></a></li>
+                                <li><a href="{:U('WeixinChannel/index')}"><i class="icon-msg-10"></i><p>微信推广</p></a></li> 
+							 -->
+                                <li><a href="{:U('Home/Weixin/fansmng')}"><i class="icon-msg-7"></i><p>粉丝管理</p></a></li>
+                                <li><a href="{:U('Home/Weixin/user_msgmng')}"><i class="icon-msg-8"></i><p>消息管理</p></a></li>
+                                <li><a href="{:U('Home/Weixin/batch_send')}"><i class="icon-msg-9"></i><p>智能群发</p></a></li>
+                                <li>
+								<?php if($nopower === true){?>
+								<a href="javascript:void(0)" class="alertmem"><i class="icon-msg-11"></i><p>微信粉丝卡</p></a></li>
+								<?php }else{?>
+								<a href="<?php echo U('LabelAdmin/MemberRegistration/weiXinIndex');?>"><i class="icon-msg-11"></i><p>微信粉丝卡</p></a></li>
+								<?php }?>
+                            </ul>
+                        </div>
+                    </div>
+					
+                    <div class="msg-slideNav mt20">
+                    	<div class="msg-slideNav-title">微信统计</div>
+                        <div class="msg-slideNav-list fn">
+                        	<ul>
+                            	<li><a href="{:U('WeixinCount/user')}"><i class="icon-msg-12"></i><p>用户统计分析</p></a></li>
+                                <li><a href="{:U('WeixinCount/channel')}"><i class="icon-msg-13"></i><p>微信渠道分析</p></a></li>
+                                <li><a href="{:U('WeixinCount/message')}"><i class="icon-msg-14"></i><p>消息统计分析</p></a></li>
+                            </ul>
+                        </div>
+                    </div>
+					
+				</div>
+                
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

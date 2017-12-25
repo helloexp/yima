@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+<title>翼码旺财</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="__PUBLIC__/Label/Js/require.js"></script>
+<link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/Epos_css.css" />
+</head>
+<body>
+<div id="header">
+    <i class="icon-back l"><a href="{:U('batchInfoList',array('sid'=>$sid))}" class="a-hide goNav"></a></i>
+    <h1>发送卡券</h1>
+    <i class="icon-home r"><a href="<?php echo C('INDEX_URL')?>" class="a-hide loginOut"></a></i>
+</div>
+<div id="wrapper">
+    <div id="main">
+        <div class="listMore">
+        	<div class="listMoreTop">
+            	<div class="img"><img src="{$data['img_url']}"></div>
+                <div class="title">
+                	<h2>{$data['batch_short_name']}</h2>
+					<notempty name="data['custom_no']">
+                    <p><span>自定编号：{$data['custom_no']}</span></p>
+					</notempty>
+                    <if condition = "$data['verify_end_type'] == 1">
+					<p><span>有效时间：{$data['verify_end_date']}天</span></p>
+                    <else />
+					<p><span>有效期至：{$data['verify_end_date']}</span></p>
+                    </if>
+                </div>
+            </div>
+        	<div class="listMoreNum">
+            	<div class="listMoreNumCon"><i class="icon-numok"></i><p>剩余{$data['remain_num']}张</p></div>
+            	<div class="listMoreNumCon"><i class="icon-numok2"></i><p>已发送{$data['send_num_sum']}张</p></div>
+            </div>
+        </div>
+        <div class="Iform">
+            <dl>
+                <dt>手机号码</dt>
+                <dd><input type="tel" maxlength="11" name="tel" placeholder="请输入手机号" class="validate[custom[phone]]" ></dd>
+            </dl>
+            <dl>
+                <dt>数量</dt>
+                <dd><input type="tel" placeholder="请输入数量" name="num" class="validate[custom[integer]]" value="1"></dd>
+            </dl>
+        </div>
+		<input type="hidden" name="hidden" value="0">
+        <div class="btn"><a id="send" class="btn-all">发送</a></div>
+    </div>
+</div>
+</body>
+<script>
+var mask = false;
+requirejs(['jquery','zDialog'], function($,zDialog) {
+	$(document).ready(function(e) {
+		$('#send').click(function(){
+			if(mask){
+				return false;
+			}
+			mask = true;
+			var phone_no = $("input[name='tel']").val();
+			var send_num = $("input[name='num']").val();
+			var batch_info_id = getUrlParam('batch_info_id');
+			var pos_id = getUrlParam('pos_id');
+			var user_id = getUrlParam('user_id');
+			loading.tips("正在发送...");
+			$.post('{:U('send')}',{'phone_no':phone_no,'send_num':send_num,'batch_info_id':batch_info_id,'pos_id':pos_id,'user_id':user_id},function(result){
+				loading.close();
+				result = eval("("+result+")");
+				mask = false;
+				 var diag = new Dialog();
+                diag.Title = '发送结果';
+                diag.Width =  300;
+                diag.Height =  100;
+                diag.ShowButtonRow = false;
+                diag.OKEvent = function () {
+                    diag.close();
+					mask = false;
+                };
+                diag.CancelEvent = function () {
+                    diag.close();
+					mask = false;
+                };
+                diag.InnerHtml = result;
+                diag.show();
+			})
+		})
+	});
+});
+function getUrlParam(name) {
+	var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+	var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+	if (r != null) {
+		return unescape(r[2]);
+	}else{
+		return null;
+	} //返回参数值
+}
+</script>
+</html>

@@ -1,0 +1,1292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>闪购_营销活动中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnewsadd.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<style>
+	table{width:100%;}
+	table td{padding-bottom:30px;}
+	.img{width:40%;text-align:right;padding-right:20px;}
+	.content{padding-left:15px;width:60%;text-align:left;vertical-align:top;font-size:18px;}
+	.content span{margin-left:10px;font-size: 14px;}
+	.content .color{font-size:20px;color:#05e625;margin-right:20px;}
+</style>
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/Wnewsadd.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jsScroll.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jscolor/jscolor.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script>
+var sendPrice = {:json_encode($sendPrice)};
+var isopencusMsg = "{$startUp}"; //1：设置了短信内容自定义 0：未设置自定义
+$(document).ready(function(e){
+	if(isopencusMsg==1){
+		$(".nocusMsg").hide();
+		$(".cusMsg").show();
+	}else{
+		$(".nocusMsg").show();
+		$(".cusMsg").hide();
+	}
+	//选择商品
+	/*$("#bind_goods").click(function(){
+    	    art.dialog.open("{:U('LabelAdmin/SelectGoods/index')}",{
+			    id:"gid",
+    	    	width: 800,
+    	    	height: 500,
+    	    	title:'选择商品',
+    	    	lock: true,
+				cache: false
+    	    })
+        });*/
+	//选择卡券/商品
+	$("#theform").validationEngine();
+	$('#bind_marketgoods,#bind_goods').click(function(){
+        var url = '', title = '';
+        if(this.id == 'bind_marketgoods'){
+            url = '{:U('Common/SelectJp/index',array('callback'=>'cb_setGoodsInfo','show_source'=>'0,1,2,4'))}';
+            title = '选择卡券';
+        }else{
+            url = '{:U('Common/SelectJp/index',array('goods_type'=>'6','callback'=>'cb_setGoodsInfo'))}';
+			title = '选择商品';
+        }
+        art.dialog.open(url,{
+            width: 800,
+            title: title,
+            id: 'selectjp'
+        })
+    });
+
+    $('#sub_button').click(function(){
+        var dialog;
+        if($("#theform").validationEngine('validate')){
+             //取得sku价格表
+            var sellprice = [];
+            $(".skuTable [name='price']").each(function(index, element) {
+                var p = $(this).val();
+                            var nid = $(this).attr("data-id");
+                var n = $(this).closest("tr").find("[name='num']").val();
+                 var sp = $(this).closest("tr").find("[name='price']").val();
+                            var arr = {
+                                    newid:nid,
+                                    price:sp,
+                                    num:n
+                            };
+                            sellprice.push(arr);
+            });
+            data["price"] = sellprice;
+            $('#data_price_info').val(JSON.stringify( data.price ));
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                           var datas = data.data;
+                           dialog.close();
+                           $(".text_form").hide();
+                           $(".tip_msg").show();
+                           $("#jump_url").attr("href",datas.url);
+                           $(window).scrollTop(0);
+                           return false;
+                      }else{
+                            dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                      },
+                dataType:'json'
+            });
+            return false;
+        }
+    }) ;
+	
+	//微信粉丝专享
+	$('#mem_join').click(function(){
+		$.post(
+			"{:U('Ecshop/GoodsPutOn/checkwxyx')}",
+			{id:1},
+			function (data) {
+				if(data.status==1){
+					art.dialog({
+						id:"msgcheck",
+						title:"微信公众号参与提醒",
+						content:'<p style="color:#333; line-height:25px; font-size:14px;padding-bottom:10px;">请确认您“微信助手”中配置的账户信息有效，否则将导致消费者无法购买该商品。</p><p style="color:#333; line-height:25px; font-size:14px;"><label class="vm"><input type="checkbox" class="vm" name="wxcheckbox"><span class="vm ml5">我确认“微信助手”设置的微信公众号账户有效</span></label></p>',
+						fixed: true,
+						width:400,
+						icon: 'warning',
+						lock:true,
+						okVal: '确认',
+						ok: function () {
+							if(!$("input[name='wxcheckbox']").attr("checked")){
+								return false
+							}else{
+								$('#wxlink').show();
+							}
+						},
+						cancel:function () {
+							$('#wxlink').hide();
+						$('#mem_join_no').attr('checked',true);
+						}
+					});
+				}else{
+					$('#mem_join_no').attr('checked',true);
+					$('#wxlink').hide();
+					art.dialog({
+						title: '微信公众号参与提醒',
+						icon: 'warning',
+						content:"亲，由于本功能需要<font color='red'><b>微信服务号</b></font>参与，<br />请在“微信助手”中绑定您的<font color='red'><b>微信服务号</b></font>。",
+						lock:true,
+						okVal:"去设置",
+						ok:function(){
+							//window.location.href = "{:U('Weixin/Weixin/index')}";
+							window.open("{:U('Weixin/Weixin/index')}",'_blank');
+						},
+						 cancelVal:'关闭',
+						 cancel: true
+					});
+					return false;
+				}
+			},
+			'json'
+		);
+	})
+
+	$('#delivery_flag').change(function(){
+		if(this.checked == true){
+                        // var length_nums = 0;
+                        // length_nums = parseInt($('#using_rules').attr('lenght_nums')) - parseInt($('#name').val().length);
+                        // $("#using_rules").attr("onkeyup","check_lenght("+length_nums+",'mms_info_text',this);");
+                        // $('#using_rules').attr('class','validate[required,maxSize['+length_nums+'] texttextarea w240');
+			$(".delivery_flag1").show();
+                }else{
+			$(".delivery_flag1").hide();
+                }        
+	});
+        
+    $('#delivery_flag2').change(function(){
+        if(!this.checked){
+            $('#isSendPay').hide();
+        }else{
+            $('#isSendPay').show();
+        }
+    });
+    if($('#delivery_flag2').attr('checked') == 'checked'){
+        $('#isSendPay').show();
+    }else{
+        $('#isSendPay').hide();
+    } 
+        
+})
+
+function checkCodeLogo(){
+    if($("#resp_code_img").val() == '')
+        {
+            return "请上传二维码Logo";
+        }
+}
+function check_goods_img(){
+	if($("#resp_goods_img").val() == '')
+    {
+        return "请上传商品图片";
+    }
+}
+function goods_count(field){
+    var id_value = field.attr("id");
+    var last_str = id_value.substr(id_value.length-1,1);
+    if(!isNaN(last_str) ){
+        var day_goods_count = $("#day_goods_count_"+last_str).val();
+        var goods_count = $("#goods_count_"+last_str).val();
+        if(day_goods_count > goods_count){
+            return "奖品总数要大于或等于每日奖品限量数！";
+        }
+    }else{
+        var day_goods_count = $("#day_goods_count").val();
+        var goods_count = $("#goods_count").val();
+        if(day_goods_count > goods_count){
+            return "奖品总数要大于或等于每日奖品限量数！";
+        }
+    }
+}
+/*获取图片路径中的图片名*/
+function base_name(url){
+    var urlList = url.split('/'); 
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+
+function uploadImg(url) {
+var win_width = 500;
+art.dialog.open(url, {
+    lock: true,
+    title: "上传图片",
+    width: win_width,
+    height: win_width / 1.6,
+    id: 'art_upload'
+});
+}
+
+//背景图片回调函数
+function bgCallback(d) {
+//填充缩略图
+$('#img_resp_show').attr('src', d.absolutepath).show();
+//上传用
+$('#resp_goods_img').val(base_name(d.absolutepath));
+}
+//选择商品/卡券回调函数
+function cb_setGoodsInfo(dataInfo){
+    _goods_info = dataInfo;
+    art.dialog.list['selectjp'].close();
+	$('#select_goods_id').val(dataInfo.id);
+    $('#select_goods_name').val(dataInfo.goods_name);
+    $('#goods_memo').val(dataInfo.goods_desc);
+	$('#market_price').val(dataInfo.market_price);
+    $('#mms_title').val(dataInfo.mms_title);
+    $('#using_rules').val(dataInfo.mms_text);
+    $('#is_sku').val(dataInfo.is_sku);
+    if( false == dataInfo.is_sku ){
+        $('.not_skuinfos').show();
+        $('.sku_infos').hide();
+    }else{
+        $('.sku_infos').show();
+        $('.not_skuinfos').hide();
+    }
+    data.price = eval('('+"["+dataInfo.skudetail+"]"+')');
+    data.namelist = eval('('+"["+dataInfo.skutype+"]"+')');
+    begin(data);
+    //$('#goods_image').attr('src', data.goods_image);
+	$('#mms_title, #using_rules, #goods_memo').trigger('keyup');
+    //不限库存
+    if(dataInfo.storage_type == '0'){
+		$("#select_goods_limit").val("-1");
+		$('#buy_limit_note').html("注：该商品库存不限");
+		$('.goods_total_num').show();
+    }
+    //限制库存
+    else{
+        $('#buy_limit_note').html("注：该商品库存为"+dataInfo.remain_num+"，数量设置不能多于库存");
+		$("#select_goods_limit").val(dataInfo.remain_num);
+		$('.goods_total_num').hide();
+    }
+	$('#buy_limit_note').show();
+	//非商品类营销品默认只能选择自提
+	if(dataInfo.goods_type != '6'){
+        $('#delivery_status1').show();
+        $('#delivery_status2').hide();
+	$('.delivery_flag1').show();
+        $('#isSendPay').hide();
+        $(':checkbox[name="delivery_flag[]"][value="0"]').attr('checked', 'checked');
+        $(':checkbox[name="delivery_flag[]"][value="1"]').removeAttr('checked');
+    }else{
+        if('2' == dataInfo.is_order){
+            $('#isSendPay').hide();
+            $('#delivery_status2').hide();
+            $('#delivery_status3').show();
+        }else{
+            $('#isSendPay').show();
+            $('#delivery_status2').show();
+            $('#delivery_status3').hide();
+        }
+        $('#delivery_status1').hide();
+        $(':checkbox[name="delivery_flag[]"]').removeAttr('checked');
+        if('2' == dataInfo.is_order){
+            $('#delivery_flag2').attr('checked', true);
+        }
+    }
+/*
+	//资费标准提示
+  	//卡券时
+  	var str;
+    if(dataInfo.goods_type != 6){
+    	if (dataInfo.source == 0) {
+    		str = '每张卡券将收取'+sendPrice.self+'元卡券下发费用';
+    	} else {
+    		str = '每张卡券将收取'+sendPrice.buy+'元异业卡券下发费';
+    	}
+    }
+  	//商品时
+    else {
+    	str = '消费者购买自提商品后，系统将发送一张商品提领卡券至消费者手机。每张卡券将收取'+sendPrice.self+'元卡券下发费用';
+    }
+    $('#tipStr').text(str);
+    $('#tipStr').show();
+*/
+    //按日期
+    /*if(data.verify_time_type == '0'){
+        $('#verify_begin_date').val(data.verify_begin_date ? data.verify_begin_date.substr(0, 8) : '');
+        $('#verify_end_date').val(data.verify_end_date ? data.verify_end_date.substr(0, 8) : '');
+    }
+    else{
+        $('#verify_begin_days').val(data.verify_begin_date);
+        $('#verify_end_days').val(data.verify_end_date);
+    }
+    $(':radio[name="verify_time_type"][value="'+data.verify_time_type+'"]').trigger('click');
+
+    $('.goods_info').show();
+    $('#step2').show();
+    $('#nav_step2').addClass('hover');
+    windowheight();
+	*/
+       /*广西石油物流方式处理*/
+    /*只有石油的商品才可以选自提，其他商户的商品只能选择物流*/
+    <php>if($is_cnpc_gx){</php>
+    var goods_no = dataInfo.goods_id;
+    var url = "{:U('CnpcGX/Goods/check_is_self/')}&goods_no=" + goods_no;
+    $.get(url, function (data) {
+        if (data == "0")
+        {
+            $('#delivery_flag1_label').hide();
+        }else{
+            $('#delivery_flag1_label').show();
+        }
+    });
+    <php>}</php>
+    //默认不显示货到付款
+    $('#isSendPay').hide();
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel text_form">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>></p>
+							<p><a href="{:U('Home/Index/marketingShow5')}">多宝电商</a></p>
+                            <p>></p>
+                            <p><a href="{:U('Ecshop/O2OHot/index',array('batch_type'=>'26'))}">闪购</a></p>
+							<p>></p>
+                            <p>添加</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <form action="{:U('Ecshop/GoodsSale/add')}" method="post" name="theform" id="theform" enctype="multipart/form-data">
+                                        <div class="global-input2 fn w2 pb30">
+                                        <ul class="newsadd-title">活动基础信息</ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;活动名称：</li>
+                                                <li class="global-input2-input"><input name="name" id="name"  type="text"  class="validate[required,optional,maxSize[20]] textbox w300"  value=""/></li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;活动时间：</li>
+                                                <li class="global-input2-input"><input name="start_time" id="start_time" type="text"  class="validate[required] textbox w130" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" /><span class="mlr10">-</span><input name="end_time" id="end_time" type="text"  class="validate[required] textbox w130"  onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" /></li>
+                                            </ul>
+                                            <ul class="newsadd-title">选择销售商品</ul>
+                                            <ul>
+											  <li class="global-input2-name">*&nbsp;选择商品：</li>
+											  <li class="global-input2-input">
+											   <input type="hidden" name="select_goods_id" id="select_goods_id" value=""/>
+											    <input type="hidden" name="select_goods_limit" id="select_goods_limit" value=""/>
+											   <input name="select_goods_name" id="select_goods_name" type="text" class="validate[condRequired[is_cj_true]] textbox w120" value="" readonly="readonly"/>
+											  <a href="javascript:void(0)" class="btn_inner" id="bind_goods" style="margin-left:10px; margin-right:10px;">选择商品</a> 
+											  <a href="javascript:void(0)" class="btn_inner" id="bind_marketgoods">选择卡券</a>
+											  </li>
+											</ul>
+											<ul>
+                                                <li class="global-input2-name">*&nbsp;商品描述：</li>
+                                                <li class="global-input2-input">
+                                                    <textarea name="goods_memo" id="goods_memo" class="validate[required,optional,maxSize[200]] texttextarea w300 h126"></textarea>
+                                                    <br /><p class="font-12-cc">最多200个字</p>
+                                                </li>
+                                            </ul>
+                                            <!--
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;商品销售价格：</li>
+                                                <li class="global-input2-input"><input name="group_price" id="group_price"  type="text"  class="validate[custom[number],min[0],required,maxSize[10]] textbox w50" value="" maxlength="9"/>&nbsp;元</li>
+                                            </ul>
+											<ul>
+                                                <li class="global-input2-name">*&nbsp;商品市场价格：</li>
+                                                <li class="global-input2-input">
+													<input type="radio" id="market_price_flag" name="market_price_flag" value="0" checked="checked"> 不显示&nbsp;&nbsp;
+													<input type="radio" id="market_price_flag" name="market_price_flag" value="1"> 显示&nbsp;
+                                                    <input name="market_price" id="market_price"  type="text"  class="validate[custom[number],min[0],maxSize[10]] textbox w50" value="" maxlength="9"/>&nbsp;元
+                                                </li>
+										</ul>
+                                        -->
+					    <ul class='sku_infos' style="display:none;">
+                                                <li class="global-input2-name">*&nbsp;商品销售规格：</li>
+                                                <li class="global-input2-input">
+                                                	<div class="skuTable"></div>
+                                                </li>
+                                            </ul>
+					    <ul class='not_skuinfos' style="display:none;">
+                                                <li class="global-input2-name">*&nbsp;商品销售价格：</li>
+                                                <li class="global-input2-input"><input name="group_price" id="group_price"  type="text"  class="validate[custom[number],min[0],required,maxSize[10]] textbox w50" value="" maxlength="9"/>&nbsp;元</li>
+                                            </ul>
+					    <ul class='not_skuinfos'>
+                                                <li class="global-input2-name">*&nbsp;商品市场价格：</li>
+                                                <li class="global-input2-input">
+													<input type="radio" id="market_price_flag" name="market_price_flag" value="0" checked="checked"> 不显示&nbsp;&nbsp;
+													<input type="radio" id="market_price_flag" name="market_price_flag" value="1"> 显示&nbsp;
+                                                    <input name="market_price" id="market_price"  type="text"  class="validate[custom[number],min[0],maxSize[10]] textbox w50" value="" maxlength="9"/>&nbsp;元
+                                                </li>
+					    </ul>
+                                            <ul class='not_skuinfos'>
+                                                <li class="global-input2-name">*&nbsp;商品总数：</li>
+                                                <li class="global-input2-input">
+												<label class="goods_total_num dn">
+													<input type="radio"  name="goods_num_limit" value="1"  > 不限
+												</label>
+												<label class="goods_total_num dn">
+													<input type="radio"  id="goods_num_limit" name="goods_num_limit" value="0" checked="checked"> 限&nbsp;
+												</label>
+													<input name="goods_num" id="goods_num"  type="text"  class="validate[custom[integer],min[0],condRequired[goods_num_limit]] textbox w50" value=""/>&nbsp;份<p class="font-12-cc" style="display:none;" id="buy_limit_note"></p></li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name">*&nbsp;每日限购量：</li>
+                                                <li class="global-input2-input">
+													<input type="radio" id="buy_num_flag" name="buy_num_flag" value="0" checked="checked"> 不限&nbsp;&nbsp;
+													<input type="radio" id="buy_num_flag" name="buy_num_flag" value="1"> 限购&nbsp;
+                                                    <input name="buy_num" id="buy_num"  type="text"  class="validate[custom[integer],min[0]] textbox w50" value=""/>&nbsp;份
+													<!--
+													<p class="font-12-cc">0表示不限制</p>-->
+                                                </li>
+											</ul>
+											<ul>
+                                                <li class="global-input2-name">*&nbsp;个人限购量：</li>
+                                                <li class="global-input2-input">
+													<input type="radio" id="buy_num_user" name="buy_num_user" value="0" checked="checked" > 不限&nbsp;&nbsp;
+													<input type="radio" id="buy_num_user" name="buy_num_user" value="1"> 限购&nbsp;
+                                                    <input name="buy_cont" id="buy_cont"  type="text"  class="validate[custom[integer],min[0]] textbox w50" value=""/>&nbsp;份
+													<!--
+                                                    <p class="font-12-cc">0表示不限制</p>-->
+                                                </li>
+                                            </ul>
+											<ul>
+                                                <li class="global-input2-name">*&nbsp;参与红包优惠：</li>
+                                                <li class="global-input2-input">
+													<input type="radio" id="bonus_flag1" name="bonus_flag" value="1" checked="checked" ><p class="ml5">是</p>
+													<input type="radio" id="bonus_flag2" name="bonus_flag" value="0" class="ml20"><p class="ml5">否</p>
+													<span class="font-12-cc" ><br />选择参与红包优惠，则消费者在线购买此商品时，可以使用红包抵用支付金额</span>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                            <li class="fn">
+                                                <li class="global-input2-name">*&nbsp;支持积分支付：</li>
+                                                <li class="global-input2-input">
+                                                    <input type="radio" name="integral_flag" value="1" <if condition="$isIntergral neq true">disabled</if>><p class="ml5">是</p>
+                                                    <input type="radio" name="integral_flag" value="0" checked="checked" class="ml20" <if condition="$isIntergral neq true">disabled</if> ><p class="ml5">否</p>
+                                                    <if condition="$isIntergral eq true"><span class="font-12-cc" ><br />选择支持积分支付，此商品即允许消费者使用积分来购买；<br /><a href="{:U('Integral/Integral/integralRuleList/')}" target="_blank">点击查看积分支付规则</a></span></if>
+                                                    <if condition="$isIntergral neq true"><span class="font-12-cc" ><br />您尚未开启积分支付功能，<a href="{:U('Integral/Integral/integralRuleList/')}" target="_blank">点击立即开通</a></span></if>
+                                                </li>
+                                            </li>
+                                            </ul>    
+											<ul>
+                                                <li class="global-input2-name">*&nbsp;购买对象限制：</li>
+												<li class="global-input2-input" style="line-height:28px;">
+													<input type="radio" name="member_join_flag" value="0" checked="checked" id="mem_join_no" onClick="$('#wxlink').hide();"> 不限&nbsp;&nbsp;
+													<input type="radio" name="member_join_flag" value="1" id="mem_join"> 微信粉丝&nbsp;
+                                                </li>
+                                            </ul>
+											<ul id="wxlink" class="dn">
+                                                <li class="global-input2-name">*&nbsp;引导页链接：</li>
+                                                <li class="global-input2-input"><input name="fans_collect_url" id="fans_collect_url"  type="text"  class="validate[required,optional,maxSize[200]] textbox w300"  value="" placeholder="请输入带http://的地址"/>
+												<br /><p class="font-12-cc">当消费者不是您微信公众号粉丝时，将引导消费者打开您设置的“引导关注页”。<a href="http://www.wangcaio2o.com/index.php?g=Home&m=Help&a=helpArt&news_id=1333&leftId=zxwt&class_name=%E6%9C%80%E6%96%B0%E9%97%AE%E9%A2%98&type=1" target="_blank">如何设置？</a></p>
+												</li>
+                                            </ul>
+											<ul>
+                                                <li class="global-input2-name">*&nbsp;是否配送：</li>
+                                                <li class="global-input2-input">
+													<label id="delivery_status1" class="ml20 dn">自提</label>
+													<div id="delivery_status2">
+                                                                                                            <label id="delivery_flag1_label"><input type="checkbox" id="delivery_flag" name="delivery_flag[]" value="0" ><p class="ml5">消费者自提</p></label>
+														<input type="checkbox"  name="delivery_flag[]" id="delivery_flag2" value="1" ><p class="ml5">物流配送</p>    
+													</div>
+                                                                                                        <label id="delivery_status3" class="ml20 dn">仅支持物流配送</label> 
+                                                    <div class="cl"></div>
+                            						<p class="dn" id="tipStr"></p>
+                                                </li>                                                   
+                                            </ul>
+                                            <ul id="isSendPay">
+                                                <li class="global-input2-name">*&nbsp;支持货到付款：</li>
+                                                <li class="global-input2-input">
+													<input type="radio" id="deli_pay_flag1" name="deli_pay_flag" value="0" checked="checked" ><p class="ml5">否</p>
+													<input type="radio" id="deli_pay_flag2" name="deli_pay_flag" value="1" class="ml20"><p class="ml5">是</p>
+                                                </li>
+                                            </ul>
+											<ul>
+                                                <li class="global-input2-name">*&nbsp;加入闪购活动列表：</li>
+                                                <li class="global-input2-input">
+													<input type="radio" id="show_flag" name="show_flag" value="0" checked="checked" ><p class="ml5">否</p>
+													<input type="radio" id="show_flag" name="show_flag" value="1" class="ml20"><p class="ml5">是</p>
+													<span class="font-12-cc" ><br />选择【是】，您的活动将显示在旺财创建的闪购活动列表中，消费者在任一闪购活动页面均可浏览您的活动列表。<font color="red">请确保您的测试类活动不要勾选此选项，以避免消费者下单购买您的测试商品而产生纠纷</font></span>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                              <li class="global-input2-name">SNS分享：</li>
+                                              <li class="global-input2-input">
+                                              <?php 
+                                              $sns_arr = C('SNS_ARR');
+                                              foreach($sns_arr as $sns_k=>$sns_v){
+                                              if($sns_k>4) continue;
+                                              ?>
+                                              <input name="sns_type[]" type="checkbox" value="<?php echo $sns_k?>"/><p class="ml5"><?php echo $sns_v?></p>
+                                              <?php }?>
+                                              <br /><p class="font-12-cc">勾选后，允许消费者将您的营销活动分享给他的社交网络好友</p>
+                                              </li>
+                                              
+                                            </ul>
+											
+					    <div class="delivery_flag1 dn">
+                                            <ul class="newsadd-title">下发商品短信设置</ul>
+                                            	<ul class="showSendtype cusMsg dn">
+                                                    <li class="global-input2-name"><span>*</span>&nbsp;短信内容：</li>
+                                                    <li class="global-input2-input">
+                                                        <textarea maxlength="40" name="cusMsg" id="cusMsg" style="width:318px;"   class="validate[required,maxSize[40]] Gview-cusMsg" placeholder="您收到哈根达斯100元代金券"></textarea>
+                                                    </li>
+                                                </ul>
+                                                <ul class="moren sendType">
+                                                    <li class="global-input2-name"><span>*</span>&nbsp;商品使用说明：</li>
+                                                    <li class="global-input2-input" style="position:relative">
+                                                        <textarea name="using_rules" id="using_rules" style="width:318px;" id="usage_config" class="validate[required]" ></textarea>
+                                                    
+                                                        <span>使用说明将显示在短信详情页面</span>
+                                                    </li>
+                                                </ul>
+                                                <ul>
+                                                    <li class="global-input2-name">&nbsp;支持送礼：</li>
+                                                    <li class="global-input2-input">
+                                                       <label><input type="radio" value="0" name="send_gift" class="checkradio" checked="checked" />否</label>
+                                                       <label><input type="radio" value="1" name="send_gift" id="send_gift" class="checkradio" />是</label>
+
+                                                    </li>
+                                                </ul>
+											<ul>
+												<li class="global-input2-name">*&nbsp;商品使用截至时间：</li>
+												<li class="global-input6-input">
+													<div class="judgeDiv">
+														<label class="ml5" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();$('#verify_end_date').val('');">
+														<input type="radio" checked="checked" name="verify_time_type" value="0" id="verify_begin_type1"/><span class="ml5">按日期设置</span></label>
+														<label class="ml10" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();$('#verify_end_days').val('');">
+														<input type="radio" name="verify_time_type" value="1" id="verify_begin_type2"/><span class="ml5">按天数设置</span></label>
+													</div>
+													<div class="judgeCon-time judgeCon1">
+														<p class="ml20">使用结束时间</p>
+														<input name="verify_end_date" id="verify_end_date" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'end_time\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="<?php echo dateformat($jp_arr['verify_end_date'],'Ymd')?>" />
+														<div class="cl"></div>
+														<p class="font-12-cc">商户可以自定义验码时间：如"4月1号";</p>
+													</div>
+													<div class="judgeCon-time judgeCon2" style="display:none;">
+														<p class="ml20">发送商品后</p>
+														<input name="verify_end_days" id="verify_end_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$jp_arr['verify_end_date']}">&nbsp;天结束使用
+														<div class="cl"></div>
+														<p class="font-12-cc">商户可以自定义验码时间：如30天后结束</p>
+													</div>
+												</li>
+											</ul>
+                                           </div>
+                                            <ul class="newsadd-title">发布二维码样式设置</ul>
+                                            <ul>
+                                                <li class="global-input2-name">生成二维码图片大小：</li>
+                                                <li class="global-input2-input">
+                                                    <select name="size" id="size"   class="w248 selectbox">
+                                                      <?php 
+                                                        $sns_arr= C('SIZE_ARR');
+                                                        foreach($sns_arr as $k=>$v){
+                                                        ?>
+                                                        <option value="<?php echo $k;?>" <?php if($k==2) echo 'selected="selected"';?>><?php echo $v;?></option>
+                                                        <?php }?>
+                                                    </select>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name">自定义二维码Logo：</li>
+                                                <li class="global-input2-input">
+                                                    <input name="is_code_img" id="is_code_img"  type="radio" id="logo-true" value="0" checked="checked"/>
+                                                    <label for="logo-true" class="ml5">否</label>
+                                                    <input name="is_code_img" id="is_code_img"  type="radio" id="logo-false" value="1" />
+                                                    <label for="logo-false" class="ml5">是</label>
+                                                    <div id="logo-upload" class="dn">
+                                                    <input id="code_img_show" type="text" class="validate[required,condRequired[logo-false],funcCall[checkCodeLogo]]] textbox w140 l" />
+                                                    <div class="rel l">
+                                                    <input type="file" name="code_img" style="left:-152px;" id="code_img" class="upload-file" onChange="$('#code_img_show').val($(this).val())"/><a href="javascript:void(0);" title="上传" class="btn_inner w60 ml10">浏览</a><a href="javascript:;" title="上传" class="btn_inner w60 ml10" onClick="return ajaxFileUpload('code_img','resp_code_img','show1','{:U('LabelAdmin/Upfile/index','act=news&type=img')}');">上传</a>
+                                                    <input type="hidden" value="" name="data_price_info" id="data_price_info" />
+                                                    <input type="hidden" value="" name="data_name_info" id="data_name_info" /> 
+                                                    <input type="hidden" value="" name="is_sku" id="is_sku" />
+                                                    <input type="hidden" value="" name="resp_code_img" id="resp_code_img"/>
+                                                    <input type="hidden" value="" name="count_num" id="count_num" /> 
+                                                    </div>
+                                                    <br /><p class="fn font-12-cc">Logo将显示在二维码图片中央，图片格式为jpg,gif,png,jpeg，小于等于1M</p>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                            <ul>
+                                                <li class="global-input2-name"></li>
+                                                <li class="global-input2-input">
+                                                <input type="hidden" name="ajax" value="1" />
+                                                <a href="javascript:;" id="sub_button" title="确认" class="btn-all w110">确认</a>
+                                                <a href="javascript:history.go(-1)" title="取消" class="btn-all-del w110 ml10">取消</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="activityread_iphone tc mt70">
+                                      <div class="activityread_iphone_con">
+                                          <div id="iphonePreview">
+                                          <div id="iphonePreview-con">
+                                          <!-----------预览----------->
+                                          	<div id="iphonePreview-one">
+                                            	<div id="Preview-wrapper">
+                                                    <div id="Preview-container">
+                                                        <div id="Preview-main">
+                                                            <img src="__PUBLIC__/Image/ap-iphone-GoodsSale.png" style="width: 100%; height:auto;" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!---分隔两个预览--->
+                                            <div id="iphonePreview-two">
+                                            	<div id="Preview-wrapper">
+                                                    <div id="Preview-container">
+                                                        <div id="Preview-main">
+                                                            <img src="__PUBLIC__/Image/ap-iphone-GoodsSale.png" style="width: 100%; height:auto;"  />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                          <!-----------预览结束----------->
+                                          <div>
+                                          </div>
+                                          <script type="text/javascript">
+                                          	jsScroll(document.getElementById('iphonePreview'),11, 27, 'divSrollBar');
+                                          </script>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                    </form>
+            </div>
+            <!-- 添加成功 begin-->
+            <div id="main" class="rel tip_msg dn">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="/index.php?g=Home&amp;m=Index&amp;a=index">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="javascript:void(0)">操作成功！</a></p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:window.location.reload()" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="fn">
+                    <div class="pop-up fn mt40">
+                           <div class="loadTip">
+                                <div class="loadStatus ok">
+                                    <dl>
+                                        <dt class="font20">闪购创建成功！</dt>
+                                        <dd>您可以：</dd>
+                                        <dd><a href="javascript:void(0);" id="jump_url">发布到线上线下渠道</a><span>发布到渠道后，将获得各渠道的访问链接及二维码。</span></dd>
+                                        <dd><a href="{:U('Ecshop/O2OHot/index',array('batch_type'=>'26'))}">返回闪购列表页</a></dd>
+                                    </dl>
+                                </div>
+                            </div>
+                    </div>
+               </div>
+            </div>
+            <!-- 添加成功 end-->
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>
+<script>
+$("input[name=is_code_img]").change(function(){
+        if($(this).val() == '1'){
+            $('#logo-upload').show();
+        }else{
+            $('#resp_code_img').val('');
+            $('#logo-upload').hide();
+        }
+    });
+    
+//是否抽奖
+$("input[name=is_cj]").change(function(){
+        if($(this).val() == '1'){
+          $('#jp_set').show();
+            //$('#cj_style').show();
+            //$('#cj_text').show();
+        }else{
+          $('#jp_set').hide();
+            $('#cj_style').hide();
+           // $('#cj_text').hide();
+        }
+    });
+//单奖品多奖品
+$("input[name=jp_set_type]").change(function(){
+        if($(this).val() == '1'){
+            $('#cj_style').show();
+            $('.more_level').hide();
+        }else{
+            $('#cj_style').hide();
+            $('.more_level').show();
+        }
+    });
+
+
+//选择奖品
+$("#jp_type").change(function(){
+        if($(this).val() == '1'){
+            $('#zc_style').show();
+            $('#wc_style').hide();
+        }else if($(this).val() == '2'){
+            $('#zc_style').hide();
+            $('#wc_style').show();
+        }else if($(this).val() == '3'){
+            $('#zc_style').hide();
+            $('#wc_style').hide();
+        }
+    });
+//选择奖品1
+$("#jp_type_1").change(function(){
+        if($(this).val() == '1'){
+            $('#zc_style_1').show();
+            $('#wc_style_1').hide();
+        }else if($(this).val() == '2'){
+            $('#zc_style_1').hide();
+            $('#wc_style_1').show();
+        }
+    });
+//选择奖品2
+$("#jp_type_2").change(function(){
+        if($(this).val() == '1'){
+            $('#zc_style_2').show();
+            $('#wc_style_2').hide();
+        }else if($(this).val() == '2'){
+            $('#zc_style_2').hide();
+            $('#wc_style_2').show();
+        }
+    });
+//选择奖品3
+$("#jp_type_3").change(function(){
+        if($(this).val() == '1'){
+            $('#zc_style_3').show();
+            $('#wc_style_3').hide();
+        }else if($(this).val() == '2'){
+            $('#zc_style_3').hide();
+            $('#wc_style_3').show();
+        }
+    });
+    
+//文件上传
+function ajaxFileUpload(imgid,hiddenid,showid,url){
+var dialog = art.dialog({title:false,fixed: true,padding:0});
+$.ajaxFileUpload
+({
+    url:url,
+    secureuri:false,
+    fileElementId:imgid,
+    dataType: 'json',
+    data:{name:'logan', id:'id'},
+    success: function (data, status)
+    {
+        if(typeof(data.error) != 'undefined')
+        {
+            if(data.error != '')
+            {
+                dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+            }else{
+
+                var resp = data.msg;
+                if(resp != '0000'){
+                    dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+                    return false;
+                }else{
+                    dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+                }
+                $('#'+hiddenid).val(data.imgurl);
+                if(showid == 'showpage1'){
+                    $('#showpic1').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+                    $('#show_jpg').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+                }
+                else if(showid == 'showpage2'){
+                    $('#showpic2').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+                }
+                else if(showid == 'showpage3'){
+                    $('#showpic3').attr('src','<?php echo APP_PATH.'Upload/';?>'+data.imgurl);
+                }
+            }
+        }
+    },
+    error: function (data, status, e)
+    {
+
+        dialog.time(3).content("<div class='msg-all-error'>"+e+"</div>");
+    }
+})
+
+return false;
+}
+</script>
+
+<script>
+var newid = 1;
+var data = {
+	cookiename:"",
+	cookielist:"",
+	length:function(){
+		var l = 0;
+		for(var i=0;i<data.namelist.length;i++){
+			if(data.namelist[i].list!=""){
+				l++;
+			}
+		}
+		if(l==0){l="";}
+		return l;
+	},
+	length2:function(){
+		var l = 0;
+		for(var i=0;i<data.namelist.length;i++){
+			if(data.namelist[i].list!=""){
+				l++;
+			}
+		}
+		return l+2;
+	},
+	length3:function(){
+		var l = 0;
+		if(data.namelist.length==1){
+			l = 0;
+		}else if (data.namelist.length==2){
+			l = data.namelist[1].list.length;
+		}else if (data.namelist.length==3){
+			if(data.namelist[2].list.length!=0){
+				l = data.namelist[1].list.length*data.namelist[2].list.length;
+			}else{
+				l = data.namelist[1].list.length;
+			}
+		}
+		if(l==0){l="";}
+		return l;
+	},
+	length4:function(){
+		var l = 0;
+		if (data.namelist.length==2){
+			l = 0;
+		}else if (data.namelist.length==3){
+			l = data.namelist[2].list.length;
+		}
+		if(l==0){l="";}
+		return l;
+	},
+	namelist: [],
+	price : []
+};
+//大部分修改预览
+$(document).ready(function(e){
+	begin(data);
+	//设置总库存:检测数值
+	$("body").on("change keyup click","input[name='allprice'],input[name='allnum'],input[name='allsellprice']",function(e){
+		var t = $(this),
+			i = t.closest("td").find(".icon-skuOk"),
+			v = t.val();
+		v=="" ? i.addClass("erro") : i.removeClass("erro");
+	});
+	//设置总库存:确认
+	$("body").on("click",".skuOk-allprice:not('.erro'),.skuOk-allnum:not('.erro'),.skuOk-allsellprice:not('.erro')",function(e){
+		var t = $(this),
+			h = t.hasClass("skuOk-allprice"),
+			i = t.closest("td").find("input"),
+			v = i.val();
+		if(t.hasClass("skuOk-allprice")){
+			h="allprice";
+		}else if(t.hasClass("skuOk-allnum")){
+			h="allnum";
+		}else if(t.hasClass("skuOk-allsellprice")){
+			h="allsellprice";
+		}else{h= false;}
+		if(h=="allprice"){
+			var r = /^[\-\+]?((([0-9]{1,3})([,][0-9]{3})*)|([0-9]+))?([\.]([0-9]+))?$/;
+			r = r.test(v);
+			if(r){
+				$("input[name='price']").val(v);
+			}else{
+				i.addClass("shopFormBannerAn");
+				setTimeout(function(){
+					i.removeClass('shopFormBannerAn')
+				},1000);
+			}
+		}else if(h=="allnum"){
+			var r = /^[\-\+]?\d+$/;
+			r = r.test(v);
+			if(r){
+				$("input[name='num']").val(v);
+                                $('#count_num').val($("input[name='num']").length*v);
+				$("#all").text("已设置的总库存为："+$("input[name='num']").length*v+"，不填写库存，则商品库存为不限,总共0处为不限");
+			}else{
+				i.addClass("shopFormBannerAn");
+				setTimeout(function(){
+					i.removeClass('shopFormBannerAn')
+				},1000);
+			}
+		}else if(h=="allsellprice"){
+			var r = /^[\-\+]?((([0-9]{1,3})([,][0-9]{3})*)|([0-9]+))?([\.]([0-9]+))?$/;
+			r = r.test(v);
+			if(r){
+				$("input[name='sellprice']").val(v);
+			}else{
+				i.addClass("shopFormBannerAn");
+				setTimeout(function(){
+					i.removeClass('shopFormBannerAn')
+				},1000);
+			}
+		}
+		t.addClass("erro");
+		i.val("");
+	});
+	//设置总库存:库存总数预览
+	$("body").on("change keyup","input[name='num']",function(e){
+		var l = 0;
+		var t = 0;
+		for(var i=0;i<$("input[name='num']").length;i++){
+			if($("input[name='num']:eq("+i+")").val()=="" || $("input[name='num']:eq("+i+")").val()=="不限" || $("input[name='num']:eq("+i+")").val()=="-1"){
+				t++;
+			}else{
+				l += parseInt($("input[name='num']:eq("+i+")").val());
+			}
+		}
+                if(t > 0)
+                    $('#count_num').val('-1');
+                else
+                    $('#count_num').val(l);
+		$("#all").text("已设置的总库存为："+l+"，不填写库存，则商品库存为不限,总共"+t+"处为不限");
+	});
+	$("body").on("focus","input[name='price']",function(){
+		$("input[name='price']").prev(".formError").remove();
+	});
+});
+function begin(data){
+        var namelist_nums = 0;
+	if(data.namelist!=""){
+		for(var i=0;i<data.namelist.length;i++){
+			var namelist = data.namelist[i];
+			namelist["newid"] = newid;
+			if(namelist.list!=""){
+				for(var j=0;j<namelist.list.length;j++){
+					var list = namelist.list[j];
+					list["newid"] = newid;
+					newid++;
+				}
+			}
+			newid++;
+		}
+            namelist_nums = namelist_nums + parseInt(data.namelist.length)*8;    
+	}
+	var html = template("skuList",data);
+	var html2 = template("skuTable",data);
+        //计算已用字数
+        // var lenght_nums = namelist_nums + parseInt($('#name').val().length);
+        // $("#using_rules").attr("onkeyup","check_lenght("+(100 - lenght_nums)+",'mms_info_text',this);");
+        // $("#using_rules").attr("lenght_nums",100 - namelist_nums);
+        // $('#using_rules').attr('class','validate[required,maxSize['+(100 - lenght_nums)+'] texttextarea w240');
+	$(".skuForm").html(html);
+	$(".skuTable").html(html2);
+	$(".skuList").each(function(index, element) {
+		var z = 10-index;
+        $(this).css("z-index",z);
+    });
+	$("input[name='price']").each(function(index, element) {
+		var t = $(this),
+			id = t.attr("data-id");
+		for(var i=0;i<data.price.length;i++){
+			if(data.price[i].id.toString()==id){
+				t.val(data.price[i].price);
+				t.next("span").text(t.val());
+				data.price[i]["newid"]=t.attr("data-newid");
+			}
+		}
+    });
+	$("input[name='num']").each(function(index, element) {
+		var t = $(this),
+			id = t.attr("data-id");
+		for(var i=0;i<data.price.length;i++){
+			if(data.price[i].id.toString()==id){
+				if(Number(data.price[i].remain_num)>=0){
+					t.val(data.price[i].remain_num);
+					t.next("span").text(t.val());
+					t.attr("class","validate[required,custom[number],min[0],max["+data.price[i].remain_num+"]]");
+				}else if(Number(data.price[i].remain_num)==-1){
+					t.val("不限");
+					t.next("span").text(t.val());
+				}
+			}
+		}
+    });
+	$("input[name='sellprice']").each(function(index, element) {
+		var t = $(this),
+			id = t.attr("data-id");
+		for(var i=0;i<data.price.length;i++){
+			if(data.price[i].id.toString()==id){
+				t.val(data.price[i].sellprice);
+				data.price[i]["newid"]=t.attr("data-newid");
+			}
+		}
+    });
+	var l = 0;
+	var t = 0;
+	for(var i=0;i<$("input[name='num']").length;i++){
+		if($("input[name='num']:eq("+i+")").val()=="" || $("input[name='num']:eq("+i+")").val()=="不限" || $("input[name='num']:eq("+i+")").val()=="-1"){
+			t++;
+		}else{
+			l += parseInt($("input[name='num']:eq("+i+")").val());
+		}
+	}
+        if(t > 0)
+            $('#count_num').val('-1');
+        else
+            $('#count_num').val(l);
+	$("#all").text("已设置的总库存为："+l+"，不填写库存，则商品库存为不限,总共"+t+"处为不限");
+}
+</script>
+
+<script id="skuList" type="text/html">
+{{each namelist}}
+<div class="skuList" data-id="{{value.id}}" data-newid="{{value.newid}}">
+	<div class="skuListHead fn">
+		<i class="icon-skuDel r"><a href="javascript:void(0)" class="a-hide">删除</a></i>
+		<div class="searchInput">
+			<span data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.name}}</span>
+			<i class="icon-skuEdit">
+				<a href="javascript:void(0)" class="a-hide">修改</a>
+			</i>
+			<div class="searchInput-edit dn">
+				<div class="input">
+				<input type="text" maxlength="6">
+					<i class="icon-skuOk erro">
+						<a href="javascript:void(0)" class="a-hide">修改</a>
+					</i>
+				</div>
+				<dl class="valLsit">
+					{{each cookiename}}
+					<dd>{{value}}</dd>
+					{{/each}}
+					<dd class="nodata dn">"回车"创建临时规格</dd>
+				</dl>
+				<div class="valLsitclose"></div>
+			</div>
+		</div>
+	</div>
+	<div class="skuCon fn">
+		<div class="skuRule">
+			{{each value.list}}
+			<div class="skuRuleItem" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}<i></i></div>
+			{{/each}}
+			<div class="skuRuleAdd">
+				<div class="input">
+					<input type="text">
+					<i class="icon-skuOk erro">
+						<a href="javascript:void(0)" class="a-hide">修改</a>
+					</i>
+				</div>
+				<dl class="valLsit">
+					{{each cookielist}}
+					<dd>{{value}}</dd>
+					{{/each}}
+					<dd class="nodata dn">"回车"创建临时类别</dd>
+				</dl>
+				<div class="valLsitclose"></div>
+				<div class="skuRuleBtn">
+					<i></i>添加类型
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{{/each}}
+<div class="addsku">
+	<i></i>
+	<span>添加规格</span>
+</div>
+</script>
+
+<script id="skuRuleItem" type="text/html">
+<div class="skuRuleItem">{{name}}<i></i></div>
+</script>
+
+<script id="skuTable" type="text/html">
+{{if namelist.length >= 1 && namelist[0].list!="" }}
+<table cellpadding="0" cellspacing="0" class="sku-table small">
+	<tr>
+	{{each namelist}}
+		{{if value.list!=""}}<th data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.name}}</th>{{/if}}
+	{{/each}}
+		<th width="130" >售价&nbsp;|&nbsp;原价(元)</th>
+		<th width="130" >出售数量&nbsp;|&nbsp;库存</th>
+	</tr>
+	<tr>
+		<td colspan="{{length}}" class="top">批量设置</td>
+		<td class="top"><input type="text" name="allprice" placeholder="批量修改" /><i class="icon-skuOk skuOk-allprice erro"><a href="javascript:void(0)" class="a-hide">确定</a></i></td>
+		<td class="top"><input type="text" name="allnum" placeholder="请输入数字" /><i class="icon-skuOk skuOk-allnum erro"><a href="javascript:void(0)" class="a-hide">确定</a></i></td>
+	</tr>
+	
+	{{if namelist.length == 1}}
+	{{if namelist[0].list!=""}}
+		{{each namelist[0].list as value j}}
+		<tr>
+			<td rowspan="{{length3}}" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}</td>
+			<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /><span>&nbsp;</span></td>
+			<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /><span>&nbsp;</span></td>
+		</tr>
+		{{/each}}
+	{{/if}}
+	{{/if}}
+	
+	{{if namelist.length == 2}}
+	{{if namelist[0].list!=""}}
+		{{each namelist[0].list as value j}}
+		<tr>
+			<td rowspan="{{length3}}" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}</td>
+			{{if namelist[1].list!=""}}
+				{{each namelist[1].list as value1 j}}
+					<td rowspan="{{length4}}" data-id="{{value1.id}}" data-newid="{{value1.newid}}">{{value1.val}}</td>
+					<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}},{{value1.id}}"  data-newid="{{value.newid}},{{value1.newid}}" /><span>&nbsp;</span></td>
+					<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value.id}},{{value1.id}}"  data-newid="{{value.newid}},{{value1.newid}}" /><span>&nbsp;</span></td>
+					</tr>
+				{{/each}}
+			{{else}}
+				<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /><span>&nbsp;</span></td>
+				<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /><span>&nbsp;</span></td>
+				</tr>
+			{{/if}}
+		{{/each}}
+	{{else if namelist[1].list!=""}}
+		{{each namelist[1].list as value1 j}}
+			<td rowspan="{{length4}}" data-id="{{value1.id}}" data-newid="{{value1.newid}}">{{value1.val}}</td>
+			<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value1.id}}"  data-newid="{{value1.newid}}" /><span>&nbsp;</span></td>
+			<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value1.id}}"  data-newid="{{value1.newid}}" /><span>&nbsp;</span></td>
+			</tr>
+		{{/each}}
+	{{/if}}
+	{{/if}}
+	
+	{{if namelist.length == 3}}
+	{{if namelist[0].list!=""}}
+		{{each namelist[0].list as value j}}
+		<tr>
+			<td rowspan="{{length3}}" data-id="{{value.id}}" data-newid="{{value.newid}}">{{value.val}}</td>
+			{{if namelist[1].list!=""}}
+				{{each namelist[1].list as value1 j}}
+					<td rowspan="{{length4}}" data-id="{{value1.id}}" data-newid="{{value1.newid}}">{{value1.val}}</td>
+					{{if namelist[2].list!=""}}
+						{{each namelist[2].list as value2 j}}
+							<td data-id="{{value2.id}}" data-newid="{{value2.newid}}">{{value2.val}}</td>
+							<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}},{{value1.id}},{{value2.id}}"  data-newid="{{value.newid}},{{value1.newid}},{{value2.newid}}" /><span>&nbsp;</span></td>
+							<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value.id}},{{value1.id}},{{value2.id}}"  data-newid="{{value.newid}},{{value1.newid}},{{value2.newid}}" /><span>&nbsp;</span></td>
+							</tr>
+						{{/each}}
+					{{else}}
+						<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}},{{value1.id}}"  data-newid="{{value.newid}},{{value1.newid}}" /><span>&nbsp;</span></td>
+						<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value.id}},{{value1.id}}"  data-newid="{{value.newid}},{{value1.newid}}" /><span>&nbsp;</span></td>
+						</tr>
+					{{/if}}
+				{{/each}}
+			{{else if namelist[2].list!=""}}
+				{{each namelist[2].list as value2 j}}
+					<td rowspan="{{length4}}" data-id="{{value2.id}}" data-newid="{{value2.newid}}">{{value2.val}}</td>
+					<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}},{{value2.id}}"  data-newid="{{value.newid}},{{value2.newid}}" /><span>&nbsp;</span></td>
+					<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value.id}},{{value2.id}}"  data-newid="{{value.newid}},{{value2.newid}}" /><span>&nbsp;</span></td>
+					</tr>
+				{{/each}}
+			{{else}}
+				<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /><span>&nbsp;</span></td>
+				<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value.id}}"  data-newid="{{value.newid}}" /><span>&nbsp;</span></td>
+				</tr>
+			{{/if}}
+		{{/each}}
+	{{else if namelist[1].list!=""}}
+		{{each namelist[1].list as value1 j}}
+			<td rowspan="{{length4}}" data-id="{{value1.id}}" data-newid="{{value1.newid}}">{{value1.val}}</td>
+			{{if namelist[2].list!=""}}
+				{{each namelist[2].list as value2 j}}
+					<td data-id="{{value2.id}}" data-newid="{{value2.newid}}">{{value2.val}}</td>
+					<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value1.id}},{{value2.id}}"  data-newid="{{value1.newid}},{{value2.newid}}" /><span>&nbsp;</span></td>
+					<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value1.id}},{{value2.id}}"  data-newid="{{value1.newid}},{{value2.newid}}" /><span>&nbsp;</span></td>
+					</tr>
+				{{/each}}
+			{{else}}
+				<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value1.id}}"  data-newid="{{value1.newid}}" /><span>&nbsp;</span></td>
+				<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value1.id}}"  data-newid="{{value1.newid}}" /><span>&nbsp;</span></td>
+				</tr>
+			{{/if}}
+		{{/each}}
+	{{else if namelist[2].list!=""}}
+		{{each namelist[2].list as value2 j}}
+			<td data-id="{{value2.id}}" data-newid="{{value2.newid}}">{{value2.val}}</td>
+			<td class="tl"><input type="text" name="price" class="validate[required,custom[number],min[0]]" data-id="{{value2.id}}"  data-newid="{{value2.newid}}" /><span>&nbsp;</span></td>
+			<td class="tl"><input type="text" name="num" class="validate[custom[number],min[0],max[99999]]" data-id="{{value2.id}}"  data-newid="{{value2.newid}}" /><span>&nbsp;</span></td>
+			</tr>
+		{{/each}}
+	{{/if}}
+	{{/if}}
+	<tr>
+		<td colspan="{{length2}}" id="all">{{allnum}}</span></td>
+	</tr>
+</table>
+{{/if}}
+</script>
+
+<script>
+function cjSendtype(t){
+    var val = t.attr("data-val");
+    if(val=="0"){
+        $(".sendType").show();
+		$(".shortMsgImg").css("display","block");
+    }
+    if(val=="1"){
+        $(".sendType").hide();
+		$(".shortMsgImg").css("display","none");
+    }
+}
+$(function(){
+    $("#shortMsg_config").focus(function(){
+        $(this).next().removeClass("dn");
+    })
+    $("#shortMsg_config").blur(function(){
+        $(this).next().addClass("dn");
+    })
+
+    $("#using_rules").focus(function(){
+        $(".shortMsgImg").removeClass("dn");
+    })
+    $("#using_rules").blur(function(){
+        $(".shortMsgImg").addClass("dn");
+    })
+})
+</script>

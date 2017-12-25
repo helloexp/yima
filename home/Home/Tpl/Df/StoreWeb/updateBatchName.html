@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>添加模块_业务中心_翼码旺财</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <css href="__PUBLIC__/Css/Wactlist.css?v=__VR__"/>
+
+    <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+    <js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/Common.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+
+    <js href="__PUBLIC__/Js/Wactlist.js?v=__VR__"/>
+    <js href="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"/>
+
+    <script type="text/javascript">
+
+        var kIsSubmiting = false;
+
+
+
+        $(document).ready(function (e) {
+
+
+            function sumitingStart() {
+
+                kIsSubmiting = true;
+            }
+            function submitComplete() {
+                kIsSubmiting = false;
+            }
+            function isSubmiting() {
+                return kIsSubmiting;
+            }
+
+            //addactlist();
+            //保存
+            $('#save').click(function () {
+
+
+                if (isSubmiting()) {
+                    return;
+                }
+                sumitingStart();
+
+                if (isBlank($('#name').val())) {
+                    art.dialog('微官网标题不能为空！');
+                    submitComplete();
+                    return false;
+                }
+
+                $.post(
+                        "{:U('MicroWeb/Index/updateBatchNameSubmit');}",
+                        $('#theform').serialize(),
+                        function (data) {
+
+                            if (data.status == '1') {
+                                window.parent.location.reload();
+                            } else {
+                                submitComplete();
+                                art.dialog('保存失败！' + data.info);
+                            }
+                        },
+                        'json'
+                );
+            });
+        })
+        function isBlank(str) {
+            return (!str || /^\s*$/.test(str));
+        }
+    </script>
+</head>
+<form method="post" id="theform">
+    <input type="hidden" value="{$list[0]['id']}" name="mw_batch_id" id="mw_batch_id"/>
+
+    <body class="bgfff" style="height:400px; min-height:400px">
+
+    <div class="msg-edit-area" id="msgEditArea" data-item-index="0">
+
+        <div class="rel msg-editer-wrapper">
+            <div class="msg-editer">
+                <label>微官网标题</label>
+                <input type="text" class="msg-input" id="name" name="name" maxlength="50" value="{$list[0]['name']}">
+
+                <div class="fn tc pt10">
+                    <a href="javascript:void(0)" class="btn-all w90" id="save">保存</a>
+                    <a href="javascript:void(0)" class="btn-all-del btn-all-del-act w90 ml20"
+                       onclick="art.dialog.close();">取消</a>
+                </div>
+            </div>
+        </div>
+        <div class="oh z shadow">
+            <span class="l ls"></span><span class="r rs"></span>
+        </div>
+    </div>
+    </div>
+    </body>
+</form>
+</html>

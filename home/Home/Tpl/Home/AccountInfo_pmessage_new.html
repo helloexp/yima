@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>留言板信息私信_旺消息_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/Wonlineactivity.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript">
+$(document).ready(function(e) {
+//联系商家
+	$(".del-mes").on("click",function(){
+         var del_id=$(this).attr("data-id");
+		 if(confirm("确定需要删除吗？")){
+			$.get("{:U('AccountInfo/del_msg')}",{"id":del_id},function(data){
+				if(data!='0'){
+					alert("删除成功");
+					window.location.reload();
+				}
+			});	
+				 
+		 }
+     });
+//提交子级留言
+	$(".mes-btn").on("click",function(){
+		var _this=$(this)
+		var thisform=$(this).closest("form");
+		var dialog;		
+		//alert(thisform);
+						
+		//var thisform=$(this).find("form[name=replyform]");
+		//alert(thisform);
+        //if($("#".thisform).validationEngine('validate')){			
+			thisform.ajaxSubmit({
+				beforeSubmit:function(){
+					dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+				},
+				success:function(data){					 
+					 dialog.time(1).content("<div class='msg-all-error'>"+data.info+"</div>");
+					 if(data.status == '1'){ dialog.close=function(){;
+						 window.location.reload(0);
+					    }
+					 } 
+				},
+				dataType:'json'
+			});
+		//};
+    });
+	//提交子级留言
+});
+function message_dialog(id){
+	art.dialog.open("?g=Home&m=AccountInfo&a=reply_view&id="+id,{
+		title: '留言回复信息',
+		width:'660px',
+		height:'500px'
+	});
+}
+function reply(id){
+	$.get("{:U('AccountInfo/replay_status')}",{"id":id},function(data){
+		if(data!='0'){
+			alert("系统错误，查看回复失败");
+		}
+	});	
+}
+function look(id){
+	$.get("{:U('AccountInfo/message_view')}",{"id":id},function(data){
+		if(data!='0'){
+			alert("系统错误，查看内容失败");
+		}
+	});	
+}
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container">
+            <div id="main" class="rel">
+                  <div class="sidenav">
+                    <!--开始引入左菜单-->
+					<assign name="leftMenuId" value="8"/>
+                    <include file="Home/AccountCenter/menu2" leftmenuid="new-sx"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4>评论</h4>
+                    </div>
+                    
+                    <div class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn">
+                            <p><a href="<?php echo U('AccountInfo/message_new'); ?>">评论</a></p>
+                            <p class="Wcanal-tab-hover"><a href="<?php echo U('AccountInfo/pmessage_new'); ?>">私信</a></p>
+                        </div>
+                    </div>
+                    <div class="fn pt10">
+                    	<if condition="!empty($list)">
+                        <ul class="Ufont-List-four">
+                        	<volist name="list" id="val">
+                            <li class="hasimg">
+                                <?php
+                                if($val['child']){
+                                        foreach($val['child'] as $ck=>$cal){
+                                ?>
+                                <div class="hasimgList <if condition="$ck neq '0'">other-child</if>">
+                                    <?php
+                                    if($val['head_photo']!=""){
+                                    ?>
+                                    <img class='l' src="__UPLOAD__/<?php echo $val['head_photo'];?>" width="60" height="60" />
+                                    <?php
+                                    }else{
+                                    ?>
+                                    <img class='l' src="__PUBLIC__/Image/portrait.gif" width="60" height="60" />
+                                    <?php
+                                    }
+                                    ?>
+                                    <div class="hasimgList-title">
+                                        <?php if($cal['send_node_id']==$node_id){?>
+                                           			  我 回复 <?php echo $cal['receive_node_name'];?>
+                                        <?php }else{?>
+                                            <?php echo $cal['node_name'];?> 回复 我
+                                        <?php }?>：
+                                        <a class="link <?php if($cal['status']==0 && $ck=='0' && $cal['send_node_id'] !=$node_id){?>new<?php } ?>"><?php echo $cal['message_text'];?></a>
+                                    </div>
+                                    <div class="opr">
+                                        <if condition="count($val['child']) gt 1">
+                                        <a class="more-mes" href="javascript:void(0)"><i class="more"></i>展开评论</a>
+                                        </if>
+                                    	<a class="answer-mes" data-id="<?php echo $cal['id'];?>" data-status="<?php echo $cal['status'];?>" href="javascript:void(0)"><i class="answer"></i>回复</a>
+                                    </div>
+                                    <div class="hasimgList-description"><span><?php echo dateformat($cal['add_time']);?></span></div>
+                                </div>
+                                <?php
+                                    }
+                                }
+                                ?>
+                                <div class="cl"></div>
+                                <div class="hasimgList-form">
+                                    <form name="replyform" id="replyform" action="{:U('Home/AccountInfo/reply_msg')}" method="post">
+                                    <input type="hidden" id="reply_id" name="reply_id" value="<?php 
+                                    if($cal['send_node_id']==$node_id)
+                                        echo $cal['receive_node_id'];
+                                        else echo $val['send_node_id'];?>">
+                                        <input type="hidden"  name="msgtype" value="2">
+                                        <input type="hidden"   name="reply_id1"  value="{$cal['reply_id']}" />
+                                    	<textarea name="reply_message" id="reply_message" maxlength="80"></textarea>
+                                        <div class="btn-opr">
+                                            <a href="javascript:void(0)" class="close">取消</a>
+                                        	<a href="javascript:void(0)" class="mes-btn">发送</a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </li>
+                            </volist>
+                        </ul>
+                        <else/>
+                        	<div class="nonedatb mt20 bgf4f4f4"><p>没有更多的数据了</p></div>
+                        </if>
+                        <div class="pageBase-sm pt20">
+                            <ul class="pageul">{$page}</ul>
+                        </div>
+					</div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<script>
+$(function(){
+	$('.answer-mes').on('click', function(event) {
+		var status = $(this).attr("data-status");
+		$(this).closest("li").find(".hasimgList-form").show();
+		if(status!=2){
+			$.post("{:U('Home/AccountInfo/update_status')}",{id:$(this).attr('data-id'),type:2},function(data) {},"json");
+		}
+		$(this).attr("data-status",2);
+		windowheight();
+	});
+	$('.btn-opr .close').on('click', function(event) {
+		$(this).closest("li").find(".hasimgList-form").hide();
+		windowheight();
+	});
+	$('.more-mes').toggle(function(){
+			$(this).closest("li").find(".hasimgList.other-child").show();
+			$(this).html('<i class="closemore"></i>收起评论');
+			windowheight();
+		},function(){
+			$(this).closest("li").find(".hasimgList.other-child").hide();
+			$(this).html('<i class="more"></i>展开评论');
+			windowheight();
+	});
+})
+</script>
+</html>

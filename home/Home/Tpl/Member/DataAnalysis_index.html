@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>数据统计_粉丝筐_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<link href="__PUBLIC__/Css/member.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/member.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/highcharts.js?v=__VR__"/>
+<script type="text/javascript" src="http://widget.renren.com/js/rrshare.js"></script>
+<script type="text/javascript" charset="utf-8">
+//数据源
+var charData = {:json_encode($query_list)};
+
+var charDataColumnName = [];
+//计算访问量柱状图 X 坐标值
+var charDataClickColumnValue = [];
+
+for(var i in charData){
+       charDataColumnName.push(charData[i]['date']);
+        charDataClickColumnValue.push(charData[i]['num']*1);
+}
+
+
+
+var chart;
+$(document).ready(function() {
+   //柱状图
+   $('#chart_column').highcharts({
+       chart: {
+           type: 'column'
+       },
+       title: {
+           text: '刷卡时段分析'
+       },
+       subtitle: {
+           text: ''
+       },
+       xAxis: {
+       
+            title:{text:'时间'},
+    	   categories: charDataColumnName
+       },
+       yAxis: {
+           min: 0,
+           title: {text: '数量（时/次数）'}
+       },
+       tooltip: {
+    	   valueSuffix: ' 个'
+       },
+       plotOptions: {
+           column: {
+               pointPadding: 0.2,
+               borderWidth: 0
+           }
+       },
+       series:[{
+        name:'刷卡次数',
+        data:charDataClickColumnValue}]
+   });
+});
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+            	<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="index.php?g=Member&m=Member&a=index">粉丝筐</a></p>
+                             <p>></p>
+                            <p>数据统计</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="Member/Member/leftMenu" leftmenuid="sjtj"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="Wcanal-tab mt10">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover">刷卡时段分析</p>
+                            <!--<p class=""><a href="{:U('DataAnalysis/index2')}"> 性别、年龄分析</a></p>-->
+                            <p onclick="location.href='{:U('DataAnalysis/index3',array('show'=>'1'))}'">年龄及性别分析</p>
+                            <p onclick="location.href='{:U('DataAnalysis/index3',array('show'=>'2'))}'">每日新增粉丝</p>
+                            <p onclick="location.href='{:U('DataAnalysis/index3',array('show'=>'3'))}'">每日活跃粉丝</p>
+                            <p onclick="location.href='{:U('DataAnalysis/index3',array('show'=>'4'))}'">每日发卡及刷卡量</p>
+                        </div>
+                        <div class="Wcanal-tab-list">
+                            <div class="SearchArea  fn" style="margin-top:15px;">
+                                <form action="{:U('DataAnalysis/index')}" method="POST" name="theform" id="theform">
+                                    <div class="SearchAreaLeft">
+                                    <label>
+                                    <span>请选择日期区间</span>
+                                    <input value="<?php echo  isset($begin_time)&&!empty($begin_time) ? date('Ymd', strtotime($begin_time)) : date('Ymd') ;?>" name="begin_time" id="begin_time" type="text"   onclick="WdatePicker({maxDate:'#F{$dp.$D(\\\'end_time\\\')}'})" class="textbox w90" >-<input value="<?php echo  isset($end_time)&&!empty($end_time) ? date('Ymd', strtotime($end_time)) : date('Ymd') ;?>" name="end_time" id="end_time" type="text"   onclick="WdatePicker({minDate:'#F{$dp.$D(\\\'begin_time\\\')}'})" class="textbox w90" >
+                                    </label></div>
+                                    <div class="SearchAreaRight">
+                                    <a href="javascript:void(0);" onclick="return $('#theform').submit();" id="sub_button" class="searchBtn">查找</a>
+                                    </div>
+                                </form>
+                            </div>
+                            <div id="globallibscontent" class="hover fn">
+                                <div id="chart_column"></div>
+                            </div>
+                        </div>
+                    </div>                                   
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

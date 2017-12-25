@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$row['wap_title']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20141224.css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/masonry/jquery.infinitescroll.new.js?v=__VR__"></script>
+</head>
+<body>
+<div id="wrapper" ontouchstart="autoaudio()">
+    <div id="container">
+    	<div id="main">
+        	 <include file="Label/SnowBall/header"/>
+            
+            <div class="page1">
+            	<h3><span id="order1"><a href="<?php echo U('Label/SnowBall/snowList',array('id'=>$id));?>">我获赠的雪球</a></span><span class="erro" id="order2"><a href="<?php echo U('Label/SnowBall/snowGiveList',array('id'=>$id));?>">我送出的雪球</a></span></h3>
+                <div class="myGold pr0"><em>{$frow['fcount'] *5}</em><span>个</span><p>来自 <a>{$frow['fcount']}</a> 个好友的鼎力支援</p></div>
+                <div class="sendList">
+                	<ul id="masonry">
+                	<?php if($friend_arr){
+                		foreach($friend_arr as $friend){
+                		?>
+                        <li class="box"><img src="<?php echo $friend['headimgurl'];?>" /><p class="l"><?php echo $friend['nickname'];?><span><?php echo date('Y-m-d H:i',strtotime($friend['add_time']));?></span></p><p class="r">赠送了<?php echo $friend['ball_count'];?>个雪球</p></li>
+                        <?php }}?>
+                    </ul>
+                </div>
+                <nav id="page-nav">
+                	<a href="<?php echo $nextUrl;?>" class="btn-more load">加载更多好友</a>
+                </nav>
+            </div>
+    <!--分享-->
+    <include file="Label/SnowBall/public"/>
+    <!--分享-->
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    init();
+    $('#masonry').infinitescroll({
+        navSelector  : '#page-nav',    // selector for the paged navigation 
+        nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
+        itemSelector : '.box',     // selector for all items you'll retrieve
+		loadingImg   : '__PUBLIC__/Label/Image/Item/loading.gif',
+        loading: {
+            	finishedMsg: '没有更多数据了',
+            	loadingImg: '__PUBLIC__/Label/Image/Item/loading.gif',
+			}
+	});
+	$(window).unbind('.infscr');
+	$('a.btn-more').click(function(){
+		$(document).trigger('retrieve.infscr');
+		return false;
+	});
+	$(document).ajaxError(function(e,xhr,opt){
+		if(xhr.status==404)$('a.btn-more').remove();
+	});
+});
+
+function init(){
+	var windowwidth=$("#wrapper").width();
+	var scale=windowwidth/640;
+	$(".flash").css({
+		paddingLeft:207*scale
+	})
+	$(".flash li").css({
+		width:207*scale
+	})
+}
+</script>
+<include file="Label/SnowBall/share"/>

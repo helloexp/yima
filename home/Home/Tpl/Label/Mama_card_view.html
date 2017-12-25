@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>致美丽的妈妈</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,致美丽的妈妈" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<load href="__PUBLIC__/Label/Css/activity/wap_20140511.css"/>
+<script>
+var cardId = '{$cardId}';
+var id = '{:I("id")}';
+$(document).ready(function(e) {
+    //抽奖
+    var _is_sub = false;
+    $('.go-input-button').click(function() {
+        if (_is_sub) return false;
+        _is_sub = true;
+        $.post("{:U('Label/Mama/mama_submit')}", {cardId:cardId, id:id}, function(data) {
+            //领奖成功
+            if(data.status == 1)
+                $('#btn_li').hide();
+
+            popForm('popMsg', data.info, data.status);
+            _is_sub = false;
+        }, 'json');
+    })
+    //页面大小
+    initialise();
+    $(".close-AjaxWrapper").click(function() {
+        $("#AjaxWrapper").fadeOut(300);
+    });
+
+    $(".choose-choose").click(function() {
+        $("#chooseWrapper").fadeIn(300);
+    });
+    $(".go-input-back").click(function() {
+        $(".mainCon").fadeIn(300);
+        $(".wrapperView").hide();
+    });
+});
+$(window).resize(function(e) {
+    initialise();
+});
+
+function initialise() {
+    var windowwidth = $(window).width();
+    if (windowwidth > 640) {
+        windowwidth = 640;
+    }
+    var scale = windowwidth / 320;
+    $(".logo-bg").css({
+        "width": scale * 320,
+        height: scale * 91
+    });
+    $(".logo-con").css({
+        "width": scale * 60,
+        height: scale * 56,
+        "top": scale * 30
+    });
+    $(".wrapperView .top-title").css("margin-top", scale * 30);
+    $(".wrapperView .mainCon-contenter").css("padding-top", scale * 75);
+    $(".mainConFormup li.tc").css("margin-top", scale * 20);
+    $(".cjWrapper").css("padding-bottom", scale * 13);
+    $(".AjaxWrapper-bg").css({
+        "margin-left": scale * 15,
+        "margin-right": scale * 15
+    });
+}
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div class="wrapperView">
+                <img src="__PUBLIC__/Label/Image/20140511/bg3.jpg" id="bg-img3"/>
+                <img src="__PUBLIC__/Label/Image/20140511/flow-1.png" class="flow-1" />
+                <img src="__PUBLIC__/Label/Image/20140511/flow-2.png" class="flow-2" />
+                <div class="top-title">{$row['node_name']}</div>
+                <?php
+                if($row['log_img']!= ''){?>
+                <div class="logo-con"><img src="__UPLOAD__/<?php echo $row['log_img']?>"/></div>
+                <?php }?>
+                <div class="logo-bg"></div>
+                <div class="mainCon-contenter">
+                    <img src="__PUBLIC__/Label/Image/20140511/msgText{$info['bless_id']+1}.png" class="msgText msgText{$info['bless_id']+1}" />
+                    <div class="mainConFormup">
+                        <ul>
+                        <li class="tr">您的{$info.son_name}</li>
+                        <li class="tc" id="btn_li">
+                            <eq name="info.check_flag" value="0">
+                            <a href="javascript:void(0)" class="go-input-button"> 抽  奖 </a>
+                            </eq>
+                        </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+</div>
+
+
+<script>
+function popForm(type,msg,isTrue) {
+    if(isTrue=="defult"){
+        $(".AjaxWrapper-top p").text("妈妈将收到短信如下");
+    }else{
+        $(".AjaxWrapper-top p").text("抽奖结果");
+    };
+    if(isTrue=="defult"){
+        $(".cjCon").css("padding-top","10px");
+    }else{
+        $(".cjCon").css("padding-top","40px");
+    };
+    $("#AjaxWrapper").fadeIn(300);
+    if(type=="popForm"){
+        $("#popMsg").hide();
+        $("#popForm").show();
+        $("#popForm .cjText-text").html(msg);
+        $("#nocj_resp_id").hide();
+        $("#cj_resp_id").show();
+    }else if(type == 'popMsg'){
+        $("#popForm").hide();
+        $("#popMsg").show();
+        $("#popMsg .cjText-text").html(msg);
+        if(isTrue == '1'){
+            $("#cj_resp_id").hide();
+            $("#nocj_resp_id").show();
+        }else{
+        }
+    }
+}
+</script>
+<div id="AjaxWrapper" class="dn">
+    <div class="cjWrapper">
+        <div class="AjaxWrapper-top"><img src="__PUBLIC__/Label/Image/20140511/pop-bg2.png"><p>抽奖结果</p></div>
+        <div class="AjaxWrapper-bg">
+            <div class="AjaxWrapper-con">
+                <div class="cjWrapper-close"><a href="javascript:void(0)" class="close-AjaxWrapper">+</a></div>
+                <div class="cjCon pb10 dn" id="popMsg">
+                    <div class="cjText">
+                        <div class="cjText-con">
+                            <div class="cjText-text">您填写的信息有误，<br />请重新输入！</div>
+                        </div>
+                    </div>
+                    <div class="cjBtn">
+                        <a href="javascript:void(0)" class="cjBtn-back close-AjaxWrapper" id="nocj_resp_id">返回</a>
+                        <a href="javascript:void(0)" class="cjBtn-back" style="display: none;" id="cj_resp_id" onclick="popForm('popForm',0,'defult')">返回</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="chooseWrapper" class="dn">
+    <div class="chooseWrapper">
+        <div class="chooseWrapper-con">
+            <ul>
+            <volist name="blessings_arr" id="vo" >
+                <li class="chooseWrapper-li"><input type="checkbox" value="{$vo}" class="sOne-Checkbox" id="choose-{$key}" data-rel="{$key}"><div class="label"><label for="choose-{$key}">{$vo}</label></div></li>
+            </volist>
+                <li class="tc"><a href="javascript:void(0)" class="choose-updata"/>确认</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

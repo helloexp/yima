@@ -1,0 +1,121 @@
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.scrollToTop.min.js?v=__VR__"></script>
+<input type="hidden" name="is_phone" id="is_phone" value="<?php echo $userInfo[contact_phone];?>" />
+<style type="text/css">
+    #headerTwo .headerBg { background: #ffffff; border-bottom: 1px #e5e5e5 solid;}
+    #headerTwo .logo-img { width:220px; background: url(__PUBLIC__/Image/Zggk/LOGO.png?v=2) no-repeat center center;}
+    #headerTwo .headerOpr .headerOprList>a { color: #666666;}
+    .login-logo2 h2 { margin-left: 0; float: none; text-align: center;}
+    .ind-footer { background: #fff; border-top: 1px #e5e5e5 solid;}
+    .ind-copyright span,.ind-copyright a,#headerTwo .headerMsg { color: #666666;}
+</style>
+<div id="headerTwo"> 
+    <div class="headerBg">
+        <div class="headerCon fn">
+            <div class="logo">
+                <div class="logo-img"><a href="{:U('Zggk/Index/index')}" class="a-hide"></a></div>
+            </div>
+            <?php
+            if(!empty($userInfo['node_id']))
+            {
+            ?>
+            <div class="headerOpr">
+                <div class="headerOprList hasMoreList">
+                    <a href="{:U('Home/AccountInfo/message')}"><?php if($unReadMsg>0){ ?><i class="icon-mail-alt"></i><?php }?></a>
+                    <div class="headerMore">
+                        <div class="headerMoreNews">
+                        <volist name="msgArrcount" id='v'>
+                        <if condition="$v['message_type'] eq 1">
+                                <a href="{:U('Home/AccountInfo/message')}">系统消息 
+                                <elseif condition="$v['message_type'] eq 2"/>
+                                <a href="{:U('Home/AccountInfo/batch_msg')}">O2O活动消息
+                                <elseif condition="$v['message_type'] eq 3"/>
+                                <a href="{:U('Home/AccountInfo/message_new')}">
+                                留言板消息
+                                <elseif condition="$v['message_type'] eq 4"/>
+                                <a href="{:U('LabelAdmin/OrderList/index')}">
+                                电商订单提醒
+                         </if>
+                        <em>
+                        ({$v['new_message_cnt']})
+                        </em>
+                         </a>
+                        </volist>
+                        </div>
+                    </div>
+                </div>
+                <div class="headerOprList"><a href="{:U('Zggk/Index/index')}">返回首页</a></div>
+                <div class="headerOprList"><a href="index.php?g=Zggk&m=Logout&a=index">[退出]</a></div>
+            </div>
+            <div class="headerMsg">
+                <div class="text"><span>欢迎，{$userInfo.user_name}</span><i class="icon-down-dir"></i><i class="icon-up-dir"></i></div>
+                <div class="headerMore">
+                    <p>{$userInfo.user_name}，欢迎来到中港高科！</p>
+                    <p><span>{$nodename}<?php if($userInfo['status_tips']==1){ ?>，尊敬的旺财用户：截止到<span><?php echo date('Y年m月d日');?></span>,您的账户<span>已欠费</span>。为了不影响您继续使用旺财,请您尽快充值。如有疑问,请致电客服热线400-8827770。 <a href="<?php echo C('YZ_RECHARGE_URL')?>&node_id=<?php echo $userInfo['node_id'];?>&name=<?php echo $userInfo['user_name'];?>&token=<?php echo $token;?>">马上充值</a>
+<?php } ?></span></p>
+                    <p class="link"><a href="/index.php?g=Home&amp;m=NodeUserNew&amp;a=index">用户管理</a><a href="/index.php?g=Home&amp;m=EditPwd&amp;a=index">修改密码</a></p>
+                    <p class="link">
+                        <?php
+                        //支撑工单地址
+                        $pzt=get_iss_page_url('', '');
+                        if($_SESSION['GET_URL']==""){
+                        $userService = D('UserSess', 'Service');
+                        $sso = $userService->initSso();
+                        $userInfo = $userService->getUserInfo();
+                        $epos=C('EPOS_LOGIN_URL')."?token=".$userInfo['token']."&node_id=".$userInfo['node_id']."&node_name=".$userInfo['name']."&user_id=".$userInfo['user_id']."&user_name=".$userInfo['user_name'];
+                        session("epos_url",$epos);
+                        session("token_url",$userInfo['token']);
+                        $ds=C('DS_URL')."?token=".$userInfo['token']."&node_id=".$userInfo['node_id']."&node_name=".$userInfo['name']."&user_id=".$userInfo['user_id']."&user_name=".$userInfo['user_name'];
+                        session("ds_url",$ds);
+                        session('GET_URL','1');   
+                        }
+                        if(_hasIss()){
+                        ?>
+                        <a target="_blank" href="<?php echo $pzt;?>">翼码凭证通</a>
+                        <?php
+                        }
+                        ?>
+                        <?php
+                        //查询用户是否管理员
+                        $uInfo = M('tuser_info')->field("role_id")->where("node_id='".$userInfo['node_id']."' AND user_id='".$userInfo['user_id']."'")->find();
+                        if($uInfo['role_id']=='2'||$userInfo['node_id']=='00000000'){
+                        $sso_admin_url=C('SSO_ADMIN');
+                        $sso_id=C('SSO_SYSID');
+                        if($userInfo['token']=="" && !empty($_SESSION['token_url'])){
+                            $token_url=$_SESSION['token_url'];
+                        }else{
+                            $token_url=$userInfo['token'];
+                        }
+                        $sso_url=$sso_admin_url.$sso_id."&token=".$token_url;
+                        ?>
+                        <a target="_blank" href="<?php echo $sso_url;?>">SSO后台</a>
+                        <?php
+                        }
+                        ?>
+                        <?php
+                        if(_hasIss() && $userInfo['node_id']=='00000000'){
+                            if($userInfo['token']==""){
+                                $token_url=$_SESSION['token_url'];
+                            }else{
+                                $token_url=$userInfo['token'];
+                            }
+                            $wcadmin=C("WCADMIN_URL").$token_url;
+                        ?>
+                        <a target="_blank" href="<?php echo $wcadmin;?>">旺财后台</a>
+                        <?php
+                        }
+                        ?>
+                    </p>
+                </div>
+            </div>
+            <?php
+            }else{
+            ?>
+            <div class="headerOpr">
+                <div class="headerOprList"><a href="{:U('Zggk/Login/showLogin')}">登录</a></div>
+            </div>
+            <?php
+            }
+            ?>
+        </div>
+    </div>
+</div>

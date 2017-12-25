@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>通知消息 系统消息</title>
+  <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+  <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+  <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+  <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+  <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+  <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+  <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+  <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+  <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+  <script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+  <script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+  <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+  <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+  <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+</head>
+<body class="bgfff">
+  <div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <div id="container" class="bgfff">
+      <div id="main" class="rel">
+        <div class="new_sidenav">
+          <include file="./Home/Tpl/Integral/Integral/Store_sidenav.html" leftmenuid="xtxx"/>
+        </div>
+        <div id="div_content" class="subcon fn">
+          <div class="shopCon">
+            <div class="main-name fn">
+              <h4>新消息</h4>
+            </div>
+            <div class="Gform l" style="width:600px;">
+              <form action="{:U('Integral/Integral/addSysMessage')}" method="post" id='theform'>
+                <ul>
+                  <li class="Gname">
+                    <span>*&nbsp;</span>
+                    标题
+                  </li>
+                  <li class="Ginput">
+                    <input maxlength="15" style="width:330px" type="text" class="validate[required,maxSize[15]]" id='sendTitle' name='sendTitle'/>
+                    <span class="maxTips forInput" data-max="15" style="left:485px;">0/15</span>
+                  </li>
+                </ul>
+                <ul>
+                  <li class="Gname">
+                    <span>*&nbsp;</span>
+                    正文内容
+                  </li>
+                  <li class="Ginput">
+                    <textarea name="sendContent" id="new-notice" class=""></textarea>
+                  </li>
+                </ul>
+                <ul>
+                  <li class="Gname">
+                    <span>*&nbsp;</span>
+                    发送对象
+                  </li>
+                  <li class="Ginput">
+                    <div class="switch" data-callback="windowheight">
+                      <input type="radio" checked="checked" value="0" name='sendType'>
+                      <div class="newRadio">
+                        <span data-val="0" class="valfirst">所有会员</span>
+                        <span data-val="1" class="vallast">指定会员</span>
+                      </div>
+                      <div class="newRadio-input mt15" style="width:100%">
+                        <div class="switch auto hover">
+                        <?php foreach($memberCard as $key => $value):?>
+                          <input type="checkbox" checked="" name="sendGroup[]" value="{$value['id']}">
+                        <?php endforeach;?>
+                          <div class="newRadio">
+                        <?php foreach($memberCard as $key => $value):?>
+                            <span data-val="{$value['id']}" class="hover">{$value['card_name']}</span>
+                        <?php endforeach;?>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </form>
+              <ul>
+                <li class="Ginput">
+                  <a href="javascript:void(0)" class="btn-all" id="subMessage">立即发送</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="integralService"></div>
+  <!--底部开始-->
+  <include file="./Home/Tpl/Public/Public_footer.html" />
+  <!--底部结束-->
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+//图文编辑调用  
+  var ue_mn = UE.getEditor('new-notice', {
+      imageUrl : "{:U( 'LabelAdmin/Upfile/editoImageSave')} ",
+      imagePath : "__UPLOAD__ ",
+      catcherUrl : "{:U( 'LabelAdmin/Upfile/getRemoteImage')} ",
+      catcherPath : "__UPLOAD__ ",
+      initialFrameWidth : 385,
+      initialFrameHeight : 100
+  });
+
+  $('#subMessage').click(function(){
+    if($("#theform").validationEngine('validate')){
+      $('#theform').ajaxSubmit({
+          beforeSubmit:function(){
+              Dialoading("正在提交...");
+          },
+          success:function(data){
+              if(data.status==1){
+                   Diasucceed("正在提交...");
+                   var surl =  "{:U('Integral/Integral/sysMessageList')}";
+                  window.location.href = surl;
+              }else{
+                  Diaerror(data.info);
+              }
+          },
+          dataType:'json'
+      });
+    }
+  })
+});
+</script>

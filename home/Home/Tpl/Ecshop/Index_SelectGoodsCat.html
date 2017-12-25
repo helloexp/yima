@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>选择卡券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wselect_et.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+var _json_data = <?php echo json_encode(array_valtokey($list, 'id'));?>;
+var _arr = [];
+var max_num = 8;
+var _callback = '{:I('callback')}';
+$(document).ready(function(e){
+	var win = art.dialog.opener;
+	var _this=art.dialog.data('_this');
+	
+	$(".etList ul li").click(function(e) {
+	    var is_selected=$(this).hasClass("selected");
+		if(is_selected){
+			$(this).find("input").attr("checked",false);
+			$(this).removeClass("selected");
+		}else{
+			$(".etList ul li").removeClass("selected");
+			$(this).find("input").attr("checked",true);
+			$(this).addClass("selected");
+		}
+	});
+	
+
+	for(i = 0; i<_arr.length; i++){
+		$(':radio[value="'+_arr[i]+'"]').attr('checked',true);
+	}
+
+	if(_arr.length == max_num) $(":radio").not("input:checked").attr('disabled', 'disabled');
+
+	$(".btn-next").click(function(){
+		var v = $("input:checked").val(),
+            l_id = $("#l_id").val();
+        var j_data = _json_data[v];
+        j_data.l_id = l_id;
+		if(_callback && win[_callback] && typeof(win[_callback]) == 'function' )
+			_arr = win[_callback].call(this, j_data,_this);
+		art.dialog.close();
+	});
+});
+</script>
+</head>
+<body class="no">
+<div class="iframeCon SelectGoods">
+    <div class="etList">
+        <input type="hidden" id="l_id" value="{$label_id}" />
+                    <notempty name="list">
+                    <ul>
+                        <foreach name="list" item="vo" >
+                        <li class="noImg">
+                            <div class="text">
+                                <h3><span>{$vo['class_name']}</span>
+                                    <i class="gray type3">商品分组</i><!-- type2 -->
+                                </h3>
+                                <p>&nbsp;</p>
+                                <p>创建时间：{$vo['add_time']|strtotime|date="Y-m-d",###}</p>
+                            </div>
+                            <input type="radio" class="dn"  value="{$vo['id']}" />
+                        </li>
+                        </foreach>
+                    </ul>
+                    <else/>
+                    <div class="iframeCon">
+                        <div class="Dianodate">
+                            <img src="__PUBLIC__/Image/member/nodata.gif" />
+                            <p>空空如也，还没单页~~</p>
+                			<p>您可以<a href="{:U('Ecshop/Classify/index')}" target="_blank">管理分组</a></p>
+                        </div>
+                    </div>
+                    </notempty>
+                    <div class="page mini">{$page}</div>
+                </div>
+    <div class="DiabtnCon">
+        <a class="Diabtn-all btn-next">确定</a>
+        <a href="javascript:art.dialog.close();" class="Diabtn-all-del">取消</a>
+    </div>
+</div>
+</body>
+</html>

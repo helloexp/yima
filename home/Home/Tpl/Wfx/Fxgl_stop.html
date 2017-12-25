@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加本层机构</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wfx.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.js?v=__VR__"></script>
+<style>
+.shopTable tr td{ font-size:14px;word-break: break-all; line-height:24px; padding:7px 15px; text-align:left; word-break:break-all;}
+.shopTable tr:first-child td{ border-top: solid 1px #e3e3e3; }
+.shopTable tr td a{ color:#2e7dc6; line-height:24px;}
+.shopTable tr td a img{ width:104px; height:104px;}
+.shopTable tr td a.licences img{ width:80px; height:58px;}
+.shopTable tr td a span{ padding-left:10px;}
+.shopTable tr td em{ font-size:12px; color:#666}
+.shopTable td:nth-of-type(odd){ background:#fcfcfc; text-align:left; color:#666;width: 20%}
+.shopTable td:nth-of-type(even){ background:#fff; text-align:left; color:#666;width: 30%}
+.shopTable tr.gap td{ border-left:0;border-right:0; background:#FFF}
+.shopTable.editHistory tr td{ text-align:center; background:#FFF}
+.shopTable.editHistory th{border:0; border-top: solid 1px #e3e3e3; font-size:14px}
+.shopTable.editHistory th.first{border-left: solid 1px #e3e3e3;}
+.shopTable.editHistory th.last{border-right: solid 1px #e3e3e3;}
+
+</style>
+</head>
+<body>
+<div class="popupWin">
+	<div class="importantTip">
+    	<h2 class="tipTitle"><i class="off"></i>您正在停用<eq name="role" value="2">经销商<else/>销售员</eq><span>{$name}</span>，停用后</h2>
+        <dl class="tipList">
+            <dd>• 该帐号将不能进入个人中心的分销管理菜单</dd>
+            <dd>• 该帐号将不再获得任何提成</dd>
+            <dd>• 通过该账号的分销链接产生的订单，将视为其上级经销商的销售订单</dd>
+            <eq name="role" value="2"><dd>• 该帐号将没有下级经销商和下级销售员</dd></eq>
+            
+        </dl>
+    </div>
+    
+    <div class="tipDetails">
+     <eq name="role" value="2">
+        检测到该账号下有：<strong>{$customAmt}</strong>个消费者（已绑定客户保护关系），<strong>{$sonAgencyAmt}</strong>个下级经销商，<strong>{$sonSalerAmt}</strong>个下级销售员
+     <else/>
+        检测到该账号下有：<strong>{$customAmt}</strong>个消费者（已绑定客户保护关系）
+     </eq>
+    
+    </div>
+    
+	<div class="Gform" style="margin-left:-50px;">
+        <neq name="customAmt" value="0">
+    	<ul>
+        	<li class="Gname">消费者转移</li>
+            <li class="Ginput">
+                <input type="text" id="phone_no" name="phone_no" placeholder="输入销售员/经销商手机号码">
+                <p class="Gtext" style="font-size: 13px;color: #aaa;">将已绑定客户保护关系的消费者分配给其他人</p>
+            </li>
+        </ul>
+        </neq>
+        <eq name="downFlag" value="1">
+        <ul>
+        	<li class="Gname">下级人员转移</li>
+            <li class="Ginput">
+                <include file="./Home/Tpl/Wfx/CommonSelect.html" stype="fromAgency"/>
+                <p class="Gtext" style="font-size: 13px;color: #aaa;margin-top:-10px;">为下级销售员、经销商指定新的上级</p>
+                <span class="txtTips important">请勿频繁进行转移操作！</span>
+            </li>
+        </ul>
+        </eq>
+    </div>
+    <form action="{:U('Wfx/Fxgl/stopAjax')}" method="post" id="theform"></form>
+    <div class="tc"><a href="javascript:void(0);" id="sub" class="btn-all btn_primary  mt30 mb30">确认停用</a></div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+    var role = "{$role}";
+    var sonAgencyAmt = "{$sonAgencyAmt}";
+    var sonSalerAmt = "{$sonSalerAmt}";
+    var isNone = 1;
+    if(sonAgencyAmt == 0 && sonSalerAmt == 0){
+        isNone = 2;
+    }
+    if(role == '1'){
+        $("#sub").click(function(){
+            succSubmit();
+        });
+    }
+    if(role == '2' && isNone == '2'){
+        $("#sub").click(function(){
+            succSubmit();
+        });
+    }
+    function succSubmit(){
+
+        var dialog;
+        var winer = art.dialog.opener;
+        var customAmt = "{$customAmt}";
+        
+        var phoneNo = customAmt == "0" ? "" : $("#phone_no").val();
+        
+        var selectedAgency = role == "1"?"":$("#agency").val();
+        var url = $("#theform").attr("action")+"&phone_no="+phoneNo+"&selected_agency="+selectedAgency+"&id="+"{$id}"+"&role="+"{$role}"+"&amount="+customAmt+"&isNone="+isNone;
+        $("#theform").attr("action",url);
+        $("#theform").ajaxSubmit({
+            beforeSubmit:function(){
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+                if(data.status == '1'){
+                    dialog.time(2).content("<div class='msg-all-succeed'>" + data.info + "</div>");
+                    winer.reload();
+                }else{
+                    dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },
+            dataType:'json',
+        });
+    }
+</script>

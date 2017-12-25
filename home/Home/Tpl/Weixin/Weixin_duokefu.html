@@ -1,0 +1,223 @@
+<php>
+//账号类型
+$account_type_arr = array(
+'1'=>'未认证订阅号',
+'2'=>'已认证订阅号',
+'3'=>'未认证服务号',
+'4'=>'已认证服务号'
+);
+</php>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wdkf.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script>
+$(function(){
+	//开关 开启表示从关闭状态到开始状态 关闭表示从开启状态转到关闭状态
+	$(".Uswitch").click(function(){
+		if($(this).attr("data-rel")=="0"){
+			$(this).find(".Uswitch-on").fadeIn(200);
+			$(this).attr("data-rel","1");
+			$("#flag").val('0');
+			$(this).find("i").animate({left:29},200,function(){
+			//此处提交数据的函数
+                $.post('{:U(Weixin/Weixin/duokefu)}', {'flag':'1'}, function(data){
+                });
+			});
+		}else{
+			$(this).find(".Uswitch-on").fadeOut(200);
+			$(this).attr("data-rel","0");
+			$("#flag").val('0');
+			$(this).find("i").animate({left:0},200,function(){
+			//此处提交数据的函数	
+				$.post('{:U(Weixin/Weixin/duokefu)}', {'flag':'0'}, function(data){
+                });
+			});
+		}
+	});
+
+});
+
+$(function(){
+	
+	$(".msg-user-opr").click(function(){
+		$(".msg-user-info").hide();
+		$(".msg-user-add").height("auto");
+		var addHeight=$(".msg-user-add").height();
+		$(".msg-user-add").height("28px").show();
+		$(".msg-user-add").animate({height:addHeight},500,function(){$(".msg-user-add").height("auto");});
+	});
+	$(".msg-user-exit,#btn-cancel").click(function(){
+		$(".msg-user-add").animate({height:28},500,function(){
+			$(".msg-user-add").hide();
+			$(".msg-user-info").show();
+		});
+	});
+	$(".msg-user-type").change(function(){
+		if($(this).val()=="1"){
+			$(".msg-user-typeDiv").hide();
+		}else{
+			$(".msg-user-typeDiv").show();
+		}
+	})
+	$(".alertmem").click(function(){
+		var tel="<div class='proInt-callus'>您尚未开通此项服务，欢迎拨打业务咨询热线：400-882-7770</div>"
+			art.dialog({
+				title:"马上开通",
+				lock:true,
+				content:tel,
+				id:"pro",
+				width:"830px",
+				padding:0
+			});
+	})
+	
+	$("#theform").submit(function(){
+		var actionUrl = $(this).attr("action");
+		var data = getFormData(this);
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.post(actionUrl,data,function(d){
+			alert(d.info);
+			if(d.status=='1'){
+				window.location.reload();
+			}
+			dialog.close();
+		},'json');
+		return false;
+	});
+
+	$("#btn-generate-token").click(function(){
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		var actionUrl = $(this).attr("data-url");
+		var data = getFormData("#theform");
+		if(!data.weixin_code){
+			alert("账号名不能为空");
+			return false;
+		}
+		$.post(actionUrl,data,function(d){
+			
+			if(d.status=='1'){
+				$("#token","#theform").val(d.info.token);
+				dialog.close();
+				return;
+			}
+			dialog.close();
+			alert(d.info);
+			
+		},'json');
+	});
+	
+
+	//查看攻略
+    $('#btn-Introduce').click(function(){
+          art.dialog.open("{:U('Home/Introduce/weixin')}",{
+				title: '渠道攻略',
+				width:860,
+                height:'90%'
+			});
+        
+    });
+	
+	//开启关闭按钮
+	
+
+	//判断初始
+	<eq name="_GET.setting" value="1">
+		$(".msg-user-opr").click();
+	</eq>
+
+    <eq name="configFlag" value="1">
+        productIntroduce(1,"wx","javascript:void(0)");
+    <else/>
+        productIntroduce(2,"wx","javascript:void(0)");
+    </eq>
+	$(".msg-user-type").change();
+
+});
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+    	<div id="container" >
+            <div id="main" class="rel">
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+                    <include file="LabelAdmin/Batch/WleftMenu" leftmenuid="dkf"/>
+                </div>
+                
+                <div class="subcon">
+                <div class="main-name fn">
+                    <h4>多客服
+                    <div class="Uswitch dib ml20" data-rel="{$flag['service_flag']}">
+                        <php>
+                            
+                            if(1 == $flag['service_flag']){
+                                echo '<div class="Uswitch-off"></div><div class="Uswitch-on"></div><i class="Uswitch-i-on"></i>';
+                            }else{
+                                echo '<div class="Uswitch-off"></div><div class="Uswitch-on" style="display:none"></div><i class="Uswitch-i-on" style="left:0px;"></i>';
+                            }
+                        </php>
+                        <input type="hidden" id="flag" name="flag" value="{$flag['service_flag']}">
+                    </div>
+                    </h4>
+                    
+                </div>
+                <div class="highlight_box icon_wrap icon_small border">
+                             <p class="desc pl0" style="padding-left:0">   
+                                 <dl class="dkf_dl" style="color:#8D8D8D">
+                                    <dt style="padding:0px 10px 80px 0; display:block; float:left;">注：</dt>
+                                    <dd>1. 多客服功能，只有微信的认证服务号才可以使用。</dd>
+                                    <dd>2. 开启多客服功能后，发送公众号的信息将都到微信多客服系统上。</dd>
+                                    <dd>3. 开启后，您可以微信官方多客服系统，进行客服管理 <a href="http://crm.mp.weixin.qq.com/cgi-bin/dkf_download_url">点击下载</a></dd>
+                                 </dl>
+                             </p>
+                         </div>
+                <div class="mod-weixin-area" id="body">
+                 <div class="mod-weixin-area__body" id="my_cont">
+                     
+                     <div class="mp_news_area notices_box">
+                    <div class="title_bar"><h3>使用介绍</h3></div>
+                    <ul class="mp_news_list">
+                      <li class="mp_news_item">
+                        Step1：登陆微信平台添加客服人员
+                      </li>
+                      <li class="mp_news_item">
+                        Step2：登陆到多客服终端
+                      </li>
+                      <li class="mp_news_item">
+                        Step3：完成客服对话
+                      </li>
+                    </ul>
+                    </div>
+                     
+                 </div>      
+                </div>
+                
+                
+                
+                </div>
+                
+                
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

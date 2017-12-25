@@ -1,0 +1,238 @@
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><span></span></section>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript">
+    var cjResultData = '';
+    //领取卡券
+    window['getWxCard'] = function (data) {
+        alert('您点得太快了，请多点几次');
+    };
+    
+    document.addEventListener('WeixinJSBridgeReady', function () {
+        window['getWxCard'] = function (data) {
+            if (typeof(WeixinJSBridge) == 'undefined') {
+                alert('wait...');
+                return;
+            }
+            WeixinJSBridge.invoke('batchAddCard', {
+                "card_list": [{
+                    "card_id": data.card_id,
+                    "card_ext": data.card_ext
+                }]
+            }, function (res) {
+            });
+        }
+    }, false);
+    
+    $(document).ready(function (e) {
+        //判断字符
+        var topTitleClassObject = $(".member_title2");
+        var fData = topTitleClassObject.text();
+        var intLength = 0;
+        for (var i = 0; i < fData.length; i++) {
+            if ((fData.charCodeAt(i) < 0) || (fData.charCodeAt(i) > 255)) {
+                intLength = intLength + 2;
+            } else {
+                intLength = intLength + 1;
+            }
+        }
+        if (intLength <= 8) {
+            topTitleClassObject.css("font-size", "26px");
+        } else if (intLength <= 10) {
+            topTitleClassObject.css("font-size", "24px");
+        } else {
+            topTitleClassObject.css("font-size", "20px");
+        }
+
+        function verifyPhoneno() {
+            var phone_no = $("#phone_no").val();
+            var reg = new RegExp(/^[0-9]{11}$/);
+            phone_no = phone_no.trim();
+            if (reg.test(phone_no)) {
+                return true;
+            } else {
+                showErrorMessage("请输入11位手机号码");
+                return false;
+            }
+        }
+
+        function verifyCheck() {
+            var check_code = $("#check_code").val();
+            var reg = new RegExp(/^[0-9]{4}$/);
+            check_code = check_code.trim();
+            if (!reg.test(check_code)) {
+                showErrorMessage("请输入4位验证码");
+                return false;
+            }
+
+            var rName = $("#requeired_name").val();
+            if(rName == 1) {
+                var nid = $("#requeired_name").attr("data-id");
+                if(!$("#"+nid).val()) {
+                    showErrorMessage("请输入姓名");
+                    return false;
+                }
+            }
+            var rBir = $("#requeired_birthday").val();
+            if(rBir == 1) {
+                var bid = $("#requeired_birthday").attr("data-id");
+                console.log(bid);
+                if(!$("#"+bid).val()) {
+                    showErrorMessage("请输入生日");
+                    return false;
+                }
+            }
+            var rArea = $("#requeired_area").val();
+            if(rArea == 1) {
+                if(!$("#province").val()) {
+                    showErrorMessage("请选择地区");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function showErrorMessage(msg) {
+            $("#loadingBox span").html(msg);
+            $("#loadingBox").show();
+            setTimeout("$('#loadingBox').hide()", 2000);
+        }
+
+        var Int;
+        $('#sub_button').click(function () {
+            if (verifyPhoneno() && verifyCheck()) {
+                $("form").ajaxSubmit({
+                    success: function (data) {
+                        cjResultData = data;
+                        if (typeof data.status != 'undefined' && data.status == '1') {
+                            $("#loginForm").hide();
+                            $("#prizeForm").show();
+                            if(data.is_cj == '1'){
+                                var htmlText = '<dl class="member_prompt"><dt>恭喜您!</dt><dd>'+data.memberInfo+'</dd><dd>您获得了一次抽奖机会。</dd>';
+                                htmlText += '<a href="javascript:void(0);" id="cj" class="input_button now_verb">立即抽奖</a></dl>';
+                                $('.member_center').addClass('dn')
+                            }else{
+                                var htmlText = '<dl class="member_prompt"><dd>'+data.memberInfo+'</dd>';
+                            }
+                            $("#re").html(htmlText);
+                        } else {
+                            if (typeof data.info != 'undefined') {
+                                $("#loadingBox span").html(data.info);
+                            } else {
+                                $("#loadingBox span").html(JSON.stringify(data));
+                            }
+                            $("#loadingBox").show();
+                            setTimeout("$('#loadingBox').hide()", 2000);
+                        }
+                        $('.member_notice').hide();
+                        $('.member_logo').css('height','173px');
+                    },
+                    dataType: 'json'
+                });
+            }
+            return false;
+        });
+
+        $("#getpasscode").live("click", function () {
+            var phone_no = $("#phone_no").val();
+            var id = $("#id").val();
+            var reg = new RegExp(/^[0-9]{11}$/);
+            phone_no = phone_no.trim();
+            if (verifyPhoneno()) {
+                $(this).val("正在发送..");
+                $.post("{:U('Label/MemberRecruit/sendCheckCode')}", {"id": id, "phone_no": phone_no}, function (data) {
+                    var loadingBoxObject = $("#loadingBox span");
+                    if (data.status == '1') {
+                        loadingBoxObject.text(data.info);
+                        $("#loadingBox").show();
+                        setTimeout("$('#loadingBox').hide()", 2000);
+                        $("#getpasscode").attr("id", "noSend");
+                        Int = setInterval(checkTime, 1000)
+                    } else {
+                        loadingBoxObject.text(data.info);
+                        $("#loadingBox").show();
+                        setTimeout("$('#loadingBox').hide()", 2000);
+                        $("#getpasscode").val("获取验证码");
+                    }
+                }, "json");
+            }
+        });
+
+        var time = {$expiresTime};
+        var checkTime = function () {
+            var getPassCodeObject = $("a[name='getpasscode']");
+            getPassCodeObject.text("还剩" + time + "秒");
+            if (time == 0) {
+                getPassCodeObject.text("获取验证码");
+                getPassCodeObject.attr("id", "getpasscode");
+                time = {$expiresTime};
+                clearInterval(Int);
+                return false;
+            }
+            time--;
+        };
+        
+        $(document).on('click', '.member_center', function(){
+            var node_id = $("#node_id").val();
+            var id = $("#id").val();
+            //判断登录
+            $.post("{:U('Label/Member/checkPhoneLogin')}",{'node_id':node_id},function(data){
+                    if(data.status == 1){
+                        location.href = "{:U('Label/Member/index')}&node_id="+node_id;
+                    } else {
+                        var surl = "<?php echo urlencode('http://'.$_SERVER['HTTP_HOST'].'/index.php?g=Label&m=Member&a=index&node_id='.$row['node_id']);?>";
+                        var link = "{:U('Label/O2OLogin/index')}&id="+id+"&backcall=bclick&surl="+surl;
+                        location.href = link;
+                    }
+                },
+            'json');
+        });
+        
+        $(document).on('click', '#cj', function(){
+            $.post("{:U('Label/MemberRecruit/cjAct')}", {'id':cjResultData.id, 'memberId':cjResultData.member_id}, function(result){
+                $('.bj_cover').removeClass('dn');
+                if(result.cjResult == '0'){
+                    var htmlText = '<div class="member_draw"><div class="member_drawtop rel"><dl><dt>'+result.cjInfo+'</dt>';
+                        htmlText += '</dl></div><ul><li class="enter_mbcenter"><a class="input_button member_center" href="javascript:void(0)">进入会员中心</a></li></ul></div>';
+                    $("#prizeForm").before(htmlText);
+                }else if(result.cjResult == '1' && result.prizeType == '4'){
+                    var htmlText = '<div class="member_draw"><div class="member_drawtop rel"><dl><dt>'+result.cjInfo+'</dt>';
+                    htmlText += '<dd>您获得<span style="color:#ed3f41">'+result.goodsName+'</span>';
+                    htmlText += '+'+result.integralNum+'</dd></dl></div><ul><li class="enter_mbcenter">';
+                    htmlText += '<a class="input_button" href="index.php?g=Label&m=Member&a=youdou&node_id='+result.node_id+'">';
+                    htmlText += '查看我的积分</a></li></ul></div>';
+                    $("#prizeForm").before(htmlText);
+                }else if(result.cjResult == '1' && result.prizeType == '1'){
+                    var htmlText = '<div class="member_draw"><div class="member_drawtop rel"><dl><dt>'+result.cjInfo+'</dt>';
+                        htmlText+= '<dd>您获得<span style="color:#ed3f41">'+result.goodsName+'</span>';
+                        if (result.batchClass == '15') {
+                        	htmlText+= '，奖品将在三日内充值到账，请注意查收！</dd></dl></div><ul><li class="enter_mbcenter">';
+                        } else {
+                        	htmlText+= '，奖品将在几分钟后通过短信发送给您，请注意查收！</dd></dl></div><ul><li class="enter_mbcenter">';
+                        }
+                        htmlText+= '<a class="input_button member_center" href="javascript:void(0)">进入会员中心</a></li></ul></div>';
+                    $("#prizeForm").before(htmlText);
+                }else if(result.cjResult == '1' && result.prizeType == '2'){
+                    var htmlText = '<div class="member_draw"><div class="member_drawtop rel"><dl><dt>'+result.cjInfo+'</dt>';
+                        htmlText+= '<dd>您获得<span style="color:#ed3f41">'+result.goodsName+'</span>';
+                        htmlText+= '，请点击下方领取按钮将其存放入卡包中。</dd></dl></div><ul><li class="enter_mbcenter">';
+                        htmlText+= '<a class="input_button" href="javascript:void(0)" id="wxCard">存入卡包</a></li></ul></div>';
+                    $("#prizeForm").before(htmlText);
+                }else if(result.cjResult == '1' && result.prizeType == '3'){
+                    var htmlText = '<div class="member_draw"><div class="member_drawtop rel"><dl><dt>'+result.cjInfo+'</dt>';
+                        htmlText+= '<dd>您获得价值<span style="color:#ed3f41">'+result.goodsName+'</span>';
+                        htmlText+= '的商城红包一个！</dd></dl></div><ul><li class="enter_mbcenter">';
+                        htmlText+= '<a class="input_button" href="index.php?g=Label&m=Label&a=index&id="'+result.shopid+'>使用红包</a></li></ul></div>';
+                    $("#prizeForm").before(htmlText);
+                }
+            },'json');
+        });
+        
+        $(document).on('click', '#wxCard', function(){
+            var data = {card_ext:cjResultData.card_ext,card_id:cjResultData.card_id};
+            getWxCard(data);
+        });
+    });
+</script>
+</body>
+</html>

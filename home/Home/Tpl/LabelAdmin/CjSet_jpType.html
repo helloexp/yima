@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>抽奖_营销活动_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wprize.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+	$(function(){
+		var _one_sub = false;
+		$('#btn2').click(function(){
+				if($('#cj_cate_name').val() == ''){
+					art.dialog.msg({
+						content:"奖品类别名称不能为空!",
+						cancel:true
+					});
+					return false;
+				}
+			//粉丝id		
+			  var member_id=''; 
+			  $('input[name="mem_batch"]:checked').each(function(){ 
+			    member_id+=$(this).val()+'-'; 
+			  }); 
+			  if (member_id.length > 0) { 
+				    member_id = member_id.substring(0,member_id.length - 1); 
+			  } 
+			
+			 if(_one_sub)
+					return false;
+
+				 _one_sub = true;
+			//提交
+			
+			var data = {
+				cj_cate_id : $('#cj_cate_id', '#form2').val(),
+				cj_cate_name : $('#cj_cate_name', '#form2').val(),
+				member_id : member_id,
+				batch_id : $('#batch_id').val()
+			}
+			$.post('{:U('Common/SelectJp/jpLevelSave')}', data, function(resp){
+				art.dialog.msg({
+					content:resp.info,
+					ok: function () {
+						_one_sub = false;
+						if(resp.status=='1'){
+							window.parent.location.reload()
+						}
+					},
+					close:function(){
+						_one_sub = false;
+					}
+				});
+				
+			}, 'json');
+		});	
+		
+	})
+	
+
+</script>
+</head>
+<body>
+<div id="one_div">
+	<div id="form2">
+	<input  type="hidden" id="batch_id" value="{$batch_id}"/>
+	<input  type="hidden" id="cj_cate_id" value="{$cj_cate_id}"/>
+		<div class="Gform fn">
+			<ul>
+            	<li class="Gname">*&nbsp;奖品类别名称</li>
+            	<li class="Ginput"><input id="cj_cate_name" maxlength="6" type="text" class="validate[required,maxSize[6]]" value="{$cate_arr['name']}"/></li>
+			</ul>
+			<php>
+			if($cate_arr['member_batch_id'] != '' || !in_array($batchInfo['batch_type'], array('2','3','20')) ){
+			</php>
+			<ul>
+            	<li class="Gname">粉丝专享</li>
+            	<li class="Ginput">
+                	<div class="judgeDiv fn">
+                    <?php 
+                    $memarr = $cate_arr['member_batch_id'] ? explode(',',$cate_arr['member_batch_id']) : array();
+                    if($mem_batch){foreach($mem_batch as $mem_arr){?>
+                        <label class="ml5"><input type="checkbox" name="mem_batch" class="mem_batch" value="<?php echo $mem_arr['id'];?>" <?php if(in_array($mem_arr['id'],$memarr)){?>checked="checked"<?php }?>/>
+                        <span><?php echo $mem_arr['level_name'];?></span>
+                        </label>
+                    <?php }}else{?>
+                        <label class="ml5">还没配置粉丝类别<a target="_blank" href="<?php echo U('Member/Regulation/index');?>">去配置(只能粉丝中奖)</a></label>
+                    <?php }?>
+                    </div>
+                    <span class="txtTips">只有勾选的粉丝才能中奖</span>
+            	</li>
+			</ul>
+			<php>
+			}
+			</php>
+    
+			<div class="DiabtnCon">
+                <a href="javascript:void(0)" class="Diabtn-all" id="btn2">确定</a>
+                <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+            </div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

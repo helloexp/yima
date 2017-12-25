@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<title>会员详情</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Whygl.css" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<style type="text/css">
+	.mark { display: none;}
+	.Wcanal-tab .Wcanal-tab-title { margin-bottom: 15px;}
+	.Wcanal-tab .Wcanal-tab-title .Wcanal-tab-hover, .Wcanal-tab .Wcanal-tab-title .Wcanal-tab-hover:hover { border-top: 3px #ed1c24 solid;}
+	.userHeader-inner>img { float:left;/* margin-left:20px;*/ width:56px; height:56px; border-radius:50%; border:solid 2px #fff;}
+	.userHeader-inner>p {/* padding:5px 0;*/ line-height:20px; font-size: 15px; font-weight: bold; text-align:left; text-indent:8px; color: #333333;}
+	.userHeader-inner>p span {font-size: 14px; color: #666666; font-weight: normal;}
+	.popupList,.steps { margin: 0 0 15px 0;}
+	.popupList li { border: 1px #e8e8e8 solid; border-width: 0 1px 1px 1px; width: 49%; float: left;}
+	.popupList li:nth-child(2n) { border-left-width: 0;}
+	.popupList li label { background: #f7f7f7; border-right: 1px #e8e8e8 solid;}
+	.popupList li label,.popupList li span { display: inline-block;line-height: 40px; height: 40px; vertical-align: top; font-size: 14px; text-align: center;}
+	.popupList li label{width:38%}
+	.popupList li span{width:60%;}
+	.mb1 { height: 36px; line-height: 36px; text-align: center; font-size: 15px; padding: 0px 10px;}
+</style>
+<script type="text/javascript">
+	$(function(){
+		$(".mark").eq(0).show();
+		$("body").on("click",".Gform .switch .newRadio span",function(){
+			var $index = $(this).index();
+			$(".mark").hide();
+			$(".mark").eq($index).show();
+		});
+		
+		$(".mb1 i").click(function(){
+            var t = this;
+            art.dialog.confirm("确认删除该标签？",function(){
+                var labelId = $(t).parent(".mb1").attr("data-id");
+                var m_id = <?php echo $memberData['id']; ?>;
+                var dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                $.post(
+                    "{:U('delMemberLabel')}",
+                    {m_id: m_id, label_id: labelId},
+                    function (data) {
+                        if (data.status == '1') {
+                            $(t).parent(".mb1").remove();
+                            dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                        } else {
+                            dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                        }
+                    },
+                    'json'
+                );
+            });
+		});
+    });
+</script>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab db" id="Wcanal-tabon">
+	<div class="Wcanal-tab-title fn">
+        <p class="Wcanal-tab-hover"><a href="{:U('detail')}&m_id={$memberData['id']}">会员信息</a></p>
+        <p class=""><a href="{:U('behaviorRecord')}&m_id={$memberData['id']}">行为记录</a></p>
+        <li class="last" style="width:160px;"></li>
+    </div>
+    <div class="userHeader">
+    	<div class="userHeader-inner mb15 fn">
+            <div class="msgArea" onClick="">
+            </div>
+            <?php if($memberData['nickLogo']) { ?>
+            <img src="{$memberData['nickLogo']}" />
+            <?php } else { ?>
+			<img src="__PUBLIC__/Image/Whygl/Shop/default_member.png" />
+            <?php } ?>
+			<p style="padding-top: 10px;">{$mcData['card_name']}</p>
+            <p><span>{:L('INTEGRAL_NAME')}：{$memberData['point']}</span></p>
+    	</div>
+    </div>
+    <ul class="popupList fn">
+    	<li style="border-top-width: 1px;">
+    		<label>姓名</label>
+    		<span>{$memberData['name']}</span>
+    	</li>
+    	<li style="border-top-width: 1px;">
+    		<label>手机号码</label>
+    		<span>{$memberData['phone_no']}</span>
+    	</li>
+    	<li>
+    		<label>性别</label>
+    		<span>{$memberData['sex']}</span>
+    	</li>
+    	<li>
+    		<label>出生日期</label>
+    		<span>{$memberData['birthday']|preg_replace='/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])(.*)/','$1-$2-$3',###|}</span>
+    	</li>
+    	<li>
+    		<label>微信昵称</label>
+    		<span>{$memberData['nickname']}</span>
+    	</li>
+    	<li>
+    		<label>所在区域</label>
+    		<span>
+                <?php 
+                if($memberData['citycode']) {
+                    echo $memberData['province'].$memberData['city'].$memberData['town']; 
+                } else {
+                    echo $memberData['address'];
+                }
+                ?>
+            </span>
+    	</li>
+    	<li>
+    		<label>首次来源</label>
+    		<span><?php if($channel_name=='旺分销-群发消息') {echo '旺分销消息';} else {echo $channel_name;} ?></span>
+    	</li>
+    	<li>
+    		<label>登记日期</label>
+    		<span>{$memberData['add_time']|preg_replace='/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])(.*)/','$1-$2-$3',###|}</span>
+    	</li>
+    </ul>
+    <div class="steps">自定义信息</div>
+    <ul class="popupList fn">
+        <volist name='customFieldInfo' id='customField'>
+            <li style="border-top-width: 1px;">
+                <label>{$customField['text']}</label>
+                <span>{$customField['value']}</span>
+            </li>
+        </volist>
+    </ul>
+	
+    <div class="steps">互动记录</div>
+    <ul class="popupList fn">
+    	<li style="border-top-width: 1px;">
+    		<label>活动参与次数</label>
+    		<span>{$aData['join_total']|default=0}</span>
+    	</li>
+    	<li style="border-top-width: 1px;">
+    		<label>到店核销数</label>
+    		<span>{$aData['verify_total']|default=0}</span>
+    	</li>
+    	<li>
+    		<label>接收卡券数</label>
+    		<span>{$aData['send_total']|default=0}</span>
+    	</li>
+    	<li>
+    		<label>线上购物总额</label>
+    		<span>{$shopAmt|default=0}</span>
+    	</li>
+    	<li>
+    		<label>线上购物次数</label>
+    		<span>{$aData['shop_total']|default=0}</span>
+    	</li>
+    	<li>
+    		<label>线上购物商品</label>
+    		<span><a href="{:U('LabelAdmin/OrderList/index')}&order_phone={$memberData['phone_no']}" target="_blank">点击查看</a></span>
+    	</li>
+    	<li>
+    		<label>线下消费次数</label>
+    		<span>{$aData['shopline_total']|default=0}</span>
+    	</li>
+    	<li>
+    		<label>线下消费金额</label>
+    		<span>{$shopLineAmt|default=0}</span>
+    	</li>
+    	<li>
+    		<label>最近一次购物</label>
+    		<span>{$memberData['shop_time']|preg_replace='/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])(.*)/','$1-$2-$3',###|}</span>
+    	</li>
+    	<li>
+    		<label>最后一次登录</label>
+    		<span>{$memberData['update_time']|preg_replace='/([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])(.*)/','$1-$2-$3',###|}</span>
+    	</li>
+    </ul>
+    <div class="steps">标签</div>
+    <ul id="tp1">
+        <li class="Ginput fn">
+            <volist name="labels" id="vo">
+            <div class="mb1 fl" data-id="{$vo.id}">{$vo.label_name}<i></i></div>
+            </volist>
+        </li>
+    </ul>
+    <div class="Gform">
+        <div class="DiabtnCon">
+            <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">关闭</a>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>

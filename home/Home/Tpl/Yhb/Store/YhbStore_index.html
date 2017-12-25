@@ -1,0 +1,405 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>翼惠宝门店管理</title>
+    <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    
+    <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wyhb.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <!--<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>-->
+    <script type="text/javascript">
+        var    _sel_street_info = "{:I('town_code')}",
+                _sel_street_code = "{:I('street_code')}",
+                _sel_village_code = "{:I('village_code')}";
+        $(document).ready(function(e) {
+            $("#street_info").change(function(){
+                var town_code=$(this).val();
+                $.post("{:U('Yhb/YhbStore/street_info')}",{"town_code":town_code},function(data){
+                    if(data.status =='0'){
+//                        alert(data.info);
+                        $(".street_option").remove();
+                        $(".village_option").remove();
+                    }else{
+                        $("#street_code").find(".street_option").remove();
+                        $("#village_code").find(".village_option").remove();
+                        $(data.info).each(function(index,item){
+                            $("#street_code").append("<option class='street_option' value='"+item.street_code+"'>"+item.street+"</option>");
+                        });
+                        if(_sel_street_code){
+                            $("#street_code").val(_sel_street_code).trigger('change');
+                            _sel_street_code = '';
+                        }
+                    }
+                },'json');
+            });
+            $("#street_code").change(function(){
+                var street_code=$(this).val();
+                $.post("{:U('Yhb/YhbStore/village_info')}",{"street_code":street_code},function(data){
+                    if(data.status =='0'){
+//                        alert(data.info);
+                        $(".village_option").remove();
+                    }else{
+                        $("#village_code").find(".village_option").remove();
+                        $(data.info).each(function(index,item){
+                            $("#village_code").append("<option class='village_option' value='"+item.village_code+"'>"+item.village+"</option>");
+                        });
+                        if(_sel_village_code){
+                            $("#village_code").val(_sel_village_code);
+                            _sel_village_code = '';
+                        }
+                    }
+                },'json');
+            });
+
+            if(_sel_street_info != ''){
+                $('#street_info').val(_sel_street_info).trigger('change');
+            }
+            $(".jiantou_up").click(function(){
+                $("#order_sort").val("1");
+                $("#storeForm").submit();
+            });
+            $(".jiantou_down").click(function(){
+                $("#order_sort").val("2");
+                $("#storeForm").submit();
+            });
+            //门店下线
+//            CityCode({
+//                province:$("#province"),//省
+//                city:$("#city"),//市
+//                town:$("#town"),//区
+//                selected:"{:$_GET['province'].$_GET['city'].$_GET['town']}",
+//                url:"{:U('LabelAdmin/AjaxCity/index')}"
+//            });
+
+            $(".js_edit").click(function(e) {
+                var storeId=$(this).attr('store_id');
+                //alert("{:U('Home/Store/edit')}?id="+storeId);return false;
+                art.dialog.open("{:U('Yhb/YhbStore/edit')}&id="+storeId,{
+                    id:'storeID',
+                    title: '编辑门店信息',
+                    width:'900px',
+                    lock:true,
+                    height:'580px'
+                });
+            });
+
+            $(".js_view").click(function(e) {
+                var storeId=$(this).attr('store_id');
+                art.dialog.open("{:U('Yhb/YhbStore/view')}&id="+storeId,{
+                    title: '查看详情',
+                    width:'900px',
+                    lock:true,
+                    height:'580px'
+                });
+            });
+//跳转设置微官网
+            $(".store_location").click(function(e) {
+                var storeId=$(this).attr('store_id');
+                window.location.href="{:U('MicroWeb/Index/add')}&id="+storeId;
+            });
+            $(".js_location").click(function(e) {
+                var storeId=$(this).attr('store_id');
+                art.dialog.open("{:U('Yhb/YhbStore/location')}&id="+storeId,{
+                    id:'locaID',
+                    title: '导航定位',
+                    width:'900px',
+                    lock:true,
+                    height:'580px'
+                });
+            });
+
+            $("#sub_button").click(function(){
+                $("#storeForm").submit();
+            });
+
+            //下载导出数据
+            $("#down").click(function(){
+                var down=$("#storeForm").serialize();
+                window.location.href="index.php?"+down+"&downtype=1";
+            });
+
+            $("#yuangong").click(function(event) {
+                art.dialog.open("{:U('Yhb/YhbStore/batchApply')}",{
+                    id:'uduf',
+                    title: '添加新门店',
+                    width:600,
+                    height:360,
+                    lock:true,
+                    close: function(){
+                        location.reload();
+                    }
+                })
+            });
+        });
+        function chg_order(store_id, order){
+            $.post("{:U('Yhb/YhbStore/chg_order')}",{"store_id":store_id,"order":order},function(data){
+                if(data.status==1){
+                    art.dialog({title:false,content:"<div class='msg-all-succeed'>操作成功</div>",fixed: true,padding:0,time:2});
+//                    window.location.href="/index.php?g=Yhb&m=YhbStore&a=index";
+                }else{
+                    art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+                }
+            },"json");
+        }
+        function down_line(store_id,line_status){
+            if(store_id==''){
+                alert("store_id不能为空");
+            }
+            $.post("{:U('Yhb/YhbStore/downLine')}",{"store_id":store_id,line_status:line_status},function(data){
+                if(data.status==1){
+                    art.dialog({title:false,content:"<div class='msg-all-succeed'>操作成功</div>",fixed: true,padding:0,time:2});
+                    window.location.href="/index.php?g=Yhb&m=YhbStore&a=index";
+                }else{
+                    art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+                }
+            },"json");
+        }
+        $(function(){
+            $("#parent_id").change(function() {
+                loadCatalog($("#parent_id option:selected").val());
+            });
+            if($("#parent_id option:selected").val()!='')
+            {
+                loadCatalog($("#parent_id option:selected").val());
+            }
+            function loadCatalog(parentid) {
+                var selected_id='{$post["catalog_id"]}';
+                $.ajax({
+                    url: "{:U('Yhb/Merchant/AjaxCatalog')}&parent_id="+ parentid,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    timeout: 5000,
+                    error: function() { alert('Error loading data!'); },
+                    success: function(msg) {
+                        $("#catalog_id").empty();
+                        $("<option value=''>请选择</option>").appendTo($("#catalog_id"));
+                        $.each(eval(msg), function(i, item) {
+                            if(selected_id==item.id){
+                                $("<option value='" + item.id + "' selected='selected'>" + item.catalog_name + "</option>").appendTo($("#catalog_id"));
+                            }else{
+                                $("<option value='" + item.id + "'>" + item.catalog_name + "</option>").appendTo($("#catalog_id"));
+                            }
+
+                        });
+                    }
+                });
+            }
+        });
+        function epos_apply(store_id){
+           //重新申请开设终端
+            $.ajax({
+                url: "{:U('Yhb/YhbStore/eposAddOne')}",
+                data:{store_id:store_id},
+                type: 'POST',
+                dataType: 'JSON',
+                timeout: 5000,
+                error: function() { alert('Error loading data!'); },
+                success: function(msg) {
+                   if(msg.status==0){
+                       result_(msg.info);
+                   }else{
+                       success(msg.info);
+                    }
+                }
+            });
+        }
+        function result_(contents){
+            art.dialog({
+                title:"提示",
+                height:100,
+                content:contents,
+                icon: 'failed',
+                lock:true,
+                ok:function(){
+                    //art.dialog.close();
+                }
+            })
+        }
+
+        function success(contents){
+            art.dialog({
+                title:"提示",
+                height:100,
+                content:contents,
+                icon: 'succeed',
+                lock:true,
+                ok:function(){
+                    window.location.href="index.php?g=Yhb&m=YhbStore&a=index";
+                }
+            })
+        }
+    </script>
+    <style type="text/css">
+        .main-name h4 a.btn-add {
+            margin-left: 10px;
+            border: solid 1px #ffd0d3;
+            background: #fff2f3;
+            color: #f15755;
+            width: auto;
+        }
+        .subcon .tbtn.btn-red { margin: 2px 15px 0 15px; border: 1px #ed3f41 solid; background: #ed3f41;}
+    </style>
+</head>
+<body>
+<div id="wrapper">
+    <div id="headerTwo" style="z-index: 999">
+        <include file="Login:loginHeader"/>
+    </div>
+    <div id="container" class="bgfff">
+        <div id="main" class="rel">
+            <!--<div class="new_sidenav">-->
+                <!--<dl>-->
+                    <!--<dt>翼惠宝门店管理</dt>-->
+                    <!--<dd class="active"><a href="{:U('Yhb/YhbStore/add')}">录入新门店</a></dd>-->
+                    <!--<dd><a href="{:U('Yhb/YhbStore/index')}">门店展示区</a></dd>-->
+                    <!--<dd><a href="#">城市商区</a></dd>-->
+                <!--</dl>-->
+            <!--</div>-->
+            <div class="sidenav">
+                <!--开始引入左菜单-->
+                <include file="Store:Yhb_menu" leftmenuid="yhbstore_index"/>
+            </div>
+            <div class="subcon fn">
+                <div class="main-name fn">
+                    <h4>门店列表
+                        <!--<div class="icon_list fn">-->
+                            <!--<a class="btn-export" href="javascript:void(0);" id="down"><i></i>导出查询数据</a>-->
+                        <!--</div>-->
+                        <!--<div class="icon_list fn">-->
+                            <!--<a class="btn-down" href="javascript:void(0);" id="yuangong"><i></i>批量导入门店数据</a>-->
+                        <!--</div>-->
+                        <php>if($admin_flag===true){</php>
+                            <a class="tbtn btn-add btn-red first" href="{:U('YhbStore/add',array('node_id'=>$node_id))}"><i></i>录入新门店</a>
+                        <php>}</php>
+                    </h4>
+                </div>
+
+                <!--<div class="sweet_tips">-->
+                    <!--您共有 {$storeCount} 家门店，其中 {$storePosCount} 家已开通终端-->
+                <!--</div>-->
+                <div class="Wcanal-tab" id="Wcanal-tabon">
+
+
+                    <div class="Wcanal-tab-list" style="display: block;">
+                        <div class="SearchArea fn">
+                            <form method="get" action="" id="storeForm">
+                            	<div class="SearchAreaLeft">
+                                    <!--提交地址-->
+                                    <input type="hidden" name="g" value="{$Think.GROUP_NAME}"/>
+                                    <input type="hidden" name="m" value="{$Think.MODULE_NAME}"/>
+                                    <input type="hidden" name="a" value="{$Think.ACTION_NAME}"/>
+                                    <input type="hidden" value="" name="order_sort" id="order_sort"/>
+                                    <input type="hidden" name="node_id" value="{$node_id}"/>
+                                    <input type="hidden" name="pos_count_status" value="{$_GET['pos_count_status']}"/>
+                                    <label><span>门店简称</span><input type="text" name="store_name" id="store_name" class="textbox w100" value="{$_GET['store_name']}"></label>
+                                    <label><span>商户简称</span><input type="text" class="textbox w100" name="merchant_short_name" value="{$_GET['merchant_short_name']}"></label>
+                                    <!--<p class="ml20">负责人邮箱</p>-->
+                                    <!--<p><input type="text" name="jg_name_email" id="jg_name_email" class="textbox w100" value="{$_GET['jg_name_email']}"></p>-->
+                                    <label><span>状态</span>
+                                        <select class="textbox w100" name="pos_count_status">
+                                            <option value="">全部</option>
+                                            <?php foreach($pos_status as $k=>$v){ ?>
+                                            <option value="<?php echo $k; ?>" <?php if($_GET['pos_count_status'] == $k){?> selected="selected"<?php } ?>><?php echo $v; ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </label>
+                                    <label><span>城市商圈</span>
+                                                <select class="validate[required] selectbox ml10"  style="width:100px;"name="town_code" id="street_info">
+                                                    <option value="" >选择区</option>
+                                                    {:show_arr_opt($townCode_list,$town_code)}
+                                                </select>
+                                                <select class="validate[required] selectbox ml10"  style="width:100px" name="street_code"  id="street_code">
+                                                    <option value="">选择</option>
+                                                </select>
+                                                <select class="validate[required] selectbox ml10"  style="width:100px" name="village_code" id="village_code">
+                                                    <option value="">选择</option>
+                                                </select>
+                                     </label>
+                                     <label><span>所属分类</span>
+                                            <select name="parent_id" id="parent_id"  class="validate[required]">
+                                                <option value="">请选择</option>
+                                                <php>
+                                                    $parentArr = array_valtokey($parentInfo,'id','catalog_name');
+                                                </php>
+                                                {:show_arr_opt($parentArr,$post['parent_id'])}
+                                            </select>
+                                            <select name="catalog_id" id="catalog_id" class="catalog_id validate[required]">
+                                                <option value="">请选择</option>
+                                            </select>
+                                     </label>
+                                </div>
+                                <div class="SearchAreaRight">
+                                <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="shopCon">
+                            <table cellpadding="0" cellspacing="0" class="shopTable">
+                                <tbody>
+                                <tr class="th">
+                                    <!--<th>排序<a href="javascript:;" class="jiantou_up">↑</a><a href="javascript:;" class="jiantou_down">↓</a></th>-->
+                                    <th width="8%">门店简称</th>
+                                    <th width="18%">所在省市区</th>
+                                    <th width="8%">门店负责人</th>
+                                    <th>负责人电话</th>
+                                    <th width="15%">负责人邮箱</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                                <?php if($queryList){
+					   foreach($queryList as $v){  ?>
+                                <tr class="title">
+                                    <!--<td><input type="text" maxlength="5" value="{$v.order_sort}" class="w50" onchange="chg_order('{$v.store_id}', this.value);" /></td>-->
+                                    <td class="hover">
+                                        <a href="javascript:void(0);" class="js_view" store_id="{$v['id']}">
+                                            {$v.store_short_name|default='未填写'}
+                                        </a></td>
+                                    <td>{$v.province}{$v.city}{$v.town}</td>
+                                    <td>{$v.principal_name|default='未填写'}</td>
+                                    <td>{$v.principal_tel|default='未填写'}</td>
+                                    <td>{$v.principal_email|default='未填写'}</td>
+                                    <td>{$shelfStatus[$v['line_status']]|default='未填写'}</td>
+                                    <td>
+                                        <php>if($admin_flag===true){</php>
+                                        <php>if($v['line_status']==1){</php>
+                                        <a href="javascript:void(0);"  onclick="down_line('{$v.store_id}',2)">展示</a>&nbsp;|
+                                        <php>}</php>
+                                        <a href="javascript:void(0);" class="js_edit" store_id="{$v['id']}">编辑</a>&nbsp;|
+                                        <php>if(empty($v['pos_id'])){</php>
+                                        <a href="javascript:void(0);"  onclick="epos_apply('{$v.store_id}')">重新申请EPOS</a>
+                                        <php>}</php>
+                                        <php>}</php>
+                                        <a href="javascript:void(0);" class="js_location" store_id="{$v['id']}">导航定位</a>
+                                    </td>
+                                </tr>
+                                <?php } }else{ ?>
+                                <tr><td colspan="8"><div class="nonedata"></div></td></tr>
+                                <?php } ?>
+                            </table>
+                            <div class="page"><?php echo $pageShow; ?></div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+</body>
+</html>

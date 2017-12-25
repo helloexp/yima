@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>在线交易</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WonlineSales.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript">
+$(document).ready(function(e) { 
+    $("#search").click(function(){
+        $("form").submit();
+    });
+});
+function confirm_order(order_id,goods_price){
+	var confirm_str = '确认订单?';
+    if(goods_price=='0.00'){
+    	confirm_str = '该订单为免费卡券,不需要采购方付款,是否确认订单?';
+    }
+	var dialog;
+    art.dialog.confirm(confirm_str,function(){
+    	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+        $.post("{:U('supplyConfirmOrder')}",{'order_id':order_id},function(data){
+	    	if(data.status == '1'){
+                dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                setTimeout("window.location.reload();",500);
+                return false;
+           }else{
+                 dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+           }
+        },'json');
+	});
+}
+function close_order(order_id,goods_price){
+	var confirm_str = '确认关闭订单?';
+    var dialog;
+    art.dialog.confirm(confirm_str,function(){
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+        $.post("{:U('supplyCloseOrder')}",{'order_id':order_id},function(data){
+            if(data.status == '1'){
+                dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                setTimeout("window.location.reload();",500);
+                return false;
+           }else{
+                 dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+           }
+        },'json');
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <div class="shopNav">
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="zxjy"/>  
+        </div>
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav"> 
+                    <include file="./Home/Tpl/WangcaiPc/OnlineTrading_leftMenu.html" leftmenuid="ghdd"/>          
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>供货订单</h4>
+                    </div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                    <div class="Wcanal-tab-list" style="display: block;">
+                    <div class="SearchArea fn">
+                    <form id="theform" action="{:U('supplyOrderList')}" method="post">
+                    <div class="SearchAreaLeft">
+                    <label>
+                    <span>采购方</span>
+                    <input type="text" name="node_name"  value="{$_REQUEST['node_name']}" />
+                    </label>
+                    <label>
+                    <span>下单日期</span>
+                    <input name="badd_time" type="text" value="{$_REQUEST['badd_time']}"  onClick="WdatePicker()" />
+                        -
+                        <input name="eadd_time" type="text"  onClick="WdatePicker()" value="{$_REQUEST['eadd_time']}" />
+                    </label>
+                    <label>
+                    <span>订单状态</span>
+                    <select name="status" class="textbox w100">
+                        <option value="">全部</option>
+                        <volist name="status" id="vo">
+                        <option value="{$key}" class="" <if condition="strval($key) heq $_REQUEST['status']">selected="selected"</if>>{$vo}</option>
+                        </volist>
+                    </select>
+                    </label>
+                    </div>
+                    <div class="SearchAreaRight">
+                    <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                    </div>
+                    </form>
+                    </div>
+                    <div class="shopCon">
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                    <tr class="th">
+                    <th>卡券信息</th>
+                    <th>订单金额（元）</th>
+                    <th>订单状态</th>
+                    <th>操作</th>
+                    </tr>
+                    
+                    <empty name="list" >
+                            <tr class="info">
+                                <td colspan="10" class="last">
+                                    <div class="nonedata"></div>
+                                </td>
+                            </tr>
+                    </empty>
+                    <volist name="list" id="vo">
+                    <tr class="title">
+                        <td class="title tl" colspan="5"><span>订单编号：{$vo['order_id']}</span> <span>下单日期：{$vo.add_time|dateformat=###,'Y-m-d'}</span></td>
+                    </tr>
+                    <tr>
+                    <td>
+                    <div class="format">
+                        <ul>
+                            <li><img src="{:get_upload_url($hallModel->getfirestImg($vo['batch_img']))}" class="img" /></li>
+                            <li>
+                                <span><a href="{:U('Hall/Index/goods',array('goods_id'=>$vo['h_id']))}" target="_blank">{$vo['batch_name']}</a></span>
+                                <span class="grayfont">采购方：{$vo['node_name']}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    </td>
+                    <td><if condition="$vo['goods_price'] eq 0">免费<else />{:number_format($vo['goods_price']*$vo['book_num'],2)}</if></td>
+                    <td>{$status[$vo['status']]}</td>
+                    <td>
+                        <if condition="$vo['status'] eq '0'">
+                        <a href="javascript:void(0);" onclick="confirm_order('{$vo['order_id']}','{$vo['goods_price']}')">确认订单</a><br />
+                        <a href="javascript:void(0);" onclick="close_order('{$vo['order_id']}')">关闭订单</a><br />
+                        </if>
+                        <a target="_blank" href="{:U('supplyOrderDetail',array('order_id'=>$vo['order_id']))}">查看详情</a><br />
+                    </td>
+                    </tr>
+                    </volist>
+                    
+                    </table>
+                    <div class="page">{$page}</div>
+                    </div>
+                    </div>
+                    </div>
+                    
+                
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

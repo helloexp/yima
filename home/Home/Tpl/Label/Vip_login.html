@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$fb_wap_title}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<load href="__PUBLIC__/Label/Css/wap_Csyd.css"/>
+<script>
+ var _one_sub = false;
+$(function(){
+	$("#getpasscode").live("click",function(){
+		if(_one_sub)
+            return false;
+        _one_sub = true;
+        $(this).val("正在发送..");
+        var phone = $("#phone").val();
+        var id = $("#id").val();
+        $.post("{:U('Label/Vip/sendCheckCode')}",{"id":'<?php echo $id;?>',"phone":phone},function(data){
+        	_one_sub = false;
+            if(data.status=='1'){
+            	$("#loadingBox span").text(data.info);
+                $("#loadingBox").show();
+                setTimeout("$('#loadingBox').hide()",2000);
+                $("#getpasscode").attr("id","noSend");
+                Int = setInterval(checkTime,1000)
+            }else{
+                $("#loadingBox span").text(data.info);
+                $("#loadingBox").show();
+                setTimeout("$('#loadingBox').hide()",2000);
+                $("#getpasscode").val("获取验证码");
+            }
+        },"json");
+    });
+	var time = {$expiresTime};
+    var checkTime = function(){
+        $("input[name='getpasscode']").val("还剩"+time+"秒");
+        if(time==0){
+            $("input[name='getpasscode']").val("获取验证码");
+            $("input[name='getpasscode']").attr("id","getpasscode");
+            time = {$expiresTime};
+            clearInterval(Int);
+            return false;
+        }
+        time--;
+    }
+	
+});
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bggray">
+    	<div id="header" class="fn">
+        	<div class="header-Title">登录</div>
+        </div>
+    	<div id="container">
+            <div id="main" class="sOne-mainbg">
+            	<div class="login">
+                	<div class="loginLogo sOne-loginLogo" <?php if($node_id == '00000370'){?>  style="background: url() no-repeat center center;" <?php }else{?> style="background: url(__PUBLIC__/Label/Image/Item/O2OParklogo.jpg) no-repeat center center;background-size: 100%;width: 100px;height: 100px"<?php }?> ></div>
+                    <div class="loginTitle sOne-loginTitle"><?php echo $node_id == '00000370' ? '长沙移动VIP优服务平台' :'O2OPark'; ?></div>
+                    <form action="<?php echo U('Label/Vip/login',array('id'=>$id))?>" method="POST">
+                    <input type="hidden" name="id" value="<?php echo $id;?>"/>
+                    <div class="loginForm">
+                    	<ul class="sOne-loginForm">
+                        	<li class="bd-b"><i class="sOne-iconUsername"></i>
+                        	<input type="text" id="phone" class="sOne-loginInput" name="phone" placeholder="请输入您的手机号" value="" maxlength="11"></li>
+                            <li><i class="sOne-iconPasscode"></i>
+                            <input type="text" class="sOne-loginInput-half" name="check_code" placeholder="验证码">
+                            <input type="button" name="getpasscode" class="sOne-getpasscode" value="获取验证码" id="getpasscode" data-href="" maxlength="4"></li>
+                        </ul>
+                        <ul class="sOne-loginFormBtn">
+                        	<li><input type="submit" name="doSubmit" class="sOne-loginInput-btn" value="登&nbsp;&nbsp;&nbsp;&nbsp;录" /></li>
+                        </ul>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<section style="display: none;" class="loadingBox" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>

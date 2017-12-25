@@ -1,0 +1,343 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>编辑优惠_平安_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+    $("#sub_button").click(function(){
+		var mer_id = $('#merchant_id').val();
+		if(mer_id == ''){
+			alert('商户不能为空');
+			return false;
+		}
+    	var dialog;
+		//$("#theform").validationEngine().submit();
+		if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                 if(data.status == '1'){
+                       //all_art_close();
+                       //$('#div_content').hide();
+                       //$('#div_success').show();
+                       //windowheight();
+                       //return false;
+					   dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+					   setTimeout("top.window.location.href='{:U('coupon')}';",500);
+                       return false;
+                  }else{
+                       dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                  }
+            },
+                dataType:'json'
+            });
+            return false;
+        }
+        
+    });
+
+    $(".message-show").click(function(){
+        var message=$("#mms_info").val();
+        var html=
+        ['<div class="aipai-iphone">',
+          '<div class="aipai-iphone-text">',
+              message,
+          '</div>',
+          '</div>'].join('');
+          art.dialog({
+            padding: 20,
+            title: '短信预览',
+            content: html,
+            lock: true
+        });
+    });
+    
+    //短信内容js
+    $('#batch_des').focusout(function(){
+    	var text = $(this).val();
+    	if(text == '') return false;
+    	$("#Amsg-con").html(text);
+    });
+    $('#ai_end_date').focusout(function(){
+        var text = $(this).val();
+        if(text == '') return false;
+        text = text.substr(0, 4) + "-" + text.substr(4, 2) + "-" + text.substr(6, 2);
+        $("#Amsg-date").html(text);
+    });
+    $('#node_phone').focusout(function(){
+        var text = $(this).val();
+        if(text == '') return false;
+        $("#Amsg-tel").html(text);
+    });
+    
+    $(".choosetext1").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").hide();
+    });
+    $(".choosetext2").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").show();
+    });
+})
+function checkImg(){
+    if($("#resp_img").val() == '')
+        {
+            return "请上传营销图片";
+        }
+}
+function imgCheck(){
+	if($("#goods_img").val() == ''){
+        return "请上传营销图片";
+    }
+}
+
+/*获取图片路径中的图片名*/
+function base_name(url){
+    var urlList = url.split('/'); 
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+
+function uploadImg(url) {
+var win_width = 700;
+art.dialog.open(url+"&uploadUrl={:urlencode(U('ImgResize/Resize/uploadFile','','','',true))}&menuType=1", {
+    lock: true,
+    title: "上传图片",
+    width: win_width,
+    height: win_width / 1.6,
+    id: 'art_upload'
+});
+}
+
+//背景图片回调函数
+function bgCallback(d) {
+//填充缩略图
+$('#goods_img_show').attr('src', d.absolutepath).show();
+//上传用
+$('#goods_img').val(base_name(d.absolutepath));
+}
+
+</script>
+</head>
+<body>
+                <div class="mt30 fn">
+                    <div id="store_check">
+                    <form method="post" action="{:U('coupon_edit')}" id="theform">
+					<input type="hidden" name="id" value="{$info['id']}">
+                        <div class="global-input6 fn">
+                                <!--旺财商品表单1-->
+                                <div id="Wform">
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;优惠名称：</li>
+                                    <li class="global-input6-input"><input name="name" id="name" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[24]] textbox w380" value="{$info['name']}"/><br /><p class="font-12-cc" id="name_text">还可以输入24个字</p></li>
+                                </ul>
+								<ul>
+									<li class="global-input6-name">*&nbsp;优惠有效时间：</li>
+									<li class="global-input6-input"><input name="start_time" id="start_time" type="text"  class="validate[required] textbox w130" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$info['start_time']|dateformat=###,'Ymd'}"/><span class="mlr10">-</span><input name="end_time" id="end_time" type="text"  class="validate[required] textbox w130"  onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$info['end_time']|dateformat=###,'Ymd'}"/></li>
+								</ul>
+								<ul>
+									<li class="global-input6-name">*&nbsp;优惠使用截至时间：</li>
+									<li class="global-input6-input">
+										<div class="judgeDiv">
+											<label class="ml5" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();$('#verify_begin_date').val('');$('#verify_end_date').val('');">
+											<input type="radio" <eq name="info.verify_begin_type" value="0">checked="checked"</eq> name="verify_time_type" value="0" id="verify_begin_type1"/><span class="ml5">按日期设置</span></label>
+											<label class="ml10" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();$('#verify_begin_days').val('');$('#verify_end_days').val('');">
+											<input type="radio" <eq name="info.verify_begin_type" value="1">checked="checked"</eq> name="verify_time_type" value="1" id="verify_begin_type2"/><span class="ml5">按天数设置</span></label>
+										</div>
+										<div class="judgeCon-time judgeCon1" <eq name="info.verify_begin_type" value="1">style="display:none;"</eq>>
+											<p class="ml20">使用开始时间</p>
+											<input name="verify_begin_date" id="verify_begin_date" type="text" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="{$info['verify_begin_date']|dateformat=###,'Ymd'}" />
+											<p class="ml20">使用结束时间</p>
+											<input name="verify_end_date" id="verify_end_date" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="{$info['verify_end_date']|dateformat=###,'Ymd'}"/>
+											<div class="cl"></div>
+											<p class="font-12-cc">商户可以自定义验码时间：如"4月1号";</p>
+										</div>
+										<div class="judgeCon-time judgeCon2" <eq name="info.verify_begin_type" value="0">style="display:none;"</eq> >
+											<p class="ml20">发送优惠后</p>
+											<input name="verify_begin_days" id="verify_begin_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$info['verify_begin_date']}" >&nbsp;天开始使用
+											<p class="ml20">发送优惠后</p>
+											<input name="verify_end_days" id="verify_end_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$info['verify_end_date']}">&nbsp;天结束使用
+											<div class="cl"></div>
+											<p class="font-12-cc">商户可以自定义验码时间：如30天后结束</p>
+										</div>
+									</li>
+								</ul>
+								<ul>
+                                    <li class="global-input6-name">*&nbsp;商户名称：</li>
+                                    <li class="global-input6-input"><p>{$info['merchant_name']}</p></li>
+                                </ul>								
+								<ul>
+                                    <li class="global-input6-name">*&nbsp;可用门店：</li>
+                                    <li class="global-input6-input">
+									<div id="storelist">{$str}
+									</div>
+									</li>
+                                </ul>
+                                <!--<ul>
+                                    <li class="global-input6-name">*&nbsp;配送方式：</li>
+                                    <li class="global-input6-input">
+                                    <input name="delivery_flag" value="1" <eq name="info.defined_one_name" value="1">checked="checked"</eq> type="radio" class="choosetext1"/><p class="ml5 choosetext1">到店领取</p>
+                                    <input name="delivery_flag" value="2" <eq name="info.defined_one_name" value="2">checked="checked"</eq> type="radio" class="ml20 choosetext2"/><p class="ml5 choosetext2">物流配送</p></li>
+                                </ul>-->
+								<ul>
+                                    <li class="global-input6-name">*&nbsp;优惠总数：</li>
+                                    <li class="global-input6-input">
+                                        <input name="goods_num" type="text"  class="validate[custom[number],required,min[0],maxSize[10]] textbox w240" maxlength="10" value="{$info['storage_num']}"/>&nbsp;份
+										<span class="font-12-cc">剩余{$info['remain_num']}&nbsp;份</span>
+                                    </li>
+                                </ul>
+								<ul>
+                                    <li class="global-input6-name">*&nbsp;{$show_name}图片：</li>
+                                    <li>
+                                        <div id="logo-upload2" class="vm dib ml10">
+                                            <div class="rel l">
+                                                <a href="javascript:void(0);" title="上传" class="btn_inner w60 " onclick="log_add()">上传</a>
+                                                <input type="text" value="" name="goods_img" id="goods_img" class="validate[required,condRequired[logo-false],funcCall[imgCheck]]]" style="width:1px;height: 1px;border-style:none" />
+                                            </div>
+                                        </div>
+                                        <div class="cl"></div>
+                                        <img id="img_logo_show" class="mt5 w80" src="{$info['goods_image']|get_upload_url}" style="margin-left:10px;"/>
+                                        <input type="hidden" name="previewimgis_logo" vale="0" />
+                                    </li>
+                                    <script>
+                                        $(document).ready(function(e) {
+                                            $("input[name='is_log_img']").change(function() {
+                                                var t = $(this).val();
+                                                showimg(t)
+                                            })
+
+                                            //初始化页面logo
+                                            function startaction(){
+                                                $('#img_logo_show').show();
+                                                //previewuploadimg('{:get_upload_url($node_logo)}', "logo");
+                                                //$('#goods_img').val('{$node_logo}');
+//                                                $("#img_logo_show").hide();
+                                                $('#goods_img').val("{$info['goods_image']}");
+                                                $('#reset_logo').val(1);
+                                            }
+                                            //调用初始化页面logo
+                                            startaction();
+                                        });
+                                        function showimg(t) {
+                                            if (t == 0) {
+                                                $('#img_logo_show').hide('');
+                                                $('#logo-upload2').hide();
+                                                $(".Preview-mainCon").addClass("noLogo");
+                                                var i = $("[name='node_name_radio']:checked").val();
+                                                if (i == 0) {
+                                                    $(".Preview-mainCon").addClass("noTitle");
+                                                } else {
+                                                    $(".Preview-mainCon").removeClass("noTitle");
+                                                }
+                                            } else {
+                                                $('#logo-upload2').show();
+                                                $(".Preview-mainCon").removeClass("noLogo");
+                                                $(".Preview-mainCon").removeClass("noTitle");
+                                                $('#img_logo_show').show();
+                                                if ("{$info['goods_image']}" != '' && $('input[name="previewimgis_logo"]').val() == 0) {
+                                                    previewuploadimg("{:get_upload_url($info['goods_image'])}", "logo");
+                                                    $('#goods_img').val("{$info['goods_image']}");
+                                                    $('#reset_logo').val(1);
+                                                }
+                                            }
+                                        }
+                                        function log_add() {
+                                            var opt = {
+                                                obj: $("#img_resp_show"),
+                                                height: 400,
+                                                width: 640,
+                                                cropPresets:false,
+                                                callback: function(data) {
+                                                    $('#img_logo_show').attr('src', data['src']);
+                                                    $('#img_logo_show').show();
+                                                    $('#goods_img').val(data['savename']);
+                                                    $('#reset_logo').val(1);
+                                                    $('input[name="previewimgis_logo"]').val(1);
+                                                }
+                                            };
+                                            open_img_uploader(opt);
+                                        }
+                                        function openUploaderMeitu_log(url) {
+                                            var win_width = 700;
+                                            art.dialog.open(url, {
+                                                lock: true,
+                                                title: "上传LOGO图片",
+                                                width: win_width,
+                                                height: win_width / 1.6,
+                                                id: 'art_upload'
+                                            });
+                                        }
+                                    </script>
+                                 </ul>
+								<ul>
+                                    <li class="global-input6-name">*&nbsp;优惠简述：</li>
+                                    <li class="global-input6-input"><textarea name="goods_desc" id="goods_desc" class="validate[maxSize[200]] texttextarea w380">{$info['goods_desc']}</textarea></li>
+                                </ul>
+								<ul>
+                                    <li class="global-input6-name">*&nbsp;优惠详情：</li>
+                                    <li class="global-input6-input"><textarea name="goods_info" id="goods_info" class="validate[maxSize[2000]] texttextarea w380">{$info['memo']}</textarea></li>
+                                </ul>
+								<!--<ul>-->
+									<!--<li class="global-input6-name">&nbsp;彩信标题：</li>-->
+									<!--<li class="global-input6-input"><input id="mms_title" name="mms_title" type="text" onkeyup="check_lenght(10,'title_text',this);"  class="validate[maxSize[10]] textbox w380" value="{$info['info_title']}"/>-->
+									<!--<br />-->
+									<!--<p class="font-12-cc" id="title_text">还可以输入10个字</p>-->
+									<!--</li>-->
+								<!--</ul>-->
+								<!--<ul>-->
+									<!--<li class="global-input6-name">&nbsp;彩信内容：</li>-->
+									<!--<li class="global-input6-input"><textarea name="mms_info" id="mms_info" onkeyup="check_lenght(100,'text',this);" class="validate[maxSize[100]] texttextarea w380 h50">{$info['use_rule']}</textarea>-->
+									<!--<br />-->
+									<!--<span class="font-12-cc" id="text">还可以输入100个字</span>-->
+									<!--</li>-->
+								<!--</ul>-->
+								<!--<ul>-->
+                                    <!--<li class="global-input6-name">*&nbsp;打印小票内容：</li>-->
+                                    <!--<li class="global-input6-input"><textarea name="print_text" id="print_text" class="validate[maxSize[100],required] texttextarea w380">{$info['print_text']}</textarea><br /><a href="javascript:void(0)" class="message-show"></a>-->
+                                    <!--<p class="font-12-cc">小票内容将显示在验证后的打印小票上，运营员根据打印小票内容提供服务</p>-->
+                                    <!--</li>-->
+                                <!--</ul>-->
+    							</div>
+                                <!--旺财商品表单1-->
+                                    <ul>
+                                        <li class="global-input6-name"></li>
+                                        <li class="global-input6-input">
+                                        <a href="javascript:void(0);" title="确认" id="sub_button" class="btn-all w110 ml10">确定</a>
+										<a href="javascript:art.dialog.close();" title="取消" class="btn-all-del w110 ml10">取消</a>
+                                        </li>
+                                    </ul> 
+                            </div>    
+                    </form>
+    </div>
+</div>
+</body>
+</html>

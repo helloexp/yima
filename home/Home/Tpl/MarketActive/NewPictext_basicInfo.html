@@ -1,0 +1,144 @@
+<script type="text/javascript">
+//基础及音乐
+var isTempUser = '{$isTempUser}';
+<if condition="$info neq '' ">
+var basicData = {"title":"<?=$info['title']?>","share_descript":"<?=$info['share_descript']?>","loop":0,"cover_img":"<?=$info['cover_img']?>","music":"<?=$info['music']?>","node_belongs":""};
+<else/>
+var basicData = {"title":"图文排版","share_descript":"用户通过微信分享时显示","loop":0,"cover_img":"./Home/Public/Image/poster/jichu.jpg","music":"","node_belongs":"<?=$info['nodeBelongs']?>"};
+</if>
+$(document).ready(function(e) {
+    Gform();
+    $("body").on("click",".switch-01",function(){
+        var input=$('.switch-01 input');
+        if($(this).hasClass("hover")){
+            basicData.loop=0;
+            input.val(0);
+            $(this).removeClass("hover");
+        }else{
+            basicData.loop=1;
+            input.val(1);
+            $(this).addClass("hover");
+        }
+        console.log(2)
+    });
+    //2015-06-25增加
+    $("#btn-basic,.phonetitle").click(function(){
+        //document.location.href = "index.php?g=MarketActive&m=NewPictext&a=add";
+        var html = template("temp-addCon", basicData);
+        art.dialog({
+            id:"art",
+            width:800,
+            title:"基础设置",
+            padding:0,
+            content:html,
+            ok:function(){
+                basicData.title = $("input[name='title']").val();
+                basicData.share_descript = $("textarea[name='share_descript']").val();
+                basicData.loop = $("input[name='loop']").val();
+                basicData.cover_img = $("input[name='cover_img']").val();
+        
+                var operation = 'add';
+                var id = $('#poster_id').val();
+                if (id > 0) {
+                    operation = 'edit';
+                }
+        
+                $("#basicInfoForm").ajaxSubmit({
+                    beforeSubmit:function(){
+                        if (operation  == 'edit') {
+                            Diasucceed("正在提交，请稍后...");
+                        }
+                    },
+                    success:function(data){
+                        if (operation == 'edit') {
+                            Diasucceed(data.info);
+                        } else {
+                            /*
+                            var sdata={};
+                            sdata.url = data.url;
+                            var html = template("temp-addCos",sdata);
+                            art.dialog({id: 'art',padding:0,title:"选择模板"}).content(html);
+                            */
+                            if(data.code == 0)
+                            {
+                                document.location.href = "/index.php?g=MarketActive&m=NewPictext&a=add&id="+data.data.id;
+                            }
+                            else
+                            {
+                                alert('data.msg');
+                            }
+                        }
+                    },
+                    url:"{:U('MarketActive/NewPictext/saveBasicInfo')}",
+                    dataType:'json',
+                    type:'post'
+                });
+            },
+            cancel:true
+        });
+        Gformbegin();
+    });
+    $("body").on("click","#upcover_img",function(){
+        var isTempLogin = isTempUser || 2;
+        var opt = {
+            width : 250, //建议宽度
+            height : 250, //建议高度
+            userid:isTempLogin==2?false:userid,
+            callback : 'coverimg',
+        }
+        open_img_uploader(opt);
+    });
+});
+function coverimg(options) {
+    $("#cover_img").attr('src', options.src);
+    $("[name='cover_img']").val(options.src);
+}
+function updateMusic() {
+    Diasucceed("正在提交...");
+    $.post("{:U('MarketActive/NewPoster/updateBasicInfoMusic')}", {
+        music: basicData.music,
+        poster_id: '{$poster_id}'
+    }, function (data) {
+        Diasucceed(data.info);
+    }, 'json');
+}
+</script>
+
+<script id="temp-addCon" type="text/html">
+    <form id="basicInfoForm" action="{:U('MarketActive/NewPoster/saveBasicInfo')}" >
+        <input type="hidden" id="basic_batch_id" name="batch_id" value="{$batch_id}">
+        <input type="hidden" id="basic_batch_type" name="batch_type" value="{$batch_type}">
+        <input type="hidden" id="poster_id" name="id" value="<?=$info['id']?>">
+        <div id="addCon" class="addCon">
+            <div class="fn addCon-left" >
+                <dl>
+                    <h4></h4>
+                    <dt>
+                        <h4>封面最佳尺寸&nbsp;&nbsp;&nbsp;&nbsp;250x250</h4>
+                        <p><img src="{{cover_img}}" id="cover_img"/></p>
+                        <input type="text" value="{{cover_img}}" name="cover_img" class="dn"/>
+                     </dt>
+                    <dd>
+                        <a href="javascript:void(0)" class="btn-all" id="upcover_img">自定义封面 </a>
+                    </dd>
+                </dl>
+            </div>
+            <div class="fn addCon-right" >
+                <div class="Gform">
+                    <ul>
+                        <li class="Gname">图文名称：</li>
+                        <li class="Ginput"><input name="title" type="text" maxlength="30" value="{{title}}" placeholder="海报名称" /><span class="maxTips forInput" data-max="30">0/30</span></li>
+                    </ul>
+                    <ul>
+                        <li class="Gname">所属商户：</li>
+                        <li class="Ginput"><input name="node_belongs" type="text" maxlength="30" value="{{node_belongs}}" placeholder="所属商户" /><span class="maxTips forInput" data-max="30">0/30</span></li>
+                    </ul>
+                    <ul>
+                        <li class="Gname">图文描述：</li>
+                        <li class="Ginput"><textarea name="share_descript" maxlength="60" placeholder="用户通过微信分享时显示">{{share_descript}}</textarea><span class="maxTips forArea" data-max="60">0/60</span><span class="txtTips">微信分享时的描述</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </form>
+</script>

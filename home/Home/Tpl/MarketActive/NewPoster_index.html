@@ -1,0 +1,277 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>电子海报_营销活动中心_翼码旺财</title>
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/Wposter2.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.qrcode.min.js?v=__VR__"></script>
+    <script type="text/javascript">
+        $(function(){
+            $('#sub_button').click(function(){
+                $('#theform').submit();
+            });
+            $("#down").click(function(){
+                $("form").attr("action","{:U('NewPoster/export')}").submit();
+            });
+        })
+
+    </script>
+</head>
+<body>
+<div id="wrapper">
+    <include file="./Home/Tpl/Public/Public_header.html" />
+    <div id="container" class="bgfff fn">
+      <div id="main" class="rel">
+        <div class="sidenav"><include file="./Home/Tpl/MarketActive/LeftMenu.html"  leftmenuid="poster"/></div>
+        <div class="subcon" style="overflow-x:hidden">
+        <!--[if IE]><div class="IEmsgerro">您的浏览器无法使用该模块功能,请使用<span>Chrome谷歌浏览器</span>或切换至<span>极速模式</span>/<span>高速模式</span>进行操作</div><![endif]-->
+        <if condition="$posterList neq '' ">
+        <div class="main-name fn">
+            <h4>电子海报
+            <a href="javascript:void(0);" id="btn-basic" class="btn-add first"><i></i>新建海报</a>
+            <!--<a href="javascript:void(0);" class="btn-down" id="down"><i></i>下载列表</a>-->
+            </h4>
+        </div>
+        <div class="SearchArea fn">
+            <form action="{:U('MarketActive/NewPoster/index/')}" method="POST" name="theform" id="theform">
+            <div class="SearchAreaLeft">
+                <label><span>活动名称</span><input type="text" name="key" value="{$Think.request.key}" /></label>
+                <label><span>创建日期</span><input type="text" name="start_time" id="start_time" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$Think.request.start_time}" />
+                    -
+                    <input type="text" name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time}" /></label>
+                <label>
+                	<span>活动状态</span>
+                	<select name="status" id="status">
+                        <option value="" <if condition="$_REQUEST['status'] eq ''">selected="selected"</if> >请选择</option>
+                        <option value="1" <if condition="$_REQUEST['status'] eq '1'">selected="selected"</if> >正常</option>
+                        <option value="2" <if condition="$_REQUEST['status'] eq '2'">selected="selected"</if> >停用</option>
+                    </select>
+                </label>
+                <label><span>所属商户</span>
+                    <select name="node_id" id="select" class="selectbox" >
+                        <option value="" class="">全部</option>
+
+                        <volist name="nodeList" id="vo">
+                            <option value="{$vo['node_id']}"  <if condition="$vo['node_id'] eq $_REQUEST['node_id']">selected="selected"</if>>{$vo['node_name']}</option>
+                        </volist>
+
+                    </select>
+                </label>
+                </div>
+                <div class="SearchAreaRight">
+                <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                </div>
+            </form>
+        </div>
+        <div class="Actives-ul">
+               <div class="posterList fn">
+                    <!--循环-->
+                        <volist name="posterList" id="currentPoster" >
+                            <div class="posterItem" data-url="{:U('Label/Label/index', array('id' => $currentPoster['label_id'], 'wechat_card_js' => 1))}">
+                                <div class="img" style="background-image:url({$currentPoster['cover_img']});"><a href="{:U('Label/Label/index', array('id' => $currentPoster['label_id'], 'wechat_card_js' => 1))}" target="_blank"><div class="posterQr"></div></a></div>
+                                <div class="opr">
+                                    <div class="title">{$currentPoster['name']}</div>
+                                    <div class="opr-data">
+                                        <div class="opr-view" title="访问量:{$currentPoster['click_count']}" onclick="showViewInfo('{:U('LabelAdmin/Chart/clickChart',array('batch_id'=>$currentPoster['id'],'batch_type'=>$batch_type))}')"><i class="icon-eye"></i><span>{$currentPoster['click_count']}</span></div>
+                                        <div class="opr-view" title="表单收集数据:{$currentPoster['form_collect_count']}" onclick="showFormInfo({$currentPoster['id']},{$currentPoster['batch_type']})"><i class="icon-chart-bar"></i><span>{$currentPoster['form_collect_count']}</span></div>
+                                    </div>
+                                    <div class="opr-other">
+                                        <if condition="$userInfo['node_id'] eq $currentPoster['node_id'] ">
+                                        <a href="{:U('MarketActive/NewPoster/add',array('id'=>$currentPoster['id']))}" class="opr-list normal"><i class="icon-edit"></i><span>编辑</span></a>
+                                        </if>
+                                        <if condition="$userInfo['node_id'] eq $currentPoster['node_id'] ">
+                                        <a href="<?php echo U('LabelAdmin/BindChannel/index','batch_type='.$batch_type.'&batch_id='.$currentPoster['id']);?>" class="opr-list normal"><i class="icon-paper-plane"></i><span>发布</span></a>
+                                        </if>
+                                        <a href="javascript:void(0)" class="opr-list normal2" onclick="viewChannel({$currentPoster['id']},{$currentPoster['batch_type']},'渠道分析')"><i class="icon-chart-pie"></i><span>渠道分析</span></a>
+                                        <a href="javascript:void(0)" class="opr-list normal" onclick="deletePoster({$currentPoster['id']},{$currentPoster['batch_type']},'删除海报')"><i class="icon-trash"></i><span>删除</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                           </volist>
+
+                    <!--循环-->
+                </div>
+                <div class="page" data-load=".posterList" data-callback="refurbish">{$page}</div>
+            </div>
+
+            <else/>
+
+            <div class="elect_nodata">
+                <div class="elect_l"><img src="__PUBLIC__/Image/dlhdyx/dlhd_nodata.png"></div>
+                <div class="elect_r rel">
+                    <h1>电子海报</h1>
+                    <h2 class="c666">移动场景营销专家</h2>
+                    <ul class="fn">
+                       <li><i></i>邀请函</li>
+                       <li><i></i>贺卡</li>
+                       <li><i></i>企宣</li>
+                       <li><i></i>品宣</li>
+                       <li><i></i>相册</li>
+                       <li><i></i>图集</li>
+                       <li><i></i>简历</li>
+                    </ul>
+                    <p>更多创意等您发现</p>
+                    <a href="javascript:void(0)" id="btn-basic" class="btn-add w130 h40 reg">创建电子海报</a>
+                </div>
+            </div>
+            <h3>优秀电子海报案例演示</h3>
+            <div class="proIntCase fn">
+                <div class="proIntCaseCon">
+                    <div class="case">
+                        <div class="shade-wrapper">
+                            <div class="shade-box"></div>
+                            <div class="shade" onclick="window.open('http://www.wangcaio2o.com/index.php?&g=Label&m=NewPoster&a=index&id=97793&wechat_card_js=1')">
+                                <p class="info-tit">企业招聘</p>
+                                <p class="info-type">案例演示</p>
+                                <div class="code-pic posterItem" data-url="http://www.wangcaio2o.com/index.php?&g=Label&m=NewPoster&a=index&id=97793&wechat_card_js=1">
+                                    <div class="posterQr"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="http://static.wangcaio2o.com/Home/Public/Image/poster/fm/fm1.png">
+                    </div>
+                    
+                    <div class="case">
+                        <div class="shade-wrapper">
+                            <div class="shade-box"></div>
+                            <div class="shade" onclick="window.open('http://www.wangcaio2o.com/index.php?&g=Label&m=NewPoster&a=index&id=97795&wechat_card_js=1')">
+                                <p class="info-tit">品牌促销</p>
+                                <p class="info-type">案例演示</p>
+                                <div class="code-pic posterItem" data-url="http://www.wangcaio2o.com/index.php?&g=Label&m=NewPoster&a=index&id=97795&wechat_card_js=1">
+                                    <div class="posterQr"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="http://static.wangcaio2o.com/Home/Public/Image/poster/fm/fm6.png">
+                    </div>
+                    
+                    <div class="case">
+                        <div class="shade-wrapper">
+                            <div class="shade-box"></div>
+                            <div class="shade" onclick="window.open('http://www.wangcaio2o.com/index.php?&g=Label&m=NewPoster&a=index&id=97798&wechat_card_js=1')">
+                                <p class="info-tit">企业宣传</p>
+                                <p class="info-type">案例演示</p>
+                                <div class="code-pic posterItem" data-url="http://www.wangcaio2o.com/index.php?&g=Label&m=NewPoster&a=index&id=97798&wechat_card_js=1">
+                                    <div class="posterQr"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="http://static.wangcaio2o.com/Home/Public/Image/poster/fm/fm7.png">
+                    </div>
+                    
+                    <div class="case">
+                        <div class="shade-wrapper">
+                            <div class="shade-box"></div>
+                            <div class="shade" onclick="window.open('http://www.wangcaio2o.com/index.php?&g=Label&m=NewPoster&a=index&id=97802&wechat_card_js=1')">
+                                <p class="info-tit">节日活动</p>
+                                <p class="info-type">案例演示</p>
+                                <div class="code-pic posterItem" data-url="http://www.wangcaio2o.com/index.php?&g=Label&m=NewPoster&a=index&id=97802&wechat_card_js=1">
+                                    <div class="posterQr"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <img src="http://static.wangcaio2o.com/Home/Public/Image/poster/fm/fm4.png">
+                    </div>
+                </div>
+            </div>
+            </if>
+
+          </div>
+        </div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+</div>
+<div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+$(document).ready(function() {
+    $(".posterItem").each(function(){
+        var url = $(this).attr("data-url");
+        if(url.indexOf("http://")>=0){
+            $(this).find(".posterQr").qrcode({width:100,height:100,text:url});
+        }else{
+            var url = "http://"+window.location.hostname+$(this).find(".img a").attr("href");
+            $(this).find(".posterQr").qrcode({width:100,height:100,text:url});
+        }
+    })
+})
+function refurbish(){
+    $(".posterItem").each(function(){
+        var url = $(this).attr("data-url");
+        var url = "http://"+window.location.hostname+$(this).find(".img a").attr("href");
+        $(this).find(".posterQr").qrcode({width:100,height:100,text:url});
+    })
+}
+    function showViewInfo(url){
+        var transUrl = url;
+        art.dialog.open(transUrl,{
+            width:800,
+            title:'访问量'
+        });
+    }
+    function showFormInfo(batch_id,batch_type){
+        var transUrl = "index.php?g=MarketActive&m=NewPoster&a=showFormInfo&id="+batch_id+"&batch_type="+batch_type;
+        art.dialog.open(transUrl,{
+            width:800,
+            title:'表单收集数据'
+        });
+    }
+
+	function viewChannel(batch_id,batch_type,batch_name){
+		var transUrl = "index.php?g=LabelAdmin&m=Chart&a=channelChart&batch_id="+batch_id+"&batch_type="+batch_type;
+		art.dialog.open(transUrl,{
+			width:800,
+			title:batch_name+'-渠道分析'
+		});
+	}
+
+    function deletePoster(id, batch_type) {
+        var title = "您确认删除该海报？";
+        art.dialog.confirm(title, function () {
+            $.post("{:U('MarketActive/NewPoster/deletePoster')}", {
+                "id": id,
+                "batch_type": batch_type
+            }, function (data) {
+                if (data.status == 1) {
+                    art.dialog({
+                        title: false,
+                        content: "<div class='msg-all-succeed'>删除成功,正在跳转。。。</div>",
+                        fixed: true,
+                        padding: 0,
+                        time: 2
+                    });
+                    setTimeout(function(){
+                        document.location.reload();
+                    }, 2000);
+                } else {
+                    art.dialog({
+                        title: false,
+                        content: "<div class='msg-all-error'>" + data.info + "</div>",
+                        fixed: true,
+                        padding: 0,
+                        time: 2
+                    });
+                }
+            }, "json");
+        });
+    }
+
+</script>
+
+<include file="./Home/Tpl/MarketActive/NewPoster_basicInfo.html" />
+
+<include file="./Home/Tpl/MarketActive/NewPoster_templateList.html" />
+
+
+

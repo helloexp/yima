@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+            <title>使用规则-促销管理</title>
+            <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+            <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+            <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+            <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+            <link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+            <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+            <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+            <link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+            <link href="__PUBLIC__/Css/WHongBao.css?v=__VR__" rel="stylesheet" type="text/css" />
+            <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+            <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+            <script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+            <script type="text/javascript" src="__PUBLIC__/Js/highcharts.js"></script>
+    </head>
+    <body>
+        <div id="wrapper"> 
+            <include file="./Home/Tpl/Public/Public_header.html" />
+            <include file="Shop/nav" navmenuid="Navsale"/>
+            <div id="container" class="bgfff"> 
+                <div id="main" class="rel"> 
+                    <div class="sidenav">
+                        <!--开始引入左菜单-->
+                        <include file="Sale/menu" salemenu_id="mjs"/>
+                    </div>
+                    <div class="subcon fn">
+                        <div class="main-name fn">
+                            <h4>满减促销<a class="btn-add first" href="{:U('ElectronicCommerce/creteRule')}"><i></i>创建满减活动</a></h4>
+                        </div>
+                        <table class="W-table">
+                            <tr>
+                                <th>满减活动</th>
+                                <th>参与商品数</th>
+                                <th>活动时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                            <volist name="fullReduceList" id="vo">
+                                <tr>
+                                    <td class="info" >
+                                        <a href="javascript:void(0)" class="down">更多优惠<img  src="__PUBLIC__/Image/eTicket/icon_extend.png"/></a>
+                                        <a href="javascript:void(0)" class="up"> 收起<img src="__PUBLIC__/Image/eTicket/icon_extend-active.png"/></a>
+                                        <div class="h40">
+                                        	
+                                           <volist name="vo.rule_data" id="list">
+                                            <span>{$i}满{$list.full_money}减{$list.reduce_money}元；</span>
+                                            </volist>
+                                        </div>
+
+                                    </td>
+                                    <td>{$vo.goods_num}</td>
+                                    <td>{$vo.begin_time|date="Y-m-d H:i:s",###}至{$vo.end_time|date="Y-m-d H:i:s",###}</td>
+                                    <td><if condition="$vo.status eq 1">启用<else />停用</if></td>
+                                    <td>
+                                        <a href="javascript:void(0)">编辑</a>
+                                        <if condition="$vo.status eq 1"><a href="javascript:void(0)">停用</a><br/><else />停用</if>
+                                        <if condition="$vo.status eq 2"><a href="javascript:void(0)">启用</a><else />启用</if>
+                                        <a href="javascript:void(0)">删除</a>
+                                    </td>
+
+                                </tr>
+                            </volist>    
+                        </table>
+
+                    </div>
+                    <div class="page">{$page}</div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+        </div>
+        <div class="service"></div>
+    </body>
+</html>
+
+<script>
+function ruledelete(id){
+    var title="您确认删除该规则？";	
+	var url = "{:U('Ecshop/ElectronicCommerce/ruleDelete')}";
+        art.dialog.confirm(title,function(){
+        $.post(url,{"id":id,},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>删除成功</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+
+
+$(function () {
+//	更多选择操作  
+    $('.W-table .info div').each(function(index,elem){
+        var aa=$(this).find('span').length;
+        if(aa <= 2){
+	        $(this).removeClass('h40');
+	        $(this).closest('.info').find('a').hide();
+			$('.info a').hide(function(){
+				var t=$(this).closest('.info');
+				var span_t=t.find('div span').last();
+				var strSpan = span_t.html().substr(0, span_t.html().length - 1);
+				span_t.html(strSpan + '。');	
+			});
+        }else if(aa>2){		
+        	$(this).addClass('h40')
+		    $(this).closest('.info').find('a.down').show();
+		    $('.info a').on('click', function () {
+		    	var t=$(this).closest('.info');
+			    var span_t=t.find('div span').last();
+			    var strSpan = span_t.html().substr(0, span_t.html().length - 1);
+			    span_t.html(strSpan + '。');
+			    t.find('a').show();
+			    $(this).hide();
+			    t.find('div').toggleClass('h40')
+		    });     		
+        }	
+    });
+
+});
+function statusChange(status,id){
+    if(status==1){
+        var title="您确认启用该规则？";
+    }else{
+        var title="您确认停用该规则？";
+    }	
+    var url = "{:U('Ecshop/ElectronicCommerce/ruleChangeStatus')}";
+	
+    art.dialog.confirm(title,function(){
+        $.post(url,{"id":id,"status":status},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>更新成功</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+</script>

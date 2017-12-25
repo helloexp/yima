@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>选择商品</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<js href="__PUBLIC__/Js/Datejs/date-zh-CN.js?v=__VR__" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script>
+var _json_data = <?php echo json_encode(array_valtokey($list, 'id'));?>;
+var _arr = [];
+var cb_init = '{:I('cb_init')}';
+var cb_rgoodsadd = '{:I('cb_rgoodsadd')}';
+var cb_rgoodsdel = '{:I('cb_rgoodsdel')}';
+var max_num = 8;
+$(document).ready(function(e){
+	var win = art.dialog.opener;
+	var _this=art.dialog.data('_this');
+
+	if(cb_init && win[cb_init] && typeof(win[cb_init]) == 'function' )
+		_arr = win[cb_init].call(this,_this);
+
+	for(i = 0; i<_arr.length; i++){
+		$(':checkbox[value="'+_arr[i]+'"]').attr('checked',true);
+	}
+
+	if(_arr.length == max_num) $(":checkbox").not("input:checked").attr('disabled', 'disabled');
+
+	$(':checkbox').change(function(){
+		if(this.checked){
+			if(cb_rgoodsadd && win[cb_rgoodsadd] && typeof(win[cb_rgoodsadd]) == 'function' )
+				_arr = win[cb_rgoodsadd].call(this, _json_data[this.value],_this);
+
+			if(_arr.length == max_num) $(":checkbox").not("input:checked").attr('disabled', 'disabled');
+		}
+
+		else{
+			if(cb_rgoodsdel && win[cb_rgoodsdel] && typeof(win[cb_rgoodsdel]) == 'function' )
+				_arr = win[cb_rgoodsdel].call(this, _json_data[this.value],_this);
+
+			if(_arr.length < max_num) $(":checkbox").not("input:checked").removeAttr('disabled');
+		}
+	});
+
+	$(".btn-next").click(function(){
+		var list = win.art.dialog.list;
+		for(d in list)
+			list[d].close();
+	});
+});
+</script>
+</head>
+
+<body class="bgfff">
+	<div class="Wcanal-tab showsaloonForm1">
+		<div class="Wcanal-tab-list">
+			<div class="fn">
+				<table cellpadding="0" cellspacing="0" class="W-table">
+					<tr>
+						<th width="120">选择</th>
+						<th>商品名称</th>
+						<th>有效期</th>
+					</tr>
+					<?php
+					if(!empty($list)){ 
+						foreach($list as $v){
+					?>
+					<tr>
+						<td>
+							<?php if($v['storage_type'] == '1' && $v['remain_num'] == 0 ){
+								echo '无库存！';
+								}else{?>
+							<input type="checkbox"  value="<?php echo $v['id']?>" name="id"/>
+							<?php }?>
+						</td>
+						<td><?php echo $v['goods_name'];?></td>
+						<td><?php echo dateformat($v['begin_time'],'Y-m-d').'到'.dateformat($v['end_time'],'Y-m-d')?></td>
+					</tr>
+					<?php }}else{?>
+					<td colspan="4">无数据</td>
+					<?php }?>
+				</table>
+			</div>
+			<div class="tr pt5 pb5"><?php echo $page;?>&nbsp;&nbsp;</div>
+			<div class="fn tc pt20 pb20"><a href="javascript:void(0)" class="btn-all w120 btn-next">确定</a></div>
+		</div>
+	</div>
+</body>

@@ -1,0 +1,341 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>营销推广渠道分析_营销推广渠道_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/highcharts.js?v=__VR__"/>
+<script type="text/javascript" src="http://widget.renren.com/js/rrshare.js"></script>
+<script src="http://qzonestyle.gtimg.cn/qzone/app/qzlike/qzopensl.js#jsdate=20111201" charset="utf-8"></script>
+<script type="text/javascript" charset="utf-8">
+//数据源
+var charData = {:json_encode($query_list)};
+//计算访问量饼图数据
+var charDataClick = [];
+//计算中奖数饼图数据
+var charDataSend = [];
+//计算访问量柱状图 X 坐标名
+var charDataColumnName = [];
+//计算访问量柱状图 X 坐标值
+var charDataClickColumnValue = [];
+
+//计算中奖数柱状图 X 坐标值
+var charDataSendColumnValue = [];
+
+for(var i in charData){
+	charDataColumnName.push(charData[i]['name']);
+	charDataClick.push([charData[i]['name'],charData[i]['click_count']*1]);
+	charDataClickColumnValue.push(charData[i]['click_count']*1);
+
+	charDataSend.push([charData[i]['name'],charData[i]['send_count']*1]);
+	charDataSendColumnValue.push(charData[i]['send_count']*1);
+}
+var chart;
+$(document).ready(function() {
+   chart = new Highcharts.Chart({
+      chart: {
+         renderTo: 'chart_1'
+      },
+      title: {
+         text: '访问量占比分析'
+      },
+      plotArea: {
+         shadow: null,
+         borderWidth: null,
+         backgroundColor: null
+      },
+      tooltip: {
+         formatter: function() {
+            return '<b>'+ this.point.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 1) +'% ('+
+                         Highcharts.numberFormat(this.y, 0, ',') +' 个)';
+         }
+      },
+      plotOptions: {
+         pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+               enabled: true,
+               formatter: function() {
+                  if (this.percentage > 4) return this.point.name;
+               },
+               color: '',
+               style: {
+                  font: '13px Trebuchet MS, Verdana, sans-serif'
+               }
+            }
+         }
+      },
+      legend: {
+         backgroundColor: '#FFFFFF',
+         x: 0,
+         y: -30
+      },
+      credits: {
+          enabled: false
+      },
+       series: [{
+         type: 'pie',
+         name: 'Browser share',
+         data: 
+            charDataClick
+
+		}]
+   });
+
+   chart = new Highcharts.Chart({
+      chart: {
+         renderTo: 'chart_2'
+      },
+      title: {
+         text: '中奖数占比分析'
+      },
+      plotArea: {
+         shadow: null,
+         borderWidth: null,
+         backgroundColor: null
+      },
+      tooltip: {
+         formatter: function() {
+            return '<b>'+ this.point.name +'</b>: '+ Highcharts.numberFormat(this.percentage, 1) +'% ('+
+                         Highcharts.numberFormat(this.y, 0, ',') +' 个)';
+         }
+      },
+      plotOptions: {
+         pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+               enabled: true,
+               formatter: function() {
+                  if (this.percentage > 4) return this.point.name;
+               },
+               color: '',
+               style: {
+                  font: '13px Trebuchet MS, Verdana, sans-serif'
+               }
+            }
+         }
+      },
+      legend: {
+         backgroundColor: '#FFFFFF',
+         x: 0,
+         y: -30
+      },
+      credits: {
+          enabled: false
+      },
+       series: [{
+         type: 'pie',
+         name: 'Browser share',
+         data: charDataSend
+		}]
+   });
+   
+   //柱状图
+   $('#chart_column').highcharts({
+       chart: {
+           type: 'column'
+       },
+       title: {
+           text: '访问量占比分析'
+       },
+       subtitle: {
+           text: ''
+       },
+       xAxis: {
+    	   categories: charDataColumnName
+       },
+       yAxis: {
+           min: 0,
+           title: {
+               text: ''
+           }
+       },
+       tooltip: {
+    	   valueSuffix: ' 个'
+       },
+       plotOptions: {
+           column: {
+               pointPadding: 0.2,
+               borderWidth: 0
+           }
+       },
+       series: [{
+           name: '访问量',
+           data: charDataClickColumnValue
+
+       }, {
+           name: '中奖数',
+           data: charDataSendColumnValue
+
+       }]
+   });
+});
+
+function show(name,url){
+	art.dialog({
+	    title: name,
+	    content: "<img src='"+url+"' border='0'>"
+	});
+}
+
+function share(channel_id,batch_id,batch_type,label_id){
+    $.post("<?php echo U('Sns/index');?>",{batch_id:batch_id,channel_id:channel_id,batch_type:batch_type},function(data){
+        if(data.status==1){
+            art.dialog({
+                title: data.titleName,
+                content: "<textarea id='content' class='texttextarea w300 h126'>"+data.batchName+data.batchUrl+"</textarea><br /><p>最多140个字</p><br /><img src='<?php echo U('LabelAdmin/ShowCode/index','id=')?>"+label_id+"'><input type='hidden' id='channel_id' value='"+data.channelId+"'/><input type='hidden' id='batch_name' value='"+data.batchName+"'/><input type='hidden' id='batch_url' value='"+data.batchUrl+"'/>",
+                button: [{
+                    name: '分享',
+                    callback: function(){
+                        var content = $("#content").val();
+                        var channel_id = $("#channel_id").val();
+                        var batch_name = $("#batch_name").val();
+                        var batch_url  = $("#batch_url").val();
+                        var dialog = art.dialog({title:false,fixed: true,padding:0});
+                        $.post("<?php echo U('Sns/putOut');?>",{content:content,channel_id:channel_id,label_id:label_id,batch_name:batch_name,batch_url:batch_url},function(data){
+                            if(data.status==1){
+                                dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                            }else{
+                                if(data.info == 'noBind'){
+                                    dialog.close();
+                                    art.dialog({
+                                        title: '绑定平台账号',
+                                        content: '该渠道未绑定或已过期,请先绑定',
+                                        okVal: '立刻去绑定',
+                                        ok: function(){
+                                            var w = 800;     //宽度
+                                            var h = 650;   //高度
+                                            var t = (screen.height-h)/2; //离顶部距离
+                                            var l = (screen.width-w)/2; //离左边距离
+                                            window.open("<?php echo U('Sns/authorize','channel_id=');?>"+channel_id,'_blank',"width="+w+",height="+h+",scrollbars=no,location=no,top="+t+",left="+l);
+                                        },
+                                        cancel:true
+                                    });
+                                }else{
+                                    dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                                }
+                            }
+                        },"json");
+                        return false;
+                    }
+                }],
+                cancel: true
+            });
+        }else{
+            art.dialog(data.info);
+        }
+    },"json");
+}
+function other_share(channel_id,batch_id,batch_type,label_id,sns_type) {
+	$.post("<?php echo U('Sns/index');?>",{batch_id:batch_id,channel_id:channel_id,batch_type:batch_type},function(data){
+		if(data.status==1){
+			if(sns_type == 4){
+				var rrShareParam = {
+				        resourceUrl : data.batchUrl,   //分享的资源Url
+				        srcUrl : data.batchUrl,    //分享的资源来源Url,默认为header中的Referer,如果分享失败可以调整此值为resourceUrl试试
+				        pic : "<?php echo CURRENT_HOST.U('LabelAdmin/ShowCode/index','id=')?>"+label_id,       //分享的主题图片Url
+				        title : data.batchName,     //分享的标题
+				        description : data.batchName+data.batchUrl    //分享的详细描述
+				};
+				rrShareOnclick(rrShareParam);
+			}else if(sns_type == 3){
+			   var p = {
+                url:data.batchUrl,
+                showcount:'0',/*是否显示分享总数,显示：'1'，不显示：'0' */
+                desc:data.batchName+data.batchUrl,/*默认分享理由(可选)*/
+                summary:'欢迎大家点击上面的链接或用手机扫描二维码来参与我们的活动哦~~~',/*分享摘要(可选)*/
+                title:data.batchName,/*分享标题(可选)*/
+                site:'',/*分享来源 如：腾讯网(可选)*/
+                pics:"<?php echo CURRENT_HOST.U('LabelAdmin/ShowCode/index','id=')?>"+label_id, /*分享图片的路径(可选)*/
+                style:'203',
+                width:98,
+                height:22
+                };
+                var s = [];
+                for(var i in p){
+                s.push(i + '=' + encodeURIComponent(p[i]||''));
+                }
+                var url = 'http://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?'+s.join('&');
+                wa = 'width=700,height=650,left=0,top=0,resizable=yes,scrollbars=1';
+                window.open(url,'qq',wa);
+			}else{
+				art.dialog("未知的分享类型");
+			}
+		}else{
+			art.dialog(data.info);
+		}
+	},"json");
+    
+}
+</script>
+
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="{:U('LabelAdmin/Channel/add')}">营销推广渠道</a></p>
+							<p>></p>
+							<p>查看渠道数据</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单-->
+					<include file="LabelAdmin/Channel/leftMenu" leftmenuid="yyqd"/>
+                </div>
+    
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">{$batch_name}-渠道分析</h4>
+                    </div>
+                    <div id="Wcanal-tabon" class="Wcanal-tab">
+                        <div class="Wcanal-tab-title fn">
+                            <p class="Wcanal-tab-hover"><a href="javascript:void(0)">饼状图</a></p>
+                            <p><a href="javascript:void(0)">柱状图</a></p>
+                        </div>
+                        <div class="Wcanal-tab-list db fn">
+                            <div class="l" id="chart_1" style="height:350px; width: 400px;"><!-- 访问量饼图--></div>
+                            <div class="r" id="chart_2" style="height:350px; width: 400px;"><!-- 中奖饼图--></div>
+                        </div>
+                        <div class="Wcanal-tab-list dn fn">
+                            <div class="l" id="chart_column" style=" width:830px;"></div>
+                        </div>
+                    </div>
+                    <div class="cl"></div>
+                    <div class="fn-clear fn mt20">
+                        
+                       
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

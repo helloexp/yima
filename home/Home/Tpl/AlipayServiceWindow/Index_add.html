@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信菜单</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/json2.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script>
+	//选择后的回调函数
+	var selectcallback = function(mid){
+		if(!mid) return false;
+		var dialog = art.dialog({title:false,lock:true});
+		var data = {material_id:mid};
+		$("#input-response_info_img").val(mid);
+		$.post("{:U('AlipayServiceWindow/Index/showMaterialById')}",data,function(d){
+			dialog.close();
+			$("#imgShowArea").html(d);
+		});
+	}
+
+	$(function(){
+		$("#btn_submit_text,#btn_submit_img,#btn_submit_url").click(function(){
+			$form = $(this).closest("form");
+			if(!confirm("确定要保存吗?") 
+			|| !check_form($("#menu_title"),{type:'elem'})
+			|| !check_form($form)
+			){ return false;}
+			var data = getFormData($form);
+			data['menu_title'] = $("#menu_title").val();
+			var loading = art.dialog.through({
+				title: false,
+				lock: true
+			});
+			var redirectUrl = "{:U('Index/edit')}";
+			$.post($form.attr("action"),data,function(d){
+				if(d.status == 1){
+					loading.close = function(){
+						parent.window.location.href = "{:U('AlipayServiceWindow/Index/selfMenu')}"
+					};
+				}
+				loading.time(1).content(d.info);
+			},'json');
+		});
+
+		$('.libraryArea-add').click(function(){
+			var openUrl = $(this).attr("data-url") || 'about:blank';
+			art.dialog.open(openUrl,{
+				lock: true,
+				fixed:true,
+				title:"选择图文信息",
+				width:740,
+				height: '80%'
+				});
+			});
+		
+		//初始化tab
+		var mid = $("#input-response_info_img").val();
+		selectcallback(mid);
+
+		var response_class = $("#hidden_response_class").val() || 0;
+		if(response_class == 0 || response_class == 1 || response_class == 2){
+			$("#Msg-tabon .Wcanal-tab-title p").eq(response_class).click();
+		}
+		
+
+		//选择互动模块
+		$('#add-url-link').click(function(){
+			art.dialog.open($(this).attr('href'),{
+				lock: true,
+				title:"添加已创建活动",
+				width:800,
+				height:600
+			});
+			return false;
+		});
+
+	});
+
+//打开窗口的回调函数
+var selectActivityCallback = function(d){
+	if(!d) return false;
+	var dialog = art.dialog({title:false,lock:true});
+	var data = {batch_id:d.batch_id,batch_type:d.batch_type};
+	$.post("{:U('AlipayServiceWindow/Index/getActivityLabelUrl')}",data,function(d){
+		dialog.close();
+		$("#input-response_info_url").val(d.info.url);
+	},'json');
+}
+</script>
+</head>
+<body class="bgfff">
+
+        <div class="msg-nav-con-title bd-b-565656">{$actionTitle|default='新增菜单-一级菜单'}</div>
+        <div class="global-input2 fn w1 pb10">
+            <ul>
+                <li>*&nbsp;菜单名称：<input name="menu_title" id="menu_title"  type="text"  class="textbox w300" value="{$info['title']}" jscheckrule="null=0;" jschecktitle="菜单名称" maxLength="10" placeholder="10个字内"/></li>
+            </ul>
+            <ul>
+                <li>*&nbsp;文本内容：</li>
+            </ul>
+			<input type="hidden" id="hidden_response_class" value="{$info.response_class}"/>
+        </div>
+        <div class="msg-libs">
+            <div id="Msg-tabon" class="Wcanal-tab">
+                <div class="Wcanal-tab-title fn">
+                    <p class="p-title">文&nbsp;&nbsp;&nbsp;&nbsp;字</p>
+                    <p class="p-title">图&nbsp;&nbsp;&nbsp;&nbsp;文</p>
+                    <p class="p-title">链&nbsp;&nbsp;&nbsp;&nbsp;接</p>
+                </div>
+                <div class='Wcanal-tab-list bgf3f3f3'>
+                    <div class="txtArea">
+					 <form action="{:U('Index/'.ACTION_NAME)}" method="post" onsubmit="return false;">
+					 <input type="hidden" name="id" value="{$info['id']}"/>
+					 <input type="hidden" name="level" value="{$level|default=1}"/>
+					 <input type="hidden" name="parent_id" value="{$parent_id|default=0}"/>
+					 <input type="hidden" name="response_class" value="0"/>
+                        <div class="functionBar">
+                            <div class="opt">请输入您回复的文字</div>
+                            <div class="tip"></div>
+                            <div class="cl"></div>
+                        </div>
+                        <div class="editArea">
+                            <textarea name="response_info" class="editArea-textarea" maxlength="1000" id="input-response_info" jscheckrule="null=0;" jschecktitle="回复文字" placeholder="请输入回复消息，最多1000 字">{$info['response_info']}</textarea>
+                        </div>
+                        <div class="msg-libs-update">
+                            <a href="javascript:void(0);" title="确认" class="btn-all w110" id="btn_submit_text">保存</a>
+                            <a href="javascript:void(0);" title="取消" class="btn-all-del w110 ml10" onclick="javascript:$(this).closest('form')[0].reset();">取消</a>
+                        </div>
+					 </form>
+                    </div>
+                </div>
+                <div class="Wcanal-tab-list bgf3f3f3 dn">
+                    <div class="txtImg">
+					 <form action="{:U('Index/'.ACTION_NAME)}" method="post" onsubmit="return false;">
+						 <input type="hidden" name="id" value="{$info['id']}"/>
+						 <input type="hidden" name="level" value="{$level|default=1}"/>
+						 <input type="hidden" name="parent_id" value="{$parent_id|default=0}"/>
+						 <input type="hidden" name="response_class" value="1"/>
+                        <div class="functionBar">
+                            <div class="opt">请选择您需要的图文信息</div>
+                            <div class="r libraryArea">
+                                <a href="javascript:void(0)" class="libraryArea-add" data-url="{:U('AlipayServiceWindow/Index/selectImgTxt')}">从素材库中添加</a>
+                            </div>
+                            <div class="cl"></div>
+                        </div>
+                        <div class="editArea" style="min-height:80px" id="imgShowArea">
+                        </div>
+                        <div class="msg-libs-update">
+                           <input type="hidden" name="response_info_img" id="input-response_info_img" value="{$info['response_info_img']}"/>
+                            <a href="javascript:void(0);" title="确认" class="btn-all w110" id="btn_submit_img">保存</a>
+                            <a href="javascript:void(0);" title="取消" class="btn-all-del w110 ml10" id="btn_cancel" onclick="javascript:window.location.reload();">取消</a>
+                        </div>
+					 </form>
+                    </div>
+                </div>
+
+				<div class="Wcanal-tab-list bgf3f3f3 dn">
+                    <div class="txtImg">
+					 <form action="{:U('Index/'.ACTION_NAME)}" method="post" onsubmit="return false;">
+						 <input type="hidden" name="id" value="{$info['id']}"/>
+						 <input type="hidden" name="level" value="{$level|default=1}"/>
+						 <input type="hidden" name="parent_id" value="{$parent_id|default=0}"/>
+						 <input type="hidden" name="response_class" value="2"/>
+                        <div class="functionBar">
+                            <div class="opt">请输入您要跳转的链接 </div>
+                            <div class="tip"><a href="{:U('LabelAdmin/SelectBatch/index')}" class="ml10 l" id="add-url-link">选择互动模块</a></div>
+                            <div class="cl"></div>
+                        </div>
+                        <div class="editArea">
+                            <input type="text" name="response_info_url" style="width:100%;border:1px solid #DDDDDD" maxlength="300" value="{$info.response_info_url}" id="input-response_info_url" jscheckrule="null=0;" jschecktitle="跳转链接" placeholder="http://" maxlength="1000"/>
+							<div><!--营销活动返回信息--></div>
+                        </div>
+                        <div class="msg-libs-update">
+                            <a href="javascript:void(0);" title="确认" class="btn-all w110" id="btn_submit_url">保存</a>
+                            <a href="javascript:void(0);" title="取消" class="btn-all-del w110 ml10" onclick="javascript:$(this).closest('form')[0].reset();">取消</a>
+                        </div>
+					 </form>
+                    </div>
+                </div>
+            </div>
+     </div>
+</body>
+</html>

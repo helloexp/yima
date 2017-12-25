@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加本层机构</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wfx.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="__PUBLIC__/Js/jquery-ui-1.11.4.custom/jquery-ui.min.css">
+<script>
+$(function(){
+    $("#upload_pic_btn").click(function(){
+        var opt = {
+            obj:$("#img_resp_show"),
+            height:160,
+            width:160,
+            Gform:false,
+            callback:function(data){
+                alert("11");
+                $('#logo_pic').val(data['savename']);
+                $('#logo_pic_show').attr('src',data['src']);
+            }
+        };
+        open_img_uploader(opt);
+    });
+    var availableTags = "{$agencyList}".split(" ");
+    var availableTagsEx = "{$salerList}".split(" ");
+    $("#agency").autocomplete({
+        source: availableTags
+    });
+    $("#saler").autocomplete({
+        source: availableTagsEx
+    });
+    $("#agency").click(function(){
+        $('#errorTip').html("");
+    });
+    $("#saler").click(function(){
+        $('#errorTipEx').html("");
+    });
+    $("#sub_button").click(function(){
+        var agencySelect = $("#agency").val();
+        if($.inArray(agencySelect,availableTags)== '-1'){
+            $('#errorTip').html("错误：请重新选择经销商！");
+            return false;
+        }else{
+            succSubmit();
+        }
+    });
+    $("#sub_buttonex").click(function(){
+        var agencySelect = $("#saler").val();
+        if($.inArray(agencySelect,availableTagsEx)== '-1'){
+            $('#errorTipEx').html("错误：请重新选择经销商！");
+            return false;
+        }else{
+            succSubmitEx();
+        }
+    });
+})
+</script>
+
+
+<script type="text/javascript">
+    function succSubmit(){
+        var dialog;
+        var parentWin = art.dialog.opener;
+        var agencyName = $("#agencyName").val();
+        if($("#theform").validationEngine('validate')){
+            $("#theform").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        art.dialog({
+                            title:"提示(5秒后自动关闭)",
+                            width:350,
+                            height:100,
+                            content:'<span style="font-weight:bold;">经销商<blue style="color:#3D86BA;">&nbsp;'+agencyName+'&nbsp;</blue>添加成功，请及时审核！</span><br />通过审核后，<blue style="color:#3D86BA;">&nbsp;'+agencyName+'&nbsp;</blue>可以登录旺财小店，管理下级销售员。<br />经销商详情中可以下载分销入口二维码。',
+                            icon: "succeed",
+                            lock:true,
+                            close:function(){
+                                art.dialog.close();
+                                art.dialog.opener.reload();
+                            }
+                        }).time(5);
+                        return false;
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json',
+            });
+            
+            return false;
+        }
+        return false;
+    }
+    function succSubmitEx(){
+        var dialog;
+        var parentWin = art.dialog.opener;
+        var salerName = $("#salerName").val();
+        if($("#theformex").validationEngine('validate')){
+            $("#theformex").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                        art.dialog({
+                            title:"提示(5秒后自动关闭)",
+                            width:350,
+                            height:100,
+                            content:'<span style="font-weight:bold;">销售员<blue style="color:#3D86BA;">&nbsp;'+salerName+'&nbsp;</blue>添加成功，请及时审核！</span><br />通过审核后，<blue style="color:#3D86BA;">&nbsp;'+salerName+'&nbsp;</blue>可以登录旺财小店，查看分销业绩。<br />销售员详情中可以下载分销入口二维码。',
+                            icon: "succeed",
+                            lock:true,
+                            close:function(){
+                                art.dialog.close();
+                                art.dialog.opener.reload();
+                            }
+                        }).time(5);                
+                        return false;
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                    }
+                },
+                dataType:'json',
+            });
+            
+            return false;
+        }
+        return false;
+    }
+</script>
+</head>
+<body>
+<div class="popupWin">
+<div class="Wcanal-tab inPop" id="Wcanal-tabon">
+<div class="Wcanal-tab-title fn" id="third-tab">
+    <p class="Wcanal-tab-hover"><a href="javascript:void(0);">新增经销商</a></p>
+    <p class=""><a href="javascript:void(0);">新增销售员</a></p>
+</div>
+<div class="Wcanal-tab-list">
+    <div class="Gform fn"  style="width:100%;">
+    <form id="theform" action="{:U('Wfx/Fxgl/add_ajax',array('type'=>1))}" method="post" enctype="multipart/form-data">
+    <a href="javascript:void(0)" style="float:right; line-height:28px; padding-right:10px;" onclick="window.open('{:U('Home/Help/helpArt',array('news_id'=>'1347','type'=>11,'leftId'=>'wfx','class_name'=>'旺分销'))}')">什么是经销商？</a>
+        <div class="Gtitle">基本信息</div>
+        <ul class="first">
+            <li class="Gname"><span>*</span>经销商名称</li>
+            <li class="Ginput"><input type="text" name="name" id="agencyName" class="validate[required]" value="" placeholder="必填"></li>
+        </ul>
+        <ul>
+            <li class="Gname"><span>*</span>负责人姓名</li>
+            <li class="Ginput"><input type="text" name="contact_name" id="contact_name" class="validate[required]" value="" placeholder="必填"></li>
+        </ul>
+        <ul>
+            <li class="Gname"><span>*</span>手机号码</li>
+            <li class="Ginput"><input type="text" name="phone_no" id="phone_no" class="validate[required,custom[phone]]" value="" placeholder="必填"></li>
+        </ul>
+        <eq name="accountType" value="1">
+        <ul class="last">
+            <li class="Gname">支付宝账号</li>
+            <li class="Ginput"><input type="text" name="alipay_account" id="alipay_account" value="" placeholder="选填"><span class="txtTips">负责人接收到通知短信后也可自行绑定账号</span></li>
+        </ul>
+        <else/>
+        <ul>
+            <li class="Gname">银行名称</li>
+            <li class="Ginput">
+                <select name="bank_name" id="bank_name">
+                    <option value="">请选择银行</option>
+                    <volist name="defaultBankName" id="vd">
+                    <option value="{$vd}">{$vd}</option>
+                    </volist>
+                </select>
+                <p class="Gtext" style="font-size: 13px;color: #aaa;"></p>
+            </li>
+        </ul>
+        <ul class="last">
+            <li class="Gname">银行账号</li>
+            <li class="Ginput"><input type="text" name="bank_account" id="bank_account" value="" placeholder="选填，银行名称与账户必须同时存在"><span class="txtTips">负责人接收到通知短信后也可自行绑定账号</span></li>
+        </ul>
+        </eq>
+        <div class="Gtitle">提成默认设置<span style="margin-left:20px;font-weight: normal;">(具体以商品配置时的数值为准)</span></div>
+        <ul class="first">
+            <li class="Gname"><span>*</span>销售提成比</li>
+            <li class="Ginput"><input type="text" name="default_sale_percent" id="default_sale_percent" value="" placeholder="该经销商直接销售产品时获得的提成">%<span class="txtTips"></span></li>
+        </ul>
+        <ul class="last">
+            <li class="Gname"><span>*</span>管理提成比</li>
+            <li class="Ginput"><input type="text" name="default_manage_percent" id="default_manage_percent" value="" placeholder="该经销商下的销售员产生业绩时所得提成">%<span class="txtTips"></span></li>
+        </ul>
+        <div class="Gtitle">所属经销商</div>
+        <ul class="first last">
+            <li class="Gname">选择经销商</li>
+            <li class="Ginput">
+                <input type="text" name="level_info" id="agency" value="{$selectAgencyName}" placeholder="关键字，如：一级-16835359696-翼码">
+                <span class="txtTips">分销商等级不得超过5级<br/>创建一级经销商时，请输入“0”并选择“顶级-000****”</span>
+                <p id="errorTip" style="color:red;font-size:12px;"></p>
+            </li>
+        </ul>
+        <div class="Gtitle">其他信息<span style="margin-left:20px;font-weight: normal;">(选填)</span></div>
+        <ul class="first last">
+            <li class="Gname">上传营业执照</li>
+            <li class="Ginput">
+                <div class="Gchoose Gview-img">
+                    <input type="text" name="business_licence" id="logo_pic" value="">
+                    <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:641,height:321}"><i></i></a>
+                </div>
+            </li>
+        </ul>
+        <div class="tc"><a href="javascript:void(0)" class="btn-all btn_primary mt30 mb30" id="sub_button">确认</a></div>
+    </form>
+    </div>
+</div>
+<div class="Wcanal-tab-list dn" style="display: none;">
+    <div class="Gform fn" style="width:100%;">
+    <form id="theformex" action="{:U('Wfx/Fxgl/add_ajax',array('type'=>2))}" method="post">
+    <a href="javascript:void(0)" style="float:right; line-height:28px; padding-right:10px;" onclick="window.open('{:U('Home/Help/helpArt',array('news_id'=>'1344','type'=>11,'leftId'=>'wfx','class_name'=>'旺分销'))}')">什么是销售员？</a>
+        <div class="Gtitle">基本信息</div>
+        <ul>
+            <li class="Gname"><span>*</span>销售员姓名</li>
+            <li class="Ginput"><input type="text" name="name" id="salerName" class="validate[required]" placeholder="必填"></li>
+        </ul>
+        <ul>
+            <li class="Gname"><span>*</span>手机号码</li>
+            <li class="Ginput"><input type="text" name="phone_no" id="phone_no" class="validate[required]" placeholder="必填"></li>
+        </ul>
+        <ul>
+            <li class="Gname">销售编号</li>
+            <li class="Ginput"><input type="text" name="custom_no" id="custom_no" class="validate[maxSize[10],custom[number]]" placeholder="选填"><span class="maxTips forInput" data-max="10">0/10</span><span class="txtTips">下订单时用于标记提成归属</span></li>
+        </ul>
+        <eq name="accountType" value="1">
+        <ul>
+            <li class="Gname">支付宝账号</li>
+            <li class="Ginput"><input type="text" name="alipay_account" id="alipay_account" placeholder="选填"><span class="txtTips">其接收到分佣短信后也可自行绑定账号</span></li>
+        </ul>
+        <else/>
+        <ul>
+            <li class="Gname">银行名称</li>
+            <li class="Ginput">
+                <select name="bank_name" id="bank_name">
+                    <option value="">请选择银行</option>
+                    <volist name="defaultBankName" id="vd">
+                    <option value="{$vd}">{$vd}</option>
+                    </volist>
+                </select>
+            <p class="Gtext" style="font-size: 13px;color: #aaa;"></p>
+            </li>
+        </ul>
+        <ul>
+            <li class="Gname">银行账号</li>
+            <li class="Ginput"><input type="text" name="bank_account" id="bank_account" value="" placeholder="选填，银行名称与账户必须同时存在"><span class="txtTips">负责人接收到通知短信后也可自行绑定账号</span></li>
+        </ul>
+        </eq>
+        <div class="Gtitle">提成默认设置<span style="font-size: 13px;color: #aaa;margin-left:20px;font-weight: normal;">(具体以商品配置时的数值为准)</span></div>
+        <ul>
+            <li class="Gname"><span>*</span>销售提成</li>
+            <li class="Ginput"><input type="text" name="default_sale_percent" id="default_sale_percent" placeholder="具体以商品配置时的数值为准">%<span class="txtTips"></span></li>
+        </ul>
+        <div class="Gtitle">所属经销商</div>
+        <ul>
+            <li class="Gname"><span>*</span>选择经销商</li>
+            <li class="Ginput">
+                <input type="text" id="saler" name="level_info" value="{$selectAgencyName}" placeholder="关键字，如：一级-16835359696-翼码">
+                <p id="errorTipEx" style="color:red;font-size:12px; line-height:24px;"></p>
+            </li>
+        </ul>
+        <div class="tc"><a href="javascript:void(0)" class="btn-all btn_primary mt30 mb30" id="sub_buttonex">确认</a></div>
+    </form>
+    </div>
+</div>
+</div>
+</div>
+</body>
+</html>

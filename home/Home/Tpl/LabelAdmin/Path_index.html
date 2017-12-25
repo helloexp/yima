@@ -1,0 +1,175 @@
+<?php
+//$group_name  = GROUP_NAME;
+$module_name = MODULE_NAME;
+$action_name = ACTION_NAME;
+$thisType = I('batch_type');
+$_GET['batch_id'] = I('get.batch_id');
+if($_GET['batch_id']!='' && ($module_name == 'CjSet' || $module_name=='CjSetSnowBall' || $module_name=='LaborDayCjSet')){
+	$thisType = M('tmarketing_info')->where("id='".$_GET['batch_id']."'")->getField('batch_type');
+	$cjset = true;
+}
+//活动名(按活动类型)
+$bname_num_arr = C('BATCH_TYPE_NAME');
+//活动名(按活动名称)
+$bname_str_arr = C('BATCH_ACTION_NAME');
+
+//常见营销
+$cjyx_arr = array(
+    '2'=> 'News',
+    '3'=> 'Bm',
+    '8'=> 'List',
+    '9'=> 'Coupon',
+    '10'=>'Answers',
+    '20'=>'Vote',
+    '32'=>'Registration',
+    '34'=>'ShoppingPolite',
+    '36'=>'Spelling',
+    '37'=>'Poster',
+    '14'=>'Feedback',
+    '44'=>'Dawan',
+); 
+//节日营销
+$jryx_arr = array(
+    '11'=>'Special',
+    '12'=>'Valentine',
+    '15'=>'Women',
+    '16'=>'LogoGuess',
+    '18'=>'Mama',
+    '28'=>'Qixi',
+    '30'=>'ZhongQiu',
+    '35'=>'SnowBall',
+    '42'=>'Spring2015',
+	'45'=>'LaborDay',
+	'46'=>'MamaSjb',
+	'50'=>'ZongZi',
+	'61'=>'MatchGuess',
+);
+$ex_arr = array_merge(array_flip($cjyx_arr),array_flip($jryx_arr));
+//粉丝营销
+$tj_arr = array(
+    '4'=> 'MemberRegistration',
+);
+//商品销售
+$goodssale_arr = array(
+    '26'=>'GoodsSale',
+    '27'=>'MaShangMai',
+    '41'=>'SalePro'
+);
+//旺工具
+$wgj_arr = array(
+    '19'=>'Med'
+);
+
+//操作类型
+$action_arr = array(
+    'add'=>'添加',
+    'edit'=>'编辑',
+    'index'=>'',
+);
+
+if(!isset($bname_str_arr[$module_name])){
+    $bname_str_arr[$module_name] = "[batch_name]";
+    if($bname_str_arr[$module_name] == '['.'batch_name'.']'){
+            $bname_str_arr[$module_name] = '';
+    }
+}
+?>
+<div class="bread-area" style="width:100%">
+	<i class="icon-bread"></i>
+	<p><a href="{:U('Home/Index/index')}">首页</a></p>
+	<p>></p>
+	<?php  if(in_array($module_name,$cjyx_arr) || in_array($module_name,$jryx_arr) || $module_name == "CjSet" || $module_name == 'LaborDayCjSet'){ ?> 
+		<p><a href="{:U('MarketActive/Activity/index')}">多乐互动</a></p>
+	<?php }else{ ?> 
+		<p><a href="{:U('MicroWeb/Index/index')}">业务中心</a></p>
+	<?php } ?>
+
+        <?php  if(in_array($module_name,$cjyx_arr) || (!empty($thisType) && !empty($cjyx_arr[$thisType]))){?>
+	
+        <?php }elseif(in_array($module_name,$jryx_arr) || (!empty($thisType) && !empty($jryx_arr[$thisType]))){?>
+	
+	<?php }elseif(in_array($module_name,$tj_arr) || (!empty($thisType) && !empty($tj_arr[$thisType]))){?>
+	<p>></p>
+	<p><a href="index.php?g=Home&m=Index&a=marketingShow4">粉丝营销</a></p>
+	
+        <?php }elseif(in_array($module_name,$wgj_arr) || (!empty($thisType) && !empty($wgj_arr[$thisType]))){?>
+	<p>></p>
+	<p><a href="index.php?g=Home&m=Index&a=marketingShow3">旺工具</a></p>
+	
+	<?php }elseif(in_array($module_name,$goodssale_arr) || (!empty($thisType) && !empty($goodssale_arr[$thisType])) || $thisType=='29'){?>
+	<p>></p>
+	<p><a href="index.php?g=Home&m=Index&a=marketingShow5">多宝电商</a></p>
+	<?php }?>
+        
+        <?php if($thisType == '1003'){?>
+	<p>></p>
+	<p><a href="<?php echo U('Home/Store/index');?>">DF门店首页</a></p>
+        <?php }elseif($thisType == '1004'){?>
+	<p>></p>
+	<p><a href="<?php echo U('Df/Member/infocollection');?>">DF会员信息收集</a></p>
+
+	<?php }elseif($bname_str_arr[$module_name] !=''){?>
+	<p>></p>
+	<p><a href="<?php
+	if(in_array($module_name,$cjyx_arr) || in_array($module_name,$jryx_arr)){
+		echo "index.php?g=MarketActive&m=Activity&a=MarketList&batch_type=".$ex_arr[$module_name];
+	}else{
+		echo U('index');
+	}
+	 ?>"><?php echo $bname_str_arr[$module_name]; ?></a></p>
+	
+        <?php }elseif(!empty($thisType) && $bname_num_arr[$thisType] != ''){?>
+	<p>></p>
+	<p>
+	<?php if($thisType != '41'){ ?>
+	<a  <?php if($thisType != '13' && $thisType != '26' && $thisType != '27'  && $thisType != '29' && !in_array($thisType,$ex_arr)){?>href="index.php?g=LabelAdmin&m=<?php if(!empty($cjyx_arr[$thisType])){echo $cjyx_arr[$thisType] ;}elseif(!empty($jryx_arr[$thisType])){echo $jryx_arr[$thisType] ;}elseif(!empty($tj_arr[$thisType])){echo $tj_arr[$thisType] ;}elseif(!empty($goodssale_arr[$thisType])){echo $goodssale_arr[$thisType] ;}?>&a=index" <?php }elseif($thisType == '26' || $thisType == '27'){?>href="index.php?g=Ecshop&m=O2OHot&a=index&batch_type=<?php echo $thisType ?>"<?php }elseif($thisType == '29'){?>href="index.php?g=Ecshop&m=Index&a=preview"<?php }elseif(in_array($thisType,$ex_arr)){?>href="index.php?g=MarketActive&m=Activity&a=MarketList&batch_type=<?php echo $thisType;?>"<?php }else{?>href="index.php?g=MicroWeb&m=Index&a=index"<?php }?>  ><?php echo $bname_num_arr[$thisType]; ?></a>
+        </p>
+	<?php
+		}else{
+	?>
+		<a href="index.php?g=Ecshop&m=SalePro&a=index">随机红包</a>
+	<?php
+		}
+	}
+	?>
+
+
+	<?php 
+	if(!empty($action_arr[$action_name])){?>
+	<p>></p>
+	<p><a href="javascript:void(0)"><?php echo $action_arr[$action_name]; ?></a></p>
+	<?php }?>
+        
+	<?php 
+	if( $module_name == 'Map'){?>
+	<p>></p>
+	<p>地图调研结果查看</a></p>
+	<?php }
+	if(isset($cjset) && $cjset===true){?>
+	<p>></p>
+	<p><a href="javascript:void(0)">设置</a></p>
+	<?php }?>
+	
+        <?php  
+            if((in_array($module_name,$cjyx_arr) || (!empty($thisType) && !empty($cjyx_arr[$thisType]))) 
+            || (in_array($module_name,$jryx_arr) || (!empty($thisType) && !empty($jryx_arr[$thisType])))
+            ){ ?>
+            <?php if(!empty($action_arr[$action_name])){?>
+			          <i class="tip_icon r"><a href="/index.php?g=Home&m=Wservice&a=windex&wserver_id=3">打造专属多乐互动，玩转O2O</a></i>
+            <?php }?>
+        <?php }?>
+</div>
+<style type="text/css">
+i.tip_icon{width: auto;
+line-height: 24px;
+display: inline-block;
+background: url(__PUBLIC__/Image/eTicket/tip_icon.gif) left center no-repeat;
+color: #666;
+font-size: 12px;
+padding-left: 25px;
+font-style: normal;
+text-decoration: none;
+float:right;					
+}
+i.tip_icon a{ color:#666}
+</style>

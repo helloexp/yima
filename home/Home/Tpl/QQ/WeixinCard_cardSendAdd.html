@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_微信卡券投放_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wqq.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcard.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcard.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+    window._g = window._g || {};
+    _g.card_info = {:json_encode($cardInfo)};
+$(function(){
+      var ue = UE.getEditor('wap_info',{
+            imageUrl:"{:U('LabelAdmin/Upfile/editoImageSave')}",
+            imagePath:"__UPLOAD__",
+            catcherUrl:"{:U('LabelAdmin/Upfile/getRemoteImage')}",
+            catcherPath:"__UPLOAD__",
+            initialFrameWidth:320,
+            initialFrameHeight:280
+        });
+        ue.addListener("contentChange",function(){
+            $(".viewshop-con").html(this.getContent());
+        });
+        
+        $('#sub_button').click(function(){
+        	if(!ue.getContent()){
+                $('#wap_tip').validationEngine('showPrompt', '页面内容不能为空','error','topRight',true);
+            }else{
+                $('#wap_tip').validationEngine('hide');
+            }
+            //手动提交需要手动同步编辑器数据
+            ue.sync();
+            var dialog;
+            if($("#theform").validationEngine('validate')){
+                $("#theform").ajaxSubmit({
+                    beforeSubmit:function(){
+                        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                    },
+                    success:function(data){
+                         if(data.status == '1'){
+                               var datas = data.data;
+                               dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                               var jump = "var win = art.dialog.open.origin;win.location.href='{:U('QQ/WeixinCard/cardSendIndex')}';";
+                               setTimeout(jump,1000);
+                               return false;
+                          }else{
+                                dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                          }
+                    },
+                    dataType:'json'
+                });
+                return false;
+            }
+        });
+        
+        //选择抽奖
+        $('#select_card').click(function(){
+            art.dialog.open("{:U('Common/SelectJp/index',array('callback'=>'call_back','show_source'=>'3'))}",{
+                id: 'closeJp',
+                width: 800,
+                title:'选择卡券'
+            })
+        });
+
+    if(_g.card_info){
+        call_back(_g.card_info);
+    }
+});
+function call_back(datas){
+    $(".title").html(datas.goods_name);
+    $("#c_id").val(datas.id);
+    if(datas.storage_type == '0'){
+        $("#card_num").val("不限");
+    }else{
+        $("#card_num").val(datas.remain_num);
+    }
+    
+}
+
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" >
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <include file="Batch/WleftMenu" leftmenuid="wxkj"/>
+                </div>
+                <div class="subcon">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656 msg-title noborder">新增卡券投放</h4>
+                    </div>
+                    <div class="Wcanal-tab">
+                        <div class="Wcanal-tab-list">
+                            <div class="fn ml30 mr30 pt20">
+                                <div class="shopBox fn">
+                                    <div class="shopBoxCon nobottom">
+                                        <div class="shopBoxCon-top"></div>
+                                        <div class="shopBoxCon-title" onClick="nextMain(0)"><span class="viewshop-name">活动名称</span></div>
+                                        <div class="cl"></div>
+                                        <div class="shopBoxView nopadding fn">
+                                            <div class="shopMod disabled" id="shopMod_0" data-edit="0" data-special="0">
+                                                <div class="shopModBox-8">
+                                                    <div class="shopModText viewshop-con">
+                                                        <p class="tc" style="font-size:18px; line-height:30px;">点击右侧富文本编辑器编辑内容</p>
+                                                    </div>
+                                                </div>
+                                                <div class="shopModBox-14">
+                                                    <div class="shopModText pb5">
+                                                        <a href="javascript:void(0)" class="viewshop-btn">领取卡券</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="shopBoxForm">
+                                        <div class="shopBoxFormCon" style="margin-left:350px; margin-top:0;">
+                                            <!--页面-->
+                                            <form id="theform" method="post" action="{:U('QQ/WeixinCard/cardSendAdd')}">
+                                                <div class="editshopBoxForm shopBoxForm-0" data-id="shopMod_0">
+                                                    <div class="shopForm fn">
+                                                        <ul class="shopFormU">
+                                                            <li class="shopFormN">*&nbsp;选择翼码卡券：</li>
+                                                            <li class="shopFormI">
+                                                                <input type="hidden" name="c_id" id="c_id" value="" />
+                                                                <span class="title"></span>
+                                                                <a href="javascript:void(0)" id="select_card" class="btn-up btn-upCard vm">选择翼码卡券</a>
+                                                            </li>
+                                                        </ul>
+                                                        <ul class="shopFormU">
+                                                            <li class="shopFormN">&nbsp;卡券剩余库存：</li>
+                                                            <li class="shopFormI">
+                                                                <input type="text" class="textbox" id="card_num" disabled="disabled" value="--" />
+                                                            </li>
+                                                        </ul>
+                                                        <ul class="shopFormU">
+                                                            <li class="shopFormN">*&nbsp;活动名称：</li>
+                                                            <li class="shopFormI">
+                                                                <input type="text" class="validate[required,maxSize[12]] textbox view-name" name="batch_name" maxlength="12" value="" /><span class="maxTips forInput" data-max="12">0/12</span>
+                                                            </li>
+                                                        </ul>
+                                                        <ul class="shopFormU">
+                                                            <li class="shopFormN">*&nbsp;活动时间：</li>
+                                                            <li class="shopFormI">
+                                                                <div class="inputTime2 fn">
+                                                                    <input name="start_time" id="start_time" type="text" class="validate[required] textbox textbox1 view-time1" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'end_time\\')}'})" />
+                                                                    <em>至</em>
+                                                                    <input name="end_time" id="end_time" type="text" class="validate[required] textbox textbox1 view-time2" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')||\\'%y-%M-%d\\'}'})" />
+                                                                </div>
+                                                            </li>
+                                                        </ul>
+                                                        <ul class="shopFormU">
+                                                            <li class="shopFormN">*&nbsp;投放数量：</li>
+                                                            <li class="shopFormI">
+                                                                <input type="text" class="validate[required,custom[number],min[1]] textbox" name="storage_num" value="" />
+                                                            </li>
+                                                        </ul>
+                                                        <ul class="shopFormU">
+                                                            <li class="shopFormN">*&nbsp;页面内容：</li>
+                                                            <li class="shopFormI" id="wap_tip">
+                                                                <textarea name="wap_info" id="wap_info"></textarea>
+                                                                <span class="txtTips">&nbsp;</span>
+                                                            </li>
+                                                        </ul>
+                                                        <ul class="shopFormU">
+                                                            <li class="shopFormN">*&nbsp;领取按钮文字：</li>
+                                                            <li class="shopFormI">
+                                                                <input type="text" name="botton_text" class="validate[required,maxSize[8]] textbox view-btn" maxlength="8" value="领取卡券" /><span class="maxTips forInput" data-max="8">0/8</span>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="fn tc p20">
+                                    <a href="javascript:;" id="sub_button" class="btn btn_primary">保存</a>
+                                    <a href="javascript:history.go(-1);" class="btn btn_default ml20">取消</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+$(document).ready(function(e){
+    $(".switch").click(function(){
+        if($(this).hasClass("disabled")){return false;}
+        if($(this).hasClass("hover")){
+            $(this).removeClass("hover");
+            $(this).find("input[type='radio']").val($(this).find(".value1").attr("data-rel"));
+            $(this).find("input[type='text']").val("");
+        }else{
+            $(this).addClass("hover");
+            $(this).find("input[type='radio']").val($(this).find(".value2").attr("data-rel"));
+        };
+    })
+    $(".switch input").click(function(){
+        event.stopPropagation();
+    })
+    
+    //大部分修改预览
+    $(".shopBoxFormCon [class*='view-']").live("change keyup click",function(){
+        var _this = $(this);
+        var _thisclosest = _this.closest(".shopForm");
+        var type = $(this).attr("class").substring($(this).attr("class").indexOf("view-"));
+            if(type.indexOf(" ")!=-1){
+                var type = type.substring(0,type.indexOf(" "));
+            }
+        var val = _this.val();
+        switch(type){
+            case ("view-name"):
+                $(".viewshop-name").text(val);
+                break;
+            case ("view-btn"):
+                $(".viewshop-btn").text(val);
+                break;
+            default:return false;
+        }
+    });
+});
+</script>

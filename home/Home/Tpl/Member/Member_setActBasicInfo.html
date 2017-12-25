@@ -1,0 +1,396 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>会员管理-招募活动创建-基础信息</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wmember.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/My97DatePicker/WdatePicker.js"></script>
+<script>
+$(function(){
+	Gform();
+	$('#save').click(function(){
+		var j_mode = '';
+		$('[name="join_mode[]"]').each(function(){
+			if ($(this).attr('checked') == 'checked') {
+				j_mode += $(this).val() + ',';
+			}
+		});
+		if (j_mode) {
+			j_mode = j_mode.substr(0,(j_mode.length - 1));
+			$('#join_mode').val(j_mode);
+		}
+		var sns_share = '';
+		$('[name="sns[]"]').each(function(){
+			if ($(this).attr('checked') == 'checked') {
+				sns_share += $(this).val() + '-';
+			}
+		});
+		if (sns_share) {
+			sns_share = sns_share.substr(0,(sns_share.length - 1));
+			$('#sns').val(sns_share);
+		}
+		if($("#theform").validationEngine('validate')){
+			//var returndata = updataJson();	
+			//if(returndata[0]==""){
+			//	alert("出错了，提交数据为空！");	
+			//}
+			//var datastr=returndata[0];
+			//$("#memo").val(datastr);
+			
+				$("#theform").ajaxSubmit({
+					beforeSubmit:function(){
+						if (!$('#join_mode').val()) {
+							dialog = art.dialog({title:false,content:"<div class='msg-all-error'>请选择参与方式</div>",fixed: true,padding:0});
+							dialog.time(2);
+							return false;
+						}
+						dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+						//var setActConfig = "{:U('Member/Member/setActConfig')}";
+						//setTimeout("window.location.href='"+setActConfig+"'",300);
+					},
+					success:function(data){
+					  if (data.status == '1'){
+						   dialog.close();
+						   if (data.info.isReEdit == '1') {
+							   window.location.href="{:U('Member/Member/recruit')}";
+						   } else {
+							   window.location.href="{:U('Member/Member/setActConfig')}&m_id="+data.info.m_id+"&isReEdit=0";
+						   }
+					  } else {
+					  	  dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+					  }
+					},
+					url:"{:U('Member/Member/setActConfig')}",
+					dataType:'json'
+				});
+				return false;
+		  }
+	}) ;
+})
+</script>
+<script>
+var clickMb1 = function(e) {
+    $("#tp2 .mb1").removeClass("current");
+	$(this).addClass("current");
+	var bgimg=$(this).children("img").attr("src");
+	$(".selected").css("background-image","url(" + bgimg + ")");
+	$('#bg_img').val(bgimg);
+	var index = $(this).index() + 1;
+	$('#bg_style').val(index);
+}
+$(function(){
+	$("#tp1 .mb1").click(function(e) {
+        $("#tp1 .mb1").removeClass("current");
+		$(this).addClass("current");
+		var id = $(this).attr('id');
+		id = id.substr(2);
+		$('#template').val(id);
+    });	
+	$("#tp2 .mb1").click(clickMb1);
+	
+	$("#mb1").click(function(e) {
+        $("#phoneCon").fadeIn(300);
+		$("#phoneCon").addClass("selected");
+		$("#phoneCon_two").fadeOut(300);
+		$("#phoneCon_two").removeClass("selected");
+    });
+	
+	$("#mb2").click(function(e) {
+        $("#phoneCon_two").fadeIn(300);
+		$("#phoneCon_two").addClass("selected");
+		$("#phoneCon").fadeOut(300);
+		$("#phoneCon").removeClass("selected");
+    });
+	
+})
+function add()
+{
+        var opt = {
+            cropPresets:'640x340',
+            callback:uploadCallback
+        };
+        open_img_uploader(opt);
+ }
+function uploadCallback(data){
+    //显示预览
+    if ($('#tp2 .Ginput .mb1').length == 2) {
+    	$('#tp2 .Ginput .mb1:eq(1)').after('<div class="mb1 fl"><img src="'+data.src+'" width="100"></div>');
+    } else {
+    	$('#tp2 .Ginput .mb1:eq(2)').replaceWith('<div class="mb1 fl"><img src="'+data.src+'" width="100"></div>');
+    }
+    $("#tp2 .mb1").click(clickMb1);
+    $('#tp2 .mb1:eq(2)').click();
+}
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+            	<div class="member_con">
+                	<div class="member_steps">
+                    	<ul>
+                        	<li class="current">基础信息</li>
+                            <li>活动配置</li>
+                            <li>奖项设定</li>
+                            <li>活动发布</li>
+                            <li>发布成功</li>
+                        </ul>
+                    </div>
+                	<div class="member_l">
+                    	<div id="phone">
+                            <div class="phonetop"></div>
+                            <div id="phoneCon" class="selected">
+                                <div class="member_logo"><img src="{$node_logo}"></div>
+                                <div class="member_title">{$node_name}</div>
+                                <div class="member_hd_name"><notempty name="act_name">{$act_name}<else />活动名称</notempty></div>
+                                <form  method="post">
+                                    <div class="m-bind">
+                                        <input type="hidden" name="charge_type" value="0">
+                                        <div class="m-input">
+                                            <p class="tit">手机号码</p>
+                                            <p class="cont"><input type="text" class="input" id="org_number" name="org_number" placeholder="请输入手机号" maxlength="15"></p>
+                                        </div>
+                                        <div class="m-input">
+                                            <p class="tit">姓名</p>
+                                            <p class="cont"><input type="text" class="input" id="org_number" name="org_number" placeholder="请输入您的姓名" maxlength="15"></p>
+                                        </div>
+                                        <div class="m-input">
+                                            <p class="tit">性别</p>
+                                            <nav class="segmented-control">
+                                                <input type="radio" name="sc-2" id="sc-2-1"  />
+                                                <input type="radio" name="sc-2" id="sc-2-2" checked="checked" />
+                                                <label for="sc-2-1" data-value="男">男</label>
+                                                <label for="sc-2-2" data-value="女">女</label>
+                                            </nav>
+                                        </div>
+                                        <div class="m-input">
+                                            <p class="tit">所在省份</p>
+                                            <p class="cont"><input type="text" class="input" id="org_number" name="org_number" placeholder="请输入您所在的省份" maxlength="15"></p>
+                                        </div>
+                                        <div class="m-input">
+                                            <p class="tit">所在城市</p>
+                                            <p class="cont"><input type="text" class="input" id="org_number" name="org_number" placeholder="请输入您所在的城市" maxlength="15"></p>
+                                        </div>
+                                        <div class="m-input">
+                                            <p class="tit">生日</p>
+                                            <p class="cont"><input type="text" class="input" id="org_number" name="org_number" placeholder="请输入您的生日" maxlength="15"></p>
+                                        </div>
+                                        <a class="m-btn" href="javascript:void(0);" id="sub_button">提&nbsp;&nbsp;交</a>
+                                    </div>
+                                </form>
+                                <div class="member_hd_desc">
+                                	<dl>
+                                    	<dt>活动说明：</dt>
+                                        <dd>此处文字内容会调用后台配置的活动说明。 </dd>
+                                        <dd>您可以在活动说明中编辑对于本次活动的相关介绍以及内容。 </dd>
+                                        <dd>说明文字最多不可超140个字。</dd>
+                                    </dl>
+                                </div>
+                                <div class="member_hd_bottom">
+                                	<p>企业服务热线：533435</p>
+                                    <p>Copyright  © 2016  翼码旺财出品  举报该网页</p>
+                                </div>
+                            </div>
+                            <div id="phoneCon_two" class="dn">
+                                <div class="member_logo2" style="float:left"><img src="{$node_logo}" width="61" height="61"></div>
+                                <div class="member_title2" style="float:left; margin-top:112px;">{$node_name}</div>
+                                <div class="cl"></div>
+                                <div class="member_hd_name2"><notempty name="act_name">{$act_name}<else />活动名称</notempty></div>
+                                <form  method="post">
+                                    <div class="m-bind2">
+                                        <input type="hidden" name="charge_type" value="0">
+                                        <div class="m-input">
+                                            <p class="tit">手机号码</p>
+                                            <p class="cont"><input type="text" class="input" id="org_number" name="org_number" placeholder="请输入手机号" maxlength="15"></p>
+                                        </div>
+                                        <div class="m-input">
+                                            <p class="tit">姓名</p>
+                                            <p class="cont"><input type="text" class="input" id="org_number" name="org_number" placeholder="请输入您的姓名" maxlength="15"></p>
+                                        </div>
+                                        <div class="m-input">
+                                            <p class="tit">性别</p>
+                                            <p class="cont">
+                                            <span style="position:relative"><input type="radio" name="forwho" id="forother" checked="checked" value="forother"><i class="radios"></i><label style="padding-left:20px;" for="forother">男</label></span>
+                                            <span style="position:relative;"><input type="radio" name="forwho" id="forself" value="forself"><i class="radios"></i><label style="padding-left:20px;" for="forself">女</label></span>
+                                            </p>
+                                        </div>
+                                        <div class="m-input">
+                                            <p class="tit">所在省份</p>
+                                            <p class="cont"><input type="text" class="input" id="org_number" name="org_number" placeholder="请输入您所在的省份" maxlength="15"></p>
+                                        </div>
+                                        <div class="m-input">
+                                            <p class="tit">所在城市</p>
+                                            <p class="cont"><input type="text" class="input" id="org_number" name="org_number" placeholder="请输入您所在的城市" maxlength="15"></p>
+                                        </div>
+                                        <div class="m-input">
+                                            <p class="tit">生日</p>
+                                            <p class="cont"><input type="text" class="input" id="org_number" name="org_number" placeholder="请输入您的生日" maxlength="15"></p>
+                                        </div>
+                                        <a class="m-btn" href="javascript:void(0);" id="sub_button">提&nbsp;&nbsp;交</a>
+                                    </div>
+                                </form>
+                                <div class="member_hd_desc">
+                                	<dl>
+                                    	<dt>活动说明：</dt>
+                                        <dd>此处文字内容会调用后台配置的活动说明。 </dd>
+                                        <dd>您可以在活动说明中编辑对于本次活动的相关介绍以及内容。 </dd>
+                                        <dd>说明文字最多不可超140个字。</dd>
+                                    </dl>
+                                </div>
+                                <div class="member_hd_bottom">
+                                	<p>企业服务热线：533435</p>
+                                    <p>Copyright  © 2016  翼码旺财出品  举报该网页</p>
+                                </div>
+                            </div> 
+                        </div>
+                    </div>
+                    <div class="member_r">
+                    	<form action="" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+                        <input type="hidden" id="m_id" name="m_id" value="{$m_id}">
+                        <input type="hidden" id="join_mode" name="j_mode" value="">
+                        <input type="hidden" id="sns" name="sns_share" value="">
+                        <input type="hidden" id="template" name="template" value="{$template}">
+                        <input type="hidden" id="bg_img" name="bg_img" value="{$bg_img}">
+                        <input type="hidden" id="bg_style" name="bg_style" value="{$bg_style}">
+                        <input type="hidden" id="isReEdit" name="isReEdit" value="{$isReEdit}">
+                    	<h3>活动基础信息</h3>
+                        <div class="Gform l">
+                            <ul>
+                            <li class="Gname">*&nbsp;参与方式：</li>
+                            <li class="Ginput">
+                                <div class="switch auto hover">
+                                    <!-- <input type="checkbox" name="join_mode[]" value="0" <if condition="in_array(0,$join_mode) ">checked</if>> -->
+                                    <input type="checkbox" name="join_mode[]" value="1" <if condition="empty($join_mode) or in_array(1,$join_mode) ">checked</if>>
+                                    <div class="newRadio">
+                                        <!-- <span class='<if condition="in_array(0,$join_mode) ">hover</if>' data-val="0">手机号码</span> -->
+                                        <span class='<if condition="empty($join_mode) or in_array(1,$join_mode) ">hover</if>' data-val="1">微信号</span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                            <ul>
+                            <li class="Gname">* 活动名称：</li>
+                            <li class="Ginput">
+                                <input type="text" maxlength="20" class="Gview-text validate[required,optional,maxSize[20]]" style="width:450px" name="act_name" value="{$act_name}">
+                            </li>
+                            </ul>
+                            <ul>
+                            <li class="Gname">* 活动时间：</li>
+                            <li class="Ginput">
+                                <div class="Gtime2 fn">
+                                    <input type="text" style="width:136px;" class="validate[required]" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'act_time_to\\')}'})" name="act_time_from"  id="act_time_from" value="{$act_time_from}">
+                                    <em>至</em>
+                                    <input type="text" style="width:136px;" class="validate[required]" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'act_time_from\\')}'})" name="act_time_to" id="act_time_to" value="{$act_time_to}">
+                                </div>
+                            </li>
+                        </ul>
+                            <ul>
+                                <li class="Gname">活动说明：</li>
+                                <li class="Ginput">
+                                    <textarea maxlength="200" class="Gview-textarea validate[required]" name="introduce">{$introduce}</textarea><span class="maxTips forArea" data-max="200">0/200</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="cl"></div>
+                        <h3>活动界面设计</h3>
+                        <div class="Gform l">
+                        <ul id="tp1">
+                        <li class="Gname">* 页面模板：</li>
+                        <li class="Ginput">
+                           <div class='mb1 fl <if condition="empty($template) or ($template eq 1)">current</if>' id="mb1"><img src="__PUBLIC__/Image/member/mb_1.png" width="100"></div> 
+                           <div class='mb1 fl <eq name="template" value="2">current</eq>' id="mb2"><img src="__PUBLIC__/Image/member/mb_2.png" width="100"></div> 
+                        </li>
+                        </ul>
+                        <ul id="tp2">
+                        <li class="Gname">背景：</li>
+                        <li class="Ginput">
+                            <div class='mb1 fl <if condition="empty($bg_style) or ($bg_style eq 1)">current</if>'><img src="__PUBLIC__/Image/member/mb_top_bg1.png" width="100"></div> 
+                            <div class='mb1 fl <eq name="bg_style" value="2">current</eq>'><img src="__PUBLIC__/Image/member/mb_top_bg2.png" width="100"></div>
+                            <eq name="bg_style" value="3"><div class="mb1 fl current"><img src="{$bg_img}" width="100"></div></eq>
+                            <div class="add_set_bg" onclick="add()"></div> 
+                        </li>
+                    </ul>
+                        </div>
+                        <div class="cl"></div>
+                        <h3>商户信息</h3>
+                        <div class="Gform l">
+                            <ul>
+                            <li class="Gname">* 商户名称：</li>
+                            <li class="Ginput">
+                                <input type="text" maxlength="20" class="Gview-text validate[required]" style="width:450px" value="{$node_name}" name="node_name">
+                            </li>
+                            </ul>
+                            <ul>
+                        <li class="Gname">商户logo：</li>
+                        <li class="Ginput">
+                            <div class="Gchoose Gview-img"  style="width:422px">
+                                <input type="text" value="{$node_logo}" name="node_logo">
+                                <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:160,height:160}"><i></i></a>
+                            <div class="Gchoose-opr an" style="display: none;"><div class="Gchoose-opr-img"><img src="" style="width:100px;"></div><div class="Gchoose-opr-opr"><a href="javascript:void(0)" class="Gchoose-opr-edit"></a><a href="javascript:void(0)" class="Gchoose-opr-del"></a></div><span class="Gchoose-opr-jt"></span></div><div class="Gchoose-oprbg"></div></div>
+                        </li>
+                    </ul>
+                        </div>
+                        <div class="cl"></div>
+
+                        <h3>分享设置</h3>
+                        <div class="Gform l">
+                            <ul>
+                            <li class="Gname">SNS分享：</li>
+                            <li class="Ginput">
+                                <div class="switch auto hover">
+                                    <input type="checkbox" name="sns[]" value="1" <if condition="in_array(1,$sns) ">checked</if> >
+                                    <input type="checkbox" name="sns[]" value="2" <if condition="in_array(2,$sns) ">checked</if> >
+                                    <input type="checkbox" name="sns[]" value="3" <if condition="in_array(3,$sns) ">checked</if> >
+                                    <input type="checkbox" name="sns[]" value="4" <if condition="in_array(4,$sns) ">checked</if> >
+                                    <div class="newRadio">
+                                        <span class='<if condition="in_array(1,$sns) ">hover</if>' data-val="1">新浪微博</span>
+                                        <span class='<if condition="in_array(2,$sns) ">hover</if>' data-val="2">腾讯微博</span>
+                                        <span class='<if condition="in_array(3,$sns) ">hover</if>' data-val="3">QQ空间</span>
+                                        <span class='<if condition="in_array(4,$sns) ">hover</if>' data-val="4">人人网</span>
+                                    </div>
+                                </div>
+                                <span class="txtTips">选择后，允许消费者将您的营销活动分享给他的社交网络好友</span>
+                            </li>
+                        </ul>
+                        <ul class="pt20">
+                            <li class="Ginput noName tc">
+                                <a href="javascript:void(0)" class="btn-all-del ml10">取消</a>
+                                <a href="javascript:void(0)" class="btn-all ml50" id="save"><eq name="isReEdit" value="1">保存<else />下一步</eq></a>
+                            </li>
+                        </ul>
+                    	
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

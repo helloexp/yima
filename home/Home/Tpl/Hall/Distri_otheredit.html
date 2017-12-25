@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>发布代金券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<style>
+    .btn-choose{float:left;display:block;width: 150px;border:2px #ed1c24 solid;line-height:1.4;padding:5px;font-size: 14px;text-align: center;border-radius: 3px;}
+    .click1{background: #ed1c24;color: #fff;}
+    .click2{background: #fff;color: #ed1c24;}
+</style>
+<script>
+$(document).ready(function(e){
+	// 提交保存
+	$("#voucherSmb").click(function(){
+		$("#voucherform").submit();
+    });
+	
+    $(".choosetext1").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").hide();
+    });
+    $(".choosetext2").click(function(){
+    	var counts = $(this).closest("li").find(".choosetext").val();
+    	if(counts!=null&&counts!=-1){
+    		$(this).closest("li").find(".choosetext").val(counts);
+    	}else{
+            $(this).closest("li").find(".choosetext").val("");
+    	}
+        $(this).closest("li").find(".choosetext").show();
+    });
+    $("#choose-mode a").click(function(event) {
+        var index = $(this).index();
+        //console.log(index);
+        $(this).css({"background":"#ed1c24","color":"#fff"});
+        $(this).siblings().css({"background":"#fff","color":"#ed1c24"});
+        $("form").fadeOut(200);
+        $("form").eq(index).fadeIn(200);
+    });
+});
+
+function showImgCheck(){
+    if($("#show_resp_img").val() == '')
+        {
+            return "请上传代金券图片";
+        }
+}
+function aiImgCheck(){
+    if($("#ai_img_resp").val() == ''){
+        return "请上传代金券图片";
+    }
+}
+
+/*获取图片路径中的图片名*/
+function base_name(url){
+    var urlList = url.split('/'); 
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*    2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+
+function uploadImg(url) {
+var win_width = 500;
+art.dialog.open(url, {
+    lock: true,
+    title: "上传图片",
+    width: win_width,
+    height: win_width / 1.6,
+    id: 'art_upload'
+});
+}
+
+//背景图片回调函数
+function aiCallback(d) {
+//填充缩略图
+$('#ai_img_resp_show').attr('src', d.absolutepath);
+//上传用
+$('#ai_img_resp').val(base_name(d.absolutepath));
+}
+
+//背景图片回调函数
+function showCallback(d) {
+//填充缩略图
+$('#show_img_resp_show').attr('src', d.absolutepath);
+//上传用
+$('#show_img_resp').val(base_name(d.absolutepath));
+}
+</script>
+</head>
+
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="index.php?g=Hall&m=Voucher&a=index">代金券分销助手</a></p>
+                            <p>></p>
+                            <p><a href="index.php?g=Hall&m=Distri&a=index">已分销的代金券</a></p>
+                            <p>></p>
+                            <p>编辑</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="Hall/Mypartner/left" leftmenuid="fxdzq"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4 class="bd-b-565656">代金券编辑</h4>
+                    </div>
+                       <!-- // 分销 -->
+                <form method="post" action="{:U('Hall/Distri/saveDis')}" id="voucherform">
+                   <input type="hidden" name="goods_id" value="{$goodsData[goods_id]}" />
+                    <div class="showsaloonForm2">
+                        <div class="global-input4 fn w1">
+                            <ul>
+                                <li class="global-input4-name">&nbsp;代金券名称：</li>
+                                <li class="global-input4-input saloon-channel">{$goodsData['goods_name']}</li>
+                            </ul>
+                             <ul>
+                                <li class="global-input4-name">&nbsp;代金券面值：</li>
+                                <li class="global-input4-input saloon-channel">{$goodsData['goods_amt']}元</li>
+                                <input type="hidden" id="app1" value="{$goodsData['goods_amt']}"/>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">&nbsp;代金券有效期：</li>
+                                <li class="global-input4-input saloon-channel">{$time.begin_time|dateformat=###,'Y-m-d'}&nbsp;到&nbsp;{$time.end_time|dateformat=###,'Y-m-d'}</li>
+                            </ul>
+                            <?php if($goodsData['begin_time'] > date('YmdHis',time())){ ?>
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;代金券图片：</li>
+                                <li class="global-input4-input">
+                                    <div class="rel l">
+                                        <input type="hidden" value="<?php echo basename($goodsData['goods_image'])?>" name="ai_img_resp" id="ai_img_resp"/>
+                                        <a href="javascript:;" title="上传" onclick="return uploadImg('{:U('ImgResize/Resize/index',array('ratioX'=>230,ratioY=>190,'suggestX'=>230,'suggestY'=>190,'bathName'=>'这是您的代金券图片','callback'=>'aiCallback'))}')" class="btn-all w60">上传</a>
+                                    </div>
+                                    <div class="cl"></div>
+                                    <img src="__UPLOAD__/<?php echo $goodsData['goods_image']?>" id="ai_img_resp_show" width="150" class="mt10"/>
+                                    <div class="cl"></div>
+                                    <p class="font-12-cc">建议尺寸230px*190px，请上传1M以内的jpg,jpeg,png图片</p>
+                                    <div class="cl"></div>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;分销商名称：</li>
+                               <li class="global-input4-input">
+                                    {$goodsData['node_name']}
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;分销价格：</li>
+                                <li class="global-input4-input" id="theone">
+                                    <input type="text" class="textbox" style="width:208px;" name="goods_amt" id="aprice" value="{$goodsData['settle_price']}"/>　元<p class="dn ml20" style='color:#aaa;'></p>
+                                </li>
+                            </ul>
+                            <p style="padding:0 120px;color:#999;">平台将会根据此金额，按照双方建立分销关系时设置的预付费管控进行应清算金额的计算，请务必按照双方协议正确填写，以免出现误差。</p>
+                            <?php if($time['storage_num']==-1){ ?>
+                            <ul>
+                            <li class="global-input4-name">*&nbsp;分销数量：</li>
+                               <li class="global-input4-input ml20">
+                                    <input name="num_type" id="num_type1" value="1" checked="checked" type="radio" class="choosetext1"/><p class="ml5 choosetext1">不限</p>
+                                    <input name="num_type" id="num_type2" value="2" type="radio" class="ml20 choosetext2"/><p class="ml5 choosetext2">限制</p>
+                                    <input name="goods_num" type="text" class="validate[min[1],condRequired[num_type2],custom[integer]] textbox dn w50 ml5 choosetext" value=""/>&nbsp;
+                              </li>
+                            </ul>
+                           <?php }else{ ?>
+                           <ul>
+                            <li class="global-input4-name">*&nbsp;分销数量：</li>
+                               <li class="global-input4-input ml20">
+                                    <input name="num_type" id="num_type2" value="2"  checked="checked" type="radio" class="ml20 choosetext2"/><p class="ml5 choosetext2">限制</p>
+                                    <input name="goods_num" type="text" class="validate[min[1],condRequired[num_type2],custom[integer]] textbox w50 ml5 choosetext" value="{$goodsData['remain_num']}"/>&nbsp;
+                              </li>
+                            </ul>
+                           <?php } ?>
+                           <?php }else{ ?>
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;代金券图片：</li>
+                                <li class="global-input4-input">
+                                    <div class="cl"></div>
+                                    <img src="__UPLOAD__/<?php echo $goodsData['goods_image']?>" id="ai_img_resp_show" width="150" class="mt10"/>
+                                    <div class="cl"></div>
+                                    <p class="font-12-cc">建议尺寸230px*190px，请上传1M以内的jpg,jpeg,png图片</p>
+                                    <div class="cl"></div>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;分销商户：</li>
+                                <li class="global-input4-input">
+                                    {$goodsData['node_name']}
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;分销价格：</li>
+                                <li class="global-input4-input" id="theone">
+                                 <p><?php echo $goodsData['settle_price']."&nbsp元";?></p>  <P class="ml20" style="padding:0 20px;color:#999;"><?php echo "折扣率：".sprintf('%.1f',$goodsData['settle_price']/$goodsData['goods_amt']); ?></P>
+                                </li>
+                            </ul>
+                            <ul>
+                            <li class="global-input4-name">*&nbsp;分销数量：</li>
+                               <li class="global-input4-input">
+                              <?php if($goodsData['storage_num']==-1){ echo "不限";}else{ echo $goodsData['storage_num'];}?> 
+                              </li>
+                            </ul>
+                           <?php } ?>
+                            <ul>
+                                <li class="global-input4-name">*&nbsp;分销期限：</li>
+                                <li class="global-input4-input">
+                                 <input <?php if($goodsData['begin_time']<=date('YmdHis',time())){ ?>onfocus=this.onblur() readonly="true" <?php } ?> id="begin_time" name="begin_time" type="text" onfocus="WdatePicker({minDate:'<?php echo date("Y-m-d",strtotime($time['begin_time'])); ?>'})" value="<?php echo date('Ymd',strtotime($goodsData['begin_time']));?>" class="textbox w100" />-
+                                 <input <?php if($goodsData['begin_time']<=date('YmdHis',time())){ ?> onclick="WdatePicker({minDate:'<?php echo date("Y-m-d",strtotime($goodsData['end_time'])); ?>',maxDate:'<?php echo date("Y-m-d",strtotime($time['end_time'])); ?>'})" <?php }else{?> onclick="WdatePicker({minDate:'<?php echo date("Y-m-d",strtotime($time['begin_time'])); ?>',maxDate:'<?php echo date("Y-m-d",strtotime($time['end_time'])); ?>'})" <?php } ?> name="end_time" type="text" value="<?php echo date('Ymd',strtotime($goodsData['end_time'])); ?>" class="textbox w100"/>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="fn pb20" style="margin-left:70px;">
+                            <a href="javascript:void(0)" id="voucherSmb" class="btn-all w120 btn-updata ml50 mt30">确定</a>
+                        </div>
+                    </div>  
+                </form>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+$(function(){
+  $("#aprice").blur(function(){
+	  var aprice1=$("#app1").val();
+	  var apruce2=$("#aprice").val();
+	  if(apruce2 != ""){
+	  var res=apruce2/aprice1;
+	  $("#theone p").text('折扣率：'+res.toFixed(2)).show();
+	  }
+  });	
+	
+});
+</script>

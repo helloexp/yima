@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>爱拼才会赢</title>
+<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+<link rel="stylesheet" href="__PUBLIC__/Label/Css/spelling/customize-sp2.css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$("#sub_from").click(function(){
+			  var phone=$("#login_").val();
+			  var code=$("#code_").val();
+			  var id=<?php echo $id; ?>;
+			  var fid=<?php echo $wxid; ?>;
+		      var did=<?php echo $duty_id; ?>;
+			  if(phone == ''){
+				alert('手机号不能为空，亲！！！');return false;
+			  }
+			  if(code == ''){
+				 alert('验证码不能为空，亲！！！');return false;
+			  }
+			  $.post("<?php echo U('Label/Spelling/dejiang'); ?>",{"iphone":phone,"codenumber":code,"id":id,"from_user_id":fid,"duty_id":did},function(d){
+					var ent=d.code_text;  
+					alert(ent);
+					window.location.href="index.php?g=Label&m=Spelling&a=index&id="+id;
+					//location.href="<?php echo U('Label/Spelling/index');?>&id=<?php echo $id; ?>";    				
+			  },"json");
+		});
+	});
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div id="header">
+             
+                <div class="headerbg0"></div>
+                
+                <div class="cl"></div>
+            </div>
+            <div class="home_btn"><a href="<?php echo U('Label/Spelling/index');?>&id=<?php echo $id; ?>&from_user_id=<?php echo $wxid; ?>&duty_id=<?php echo $duty_id; ?>"></a></div>
+            <div id="layer_box">
+                <div id="layer_content">
+                	<div class="page_tips ac">
+                       <!-- <img src="__PUBLIC__/Label/Image/spelling/zc-title.png" class="get-step1">-->
+                    </div>
+                    <div class="page_content">
+                        <div class="login">
+                          
+                        	<ul>
+                            	<li class="name">手机号&nbsp;&nbsp;</li>
+                            	<li class="input">
+                                    <input type="text" name="iphone" value="" style="width:98%;" onKeyUp="this.value=this.value.replace(/\D/g,'')" id="login_">
+                                    <!--<span class="input-error tooltips" data-original-title="please write a valid email">
+                                        <i class="icon-exclamation-sign"></i>
+                                    </span>-->
+                                    <p class="getcode"><input class="btn-all gcode" type="button" class="sOne-getpasscode2" value="获取动态验证码" id="getpasscode2" name='getpasscode2' data-href="" style=" height:30px; line-height:30px; font-size:14px;"></p>
+                                </li>
+                            </ul>
+                        	<ul>
+                            	<li class="name">验证码&nbsp;&nbsp;</li>
+                            	<li class="input"><input type="text" name="login" value="" style="width:98%;"  onkeyup="this.value=this.value.replace(/\D/g,'')" id="code_"></li>
+                            </ul>
+                        	<ul class="noname">
+                            	<li class="input">
+                                	<div class="opr_btn" style="margin-top:10px; margin-right:0px">
+                                        <a href="javascript:void(0);" class="cd-popup-trigger" id="sub_from"><b>完成</b></a>
+                                    </div>
+                                </li>
+                            </ul>
+                         
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+<div class="foot" style="padding-top:15px;"></div>
+</div>
+</body>
+<script>
+$(function(){
+ $("#getpasscode2").on("click",function(){
+        var phone = $("#login_").val();
+		var id=<?php echo $id; ?>;
+		var fid=<?php echo $wxid; ?>;
+		var did=<?php echo $duty_id; ?>;
+		if(phone == ''){
+		 alert('亲，手机号不能为空哦！'); return false;
+		}
+		$("#phone_err,#pass_err").hide();
+        $(this).val("正在发送..");
+       
+       // var id = $("#id").val();
+		//var verify =$("#verify").val();
+        $.post("{:U('Label/Spelling/sendCheckCode')}",{"phone":phone,"id":id,"from_user_id":fid,"duty_id":did},function(data){
+            if(data.status=='1'){
+                $("#getpasscode2").attr("id","noSend");
+                Int = setInterval(checkTime,1000)
+            }else{
+            	alert(data.info);
+                setTimeout("$('#loadingBox').hide()",2000);
+                $("#getpasscode2").val("获取验证码");
+            }
+        },"json");
+    });
+	var time = 600;
+    var checkTime = function(){
+        $("input[name='getpasscode2']").val("已发送,"+time+"秒");
+        if(time==0){
+            $("input[name='getpasscode2']").val("获取验证码");
+            $("input[name='getpasscode2']").attr("id","getpasscode2");
+            time = 600;
+            clearInterval(Int);
+            return false;
+        }
+        time--;
+    }
+	
+})
+</script>
+<include file="Label/Spelling/share"/>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="__PUBLIC__/Css/Wshop.css?v=__VR__" />
+<js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+function revocation(id){
+	art.dialog.confirm("确认撤销?",function(){
+		Dialoading("正在提交...");
+		$.post("{:U('Ecshop/BatchTrace/revocationCode')}",{"id":id},function(data){
+			Dialoading();
+			if(data.status==1){
+				Diasucceed(data.info,function(){
+					window.location.reload();
+				});
+			}else{
+				Diaerro(data.info);
+			}
+		},"json");
+	});
+}
+//href="{:U('Ecshop/BatchTrace/reSend?id='.$v[id])}"
+function resend(id){
+	art.dialog.confirm("确认重发?",function(){
+		Dialoading("正在提交...");
+		$.post("{:U('Ecshop/BatchTrace/reSend')}",{"id":id},function(data){
+			Dialoading();
+			if(data.status==1){
+				Diasucceed(data.info,function(){
+					window.location.reload();
+				});
+			}else{
+				Diaerro(data.info);
+			}
+		},"json");
+	});
+}
+
+function regenerate(id,order_id){
+	art.dialog.confirm("确认重新生成?",function(){
+		Dialoading("正在提交...");
+		$.post("{:U('Ecshop/BatchTrace/reGenerateCode')}",{"id":id,"order_id":order_id},function(data){
+			Dialoading();
+			if(data.status==1){
+				Diasucceed(data.info,function(){
+					window.location.reload();
+				});
+			}else{
+				Diaerro(data.info);
+			}
+		},"json");
+	});
+}
+
+</script>
+</head>
+
+<body>
+    <h1 style="font-size:14px; color:#000; padding-bottom:5px;">
+        <span>订单号:{$orderInfo['order_id']}</span>
+        <span class="ml20">收货人手机号:{$orderInfo['receiver_phone']}</span>
+    </h1>
+    <table cellpadding="0" cellspacing="0" class="shopTable">
+        <tr>
+            <th class="first">发码流水号</th>
+            <th>发送时间</th>
+            <th>发送结果</th>
+            <th>凭证状态</th>
+            <th>使用状态</th>
+            <th class="last">操作</th>
+        </tr>
+        <if condition="$orderInfo['order_type'] eq 2"><!--旺财小店订单--->
+        <volist name="orderInfoExList" id="v">
+            <tr class="title">
+                <td class="title" colspan="6">
+                    商品名称:<span>{$v['b_name']}</span>
+                    <span class="ml20">购买份数:{$v['goods_num']}</span>
+                </td>
+            </tr>
+            <volist name="v['barcodeInfo']" id="k">
+                <tr class="info">
+                    <td>{$k['request_id']}</td>
+                    <td>{$k['trans_time']|dateformat=###,'Y-m-d H:i:s'}</td>
+                    <td><if condition="$k['ret_code'] eq '0000'">发送成功<else />发送失败</if></td>
+                    <td><if condition="$k['status'] eq 0">正常<elseif condition="$k['status'] eq 1"/>撤销<else />失败</if></td>
+                    <td><if condition="$k['use_status'] eq 0">未使用
+                        <elseif condition="$k['use_status'] eq 1"/>使用中<else />
+
+                        <span title="<p>验证时间：{$transTime|dateformat=###,'Y-m-d H:i:s'}</p><p>门店地址：{$address}</p><p>门店名称：{$storeName}</p>" data-placement="bottom">已使用<i class="icon-down-dir"></i></span></if></td>
+                    <td class="last"><if condition="($k['status'] eq 0) and ($k['use_status'] neq 2)">
+                        <a href="javascript:void(0);" onclick="resend('{$k['id']}')">重发</a>
+                        <a href="javascript:void(0);" onclick="revocation('{$k['id']}')" class="ml10">撤销</a>
+                        </if>
+                        <if condition="($k['status'] eq 3) and ($k['ret_code'] neq '0000')"><a href="javascript:void(0);" onclick="regenerate('{$k['id']}','{$orderInfo['order_id']}')" >重新生成</a></if>
+                    </td>
+                </tr>
+            </volist>
+        </volist>
+        <else /><!--闪购码上买订单--->
+        <tr class="title">
+            <td class="title" colspan="6">
+                商品名称:<span>{$orderInfo['group_goods_name']}</span>
+                <span class="ml20">购买份数:{$orderInfo['buy_num']}</span>
+            </td>
+        </tr>
+        <volist name="barcodeInfo" id="v">
+        <tr class="info">
+            <td>{$v['request_id']}</td>
+            <td>{$v['trans_time']|dateformat=###,'Y-m-d H:i:s'}</td>
+            <td><if condition="$v['ret_code'] eq '0000'">发送成功<else />发送失败</if></td>
+            <td><if condition="$v['status'] eq 0">正常<elseif condition="$v['status'] eq 1"/>撤销<else />失败</if></td>
+            <td><if condition="$v['use_status'] eq 0">未使用
+                <elseif condition="$v['use_status'] eq 1"/>使用中<else /><span title="<p>{$transTime|dateformat=###,'Y-m-d H:i:s'}</p><p>{$address}</p><p>{$storeName}</p>" data-placement="bottom">已使用<i class="icon-down-dir"></i></span></if></td>
+            <td><if condition="($v['status'] eq 0) and ($v['use_status'] neq 2)">
+             <a href="javascript:void(0);" onclick="resend('{$v['id']}')" >重发</a>
+             <a href="javascript:void(0);" onclick="revocation('{$v['id']}')" class="ml10">撤销</a></if>
+             <if condition="($v['status'] eq 3) and ($v['ret_code'] neq '0000')"><a href="javascript:void(0);" onclick="regenerate('{$v['id']}','{$orderInfo['order_id']}')" >重新生成</a></if>
+            </td>
+        </tr>
+        </volist>
+        </if>
+    </table>
+	<div class="DiabtnCon">
+       <a href="javascript:art.dialog.close();" class="Diabtn-all">确定</a>
+	</div>
+</body>
+</html>

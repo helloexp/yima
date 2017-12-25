@@ -1,0 +1,385 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券中心-发布卡券（旺财APP）</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script>
+var isopencusMsg = "{$startUp}"; //1：设置了短信内容自定义 0：未设置自定义
+var goods_type= "{$goodsData[goods_type]}";
+$(document).ready(function(e){
+	if(goods_type == 7 || goods_type == 8){
+		$(".nocusMsg").hide();
+		$(".cusMsg").hide();
+		$("#phone").hide();
+		$(".prizeConfig_usage").addClass("dn");
+	}else{
+		if(isopencusMsg==1){
+			$(".nocusMsg").hide();
+			$(".cusMsg").show();
+		}else{
+			$(".nocusMsg").show();
+			$(".cusMsg").hide();
+		}
+	}
+
+	Gform();
+    $("#smb").click(function(){
+        $("#curForm").ajaxSubmit({
+            beforeSubmit:function(){
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+                if(data.status == '1'){
+                    dialog.time(1).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                    // window.location.href="{:U('WangcaiPc/NumGoods/numGoodsList')}";
+                    window.location.href="{:U('WangcaiPc/NumGoods/publishSuccess')}&type=1&goods_id="+data.goods_id;
+                    return false;
+                }else{
+                    dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },
+            dataType:'json',
+        });
+    });
+    $(".choosetext1").click(function() {
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").hide();
+    });
+    $(".choosetext2").click(function() {
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").show();
+    });
+    $("a[name='choose_shop']").click(function() {
+        var type = '&type=0';
+        if ($(this).attr("name") == "choose_shop") {
+            type = "&type=1";
+        }
+        art.dialog.open("{:U('WangcaiPc/NumGoods/shopList')}" + type, {
+            lock: true,
+            title: "选择门店",
+            width: '800px'
+        });
+    });
+});
+
+function showImgCheck(){
+    if($("#show_resp_img").val() == '')
+        {
+            return "请上传营销图片";
+        }
+}
+function aiImgCheck(){
+    if($("#ai_img_resp").val() == ''){
+        return "请上传营销图片";
+    }
+}
+
+function cjSendtype(t){
+    var val = t.attr("data-val");
+    if(val=="0"){
+        $(".sendType").show();
+		$(".shortMsgImg").css("display","block");
+    }
+    if(val=="1"){
+        $(".sendType").hide();
+		$(".shortMsgImg").css("display","none");
+    }
+}
+
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+   function change_img()
+ {
+         var opt = [
+            ,"uploadUrl={:urlencode(U('ImgResize/Meitu/uploadFile','','','',true))}"
+            ,"cropPresets=230x190"
+            ,"callback=img_Call"
+            ,"menuType=1"
+        ].join('&');
+        openUploaderMeitu_message("{:U('ImgResize/Meitu/index')}&"+opt); 
+ }
+ function openUploaderMeitu_message(url) {
+    var win_width = 700;
+    art.dialog.open(url, {
+        lock: true,
+        title: "上传图片",
+        width: win_width,
+        height: win_width / 1.6,
+        id: 'art_upload',
+        zIndex:1600
+    });
+}
+ 
+ function img_Call(data) {
+//填充缩略图
+$('#show_img_resp_show').attr('src', data.info.imgWay+data.info.imgName);
+//上传用
+$('#show_img_resp').val(data.info.imgName);
+}  
+
+</script>
+<style type="text/css">
+</style>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <!--开始引入顶部菜单-->
+        <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="wddzq"/>  
+        </div>
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="sidenav"> 
+                    <!--开始引入左菜单-->
+                    <include file="WangcaiPc/NumGoods/tabMenu" leftmenuid="zjdzq"/>                  
+                </div> 
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>发布卡券（旺财APP）</h4>
+                    </div>
+                    
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-list">
+                        <form id="curForm" method="post" action="{:U('WangcaiPc/NumGoods/numGoodsAppPublish')}">
+                            <input type="hidden" name="goods_id" value="{$goodsData['goods_id']}" />
+                            <input type="hidden" name="goods_type" value="{$goodsData['goods_type']}" />
+                            <div class="eTicket_form" style="float:left">
+                                <div class="imvBox">
+                                    <div class="imvBox-edit">
+                                    <div id="Wform" class="Gform l">
+                                        <ul>
+                                            <li class="Gname"><span>*</span>&nbsp;卡券名称</li>
+                                            <li class="Ginput">
+                                                <p class="txt">{$goodsData['goods_name']}</p>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                            <li class="Gname"><span>*</span>&nbsp;剩余库存</li>
+                                            <li class="Ginput">
+                                                <p class="txt"><if condition="$goodsData['storage_type'] eq '0'">不限<else />{$goodsData['remain_num']}</if></p>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                            <li class="Gname"><span>*</span>&nbsp;卡券编号</li>
+                                            <li class="Ginput">
+                                                <input type="text" maxlength="4" name="elecNo" value="" placeholder="请填写4位阿拉伯数字作为卡券编号">
+                                                <span class="cl fn txtTips">在旺财App的搜索框中输入该编号，可快速搜索到对应卡券</span>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;可发送门店</li>
+                                    <li class="Ginput">
+                                    <div class="switch">
+                                            <input type="radio" name="shop" id="shop" value="1" checked="checked" />
+                                            <div class="newRadio">
+                                                <span class="valfirst" data-val="1" id="getAllStores">所有门店</span>
+                                            	<span class="vallast" data-val="2" id="selectShop">指定门店</span>
+                                            </div>
+                                            <div class="cl fn"></div>
+                                            <div class="newRadio-input">
+                                                <div class="sweet_tips2" id="htmlss">您总共选择了<span id="number">0</span>家门店&nbsp;&nbsp;<a href="javascript:void()" id="editStore"  name="choose_shop">点击查看</a></div>
+                                            </div>
+                                            <p class="cl fn txtTips">注：仅限已安装核验终端的门店</p>
+                                            <input type="hidden" id="shop_idstr" name="shop_idstr" value=""/>
+                                            <input type="hidden" id="openStores" name="openStores" value=""/>
+                                        </div>
+                                    </li>
+                                </ul>
+                                        <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;数量</li>
+                                    <li class="Ginput">
+                                    <div class="newRadio-input"><input type="text" class="validate[required,funcCall[checkswitch]]" name="num_limit" value=""><span class="maxTips forInput">张</span></div>
+                                    </li>
+                                </ul>
+                                    <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;卡券有效期</li>
+                                    <li class="Ginput">
+                                    <div class="Gtime2 fn l">
+                                    <input type="text" class="validate[required]" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'goods_end_time\\')}'})" name="goods_begin_time" id="goods_begin_time" value="">
+                                    <em>至</em>
+                                    <input type="text" class="validate[required]" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'goods_begin_time\\')||\\'%y-%M-%d\\'}'})" name="goods_end_time" id="goods_end_time" value="">
+                                    </div>
+                                    <span class="cl fn txtTips">超过有效期，卡券将不能在旺财APP上发送;</span>
+                                    </li>
+                                    </ul>
+                                    <ul>
+                                    <li class="Gname"><span>*</span>&nbsp;使用卡券时间</li>
+                                    <li class="Ginput">
+                                    <div class="Gtime2 fn l">
+                                        <input type="text" class="validate[required]" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'goods_begin_time\\')}'})" name="use_start_time" id="use_start_time" value="">
+                                        <em>至</em>
+                                        <input type="text" class="validate[required]" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'goods_end_time\\')}'})" id="use_end_time" name="use_end_time" value="">
+                                        </div>
+                                    <span class="cl fn txtTips">商户可以自定义验码开始的日期如："4月1号,6月1号";</span>
+                                    </li>
+                                    </ul>
+                                    <ul class="moren">
+                    <li class="Gname"><span>*</span>&nbsp;奖品发送方式</li>
+                    <li class="Ginput">
+                    <div class="switch" data-callback="cjSendtype">
+                        <input type="radio" name="" value='0' checked="checked">
+                        <div class="newRadio">
+                            <span class="valfirst" data-val="0">短信</span>
+                        </div>
+                        <div class="cl"></div>
+                        <p>{$tipStr}</p>
+                    </div>
+                    </li>
+                </ul>
+                <ul class="showSendtype cusMsg dn">
+                    <li class="Gname"><span>*</span>&nbsp;短信内容</li>
+                    <li class="Ginput">
+                        <textarea maxlength="40" name="cusMsg" id="cusMsg"  class="validate[required,maxSize[40]] Gview-cusMsg" placeholder="您收到哈根达斯100元代金券">{$smsText}</textarea>
+                        <span class="maxTips forArea" data-max="40">0/40</span>
+                    </li>
+                </ul>
+                                    <ul class="moren sendType">
+                                        <li class="Gname"><span>*</span>&nbsp;使用说明</li>
+                                        <li class="Ginput">
+                                            <textarea maxlength="100" name="caixin_content" id="usage_config" class="validate[required,maxSize[100]]" ></textarea>
+                                            <p class="txtTips">使用说明将显示在短信详情页面</p>
+                                        </li>
+                                    </ul>
+                                    
+                                    <ul>
+                                    <li class="Gname"></li>
+                                    <li class="Ginput mt5">
+                                    <a href="javascript:void(0);" title="确认" id="smb" class="btn-all w110">确定</a>
+                                    <a href="javascript:history.back();" title="取消" class="btn-all-del w110 ml10">取消</a>
+                                    </li>
+                                    </ul> 
+                                    </div>
+                                    </div>
+                                    <div class="imvBox-show" style="margin-top:15px;">
+                                	<div id="phone" style="background:#FFF">
+                                    <div class="phonetop"></div>
+                                    <div id="phoneCon">
+                                        <div class="wx-show">
+                                        	<img src="__PUBLIC__/Image/shortMsg-top.png">
+                                            <div class="wx-sc-content" style=" font-size:13px; line-height:18px; color:#000; margin:0 10px; padding:0 8px; background:#e5e5ea; width:204px;">
+                                            	<div class="nocusMsg">
+                                                <p>【翼码科技】辅助码：00000000000000</p>
+                                                <p>您收到<span class="shname" id="sample">{$smsContent}</span></p>
+                                                </div>
+                                                <div class="cusMsg">
+                                                <p>【翼码科技】<span class="Gshow-cusMsg" style="word-break:break-all">{$smsText}</span></p>
+                                                </div>
+                                                <p>详见<a href="javascript:void(0)">ym06.cn/fln3Qb</a></p>
+                                            </div>
+                                            <img src="__PUBLIC__/Image/shortMsg-bottom.png">
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                                </div>
+                            </div>
+                            <img src="__PUBLIC__/Image/prizeConfig_usage.png" class="prizeConfig_usage dn" style="position: relative; float:left; left:0px; top:15px;">
+                            </div>
+                        </form>
+                        </div>
+                    </div>
+                    
+                
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+$(function(){
+		$("#selectShop").click(function(e){
+		art.dialog.open("{:U('Home/Store/toNavigation')}",{
+			title: '选择门店',
+			width:'800px'
+		});
+		//$(".newRadio-default").show();
+	});
+	
+	$("#editStore").click(function(){
+		art.dialog.open("{:U('Home/Store/toNavigation')}",{
+			title: '选择门店',
+			width:'800px'
+		});
+	});
+	
+})
+</script>
+
+
+<script>
+$(function(){
+    $("#shortMsg_config").focus(function(){
+		$("#phone").hide();
+		if(goods_type == 7 || goods_type==8){
+			$(".prizeConfig_usage").addClass("dn");
+		}else
+		{
+			$(".prizeConfig_usage").removeClass("dn");
+		}  
+    })
+	
+	
+    $("#shortMsg_config").blur(function(){
+		if(goods_type == 7 || goods_type==8){
+			$(".prizeConfig_usage").addClass("dn");
+		}else
+		{
+			$(".prizeConfig_usage").removeClass("dn");
+		} 
+    })
+
+    $("#usage_config").focus(function(){		
+		$("#phone").hide();
+		if(goods_type == 7 || goods_type==8){
+			$(".prizeConfig_usage").addClass("dn");
+		}else
+		{
+			$(".prizeConfig_usage").removeClass("dn");
+		}
+    })
+    $("#usage_config").blur(function(){
+		if(goods_type == 7 || goods_type==8){
+			$("#phone").hide();
+			$(".prizeConfig_usage").addClass("dn");
+		}else
+		{
+			$("#phone").show();
+			$(".prizeConfig_usage").addClass("dn");
+		}
+		
+    })
+})
+</script>

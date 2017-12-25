@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>账单_账户中心_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/Wcanal.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<style>
+tr.ahover:hover{ cursor:pointer; background:#f2f2f2}
+.W-table th{    height: 38px;
+    text-align: center;
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #e1e1e1;
+    color: #666;
+    font-size: 14px;
+	padding:0 5px;
+    font-family: "microsoft yahei";
+    line-height: 38px;}
+</style>
+<script>
+$(document).ready(function(){
+	$('tr').click(function(){
+		var id=$(this).attr('id');
+		if (id) {
+			$.post(
+				"{:U('Home/ServicesCenter/ByServiceInfo')}",
+				{'actId':id},
+				function(data){
+					if(data){
+						var ActDetail = template('detail',data);
+						art.dialog({
+							title: '活动详情',
+							width: '500px',
+							padding: '30px',
+							content: ActDetail,
+						})
+					}
+				},
+				'JSON'
+			);
+		}
+	});
+	
+	function checkDate(){
+		if($('#end_time').val()<$('#start_time').val()){
+			return '开始日期不能大于结束日期';
+		}
+	}
+
+})
+
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                 <div class="sidenav">
+                    <!--开始引入左菜单-->
+					<assign name="leftMenuId" value="8"/>
+                    <include file="Home/AccountCenter/menu" leftmenuid="serviceBuy"/>
+                </div>
+                <div class="subcon">
+                    <div class="main-name fn">
+                        <h4>服务购买</h4>
+                    </div>
+                    
+                    <div class="SearchArea fn">
+                        <form method="post" action="{:U('Home/ServicesCenter/serviceBuy')}" id="theform">
+                            <div class="SearchAreaLeft">
+                              <label><span>活动名称</span><input name="name" type="text" value="{$argument['name']}" /></label>
+                              <label><span>成交时间</span>
+							  <input name="badd_time" id="start_time" type="text" value="{$argument['badd_time']}" onclick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})"> - 
+							  <input name="eadd_time" id="end_time" type="text" value="{$argument['eadd_time']}" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})"></label>
+                              </div>
+                            <div class="SearchAreaRight">   
+								<input class="searchBtn" type="submit" value="查询"/>
+                            </div>
+                        </form>
+                    </div>
+                    <table cellpadding="0" cellspacing="0" class="W-table">
+                        <tbody>
+                        <tr class="th">
+                            <th>活动名称</th>
+                            <th>活动类型</th>
+                            <th>交易时间</th>
+                            <th>支付方式</th>
+                            <th>实付款（元）</th>
+                        </tr>
+						<?php if ($ServiceInfo):?>
+							<?php foreach ($ServiceInfo as $v) :?>
+							<tr id="{$v['id']}" class="ahover">
+								<td>{$v['name']}</td>
+								<td>{$v['batch_type']}</td>
+								<td>{$v['add_time']}</td>
+								<td>{$v['pay_way']}</td>
+								<td>{$v['amount']}</td>
+							</tr>
+							<?php endforeach;?>
+						<?php else:?>
+							<tr>
+								<td colspan="10">
+									<div class="nonedata"></div>
+								</td>
+							</tr> 
+						<?php endif;?>
+                        </tbody>
+                    </table>
+                    <div class="page">{$page}</div>
+                </div>   
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>
+<script id="detail" type="text/html">
+<div class="popWin" style="width:100%;">
+<h4>活动使用时间：{{start_time}}~{{end_time}}</h4>
+<table cellpadding="0" cellspacing="0" class="W-table">
+	<tr>
+		<th>营销活动收费项目</th>
+		<th>单价</th>
+		<th>数量</th>
+		<th>小计（元）</th>
+		<th>实付款（元）</th>
+	</tr>
+	<tr>
+		<td>{{batch_name}}</td>
+		<td>{{serviceArr.config.price}}</td>
+		<td>{{serviceArr.num}}</td>
+		<td>{{(serviceArr.config.price)*(serviceArr.num)}}</td>
+		<td rowspan="2"><font color="#f00">{{act_price}}</font></td>
+	</tr>
+
+	{{each couponDetail as value i}}
+	<tr>
+	<td>{{value.config.name}}</td>
+	<td>{{value.config.price}}</td>
+	<td>{{value.num}}</td>
+	<td>{{(value.config.price)*(value.num)}}</td>
+	</tr>
+	{{/each}}
+</table>
+</div>
+</script>

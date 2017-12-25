@@ -1,0 +1,533 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>卡券中心</title>
+        <meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+        <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+		<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+        <script>
+			$(document).ready(function(e){
+				$("#down").click(function(){
+					var udata = {};
+                    var objInfo = false;
+                    $(".SearchArea input,.SearchArea select").each(function(index, element){
+						if ($(this).val() != ""){
+							if($(this)[0].tagName =="INPUT"){
+								udata[$(this).attr('name')] = $(this).val();
+								udata['isshow'] = true;
+							}else if($(this)[0].tagName =="SELECT"){
+								udata[$(this).attr('name')] = $(this).find("option:selected").text();
+								udata['isshow'] = true;
+							}
+						}
+					});
+                    var uhtml = template("down-list", udata);
+                    art.dialog({
+                    	id: 'down_tips',
+						title:"数据下载",
+						width:800,
+						content:uhtml,
+						ok:function(){
+							var data = "";
+							$('input[name^="a["]').each(function(){
+								var id = $(this).attr("data-val");
+								if ($(this).attr("checked")){
+									var val = 1;
+								}else{
+									var val = 0;
+								}
+								data += id + "=" + val + "&";
+							});
+							$('#col_list').val(data);
+							$("#theform").attr("action", "{:U('WangcaiPc/Withdraw/exportCode')}").submit();
+						},
+						cancel:true
+                    })
+				});
+				$("body").on("click",".down-list .checkdiv li:not('.disabled')",function(){
+					$(this).toggleClass("checked");
+                                        if($(this).hasClass("checked") == true){
+                                            $(this).find("input").attr("checked",true);
+                                            $(this).find("input").val(1);
+                                        }else{
+                                            $(this).find("input").attr("checked",false);
+                                            $(this).find("input").val(0);
+                                        }
+					var checknum = $(this).closest("td").find(".checkdiv li.checked:not('.disabled')");
+					var num = $(this).closest("td").find(".checkdiv li:not('.disabled')");
+					var p = $(this).closest("td").prev("td").find("p");
+					var allcheck = 0;
+					num.each(function(index, element) {
+						if(!$(this).hasClass("checked")){
+							allcheck = 1;
+						}
+					});
+					if(checknum.length==0){
+						allcheck=2;
+					};
+					if(checknum.length==num.length){
+						allcheck=0;
+					};
+					if(allcheck==1){
+						p.attr("class","nochecked")
+					}else if(allcheck==2){
+						p.attr("class","")
+					}else if(allcheck==0){
+						p.attr("class","checked")
+					}
+				});
+				$("body").on("click",".down-list td.title p:not('.disabled')",function(){
+					var li = $(this).closest("td").next("td").find(".checkdiv li:not('.disabled')");
+					$(this).removeClass("nochecked");
+					$(this).toggleClass("checked");
+					if($(this).hasClass("checked")){
+						li.each(function(index, element) {
+							$(this).addClass("checked");
+							$(this).find("input").attr("checked",true);
+							$(this).find("input").val(1);
+						});
+					}else{
+						li.each(function(index, element) {
+							$(this).removeClass("checked");
+							$(this).find("input").attr("checked",false);
+							$(this).find("input").val(0);
+						});
+					}
+				});
+				$("#sub_button").click(function(){
+					$("#theform").attr("action", "{:U('WangcaiPc/Withdraw/withdrawList')}").submit();
+				});
+				$("body").on("click","#OrderPrint",function () {
+					var openUrl = $(this).attr("data-url") || 'about:blank';
+					art.dialog.open(openUrl, {
+						id: "orderprint",
+						title: "详情",
+						width: 800
+					});
+				});
+				$(".UpdateDelivery").on("click", function () {
+					var orderName = $(this).attr("data-name");
+					var receiveNum = $(this).attr('receiveNum');
+					var receiveName = $(this).attr('receiveName');
+					var orderId = $(this).attr("data-o");
+					var dst = $(this).attr("data-d");
+					var dsd = $(this).attr("data-dd");
+					var dsn = $(this).attr("data-n");
+					var dsc = $(this).attr("data-c");
+					var dataOrder = $(this).attr('data-order');
+					var expressName = '<?php echo $usedExpress;?>';
+					var optionv = '';
+					var udata = {"status":$(this).attr("data-d"), "optionv":optionv, "dst":dst, "dsd":dsd, "dsn":dsn, "dsc":dsc, experess:[<?php echo $expressStr; ?>],receiveNum:receiveNum,receiveName:receiveName,orderName:orderName,expressName:expressName};
+					var uhtml = template("inputDeliveryInfo", udata);
+					art.dialog({
+						title: '发货',
+						width:500,
+						padding:0,
+						content:uhtml,
+						ok:function(){
+                                                    if(!$('#inputDeliveryInfoForm').validationEngine('validate')){
+                                                        return false;
+                                                    }
+                                                    var delivery_company = $('input[name=experess]').val();
+                                                    var delivery_number = $('input[name=delivery_number').val();
+                                                    var dialog = art.dialog({title:false, content:"<div class='msg-all-succeed'>正在提交...</div>", fixed: true, padding:0});
+                                                    $.post("{:U('WangcaiPc/Withdraw/updateCodeDelivery')}",{"delivery_status":'3', "delivery_company":delivery_company, "delivery_number":delivery_number, "order_id":orderId, 'dataOrder':dataOrder},function(cdata){
+                                                        var c_status = cdata.status;
+                                                        if (c_status == 1){
+                                                            dialog.time(3).content("<div class='msg-all-error'>" + cdata.info + "</div>");
+                                                            top.location.reload();
+                                                        } else{
+                                                            dialog.time(3).content("<div class='msg-all-error'>" + cdata.info + "</div>");
+                                                        }
+                                                    }, 'JSON');
+						},
+						cancel: true
+					});
+				});
+				$('.deliConfirm').click(function(){
+                                    var code = $(this).attr('rel');
+                                    var uhtml = template("delDeliveryInfo",[]);
+                                    art.dialog({
+                                        title: '撤销',
+                                        width:500,
+                                        padding:0,
+                                        content:uhtml,
+                                        ok:function(){
+                                            if(!$('#delDeliveryInfoForm').validationEngine('validate')){return false;}
+                                            var reason = $('select[name=delReason]').val();
+                                            var reasonContent = $('textarea[name=delReasonContent]').val();
+                                            $.post("{:U('WangcaiPc/Withdraw/delWithdrowCode')}", {'code':code, 'reason':reason, 'reasonContent':reasonContent}, function(data){
+                                                data = eval('('+data+')');
+                                                if(data['error'] == '0'){
+                                                    art.dialog({title:false, content:"<div class='msg-all-succeed'>"+data['msg']+"</div>", fixed: true, padding:0, ok:window.location.reload()});
+                                                }else{
+                                                    art.dialog({title:false, content:"<div class='msg-all-succeed'>"+data['msg']+"</div>", fixed: true, padding:0});
+                                                }
+                                            });
+                                        },
+                                        cancel: true
+                                    });
+                                });
+				$('body').on("change",'.delDeliveryselect',function(){
+					if($(this).val()=="0"){
+						$(".delDeliverytextarea").attr("disabled",false);
+					}else{
+						$(".delDeliverytextarea").attr("disabled",true);
+					}
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div id="wrapper">
+            <include file="./Home/Tpl/Public/Public_header.html" />  
+            <!--开始引入头部菜单-->                   
+            <div class="shopNav">
+                <!--开始引入顶部菜单-->
+                <include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="dzqsj"/>  
+            </div>
+
+
+            <div id="container" class="bgfff">
+                <div id="main" class="rel">
+
+                    <div class="sidenav"> 
+                        <!--开始引入左菜单-->
+                        <include file="WangcaiPc/NumGoods/dataMenu" leftmenuid="detailCount"/>                   
+                    </div>
+                    <div class="subcon fn">
+                        <div class="main-name fn">
+                            <h4>卡券明细数据<a href="javascript:void(0);" id="down" class="btn-down first"><i></i>下载列表</a></h4>
+                        </div>
+                        <div class="tipNormal">
+                            <p>1、只能撤销当天的验证或线上提领交易</p>
+                            <p>2、卡券下发暂不支持撤销和重发</p>
+                            <p> 3、“自用业务”指：商家在自行布放的、且由该商家支付受理服务费的验证终端上开展的业务。 “异业联盟业务”指：业务商（即实际开展业务的商家）使用商家的卡券开展业务，发出的卡券在商家的验证终端上被验证的业务。</p>
+                        </div>
+                        <div class="Wcanal-tab mt15" id="Wcanal-tabon">
+                            <div class="Wcanal-tab-title fn">
+                                <p><a href="{:U('WangcaiPc/BatchTrace/index')}">发码明细</a></p>
+                                <p><a href="{:U('WangcaiPc/BatchTrace/posTrace')}">验证明细</a></p>
+                                <if condition="$_SESSION['userSessInfo']['node_id'] eq '00023332'">
+                                    <p><a href="{:U('WangcaiPc/BatchTrace/failTrace')}">送达失败明细</a></p>
+                                </if>
+                                <p class="Wcanal-tab-hover"><a href="{:U('WangcaiPc/Withdraw/withdrawList')}">线上提领明细</a></p>
+                            </div>
+                            <div class="fn pt20">
+                                <div class="SearchArea fn extendMode">
+                                    <form action="{:U('WangcaiPc/Withdraw/withdrawList')}" method="post" name="theform" id="theform">
+                                        <input type="hidden" name="col_list" id="col_list">
+                                            <div class="SearchAreaLeft">
+                                                <label>
+                                                    <span>辅助数字串</span>
+                                                    <input name="order_id" type="text" value="{$postData.order_id}">
+                                                </label>
+                                                <label>
+                                                    <select name="order_status" class="selectbox">
+                                                        <option value="" >订单状态</option>
+                                                        <option value="1" <if condition="$postData.order_status eq '1' "> selected </if>>正常</option>
+                                                        <option value="2" <if condition="$postData.order_status eq '2' "> selected </if>>已撤销</option>
+                                                    </select>
+                                                </label>
+                                                <label>
+                                                    <select name="delivery_status" class="selectbox">
+                                                        <option value="" >配送状态</option>
+                                                        <option value="1" <if condition="$postData.delivery_status eq '1' "> selected </if>>待配送</option>
+                                                        <option value="2" <if condition="$postData.delivery_status eq '2' "> selected </if>>配送中</option>
+                                                        <option value="3" <if condition="$postData.delivery_status eq '3' "> selected </if>>已配送</option>
+                                                    </select>
+                                                </label>
+                                                <label>
+                                                    <span>下单时间</span>
+                                                    <input type="text" name="start_time" id="start_time" onClick="WdatePicker({dateFmt:'yyyyMMdd', maxDate:'#F{$dp.$D(\\'end_time\\')}'})" value="{$Think.request.start_time|dateformat='Ymd'}" />
+                                                    -
+                                                    <input type="text" name="end_time" id="end_time" onClick="WdatePicker({dateFmt:'yyyyMMdd', minDate:'#F{$dp.$D(\\'start_time\\')}'})" value="{$Think.request.end_time|dateformat='Ymd'}" />
+                                                </label>
+                                                <label>
+                                                    <span>卡券名称</span>
+                                                    <input name="codeName" type="text" value="{$postData['codeName']}" />
+                                                </label>
+                                                <label>
+                                                    <select name="order_type" class="selectbox">
+                                                        <option value="" >业务类型</option>
+                                                        <option value="1" <if condition="$postData.order_type eq '1' "> selected </if>>自用业务</option>
+                                                        <if condition="$type eq 'sellRice' ">
+                                                        <option value="2" <if condition="$postData.order_type eq '2' "> selected </if>>异业联盟业务（卡券分销）</option>
+                                                        </if>
+                                                        <option value="3" <if condition="$postData.order_type eq '3' "> selected </if>>异业联盟业务（卡券在线交易）</option>
+                                                    </select>
+                                                </label>
+                                            </div>
+                                            <div class="SearchAreaRight">
+                                                <a href="javascript:void(0);" class="searchBtn" id="sub_button" >查询</a>
+                                            </div>
+                                    </form>
+                                </div>
+                                <div class="fn">
+                                    <table cellpadding="0" cellspacing="0" class="W-table">
+                                        <tr>
+                                            <th class="first">卡券名称</th>
+                                            <th>辅助字符串</th>
+                                            <th>业务类型</th>
+                                            <th>申请时间</th>
+                                            <th>手机号</th>
+                                            <th>订单状态</th>
+                                            <th>配送状态</th>
+                                            <th class="last">操作</th>
+                                        </tr>
+                                        <volist name="orderList" id="vo">
+                                            <tr class="info" >
+                                                <td class="first">{$vo['goods_name']}</td>
+                                                <td>{$vo['assist_number']}</td>
+                                                <td>
+                                                    <if condition="$vo['code_type'] eq 'wechat'">微信卡券
+                                                    <elseif condition="$vo['source'] eq '0' AND $vo['code_type'] neq 'wechat'" />自用业务
+                                                    <elseif condition="$vo['source'] eq '5' AND $vo['code_type'] neq 'wechat'" />异业联盟业务<br />（卡券分销）
+                                                    <elseif condition="$vo['code_type'] neq 'wechat'" />异业联盟业务<br />（卡券在线交易）
+                                                    </if>
+                                                </td>
+                                                <td>{$vo['add_time']|dateformat=###,'Y-m-d'}</td>
+                                                <td>{$vo.receiver_phone}</td>
+                                                <td><if condition="$vo.order_status eq '2' ">已撤销<else />正常</if></td>
+                                                <td><if condition="$vo.delivery_status eq '1' ">待配送<elseif condition="$vo.delivery_status eq '2' " />配送中<elseif condition="$vo.delivery_status eq '3' " />已配送</if></td>
+                                                <td class="last">
+                                                    <if condition="$vo['delivery_status'] eq '1' && $vo['order_status'] neq '2' && $_SESSION['userSessInfo']['node_id'] eq $vo['delivery_node_id']">
+                                                        <a class="UpdateDelivery" href="javascript:void(0)" data-name="{$vo['goods_name']}" data-o="{$vo['assist_number']}" receivename="{$vo.receiver_name}" receivenum="{$vo.receiver_phone}" data-order="{$vo.id}" data-s="2">发货</a>
+                                                    <elseif condition="$vo['delivery_status'] eq '2' && $vo['order_status'] neq '2' && $_SESSION['userSessInfo']['node_id'] eq $vo['delivery_node_id']" />
+                                                        <a class="UpdateDelivery" href="javascript:void(0)" data-c='{$vo.delivery_company}' data-n="{$vo.delivery_number}" data-name="{$vo['goods_name']}" data-o="{$vo['assist_number']}" receivename="{$vo.receiver_name}" receivenum="{$vo.receiver_phone}" data-order="{$vo.id}" data-s="2">编辑</a>
+                                                    </if>
+                                                    <if condition="$vo['delivery_number'] eq '' && $vo['order_status'] neq '2' && $vo['code_type'] neq 'wechat' ">
+                                                        <a class="deliConfirm" href="javascript:void(0)" data-o="{$vo['id']}" rel="{$vo['assist_number']}" data-s="1">撤销</a>
+                                                    </if>
+                                                    <a id="OrderPrint" href="javascript:void(0)" data-url="{:U('WangcaiPc/Withdraw/withdrowDetail',array('order_id'=>$vo['id'], 'type'=>$vo['source']))}">详情</a>
+                                                </td>
+                                            </tr>
+                                        </volist>
+                                        <empty name="orderList">
+                                            <tr><td colspan="5" class="last"><div class="nonedata"></div></td></tr>
+                                        </empty>
+                                    </table>
+                                    <div class="page">{$page}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html" /> 
+        </div>
+        <div class="service"></div>
+    </body>
+    <script id="down-list" type="text/html">
+	<form>
+	<div class="down-list">
+		<div class="top {{if !isshow }}dn{{/if}}">
+			<h6>您将下载符合以下条件的订单数据：</h6>
+			{{if order_id }}<dd><span class="left">辅助数字串：</span><span class="right">{{order_id}}</span></dd>{{/if}}
+			{{if delivery_status }}<dd><span class="left">配送状态：</span><span class="right">{{delivery_status}}</span></dd>{{/if}}
+			{{if codeName }}<dd><span class="left">卡券名称：</span><span class="right">{{codeName}}</span></dd>{{/if}}
+			{{if start_time || end_time }}<dd><span class="left">下单时间：</span><span class="right" style="width:130px;">{{start_time}}</span><i>到&nbsp;&nbsp;</i><span class="right"  style="width:130px;">{{end_time}}</span></dd>{{/if}}
+		</div>
+		<h6>请选择您需要下载的数据项</h6>
+		<table cellpadding="3">
+			<tr>
+				<td class="title"><p class="checked"><i></i><span>基础信息</span></p></td>
+				<td>
+				<div class="checkdiv">
+					<ul>
+						<li class="checked">辅助字符串<input type="checkbox" value="1" name="a[1]" data-val="1" checked="checked" /></li>
+						<li class="checked">申请时间<input type="checkbox" value="1" name="a[2]" data-val="2" checked="checked" /></li>
+						<li class="checked">卡券名称<input type="checkbox" value="1" name="a[3]" data-val="3" checked="checked" /></li>
+						<li class="checked">收货人姓名<input type="checkbox" value="1" name="a[4]" data-val="4" checked="checked" /></li>
+						<li class="checked">收货人手机号<input type="checkbox" value="1" name="a[5]" data-val="5" checked="checked" /></li>
+						<li class="checked">收货地址<input type="checkbox" value="1" name="a[11]" data-val="11" checked="checked" /></li>
+						<li class="checked">物流公司<input type="checkbox" value="1" name="a[6]" data-val="6" checked="checked" /></li>
+						<li class="checked">物流单号<input type="checkbox" value="1" name="a[7]" data-val="7" checked="checked" /></li>
+						<li class="checked">发出时间<input type="checkbox" value="1" name="a[8]" data-val="8" checked="checked" /></li>
+						<li class="checked">配送状态<input type="checkbox" value="1" name="a[9]" data-val="9" checked="checked" /></li>
+						<li class="checked">商品名称<input type="checkbox" value="1" name="a[10]" data-val="10" checked="checked" /></li>
+					</ul>
+				</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	</form>
+	</script>
+
+    <script id="inputDeliveryInfo" type="text/html">
+		<form id="inputDeliveryInfoForm">
+		<div class="tipNormal Diagray">
+			<p>卡券<span class="ml10">{{orderName}}</span></p>
+			<p>提领者<span class="ml10">{{receiveName}}</span></p>
+			<p>手机号<span class="ml10">{{receiveNum}}</span></p>
+		</div>
+		<h6 class="pl30 mt10">物流信息</h6>
+        <div class="Gform fn pb30">
+            <ul>
+                <li class="Gname"><span>*</span>物流公司：</li>
+                <li class="Ginput">
+                    <input type="text" name="experess" id='delivery_company' value="{{if dsc!=''}}{{dsc}}{{else if expressName!=''}}{{expressName}}{{/if}}" class="validate[required]" />
+                    <div class="bankList dn">
+                        <ul>
+                            {{each experess}}
+                            <li class="dn">{{value}}</li>
+                            {{/each}}
+                            <li class="erro dn" rel="error">抱歉，没有找到该快递公司</li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+            <ul>
+                <li class="Gname"><span>*</span>物流单号：</li>
+                <li class="Ginput"><input type="text" class="validate[required]" maxlength="50" name="delivery_number" id="delivery_number" value="{{dsn}}" /></li>
+            </ul>
+        </div>
+		</form>
+    </script>
+    
+    <script id="delDeliveryInfo" type="text/html">
+		<form id="delDeliveryInfoForm">
+        <div class="Gform fn pb30">
+            <ul>
+                <li class="Gname"><span>*</span>撤销原因：</li>
+                <li class="Ginput">
+                    <select name='delReason' class="delDeliveryselect">
+                        <option value="1" >消费者选择去门店提领</option>
+                        <option value="0">其他</option></select>
+                </li>
+            </ul>
+            <ul>
+                <li class="Gname">其他原因：</li>
+                <li class="Ginput"><textarea type="text" name='delReasonContent' class="delDeliverytextarea validate[required]" maxlength="50" disabled="disabled"></textarea></li>
+            </ul>
+        </div>
+		</form>
+    </script>
+    <script type="text/javascript">
+		$(document).ready(function (e) {
+        $("body").on("click", "[name='experess']", function(e){
+        e.stopPropagation();
+                var val = $(this).val();
+                if (val != ""){
+        var erro = 0;
+                $(".bankList").show();
+                $(".bankList>ul>li").each(function(index, element) {
+        var text = $(this).text();
+                if (text.indexOf(val) >= 0){
+        $(this).removeClass("hover");
+                if (index == 0){$(this).addClass("hover"); }
+        $(this).removeClass("dn");
+                erro++;
+        } else{
+        $(this).removeClass("hover");
+                $(this).addClass("dn");
+        }
+        });
+                erro == 0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+        } else{
+        $(".bankList").show();
+                $(".bankList>ul>li").each(function(index, element) {
+        if (index == 0){$(this).addClass("hover"); }
+        var hasErrorClass = $(this).attr('rel');
+                if (hasErrorClass != 'error'){
+        $(this).removeClass("dn");
+        }
+        });
+        }
+        });
+                $("body").on("keyup", "[name='experess']", function(e){
+        if (e.keyCode != 38 && e.keyCode != 40){
+        var val = $(this).val();
+                var erro = 0;
+                $(".bankList").show();
+                $(".bankList>ul>li").each(function(index, element) {
+        var text = $(this).text();
+                if (text.indexOf(val) >= 0){
+        $(this).removeClass("dn");
+                erro++;
+        } else{
+        $(this).addClass("dn");
+        }
+        });
+                $(".bankList>ul>li").removeClass("hover");
+                $(".bankList li:not(.dn):first").addClass("hover");
+                erro == 0 ? $(".bankList .erro").show() : $(".bankList .erro").hide();
+        }
+        if (e.keyCode == 13){
+        if ($(".bankList li.hover:not(.dn)").length >= 1){
+        var v = $(".bankList li.hover").attr("data-city");
+                var key = $(".bankList li.hover").attr("data-key");
+                return false;
+        } else{
+        alert("输入的快递不存在")
+        }
+        }
+        if (e.keyCode == 38){
+        var t = $(".bankList li.hover");
+                var tnext = t.prevAll("li:not(.dn):first");
+                if (tnext.length > 0){
+        tnext.addClass("hover");
+                t.removeClass("hover");
+                if (t.nextAll("li:not(.dn)").index() > 4){
+        $(".bankList ul").scrollTop($(".bankList ul").scrollTop() - 30);
+        }
+        var text = $(".bankList li.hover").text();
+                $(this).val(text);
+        }
+        }
+        if (e.keyCode == 40){
+        var t = $(".bankList li.hover");
+                var tnext = t.nextAll("li:not(.dn):first");
+                if (tnext.length > 0){
+        if (tnext.hasClass("erro")){return false; }
+        tnext.addClass("hover");
+                t.removeClass("hover");
+                if (tnext.index() > 4){
+        $(".bankList ul").scrollTop($(".bankList ul").scrollTop() + 30);
+        }
+        var text = $(".bankList li.hover").text();
+                $(this).val(text);
+        }
+        }
+        });
+                $("body").on('focus', '#delivery_company', function(e){
+        $('.bankList ul').css('display', 'block');
+        });
+                $("body").on("click", ".bankList ul li:not('.erro')", function(e){
+        e.stopPropagation();
+                var val = $(this).text();
+                $("[name='experess']").val(val);
+                $(".bankList").addClass("dn");
+                $('.bankList ul').css('display', 'none');
+        })
+                //点击以外区域隐藏分组
+                $("body").on("click", function(){
+        $(".bankList").hide();
+        });
+        });
+                document.onkeypress = function(e){
+                if (e.keyCode == 13){
+                return false;
+                }
+                if (e.keyCode == 38){
+                return false;
+                }
+                if (e.keyCode == 40){
+                return false;
+                }
+                }
+    </script>
+</html>

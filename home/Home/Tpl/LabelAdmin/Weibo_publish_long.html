@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="Keywords" content="二维码,O2O平台,微信网站,手机二维码,O2O模式,微商城,电子凭证,线上线下,微信商城,二维码营销,电子优惠劵,微团购,二维码防伪,旺财,微信推广,二维码扫描,企业营销,微营销,二维码制作,企业推广,微信营销,二维码名片,网络营销,微信开发,二维码生成器,防伪标签,移动互联网,O2O,O2O营销,微网站" />
+<title>新浪微博_营销推广渠道_翼码旺财</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wweibo.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wweibo.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.config.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ueditor/ueditor.all.min.js?v=__VR__"></script>
+<script>
+$(function(){
+	 editor=UE.getEditor('long_content',{
+		initialFrameWidth:432,
+		initialFrameHeight:318,
+		toolbars: [
+						[
+		            'source',//源代码
+	                'fontsize',//字号
+					'horizontal', //分隔线
+	                'link', //超链接
+	                'unlink',//取消链接
+	                'drafts',
+					'||',
+	                'bold', //加粗
+	                'italic', //斜体
+	                'underline', //下划线
+	                'forecolor', //字体颜色
+	                'backcolor','|',//背景色
+	                'justifyleft', //居左对齐
+	                'justifycenter', //居中对齐
+	                'justifyright' //居右对齐
+	                ,'background'
+	                ]
+		       ],
+		autoHeightEnabled:false
+	});
+}) 
+$(document).ready(function(){
+	editor.addListener("ready",function(){
+	UE.getEditor('long_content').setContent('{$long_weibo_header}')},1000);
+	$('input[name=long_title]').val('{$long_weibo_header}');
+	$("#submit_long").click(function(){
+			var dialog;		
+			 window.backgroundcss='';
+			//if($("form").validationEngine('validate')){
+				$("form").ajaxSubmit({
+					beforeSubmit:function(){
+					    var allhtml=UE.getEditor('long_content').getAllHtml();
+					    var backexp=/<style id="editor_background">.+?<\/style>/;
+						this.data.htmlcontent=allhtml.match(backexp);
+					    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+					},
+					data:{},
+					timeout:60000,
+					success:function(data){
+						if(data.status == '1'){
+							  _imgpath =data.info.imgpath; 
+							dialog.time(2).content("<div class='msg-all-succeed'>生成长微博成功</div>");
+							dialog.close();
+							
+							var _call_back="<?php echo $call_back;?>";
+
+							var win = art.dialog.open.origin; 
+							if(_call_back && win[_call_back] && typeof(win[_call_back])=='function'){ 
+								try{ 
+										win[_call_back].call(this, _imgpath,data.info.shortpath,_imgpath,data.info.weibolong); 
+										art.dialog.close();
+								}catch(e){
+									alert('选择异常');			
+								}; 
+							} 
+
+							return false;
+						}else{
+							dialog.close();
+							art.dialog({content:"<div class='msg-all-error'>"+data.info+"</div>", time:2, lock:true});
+						   
+						}
+					},
+					dataType:'json'
+				});
+			//}
+		 
+	});
+});
+
+function checkfouse(type,obj,text){
+	var beginmsg=$(obj).val();
+	if(type==1){
+		if(beginmsg==text){
+			$(obj).val("");
+			$(obj).addClass("inputOn");
+		}else{
+			$(obj).addClass("inputOn");
+		}
+	}else{
+		if(beginmsg==""){
+			$(obj).val(text);
+			$(obj).removeClass("inputOn");
+		}
+	}
+}
+
+function changeWb(aclass){
+	$(".longWb-con").removeClass("longWb-white").removeClass("longWb-clear").removeClass("longWb-text").addClass(aclass);
+	$("#bg_type").val(aclass);
+}
+function seehtml(){
+	    var allhtml=UE.getEditor('long_content').getAllHtml();
+	    var backexp=/<style id="editor_background">body(.+?)<\/style>/;
+		var htmlcontent='';
+		var htmlcontent_bak=null;
+		htmlcontent_bak =allhtml.match(backexp);
+		if(htmlcontent_bak!=null && htmlcontent_bak[1]!=null && htmlcontent_bak[1]!='null')
+		{
+			htmlcontent='<style type="text/css">#see'+htmlcontent_bak[1]+'</style>';
+		}
+	    art.dialog({
+			   content:'<div id="see">'+htmlcontent+UE.getEditor('long_content').getContent()+'</div>',
+			   width:500,
+			   lock:true
+			   
+	}).show();
+}
+
+</script>
+</head>
+
+<body>
+    <div id="longWb">
+	<form name="theform" id="theform" action="index.php?g=LabelAdmin&m=Weibo&a=publish_long_submit" method="post" enctype="multipart/form-data" target="_blank">
+		<input type="hidden" name="bg_type" id="bg_type" value="">
+		<div style="padding: 5px 0;"><span style="display: inline-block;width:100px;">长微博标题：</span><input style="width: 320px;" type="text" name="long_title" /></div>
+		<input type="hidden" name="submit_type" id="submit_type" value="">
+    	<div class="longWb-nav">
+        	<div class="longWb-nav-img">
+            	<a class="btn-weibo-img" id="weibo_upload" href="javascript:void(0)" onmousedown="return false;" onclick="return $EDITORUI['edui42']._onClick();">上传图片</a>
+                <a class="btn-weibo-bg" href="javascript:void(0)" onmousedown="return false;" onclick="return $EDITORUI['edui41']._onClick();">设置背景</a>
+            </div>
+        	<div class="longWb-nav-img mt20">
+            	<p>
+					长微博:长微博是通过图片发布文字信息的一种形式，
+					起因是微博通常不得超过140字，
+					故将文字转化为点阵图像发布。长微博最主要的作用是突破140字限制，
+					但后来通过附带相应文字版本的链接演变为博客和长文章的入口。
+				</p>
+            </div>
+        	<!--div class="longWb-nav-title">换信纸</div>
+        	<div class="longWb-nav-list">
+            	<ul>
+                	<li onclick="changeWb('longWb-white')"><i class="icon-long-white"></i><span>白纸</span></li>
+                	<li onclick="changeWb('longWb-clear')"><i class="icon-long-clear"></i><span>简洁</span></li>
+                	<li onclick="changeWb('longWb-text')"><i class="icon-long-text"></i><span>报事贴</span></li>
+                </ul>
+            </div-->
+			<!--div class="longWb-nav-view">
+				<a href="javascript:void(0)" class="btn-savedata" id="send_long">预览</a>
+			</div>
+            <div class="longWb-nav-opr">
+            	<a href="javascript:void(0)" class="btn-updata" id="submit_long" >生成长微博</a>
+            </div-->
+			
+        </div>
+        <div class="longWb-con longWb-text">
+        	<!--<div class="longWb-con-title"><input type="text" name="long_title" id="long_title" maxlength="20" class="longWb-con-input" value="请在这里输入标题" onfocus="checkfouse(1,this,'请在这里输入标题')" /></div>-->
+        	<div class="longWb-con-con">
+            <textarea name="long_content" id="long_content" class="longWb-con-textarea"></textarea>
+                <!--<textarea  name="long_content" id="long_content" class=" longWb-con-textarea" onfocus="checkfouse(1,this,'请在这里输入正文内容')" onkeyup="check_lenght_weibo(5000,'longWb-num',this)" >请在这里输入正文内容</textarea>-->
+            <div id="longWb-num"></div></div>
+        </div>
+        <div class="DiabtnCon">
+        	<a href="javascript:void(0)" class="Diabtn-all" id="submit_long" >生成长微博</a>
+            <a href="javascript:void(0);seehtml()" class="Diabtn-all" id="submit_long" >预览</a>
+            <a href="javascript:art.dialog.close();" class="Diabtn-all-del" id="cancel">取消</a>
+        </div>
+		</form>
+    </div>
+</body>
+</html>

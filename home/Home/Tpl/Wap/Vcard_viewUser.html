@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;"/>
+        <meta name="format-detection"  content="telephone=no"/>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <title>查看云名片</title>
+        <link type="text/css" rel="stylesheet" href="__PUBLIC__/Label/Css/wap_ebc_201504.css?v=__VR__" />
+        <script src="__PUBLIC__/Label/Js/jquery-1.7.2.min.js?v=__VR__" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+        <script type='text/javascript'>
+            $(function() {
+                $("#share").click(function(e) {
+                    $('.cd-popup').addClass('is-visible');
+                });
+
+                //open popup
+                event.preventDefault();
+
+                //close popup
+                $('.cd-popup').on('click', function(event) {
+                    if ($(event.target).is('.cd-popup-close') || $(event.target).is('.cd-popup')) {
+                        event.preventDefault();
+                        $(this).removeClass('is-visible');
+                    }
+                });
+
+                //close popup when clicking the esc keyboard button
+                $(document).keyup(function(event) {
+                    if (event.which == '27') {
+                        $('.cd-popup').removeClass('is-visible');
+                    }
+                });
+
+                $('.header').click(function() {
+                    history.go(-1)
+                });
+            })
+        </script>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="header">
+                <div class="back_btn"><a href="javascript:void(0)"></a></div>
+                <h1>查看云名片</h1>
+            </div>
+            <div class="content">
+                <div class="message_area">
+                    <div>
+                        <img src="{$viewQrUrl}" style="width:100%"/>
+                    </div>
+                    <if condition="$is_win_prize eq 3">
+                        <a href="{:U('Label/News/index',array('id'=>$vcard_activity_id,'wechat_card_js'=>1,'mobile'=>$mobile))}" class="btn-cj">立即抽奖<p>赢取<span>10元话费</span></p></a>
+                    </if>
+                    <a href="{$editUrl}" class="submit">修改个人信息</a>
+                    <div class="clearfix"></div>
+                    <if condition="$is_wechat eq 1">
+                        <div class="share clearfix">
+                            <span>快来分享名片吧！好友通过识别二维码快速将您的联系方式保存至手机通讯录。</span>
+                            <a href="javascript:void(0);" class="share_btn" id='share'></a>
+                        </div>
+                    </if>
+                    <p><a href="{:U('Wap/Vcard/help')}" class="bt_link">如何收藏我的云名片？</a></p>
+                </div>    
+            </div>
+        </div>
+
+        <div class="cd-popup" role="alert">
+            <div class="cd-popup-container">
+                <a href="javascript:void(0);"><img src="__PUBLIC__/Label/Image/wap_ebc/share-wx.png?v=__VR__" alt="example3"></a>
+            </div>
+        </div>
+
+    <include file="Public:footer" />
+    <script type="text/javascript">
+        var wxShareData = {:json_encode($shareData)};
+        wx.config({
+            //debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: wxShareData.appId, //必填，公众号的唯一标识
+            timestamp: wxShareData.timestamp, // 必填，生成签名的时间戳
+            nonceStr: wxShareData.nonceStr, // 必填，生成签名的随机串
+            signature: wxShareData.signature, // 必填，签名，见附录1
+            jsApiList: [
+                'onMenuShareTimeline',
+                'onMenuShareAppMessage',
+                'onMenuShareQQ',
+                'onMenuShareWeibo',
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        $(function() {
+            var shareName = '云名片';
+            wx.ready(function() {
+                wx.onMenuShareTimeline({
+                    title: shareName, //分享标题
+                    link: '{$shareUrl}', // 分享链接
+                    imgUrl: '{$shareImgUrl}', // 分享图标
+                    success: function() {
+                        // 用户确认分享后执行的回调函数
+                    },
+                    cancel: function() {
+                        // 用户取消分享后执行的回调函数
+                    }
+                });
+
+                wx.onMenuShareAppMessage({
+                    title: shareName, // 分享标题
+                    desc: '{$shareDesc}', // 分享描述
+                    link: '{$shareUrl}', // 分享链接
+                    imgUrl: '{$shareImgUrl}', // 分享图标
+                    type: '', // 分享类型,music、video或link，不填默认为link
+                    dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+                    success: function() {
+                        // 用户确认分享后执行的回调函数
+                    },
+                    cancel: function() {
+                        // 用户取消分享后执行的回调函数
+                    }
+                });
+
+                wx.onMenuShareQQ({
+                    title: shareName, // 分享标题
+                    desc: '{$shareDesc}', // 分享描述
+                    link: '{$shareUrl}', // 分享链接
+                    imgUrl: '{$shareImgUrl}', // 分享图标
+                    success: function() {
+                        // 用户确认分享后执行的回调函数
+                    },
+                    cancel: function() {
+                        // 用户取消分享后执行的回调函数
+                    }
+                });
+
+                wx.onMenuShareWeibo({
+                    title: shareName, // 分享标题
+                    desc: '{$shareDesc}', // 分享描述
+                    link: '{$shareUrl}', // 分享链接
+                    imgUrl: '{$shareImgUrl}', // 分享图标
+                    success: function() {
+                        // 用户确认分享后执行的回调函数
+                    },
+                    cancel: function() {
+                        // 用户取消分享后执行的回调函数
+                    }
+                });
+            })
+
+            function getUrlParam(name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+                var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+                if (r != null) {
+                    return unescape(r[2]);
+                } else {
+                    return null;
+                } //返回参数值
+            }
+            var phone = getUrlParam('mobile');
+            function getOtherPic() {
+                $.post('index.php?g=Wap&m=Vcard&a=getPic', {'type': 'user', 'phone': phone, 'style': 'user'})
+                $.post('index.php?g=Wap&m=Vcard&a=getPic', {'type': 'friend', 'phone': phone, 'style': 'friend'})
+                $.post('index.php?g=Wap&m=Vcard&a=getPic', {'type': 'friend', 'phone': phone, 'style': 'friendios'})
+            }
+
+            if ({$is_add}){
+				getOtherPic()
+			}
+		});
+    </script>
+</body>
+</html>

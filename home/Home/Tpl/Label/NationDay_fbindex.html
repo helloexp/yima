@@ -1,0 +1,322 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$marketInfo['name']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20151001.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/idangerous.swiper.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js"></script>
+<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script>
+    var wxShareData = <?php echo json_encode($shareData['config']);?>;;
+    if(wxShareData) {
+        wx.config({
+            //debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: wxShareData.appId,  //必填，公众号的唯一标识
+            timestamp: wxShareData.timestamp, // 必填，生成签名的时间戳
+            nonceStr: wxShareData.nonceStr, // 必填，生成签名的随机串
+            signature: wxShareData.signature,// 必填，签名，见附录1
+            jsApiList: [
+                'onMenuShareTimeline',
+                'onMenuShareAppMessage'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+    }
+$(document).ready(function(e) {
+    wx.ready(function () {
+        wx.showOptionMenu();
+        var title = "{$shareData['desc']}";
+        var link = "{$shareData['link']}";
+        var imgUrl = "{$shareData['imgUrl']}";
+        wx.onMenuShareTimeline({
+            title: title, // 分享标题
+            link: link, // 分享链接
+            imgUrl: imgUrl // 分享图标
+        });
+        wx.onMenuShareAppMessage({
+            title: "{$shareData['title']}", // 分享标题
+            desc: "{$shareData['desc']}", // 分享描述
+            link: "{$shareData['link']}", // 分享链接
+            imgUrl: "{$shareData['imgUrl']}"// 分享图标
+        });
+    })
+	var loadImg = 0;
+	var imgNum = $(".loadimg").length-1;
+	$(".loadimg").one('load', function () {
+        loadImg++;
+		if (loadImg >= imgNum) {
+			$("#loading").hide();
+			$("#wrapper").addClass("begin");
+            return false;
+		}
+	}).each(function () {
+		if (this.complete) $(this).load();
+	});
+    setTimeout(function(){
+        $("#loading").hide();
+        $("#wrapper").addClass("begin");
+    },5000);
+});
+</script>
+</head>
+<body>
+<a href="{:U('Fb/ChangShaBank/index')}"><img src="__PUBLIC__/Label/Image/Item/csyh-10.png?v=__VR__" class="csyhImg"></a>
+<div id="loading">
+    <div class="loadingbox">
+        <h4>{$nodeName}</h4>
+        <div><i></i>
+            <?php if ($marketInfo['log_img']) { ?>
+            <img src="{$marketInfo['log_img']}" />
+            <?php } else{ ?>
+            <img src="__PUBLIC__/Label/Image/defaultlogo-sTwo.png">
+            <?php } ?>
+        </div>
+        <h5>Loading...</h5>
+        <h6>我是升旗手</h6>
+    </div>
+    <img src="__PUBLIC__/Label/Image/20151001/loadingbg.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151001/bg.jpg" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151001/flag.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151001/title.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151001/students.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151001/prizebg.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151001/qj-18.png" class="loadimg" />
+</div>
+<div id="wrapper">
+    <div id="container">
+    	<div id="main">
+        	<div id="header">
+            	<div class="logo"><div class="logoimg"><?php if ($marketInfo['log_img']) { ?>
+                    <img src="{$marketInfo['log_img']}" />
+                    <?php } else{ ?>
+                    <img src="__PUBLIC__/Label/Image/defaultlogo-sTwo.png" />
+                    <?php } ?></div><p>{$nodeName}</p></div>
+            	<img src="__PUBLIC__/Label/Image/20151001/title.png" class="title" />
+            	<img src="__PUBLIC__/Label/Image/20151001/students.png" class="students" />
+            	<div class="flag"><img src="__PUBLIC__/Label/Image/20151001/flag.png" class="flagimg" /></div>
+            	<div class="cloud"></div>
+
+            </div>
+            <div class="con">
+                <div class="opr-begin"><a href="{:U('Label/NationDay/playGame',array('id'=>$id))}" class="btn-green">我要升旗</a></div>
+                <div class="opr-other">
+                	<a href="javascript:void(0)" class="btn-normal btn-introduce">活动规则</a>
+                	<a href="{:U('Label/NationDay/foodList',array('id'=>$id))}" class="btn-normal">我的材料</a>
+                	<a href="{:U('Label/NationDay/mycardList',array('id'=>$id))}" class="btn-normal">中奖记录</a>
+                </div>
+                <php>if($list1 !=""){</php>
+                <div class="drawPrize">
+                	<div class="drawPrizeWrapper">
+                    	<div class="fn">
+                            <div class="drawPrizeCon">
+                                <ul class="swiper-wrapper">
+                                    <volist name="list1" id="vo">
+                                        <li><p><img src="{$vo.headimgurl}">{$vo.nickname}&nbsp;&nbsp;&nbsp;&nbsp;{$vo.goods_name}</p></li>
+                                    </volist>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <php>}</php>
+                <div class="prize">
+                    <div class="prizeFlash">
+                    	<ul class="swiper-wrapper">
+                            <volist name="list" id="vo">
+                                <li class="swiper-slide"><h2>{$vo.name}</h2><div class="img"><img src="__UPLOAD__/<?php echo $vo['goods_image'];?>" /></div><p>{$vo['batch_short_name']}</p></li>
+                            </volist>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var wxShareData = <?php echo json_encode($shareData);?>;
+</script>
+<include file="Label/Public/_shareWx"/>
+<include file="Public:footer"/>
+</body>
+</html>
+<script>
+var _global = {
+		onsub:false,
+		g:true
+	}
+$(document).ready(function(e) {
+	$(".btn-introduce").click(function(){
+		var html = template("js-tmpl-rule");
+		cj.content({
+			title:"活动规则",
+			msg:html
+		});
+	});
+	drawPrizeCon = new Swiper('.drawPrizeCon',{
+		loop:true,
+		slideElement:"li",
+		mode: "vertical",
+		autoplay:2000,
+		autoplayDisableOnInteraction:2000,
+		slidesPerView:5
+	});
+});
+var cj = {
+	basic:function(msg){
+		cj.close();
+		if(!msg.title){var notitle="notitle";msg.title="";}else{var notitle="hastitle"}
+		if(msg.isclose){var closehtml = '<a href="javascript:void(0)" class="close-msgPop"><i><span>+</span></i></a>'}else{var closehtml = "";}
+		var html = ['<div class="msgPop bg" id="'+msg.id+'">',
+			'<div class="msgBg">',
+			'<div class="msgTitle '+notitle+'">'+msg.title+closehtml+'</div>',
+			'<div class="msgCon">'+msg.html+'</div>',
+			'</div>',
+			'</div>'].join('');
+		$("body").append(html);
+		if(typeof(msg.start) == 'string'){
+			window[msg.start].call(this,$(this));
+		}else if(typeof(msg.start) == 'function'){
+			msg.start.call(this,$(this));
+		}
+		$("body").find(".msgBg",html).on("click",".cjBtn-back",function(){
+			var index = $(this).index();
+			if(typeof(msg.btn[index].callback) == 'string'){
+				window[msg.btn[index].callback].call(this,$(this));
+			}else if(typeof(msg.btn[index].callback) == 'function'){
+				msg.btn[index].callback.call(this,$(this));
+			}else{
+				msg.repeat ? (cj.close(),cj.login({repeat:msg.repeat})) : cj.close();
+				if($(this).attr("href")!="javascript:void(0)"){
+					window.location.href = $(this).attr("href");
+				}
+			}
+		});
+		$("body").find(".msgBg",html).on("click",".close-msgPop",function(){
+			if(typeof(msg.after) == 'string'){
+				window[msg.after].call(this,$(this));
+			}else if(typeof(msg.after) == 'function'){
+				msg.after.call(this,$(this));
+			}
+			msg.repeat ? (cj.remove(),cj.login({repeat:msg.repeat})) : cj.remove();
+		});
+		$("body").on("click","input",msg.html,function(){
+			$(this).removeClass("erro");
+		});
+	},
+	tip:function(msg){
+		$(".cjTip").remove();
+		var txt = ["10秒钟内点的越多，砍掉的价格越高"];
+		var codeRandom = Math.floor(Math.random()*txt.length);
+		if(!msg){msg = txt[codeRandom]};
+		if(msg==1){return false;}
+		var html = '<div class="cjTip"><div class="cjTipTxt"><i></i><p>'+msg+'</p></div><div class="cjTipbg"></div></div>';
+		$("body").append(html);
+	},
+	content:function(msg){
+		msg = $.extend(true, {}, cj.msg,msg);
+		msg.html = template("js-tmpl-msg",msg);
+		cj.basic(msg);
+	},
+	remove:function(msg){
+		_global.g = true;
+		$(".gameCon").removeClass("end");
+		$(".msgPop").remove();
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	close:function(msg){
+		_global.g = true;
+		$(".gameCon").removeClass("end");
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		$(".msgPop").not("[id!='']").remove();
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	msg:{
+		id:"",
+		title:false,//标题
+		html:false,//内容
+		refurbish:false,//是否刷新
+		msg:"未知错误",//内容
+		icon:false,//图标
+		repeat:false,//重新填出登陆框
+		btn:[
+			{
+				text:"返回",//按钮文字
+				url:"javascript:void(0)",//按钮链接
+				callback:function(){
+					cj.close();
+				}
+			}
+		],
+		isclose:true,
+		start:false,//弹出之后callback
+		after:false//关闭之后callback
+	}
+}
+</script>
+<script type="text/html" id="js-tmpl-msg">
+<div class="cjText">
+	{{if !html}}
+	<div class="cjText-con">
+		{{if !icon}}
+			<div class="cjText-text noicon">{{#msg}}</div>
+		{{else}}
+			<div class="cjText-text">{{#msg}}</div>
+			<div class="cjText-img">
+				{{if icon==1}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-6.png" width="64">
+				{{else}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-19-{{icon}}.png" width="100">
+				{{/if}}
+			</div>
+		{{/if}}
+	</div>
+	{{else}}
+	{{#html}}
+	{{/if}}
+</div>
+<div class="cjBtn">
+{{each btn as value i}}
+	<a href="{{value.url}}" class="cjBtn-back {{if btn.length>1}}{{if i==0}}sm{{/if}}{{/if}}">{{value.text}}</a>
+{{/each}}
+</div>
+</script>
+<script type="text/html" id="js-tmpl-rule">
+<div class="gameRule">
+	<div class="divRule">
+		<p><b>活动时间：</b><php>echo date('Y-m-d',strtotime($marketInfo['start_time']));</php>至<php>echo date('Y-m-d',strtotime($marketInfo['end_time']));</php></p>
+        <p><b>活动攻略：</b>
+            <br/>1、在15秒内用手指快速点击红旗，倒计时结束前，红旗升至旗杆顶部完成游戏；
+            <br/>2、每次升旗成功后，即有机会获得兑换材料；
+            <br/>3、集齐指定的材料后就可兑换奖品，每位参与用户在活动期内仅限兑换一次奖品；
+        </p>
+        <p><b>兑奖规则：</b>
+			<br/>一等奖：集齐数字20151001，奖品：迪士尼汤叉组一套，共20份
+			<br/>二等奖：集齐数字151001，奖品：史努比咖啡杯一套，共80份
+			<br/>三等奖：集齐数字1001，奖品：苏泊尔奶锅一份，共100份
+        </p>
+        <p><b>兑奖方法：</b>
+			<br/>兑奖成功将收到兑奖确认短信，点击短信内链接进入确定页面，请准确填写奖品寄送地址，所获奖品将在15个工作日内寄到您填写的寄送地址。
+        </p>
+        <p><b>活动说明：</b><br/><php>echo nl2br($marketInfo['wap_info']);</php></p>
+	</div>
+</div>
+</script>

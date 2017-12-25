@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_卡券管理_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/jquery-ui.css" rel="stylesheet" type="text/css" />
+
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script>
+//$(function(){
+//	$(".clip2Board").click(function(e) {
+//        var urlOrigin = $(this).attr("data-rel");
+//		alert(urlOrigin);
+//		window.clipboardData.setData("Text",urlOrigin);
+//		alert("复制成功!");
+//    });
+//})
+
+function statusChange(id,status){
+	 if(status==1){
+	        var title="您确认停止该活动？";
+	    }else{
+	        var title="您确认启用该活动？";
+	    }
+	art.dialog.confirm(title,function(){
+        $.post("{:U('Weixin/WeixinCard/cardBatchStatus')}",{"id":id,"status":status},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+function show(name,url){
+    art.dialog({
+        title: name,
+        content: "<img src='"+url+"' border='0'>",
+        lock:true
+    });
+}
+
+</script>
+
+<script>
+function newList(){
+    $.get("{:U('Weixin/WeixinCard/testWhiteList')}"+"&v="+Math.random(),function(data){
+
+        var ob = eval(data.data);
+
+        if('' == ob){
+            newAdd();
+        }else{
+            var testTmp = '';
+            for(var i=0; i<ob.length-1;i++){
+                testTmp += "<tr><td>"+ob[i]+"</td><td><a href='javascript:void(0)' onclick='newDelete("+i+")' class='js_del'>删除</a></td></tr>";
+            }
+
+
+            var testHtml2="<div class='txt-image-filter'>"+
+                          "<p>"+
+                          "<table cellpadding='0' cellspacing='0' class='W-table' style='width:400px'>"+
+                          "<tbody>"+
+                          "<tr><th>微信号</th><th>操作</th></tr>";
+
+            testHtml2 += testTmp;
+            testHtml2 +=  "</table>"+
+                          "</p>"+
+                          "<p style='text-align:center; margin:20px 0'><a href='' class='btn btn btn_default' style='padding: 0 10px;'>取消</a><a href='javascript:void(0)' onclick='newAdd()'  class='btn btn_primary ml10' style='padding: 0 10px;'>添加新用户</a></p></div>";
+
+            art.dialog({
+                title:"测试白名单管理",
+                lock:true,
+                content:testHtml2,
+                id:"testName",
+                width:"600px",
+                height:"300px",
+                padding:0
+            });
+        }
+        },'json');
+}
+
+function newAdd(){
+
+    var testHtml="<div class='txt-image-filter'><p><label class='pl0'>输入微信号：</label><input type='text' name='wxId' value='' class='selectbox' style='width:250px;'></p><p style='line-height:24px; border:1px #eee solid; margin:10px 0; padding:5px;border-radius:3px; color:#999'>注：请输入个人微信号，非微信昵称！</p><p style='text-align:center'><a href='' class='btn btn btn_default' style='padding: 0 10px;'>取消</a><a href='javascript:void(0)' class='btn btn_primary ml10' onclick='wxIdAdd()' style='padding: 0 10px;'>确认添加</a></p></div>";
+    art.dialog({
+        title:"测试白名单添加",
+        lock:true,
+        content:testHtml,
+        id:"testAdd",
+        width:"600px",
+        height:"300px",
+        padding:0
+    });
+    var wxId = $("[name=wxId]").val('');
+    parent.art.dialog.list['testName'].close();
+}
+
+function wxIdAdd(){
+    var wxId = $("[name=wxId]").val();
+    $.get("{:U('Weixin/WeixinCard/testWhiteListAdd')}",{wxId:wxId},function(d){
+        alert(d.info);
+    },'json')
+    parent.art.dialog.list['testAdd'].close();
+
+    setTimeout('newList()',500);
+}
+
+function newDelete(id){
+    $.get("{:U('Weixin/WeixinCard/testWhiteListDelete')}", {wxId:id},function(d){
+        alert(d.info);
+        parent.art.dialog.list['testName'].close();
+        //window.location.reload();
+        setTimeout('newList()',500);
+    },'json')
+}
+</script>
+
+</head>
+<body>
+    <div id="wrapper" class="bgfff">
+        <!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+        <div id="container" >
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <include file="LabelAdmin/Batch/WleftMenu" leftmenuid="wxkj"/>
+                </div>
+                <div class="subcon">
+                    <div class="main-name fn">
+                        <h4>微信卡券投放<a href="{:U('Weixin/WeixinCard/cardSendAdd')}" class="btn-add first"><i></i> 新增卡券投放</a><a href="javascript:void(0);" class="btn-down" onclick="newList()">测试白名单</a><span class="dn">在”微信卡券“未审核通过时，添加到”白名单“的微信号也体验创建的卡券投放活动</span></h4>
+                    </div>
+                    <div class="Wcanal-tab fn">
+                        <div class="Wcanal-tab-title">
+                            <p class="Wcanal-tab-hover"><a href="{:U('Weixin/WeixinCard/cardSendIndex')}">卡券投放</a></p>
+                            <p><a href="{:U('Weixin/WeixinCard/cardSendData')}">投放数据</a></p>
+                        </div>
+                        <div class="Wcanal-tab-list fn cl pt15">
+                            <form action="{:U('Weixin/WeixinCard/cardSendIndex')}" method="post">
+                            <div class="SearchArea">
+                            	<div class="SearchAreaLeft">
+                                <label>
+                                <span>活动名称</span>
+                                <input type="text" name="batch_name" value="{$Think.request.batch_name}"  class="selectbox" />
+                                </label>
+                                
+                                <label>
+                                <span>创建时间</span>
+                                <input name="start_time" id="start_time" onClick="WdatePicker({maxDate:'#F{$dp.$D(\\'end_time\\')}'})" type="text" value="{$Think.request.start_time}" />-<input name="end_time" id="end_time" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'start_time\\')}'})" type="text" value="{$Think.request.end_time}" /></label>
+                                <label>
+                                <select name="status" class="selectbox">
+                                    <option value="">全部</option>
+                                    <volist name="status" id="vo">
+                                    <option value="{$key}" class="" <if condition="strval($key) heq $_POST['status']">selected="selected"</if>>{$vo}</option>
+                                    </volist>
+                                </select>
+                                </label>
+                                </div>
+                                <div class="SearchAreaRight">
+                                <input type="submit" value="查询" class="searchBtn" id="result-btn" style="padding:0" />
+                                </div>
+                            </div>
+                            </form>
+                            <if condition="empty($list) && empty($_POST)">
+                                <!--无数据-->
+                                <div class="highlight_box ml20 mr20 fn">
+                                    <p class="tc">卡券投放说明<br />即可以生成一个领取卡券的H5页面；并可以根据消费者是否关注公众号等设置灵活领取条件</p>
+                                    <!--<p class="pt10 tc"><a href="{:U('Weixin/WeixinCard/cardSendAdd')}" class="btn btn_primary"><i class="icon14_common add_white"></i> 新增卡券投放</a></p>-->
+                                </div>
+                                <!--无数据-->
+                            <else />
+                                <div class="fn">
+                                    <table cellpadding="0" cellspacing="0" class="W-table">
+                                        <tbody><tr>
+                                            <th>活动名称</th>
+                                            <th>卡券名称</th>
+                                            <th>活动时间</th>
+                                            <th>访问量</th>
+                                            <th>投放数量</th>
+                                            <th>剩余数量</th>
+                                            <th>状态</th>
+                                            <th>创建时间</th>
+                                            <th style="width:150px">操作</th>
+                                        </tr>
+                                        
+                                        <volist name="list" id="vo">
+                                        <tr>
+                                            <td>{$vo['name']}</td>
+                                            <td><a href="{:U('Weixin/WeixinCard/cardDetail',array('id'=>$vo['c_id']))}">{$vo['title']}</a></td>
+                                            <td>{$vo.start_time|dateformat=###,'Y-m-d'}到<br />{$vo.end_time|dateformat=###,'Y-m-d'}</td>
+                                            <td>{$vo.click_count}</td>
+                                            <td>{$vo.storage_num}</td>
+                                            <td>{$vo['remain_num']}</td>
+                                            <td>{$status[$vo['status']]}</td>
+                                            <td>{$vo.add_time|dateformat=###,'Y-m-d'}</td>
+                                            <td>
+                                                <a href="javascript:void(0);" onclick="show('{$vo.batch_name}','{:U('LabelAdmin/ShowCode/index',array('id'=>$vo['labe_id']))}');">预览</a>
+                                                <a href="javascript:void(0);" data="{$vo['labe_id']}" data-rel="{:U('Label/Label/index',array('id'=>$vo['labe_id']),'','',true)}" id="clip2Board{$vo['labe_id']}" class="clip2Board">复制链接</a><br />
+                                                <if condition="$vo['status'] eq '1'">
+                                                <a href="{:U('Weixin/WeixinCard/cardSendEdit',array('id'=>$vo['id']))}">编辑</a>
+                                                </if>
+                                                <?php if($vo['status'] == '1'){?>
+                                                <a href="javascript:void(0);" onclick="statusChange('<?php echo $vo['id']?>','1')"><i class="icon-stop"></i><span>停止活动</span></a>
+                                                <?php }elseif($vo['status'] == '2'){?>
+                                                <a href="javascript:void(0);" onclick="statusChange('<?php echo $vo['id']?>','2')"><i class="icon-begin"></i><span>启用活动</span></a>
+                                                <?php }?>
+                                            </td>
+                                        </tr>
+                                        </volist>
+                                    </table>
+                                    <div class="page">{$page}</div>
+                                </div>
+                            </if>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script src="__PUBLIC__/Js/ZeroClipboard.js"></script>
+<script language="JavaScript">
+$(function(){
+	$(".clip2Board").each(function(i){
+			var id = $(this).attr('data');
+			var clip=null;
+			clip = new ZeroClipboard.Client();
+			ZeroClipboard.setMoviePath( './Home/Public/Js/ZeroClipboard.swf' );  //和html不在同一目录需设置setMoviePath
+			ZeroClipboard.setMoviePath( './Home/Public/Js/ZeroClipboard.swf' );
+			clip.setHandCursor( true );
+			clip.setText( $("#clip2Board"+id).attr("data-rel"));
+			clip.addEventListener('complete', function (client, text) {
+				Diasucceed("链接已保存至剪贴板","",2)
+			});
+			clip.glue( 'clip2Board'+id);
+	  });		
+})
+
+</script>
+

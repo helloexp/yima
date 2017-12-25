@@ -1,0 +1,289 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$cardInfo['page_title']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_bjgp.css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<style type="text/css">
+    .aui_inner .aui_header { display: none;}
+    .aui_inner .aui_buttons { height: auto; padding: 0;}
+    .aui_inner .aui_content { padding: 15px 0px;}
+    .aui_inner .aui_content { width: 100%; height: 100%; text-align: center;}
+    .aui_inner .aui_content h2 { text-align: center; font-size: 18px; color: #333333; padding-top: 40px;}
+    .aui_inner .aui_content h3 { text-align: center; font-size: 16px; color: #444444;}
+    .aui_inner .aui_content p { margin: 0 20px; font-size: 14px; color: #666666; text-align: justify;}
+    .aui_inner .aui_content p span { color: #ea5504;}
+    .aui_inner .aui_buttons button { width: 300px; display: block; border: none; background:#f4f4f4; margin: 0 auto; text-align: center; line-height: 56px; height: 56px; font-size: 16px; color: #ea5504;}
+    .aui_inner .aui_buttons button,.aui_buttons button.aui_state_highlight { border-color: #ededed;  border-top: 1px #ededed solid; color: #ea5504;}
+    .aui_inner .aui_buttons button:hover,.aui_buttons button.aui_state_highlight:hover { background:#f4f4f4; border: none; color: #ea5504;}
+    .aui_buttons button.aui_state_highlight:focus { outline:none 0; border-color:#ed3f41;color: #ea5504;}
+    .msg-all-succeed {
+    border: solid 1px #4dbf00;
+    background: #f0ffe5;
+    padding: 9px 49px;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 13px;
+    color: #444;
+}
+.Gform .input .btn-input.half {
+    padding: 0px 1px;
+    margin-top: 8px;
+    float: right;
+    line-height: 28px;
+    color: #ed3f41;
+    border: 1px #ed3f41 solid;
+    border-radius: 18px;
+}
+.richText p img{
+    width:375px;
+    height:121px;
+}
+</style>
+<script>
+    $(document).ready(function(e){
+    	var store=$('.merchant').val();
+    	if(store==''){
+    		$('#phone,#verify,#name,#age').attr('readonly',true);
+    	}
+        $("#getpasscode").click(function(){
+            var bindPhoneNo = $('#phone').val();
+            var store=$('.merchant').val();
+            if(!bindPhoneNo){
+                art.dialog({width:300,height:100,title:false,content:"<h2>"+手机号码不能为空+"</h2>",fixed: true,padding:0,button:[{
+                                name: '关闭',
+                                callback: function(){
+                                    this.close();
+                                    window.close();
+                                    return false;
+                                }
+                            }]});
+                return false;
+            }
+            var phoneArray = new Array();
+            phoneArray.push({name: 'phone', value: bindPhoneNo});
+            phoneArray.push({name:'merchant_id',value:store});
+
+            var self = $(this);
+            if(self.data('in_ajax') != 0) return ;
+            self.data('in_ajax', 1);
+            self.val("正在发送......");
+            $.ajax({
+                type: "POST",
+                data: phoneArray,
+                url: "{:U('GpEye/EyeWap/judgeByInfo')}",
+                dataType:"json",
+                success: function(re) {
+                    self.data('in_ajax', 0);
+                    if(re.status == '0') {
+                        art.dialog({width:300,height:100,title:false,content:"<h2>"+re.info+"</h2>",fixed: true,padding:0,button:[{
+                                name: '关闭',
+                                callback: function(){
+                                    this.close();
+                                    window.close();
+                                    return false;
+                                }
+                            }]});
+                        self.val("获取密码");
+                    } else {
+	                        $.ajax({		
+					                type: "POST",
+					                data: phoneArray,
+					                url: "{:U('GpEye/EyeWap/sendCheckCode')}",
+					                dataType:"json",
+					                success: function(data) {
+					                	console.log(data);
+					                    self.data('in_ajax', 0);
+					                    if(data.status == '0') {
+					                        art.dialog({width:300,height:100,title:false,content:"<h2>"+data.info+"</h2>",fixed: true,padding:0,button:[{
+                                name: '关闭',
+                                callback: function(){
+                                    this.close();
+                                    window.close();
+                                    return false;
+                                }
+                            }]});
+					                        self.val("获取密码");
+					                    } else {
+					                        self.data('in_ajax', 2);
+					                        self.val("60秒后重获密码");
+					                        var sed = 60, Int;
+					                        function aha(){
+					                            sed = sed - 1;
+					                            if( sed == 0){
+					                                self.data('in_ajax', 0);
+					                                self.val('重新获取密码');
+					                                clearInterval(Int);
+					                                return;
+					                            }else{
+					                                self.val(sed+'秒后重获密码');
+					                            }
+					                        }
+					                        Int = setInterval(aha, 1000);
+					                    }
+					                }
+	            			});
+                    }
+                }
+            });
+        });
+        $(".btn-up").click(function(){
+            if(!$("#form").validationEngine('validate')){
+                return false;
+            }
+            // var dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>"+"等待加载"+"</div>",fixed: true,padding:0});
+            dialog = art.dialog({width:300,height:100,title:false,content:"<h2>正在加载...</h2>",fixed: true,padding:0});
+            $.ajax({
+                    url:"{:U('GpEye/EyeWap/appointmentWap')}",
+                    type:'post',
+                    data:$("#form").serialize(),
+                    dataType:'json',
+                    success:function(data){
+                         dialog.close();
+                         if(data.status==1){
+                            art.dialog({width:300,height:100,title:false,content:"<h2>"+data.info+"</h2>",fixed: true,padding:0,button:[{
+                                name: '关闭',
+                                callback: function(){
+                                    this.close();
+                                    window.close();
+                                    return false;
+                                }
+                            }]});
+                         	$(".btn-up").val("已预约");
+                         	$(".btn-up").attr("disabled", "disabled");
+                         }   else{
+                         	art.dialog({width:300,height:100,title:false,content:"<h2>"+data.info+"</h2>",fixed: true,padding:0,button:[{
+                                name: '关闭',
+                                callback: function(){
+                                    this.close();
+                                    return false;
+                                }
+                            }]});
+                         }
+                    }
+                });
+        });
+        $('.merchant').change(function(){
+        	var merchant_name=$(this).val();
+        	if(merchant_name!=''){
+        		$('#phone,#verify,#name,#age').attr('readonly',false);
+        	}
+        	$.ajax({
+                type: "POST",
+                data: 'id='+merchant_name,
+                url: "{:U('GpEye/EyeWap/merchantInfoById')}",
+                dataType:"json",
+                success: function(data) {
+                	if(data.status==1){
+                		$('.storeDetails .store_phone').html('门店电话：'+data.data.store_phone);
+                   		$('.storeDetails .store_add').html('门店地址：'+data.data.address);
+                	}
+                }
+            });
+        })
+    });
+</script>
+</head>
+<body>
+<div id="wrapper" class="exgratia">
+    <div id="container">
+        <div id="header" class="userCenter fn dn">
+        	<div class="goback"><i></i></div>
+            <div class="logo"><!--<i>惠</i>--><span>{$cardInfo.page_title}</span></div>
+        </div>
+        <div id="main">
+            <div id="mainCon">
+            	<div class="richText">{$cardInfo.page_content|html_entity_decode}</div>
+                <div class="Gform yaoqing">
+                	<form id="form" action="U('GpEye/EyeWap/appointmentWap')" method="post" name="form">
+                		<div class="item mt15">
+		        			<ul>
+		                        <li class="name w100"><span>*</span>预约门店</li>
+		                        <li class="input pl100">
+		                        	<select name="merchant_id" class="merchant validate[required]">
+										<option value=''>请选择</option>
+										<volist name="merchant" id="mer">
+										<option value='{$mer.id}'>{$mer.store_short_name}</option>
+										</volist>
+									</select>
+									<i></i>
+		                        </li>
+		                    </ul>
+							<div class="storeDetails">
+								<p class="store_phone">门店电话：</p>
+								<p class="store_add">门店地址：</p>
+							</div>
+		                    <ul>
+		                        <li class="name w100"><span>*</span>预约手机号</li>
+		                        <li class="input pl100">
+		                        	<input name="phone" id="phone" type="text" class="textbox validate[required,minSize[11],custom[phone]]" maxlength="11" placeholder="请输入11位手机号" data-rel="" value=""/>
+		                        </li>
+		                    </ul>
+		        			<ul>
+		                        <li class="name w100">验证码</li>
+		                        <li class="input pl100">
+		                        	<input name="check_code" type="text" id="verify" maxlength="6" class="textbox half validate[required]" placeholder="请输入验证码" data-rel="">
+			                        <input type="button" name="getpasscode" id="getpasscode" class="btn-input half" value="获取验证码" data-in_ajax="0">
+		                        </li>
+		                    </ul>
+		                    <ul>
+		                        <li class="name w100"><span>*</span>看诊人姓名</li>
+		                        <li class="input pl100">
+		                        	<input name="name" id="name" type="text" class="textbox validate[required]" maxlength="10" placeholder="请输入需看诊人的真实姓名" data-rel="" value=""/>
+		                        </li>
+		                    </ul>
+		                    <ul>
+		                        <li class="name w100"><span>*</span>年龄</li>
+		                        <li class="input pl100">
+		                        	<input name="age" id="age" type="text" class="textbox validate[required]" maxlength="10" placeholder="请输入需看诊人的真实年龄" data-rel="" value=""/>
+		                        </li>
+		                    </ul>
+		                    <ul>
+		                        <li class="name w100"><span>*</span>性别</li>
+		                        <li class="input pl100">
+									<select name="sex" class="validate[required]">
+										<option value="0">男</option>
+										<option value="1">女</option>
+									</select>
+									<i></i>
+		                        </li>
+		                    </ul>
+	                    </div>
+	                	<ul class="btn-ul">
+		                    <li class="btn-li"><input type="button" value="预约提交" class="btn-up" /></li>
+		                </ul>
+		            </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+
+</body>
+</html>
+<eq name="$wx_flag" value="1">
+	<script>
+    var wxShareData = {:json_encode($shareData)};
+	wxShareData = $.extend(wxShareData,{
+		title:"<?php echo $cardInfo['PAGE_TITLE']?>",
+		desc:"<?php echo $cardInfo['PAGE_TITLE']?>",
+		imgUrl:
+	});
+</script>
+<include file="Label/Public/_shareWx"/>
+</eq>

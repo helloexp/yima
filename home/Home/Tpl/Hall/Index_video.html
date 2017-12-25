@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<head>
+    <title>美图秀秀文件上传</title>
+    <meta charset="utf-8">
+    <meta name="language" content="en">
+    <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+    <script src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+    <script src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+    <script>
+        var _global = {};
+        _global = $.extend(true, {}, _global, art.dialog.data('videouploadData'));
+    </script>
+
+    <style type="text/css">
+        html, body { height:100%;}
+        body { margin:0; }
+        * { padding:0; margin:0;list-style:none;}
+        .dn { display:none;}
+        .notice,.notice-bottom{height:30px;font-size:12px;line-height: 30px;background: #fff1f2;color:#ff0000; text-indent:20px;}
+        .notice-bottom { position:absolute; bottom:0; width:100%;background: #e6e6e6; color:#000;}
+        .tab{padding-left:20px;height:30px;line-height:30px;}
+        .tab a{display:block;float:left;font-size:14px;color:#e8632b;text-decoration:none;}
+        .tab a.hover{font-weight:bold;color:#e8632b;}
+        .tab span{display:block;float:left;margin:0 15px;}
+        .exist{padding-left:20px; height:auto; overflow:hidden;}
+        .exist ul{ padding:8px 5px;margin:0; min-height:210px; overflow:hidden; text-align:center;}
+        .exist.loading {background:url(__PUBLIC__/Label/Image/Item/loading.gif) no-repeat center center;}
+        #uploadImg{background:url(__PUBLIC__/Label/Image/Item/loading.gif) no-repeat center center;}
+        .exist ul>img { margin:0 auto; margin-top:50px;}
+        .exist ul>p { font-size:12px; color:#999; padding:20px;}
+        .exist li{ position:relative; float:left;margin:15px 10px 0 0;width:80px;height:80px;overflow:hidden; border:solid 2px #fff;cursor:pointer; background-position:50% 50%; background-repeat:no-repeat;}
+        .exist li.hover{border-color:#ff8a00;}
+        .exist li i{position:absolute;top:0;right:0; width:20px;height:20px;background:#ff8a00 url(__PUBLIC__/Image/icon-form.png) no-repeat -400px 0px;display:none;}
+        .exist li.hover i { display:block;}
+        .exist li p{ position:absolute;bottom:0;left:0;width:100%;height:20px;background:#000; opacity:0.5;filter:alpha(opacity=50);}
+        .exist li span { position:absolute; z-index:3;bottom:0;left:0;width:100%;height:20px;font-size:12px;color:#fff;text-align:center;line-height:20px;}
+        .exist ul>p>a { display:inline-block; *display:inline; *zoom:1; width:80px; height:20px; border-radius:3px; border:solid 1px #ff8a00; font-size:12px; margin:0 10px; color:#ff8a00; line-height:20px; text-decoration:none;}
+        .exist .page { text-align:center; margin-top:10px;}
+        .exist .page a { font-size:12px; margin:0 10px; color:#ff8a00; text-decoration:none;}
+        .exist .page a.erro { color:#999;}
+        .button{ position:absolute; bottom:30px; width:100%;height:33px;padding-top:7px;background-color:#f0f0f0;}
+        .button a{margin-right:20px;float:right;display:block;width:70px;height:24px;font-size:12px;text-decoration:none;line-height:24px;text-align:center;}
+        .button .ok-btn{background-color:#8ad600;color:#fff;border:1px solid #65c418;}
+        .button .cancel-btn{background-color:#fbfbfb;color:#666;border:1px solid #d8d8d8;}
+        .msg-all-error { border:solid 1px #ff8080; background:#fff2f2; padding:10px 60px; text-align:center; font-size:12px; font-weight:bold; color:#444;}
+        .msg-all-succeed { border:solid 1px #4dbf00; background:#f0ffe5; padding:10px 60px; text-align:center; font-size:12px; font-weight:bold; color:#444;}
+        .msg-all-warning { border:solid 1px #40b3ff; background:#e5f5ff; padding:10px 60px; text-align:center; font-size:12px; font-weight:bold; color:#444;}
+        .chooseReady { display:none; padding:0 20px; overflow:hidden;}
+        .chooseReady>p { float:left; font-size:12px; line-height:100px; color:#999;}
+        .chooseReady .chooseReadyList { border-bottom:solid 1px #ddd;}
+        .chooseReady .chooseReadyList ul{ padding:8px 5px;margin:0; height:84px; overflow: auto; text-align:center;}
+        .chooseReady .chooseReadyList li{ position:relative; float:left;margin:0 10px 0 0;width:80px;height:80px;overflow:hidden; border:solid 2px #fff;cursor:pointer; background-position:50% 50%; background-repeat:no-repeat;}
+        .chooseReady .chooseReadyList li i{position:absolute;top:0;right:0; width:20px;height:20px;background:#de0e0e url(__PUBLIC__/Image/icon-form.png) no-repeat -430px 0px;}
+        .chooseReady .chooseReadyList li p{ position:absolute;bottom:0;left:0;width:100%;height:20px;background:#000; opacity:0.5;filter:alpha(opacity=50);}
+        .chooseReady .chooseReadyList li span { position:absolute; z-index:3;bottom:0;left:0;width:100%;height:20px;font-size:12px;color:#fff;text-align:center;line-height:20px;}
+        .chooseReady .chooseReadyList ul>p>a { display:inline-block; *display:inline; *zoom:1; width:80px; height:20px; border-radius:3px; border:solid 1px #ff8a00; font-size:12px; margin:0 10px; color:#ff8a00; line-height:20px; text-decoration:none;}
+        .video { padding-top:20px; padding-right:20px;}
+        .video p { padding:10px 0;}
+        .video p + p { padding:0; padding-bottom:10px;}
+    </style>
+</head>
+<body>
+    <div id="chooseImg">
+        <div class="exist">
+            <div class="video">
+                <p><a href="{:U('Home/Help/helpArt',array('news_id'=>'1369','leftId'=>'zxwt','class_name'=>'最新问题','type'=>'1'))}" class="r" target="_blank">如何获取通用代码</a>视频通用代码</p>
+                <p><textarea style="width:646px; height:100px;" id="url"></textarea></p>
+                <p>将视频的通用代码粘贴到文本框里即可。<a href="{:U('Home/Help/helpArt',array('news_id'=>'1369','leftId'=>'zxwt','class_name'=>'最新问题','type'=>'1'))}" target="_blank">如何获取通用代码</a><br>由于视频占用资源较大，建议您完成所有编辑后插入视频</p>
+            </div>
+        </div>
+        <div class="button">
+            <a class="cancel-btn" href="javascript:void(0);">取消</a><a class="ok-btn" href="javascript:void(0);">确定</a>
+        </div>
+    </div>
+    <div class="notice-bottom">
+        支持的视频：
+        <a href="http://www.youku.com/" target="_blank">优酷</a>、
+        <a href="http://www.tudou.com/" target="_blank">土豆</a>、
+        <a href="http://v.qq.com/" target="_blank">腾讯视频</a>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+function doCallback(callback,data){
+    if(typeof(callback) == 'string'){
+        art.dialog.opener[callback].call(this,data,_global);
+    }
+    else{
+        callback.call(this,data);
+    }
+    art.dialog.close();
+}
+$(document).ready(function(){
+    $(".ok-btn").on("click",function(){
+        var data = $("#url").val().replace(/\n/g,"").replace(/height=?[^\s]*\s/g,"height=200 ").replace(/width=?[^\s]*\s/g,"width=100% ").replace(/style=?[^\s]*"/g,"style='width:100%;height:200px;' ");
+        if(_global.callback){
+            doCallback(_global.callback,data);
+        }else{
+            alert("未定义callback");
+        }
+    });
+    $(".cancel-btn").on("click",function(){
+        art.dialog.close();
+    });
+})
+</script>

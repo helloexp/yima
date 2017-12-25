@@ -1,0 +1,454 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+    <meta content="O2O,O2O营销,二维码,旺财,列表模板" name="Keywords">
+    <meta content="telephone=no" name="format-detection" />
+    <meta content="email=no" name="format-detection" />
+    <meta name="apple-touch-fullscreen" content="NO">
+    <js href="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"/>
+    <load href="__PUBLIC__/Label/Css/wap_main_a.css"/>
+    <load href="__PUBLIC__/Label/Css/wap_Shoplist.css"/>
+    <link href="__PUBLIC__/Label/Css/wap_nav.css?v=__VR__" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?type=quick&ak=WRzAu3DNewWB4oeOELaczjsM&v=1.0"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js"></script>
+    <style>
+    .dn { display: none !important; }
+    .page.lock { display: none !important; }
+    </style>
+    <script type="text/javascript">
+        var endLng = 0; //经度
+        var endLat = 0; //纬度
+        var phonelng = 0;
+        var phonelat = 0;
+        var cityName = '';
+        var des_city = '';
+        var address = '';
+        var type=1;
+        var position=true;
+        var _start={};
+        var id={$id};
+        var allCount = 0;
+        var addreepage=1;
+        var onerrorload=true;
+        //phonelat = '31.187386';
+        //phonelng = '121.5821';
+        var translateCallback = function(point) {
+            if(point.lat && point.lng){
+                    phonelng = point.lng;
+                    phonelat = point.lat;
+                    errorload();
+                    return false;
+            }
+        }
+
+        function listselect(text){
+            if(text=="province_code"){
+                $("[name='city']").html('<option>选择市</option>');
+                $("[name='town']").html('<option>选择区</option>');
+                $("[name='city'] option:eq(0)").attr("selected",true);
+                $("[name='town'] option:eq(0)").attr("selected",true);
+            }
+            if(text=="city_code"){
+                $("[name='town']").html('<option>选择区</option>');
+                $("[name='town'] option:eq(0)").attr("selected",true);
+            }
+            var province_code = $("#province_code option:selected").text();
+            var city_code = $("#city_code option:selected").text();
+            var town_code = $("#town_code option:selected").text();
+            $("#storedata").find("dl").each(function(){
+                var province = $(this).attr("data-province");
+                var city = $(this).attr("data-city");
+                var town = $(this).attr("data-town");
+                if(province_code!="选择省"){
+                    if(city_code!="选择市"){
+                        if(province_code==province&&city_code==city){
+                            var isappend = true;
+                            $("[name='town']").find("option").each(function(){
+                                if($(this).text()==town){
+                                    isappend = false;
+                                }
+                            })
+                            if(isappend){
+                                $("[name='town']").append('<option>'+town+'</option>');
+                            }
+                        }
+                    }
+                    if(province_code==province){
+                        var isappend = true;
+                        $("[name='city']").find("option").each(function(){
+                            if($(this).text()==city){
+                                isappend = false;
+                            }
+                        })
+                        if(isappend){
+                            $("[name='city']").append('<option>'+city+'</option>');
+                        }
+                    }
+                }else{
+                    $("[name='city']").html('<option>选择市</option>');
+                    $("[name='town']").html('<option>选择区</option>');
+                }
+            });
+            searchlist();
+        }
+        function showPosition(r)
+        {
+//            定位成功走这里
+            var ggPoint = new BMap.Point(r.coords.longitude, r.coords.latitude);//传入经度纬度
+            translateCallback(ggPoint);//取数据
+            /*if(ggPoint.lat && ggPoint.lng){
+                phonelng = point.lng;
+                phonelat = point.lat;
+                errorload();
+            }*/
+        }
+
+        function hrefStore(e){
+            var url = "{:U('ListShop/storeDetils',array('id'=>$id))}&store_id="+e;
+            window.location.href = url;
+        }
+
+        function errorload(){
+            if(!onerrorload){return false;}
+            onerrorload = false;
+            $.ajax(
+                    {
+                        url:'{:U('Label/ListShop/ajaxgetist',array('id'=>$id))}',
+                    data:{
+                point_x:phonelat,
+                        point_y:phonelng,
+                        province:$('#province_code option:selected').val(),
+                        city:$('#city_code option:selected').val(),
+                        town:$('#town_code option:selected').val(),
+                        page:addreepage,
+                        storeName :$('#store_name').val(),
+                        youhui:$('#youhuiStore').val(),
+            },
+            success:function(datas){
+                onerrorload = true;
+                Util_tools.ui.loading(false);
+                if(datas.list!=null && datas.list.length>0){
+                    $('.mainList-title').text(datas.node_name);
+                    $('title').text(datas.node_name);
+                    if(datas.id==30463){
+                        $('.mainList-title').text('2014宝山区购物季参与商家');
+                    }
+                    allCount = datas.store_count;
+                    $('#store_count').html('共找到'+datas.store_count+'家门店');
+                    var _temp='';
+                    var _html='';
+                    for (var i = 0; i < datas.list.length; i++) {
+                        var currentData = datas.list[i];
+                        currentData.address = currentData.address || "";
+
+                        if(!currentData.store_pic){
+                            //如果没有门店图片 就默认一张小狗图
+                            var pic = '__PUBLIC__/Image/defilt.png';
+                        }else{
+                            var pic = '__UPLOAD__/'+currentData.store_pic;
+                        }
+
+                        var dataactivity = currentData.activity_info.length ? 1 : null;
+                        _temp += '<dl class="dn" style="text-align:left;padding:10px 3%;" data-province="'+currentData.city_town.province+'" data-city="'+currentData.city_town.city+'" data-town="'+currentData.city_town.town+'"" data-activity="'+dataactivity+'">' +
+                                '<dt  class="box" onclick="hrefStore('+'.'+currentData.store_id+'9'+')" style="width:80%;overflow: hidden;padding-right:0px;border-right:none">' +
+                                '<div class="fn" style="border-right:1px #eee solid;">'+
+                                '<div class="" style="width:40px;height:40px;border-radius:3px;overflow:hidden;float:left;margin-right:8px"><img  width="40px" height="40px" src="'+pic+'"></div>'+
+                                '<div class="cnt_title" style="width:76%;overflow: hidden;float:left;font-size:16px;"><span>' + currentData.store_name + '</span></div>' +
+                                '<div style="width:76%;overflow:hidden;float:left;font-size:12px" class="cnt_title mainList-item-address" >' + currentData.city_town.province + currentData.city_town.city + currentData.city_town.town + '</div>' +
+                                '<div style="width:76%;overflow:hidden;float:left;font-size:12px" class="cnt_title mainList-item-address" >' + currentData.address + '</div></div>' ;
+
+                        var _class = '';
+                        var _div = '';
+                        for (var j = 0; j < currentData.activity_info.length; j++) {
+                            var activityList = currentData.activity_info[j];
+                            //根据活动类型使用不同的活动图标
+                            if(activityList.activity_type == 1){
+                                var type_pic = '__PUBLIC__/Image/youhui.png';
+                            }
+                            if(activityList.activity_type == 2){
+                                var type_pic = '__PUBLIC__/Image/dazhe.png';
+                            }
+                            if(activityList.activity_type == 3){
+                                var type_pic = '__PUBLIC__/Image/cuxiao.png';
+                            }
+                            if(activityList.activity_type == 4){
+                                var type_pic = '__PUBLIC__/Image/fuwu.png';
+                            }
+
+                            _temp += '<div style="width:76%;overflow: hidden;margin-left:48px;margin-top:5px" class="cnt_title mainList-item-address" data-activitytype="'+activityList.activity_type+'" ><img src="'+type_pic+'" style="vertical-align: middle;margin-right:2px"/>' + activityList.activity_title + '</div>' ;
+                        }
+                        //$(".alert").append(currentData.path_text+"<br>")
+                        _temp +='<div style="width:100%;overflow: hidden;" class="cnt_title"></div></dt></a><dd class="' + _class + '"><div  class="ico ' + _class + '">';
+                        _temp += '<span lat ="' + currentData.lbs_x + '" onclick="gps_url(this)" lng = "' + currentData.lbs_y + '" class="col2_span1"></span>' +
+                                '<input type="hidden" value="' + currentData.city_town.city + '" class="des_city"/>' +
+                                '</div>' + _div + '<em>' + (currentData.path_text?currentData.path_text:'未知距离') + '</em>' +
+                                '<dd></dl>';
+                    }
+                    _html=_temp;
+                    $('#storedata').html(_html);
+                    $("#storedata").find(">dl.dn:lt(10)").removeClass("dn");
+                    loadcallback();
+                    $("#storedata").find("dl").each(function(){
+                        var data_province = $(this).attr("data-province");
+                        var data_city = $(this).attr("data-city");
+                        var data_town = $(this).attr("data-town");
+                        var isappend = true;
+                        $("[name='province']").find("option").each(function(){
+                            if($(this).text()==data_province){
+                                isappend = false;
+                            }
+                        })
+                        if(isappend){
+                            $("[name='province']").append('<option>'+data_province+'</option>');
+                        }
+                    })
+                }else{
+                    $('#store_count').html('共找到0家门店');
+                    $('#ntitle').hide();
+                    $('#firststore').empty();
+                    $('#pagenum').text('1');
+                    $('#storedata').html('<li>没有满足条件的数据</li>');
+                    $(".page").hide();
+                    type=1;
+                    addreepage = 1;
+                }
+                load=true;
+            },
+            error:function(){
+                onerrorload = true;
+                Util_tools.ui.loading(false);
+                alert('获取数据失败');
+            },
+            async:false,
+                    dataType:'json'})
+        }
+        function getLocation(){
+            if (position && navigator.geolocation)
+            {
+                Util_tools.ui.loading('正在获取当前位置...');
+                /*HTML5 地理定位*/
+                navigator.geolocation.getCurrentPosition(showPosition, errorload,{timeout:15000});
+            } else {
+                if(position)
+                    alert('你当前浏览器不支持定位功能');
+                position=false;
+                errorload();
+            }
+        }
+        function autoload(){
+            if ((($(window).scrollTop() + $(window).height()) ) == $(document).height()){
+                $(".page").click();
+            }
+        }
+
+        $(document).ready(function(){
+            $(window).scroll(autoload)
+            setTimeout("getLocation()",1000);
+            window.gps_url=function(_this){
+                //进入百度地图
+                endLng = $(_this).attr('lng'); //门店经纬度
+                endLat = $(_this).attr('lat');
+                des_city = $(_this).parent().children('.des_city').val();
+                //再进行定位
+                navigator.geolocation.getCurrentPosition(function(r){
+                    var ggPoint = new BMap.Point(r.coords.longitude, r.coords.latitude);//手机经纬度
+
+                    if(ggPoint.lat && ggPoint.lng){
+                        $.ajax(
+                                {
+                                    url:'{:U('Label/ListShop/getcity',array('id'=>$id))}',
+                                data:{
+                            point_x:ggPoint.lat,
+                                    point_y:ggPoint.lng
+                        },
+                        success:function(datas){
+                            if(datas.status==1){
+                                cityName=datas.info;
+
+                                var start = { latlng: new BMap.Point(datas.lng, datas.lat)};
+                                var end = {
+                                    latlng:new BMap.Point(endLng, endLat)
+                                }
+                                var opts = {
+                                    mode:BMAP_MODE_DRIVING,
+//										        region:"武汉市"
+                                    origin_region: cityName,
+                                    destination_region: des_city
+                                }
+                                var ss = new BMap.RouteSearch();
+                                ss.routeCall(start,end,opts);
+                            }
+                            else {
+                                alert('你当前浏览器不支持定位功能');
+                                return false;
+                            }
+                        },
+                        error:function(datas){
+                            Util_tools.ui.loading(false);
+                            alert('你当前浏览器不支持定位功能');
+                            return false;
+                        },
+                        async:false,
+                                dataType:'json'
+                    }
+                    )
+                }
+            }, function(error){alert('你当前浏览器不支持定位功能')});
+        }
+
+        $(function(){
+            $("body").on("click",".page",function(){
+                if(!$(this).hasClass("lock")){
+                    $("#storedata").find("dl.dn:lt(10)").removeClass("dn");
+                    loadcallback();
+                }
+            })
+            $("body").on("click",".header span.y",function(){
+                $("#youhuiStore").attr("checked",true);
+                $(".header span").removeClass("hover");
+                $(this).addClass("hover");
+                searchlist();
+            })
+
+            $("body").on("click",".header span.s",function(){
+                $("#youhuiStore").attr("checked",false);
+                $(".header span").removeClass("hover");
+                $(this).addClass("hover");
+                searchlist();
+            })
+
+            $("body").on("click","#cha",function(){
+                searchlist();
+            })
+        });
+
+        document.onkeydown=function(e){
+            //刷新之后 让优惠按钮变为不选中
+            e=e||window.event;
+            if(e.keyCode==116){
+                $("#youhuiStore").attr("checked",false);
+            }
+        }
+
+        })
+function loadcallback(){
+    if($("#storedata").find("dl.dn").length==0){
+        $(".page").hide();
+    }else{
+        $(".page").show();
+    }
+}
+function searchlist(){
+    var province_code = $("#province_code option:selected").text();
+    var city_code = $("#city_code option:selected").text();
+    var town_code = $("#town_code option:selected").text();
+    var act_checked = $("#youhuiStore").prop("checked");
+    var text_text = $('[name="storeName"]').val();
+    if(province_code=="选择省"&&city_code=="选择市"&&town_code=="选择区"&&!act_checked&&text_text==""){
+        $(".page").removeClass("lock");
+        $("#storedata").find("dl").addClass("dn");
+        $("#storedata").find(">dl.dn:lt(10)").removeClass("dn");
+        loadcallback();
+        $("#store_count").text("共找到"+$("#storedata dl").length+"家门店");
+    }else{
+        $(".page").addClass("lock");
+        $("#storedata").find("dl").addClass("dn");
+        $("#storedata").find("dl").each(function(){
+            var province = $(this).attr("data-province");
+            var city = $(this).attr("data-city");
+            var town = $(this).attr("data-town");
+            var act = $(this).attr("data-activity");
+            var text = $(this).find(".cnt_title").text();
+            var isprovince = (province_code=="选择省" || province==province_code) ? 1 : 0;
+            var iscity = (city_code=="选择市" || city==city_code) ? 1 : 0;
+            var istown = (town_code=="选择区" || town==town_code) ? 1 : 0;
+            var isact = !act_checked ? 1 : (act=='1'?1:0);
+            var istext = (text.indexOf(text_text)>=0) ? 1 : 0;
+            if(isprovince==1&&iscity==1&&istown==1&&isact==1&&istext==1){
+                $(this).removeClass("dn");
+            }
+        });
+        $("#store_count").text("共找到"+$("#storedata dl:not('.dn')").length+"家门店");
+    }
+}
+</script>
+</head>
+<body style="background:#f6f6f6">
+<div  class="wrapper" style="background:#FFF">
+    <input type="hidden" name="id" id ="id" value="{$id}"/>
+    <input type="hidden" name="node_id" id ="node_id" value="{$node_id}"/>
+    <input type="hidden" name="province_code"   value="{$_GET['province']}"/>
+    <input type="hidden" name="city_code"   value="{$_GET['city']}"/>
+    <input type="hidden" name="town_code"  value="{$_GET['town']}"/>
+    <div class="content">
+        <!--<div class="shopnav" style="height:30px;overflow:hidden;width:100%;position:relative;text-align: center;padding:7px 0;text-align:center;border-bottom:1px solid #e5e5e5">
+            <div class="goback" style="position:absolute;top:7px;left:0;width:35px;height:30px;cursor:pointer;"><i></i></div>
+            <div class="mainList-title" style="color: #3d4245;;font-size:16px;line-height:30px">正在获取当前位置...</div>
+        </div>-->
+      <style>
+          .header{width: 100%;height: 55px;background: #f8f8f8;text-align: center;line-height: 50px;position: relative;font-size:16px;}
+          .header i{background: url(__PUBLIC__/Label/Image/arrow_left.png) no-repeat;display: block;position: absolute;left: 5%;width: 13px;height: 39px;background-size:100%;top:15px;}
+          .header span{height: 20px;background: #fff;border:1px solid #42474d;padding:2px 15px;font-size: 0.7em;cursor:pointer;display: inline-block;line-height:20px;}
+          .header .s{border-top-left-radius: 5px;border-bottom-left-radius: 5px;border-right:none;color: #42474d;}
+          .header .y{border-top-right-radius: 5px;border-bottom-right-radius: 5px;color: #42474d;}
+          .header span.hover{color: #fff;background: #42474d;}
+          .header b{background: url(__PUBLIC__/Label/Image/ico-search.png) no-repeat;display: block;position: absolute;right: 5%;width: 25px;height: 39px;background-size:100%;top:15px;cursor:pointer}
+          .serch{width: 100%;background: #eee;height: 70px;box-sizing: border-box;padding: 20px 5%;}
+          .serch ul li{width:93%;margin:0 auto;height:35px;padding-left:25px;background:url(__PUBLIC__/Label/Image/ico-search1.png) #fff 0 0 no-repeat ;background-size:16px;background-position:7px 9px;line-height:35px;text-align:left;border-radius: 4px;overflow:hidden;position:relative}
+          .serch ul li input{height:35px;width:80%;font-size: 1em;}
+          .serch ul li a{background:#ed3f41;display:inline-block;width:20%;color: #fff;text-align: center;position:absolute;right:0px;top:0px;border-radius:0px 4px 4px 0px}
+        </style>
+        <div class="header">
+            <input name="" type="checkbox"  autocomplete="off" style="display:none" id="youhuiStore" value="">
+            <a href="javascript:history.go(-1);"><i></i></a>
+            <span class="s hover" data-id="0">所有门店</span><span class="y" data-id="1">优惠门店</span>
+            <b onclick='$(".serch").slideToggle("slow");'></b>
+        </div>
+        <div class="serch" style="display:none">
+            <ul>
+                <li><input name="storeName" id="store_name" type="text" placeholder="请输入门店名称"><a href="javascript:void(0)" id="cha">搜索</a></li>
+            </ul>
+        </div>
+
+        <div class="selectList" style="border-bottom:1px solid #e5e5e5;padding:8px 3%;line-height:15px">
+            <select style="width:33%;margin-left:0px" onchange="listselect('province_code')" name="province" id="province_code">
+                <option value="0">选择省</option>
+            </select>
+            <select style="width:33%;margin-left:0px" name="city" onchange="listselect('city_code')"  id="city_code">
+                <option value="0">选择市</option>
+            </select>
+            <select style="width:33%;margin-left:0px"  name="town" id="town_code" onchange="listselect('town_code')">
+                <option value="0" >选择区</option>
+            </select>
+        </div>
+
+        <div class="noticeArea">
+            <div class="ntitle" id='ntitle' style="display: none;"><span><em>★</em> 离你最近的门店 <em>★</em></span></div>
+            <div id="firststore"></div>
+        </div>
+        <div class="clearfix"></div>
+        <div class="noticeArea">
+            <div id="store_count"  class="ntitle noborder">共找到0家门店</div>
+            <div id='storedata' style="background: #fff ;height: auto">
+
+            </div>
+        </div>
+        <div>
+            <div id='pagenum' style="display: none;">1</div>
+            <div class="page">查看更多</div>
+        </div>
+    </div>
+</div>
+<php>if($node_id!=C('df.node_id')){</php>
+<div class="copyright1"  style="width: 100%;background: #F3F3F3;opacity:0.7">
+    <div class="found"><a href="{:U('Med/index',array('id'=>56407,'wechat_card_js'=>1))}" target="_blank">免费dd创建一个场景&nbsp;—&nbsp;翼码旺财</a></div>
+    <p><a  style="color:black" href="javascript:;" class="call" target="_blank">拨打商家热线</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:;" style="color:black" class="report" target="_blank">非法内容举报</a></p>
+    <p>©2016 翼码科技 wangcaio2o.com 版权所有</p>
+</div>
+<php>}</php>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>我的返佣</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_marketing.css">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js"></script>
+<script>
+$(document).ready(function (e) {
+	var num = $(".myOrder ul li").length;
+	if(num==1){
+		$(".myOrder ul li").width(100/num+"%");
+		$(".myOrder ul li").css("float","left");
+		$(".myOrder ul li p").css("text-align","center");
+		$(".myOrder ul li p").css("float","none");
+	}else if(num==3){
+		$(".myOrder ul li").width(100/num+"%");
+		$(".myOrder ul li").css("float","left");
+		$(".myOrder ul li p").css("text-align","center");
+		$(".myOrder ul li p").css("float","none");
+	}
+$(".btn-alipay").click(function(){
+		var html = ['<form id="bindform" action="{:U('Label/MyReturn/bindalipay')}" method="post" name="bindform"><input type="hidden" name="id" value="<?php echo session("id");?>">',
+						'<div class="cjForm">',
+							'<div class="cjFormTitle">绑定支付宝账号<br /> <span class="tips">请确保支付宝账号无误，否则无法收到您的佣金</span></div>',
+							'<ul class="sOne-cjForm">',
+								'<li><input type="text" name="aliaccount" id="aliaccount" class="sOne-alipayInput"  value="<?php echo $bindpay;?>"placeholder="请输入支付宝账号" /></li>',
+								'<li><input type="text" name="alipay_name" id="alipay_name" class="sOne-alipayInput"  value="<?php echo $bindname;?>"placeholder="请输入支付宝姓名" /></li>',
+								'<li class="pt20"><input type="submit" name="but" value="立即绑定" class="btn-alipay-button" /></li>',
+							'</ul>',
+						'</div>',
+					'</form>'].join('');
+		msgPop(html)
+	})
+	
+	$(".btn-alipay-success").click(function(){
+		var html = ['<form id="bindform" action="{:U('Label/MyReturn/getMoney')}" method="post" name="bindform"><input type="hidden" name="old_money" value="{$remain}">',
+						'<div class="cjForm">',
+							
+							'<p class="tl" style="line-height:28px;padding-left:15px;">您可提领的现金总额为：<span class="tips">{$remain}</span>元</p>',
+							'<p class="tl" style="line-height:28px;padding-left:15px">您本次提领的支付宝手续费为：<span class="tips">{$zfb_money}</span>元</p>',
+							'<p class="tl" style="line-height:28px;padding-left:15px">您本次提领的实际到账金额为：<span class="tips">{$remain-$zfb_money}</span>元</p>',
+							'<ul class="sOne-cjForm">',
+								'<li class="pt20" style="height:45px;"><input type="submit" name="but" value="确定提领" class="btn-alipay-button" /></li>',
+							'</ul>',
+							'<span class="tips">注：提领后将在7个工作日内到账。</span>',
+						'</div>',
+					'</form>'].join('');
+		msgPop(html)
+	})
+	
+	$(".btn-deitalipay").click(function(){
+		var html = ['<form id="theform" action="" method="post" name="theform">',
+						'<div class="cjForm">',
+							'<div class="cjFormTitle">修改支付宝账号</div>',
+							'<ul class="sOne-cjForm">',
+								'<li><input type="text" name="" id="" class="sOne-alipayInput" placeholder="请输入支付宝账号" /></li>',
+								'<li class="pt20"><input type="button" id="" value="立即绑定" class="btn-alipay-button" /></li>',
+							'</ul>',
+						'</div>',
+					'</form>'].join('');
+		msgPop(html)
+	})
+	
+	$(".myMarketList dd").click(function(){
+		var src=$(this).attr("data-src");
+		if(src==""){
+			return false;
+		}
+		var html = ['<img src="'+src+'" style="margin:0 auto;" />'].join('');
+		msgPop(html);
+	})
+})
+function msgPop(msg){
+	var html=['<div class="msgPop">',
+			'<div class="msgPopCon">',
+				'<a href="javascript:void(0)" class="close" onclick="msgPopclose()">+</a>',
+				''+msg+'',
+			'</div>',
+		'</div>'].join('');
+	$("body").append(html);
+	
+}
+function msgPopclose(){
+	$(".msgPop").remove();
+}
+
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="fn">
+            <div class="back"><i></i></div>
+			
+            <div class="title">我的返佣</div>
+        </div>
+        <div id="main">		
+            
+            <div id="mainCon" class="mainCon fn m0">
+            	<div class="myMarket">
+                    
+					<?php
+					if($bindpay==""){					
+					?>
+					<div class="myphone"><p class="noalipay">手机号：<?php echo session('groupPhone');?>(未绑定支付宝)</p><a href="javascript:void(0)" class="btn-alipay">立即绑定</a></div>
+                    <?php
+					}else{
+					?>					
+                    <div class="myphone"><p class="hasalipay">手机号：<?php echo session('groupPhone');?> <br /><span>已绑定支付宝账号：<?php echo $bindpay;?><br>(<?php echo $bindname;?>)</span><a href="javascript:void(0)" class="btn-alipay">修改</a></p></div>
+                   <?php
+				   }
+				   ?>
+                   
+                    <div class="mycommission">
+                    	<p>
+                    	您还有<span class="font-ff7665">{$remain}</span>元现金尚未领取<br />
+                        <span>您总计已领取<span class="font-2ab6fa">{$have}</span>元现金</span>
+                        </p>
+                        <?php
+                        if($istbfb ===true && $remain > 0){
+						if($bindpay==""){					
+						?>
+                       <a href="javascript:void(0)" class="btn-alipay">马上领取</a>
+                       <?php }else{?>
+                       <a href="javascript:void(0)" class="btn-alipay-success">马上领取</a>
+                       <?php }}?>
+                    </div>
+                </div>
+                <div class="myMarketList">
+                    <dl>
+                    	<dt>我的返佣</dt>
+                        
+						<?php
+						if(!empty($detailList)){
+							foreach($detailList as $dk=>$dl){
+						?>
+						<dd data-src="<?php echo $dl['barcode_bmp'];?>">
+                        	<h2><?php echo $dl['name'];?></h2>
+							<?php
+							if($dl['commission_type']==3){
+							?>
+                            <h3>现金<?php echo $dl['return_num']?>元<br />
+							<?php
+							}else{
+							?>
+							<?
+							?>
+							<h3><?php echo $dl['name'];?><br />
+							<?php
+								}
+							?>
+							<span <?php if($dl['return_status']=='0'){?>class="nosend"<?php }else{?>class="send"<?php }?>><?php if($dl['return_status']=='0'){?>未发放<?php }else{?>已发放<?php }?></span></h3>							
+                        </dd>
+						<?php
+							}
+						}else{						
+						?>
+						<dt>查询无数据！</dt>
+						<?php
+						}
+						?>
+
+                        
+                    </dl>
+                </div>
+            </div>
+            <include file="Public:footer"/>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+<div class="fixedMarketing"><a href="javascript:void(0)" class="a-hide"></a></div>
+</body>
+</html>

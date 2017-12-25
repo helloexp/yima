@@ -1,0 +1,381 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>企业资质信息_账户中心_翼码旺财</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/Wcanal.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/artDialog/jquery.artDialog.js?skin=default"/>
+
+<js href="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+
+<script type="text/javascript">
+
+$(function(){
+
+    $("#theform").submit(function(){
+
+        var dialog;
+
+
+
+        if($("#theform").validationEngine('validate')){
+
+            art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+
+            return true;
+
+        }
+
+
+
+        return false;
+
+    });
+
+});
+
+//文件上传
+
+function ajaxFileUpload(imgid,hiddenid,showid,url){
+
+    var dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在上传...</div>",fixed: true,padding:0});
+
+    $.ajaxFileUpload({
+
+        url:url,
+
+        secureuri:false,
+
+        fileElementId:imgid,
+
+        dataType: 'json',
+
+        data:{name:'logan', id:'id'},
+
+        success: function (data, status){
+
+            if(typeof(data.error) != 'undefined'){
+
+                if(data.error != ''){
+
+                    dialog.time(3).content("<div class='msg-all-error'>"+data.error+"</div>");
+
+                }else{
+
+
+
+                    var resp = data.msg;
+
+                    if(resp != '0000'){
+
+                        dialog.time(3).content("<div class='msg-all-error'>上传失败！</div>");
+
+                        return false;
+
+                    }else{
+
+                        dialog.time(3).content("<div class='msg-all-succeed'>上传成功！</div>");
+
+                    }
+
+                    $('#'+hiddenid).val(data.imgurl);
+
+                }
+
+            }
+
+        },
+
+        error: function (data, status, e){
+
+            dialog.time(3).content(e);
+
+        }
+
+    })
+
+
+
+    return false;
+
+}
+
+
+
+function checkImg(){
+
+    if($("#resp_img").val() == '')
+
+        {
+
+            return "请上传营销图片";
+
+        }
+
+}
+
+</script>
+
+</head>
+
+<body>
+
+<div id="wrapper" class="bgfff">
+
+        <include file="./Home/Tpl/Public/Public_header.html" />
+
+        <div id="container" class="bgfff">
+
+            <div id="main" class="rel">
+
+                <div class="bread">
+
+                    <div class="bread-con fn">
+
+                        <div class="bread-area">
+
+                            <i class="icon-bread"></i>
+
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+
+                            <p>></p>
+
+                            <p><a href="{:U('Home/AccountInfo/index')}">账户中心</a></p>
+
+                            <p>></p>
+
+                            <p>企业资质信息</p>
+
+                        </div>
+
+                        <div class="bread-history">
+
+                            <i class="icon-history"></i>
+
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="sidenav">
+
+                    <!--开始引入左菜单-->
+
+                    <assign name="leftMenuId" value="qyzz"/>
+
+                    <include file="Home/AccountCenter/menu"/>
+
+                </div>
+
+
+
+                <form action="{:U('Home/AccountInfo/qualification')}" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+
+                <div class="fn">
+
+                    <div class="subcon fn">
+
+                        <div class="main-name fn">
+
+                            <h4 class="bd-b-565656">企业资质信息</h4>
+
+                        </div>
+
+                        {// 未审核通过的资料可以修改 }
+
+                        <neq name="info.node_type" value="2">
+
+                        <div class="numgoods-info">
+
+                            <li>当前企业资质已审核通过。</li>
+
+                        </div>
+
+                        <else/>
+
+                        <neq name="info.check_status" value="2">
+
+                        <div class="numgoods-info">
+
+                            <eq name="info.check_status" value="1">
+
+                            <li>资质审核失败，原因：{$info.check_memo}</li>
+
+                            <li>请重新编辑企业资质信息</li>
+
+                            <else/>
+
+                            <li>当前企业资质还未审核，审核之前依旧可以修改</li>
+
+                            </eq>
+
+                        </div>
+
+
+
+                        <div class="global-input6 fn">
+
+                            <ul class="mt10" id="RecentActivity_div" >
+
+                                <li class="global-input6-name">*&nbsp;企业简称：</li>
+
+                                <li class="global-input6-input"><input name="node_short_name" id="node_short_name" type="text" maxlength="20" class="textbox w300 validate[required,maxSize[40]]" value="{$info.node_short_name}"/></li>
+
+                            </ul>
+
+                            <notempty name="info.node_license_img">
+
+                            <ul>
+
+                                <li class="global-input6-name">&nbsp;已上传1：</li>
+
+                                <li class="global-input6-input">
+
+                                    <img style="width:310px;height:200px" src="{$info.node_license_img}" />
+
+                                </li>
+
+                            </ul>
+
+                            </notempty>
+
+                            <ul>
+
+                                <li class="global-input6-name"><empty name="info.node_license_img">*</empty>&nbsp;营业执照扫描件：</li>
+
+                                <li class="global-input6-input">
+
+                                    <input id="img_show" type="text" value="请上传图片"  id="" class="validate[<empty name="info.node_license_img">required,</empty>] textbox w160 l"/>
+
+
+
+                                    <div class="rel l">
+
+                                    <input name="resp_img" id="resp_img" type="hidden" value="">
+
+                                    <input name="log_img" class="upload_file" id="log_img" style="left: -172px;" onchange="$('#img_show').val($(this).val());ajaxFileUpload('log_img','resp_img','','{:U('Home/AccountInfo/qualification_upload')}');" type="file">
+
+                                    <a title="浏览" class="btn-all w60 ml10" href="javascript:;">浏览</a>
+
+                                    </div>
+
+                            </li>
+
+                            </ul>
+
+                            <ul>
+
+                                <li class="global-input6-name">企业热线电话：</li>
+
+                                <li class="global-input6-input"><input name="node_service_hotline" id="node_service_hotline" maxlength="20" jschecktitle="企业热线电话" type="text"  class="textbox w300 validate[maxSize[20]]" value="{$info.node_service_hotline}"/></li>
+
+                            </ul>
+
+                            <ul>
+
+                                <li class="global-input6-name">&nbsp;</li>
+
+                                <li class="global-input6-input"><input type="submit" value="确认" class="btn-all w110"></li>
+
+                            </ul>
+
+                        </div>
+
+                        <else/>
+
+                        {// 审核通过的资料只能查看 }
+
+                        <div class="global-input6 fn">
+
+                            <ul class="mt10" id="RecentActivity_div" >
+
+                                <li class="global-input6-name">*&nbsp;企业简称：</li>
+
+                                <li class="global-input6-input"><p>{$info.node_short_name}</p></li>
+
+                            </ul>
+
+                            <ul>
+
+                                <li class="global-input6-name">&nbsp;营业执照：</li>
+
+                                <li class="global-input6-input">
+
+                                    <p><img  style="width:310px;height:200px" src="{$info.node_license_img}" /></p>
+
+                                </li>
+
+                            </ul>
+
+                            <ul>
+
+                                <li class="global-input6-name">&nbsp;企业热线电话：</li>
+
+                                <li class="global-input6-input"><p>{$info.node_service_hotline}</p></li>
+
+                            </ul>
+
+                        </div>
+
+                        </neq>
+
+                        </neq>
+
+                    </div>
+
+                </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+                  <include file="./Home/Tpl/Public/Public_footer.html" />
+
+    </div>
+
+    <div class="service"></div>
+
+
+
+</body>
+
+<!--
+
+<script type="text/javascript" src="js/Service.js"></script>
+
+  -->
+
+</html>

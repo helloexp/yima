@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_我的场景码_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msgsend.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script>
+    function Dellabel(id,obj){
+        $.post(url,{id:id},function(d){
+            if(d.status == 1){
+                Diasucceed("删除成功！");
+                $obj.closest("tr").remove();
+            }else{
+                Diaerror("啊偶，这条信息删除失败！");
+                return false;
+            }
+        },'json');
+    };
+    function subLabel(id){
+        var fansLabel = $("input[name='fansLabel']").val();
+        $.post("{:U('Weixin/Weixin/subLabel')}",{name:fansLabel,id:id},function(d){
+            if(1==d.status){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>"+d.info+"</div>",time:'3'});
+                parent.location.reload();
+            }else{
+                art.dialog({title:false,content:"请修改后再提交",time:'3'});
+            }
+        },'json');
+    };
+    function setAct(id) {
+        art.dialog.open("{:U('Weixin/Weixin/changjingma_response')}&id="+id,{
+            title: '设置响应事件',
+            width:'800px',
+            id:'setAct'
+        });
+    };
+
+    function setLabel(id,name) {
+        if(name == '0'){
+            name = '';
+        }
+        var label =
+        '<div class="popupWin" style="height:184px;">' +
+        '<div class="DiatipsCon">设置粉丝标签，即粉丝拍码后，系统会自动使用该标签对该粉丝进行标记。</div>' +
+        '<div class="Gform">' +
+        '<ul class="first">' +
+        '<li class="Gname">粉丝标签</li>' +
+        '<li class="Ginput">' +
+        '<input type="text" name="fansLabel" value="'+name+'" style="padding:3px 6px 3px 6px"/>' +
+        '</li>' +
+        '</ul>' +
+        '</div>';
+
+        art.dialog({
+            content: label,
+            width: 400,
+            id: 'setLabel',
+            title: '设置粉丝标签',
+			ok:function(){
+				subLabel(id);
+			},
+			okVal:"确认",
+			cancel:function(){
+				window.location.href="{:U('Weixin/changjingma')}";
+			},
+			cancelVal:"取消",
+
+        });
+    };
+	function call(data){
+        var arr = '';
+		for (var i in data){
+            arr +=
+            '<tr>' +
+            '<td>'+data[i]["time"]+'</td>' +
+            '<td>'+data[i]["num2"]+'</td>' +
+            '<td>'+data[i]["num1"]+'</td>' +
+            '</tr>';
+        }
+      
+        var html = '<div class="DataView popupWin">' +
+        '<table cellpadding="0" cellspacing="0" class="shopTable" style="table-layout: fixed;">' +
+        '<tbody>' +
+        '<tr class="th">' +
+        '<th width="150px">日期</th>' +
+        '<th width="60px">扫码数</th>' +
+        '<th width="60px">关注数</th>' +
+        '</tr>' +
+        arr +
+        '</tbody>' +
+        '</table>' +
+		'<div class="page mini">' +
+        '</div></div>';
+
+        art.dialog({
+            content: html,
+            width:400,
+            title:'场景码数据统计'
+        });
+	}
+    function viewDetails(id){
+        var data;
+        var arr;
+        $.post("{:U('Weixin/Weixin/changjingmaInfoAjax')}",{id:id},function(d){
+            data = d;
+			call(data);
+        },'json');
+    }
+
+$(function(){
+	$(".js_add").click(function(e) {
+        art.dialog.open("{:U('Weixin/Weixin/changjingmaAdd')}",{
+			title: '新增场景码',
+			width:'800px',
+            id:'uduf'
+		});
+    });
+	
+    $("#search").click(function(){
+        var name = $("input[name='keywords']").val();
+        var flag = $("#methods").val();
+        var phone=$("input[name='phone']").val();
+            window.location.href="{:U('Weixin/Weixin/changjingma')}&keywords="+name+"&flag="+flag+"&phone="+phone;
+    })
+
+    $(".js-down").click(function(){
+        var name = $("input[name='keywords']").val();
+        var flag = $("#methods").val();
+        var phone=$("input[name='phone']").val();
+        window.location.href="{:U('Weixin/Weixin/changjingma')}&keywords="+name+"&flag="+flag+"&down=1"+"&phone="+phone;
+    })
+
+
+
+})
+function preview(id, type){
+    var id = id;
+    var type = type;
+            if(0==type){
+                var url="{:U('Weixin/changjingmaImg')}"+"&id="+id;
+                art.dialog({
+                    title: '预览',
+                    content: "<img src='"+url+"' border='0'>",
+                });
+            }else{
+                var url="{:U('Weixin/changjingmaImg')}"+"&id="+id+"&down=1";
+                window.location.href=url;
+            }
+}
+</script>
+</head>
+<body>
+	<div id="wrapper" >
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+    	<div id="container" >
+            <div id="main" class="rel">
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+					<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="wxcjm"/>
+                </div>
+
+                <div class="subcon">
+                	<div class="main-name fn">
+                        <h4>场景码<a class="btn-add js_add first" href="javascript:void(0)"><i></i>新增场景码</a><a class="btn-down js-down" href="javascript:void(0)"><i></i>下载</a>
+                        </h4>
+                    </div>
+                    <div class="Wcanal-tab">
+                        <div class="Wcanal-tab-list">
+                        <div class="SearchArea fn">
+                            	<form id="theform" action="" method="post">
+                                <input type="hidden" id="batch_type" name="batch_type" value="{$batch_type}">
+                                <input type="hidden" id="is_new" name="is_new" value="{$is_new}">
+                                <div class="SearchAreaLeft">
+                                <label>
+                                <span>场景码名称</span>
+                                <input type="text" name="keywords" class="selectbox" style="width:148px;" value="{$_GET['keywords']}">
+                                </label>
+                                <if condition="$lnsy_tag">
+                                <label>
+                                <span>手机号</span>
+                                <input type="text" name="phone" class="selectbox" style="width:148px;" value="{$phone}">
+                                </label>
+                                </if>
+                                </div>
+                                <div class="SearchAreaRight">
+                                    <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                                </div>
+                                </form>
+                            </div>
+                        
+                        <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                        <tbody><tr class="th">
+                        <th width="20%">场景码名称</th>
+                        <if condition="$lnsy_tag"><th  width="10%">手机号</th></if>
+                        <th width="20%">创建时间</th>
+                        <th>累计扫码数</th>
+                        <th>累计关注数</th>
+                        <if condition="$lnsy_tag"><th>状态</th></if>
+                        <th>操作</th>
+                        </tr>
+                        <volist name="list" id="vo">
+                            <tr>
+                                <td>{$vo.name}</td>
+                                <if condition="$lnsy_tag"><td>{$vo.phone|default="-"}</td></if>
+                                <td>{$vo.add_time}</td>
+                                <td>{$vo.click_count}</td>
+                                <td><a onclick="viewDetails({$vo.id})" class="viewDetails">{$vo.subscribe_count}</a></td>
+                                <if condition="$lnsy_tag"><td>{$vo['qr_status'] == 2?"过期":"正常"}</td></if>
+                                <td>
+                                    <a onclick="preview({$vo.id},0)" href="javascript:void(0)">二维码</a>
+                                    <if condition="$lnsy_tag"><br/></if>
+                                    <a onclick="setAct('{$vo.id}')"  href="javascript:void(0)">响应事件</a>
+                                    <if condition="$lnsy_tag"><br/></if>
+                                    <?php if(empty($vo['remarkname'])){ $vo['remarkname'] = '0';}?>
+                                    <a onclick="setLabel('{$vo.id}','{$vo.remarkname}')" href="javascript:void(0)">粉丝标签</a>
+                                    <a onclick="Dellabel('{$vo.id}',this)" href="javascript:void(0)">删除</a>
+                                </td>
+                            </tr>
+                        </volist>
+                        </tbody></table>
+                        <div class="page"> {$show}</div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+
+</body>
+</html>

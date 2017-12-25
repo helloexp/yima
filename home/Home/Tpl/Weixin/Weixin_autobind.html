@@ -1,0 +1,192 @@
+<php>
+//账号类型
+$account_type_arr = array(
+'1'=>'未认证订阅号',
+'2'=>'已认证订阅号',
+'3'=>'未认证服务号',
+'4'=>'已认证服务号'
+);
+</php>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wbind.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+
+<script>
+$(function(){
+	$(".msg-user-opr").click(function(){
+		$(".msg-user-info").hide();
+		$(".msg-user-add").height("auto");
+		var addHeight=$(".msg-user-add").height();
+		$(".msg-user-add").height("28px").show();
+		$(".msg-user-add").animate({height:addHeight},500,function(){$(".msg-user-add").height("auto");});
+	});
+	$(".msg-user-exit,#btn-cancel").click(function(){
+		$(".msg-user-add").animate({height:28},500,function(){
+			$(".msg-user-add").hide();
+			$(".msg-user-info").show();
+		});
+	});
+	$(".msg-user-type").change(function(){
+		if($(this).val()=="1"){
+			$(".msg-user-typeDiv").hide();
+		}else{
+			$(".msg-user-typeDiv").show();
+		}
+	})
+	$(".alertmem").click(function(){
+		var tel="<div class='proInt-callus'>您尚未开通此项服务，欢迎拨打业务咨询热线：400-882-7770</div>"
+			art.dialog({
+				title:"马上开通",
+				lock:true,
+				content:tel,
+				id:"pro",
+				width:"830px",
+				padding:0
+			});
+	})
+	
+	$("#theform").submit(function(){
+		var actionUrl = $(this).attr("action");
+		var data = getFormData(this);
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.post(actionUrl,data,function(d){
+			alert(d.info);
+			if(d.status=='1'){
+				window.location.reload();
+			}
+			dialog.close();
+		},'json');
+		return false;
+	});
+
+	$("#btn-generate-token").click(function(){
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		var actionUrl = $(this).attr("data-url");
+		var data = getFormData("#theform");
+		if(!data.weixin_code){
+			alert("账号名不能为空");
+			return false;
+		}
+		$.post(actionUrl,data,function(d){
+			
+			if(d.status=='1'){
+				$("#token","#theform").val(d.info.token);
+				dialog.close();
+				return;
+			}
+			dialog.close();
+			alert(d.info);
+			
+		},'json');
+	});
+
+	//查看攻略
+    $('#btn-Introduce').click(function(){
+          art.dialog.open("{:U('Home/Introduce/weixin')}",{
+				title: '渠道攻略',
+				width:860,
+                height:'90%'
+			});
+        
+    });
+
+	//判断初始
+	<eq name="_GET.setting" value="1">
+		$(".msg-user-opr").click();
+	</eq>
+
+    <eq name="configFlag" value="1">
+        productIntroduce(1,"wx","javascript:void(0)");
+    <else/>
+        productIntroduce(2,"wx","javascript:void(0)");
+    </eq>
+	$(".msg-user-type").change();
+
+});
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+    	<div id="container" >
+            <div id="main" class="rel">
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+                    <!--2014-10-29 9:39 wangshu-->
+                    <include file="LabelAdmin/Batch/WleftMenu" leftmenuid="zhgk"/>
+                </div>
+                
+                <!--微信2.0 账户概况 王舒 2014.10.28 15:50-->
+                <div class="subcon">
+                    <div class="main-name fn">
+                        <h4>
+                            <p class="dib">账户设置 智能绑定</p>
+                        </h4>
+                    </div>
+                    <div class="highlight_box icon_wrap icon_small border">
+                    <p class="desc">欢迎使用旺财微信营销助手“智能绑定”功能，您只需输入微信公众号账户及密码，微信助手将自动完成旺财平台与微信公众平台的数据对接，请耐心等耐。</p>
+                    </div>
+                    
+                    <div class="login_frame">
+                    <div class="login_err_panel" style="display:none;" id="err"> </div>
+                    <!--
+                    <form class="login_form" id="loginForm">
+                    	
+                        <div class="login_input_panel" id="js_mainContent">
+                            <div class="login_input">
+                                <i class="icon_login un"> </i>
+                                <input type="text" placeholder="邮箱/微信号/QQ号" id="account" name="account">
+                            </div>
+                            <div class="login_input">
+                                <i class="icon_login pwd"> </i>
+                                <input type="password" placeholder="密码" id="pwd" name="password">
+                            </div>
+                        </div>
+                        <div class="verifycode" style="display:none;" id="verifyDiv">
+                            <span class="frm_input_box">
+                                <input class="frm_input" type="text" id="verify" name="verify">
+                            </span>
+                            <img id="verifyImg" src="">
+                            <a href="javascript:;" id="verifyChange">换一张</a>
+                        </div>
+                         -->
+                        <!--<div class="login_help_panel">
+                            <label class="frm_checkbox_label selected" for="rememberCheck">
+                                <i class="icon_checkbox"></i>
+                                <input type="checkbox" class="frm_checkbox" id="rememberCheck">
+                                记住帐号
+                            </label>
+                            <a class="login_forget_pwd" href="">无法登录？</a>
+                        </div>-->
+                        <div class="login_btn_panel">
+                            <a class="btn_login" title="一键智能绑定" href="{$wxConfigUrl|default='#'}" id="loginBt">智能绑定</a>
+                        </div>
+                  
+                    </div>
+                    <p class="bind_hand_tips">旺财平台承诺：账户及密码仅限智能绑定使用，不保存！不泄漏！不放心？点此<a href="{:U('Weixin/Weixin/bind')}">手动绑定</a></p>
+                </div>
+                <!--微信2.0 账户概况 王舒 2014.10.28 15:50-->
+                
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

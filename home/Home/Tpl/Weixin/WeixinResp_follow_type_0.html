@@ -1,0 +1,146 @@
+<?php 
+//本模板同时被 respType=0 以及 respType=1 以及respType=2 使用，所以，根据不同的respClass进行文字替换
+if($respType == '0'){
+	$title = "被添加自动回复";
+}
+elseif($respType == '1'){
+	$title = "消息自动回复";
+}
+elseif($respType == '2'){
+	$title = "关键词自动回复";
+}
+else{
+	$title = "自动回复";
+}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>消息回复</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<css href="__PUBLIC__/Css/msg.css?v=__VR__" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"/>
+<js href="__PUBLIC__/Js/check_form.js?v=__VR__"/>
+
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+
+<script type="text/javascript">
+$(document).ready(function(e){
+	editAreaTxt();    //添加
+	editAreaimg();
+	showAreaimg();
+
+
+	//初始化提交表单
+	$("#btnSubmit").click(function(){
+		var $form = $(this).closest('form');
+		var actionUrl = $form.attr("action");
+		if(!check_form($form)){
+			return false;
+		}
+		var data = getFormData($form);
+		data.respClass = '0';
+		var dialog = art.dialog({title:false,fixed: true,padding:0});
+		$.post(actionUrl,data,function(d){
+			//alert(d.info);
+			//window.location.reload();
+			dialog.close = function(){
+					window.location.reload();
+			};
+			dialog.time(1).content("<div class='msg-all-error'>"+d.info+"</div>");
+		},'json');
+		return false;
+	});
+}); 
+</script>
+</head>
+<body>
+    <div id="wrapper" >
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+        <div id="container"  >
+            <div id="main" class="rel">
+            	<!--<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>&gt;</p>
+                            <p>微信助手</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="sidenav">
+					<!--开始载入左菜单-->
+					<php>
+					if($respType == '0'){
+						$leftmenuid = 'btjzdhh';
+					}
+					else{
+						$leftmenuid = 'xxzdhh';
+					}
+					</php>
+					<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="wxzs"/>
+                </div>
+                <div class="subcon">
+                	<div class="main-name fn">
+                        <h4>{$title}</h4>
+                    </div>
+                    <div class="highlight_box icon_wrap icon_small border" id="div_start">
+                    <div class="opr"><a href="javascript:;" class="btn btn_warn" id="btn_stop">停用</a></div>        
+                    <span class="icon unlock"></span>
+                    <h4 class="title">已开启自动回复设置</h4>
+                    <p class="desc">通过编辑内容或关键词规则，快速进行自动回复设置。如具备开发能力，可更灵活地使用该功能。<a href="javascript:;" class="detail_desc">查看详情</a></p>    
+                    </div>
+                    <div class="msg-libs">
+                        <p class="p-title hover"><a href="{:U('WeixinResp/follow/',array('respType'=>$respType,'respClass'=>0))}">被添加自动回复</a></p>
+                        <p class="p-title"><a href="{:U('WeixinResp/follow/',array('respType'=>$respType,'respClass'=>1))}">消息自动回复</a></p>
+                        <p class="p-title"><a href="{:U('WeixinResp/follow/',array('respType'=>$respType,'respClass'=>2))}">关键词自动回复</a></p>
+                        <div id="global-libs-content">
+                         <form method="post" action="{:U('WeixinResp/followSubmit')}">
+                            <div id="globallibscontent" class="hover">
+                                <div class="txtArea">
+                                    <div class="functionBar">
+                                        <div class="opt">请输入您回复的文字</div>
+                                        <div class="tip"></div>
+                                        <div class="cl"></div>
+                                    </div>
+                                    <div class="editArea">
+                                        <input type="hidden" name="message_id" value="{$respInfo['message_id']}"/>
+                                        <input type="hidden" name="respType" value="{$respType}"/>
+                                        <textarea name="response_info" class="editArea-textarea" maxlength="300" id="input-response_info" jscheckrule="null=1;" jschecktitle="回复文字">{$respInfo['response_info']}</textarea>
+										<span style="color:#ccc">内容为空时，则不回复。</span>
+                                    </div>
+                                    <div class="msg-libs-update">
+                                        <a href="javascript:void(0);" title="确认" class="btn-all w110" id="btnSubmit">保存</a>
+                                        <a href="javascript:void(0);" title="取消" class="btn-all-del w110 ml10" onclick="javascript:$(this).closest('form')[0].reset();">取消</a>
+                                    </div>
+                                </div>
+                            </div>
+                         </form>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+<!--
+<script type="text/javascript" src="js/Service.js"></script>
+  -->
+</html>

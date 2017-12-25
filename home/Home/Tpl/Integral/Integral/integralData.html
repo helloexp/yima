@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{:L('INTEGRAL_NAME')}数据统计</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wmember.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/highcharts.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/My97DatePicker/WdatePicker.js?v=20150603"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wmember_raphael-min.js"></script>
+<style type="text/css">
+.Gform .Ginput .Gtime1 em:before { top: 3px; left: -23px;}
+.Gform.eTicket { width: 316px;}
+</style>
+<script>
+    $(function () {
+        Highcharts.setOptions({
+            colors: ['#54a8f9', '#68bc36', '#f4da28']
+        });
+
+        /*会员整体数据统计*/
+        $('#report1').highcharts({
+            title: {
+                text: '',
+                x: 0 //center
+            },
+            subtitle: {
+                text: '',
+                x: 0
+            },
+            xAxis: { categories: [{$xyData.yData}]},
+            yAxis: [{
+                title: {
+                    text: '单位(个/{:L('INTEGRAL_NAME')})'
+                },
+                labels:{
+                    style:{
+                        color:Highcharts.getOptions().colors[0]
+                    }
+                },
+                allowDecimals:false,
+                min:0,
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+                {
+                    title: {
+                        text: ''
+                    },
+                    labels:{
+                        style:{
+                            color:Highcharts.getOptions().colors[1]
+                        }
+                    },
+                    allowDecimals:false,
+                    min:0,
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }]
+                },{
+                    title: {
+                        text: ''
+                    },
+                    labels:{
+                        style:{
+                            color:Highcharts.getOptions().colors[2]
+                        }
+                    },
+                    allowDecimals:false,
+                    min:0,
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }]
+                }],
+            legend: {
+                layout: 'horizontal',
+                align: 'center',
+                borderWidth: 0,
+                symbolWidth: 14
+            },
+            series: [{
+                name: "{:L('INTEGRAL_NAME')}赠送",
+                data: [{$xyData.xData11}],
+                tooltip: {
+                valueSuffix: "{:L('INTEGRAL_NAME')}"
+                }
+            }, {
+                name: "{:L('INTEGRAL_NAME')}兑换",
+                data: [{$xyData.xData12}],
+                tooltip: {
+                valueSuffix: "{:L('INTEGRAL_NAME')}"
+                }
+            }]
+        });
+    });
+</script>
+<style type="text/css">
+.filter input{
+	/**
+	 * .filter > input 直接子元素
+	 */
+	cursor: pointer;
+}
+.Gform .Ginput input[type="text"] {
+    width: 88px;
+}
+</style>
+<style>
+.member_data_summery .data .data-box{ width:170px; height:74px;}
+.redo_data .data .data-box{float:left;height: 44px; width:105px; border-right:1px #cccccc dashed; text-align:center}
+.redo_data .data-box:last-child{border-right:0px #cccccc dashed}
+.data_show .show .table .shopTable th { background: #f7f7f7; color: #333333;}
+.data_show .show .shopTable tr.title { background: #ffffff;}
+.highcharts-title { display: none;}
+</style>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <!--开始引入左菜单-->
+                    <include file="./Home/Tpl/Integral/Integral/Store_sidenav.html"   leftmenuid="datalist"/>
+                </div>
+                <div class="subcon fn">
+                <form action="{:U('Integral/Integral/integralData')}" method="post">
+                    <input name="type" value="" type="hidden"/>
+                    <div class="main-name fn" style="border-bottom:1px #eee solid">
+                        <h4><!--<i class="icon-Eticket no5"></i>-->赠送及兑换数据日统计
+                            <div class="icon_list fn">
+                        <!--<a href="javascript:void(0);">下载活动数据</a>-->
+                        </div>
+                        </h4>
+                    </div>
+                    <div class="data_show">
+                    	<div class="filter">
+                        	<dl class="martix1 l">
+                                <dd <if condition="$type eq 1"> class="current"</if>>
+                                <input type="button"  onclick="jump('type',1)" value="最近7日" /></dd>
+                                <dd  <if condition="$type eq 2"> class="current"</if>><input type="button"  onclick="jump('type',2)" value="最近30日"/></dd>
+                            </dl>
+
+                            <dl class="martix2">
+                            	<dd>时间区域</dd>
+                                <dd>
+                                    <ul class=" Gform eTicket">
+                                        <li class="Ginput">
+                                            <div class="Gtime1 fn l">
+                                            <input type="text" id='msdate' class="validate[required]" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'mndate\\',{d:-30})}',maxDate:'#F{$dp.$D(\\'mndate\\')}'});" name="startTime" value="{$startTime}">
+                                            <em></em>
+                                            </div>
+                                            <div class="Gtime2 noIcon">
+                                                <em style="border-left:0">至</em>
+                                            </div>
+                                            <div class="Gtime1 fn l">
+                                            <input id='mndate' type="text" class="validate[required]" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'msdate\\')}',maxDate:'#F{$dp.$D(\\'msdate\\',{d:+30})}'});" name="endTime" value="{$endTime}">
+                                            <em></em>
+                                            </div>
+                        </li>
+                                    </ul>
+                                </dd>
+                                <dd><input type="button" onclick="jump('type',4);" class="btn_inner l" value="查询"/></dd>
+                            </dl>
+                        </div>
+                        <div class="show">
+                        	<div class="graph" style="width:100%;">
+                           	  <div id="report1" style="  height:300px;"></div>
+                            </div>
+                        </div>
+                    </div>
+   					 </form>
+                <div class="main-name fn  <php>if($flag=='1'){echo 'dn';}</php>">
+                	<h4>{:L('INTEGRAL_NAME')}区间分析</h4>
+			        <div class="data_show">
+			        <div class="show">
+			        <div id="container1" style="min-width:600px;height:400px;"></div>
+			        <div class="graph" style="margin-left:610px;margin-top:-400px;">
+			        <div class="table">
+			            <table class="shopTable" cellspacing="0" cellpadding="0">
+			                <tbody>
+			                <tr class="th">
+			                    <th colspan="3">{:L('INTEGRAL_NAME')}区间分析</th>
+			                </tr>
+                            <tr class="title">
+                                <td>积分区间</td>
+                                <td>人数</td>
+                                <td>占比</td>
+                            </tr>
+			                <tr class="title">
+			                    <td>0-{$integralScoreArr[1]}</td>
+			                    <td>{$maArr1['integral1']}</td>
+			                    <td>{$maArr['integral1']}%</td>
+			                </tr>
+			                <tr class="title">
+                                <td>{$integralScoreArr[1]+1}-{$integralScoreArr[2]}</td>
+			                    <td>{$maArr1['integral2']}</td>
+			                    <td>{$maArr['integral2']}%</td>
+			                </tr>
+			                <tr class="title">
+                                <td>{$integralScoreArr[2]+1}-{$integralScoreArr[3]}</td>
+			                    <td>{$maArr1['integral3']}</td>
+			                    <td>{$maArr['integral3']}%</td>
+			                </tr>
+			                <tr class="title">
+                                <td>{$integralScoreArr[3]+1}-{$integralScoreArr[4]}</td>
+			                    <td>{$maArr1['integral4']}</td>
+			                    <td>{$maArr['integral4']}%</td>
+			                </tr>
+			                <tr class="title">
+                                <td>{$integralScoreArr[4]+1}-{$integralScoreArr[5]}</td>
+			                    <td>{$maArr1['integral5']}</td>
+			                    <td>{$maArr['integral5']}%</td>
+			                </tr>
+			                <tr class="title">
+                                <td>{$integralScoreArr[5]+1}-{$integralScoreArr[6]}</td>
+			                    <td>{$maArr1['integral6']}</td>
+			                    <td>{$maArr['integral6']}%</td>
+			                </tr>
+			                <tr class="title">
+                                <td>{$integralScoreArr[6]+1}-{$integralScoreArr[7]}</td>
+			                    <td>{$maArr1['integral7']}</td>
+			                    <td>{$maArr['integral7']}%</td>
+			                </tr>
+			                <tr class="title">
+			                    <td>大于{$integralScoreArr[7]+1}</td>
+			                    <td>{$maArr1['integral8']}</td>
+			                    <td>{$integralScoreArr2}%</td>
+			                </tr>
+			                </tbody>
+			            </table>
+			        </div>
+			            </div>
+			            </div>
+			           </div>
+			            </div>
+                </div>
+                
+            </div>
+        </div>
+        
+		<include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="integralService"></div>
+    </div>
+</body>
+</html>
+<script>
+    function jump(input,value){
+        if(value==4){
+            if($("#msdate").val()=='' || $("#mndate").val()==''){
+                alert("请填写完整的时间参数");
+                return false;
+            }
+        }
+        $('input[name='+input+']').val(value);
+        $('form').submit();
+    }
+    $(function () {
+        Highcharts.getOptions().colors = Highcharts.map(Highcharts.getOptions().colors, function(color) {
+            return {
+                radialGradient: { cx: 0.5, cy: 0.3, r: 0.7 },
+                stops: [
+                    [0, color],
+                    [1, Highcharts.Color(color).brighten(-0.3).get('rgb')] // darken
+                ]
+            };
+        });
+        $('#container1').highcharts({
+            chart: {
+            	width:600,
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: {
+                text: "{:L('INTEGRAL_NAME')}区间统计"
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        connectorColor: '#000000',
+                        formatter: function() {
+//                            return '<b>'+ this.point.name +'</b>: '+ this.percentage +' %';
+                            return '<b>'+ this.point.name +'</b>: '+ twoDecimal(this.percentage) +' %';
+                        }
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                name: 'Browser share',
+                data: [
+                    ['0-{$integralScoreArr[1]}',{$maArr['integral1']}],
+                    ['{$integralScoreArr[1]+1}-{$integralScoreArr[2]}',{$maArr['integral2']}],
+                    ['{$integralScoreArr[2]+1}-{$integralScoreArr[3]}', {$maArr['integral3']}],
+                    ['{$integralScoreArr[3]+1}-{$integralScoreArr[4]}', {$maArr['integral4']}],
+                    ['{$integralScoreArr[4]+1}-{$integralScoreArr[5]}', {$maArr['integral5']}],
+                    ['{$integralScoreArr[5]+1}-{$integralScoreArr[6]}', {$maArr['integral6']}],
+                    ['{$integralScoreArr[6]+1}-{$integralScoreArr[7]}', {$maArr['integral7']}],
+//                    ['>{$integralScoreArr[7]}',1-{$maArr['integral1']}-{$maArr['integral2']}-{$maArr['integral3']}-{$maArr['integral4']}-{$maArr['integral5']}-{$maArr['integral6']}-{$maArr['integral7']}]
+                    ['>{$integralScoreArr[7]+1}',{$integralScoreArr2}]
+                ]
+            }]
+        });
+    });
+    function twoDecimal(x) {
+        var f_x = parseFloat(x);
+        if (isNaN(f_x)) {
+            alert('错误的参数');
+            return false;
+        }
+        var f_x = Math.round(x * 100) / 100;
+        var s_x = f_x.toString();
+        var pos_decimal = s_x.indexOf('.');
+        if (pos_decimal < 0) {
+            pos_decimal = s_x.length;
+            s_x += '.';
+        }
+        while (s_x.length <= pos_decimal + 2) {
+            s_x += '0';
+        }
+        return s_x;
+    }
+</script>

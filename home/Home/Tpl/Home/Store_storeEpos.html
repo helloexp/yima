@@ -1,0 +1,741 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-申请开通ER6800/EPOS/ER1100</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript">
+var number = 0;
+$(document).ready(function(e) {
+	Gform();
+    var postype = "{$postype}";
+    //省市区初始化
+    if(postype == '3')
+    {
+        CityCode({
+            province:$("#province_code"),//省
+            city:$("#city_code"),//市
+            town:$("#town_code"),//区
+            selected:"{:$buyerInfo['province_code'].$buyerInfo['city_code'].$buyerInfo['town_code']}",//默认选中的省市区代号
+            url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+        });	
+    }
+	$("a[name='choose_shop'],a[name='choose_shop2']").click(function(){
+    	var type = '&type=0';
+    	if($(this).attr("name") == "choose_shop"){
+    		type = "&type=1";
+    	}
+        art.dialog.open("{:U('Home/Store/posStorePop')}"+type,{
+            title:"选择门店",
+            width:800
+        });
+    });
+	
+	$("#selectShop").click(function(e){
+		art.dialog.open("{:U('Home/Store/posStorePop')}",{
+			title: '选择门店',
+			width:'800px'
+		});
+	});
+	
+	$(".choosetext1").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").hide();
+    });
+    $(".choosetext2").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").show();
+    });
+
+	$(".shoplist li").click(function(){
+	    if($(this).hasClass("selected")){
+		    number=number-1;
+			$("#number").text(number);
+		    $(this).removeClass("selected");
+		    $(this).children(":checkbox").attr("checked",false);
+	    }else{
+	        number=number+1;
+			$("#number").text(number);
+		    $(this).addClass("selected");
+		    $(this).children(":checkbox").attr("checked",'checked'); 
+	    }
+	      
+    });
+
+	$("#gotopay").click(function(){
+        var dialog;
+        var checkType     = $("#checktype").val();
+        var funcType      = $("#checktype2").val();
+        var storesId      = $("#openStores").val();
+        var posType       = "{$postype}";
+        var url = $("#pForm").attr('action')+"&checkType="+checkType+"&funcType="+funcType+"&storesId="+storesId+"&posType="+posType;
+        if(posType == '3')
+        {
+            var province_code = $("#province_code").val();
+            var city_code     = $("#city_code").val();
+            var town_code     = $("#town_code").val();
+            var address_more  = $("#address_more").val();
+            var buyer_name    = $("#buyer_name").val();
+            var buyer_phone   = $("#buyer_phone").val();
+            if(funcType == '1')
+            {
+                var gprs  = ($("#gprs_check_1100_1").prop('checked') == true ? '1':'2');
+            }else{
+                var gprs  = ($("#gprs_check_1100_2").prop('checked') == true ? '1':'2');
+            }
+            url += "&province_code="+province_code;
+            url += "&city_code="    +city_code;
+            url += "&town_code="    +town_code;
+            url += "&address_more=" +address_more;
+            url += "&buyer_name="   +buyer_name;
+            url += "&buyer_phone="  +buyer_phone;
+            url += "&gprs="         +gprs;
+        }
+        if(posType == '1')
+        {
+            if(funcType == '1')
+            {
+                var gprs  = ($("#gprs_check_6800_1").prop('checked') == true ? '1':'2');
+            }else{
+                var gprs  = ($("#gprs_check_6800_2").prop('checked') == true ? '1':'2');
+            }
+            url += "&gprs="         +gprs;
+        }
+        $("#pForm").attr('action',url).ajaxSubmit({
+            beforeSubmit:function(){
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+                if(data.status == 1)
+                {
+                    dialog.time(2).content("<div class='msg-all-succeed'>即将跳转...</div>");
+                    window.location.href="{:U('Home/Store/storeEposPay')}";
+                }else{
+                    dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },
+            dataType:'json',
+        });
+        return false;
+    });
+    
+    var functype         = "{$functype}";
+    var storeCheckStatus = "{$storeCheckStatus}";
+    var strArr = new Array();
+    var length = 0;
+    if(storeCheckStatus != '')
+    {
+        strArr = storeCheckStatus.split(',');
+        length = strArr.length;
+        $("#openStores").val(storeCheckStatus);
+        $("#number").html(length);
+    }
+    if(functype == "1")
+    {
+        $("#storey").addClass('hover');
+        $("#storey").find('#checktype2').val(1);
+        $("#storey").find('.valfirst').removeClass('hover');
+        $("#storey").find('.vallast').addClass('hover');
+    }
+
+});
+
+function result_(contents){
+      art.dialog({
+				title:"提示",
+				content:contents,
+				ok:function(){
+				   art.dialog.close();
+				}
+			})
+   }
+</script>
+
+<style type="text/css">
+.shoplist li{ margin-right:14px;}
+.extend{ text-align:right; padding-right:12px; padding-left:0;}
+.main-name h4{ padding-bottom:10px}
+.main-name h4>a.back{font-size:18px; margin-right:5px}
+.back i{ width:20px; height:20px; display:inline-block; background:url(__PUBLIC__/Image/back.png) no-repeat;}
+ </style>
+</head>
+<body>
+<div id="wrapper"> 
+    <include file="./Home/Tpl/Public/Public_header.html" /> 
+    <div id="container" class="bgfff"> 
+        <div id="main" class="rel"> 
+            <div class="new_sidenav">
+                <include file="Store:sidenav" leftmenuid="sqzd"/>      
+            </div>
+            <div class="subcon fn">
+                <div class="main-name fn">
+                    <h4>
+                    <a href="{:U('Home/Store/Wapply_terminal')}" class="back"><i></i>申请验证终端</a>/
+                    <if condition="$postype eq '1'">ER6800
+                    <elseif condition="$postype eq '2'" />EPOS
+                    <elseif condition="$postype eq '3'" />ER1100
+                    </if>
+                    </h4>
+                </div>
+                <div class="tipNormal mb15">
+                    <p>仅预付费用户可以在线申请验证终端</p>
+                    <p>每月1号，系统将从预付费用户的账户余额中扣除当月的终端费用。</p>
+                    <p>请保持余额充足，避免欠费导致终端停用。</p>
+                    <php>if(_hasIss()){</php>
+                    <p>如需申请非标准资费的终端，请点击<a target="_blank" href="{$pzt}"><span>申请非标资费终端</span></a></p>
+                    <php>}</php>
+                </div>
+                <div class="Wcanal-tab" id="Wcanal-tabon">
+                <!--选择门店  开始-->
+                    <div id="Wform" class="Gform w1">
+                    <h3>基本设置</h3>
+                    <ul>
+                        <li class="Gname">添加门店</li>
+                        <li class="Ginput">
+                                <div class="switch" id="storew">
+                                    <a href="javascript:void(0);" class="btn_inner" id="selectShop">选择门店</a>
+                                    <div class="store-sel">
+                                    	<input type="hidden" id="openStores" name="openStores" value=""/>
+                                        <div class="sweet_tips2" id="htmlss">您总共选择了<span id="number">0</span>家门店&nbsp;&nbsp;<a href="javascript:void()" id="editStore"  name="choose_shop">点击查看</a></div>
+                                    </div>
+                                </div>
+                            </li>
+                    </ul>
+                    <ul>
+                        <!--<li class="Gname">选择终端功能</li>-->
+                        <li class="Gname">终端功能与资费</li>
+                        <li class="Ginput">
+                            <div class="switch" id="storey">
+                                <input type="radio" value="0" checked="checked" id="checktype2" name="functype">
+                                <div class="newRadio">
+                                       <!--<span class="valfirst hover" data-val="0">全部功能</span>
+                                       <span class="vallast" data-val="1">单项功能</span>-->
+                                </div>
+                                <div class="cl pt15"></div>
+                                <div class="newRadio-input" style="float:none">
+                                    <table class="W-table blue">
+                                        <tbody>
+                                        <if condition="$postype eq 2">
+                                            <tr>
+                                                <th width="300">收费项</th>
+                                                <th width="300">资费</th>
+                                                <th width="400">终端功能</th>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>受理服务费</td>
+                                                <td>{$pm->epos_price}元/月/网点</td>
+                                                <td <eq name="userInfo['sale_flag']" value="1">rowspan="2"</eq>>仅可受理条码支付业务</td>
+                                            </tr>
+                                            <eq name="userInfo['sale_flag']" value="1">
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>多米收单服务费</td>
+                                                <td>{$pm->duomi_price}元/月/网点</td>
+                                            </tr>
+                                            </eq>
+                                        <elseif condition="$postype eq 1"/>
+                                            <tr>
+                                                <th width="300">收费项</th>
+                                                <th width="300">资费</th>
+                                                <th width="400">终端功能</th>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>受理服务费</td>
+                                                <td>{$pm->er6800_price}元/月/台</td>
+                                                <td <eq name="userInfo['sale_flag']" value="1">rowspan="2"</eq>>仅可受理条码支付业务</td>
+                                            </tr>
+                                            <eq name="userInfo['sale_flag']" value="1">
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>多米收单服务费</td>
+                                                <td>{$pm->duomi_price}元/月/网点</td>
+                                            </tr>
+                                            </eq>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>押金</td>
+                                                <td>{$pm->er6800_deposit}元/台</td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>安装费</td>
+                                                <td>{$pm->er6800_install}元/台</td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" <neq name="gprs" value="2">checked="checked"</neq> id="gprs_check_6800_1" class="ml10 mr10"/>GPRS卡费 （可选）</td>
+                                                <td>{$pm->gprs_price}元/季度</td>
+                                                <td></td>
+                                            </tr>
+                                        <else/>
+                                            <tr>
+                                                <th width="300">收费项</th>
+                                                <th width="300">资费</th>
+                                                <th width="400">终端功能</th>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>受理服务费</td>
+                                                <td>{$pm->er1100_price}元/月/网点</td>
+                                                <td <eq name="userInfo['sale_flag']" value="1">rowspan="2"</eq>>仅可受理条码支付业务</td>
+                                            </tr>
+                                            <eq name="userInfo['sale_flag']" value="1">
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>多米收单服务费</td>
+                                                <td>{$pm->duomi_price}元/月/网点</td>
+                                            </tr>
+                                            </eq>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>终端售价</td>
+                                                <td>{$pm->er1100_terminal}元/台</td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" class="ml10 mr10" <neq name="gprs" value="2">checked="checked"</neq> id="gprs_check_1100_1"/>GPRS卡费 （可选）</td>
+                                                <td>{$pm->gprs_price}元/季度</td>
+                                                <td></td>
+                                            </tr>
+                                        </if>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="newRadio-default" style="float:none">
+                                    <table class="W-table blue">
+                                        <tbody>
+                                        <if condition="$postype eq 2">
+                                            <tr>
+                                                <th width="300">收费项</th>
+                                                <th width="300">资费</th>
+                                                <th width="400">终端功能</th>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>受理服务费</td>
+                                                <td>{$pm->epos_price}元/月/网点</td>
+                                                <td <eq name="userInfo['sale_flag']" value="1">rowspan="2"</eq>>可验证凭证、受理条码支付业务等</td>
+                                            </tr>
+                                            <eq name="userInfo['sale_flag']" value="1">
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>多米收单服务费</td>
+                                                <td>{$pm->duomi_price}元/月/网点</td>
+                                            </tr>
+                                            </eq>
+                                        <elseif condition="$postype eq 1"/>
+                                            <tr>
+                                                <th width="300">收费项</th>
+                                                <th width="300">资费</th>
+                                                <th width="400">终端功能</th>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>受理服务费</td>
+                                                <td>{$pm->er6800_price}元/月/台</td>
+                                                <td <eq name="userInfo['sale_flag']" value="1">rowspan="2"</eq>>可验证凭证、受理条码支付业务等</td>
+                                            </tr>
+                                            <eq name="userInfo['sale_flag']" value="1">
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>多米收单服务费</td>
+                                                <td>{$pm->duomi_price}元/月/网点</td>
+                                            </tr>
+                                            </eq>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>押金</td>
+                                                <td>{$pm->duomi_price}元/台</td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>安装费</td>
+                                                <td>{$pm->er6800_install}元/台</td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" <neq name="gprs" value="2">checked="checked"</neq> id="gprs_check_6800_2" class="ml10 mr10"/>GPRS卡费 （可选）</td>
+                                                <td>{$pm->gprs_price}元/季度</td>
+                                                <td></td>
+                                            </tr>
+                                        <else/>
+                                            <tr>
+                                                <th width="300">收费项</th>
+                                                <th width="300">资费</th>
+                                                <th width="400">终端功能</th>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>受理服务费</td>
+                                                <td>{$pm->er1100_price}元/月/网点</td>
+                                                <td <eq name="userInfo['sale_flag']" value="1">rowspan="2"</eq>>可验证凭证、受理条码支付业务等</td>
+                                            </tr>
+                                            <eq name="userInfo['sale_flag']" value="1">
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>多米收单服务费</td>
+                                                <td>{$pm->duomi_price}元/月/网点</td>
+                                            </tr>
+                                            </eq>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" checked="checked" id="" class="ml10 mr10" disabled="disabled"/>终端售价</td>
+                                                <td>{$pm->er1100_terminal}元/台</td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="text-align:left"><input type="checkbox" name="" <neq name="gprs" value="2">checked="checked"</neq> id="gprs_check_1100_2" class="ml10 mr10"/>GPRS卡费 （可选）</td>
+                                                <td>{$pm->gprs_price}元/季度</td>
+                                                <td></td>
+                                            </tr>
+                                        </if>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </li>
+                        </ul>
+                    <if condition="$postype eq 3">
+                    <ul id="er1100">
+                    	<li class="Gname">终端寄送地址</li>
+                        <li class="Ginput">
+                            <select class=" validate[required] selectbox n3" name="province_code" id="province_code">
+                                <option value="">选择省</option>
+                            </select>
+                            <select class="validate[required] selectbox n3" style="margin-left:4px;" name="city_code" id="city_code">
+                                <option value="">选择市</option>
+                            </select>
+                            <select class="validate[required] selectbox n3" style="margin-left:4px;" name="town_code" id="town_code"> 
+                                <option value="">选择区</option>
+                            </select>
+                            <textarea placeholder="建议您如实填写详细收货地址，例如街道名称，门牌号码，楼层和房间号等。" class="validate[required] w380" style=" float:none; display:block; margin-top:10px; clear:both" name="address_more" id="address_more">{$buyerInfo['address_more']}</textarea>
+                        </li>
+                    </ul>
+                    <ul id="er1100">
+                    	<li class="Gname">收货人姓名</li>
+                        <li class="Ginput">
+                            <input type="text" class=" validate[required]" name="buyer_name" id="buyer_name" value="{$buyerInfo['buyer_name']}" />
+                        </li>
+                    </ul>
+                    <ul id="er1100">
+                    	<li class="Gname">电话号码</li>
+                        <li class="Ginput">
+                            <input type="text" class="validate[required,custom[phone],minSize[11],maxSize[11]]" name="buyer_phone" id="buyer_phone" value="{$buyerInfo['buyer_phone']}" />
+                        </li>
+                    </ul>
+                    </if>
+                    <ul>
+                    	<li class="Gname"></li>
+                        <li class="Ginput">
+                        <form action="{:U('Home/Store/storePosAjax')}" id="pForm"></form>
+                        <a href="javascript:void(0)" class="btn-all" id="gotopay">下一步</a>
+                        <a class="btn-all-del" href="javascript:void(0);" id="cancel-ret">取消</a>
+                        </li>
+                    </ul>
+                    </div>
+                <!--支付费用 开始-->
+                <div class="apply" style="display:none;" >
+                <div class="steps">支付费用</div>
+                <table class="W-table">
+                    <tbody>
+                        <tr>
+                            <th>终端类型</th>
+                            <th>功能</th>
+                            <th>申请数量</th>
+                            <th style=" width:115px; text-align:right; padding-right:15px">费用合计（元）</th>
+                        </tr>
+                        <tr>
+                            <td class="bdn" id="posName"></td>
+                            <td class="bdn" id="posFunction">终端</td>
+                            <td class="bdn" id="storeCount"></td>
+                            <td class="bdn" id="amount" style="text-align:right; padding-right:15px"></td>
+                        </tr>
+                      
+                    </tbody>
+                </table>
+                
+                
+                <ul>
+                    <li><span >应付金额：</span><i>￥<strong id="shouldPay"></strong></i></li>
+                </ul>
+                <p class="mt15"><label for="selectAll2" class="group_select_label2 frm_checkbox_label2 selected2" style="float:right; margin-right:10px;">
+                   <i class="icon_checkbox2"></i><input type="checkbox" class="frm_checkbox2"> 我已知晓并同意<a href="{:U('Home/Help/helpArt',array('news_id'=>1465,'leftId'=>qt,'class_name'=>'其他','type'=>10))}"  target="_blank">《旺财平台受理终端在线申请须知》</a></label></p>
+                
+                
+                <div class="DiabtnCon"><a href="javascript:void(0)" class="Diabtn-all-del prev02">上一步</a><a href="javascript:void(0)" class="Diabtn-all nextok">确认支付</a></div>  
+                </div>
+                <!--支付费用 结束-->   
+                <div style="display:none; position:relative;" class="tips">
+                <form action="{:U('Home/Store/confirmPayPos')}" method="get" id="cForm"></form>
+                <div id="Succeed">
+                    <div class="succeed_icon"><img src="__PUBLIC__/Image/start_icon.png"></div>
+                    <div class="succeed_content">
+                        <dl>
+                            <dt>确认后，费用将从您的账户余额中扣除！</dt>
+                        </dl>
+                        <div class="DiabtnCon">
+                        <a href="javascript:void(0)" class="Diabtn-all confirmok" >确定</a>
+                        <a href="javascript:void(0)" class="Diabtn-all-del prev03" >取消</a>
+                        </div>
+                    </div>
+                    
+                </div>
+                </div>
+                <!--支付费用不足 -->   
+                <div style="display:none; position:relative;" class="noremain">
+                <div id="Succeed">
+                    <div class="succeed_icon"><img src="__PUBLIC__/Image/stop_icon.png"></div>
+                    <div class="succeed_content">
+                        <dl>
+                            <dt id="errq"></dt>
+                        </dl>
+                        <div class="DiabtnCon">
+                        <a href="javascript:void(0)" class="Diabtn-all-del prev04" >关闭</a>
+                        <a href="javascript:void(0)" class="Diabtn-all gocharge" >前往充值</a>
+                        </div>
+                    </div>
+                    
+                </div>
+                </div>
+                <!--付款成功 -->   
+                <div style="display:none; position:relative;" class="finishpay">
+                <div id="Succeed">
+                    <div class="succeed_icon"><img src="__PUBLIC__/Image/start_icon.png"></div>
+                    <div class="succeed_content">
+                        <dl>
+                            <dt>恭喜您，开通成功</dt>
+                        </dl>
+                        <div class="DiabtnCon">
+                        <a href="javascript:void(0)" class="Diabtn-all-del prev05" >关闭</a>
+                        </div>
+                    </div>
+                    
+                </div>
+                </div>
+                <!--付款失败 -->   
+                <div style="display:none; position:relative;" class="finishpayerr">
+                <div id="Succeed">
+                    <div class="succeed_icon"><img src="__PUBLIC__/Image/stop_icon.png"></div>
+                    <div class="succeed_content">
+                        <dl>
+                            <dt id="errp"></dt>
+                        </dl>
+                        <div class="DiabtnCon">
+                        <a href="javascript:void(0)" class="Diabtn-all-del prev06" >关闭</a>
+                        </div>
+                    </div>
+                    
+                </div>
+                </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+    $(function(){
+        var notice = "{$notice}";
+
+        if(notice){
+            $('.notice').remove();
+        }
+        $("body").on("click",".js_close",function(){
+                $(this).parent().remove();
+                $('#notice').val('true');
+        })
+    })
+</script>
+ <script type="text/javascript">
+    $(function(){
+			if(($(".shoplist").height()<76)||($(".shoplist li").length<7)){
+				$(".extend").hide();
+			}
+			var stores_is = '';
+			$(".notCheck").click(function(){
+				stores_is += ','+$(this).find('input:hidden').val();
+				$("#closeStores").val(stores_is.substring(1,stores_is.length));
+				var storeNum = parseInt($('.redfont').text());
+				$('.redfont').text(storeNum-1);
+				$(this).remove();
+			});
+
+		
+    	$(".next01").click(function(e) {
+    		var dialog;
+    		var postype = "{$postype}";
+    		var checktype = $("#checktype").val();
+    		var action = $("#sForm").attr('action');
+    		$("#sForm").attr('action',action+"&checktype="+checktype+"&postype="+postype).ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                    	dialog.close();
+                        $(".Wcanal-tab").hide();
+			    	    $(".function").show();
+						var api = art.dialog.open.api;
+							api.size(800,400);
+                    }else{
+                        dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+                        return false;
+                    }
+                },
+                dataType:'json',
+            });
+    	});
+		
+		$(".next02").click(function(e) {
+			var dialog;
+    		var action = $("#pForm").attr('action');
+			$("#pForm").attr('action',action+"&checktype="+checktype).ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    	$("#posName").html(data.posName);
+                    	$("#amount").html(data.amount);
+                    	$("#posFunction").html(data.posFunction);
+                    	$("#shouldPay").html(data.amount);
+                    	$("#storeCount").html(data.storeCount);
+                    	dialog.close();
+                        $(".function").hide();
+			    	    $(".apply").show();
+						//var api = art.dialog.open.api;
+//							api.size(800,400);
+                },
+                dataType:'json',
+            });
+    	});
+		
+		$(".prev01").click(function(e) {
+			//var api = art.dialog.open.api;
+//				api.size(820,600);	
+			$(".Wcanal-tab").show();
+    	    $(".function").hide();
+    	});
+		
+		$(".prev02").click(function(e) {
+			var api = art.dialog.open.api;
+				api.size(800,400);	
+			$(".function").show();
+    	    $(".apply").hide();
+    	});
+		
+
+		$(".nextok").click(function(e) {
+		var api = art.dialog.open.api;
+		    api.title("付款提示");
+			//api.size(800,250);			
+			$(".apply").hide();
+			$(".tips").show();
+    	});
+		$("body").on("click",".confirmok",function(e){
+			var dialog;
+			$("#cForm").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                    if(data.status == '1'){
+                    	dialog.close();
+                    	var api = art.dialog.open.api;
+                    	api.title("付款结果");
+						//api.size(800,250);			
+						$(".tips").hide();
+						$(".finishpay").show();
+                    }else{
+                    	dialog.close();
+                        var api = art.dialog.open.api;
+						$(".tips").hide();
+                        if(data.err == 1){
+                            $(".noremain").show();
+                            $("#errq").html(data.errinfo);
+                        }else if(data.err == 2){
+                            $("#errp").html(data.errinfo);
+                            $(".finishpayerr").show();
+                        }
+                        return false;
+                    }
+                },
+                dataType:'json',
+            });
+		});
+		$("body").on("click",".prev03",function(e){
+			$(".tips").hide();
+			var api = art.dialog.open.api;
+			api.close();		
+		 });
+		$("body").on("click",".prev04",function(e){
+			$(".noremain").hide();	
+			var api = art.dialog.open.api;
+			api.close();
+		});
+		$("body").on("click",".gocharge",function(e){
+			$(".noremain").hide();	
+			window.open("<?php echo C('YZ_RECHARGE_URL')?>&node_id=<?php echo $userInfo['node_id'];?>&name=<?php echo $userInfo['user_name'];?>&token=<?php echo $token;?>");
+			var api = art.dialog.open.api;
+			api.close();
+		});
+        $("#cancel-ret").click(function(){
+            window.location.href = "{:U('Home/Store/Wapply_terminal')}";
+        });
+		$("body").on("click",".prev05",function(e){
+			$(".finishpay").hide();
+			var api = art.dialog.open.api;
+			art.dialog.opener.reload();
+			api.close();
+		});
+        $("body").on("click",".prev06",function(e){
+            $(".finishpayerr").hide();
+            var api = art.dialog.open.api;
+            api.close();
+        });
+		 $(".js_extend_one").toggle(function(e){
+			$(".shoplist").css("height","auto");
+			$(".js_extend_one").html("收起<i></i>");
+			$(".extend .frm_checkbox_label").removeClass("dn");
+			$(".js_extend_one i").addClass("active");
+		},function(e){
+			$(".js_extend_one i").removeClass("active");
+			$(".shoplist").css("height","76px");
+			$(".extend .frm_checkbox_label").addClass("dn");
+			$(".js_extend_one").html("查看全部<i></i>");
+		});
+		 
+		 $(".frm_checkbox_label").click(function(){
+			if ($(this).hasClass("selected"))
+			{
+				$(this).removeClass("selected");
+				$(this).find(".frm_checkbox").attr("checked",false);
+				$(".shoplist li").removeClass("selected");
+				$(".shoplist li input:checkbox").removeAttr("checked");
+				$(".notCheck").children(":checkbox").attr("checked",false);
+				shopArray = [];
+				$('#number').text(shopArray.length);
+				number = 0;
+			}else{
+				$(this).removeClass("selected").addClass("selected");
+				$(this).find(".frm_checkbox").attr("checked",'checked');
+				$(".shoplist li").addClass("selected");
+				$(".shoplist li input:checkbox").attr("checked","checked");
+				$(".notCheck").children(":checkbox").attr("checked",'checked');
+				shopArray = [];
+				$(".shoplist li").each(function(key,val){
+					shopArray.push($(this));
+				});
+				$('#number').text(shopArray.length);
+				number = shopArray.length;
+			}
+		}); 
+		
+    })
+    
+    
+    
+    </script>

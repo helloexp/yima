@@ -1,0 +1,383 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>创建卡券_卡券_翼码旺财</title>
+
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+
+    $("#smb").click(function(){
+    	var dialog;
+    	var type = $("input[name='type']:checked").val();
+    	if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                	dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+                },
+                success:function(data){
+                     if(data.status == '1'){
+                    	   dialog.close();
+                           $('#one_div').hide();
+                           $("#two_div").show();
+                           return false;
+                      }else{
+                           dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                      }
+                },
+                dataType:'json'
+            });
+            return false;
+        }
+    });
+ 
+        
+    $("#verify_begin_date").click(function(){
+        $("input[name='verify_begin_type'][value='0']").attr("checked",true);
+    });
+    $("#verify_begin_days").click(function(){
+        $("input[name='verify_begin_type'][value='1']").attr("checked",true);
+    });
+    $("#verify_end_date").click(function(){
+        $("input[name='verify_end_type'][value='0']").attr("checked",true);
+    });
+    $("#verify_end_days").click(function(){
+        $("input[name='verify_end_type'][value='1']").attr("checked",true);
+    });
+    $("input[name='discount']").click(function(){
+        $("input[name='prt_type'][value='1']").attr("checked",true);
+    });
+    $("input[name='prt_price']").click(function(){
+        $("input[name='prt_type'][value='2']").attr("checked",true);
+    });
+    
+ 
+    $(".choosetext1").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").hide();
+    });
+    $(".choosetext2").click(function(){
+        $(this).closest("li").find(".choosetext").val("");
+        $(this).closest("li").find(".choosetext").show();
+    });
+   
+ });
+function checkImg(){
+    if($("#resp_img").val() == '')
+        {
+            return "请上传营销图片";
+        }
+}
+function get_min_date(){
+	var text = $("#cooperation_begin_date").val();
+	return text.substr(0, 4) + "-" + text.substr(4, 2) + "-" + text.substr(6, 2);
+}
+function get_max_date(){
+	var text = $("#cooperation_end_date").val();
+    return text.substr(0, 4) + "-" + text.substr(4, 2) + "-" + text.substr(6, 2);
+}
+
+/*获取图片路径中的图片名*/
+function base_name(url){
+    var urlList = url.split('/'); 
+    var a = urlList[urlList.length-1];
+    return a;
+}
+
+ /**
+* 打开图片上传地址
+* 格式如下：
+* {:U('ImgResize/Resize/index',array('ratioX'=>100,'ratioY'=>100))}
+* rationX 图片宽度
+* rationY 图片长度
+* 注：1、长宽只限定图片的比率，而不会真正裁剪成理想长宽
+*     2、过大的图片(宽>1500,长>1000,会被缩小成1/2)
+* */
+
+function uploadImg(url) {
+var win_width = 500;
+art.dialog.open(url, {
+    lock: true,
+    title: "上传图片",
+    width: win_width,
+    height: win_width / 1.6,
+    id: 'art_upload'
+});
+}
+
+//背景图片回调函数
+function bgCallback(d) {
+//填充缩略图
+$('#img_resp_show').attr('src', d.absolutepath).show();
+//上传用
+$('#img_resp').val(base_name(d.absolutepath));
+}
+ function add_num()
+{
+        var opt = [
+            ,"uploadUrl={:urlencode(U('ImgResize/Meitu/uploadFile','','','',true))}"
+            ,"cropPresets=230x190"
+            ,"callback=num_Call"
+            ,"menuType=1"
+        ].join('&');
+        openUploaderMeitu_message("{:U('ImgResize/Meitu/index')}&"+opt);
+ }
+ function openUploaderMeitu_message(url) {
+    var win_width = 700;
+    art.dialog.open(url, {
+        lock: true,
+        title: "上传图片",
+        width: win_width,
+        height: win_width / 1.6,
+        id: 'art_upload',
+		zIndex:1600
+    });
+}
+function num_Call(data) {
+//填充缩略图
+$('#img_resp_show').attr('src', data.info.imgWay+data.info.imgName).show();
+//$('#show_img_resp_show').attr('src', data.info.imgWay+data.info.imgName);
+//上传用
+$('#img_resp').val(data.info.imgName);
+}
+</script>
+</head>
+<body>
+                <div class="pl20 mt30 fn" id="one_div">
+                     <form method="post" action="<?php echo U('Hall/Index/publish_lianmeng');?>">
+                        <input type="hidden" name="city_name" id="city_name" value=""/>
+                        <input type="hidden" name="select_city" id="select_city" value=""/>
+                        <div class="global-input6 fn">
+                            <!--旺财卡券表单1-->
+                            <div id="Wform">
+							   <ul>
+                                   <li class="global-input6-name">*&nbsp;旺财联盟名称：</li>
+                                   <li class="global-input6-input"><input name="bloc_name" id="bloc_name" type="text"  class="validate[required,maxSize[50]] textbox w380"/></li>
+                               </ul>
+                               <ul>
+                                    <li class="global-input6-name">*联盟合作有效期:</li>
+                                    <li class="global-input6-input"><input name="cooperation_begin_date" id="cooperation_begin_date" type="text" onClick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'cooperation_end_date\\')}'})" class="validate[required] textbox w172"/><span class="mlr5">至</span><input name="cooperation_end_date" id="cooperation_end_date" type="text" onClick="WdatePicker({minDate:'#F{$dp.$D(\\'cooperation_begin_date\\')||\\'%y-%M-%d\\'}'})" class="validate[required] textbox w172"/></li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*招募截止日期:</li>
+                                    <li class="global-input6-input"><input name="recruit_end_date" id="recruit_end_date" type="text" onClick="var max_date=get_max_date();WdatePicker({maxDate:max_date})" class="validate[required] textbox w172"/></li>
+                                </ul>
+							   <ul>
+                                   <li class="global-input6-name">&nbsp;详细描述：</li>
+                                   <li class="global-input6-input"><textarea name="goods_desc" id="goods_desc" class="validate[maxSize[200]] texttextarea w380"></textarea></li>
+                               </ul>
+						       <ul>
+                                  <li class="global-input6-name">*&nbsp;卡券可兑换城市：</li>
+                                  <li class="global-input6-input">
+                        	          <dl class="cityListForm fn">                    	
+        						         <span id="cityspan"></span>        	
+                                      </dl>
+                                      <div class="cl"></div>
+                        	          <a href="javascript:void(0)" id="selctCity"  class="btn-all w60">选择城市</a>     
+    					          </li>
+                               </ul>
+	                           <ul>
+                                    <li class="global-input6-name">*&nbsp;联盟专用卡券名称：</li>
+                                    <li class="global-input6-input"><input name="name" id="name" type="text" onkeyup="check_lenght(24,'name_text',this);" class="validate[required,maxSize[24]] textbox w380"/><br /><p class="font-12-cc" id="name_text">还可以输入24个字</p></li>
+                                </ul>
+								 <ul>
+                                    <li class="global-input6-name">*&nbsp;联盟专用卡券面值：</li>
+                                    <li class="global-input6-input">
+                                        <input name="market_price" type="text" class="validate[custom[number],required,min[0]] textbox w240" />&nbsp;元
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;卡券图片：</li>
+                                    <li class="global-input6-input">
+                                        <div class="rel l">
+                                        <input type="hidden" value="" name="img_resp" id="img_resp" class="validate[required,funcCall[checkImg]]]" />
+                                        <a href="javascript:;" id="a_img" title="上传" onclick="add_num()" class="btn-all w60">上传</a>
+                                        </div>
+                                        <div class="cl"></div>
+                                        <img src="" id="img_resp_show" width="150" class="mt10 dn"/>
+                                        <div class="cl"></div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;联盟专用卡券数量：</li>
+                                    <li class="global-input6-input">
+                                    <input name="num_type" id="num_type1" value="1" checked="checked" type="radio" class="choosetext1"/><p class="ml5 choosetext1">不限</p>
+                                    <input name="num_type" id="num_type2" value="2" type="radio" class="ml20 choosetext2"/><p class="ml5 choosetext2">限制</p>
+                                    <input name="goods_num" type="text" class="validate[min[1],condRequired[num_type2],custom[integer]] textbox dn w50 ml5 choosetext"/>&nbsp;</li>
+                                </ul>
+								<ul>
+                                    <li class="global-input6-name">*&nbsp;打印小票内容：</li>
+                                    <li class="global-input6-input"><textarea name="print_text" id="print_text" class="validate[maxSize[100],required] texttextarea w380"></textarea><br /><a href="javascript:void(0)" class="message-show"></a>
+                                    <p class="font-12-cc">小票内容将显示在验证后的打印小票上，运营员根据打印小票内容提供服务</p>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;使用卡券时间：</li>
+                                    <li class="global-input6-input">
+                                        <div class="judgeDiv">
+                                            <label class="ml5" onclick="javascript:$('.judgeCon1').show();$('.judgeCon2').hide();">
+                                            <input type="radio" checked="checked" name="verify_time_type" value="0" id="verify_begin_type1"/><span class="ml5">按日期设置</span></label>
+                                            <label class="ml10" onclick="javascript:$('.judgeCon2').show();$('.judgeCon1').hide();">
+                                            <input type="radio" name="verify_time_type" value="1" id="verify_begin_type2"/><span class="ml5">按天数设置</span></label>
+                                        </div>
+                                        <div class="judgeCon-time judgeCon1">
+                                            <p class="ml5">使用开始时间</p>
+                                            <input name="verify_begin_date" id="verify_begin_date" type="text" onclick="WdatePicker({minDate:'%y-%M-%d',maxDate:'#F{$dp.$D(\\'verify_end_date\\')}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" value="<?php echo dateformat($jp_arr['verify_begin_date'],'Ymd')?>"/>
+                                            <p class="ml20">使用结束时间</p>
+                                            <input name="verify_end_date" id="verify_end_date" type="text" onclick="WdatePicker({minDate:'#F{$dp.$D(\\'verify_begin_date\\')||\\'%y-%M-%d\\'}'})" class="validate[condRequired[verify_begin_type1]] textbox w90 ml5" maxlength="8" value="<?php echo dateformat($jp_arr['verify_end_date'],'Ymd')?>" />
+                                            <div class="cl"></div>
+                                            <p class="font-12-cc">商户可以自定义验码开始的日期如："4月1号,6月1号";</p>
+                                        </div>
+                                        <div class="judgeCon-time judgeCon2 dn">
+                                            <p class="ml5">发送卡券后</p>
+                                            <input name="verify_begin_days" id="verify_begin_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$jp_arr['verify_begin_date']}" />&nbsp;天开始使用
+                                            <p class="ml20">发送卡券后</p>
+                                            <input name="verify_end_days" id="verify_end_days" type="text" class="validate[custom[integer],min[0],condRequired[verify_begin_type2]] textbox w50 ml5" value="{$jp_arr['verify_end_date']}" />&nbsp;天结束使用
+                                            <div class="cl"></div>
+                                            <p class="font-12-cc">商户可以自定义验码时间，如：“发送卡券后3天开始使用-发送卡券后5天结束使用”</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;彩信标题：</li>
+                                    <li class="global-input6-input"><input id="mms_title" name="mms_title" type="text" onkeyup="check_lenght(10,'title_text',this);"  class="validate[required,maxSize[10]] textbox w380"/>
+                                    <br />
+                                    <p class="font-12-cc" id="title_text">还可以输入10个字</p>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="global-input6-name">*&nbsp;彩信内容：</li>
+                                    <li class="global-input6-input"><textarea name="mms_text" id="mms_text" onkeyup="check_lenght(100,'text',this);" class="validate[required,maxSize[100]] texttextarea w380 h50"></textarea>
+                                    <br />
+                                    <span class="font-12-cc" id="text">还可以输入100个字</span><p class="font-12-cc">,请短彩信内容按照以下格式：xxx时间到xxxx地点享受xxxx服务</p>
+                                    </li>
+                                </ul>
+                                
+								 <ul>
+                                    <li class="global-input6-name"></li>
+                                    <li class="global-input6-input">
+                                    <!--<a href="javascript:void(0);" class="btn-all w110 btn-pre">上一步</a>-->
+                                    <a href="javascript:void(0);" title="确认" id="smb" class="btn-all w110 ml10">确定</a>
+                                    </li>
+                                </ul>
+							</div>
+                            <!--旺财卡券表单1-->
+                             
+                        </div>
+                       
+                        </form>
+                    </div>
+                    <div class="dn showsaloonmsg mt70 tc" id="two_div">
+                    <p class="font-18-99 pt50">旺财联盟通券创建成功，我们会尽快对旺财联盟通券进行审核</p>
+                    <div class="fn tc mt50">
+                        <a href="javascript:art.dialog.close();" class="btn-all w120 btn-ok ml20">确定</a>
+                    </div>
+    </div>
+</body>
+<script>
+$(function(){
+	//城市选择框
+    $('#selctCity').click(function(){
+        art.dialog.open('index.php?g=Hall&m=Index&a=city_dialog&call_back=city_call_back',{
+                    title: '选择城市',
+                    width:'422px',
+                    height:'473px'
+        });
+     });
+})
+function city_call_back(cityList){  
+    
+    //获取当前已选择城市
+    var city_str=$("#select_city").val();   
+    var city_name=$("#city_name").val();        
+    
+    for(var j=0;j<cityList.length;j++){
+        for(var i=0;i<cityList[j].length;i++){
+            
+            var newcity=cityList[j][i].split("-");
+
+            //没找到已经选择的城市
+            if(city_str.indexOf(newcity[1])==-1){
+                $("#cityspan").before(" <dd >"+newcity[0]+"<i>x</i></dd>");
+                //赋值
+                if(city_str!=""){               
+                    city_str=city_str+",";
+                }
+                city_str=city_str+newcity[1];
+                if(city_name!=""){              
+                    city_name=city_name+",";
+                }
+                city_name=city_name+newcity[0];
+            }
+        
+        }
+    
+    }       
+    
+    $("#select_city").val(city_str);
+    $("#city_name").val(city_name);     
+
+    //alert(city_str+"=="+city_name);       
+}
+//关闭城市
+$('.cityListForm i').live("click",function(){
+            
+    //获取原有城市名称
+    var city_name=$("#city_name").val();
+    var cityarr=city_name.split(",");
+
+    //获取原有城市编码
+    var city_str=$("#select_city").val();
+    var citycodearr=city_str.split(",");
+
+    var closecity=$(this).closest("dd").not("i").text();
+    var cityzhname=closecity.substring(-1,closecity.length-1);              
+
+    //循环判断
+    for(var i=0;i<cityarr.length;i++){
+        
+        if(cityarr[i]==cityzhname){                     
+            cityarr.splice(i,1);
+            citycodearr.splice(i,1);
+        }
+    }           
+
+    var city_name_str="";
+    var city_code_str="";
+
+    //重新拼装
+    for(var j=0;j<citycodearr.length;j++)
+    {
+        if(city_code_str!=""){
+            city_code_str=city_code_str+",";
+        }
+        city_code_str=city_code_str+citycodearr[j];
+
+        if(city_name_str!=""){
+            city_name_str=city_name_str+",";                    
+        }
+        city_name_str=city_name_str+cityarr[j];             
+    }
+    
+    $("#select_city").val(city_code_str);
+    $("#city_name").val(city_name_str);
+
+    //alert($("#city_name").val());             
+    $(this).closest("dd").remove();             
+});  
+</script>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>门店管理-申请记录</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="http://192.168.0.242/home/Home/Public/Js/My97DatePicker/WdatePicker.js?v=201507022"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script>
+$(function(){
+	CityCode({
+		province:$("#province"),//省
+		city:$("#city"),//市
+		town:$("#town"),//区
+		selected:"{:$_POST['province'].$_POST['city'].$_POST['town']}",
+		url:"{:U('LabelAdmin/AjaxCity/index')}"
+	});
+	
+ 	 $("#sub_button").click(function(){
+    	$("#theform").submit();
+  	});
+    $(".disable").click(function(){
+	     var sId=$(this).attr('storeId');
+		 var sStatus=$(this).attr('statusId');
+		 var posId=$(this).attr('posId');
+		 $.get("{:U('Home/Store/storePosStatus')}&sId="+sId+"&sStatus="+sStatus+"&posId="+posId,'',function(d){
+		       if(d.codeId == '0000')
+			   {
+			     result(d.codeText);
+			   }else{
+		         result_(d.codeText);
+			   }
+		 },'json');
+  	});
+})
+
+function result_(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				   //art.dialog.close();
+				   //location.reload();
+				}
+			})
+   }
+   function result(contents){
+      art.dialog({
+				title:"提示",
+				height:100,
+				content:contents,
+				icon: 'succeed',
+				lock:true,
+				ok:function(){
+				   art.dialog.close();
+				   location.reload();
+				}
+			})
+   }
+</script>
+
+
+</head>
+<body>
+    <div id="wrapper"> 
+    	<include file="./Home/Tpl/Public/Public_header.html" /> 
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+                <div class="new_sidenav"> 
+                    <include file="Store:sidenav" leftmenuid="sqjl"/>                
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>申请记录</h4>
+                    </div>
+                    
+                    <div class="SearchArea fn">
+                    <form id="theform" action="{:U('Home/Store/myEpos')}" method="post">
+                    <div class="SearchAreaLeft">
+                    <label>
+                    	   <span>申请时间</span><input name="badd_time" type="text" value=""  onClick="WdatePicker()" class="textbox w100"/>-<input name="eadd_time" type="text"  onClick="WdatePicker()" value="" class="textbox w100"/>
+                    </label>
+                 
+					 <label> <span>终端类型</span> 
+									<select class="selectbox w100" name="from_type" id="from_type" >
+									<option value="">全部</option>
+									<option value="0">支付宝</option><option value="1">微信</option>									</select>
+					 </label>		 
+                        <label> <span>状态</span> 
+									<select class="selectbox w100" name="from_type" id="from_type" >
+									<option value="">全部</option>
+									<option value="0">支付宝</option><option value="1">微信</option>									</select>
+					 </label>          
+                   </div>
+                   <div class="SearchAreaRight">
+                                        <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                                       <!-- <a href="javascript:void(0);" class="more-filter ml10 l">更多筛选</a>-->
+                    </div>
+                    </form>
+                    </div>
+                    <div class="shopCon">
+                    <table cellpadding="0" cellspacing="0" class="shopTable">
+                    <tbody>
+                    <tr class="th">
+                    <th>开通日期</th>
+                    <th> 终端类型</th>
+                    <th>数量（台）</th>
+                    <th>状态</th>
+                    <th>合计金额（元）</th>
+                    <th>操作</th>
+                    </tr>
+					<?php if($list){ foreach($list as $v){ ?>
+                    <tr class="title">
+                    <td></td>
+                    <td class="hover"></td>
+                    <td></td>
+                    <td><?php echo $posStatus[$v['pos_status']]; ?></td>
+                   
+                    <td>100</td>
+                   
+                    <td>
+					   <a href="javascript:void(0)" class="wapply-info" >详情</a>
+					   <a href="javascript:void(0)" >付款  <!--如果是待付款则显示付款--></a>
+					</td>
+                    </tr>
+                     <?php } }else{ ?>
+					 <tr><td colspan="6"><div class="nonedata"></div></td></tr>
+					 <?php } ?>    
+                    </table>
+                    <div class="page"><?php echo $page;?></div>
+                    </div>
+                    
+                    
+                
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+
+    <script type="text/javascript">
+    $(function(){
+		/*下载弹窗js*/
+    	$(".wapply-info").click(function(e) {
+    	    var url = "{:U('Home/Store/viewDetails')}";
+    		art.dialog.open(url,{
+    			id:"EnterpriseNo",
+    			title:"详情",
+    			width:"500px",
+    			//height:"500px",
+    			fixed:true,
+    		});
+    	});
+		
+		
+		
+		
+		
+
+
+ })
+    
+    
+    
+    </script>

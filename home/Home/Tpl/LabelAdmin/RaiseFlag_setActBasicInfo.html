@@ -1,0 +1,256 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>国庆升旗-基础信息</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshopconfig.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivity2015.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/jquery-ui.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script>
+var needShowTips = '{$needShowTips}';
+var configOneActDays = '{$configOneActDays}';
+var exPrice = '{$exPrice}';
+$(function(){
+	Gform();
+	$('#save').click(function(){
+		var sns_share = '';
+		$('[name="sns[]"]').each(function(){
+			if ($(this).attr('checked') == 'checked') {
+				sns_share += $(this).val() + '-';
+			}
+		});
+		if (sns_share) {
+			sns_share = sns_share.substr(0,(sns_share.length - 1));
+			$('#sns').val(sns_share);
+		}
+		if($("#theform").validationEngine('validate')){
+			//var returndata = updataJson();	
+			//if(returndata[0]==""){
+			//	alert("出错了，提交数据为空！");	
+			//}
+			//var datastr=returndata[0];
+			//$("#memo").val(datastr);
+			
+				$("#theform").ajaxSubmit({
+					beforeSubmit:function(){
+						dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,lock:true,padding:0});
+					},
+					success:function(data){
+					  if (data.status == '1'){
+						   dialog.close();
+						   if (data.info.isReEdit == '1') {
+							   window.location.href="{:U('MarketActive/Activity/MarketList')}";
+						   } else {
+							   window.location.href="{:U('LabelAdmin/RaiseFlag/setActConfig')}&m_id="+data.info.m_id+"&isReEdit=0";
+						   }
+					  } else {
+						  if (typeof(data.error_code) != "undefined") {
+							  if (data.error_code == '1000') {
+								  art.dialog({
+										content: '<div class="fn"><img src="__PUBLIC__/Image/sips_ans.png" class="vm"><span class="vm ml20" style="font-size:14px;">'+data.msg+'</span></div>',
+										fixed: true,
+										width:400,
+										height:100,
+										okVal: '返回首页',
+										padding:0,
+										title:"提示",
+										lock:true,
+										ok: function () {
+											location.href = data.url;
+										},
+									});
+							  }
+						  } else {
+							  dialog.time(2).content("<div class='msg-all-error'>"+data.info+"</div>");
+						  }
+					  }
+					},
+					url:"{:U('LabelAdmin/RaiseFlag/setActBasicInfo')}",
+					dataType:'json'
+				});
+				return false;
+		  }
+	}) ;
+	$("body").on("blur","#act_time_from,#act_time_to", showExTips);
+})
+</script>
+<script>
+function add()
+{
+        var opt = {
+            cropPresets:'640x340',
+            callback:uploadCallback
+        };
+        open_img_uploader(opt);
+ }
+function uploadCallback(data){
+    //显示预览
+    if ($('#tp2 .Ginput .mb1').length == 2) {
+    	$('#tp2 .Ginput .mb1:eq(1)').after('<div class="mb1 fl"><img src="'+data.src+'" width="100"></div>');
+    } else {
+    	$('#tp2 .Ginput .mb1:eq(2)').replaceWith('<div class="mb1 fl"><img src="'+data.src+'" width="100"></div>');
+    }
+}
+function limitPicker() {
+	var today = "{:date('Y-m-d')}";
+	var limit = '{$freeUseLimit}';
+	WdatePicker({minDate:today, maxDate:limit});
+}
+function normalDatePickerStart() {
+	WdatePicker({minDate:'%y-%M-%d', maxDate:"#F{$dp.$D(\\'act_time_to\\')}"});
+}
+function normalDatePickerEnd() {
+	WdatePicker({minDate:"#F{$dp.$D(\\'act_time_from\\')}"});
+}
+//显示超过60天付费的提示
+function showExTips() {
+	var startTime = $('#act_time_from').val();
+    var endTime = $('#act_time_to').val();
+    if (startTime.length > 0 && endTime.length > 0) {
+    	startTime = new Date(parseInt(startTime.substr(0,4)), (parseInt(startTime.substr(4,2)) - 1), parseInt(startTime.substr(6,2)));
+        endTime = new Date(parseInt(endTime.substr(0,4)), (parseInt(endTime.substr(4,2)) - 1), parseInt(endTime.substr(6,2)));
+        var selectDays = parseInt(Math.floor((endTime.getTime(endTime) - startTime.getTime(startTime)) / (24*60*60*1000)));
+        selectDays = selectDays + 1;
+        if (needShowTips == '1' && selectDays > configOneActDays) {
+        	$('#exTime').show();
+        } else {
+        	$('#exTime').hide();
+        }
+    }
+}
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+            	<div class="member_con">
+                	{$stepBar}
+                	<div class="member_l">
+                    	<div id="phone">
+                            <div class="phonetop"></div>
+                            <div id="phoneCon" class="selected" style="padding-top:0;">
+                                <img src="__PUBLIC__/Image/ap-iphone-Guoqing.jpg" width="320">
+                            </div>
+                            
+                            <div id="phoneCon_two" class="dn">
+                                <img src="__PUBLIC__/Image/ap-iphone-Qixi.png" width="320">
+                            </div> 
+                        </div>
+                    </div>
+                    <div class="member_r">
+                    	<form action="" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+                        <input type="hidden" id="m_id" name="m_id" value="{$m_id}">
+                        <input type="hidden" id="sns" name="sns_share" value="">
+                        <input type="hidden" id="isReEdit" name="isReEdit" value="{$isReEdit}">
+                    	<h3>活动基础信息</h3>
+                        <div class="Gform l w700">
+                            <ul>
+                            <li class="Gname"><span>*</span> 活动名称</li>
+                            <li class="Ginput">
+                                <input type="text" maxlength="20" class="Gview-text validate[required,optional,maxSize[20]]" style="width:450px" name="act_name" value="{$act_name}">
+                            </li>
+                            </ul>
+                            <ul>
+                            <li class="Gname"><span>*</span> 活动时间</li>
+                            <li class="Ginput">
+                            	<if condition="$type eq 1">
+                            	<div class="Gtime2 fn">
+                                    <input type="text" style="width:136px;" class="validate[required]" readonly="readonly"  name="act_time_from"  id="act_time_from" value="{$act_time_from}">
+                                    <em>至</em>
+                                    <input type="text" style="width:136px;" class="validate[required]" onclick="limitPicker();" name="act_time_to" id="act_time_to" value="{$act_time_to}">
+                                </div>
+                                <else />
+                                <div class="Gtime2 fn">
+                                    <input type="text" style="width:136px;"  class="validate[required]" onclick="normalDatePickerStart()" name="act_time_from"  id="act_time_from" value="{$act_time_from}">
+                                    <em>至</em>
+                                    <input type="text" style="width:136px;"  class="validate[required]" onclick="normalDatePickerEnd()" name="act_time_to" id="act_time_to" value="{$act_time_to}">
+                                </div>
+                            	</if>
+                            	<div class="txtTips important" id="exTime" style="display:none;">活动时间超过{$configOneActDays}天，超出的部分以{$exPrice}元/天，按天数收取。</div>
+                            </li>
+                        </ul>
+                            <ul class="last">
+                                <li class="Gname">活动说明</li>
+                                <li class="Ginput">
+                                    <textarea maxlength="140" class="Gview-textarea" name="introduce">{$introduce}</textarea><span class="maxTips forArea" data-max="140">0/140</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="cl"></div>
+                        <h3>商户信息</h3>
+                        <div class="Gform l">
+                            <ul>
+                            <li class="Gname"><span>*</span> 商户名称</li>
+                            <li class="Ginput">
+                                <input type="text" maxlength="20" class="Gview-text validate[required]" style="width:450px" value="{$node_name}" name="node_name">
+                            </li>
+                            </ul>
+                            <ul class="last">
+                        <li class="Gname">商户logo</li>
+                        <li class="Ginput">
+                            <div class="Gchoose Gview-img"  style="width:422px">
+                                <input type="text" value="{$node_logo}" name="node_logo">
+                                <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:160,height:160}"><i></i></a>
+                            <div class="Gchoose-opr an" style="display: none;"><div class="Gchoose-opr-img"><img src="" style="width:100px;"></div><div class="Gchoose-opr-opr"><a href="javascript:void(0)" class="Gchoose-opr-edit"></a><a href="javascript:void(0)" class="Gchoose-opr-del"></a></div><span class="Gchoose-opr-jt"></span></div><div class="Gchoose-oprbg"></div></div>
+                        </li>
+                    </ul>
+                        </div>
+                        <div class="cl"></div>
+                        <h3>微信分享设置</h3>
+                        <div class="Gform l">
+                        	<ul>
+                                <li class="Gname">分享描述</li>
+                                <li class="Ginput">
+                                    <textarea maxlength="140" class="Gview-textarea" name="share_descript">{$share_descript}</textarea><span class="maxTips forArea" data-max="140">0/140</span>
+                                </li>
+                            </ul>
+                            <ul>
+		                        <li class="Gname">分享图标</li>
+		                        <li class="Ginput">
+		                            <div class="Gchoose Gview-img"  style="width:422px">
+		                                <input type="text" value="{$share_pic}" name="share_pic">
+		                                <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:160,height:160}"><i></i></a>
+		                            <div class="Gchoose-opr an" style="display: none;"><div class="Gchoose-opr-img"><img src="" style="width:100px;"></div><div class="Gchoose-opr-opr"><a href="javascript:void(0)" class="Gchoose-opr-edit"></a><a href="javascript:void(0)" class="Gchoose-opr-del"></a></div><span class="Gchoose-opr-jt"></span></div><div class="Gchoose-oprbg"></div></div>
+		                        </li>
+		                    </ul>
+                        <ul class="pt20">
+                            <li class="Ginput noName tc">
+                                <a href="{:U('MarketActive/Activity/MarketList')}" class="btn-all-del">取消</a>
+                                <a href="javascript:void(0)" class="btn-all" id="save"><eq name="isReEdit" value="1">保存<else />下一步</eq></a>
+                            </li>
+                        </ul>
+                    	
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

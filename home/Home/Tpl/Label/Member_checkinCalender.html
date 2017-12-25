@@ -1,0 +1,272 @@
+<php>
+    $globalJs = array(
+    'url_member_center' => U('Label/Member/index', array('node_id'=>$node_id)),
+    'url_shop' => U('Label/Store/index', array('id'=>$shop_id)),
+    'url_jfshop' => U('Label/IntegralShop/index', array('id'=>$jpshop_id)),
+    'url_checkin' => U('Label/Member/checkin', array('node_id'=>$node_id)),
+    'url_checkin_calender' => U('Label/Member/checkinCalenderData', array('node_id'=>$node_id)),
+    'url_checkin_mo' => U('Label/Member/sele_mo', array('node_id'=>$node_id)),
+    );
+    $globalJs = json_encode($globalJs);
+</php>
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>每日签到</title>
+	<meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+	<meta content="telephone=no" name="format-detection" />
+	<meta content="email=no" name="format-detection" />
+	<meta name="apple-touch-fullscreen" content="NO">
+    <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_gxsyShop.css?v=__VR__">
+    <style type="text/css">
+        .userHeader {
+            padding: 10px 25px;
+            background: url(__PUBLIC__/Label/Image/gxsy/Shop/userbg1.jpg) no-repeat;
+            background-size: 100%;
+        }
+
+        .userHeader p span.red {
+            color: #ed3f41;
+        }
+
+        .ranking {
+            width: 78px;
+            height: 74px;
+            background: url(__PUBLIC__/Label/Image/gxsy/Shop/gxsyShop-icon2.png) no-repeat;
+            background-size: 100%;
+        }
+
+        .ranking p {
+            padding-top: 25px;
+            font-size: 15px;
+        }
+
+        .ranking p span.red {
+            font-weight: bold;
+        }
+
+        .userHeader a.active {
+            background: none;
+            border: 1px #ed3f41 solid;
+            color: #ed3f41;
+        }
+
+        .userHeader a.active i {
+            width: 17px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 3px;
+            background: url(__PUBLIC__/Label/Image/gxsy/Shop/gxsyShop-icon3.png) no-repeat;
+            background-size: 100%;
+        }
+
+        .userHeader a.active p {
+            color: #333333;
+        }
+
+        table, tr, th, td {
+            border: none;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .yearMonth {
+            padding: 0 10px;
+            height: 40px;
+            background: #eeeeee;
+        }
+
+        .yearMonth select {
+            border: none;
+            color: #666666;
+            font-size: 14px;
+            background: #eeeeee;
+        }
+
+        .yearMonth .year, .yearMonth .month {
+            display: inline-block;
+        }
+
+        .yearMonth .year:after, .yearMonth .month:after {
+            display: inline-block;
+            position: relative;
+            top: -3px;
+            content: "";
+            width: 8px;
+            height: 8px;
+            border: 1px #666666 solid;
+            border-width: 0 1px 1px 0;
+            -webkit-transform: rotate(45deg);
+        }
+
+        .signNum {
+            display: inline-block;
+            margin-left: 20px;
+        }
+
+        .saturday, .sunday, td:nth-child(1), td:nth-child(7) {
+            color: #ed3f41;
+        }
+
+        table th.signed i, table td.signed i {
+            display: inline-block;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            margin-left: -11px;
+            width: 22px;
+            height: 17px;
+            background: url(__PUBLIC__/Label/Image/gxsy/Shop/gxsyShop-icon4.png) no-repeat;
+            background-size: 100%;
+        }
+        .msgPopCon { padding: 20px 10px;}
+        .cjForm li { height: auto;}
+        .cjForm li strong { font-size: 16px;}
+        .cjForm li .yes { display: inline-block; width: 29px; height: 29px; background: url(__PUBLIC__/Label/Image/jfyx/Shop/jfyxShop-icon1.png) no-repeat; background-size: 100%; vertical-align: middle; margin-right: 10px;}
+        .cjForm li p { width: 100%; text-align: left; line-height: 16px; font-size: 15px; height: auto;}
+        .cjForm li p span { font-size: 15px; color: #0072c2;}
+        .mainCon { padding-bottom: 0;}
+        .copyright p { line-height: 40px; color: #999999;}
+    </style>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_jfyxShop.js"></script>
+</head>
+<body>
+<div id="wrapper" class="bgf5f5f5">
+    <div id="container">
+        <div id="header" class="fn">
+        <div class="back"><a href="javascript:void(0)" onClick="link_to('{:U('Label/Member/index',array('node_id'=>$node_id))}')"><i></i></a></div>
+            <div class="headerorder" onClick="link_to('{:U('Label/Member/index',array('node_id'=>$node_id))}')"></div>
+            <div class="title">签到日历</div>
+        </div>
+        <div id="main">
+            <div id="mainCon" class="mainCon fn m0">
+                <div class="userHeader">
+                    <!--<div class="ranking">
+                        <p>签到排名<br/><span class="red">2938</span></p>
+                    </div>-->
+
+                    <!-- 已签到按钮 -->
+                    <if condition="$checkinInfo['todayChecked']">
+                    <a href="javascript:void(0)" class="active" id="change-sign1" style='margin-right:12px;'><i></i>已签到</a>
+                    <else/>
+                        <a href="javascript:void(0)" id="change-sign" style='margin-right:12px;'>马上签到</a>
+                        <a href="javascript:void(0)" class="active" id="change-sign1" style='margin-right:12px;display:none;'><i></i>已签到</a>
+                    </if>
+                </div>
+                <div class="m-center">
+                    <div class="item">
+                        <table border="1" cellspancing="0" paddingspancing="10" width="100%" height="100">
+                            <tr>
+                                <th colspan="7" class="yearMonth">
+                                    <div class="year">
+                                        <select name="year" id="year" class='changeYear' onchange="msg();">
+                                            <?php for ($i=$year_flag - 1; $i <= $year_flag ; $i++) { ?>
+                                                <option <?php if ($year_flag == $i) { echo 'selected="selected"';} ?> value="<?php echo $i; ?>"><?php echo $i; ?>年</option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    &nbsp;
+                                    <div class="month">
+                                        <select name="month" id="month" onchange="msg();">
+                                            <?php for ($i=1; $i <= $month_flag ; $i++) { ?>
+                                            <option <?php if ($month_flag == $i) { echo 'selected="selected"';} ?> value="<?php echo $i; ?>"><?php echo $i; ?>月</option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div class="signNum">你已签到<span id="conDays"><?php if ($checkinInfo['conDays'] == null) { echo '0';}else{ ?> {$checkinInfo['conDays']}<?php} ?></span>天</div>
+                                </th>
+                            </tr>
+                            <tr class="week">
+                                <td class="sunday">日</td>
+                                <td>一</td>
+                                <td>二</td>
+                                <td>三</td>
+                                <td>四</td>
+                                <td>五</td>
+                                <td class="saturday">六</td>
+                            </tr>
+                        </table>
+                        <div class="s day" id="calender">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    var global = {$globalJs};
+    function msg() {
+        $(".show").remove();
+        var y = $("#year").val();
+        var m = $("#month").val();
+        $.ajax({
+            url: global.url_checkin_calender,
+            data: {year: y, month: m},
+            type: 'post',
+            dataType: 'json',
+            success: function (me) {
+                $("#calender").append(me.info);
+            }
+        })
+    }
+    $('.changeYear').change(function(){
+        var y = $("#year").val();
+        var m = $("#month").val();
+        $.ajax({
+            url: global.url_checkin_mo,
+            data: {year: y, month: m},
+            type: 'post',
+            dataType: 'json',
+            success: function (data) {
+                $("#month").empty();
+                $("#month").append(data);
+            }
+        })
+    });
+    $(function () {
+        msg();
+
+        $("#change-sign").click(function () {
+            Util_tools.ui.loading('处理中...');
+            $.ajax({
+                url: global.url_checkin,
+                type: "POST",
+                data: {},
+                dataType: "json",
+                success: function (data) {
+                    Util_tools.ui.loading(false);
+                    if(data.status == 0){
+                        alert(data.info);
+                        return false;
+                    }
+                    var msg = '<div class="cjCon" id="popForm">'
+                            + '<div class="cjForm">'
+                            + '<ul class="sOne-cjForm">'
+                            + '<li><strong><i class="yes"></i>签到成功！</strong></li>'
+                            + '<li style="margin-top:10px;"><p>恭喜您获得' + data.info.getPoint + '个{:L('INTEGRAL_NAME')}，您已连续签到' + data.info.conDays + '天，详情请到<a href="javascript:;" id="click_youdou">点击此处查询。</a></p>' + '</li>'
+                            + '</ul>'
+                            + '</div>'
+                            + '</div>';
+                    msgPop(msg);
+                    $('#conDays').html(data.info.conDays);
+                    $('td[data-date={:date("Ymd")}]').addClass('signed').append('<i></i>')
+                    $('#change-sign').hide();
+                    $('#change-sign1').show();
+                }
+            });
+        });
+$(document).on("click", '#click_youdou', function(){
+    var node_id = "{$node_id}";
+    var url = "{:U('Label/Member/integral_detail')}&node_id="+node_id;
+    location.href = url;
+});
+    })
+
+</script>
+</html>

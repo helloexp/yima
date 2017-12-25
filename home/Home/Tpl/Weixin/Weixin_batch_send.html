@@ -1,0 +1,607 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wresp.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/sumoselect.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.sumoselect.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__" ></script>
+<script type="text/javascript">
+	$(document).ready(function () {
+		window.test = $('.testsel').SumoSelect({okCancelInMulti:false, selectAll:true,captionFormat:'{0}个群发对象'});
+		
+		$("body").on("click",".closebtn",function(){
+			var t = $(this);
+			var tli= t.closest("li");
+			var tVal = tli.attr("data-val");
+			var tselectV = $(".options").children("li.selected");
+			
+			tselectV.each(function(index, element) {
+                if($(this).attr("data-val") == tVal){
+					$(this).click();
+				}
+            });	
+		})
+
+	});
+</script>
+
+
+<script>
+//选择卡券的回调
+var cardresp = function(d){
+console.dir(d)
+	$("#material_id_selected").val("card");
+	var html2 = template('cardresp', d);
+	$("#reply_content_3").html(html2);
+	$("#reply_content_0").hide();
+	$("#reply_content_1").hide();
+	$("#reply_content_2").hide();
+	$("#reply_content_3").show();
+	$("#reply_content_4").hide();
+    if(d.date_type == 1){
+        var da = new Date(d.date_begin_timestamp*1000);
+        var year = da.getFullYear();
+        var month = da.getMonth()+1;
+        var date = da.getDate();
+        var da2 = new Date(d.date_end_timestamp*1000);
+        var year2 = da2.getFullYear();
+        var month2 = da2.getMonth()+1;
+        var date2 = da2.getDate();
+        var html = '有效期：'+[year,month,date].join('/')+'-'+[year2,month2,date2].join('/')
+    }else{
+        var html = '发送卡券后'+d.date_fixed_begin_timestamp+'天开始使用-发送卡券后'+d.date_fixed_timestamp+'天结束使用'
+    }
+	$('.adShow_l img').attr("src",d.logo_url);
+	$('.cardtitle').html(d.goods_name);
+	$('.AstaticDate').html(html);
+	$("#cardid").val(d.card_id);
+	$("#respid").val(d.id);
+	$(".totalNum").html(d.quantity);
+	$(".remainNum").html(d.quantity - d.card_get_num);
+	var card_num = parseInt(d.quantity - d.card_get_num);
+	
+	$(".delcard").click(function(e) {
+		$("#reply_content_3").html('');
+		Diasucceed("删除成功");
+	});
+}
+
+
+function selectcallback(mid){
+    var cnts = $('.tab_panel .tab_content');
+	
+	if(mid=="") {
+		$(cnts[0]).addClass("selected");
+		return false
+	};
+	if(mid=="img"){
+		$(cnts[2]).addClass("selected");
+        $("#reply_content_0").hide();
+        $("#reply_content_1").hide();
+        $("#reply_content_2").show();
+		$("#reply_content_3").hide();
+		$("#reply_content_2").focus();
+		return false;
+	};
+	var dialog = art.dialog({title:false,lock:true});
+	var data = {material_id:mid};
+	$("#material_id").val(mid);
+	
+    $.post("{:U('Weixin/WeixinResp/showMaterialById')}", data, function(d){
+		$(cnts[0]).hide();
+		$(cnts[2]).hide();
+		$(cnts[1]).show().html('').append(d);
+		
+		dialog.close();
+		$(cnts[1]).addClass("selected");
+        $("#reply_content_0").hide();
+        $("#reply_content_1").show();
+		$("#reply_content_1").html(d);
+        $("#reply_content_2").hide();
+		$("#reply_content_3").hide();
+		windowheight();
+	});
+}
+
+
+$(function(){
+	//初始化被选中的素材
+	selectcallback($("#material_id").val());
+	
+    $('#search-btn').click(function(){
+        $('#search-btn').attr('disabled', true);
+        dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在查询...</div>",fixed: true,padding:0});
+        var group_id = $('[name="group_id[]"]').val();
+        var sex = $('[name="sex"]').val();
+        var province = $('[name="province"]').val();
+        var city = $('[name="city"]').val();
+        var keywords = $('[name="keywords"]').val();
+        var scene = $('[name="scene"]').val();
+
+        var data = {
+            group_id : group_id,
+            sex :sex,
+            province : province,
+            city : city,
+            keywords : keywords,
+            scene : scene
+        };
+
+        $.post("{:U('Weixin/Weixin/batch_send_count')}", data, function(data){
+            if(data.status ==1){
+                $('#count').html(data.info +'您已准备向 ' + data.data.countTotal + ' 位粉丝发送消息');
+                dialog.time(2).close();
+            }else{
+                $('#count').html(data.info);
+                dialog.time(2).close();
+            }
+
+        },'json');
+        
+	});
+
+    //选择图文回复-页面已有
+    $(".tab_appmsg").click(function(){
+		$(".msg_sender .tab_nav").removeClass('selected');
+		$(this).addClass('selected');
+		$('#reply_type').val(2);
+        art.dialog.open("{:U('Weixin/WeixinResp/selectImgTxt', array('callback'=>'selectcallback','type'=>1))}",{
+            title:"选择多图文信息",
+            width:800
+        });
+    });
+	
+    //选择文字回复-页面已有
+    $('.tab_text').click(function(){
+        $(".msg_sender .tab_nav").removeClass("selected");
+        $(this).addClass('selected');
+        $('.tab_panel .tab_content:eq(0)').show();
+		$('.tab_panel .tab_content:eq(1)').hide();
+		$('.tab_panel .tab_content:eq(2)').hide();
+		$('.tab_panel .tab_content:eq(3)').hide();
+        $('#reply_type').val(0);
+		$('#reply_content_0').show();
+		$('#reply_content_1').hide();
+		$('#reply_content_2').hide();
+		$('#reply_content_3').hide();
+    });
+	
+	$(".tab_img").click(function(){
+		$(".msg_sender .tab_nav").removeClass("selected");
+        $(this).addClass("selected");
+		$('.tab_panel .tab_content:eq(0)').hide();
+        $('.tab_panel .tab_content:eq(1)').hide();
+		$('.tab_panel .tab_content:eq(2)').show();
+		$('.tab_panel .tab_content:eq(3)').hide();
+		$('.tab_panel .tab_content:eq(2)').focus();
+		$('#reply_type').val(1);
+    });
+	
+	$(".tab_card").click(function(){
+        $(".msg_sender .tab_nav").removeClass("selected");
+        $(".tab_card").addClass("selected");
+		$('.tab_panel .tab_content:eq(0)').hide();
+		$('.tab_panel .tab_content:eq(1)').hide();
+		$('.tab_panel .tab_content:eq(2)').hide();
+		$('.tab_panel .tab_content:eq(3)').show();
+		$('#reply_type').val(4);
+    });
+
+    $("#theform").submit(function(){
+        var reply_type = $('#reply_type').val();
+        var send_mode = $("input[name='send_mode']").val();
+        if(send_mode == 2){
+            var send_timing = $("input[name='send_timing']").val();
+            if(!send_timing){
+                Diaerror('定时发送时间不能为空');
+                return false;
+            }
+        }
+
+        if(reply_type == '0'){
+            var cnt_obj = $('#reply_content_0');
+
+            //处理换行
+            cnt_obj.html($.trim(cnt_obj.html().replace(/<br\/?[^>]*>/g, "\n")));
+            var reply_text = cnt_obj.html();
+            check_lenght(600,'js_editorTip',document.getElementById('reply_content_0'));
+
+            if(reply_text.length == 0){
+                Diaerror('发送内容不能为空');
+                return false;
+            }
+            if(reply_text.length > 600){
+                Diaerror('回复内容超长！');
+                return false;
+            }
+
+            $('#reply_text').val(reply_text);
+        }
+        else if(reply_type == '2'){
+            var material_id = $('#material_id').val();
+            if(material_id == ''){
+                Diaerror('请选择图文内容！');
+                return false;
+            }
+        }
+		else if(reply_type == '1'){
+            var img_obj = $('#reply_content_2');
+            if(img_obj == ''){
+                Diaerror('请选择图片！');
+                return false;
+            }
+        }else if(reply_type == '4'){
+            var img_obj = $('#reply_content_3');
+            if(img_obj == ''){
+                Diaerror('请选择卡券！');
+                return false;
+            }
+        }else{
+            Diaerror('参数错误，请刷新页面重试！');
+            return false;
+        }
+        
+        var account_type = "{$account_type}";
+        var count = "{$count}";
+        if(account_type == '2' && count == '0'){
+            Diaerror('今日已群发。')
+		 	return false;
+        }
+        
+        if(send_mode == '1'){
+            if(!confirm('是否确认发送？确认之后无法取消！'))
+            return false;
+        }else{
+            if(!confirm('是否确认发送？'))
+            return false;
+        }
+        var dialog;
+        $("#theform").ajaxSubmit({
+            beforeSubmit:function(){
+                $('#js_submit').attr('disabled', true);
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+                $('#js_submit').attr('disabled', false);
+                if(data.status == '1'){
+                    dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                    setTimeout("art.dialog.close();",1000);
+                    if(send_mode == '1'){
+                        location.href="{:U('Weixin/Weixin/batch_send_his')}";
+                    }else{
+                        location.href="{:U('Weixin/Weixin/batch_send_setTiming')}";
+                    }
+                    return false;
+                }else{
+                    dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },
+            dataType:'json'
+        });
+        return false;
+    });
+    
+    $("body").on("click",".addStorage",function(e) {
+		var card_num = $(".remainNum").html();
+        var remainNums =100000 - card_num;
+		var id= $("#respid").val();
+        art.dialog({
+            title: '补充库存',
+            content: "<div class='popupWin'><p class='DiaTitle'>请输入卡券增加的库存量（还能添加<em class='remainNums redfont'>"+remainNums+"</em>张）</p><input type='text' maxlength='6' name='Storage' id='addStorage' class='DiaInput'></div>",
+            id: 'art_addnum',
+            ok: function() {
+                var addNum = $('#addStorage').val();
+                var totalNum = parseInt($(".totalNum").html()) + parseInt($(".DiaInput").val());
+                var remainNum = parseInt($(".remainNum").html()) + parseInt($(".DiaInput").val());
+                if((addNum > remainNums) || (!/^[1-9]{1}[0-9]{0,5}$/.test(addNum))){
+                    Diaerror('数量格式错误！区间为1至'+remainNums);
+                    return false;
+                }
+                $.post("{:U('Weixin/WeixinCard/addStorageNum')}", {
+                    id: id,
+                    addNum: addNum
+                }, function(resp) {
+                    //库存添加成功
+                    if (resp.status == 1) {
+                       Diasucceed("库存变更成功！");
+                       $(".totalNum").html(totalNum);
+                       $(".remainNum").html(remainNum);
+                    }else{
+                        Diasucceed(resp.info);
+                    }
+                }, 'json');
+            },
+            cancel: true,
+            lock: true
+        });
+	});
+});
+</script>
+</head>
+<body>
+<form action="{:U('Weixin/Weixin/batch_send')}" method="post" id="theform">
+	<div id="wrapper" >
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+    	<div id="container" >
+            <div id="main" class="rel">
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+					<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="qf"/>
+                </div>
+
+                <div class="subcon">
+                	<div class="main-name fn">
+                        <h4>群发功能<a href="http://www.wangcaio2o.com/index.php?m=Help&a=helpDetails&newsId=1258&classId=45" class="r" target="_blank"><span style="font-size:14px ;"><i class="allAsk mr5" style="margin-top:0;"></i>群发功能帮助说明</span></a></h4>
+                    </div>
+                    <div class="Wcanal-tab">
+                            <!--微信消息-->
+                           	<div class="Wcanal-tab"> 
+	                        <div class="Wcanal-tab-title fn">
+	                            <p class="Wcanal-tab-hover"><a href="">新建群发消息</a></p>
+                                <p><a href="{:U('Weixin/Weixin/batch_send_setTiming')}">待群发消息</a></p>
+	                            <p><a href="{:U('Weixin/Weixin/batch_send_his')}">已发送消息</a></p>
+	                        </div>
+	                        <div class="Wcanal-tab-list pt15">
+                            <div class="form-search fn mr20">
+                            	<div class="SearchArea fn extendMode">
+								<div class="SearchAreaLeft" style="margin-bottom:0">
+                                <input type="hidden" id="batch_type" name="batch_type" value="{$batch_type}">
+                                <input type="hidden" id="is_new" name="is_new" value="{$is_new}">
+                                <label>
+                                <span>粉丝标签</span>
+                                <input type="text" name="keywords" class="selectbox" style="width:100px;">
+                                </label>
+                                <label>
+                                <span>性别</span>
+                                <select name="sex" id="sex" style="width:70px;" >
+                                    <option value="">全部</option>
+                                    <option value="1" class="">男</option>
+                                    <option value="2" class="">女</option>
+                                </select>
+                                </label>
+                                
+                                <eq name="account_type" value="4">
+                                <label>
+                                <span>地区</span>
+                                <select name="province" class="n3" style="width:80px;" id="province" >
+                                    <option value="">省</option>
+                               </select>
+                                <select name="city" class="n3" style="width:80px;" id="city">
+                                    <option value="">市</option>
+                                </select>
+                                </label>
+                                </eq>
+                                <label>
+                                <span>粉丝来源</span>
+                                <input type="text" name="scene" style="width:100px;">
+                                <i style="margin-top:0; margin-left:0" class="allAsk" title="粉丝拍码关注后，系统会自动对该粉丝进行标记，以此知道粉丝是通过什么来源关注的公众号。"></i>
+                                </label>
+                                <label>
+                                <div class="multiSelect" style="width:800px;">
+                                <select multiple="multiple" name="group_id[]" id="group_id" placeholder="选择群发对象"  class="testsel">
+                                        {:show_arr_opt($group_list)}
+                                </select>
+                                <div class="show"></div>
+                                </div>
+                                </label>
+                                </div>
+                                <div class="SearchAreaRight">
+                                <a href="javascript:void(0);" class="searchBtn" id="search-btn">查询</a>
+                                <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+                                </div>
+                                </div>
+                                <div style="display:block; float:left;"><p class="mass_send_tips" id="count"></p></div>
+                                </div>
+
+                            </div>
+                                    <input type="hidden" name="reply_type" id="reply_type" value="0">
+                                    <input type="hidden" name="reply_text" id="reply_text" value="">
+                                    <input type="hidden" name="material_id" id="material_id" value="">
+                            <div class="main_bd">
+                                <div id="msgSender">
+                                    <div class="msg_sender" id="js_msgSender">
+                                        <div class="msg_tab">
+                                            <ul class="tab_navs" style="margin-top:0px;">
+                                                <li class="tab_nav tab_text width5 selected" data-type="1" data-tab=".js_textArea">
+                                                    <a href="javascript:void(0);"><i class="icon_msg_sender"></i>文字</a>
+                                                </li>
+                                                <li class="tab_nav tab_appmsg width5 no_extra" data-type="2" data-tab=".js_appmsgArea">
+                                                    <a href="javascript:void(0);"><i class="icon_msg_sender"></i>图文</a>
+                                                </li>
+                                                <li class="tab_nav tab_img" data-type="3" data-tab=".js_appmsgArea" data-tooltip="图片消息">
+                                                	<a href="javascript:void(0);" id ="uploadMeitu">&nbsp;<i class="icon_msg_sender" ></i>图片</a>
+                                                </li>
+                                            </ul>
+                                            <div class="tab_panel">
+                                                <!--文字-->
+                                                <div class="tab_content">
+                                                    <div class="js_textArea inner no_extra">
+                                                        <div class="emotion_editor">
+                                                            <div class="edit_area js_editorArea" id="reply_content_0" contenteditable="true" style="overflow-y: auto; overflow-x: hidden;" onkeydown="check_lenght_onkeydown(this)" onkeyup="check_lenght_weixin(600,'js_editorTip',this);">
+                                                            </div>
+                                                            <div class="editor_toolbar">       
+                                                                <p class="editor_tip js_editorTip" id="js_editorTip">还可以输入<em>600</em>个字</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--图文-->
+                                                <div class="tab_content dn" style="width:50%; margin:0 auto">
+                                                    <div class="msg-item-wrapper edit_area"  id="reply_content_1" style="margin:0 auto;">
+
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="tab_content dn">
+                                                <div class="edit_area js_editorArea editArea dn" id="reply_content_2" style="overflow-y: auto; min-height:188px; height:auto; overflow-x: hidden; border:0px; text-align:center;"><img src="{$respText}" /><br /><br /><a href="javascript:void(0)">删除</a><input type="hidden" id="material_src" value="" /></div>
+                                                </div>
+                                    <div class="edit_area js_editorArea editArea dn" id="reply_content_3" style="overflow-y: auto; min-height:188px; height:auto; overflow-x: hidden; border:0px; text-align:center;">
+                                    <input type="hidden" id="material_id_selected" value="card">
+                                    <input type="hidden" value="{{card_id}}" name="cardid" id="cardid">
+                                    <input type="hidden" value="{{id}}" name="respid" id="respid">
+                                    </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="Gform fn l" style="margin-left:-60px; width:auto">
+                                    	<ul>
+                                        	<li class="Gname">设置群发时间</li>
+                                            <li class="Ginput">
+                                            	<div class="switch">
+                                                    <input name="send_mode" type="radio" value="1" checked="checked">
+                                                    <div class="newRadio l">
+                                                        <span class="valfirst hover" data-val="1">立即发送</span>
+                                                        <span class="vallast" data-val="2">定时发送</span>
+                                                    </div>
+                                                    <div class="newRadio-input l">
+                                                        <div class="Gtime2">
+                                                            <input type="text" name="send_timing" style="width:150px;" id="send_timing" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'%y-%M-%d %H:%m:%s'})" value="">
+                                                        </div>
+                                                            
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="cl db fn"></div>
+                                    <div class="tool_area">
+                                        <div class="tool_bar" style="margin-top:0">
+                                            <div id="verifycode"></div>
+                                            <span>
+                                                <button id="js_submit" class="btn-all" <if condition="($account_type eq 2) AND ($count eq 0) ">disabled style="background:#B6BBC2"</if>>群发</button>
+                                            </span>
+                                            <php>if($account_type<=2){</php>
+                                            <div class="bubbleTips bubble_left warn">
+                                                <div class="bubbleTips_inner">
+                                                <p class="mass_send_tips">你今天还能群发 <em id="leftNum">{$count}</em> 条消息</p>
+                                                <i class="bubbleTips_arrow out"></i>
+                                                <i class="bubbleTips_arrow in"></i>
+                                                </div>
+                                            <php>}</php>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--微信消息-->
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+</form>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+  $(function(){
+	CityCode({
+		province:$("#province"),//省
+		city:$("#city"),//市
+		town:$("#town"),//区
+		selected:"",//默认选中的省市区代号
+		url:"index.php?g=Weixin&m=AjaxCity&a=index"//数据查询页
+	});
+	
+	$("#uploadMeitu").click(function(){
+        $(".msg_sender .tab_nav").removeClass("selected");
+        $(".tab_img").addClass("selected");
+        var opt = {
+            cropPresets:'720x400',
+            callback:function(data){
+				$("#reply_content_0").hide();
+				$("#reply_content_1").hide();
+				$("#reply_content_3").hide();
+				$("#reply_content_2").show().find("img").show().attr("src",data.src);
+				$("#material_id_selected").val("img");
+				$('#reply_text').val(data.src);
+				$("#material_src").val(data.src);
+				$("#reply_content_2 a").show();
+            }
+        };
+        open_img_uploader(opt);
+    });
+	$("#reply_content_2 a").click(function(){
+		$(this).hide();
+		$("#reply_content_2").find("img").hide().attr("src","");
+		$("#material_src").val("");
+	})
+	
+	$("#addCard").click(function(e) {
+	var isopen = 1; //0：未开通微信卡包业务，1：已开通微信卡包业务
+	if(isopen == 0)
+	{
+		art.dialog.msg({
+			content:"您的微信公众号未开通微信卡包业务",
+			ok:function(){
+				window.open("https://mp.weixin.qq.com");
+			},
+			okVal:"去开通",
+			width:400
+		})
+	}
+	else
+	{
+		art.dialog.open("{:U('Common/SelectJp/index')}&callback=cardresp&show_source=3&store_mode=2",{
+			title: '添加卡券',
+			width:800
+		});
+	}
+    });
+  })
+
+</script>
+
+<script type="text/html" id="cardresp">
+<div class="award_list">
+<dl>
+<dd>
+	<p class="adward_title">
+		<strong class="cardtitle"></strong>
+		<span>
+		<a href="javascript:void(0)" class="addStorage">补充库存</a>
+		</span>
+	</p>
+	<div class="adShow">
+		<div class="adShow_l shinfo">
+			<img src="">
+		</div>
+		<div class="adShow_r">
+			<span class="Astatic">总投入数量<em class="totalNum"></em></span>
+			<span class="Astatic">剩余数量<em class="remainNum"></em></span>
+		</div>
+		<div class="cl pt5"></div>
+		<p class="AstaticDate tip" style="text-align:left">有效期：</p>
+	</div>
+	<input type="hidden" id="material_id_selected" value="card">
+	<input type="hidden" value="" name="cardid" id="cardid">
+	<input type="hidden" value="" name="respid" id="respid">
+</dd>
+</dl>
+</div>
+</script>

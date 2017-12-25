@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+	<meta content="telephone=no" name="format-detection" />
+	<meta content="email=no" name="format-detection" />
+	<meta name="apple-touch-fullscreen" content="NO">
+	<title>我的返佣凭证</title>
+	<link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_marketing.css?v=__VR__">
+	<style>
+		.myOrderList { background:#f9f9f9; overflow:hidden; padding-bottom:20px;}
+		.myOrderList dl { border-bottom:solid 1px #e6e6e6; border-top:solid 1px #e6e6e6; background:#fff; margin-top:20px; padding:10px 7px 5px 7px;}
+		.myOrderList dt { font-size:16px; color:#000; text-align:left; padding:5px 0;}
+		.myOrderList dt span { color:#666666; float:right;}
+		.myOrderList dt span.erro { color:#d20a0a;}
+		.myOrderList dt p { font-size:10px; color:#bababa; line-height:20px; padding-top:3px;}
+		.myOrderList dd { position:relative; border-top:solid 1px #f1f1f1; height:auto; overflow:hidden; padding:5px 0;}
+		.myOrderList dd img { float:left; width:60px; border:solid 1px #f1f1f1; margin-right:5px;}
+		.myOrderList dd p { padding-right:50px; text-align:left; color:#000;}
+		.myOrderList dd p.p { color:#bababa;}
+		.myOrderList dd p span { float:right; text-align:right; color:#777; margin-right:-50px;}
+		.myOrderList dd p span b { color:#000; font-weight:normal;}
+		.myOrderList dd p span i { display:inline-block;*display:inline;*zoom:1; font-size:16px; font-style:normal;-moz-transform:rotate(45deg);-webkit-transform:rotate(45deg);-ms-transform:rotate(45deg); transform:rotate(45deg);}
+		.myOrderList dd h4 { text-align:right; color:#000;}
+		.myOrderList dd h4 span { color:#666;}
+		.myOrderList dd a.btn-msg,.myOrderList dd a.btn-pay { width:80px; height:32px; float:right; line-height:32px;border-radius:3px;-webkit-border-radius:3px;-moz-border-radius:3px;}
+		.myOrderList dd a.mr5 { margin-right:5px;}
+		.myOrderList dd a.btn-msg { border:solid 1px #ddd; color:#999;}
+		.myOrderList dd a.btn-pay { border:solid 1px #d20a0a; color:#fff; background:#d20a0a;}
+		.myOrderList-img {height:auto;position:relative; overflow:hidden; text-align:center; border-bottom:solid 1px #ebebeb; padding-bottom:10px; margin-top:10px; }
+		.myOrderList-img img {height:auto; margin:10px auto;}
+		.myOrderList-img p { font-size:14px; color:#ff9801;}
+		.myOrderList-con { padding:10px 20px 0 20px;border-top:solid 1px #fff; font-size:14px; line-height:25px;text-align:left;}
+		.myOrderList-msg { padding:10px; margin:10px; background:#e6e6e6;text-align:left;}
+		.myOrderList-msg p { font-size:14px; line-height:23px;color:#444; line-height:25px;}
+		.myOrderList-msg p a {font-size:14px; line-height:23px; color:#444; line-height:25px;}
+	</style>
+	<script type="text/javascript" src="__PUBLIC__/Label/Js/zepto.min.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="container">
+			<div id="main">
+				<div class="m-commission" id="list">
+				</div>
+				<a href="javascript:void(0);" data-nextp="1" id="more" style="margin-bottom: 100px;">加载更多</a>
+			</div>
+		</div>
+	</div>
+</body>
+<script id="tpl_list" type="text/html">
+	<div>
+		<%
+		var count = list.length;
+		for(i in list){
+		list[i]['use_status'] = 0;
+		use_flag = list[i]['use_status']!=0;
+		use_text = use_flag ? '已使用' : '未使用';
+		cls1 = use_flag ? 'off' : 'on';
+		cls2 = i == (count - 1) ? 'm-bn' : '';
+		%>
+		<div class="detail <%=cls2%>" data-id="<%=list[i]['id']%>">
+			<div class="name">
+				<p><%=list[i]['batch_short_name']%></p>
+				<p class="time"><%=list[i]['node_short_name']%></p>
+				<p class="time"><%=list[i]['return_add_time']%></p>
+			</div>
+			<div class="status">
+				<p class="<%=cls1%>"><%=use_text%><i></i></p>
+			</div>
+		</div>
+		<% } %>
+	</div>
+	<div class="m-gap"></div>
+</script>
+<script id="tpl_detail" type="text/html">
+	<%
+	use_flag = detail.use_status!=0;
+	use_text = use_flag ? '已使用' : '未使用';
+	%>
+<div class="myOrderList">
+	<div class="myOrderList-img">
+		<img src="<%=detail.barcode_bmp%>" width="100" height="100">
+		<p><%=detail.goods_name%></p>
+	</div>
+	<div class="myOrderList-con">
+		<p><span>可兑换时间：<%=detail.end_time%></span></p>
+		<p><span>凭证状态：<%=use_text%></span></p>
+		<p><span>辅助码：<%=detail.assist_number%></span></p>
+	</div>
+	<div class="myOrderList-msg">
+		<p><%=detail.mms_title%></p>
+		<p><%=detail.mms_text%></p>
+	</div>
+</div>
+</script>
+<script>
+	window._g = window._g || {};
+	_g.url_get_code = "{:U('ajax_return_code', array('id'=>$label_id))}";
+	_g.url_get_code_detail = "{:U('ajax_return_code_detail', array('id'=>$label_id))}";
+	//弹层
+	function msgPop(msg){
+		msgPopclose();
+		var option = {show_close: true};
+		if(arguments.length == 2)
+			option = $.extend(option, arguments[1]);
+		var html=['<div class="msgPop">',
+			'<div class="msgPopCon">'];
+		if(option.show_close)
+			html.push('<a href="javascript:void(0)" class="close" onclick="msgPopclose()">+</a>');
+		html.push(''+msg+'');
+		html.push('</div>');
+		html.push('</div>');
+		html = html.join('');
+		$("body").append(html);
+	}
+	function msgPopclose(){
+		$(".msgPop").remove();
+	}
+
+	function get_more(){
+		var no_close = {show_close:false}, $more = $('#more'), nextp = parseInt($more.data('nextp')), inajax = $more.data('inajax');
+		if(nextp == 0) return ;
+		if(inajax == 1) return ;
+		$more.data('inajax', 1);
+		$more.data('nextp', nextp+1);
+
+		msgPop('加载中....',no_close);
+		$.get(_g.url_get_code, {p: nextp}, function(resp){
+			$more.data('inajax', 0);
+			if(resp.status != 1){
+				msgPop(resp.info);
+				return ;
+			}else{
+				$(template('tpl_list', resp)).appendTo('#list');
+				$more.data('nextp', resp.nextp);
+				if(resp.nextp == 0)
+					$more.text('无更多数据');
+			}
+			msgPopclose();
+		}, 'json');
+	}
+	$(function(){
+		$('#more').click(function(){
+			get_more();
+		}).trigger('click');
+
+		$(document).on('click', '.detail', function(){
+			$.post(_g.url_get_code_detail, {id: $(this).data('id')}, function(resp){
+				if(resp.status != 1) {
+					msgPop(resp.info);
+				}else{
+					msgPop(template('tpl_detail', resp));
+				}
+			}, 'json');
+		})
+	});
+</script>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>供货申请</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js?v=__VR__"></script>
+
+<script type="text/javascript">
+$(document).ready(function(e) {
+    $("#sub_button").click(function(){
+        $("#theform").submit();
+    })
+
+});
+    function detail(id){
+        art.dialog.open("index.php?g=Hall&m=Mypartner&a=thirdPartyDetail&id="+id,{
+            id:'detail',
+            title:'详情',
+            width:500,
+            cancel:true
+        })
+    }
+
+    function check_info(id){
+		Dialoading("正在提交...");
+        var content = '';
+        $.get("{:U('Hall/Mypartner/thirdPartyAjaxCheckInfo')}&id="+id,function(data){
+			Dialoading();
+            if(1 == data.status){
+                content = data.data;
+                if(null == content){
+                    content = '暂无审核意见';
+                }
+                art.dialog.msg({
+                    title: '受理意见',
+                    width:500,
+                    id:'html',
+                    content:content
+                });
+            }
+        },'json');
+    }
+
+
+</script>
+
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+<div class="shopNav">
+<include file="./Home/Tpl/WangcaiPc/NumGoods_topMenu.html" topmenuid="fxzs"/>
+</div>
+        <!--开始引入头部菜单-->
+
+        <div id="container">
+            <div id="main" class="rel">
+                <div class="sidenav">
+                    <include file="Hall/Mypartner/leftMenu" leftmenuid="dsfdspt"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4>供货申请<a href="{:U('Hall/Mypartner/thirdPartyAdd')}" class="btn-add first"><i></i>提交申请</a></h4>
+                    </div>
+                    
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                    <div class="Wcanal-tab-list" style="display: block;">
+                    <div class="SearchArea fn">
+                    <form id="theform" action="{:U('Hall/Mypartner/thirdPartyApply')}" method="post">
+                    <div class="SearchAreaLeft">
+                    <label>
+                    <span>卡券名称</span>
+                    <input type="text" name="name" id="name" value="{$Think.request.name}">
+                    </label>
+                    
+                    <label>
+                    <span>平台</span>
+                    <select name="pratyType" class="textbox w80" value="{$Think.request.pratyType}">
+                        <option>请选择</option>
+                        <option>全部</option>
+                        <option value="0" <php>if($_REQUEST['pratyType'] == '0')echo 'selected="selected"';</php>>天猫</option>
+                        <option value="1" <php>if($_REQUEST['pratyType'] == '1')echo 'selected="selected"';</php>>京东</option>
+                        <option value="2" <php>if($_REQUEST['pratyType'] == '2')echo 'selected="selected"';</php>>美团</option>
+                        <option value="3" <php>if($_REQUEST['pratyType'] == '3')echo 'selected="selected"';</php>>大众点评</option>
+                        <option value="4" <php>if($_REQUEST['pratyType'] == '4')echo 'selected="selected"';</php>>1号店</option>
+                        <option value="5" <php>if($_REQUEST['pratyType'] == '5')echo 'selected="selected"';</php>>淘点点</option>
+                    </select>
+                    </label>
+                    
+                    <label>
+                    <span>审核状态</span>
+                    <select name="checkStatus" class="textbox">
+                        <option>请选择</option>
+                        <option>全部</option>
+                        <option value="0" <php>if($_REQUEST['checkStatus'] == '0')echo 'selected="selected"';</php>>未审核</option>
+                        <option value="1" <php>if($_REQUEST['checkStatus'] == '1')echo 'selected="selected"';</php>>已审核</option>
+                        <option value="2" <php>if($_REQUEST['checkStatus'] == '2')echo 'selected="selected"';</php>>未通过</option>
+                    </select>
+                    </label>
+                    </div>
+                    <div class="SearchAreaRight">
+                        <a href="javascript:void(0);" class="searchBtn" id="sub_button">查询</a>
+                    </div>
+                    </form>
+                    </div>
+                    <div class="shopCon">
+                    <table cellpadding="0" cellspacing="0" class="W-table">
+                    <tbody>
+                    <tr class="th">
+                    <th>编号</th>
+                    <th>卡券名称</th>
+                    <!--
+                    <th>卡券类型</th>
+                    -->
+                    <th>平台名称</th>
+                    <th>申请时间</th>
+                    <!--
+                    <th>当前状态</th>
+                    -->
+                    <th>受理状态</th>
+                    <!--
+                    <th>受理意见</th>
+                    -->
+                    <th>操作</th>
+                    </tr>
+                    <empty name="list" >
+                            <tr class="info">
+                                <td colspan="10" class="last">
+                                    <div class="nonedata"></div>
+                                </td>
+                            </tr>
+                    </empty>
+                    <foreach name="list" item="vo">
+                    <tr>
+                    <td>{$vo.id}</td>
+                    <td>{$vo.ticket_name}</td>
+                    <!--
+                    <td>{$ticketType[$vo['ticket_type']]}</td>
+                    -->
+                    <td>{$vo.third_type}</td>
+                    <td><?=date('Y-m-d',strtotime($vo['add_time']))?></td>
+                    <!--
+                    <td>{$status[$vo['status']]}</td>
+                    -->
+                    <td>{$checkStatusRule[$vo['check_status']]}</td>
+                    <!--
+                    <td><a href="javascript:;" onclick="check_info({$vo['id']})">点击查看</a></td>
+                    -->
+                    <td><a onclick=detail({$vo['id']}) href="javascript:void(0)">详情</a></td>
+                    </tr>
+                    </foreach>
+                    </table>
+                    <div class="page">
+                        {$page}
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+                
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

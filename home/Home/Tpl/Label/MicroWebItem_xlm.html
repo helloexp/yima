@@ -1,0 +1,269 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>微官网</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,微官网" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_website_xlm.css" />
+<script>
+
+function l(){
+	  $('#loadingBox').show();
+	  setTimeout(function(){
+		  $('#loadingBox').hide();
+	  }, 1500);
+	  return true;
+}
+
+function link_to(url){
+	if (!url)
+		return false;
+	l();
+	setTimeout(function(){
+		location.href=url;
+	  }, 100);
+	
+}
+
+$(document).ready(function(e) {
+		$('#first-view ul li').width($('#wrapper').width());
+		$('#first-view ul li').height($('#wrapper').width()/2);
+		$('.nav li').height($('.nav li').width()/1.5);
+		//全局参数定义
+			var G = {};
+			var _APP_ = '/gCenter/index.php';
+			var _cookie_expires = 2592000;
+			G.config = {};
+			G.config.pic_prefix = 'http://222.44.51.34/app_image/prize/';
+			G.config.page_pre_num = 20;
+			G.config.prize_img_default = '/gCenter/__PUBLIC__/Label/Images/icon-prize.jpg';
+			G.label_id = '90000079';
+			G.city_code = '021';//0 本店
+			G.town_code = '001';//0 本店
+			G.prize_cat = 0;//0 本店
+			G.curr_page = 1;
+			G.prize_list = [];
+			G.prize_count = [];
+			G.go_page_params = {};
+			G.prize_list_order = '';
+			G.active_id = '';
+			var _index_scroll = function(d_name){
+				var _t = this,
+					_a = $('#'+d_name+' ul'),
+					_b = $('#'+d_name+' .indicator span'),
+					_cnt = $('#'+d_name+' ul li').length,
+					_li_width = parseInt($($('#'+d_name+' ul li').get(0)).width()),
+					_startX = 0,
+					_startY = 0,
+					_initX = 0,
+					_finishX = 0,
+					_cur_i = 0,
+					_go_right = true,
+					_auto = false,
+					_tching = false;
+					_auto_time = null;
+
+				this.resize = function(){
+					_a.css('margin-left', _cur_i*_t.li_width()*-1+'px');
+				}
+				this.li_width = function(){
+					return parseInt($($('#'+d_name+' ul li').get(0)).width());
+				}
+				this.setInd = function(){
+					_b.removeClass('cur');
+					$(_b.get(_cur_i)).addClass('cur');
+					clearInterval(_auto_time);
+					_t.run();
+				}
+				this.pauseScroll = function(){
+					_tching = true;
+				}
+				this.restartScroll = function(){
+					_tching = false;
+					clearInterval(_auto_time);
+					_t.run();
+				}
+				this.autoScroll = function(){
+					if(_tching) return ;
+					var p_left = 0;
+					if(_cur_i < _cnt-1){
+						_cur_i += 1;
+						p_left = (0-_cur_i*_t.li_width())+'px';
+					}else if(_cur_i = _cnt-1){
+						_cur_i = 0;
+						p_left = 0;
+					}
+					_a.animate({marginLeft:p_left}, 300, function(){
+						_t.setInd();
+					});
+				}
+				this.run = function(){
+					_auto = true;
+					_auto_time = setInterval(function(){
+						_t.autoScroll();
+					},3500);
+				}
+				this.start = function(a){
+					var tch = a.originalEvent.touches[0];
+					_t._startX = tch.clientX;
+					_t._startY = tch.clientY;
+					_t._initX = _t._startX;
+					_tching = true;
+				}
+				this.move = function(a){
+					var tch = a.originalEvent.touches[0];
+					var _endX = tch.clientX;
+					var _endY = tch.clientY;
+					if(Math.abs(_endY-_t._startY)>Math.abs(_endX-_t._startX)){
+						return;
+					}
+					a.preventDefault();
+					_t._finishX = _endX;
+					var _absX = Math.abs(_endX-_t._startX);
+					var lastX = parseInt(_a.css('margin-left').replace('px',''));
+					if(_t._startX>_endX){
+						_go_right = true;
+						_a.css('margin-left',(lastX-_absX)+'px');
+					}else{
+						_go_right = false;
+						_a.css('margin-left',(lastX+_absX)+'px');
+					}
+					_t._startX = _endX;
+				}
+				this.end = function(a){
+					if(_t._finishX==0) return;
+					_t._initX = 0;
+					_t._finishX = 0;
+					var c = _cur_i + (_go_right ? 1 : -1);
+					if(c < 0)
+						_cur_i = 0;
+					else if( c > (_cnt-1))
+						_cur_i = _cnt-1;
+					else
+						_cur_i = c;
+	
+					var p_left = (0-_cur_i*_t.li_width())+'px';
+					_a.animate({marginLeft:p_left}, 500, function(){
+						_tching = false;
+						_t.setInd();
+					});
+				}
+
+			this.transitionEnd = function(a){
+
+			}
+
+			this.handleEvent = function(a){
+				switch (a.type){
+					case "touchstart":
+						_t.start(a);
+						break;
+					case "touchmove":
+						_t.move(a);
+						break;
+					case "touchend":
+					case "touchcancel":
+						_t.end(a);
+						break;
+					case "webkitTransitionEnd":
+					case "msTransitionEnd":
+					case "oTransitionEnd":
+					case "transitionend":
+						_t.transitionEnd(a);
+				}
+			}
+		}
+
+		G.index_scroll = new _index_scroll('first-view');
+		$('#first-view').on('touchstart touchmove touchend', function(event){
+			G.index_scroll.handleEvent(event);
+		});
+		G.index_scroll.run();
+});
+$(window).resize(function(){
+	$('#first-view ul li').width($('#wrapper').width());
+	$('#first-view ul li').height($('#wrapper').width()/2);
+	$('.nav li').height($('.nav li').width()/1.5);
+});
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div class="mainTop">
+            	<div class="header">
+                	<div class="logo"><img src="__PUBLIC__/Label/Image/Item/website_xlm_logo.png" /></div>
+                </div>
+                <div id="first-view">
+					<ul>
+                    	<li><a href="javascript:void(0);"><img src="__PUBLIC__/Label/Image/Item/website_xlm_1.jpg" /></a></li>
+						<li><a href="javascript:void(0);"><img src="__PUBLIC__/Label/Image/Item/website_xlm_2.jpg" /></a></li>
+						<li><a href="javascript:void(0);"><img src="__PUBLIC__/Label/Image/Item/website_xlm_3.jpg" /></a></li>
+                    </ul>
+                    <div class="indicator">
+                        <span class="cur"></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mainCon" class="mainCon fn">
+                <div class="mainCon-contenter">
+                	<div class="mainCon-contenter-bg">
+                        <div class="nav">
+                        	<ul class="fn">
+                                <li>
+                                    <a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12872')" href="javascript:void(0);"><img src="__PUBLIC__/Label/Image/Item/website_xlm_icon1.png">
+                                    <div class="nav-con">
+                                    	<a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12872')" href="javascript:void(0);"><p>公司简介</p></a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12873')" href="javascript:void(0);"><img src="__PUBLIC__/Label/Image/Item/website_xlm_icon2.png">
+                                    <div class="nav-con">
+                                    	<a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12873')" href="javascript:void(0);"><p>品牌介绍</p></a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12876')" href="javascript:void(0);" ><img src="__PUBLIC__/Label/Image/Item/website_xlm_icon3.png">
+                                    <div class="nav-con">
+                                    	<a honClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12876')" href="javascript:void(0);"><p>产品介绍</p></a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12877')" href="javascript:void(0);"><img src="__PUBLIC__/Label/Image/Item/website_xlm_icon4.png">
+                                    <div class="nav-con">
+                                    	<a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12877')"  href="javascript:void(0);"><p>多乐互动</p></a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12875')" href="javascript:void(0);"><img src="__PUBLIC__/Label/Image/Item/website_xlm_icon5.png">
+                                    <div class="nav-con">
+                                    	<a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12875')"  href="javascript:void(0);"><p>新闻动态</p></a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12874')" href="javascript:void(0);"><img src="__PUBLIC__/Label/Image/Item/website_xlm_icon6.png">
+                                    <div class="nav-con">
+                                    	<a onClick="javascript:link_to('http://www.wangcaio2o.com/index.php?g=Label&m=Label&a=index&id=12874')"  href="javascript:void(0);"><p>设计师俱乐部</p></a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                	</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<strong class="loading" id="loading" style="display: none">加载中</strong>
+<section style="display: none;" class="fullHtml" id="loadingBox"><i></i><span>加载中...</span></section>
+</body>
+</html>

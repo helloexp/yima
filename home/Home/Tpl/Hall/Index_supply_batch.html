@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>卡券爱拍特供卡券</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wsaloon.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script language="JavaScript">
+ function fleshVerify(){ 
+    //重载验证码
+    var time = new Date().getTime();
+        document.getElementById('verifyImg').src= '{:U("Home/Verifycode/supplyverify")}&time='+time;
+ } 
+
+ function setBatchInfo(data){
+    $('#goods_id').val(data.id);
+    $('#goods_name').val(data.goods_name);
+
+    var list = art.dialog.list;
+    list['goods_choose'].close();
+ }
+ </script>
+</head>
+<body class="bgfff">
+    <div class="showsaloonForm pb20">
+    	<form action="{:U('Hall/Index/supply_submit_batch')}" method="post" >
+		<input type="hidden" name="demand_id" id="demand_id" value="<?php echo $id;?>">
+        <input type="hidden" name="goods_id" id="goods_id" value="">
+    	<div class="global-input4 fn w1">
+        	<ul class="pt30">
+                <li class="global-input4-name">*&nbsp;卡券：</li>
+                <li class="global-input4-input">
+                    <input name="goods_name" id="goods_name" type="text" class="validate[required] textbox w120 ml10" value="" readonly="readonly">
+                    <a href="javascript:void(0)" class="btn-all w80 ml10" id="bind_cj">选择卡券</a>
+                </li>
+            </ul>
+            <ul>
+                <li class="global-input4-name">*&nbsp;联系电话：</li>
+                <li class="global-input4-input"><input name="tel" id="tel" type="text" class="validate[required,maxSize[32]] textbox w380" value=""></li>
+            </ul>
+        	<ul>
+                <li class="global-input4-name">*&nbsp;联系邮箱：</li>
+                <li class="global-input4-input"><input name="email" id="email" type="text" class="validate[required,custom[email],maxSize[32]] textbox w380" value="{$email}"></li>
+            </ul>
+        	<ul>
+                <li class="global-input4-name">*&nbsp;联系人：</li>
+                <li class="global-input4-input"><input name="linkman" id="linkman" type="text" class="validate[required,maxSize[32]] textbox w380" value=""></li>
+            </ul>        	
+        	<ul>
+                <li class="global-input4-name">*&nbsp;留言：</li>
+                <li class="global-input4-input"><textarea name="remark" id="remark" class="validate[required,maxSize[32]] texttextarea w380" maxlength="100" style="height:100px;"></textarea></li>
+            </ul>
+        	<ul>
+                <li class="global-input4-name">*&nbsp;验证码：</li>
+                <li class="global-input4-input"><input name="supplyverify" id="supplyverify" type="text" class="validate[required,maxSize[4]] textbox w150"><img id="verifyImg" src="{:U('Home/Verifycode/supplyverify')}" onclick="fleshVerify()" class="ml10" style="vertical-align:bottom; height:32px;cursor:pointer;" />
+						<span onclick="fleshVerify()" style="vertical-align:bottom;font-size:12px;cursor:pointer;">换一张</span></li>
+            </ul>
+        	<ul>
+                <li class="global-input4-name">&nbsp;</li>
+                <li class="global-input4-input">
+                	<a href="javascript:void(0)" class="btn-all w120" id="smb">确定</a>
+            		<a href="javascript:void(0)" class="btn-all w120 ml20" id="cancel">取消</a>
+            	</li>
+            </ul>
+        </div>
+        </form>
+    </div>
+    
+    <div class="dn showsaloonmsg mt70 tc">
+    	<p class="font-18-99 pt50">您的供货提交成功，请耐心等待需求发布方的确认！</p>
+        <div class="fn tc mt50">
+            <a href="javascript:void(0)" onclick="art.dialog.close();" class="btn-all w120 btn-ok ml20">确定</a>
+        </div>
+    </div>
+</body>
+<script>
+$(function(){
+    $("#smb").click(function(){
+        var dialog;
+        if($("form").validationEngine('validate')){
+            $("form").ajaxSubmit({
+                beforeSubmit:function(){
+                    dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0,time:1});
+                },
+				success:function(data){
+                    if(data.status == '1'){                        
+						$(".msg-all-succeed").hide();
+						$('.showsaloonForm').hide();
+                        $('.showsaloonmsg').show();						
+                        return false;
+                    }else{
+                        dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                        $('#msg').html(data.info);
+                    }
+                },
+                dataType:'json'
+            });
+        }
+
+    });
+	//取消
+	$("#cancel").click(function(){
+		art.dialog.close();
+	});
+
+
+    //选择抽奖
+    $('#bind_cj').click(function(){
+        art.dialog.open("{:U('Hall/Index/supply_goods_choose', 'demand_id='.I('id').'&callback=setBatchInfo')}",{
+            id:'goods_choose',
+            width: 800,
+            height: 500,
+            title:'选择卡券',
+            lock: true
+        })
+    });
+});
+</script>

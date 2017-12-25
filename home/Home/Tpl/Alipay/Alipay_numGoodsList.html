@@ -1,0 +1,410 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>翼码卡券_翼码旺财</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WE_ticket.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<style type="text/css">
+.Wcanal-tab .Wcanal-tab-title p a{ padding:0 15px}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function(e) {
+    $("#search").click(function() {
+        $("form").attr("action", "{:U('NumGoods/numGoodsList')}").submit();
+    });
+    $(".viewDetail").click(function() {
+        var goodsid = $(this).parent().parent().attr('goodsid');
+		window.open("{:U('NumGoods/numGoodsDetail')}&goods_id=" + goodsid);
+    });
+    $(".trans_help").click(function() {
+        window.open("{:U('Home/Help/helpArt',array('type'=>7,'leftId'=>'dzq','news_id'=>1382,'class_name'=>'卡券'))}");
+    });
+
+});
+function addStorageNum(id, name, obj) {
+    art.dialog({
+        follow: obj,
+        title: '补充库存',
+        content: '请输入翼码卡券增加的库存量<br/> <input id="addNum" type="text" class="textbox" style="width:100px;" value="1" />',
+        id: 'art_addnum',
+        ok: function() {
+            var addNum = $('#addNum').val();
+            if (!/^[1-9]{1}[0-9]{0,7}$/.test(addNum)) {
+                alert('数量格式错误！区间为1至99999999');
+                return false;
+            }
+            $.post('/index.php?g=WangcaiPc&m=NumGoods&a=addStorageNum', {
+                id: id,
+                addNum: addNum
+            }, function(resp) {
+                alert(resp.info);
+                //库存添加成功
+                if (resp.status == 1) {
+                    reload();
+                }
+            }, 'json');
+
+            return false;
+        },
+        cancel: true
+    });
+}
+function viewStorage(goods_id){
+    window.open("{:U('NumGoods/storageTrace')}&goods_id=" + goods_id);
+}
+
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div class="shopNav">
+        <include file="./Home/Tpl/Alipay/Alipay_public_header.html" topmenuid="alipay"/>
+        </div>
+
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel"> 
+            	<div class="sidenav">
+                <include file="./Home/Tpl/Alipay/Index_left_menuNew.html" leftmenuid="tuangou"/> 
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                        <h4>卡券</h4>
+                    </div>
+                    <div class="Wcanal-tab" id="Wcanal-tabon">
+                        <div class="Wcanal-tab-title fn">
+                        <p class="Wcanal-tab-hover" data-rel="1"><a href="javascript:void(0);">美团</a></p>
+                        <p data-rel="2"><a href="javascript:void(0);">大众点评</a></p>
+                        <p data-rel="3"><a href="javascript:void(0);">百度糯米</a></p>
+                        <p data-rel="4"><a href="javascript:void(0);">天猫/淘宝</a></p>
+                        <p data-rel="5"><a href="javascript:void(0);">掌上生活</a></p>
+                        <a href="javascript:void(0);" class="btn_inner applyOpen" style="float:right;">申请开通</a>
+                        </div>
+                        <div class="Wcanal-tab-list" style=" display:block; float:none; width:100%; margin-top:15px;">
+                        <div class="SearchArea fn">
+                        <form id="theform" action="{:U('WangcaiPc/NumGoods/numGoodsList')}" method="post">
+                            <input type="hidden" name="goods_type" value="{$Think.request.goods_type}"/>
+                            <div class="SearchAreaLeft">
+                            <label>
+                            <span>卡券名称</span>
+                            <input type="text" name="name" value="" />
+                            </label>
+                            <label>
+                            <span>卡券状态</span>
+                            <select>
+                            	
+                            </select>
+                            </label>
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                            </div>
+                        </form>
+                        </div>
+                        <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                        <tr class="th">
+                        <th>序号</th>
+                        <th>团购平台卡券号</th>
+                        <th>卡券名称</th>
+                        <th>卡券有效期</th>
+                        <th>卡券状态</th>
+                        <th>验证数</th>
+                        <th>操作</th>
+                        </tr>
+                        <tr class="title hover">
+                        <td>1</td>
+                        <td>8907867868</td>
+                        <td>8元代金券</td>
+                        <td>2015-10-01至2016-10-01</td>
+                        <td>正常</td>
+                        <td>199</td>
+                        <td><a href="javascript:void(0);" class="viewDetails">详情</td>
+                        </tr>
+                        <td>2</td>
+                        <td>8907867868</td>
+                        <td>8元代金券</td>
+                        <td>2015-10-01至2016-10-01</td>
+                        <td>正常</td>
+                        <td>199</td>
+                        <td><a href="javascript:void(0);" class="viewDetails">详情</td>
+                        </tr>
+                        <tr class="info">
+                            <td colspan="7" class="last">
+                                <div class="nonedata"></div>
+                            </td>
+                        </tr>
+                        </table>
+                        <div class="page">{$page}</div>
+                        </div>
+                        </div>
+                        <div class="Wcanal-tab-list" style=" display:none; float:none; width:100%; margin-top:15px;">
+                        <div class="SearchArea fn">
+                        <form id="theform" action="{:U('WangcaiPc/NumGoods/numGoodsList')}" method="post">
+                            <input type="hidden" name="goods_type" value="{$Think.request.goods_type}"/>
+                            <div class="SearchAreaLeft">
+                            <label>
+                            <span>卡券名称</span>
+                            <input type="text" name="name" value="" />
+                            </label>
+                            <label>
+                            <span>卡券状态</span>
+                            <select>
+                            	
+                            </select>
+                            </label>
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                            </div>
+                        </form>
+                        </div>
+                        <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                        <tr class="th">
+                        <th>序号</th>
+                        <th>团购平台卡券号</th>
+                        <th>卡券名称</th>
+                        <th>卡券有效期</th>
+                        <th>卡券状态</th>
+                        <th>验证数</th>
+                        <th>操作</th>
+                        </tr>
+                        <tr class="title hover">
+                        <td>1</td>
+                        <td>8907867868</td>
+                        <td>8元代金券</td>
+                        <td>2015-10-01至2016-10-01</td>
+                        <td>正常</td>
+                        <td>199</td>
+                        <td><a href="javascript:void(0);" class="viewDetails">详情</td>
+                        </tr>
+                        <td>2</td>
+                        <td>8907867868</td>
+                        <td>8元代金券</td>
+                        <td>2015-10-01至2016-10-01</td>
+                        <td>正常</td>
+                        <td>199</td>
+                        <td><a href="javascript:void(0);" class="viewDetails">详情</td>
+                        </tr>
+                        <tr class="info">
+                            <td colspan="7" class="last">
+                                <div class="nonedata"></div>
+                            </td>
+                        </tr>
+                        </table>
+                        <div class="page">{$page}</div>
+                        </div>
+                        </div>
+                        <div class="Wcanal-tab-list" style=" display:none; float:none; width:100%; margin-top:15px;">
+                        <div class="SearchArea fn">
+                        <form id="theform" action="{:U('WangcaiPc/NumGoods/numGoodsList')}" method="post">
+                            <input type="hidden" name="goods_type" value="{$Think.request.goods_type}"/>
+                            <div class="SearchAreaLeft">
+                            <label>
+                            <span>卡券名称</span>
+                            <input type="text" name="name" value="" />
+                            </label>
+                            <label>
+                            <span>卡券状态</span>
+                            <select>
+                            	
+                            </select>
+                            </label>
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                            </div>
+                        </form>
+                        </div>
+                        <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                        <tr class="th">
+                        <th>序号</th>
+                        <th>团购平台卡券号</th>
+                        <th>卡券名称</th>
+                        <th>卡券有效期</th>
+                        <th>卡券状态</th>
+                        <th>验证数</th>
+                        <th>操作</th>
+                        </tr>
+                        <tr class="title hover">
+                        <td>1</td>
+                        <td>8907867868</td>
+                        <td>8元代金券</td>
+                        <td>2015-10-01至2016-10-01</td>
+                        <td>正常</td>
+                        <td>199</td>
+                        <td><a href="javascript:void(0);" class="viewDetails">详情</td>
+                        </tr>
+                        <td>2</td>
+                        <td>8907867868</td>
+                        <td>8元代金券</td>
+                        <td>2015-10-01至2016-10-01</td>
+                        <td>正常</td>
+                        <td>199</td>
+                        <td><a href="javascript:void(0);" class="viewDetails">详情</td>
+                        </tr>
+                        <tr class="info">
+                            <td colspan="7" class="last">
+                                <div class="nonedata"></div>
+                            </td>
+                        </tr>
+                        </table>
+                        <div class="page">{$page}</div>
+                        </div>
+                        </div>
+                        <div class="Wcanal-tab-list" style=" display:none; float:none; width:100%; margin-top:15px;">
+                        <div class="SearchArea fn">
+                        <form id="theform" action="{:U('WangcaiPc/NumGoods/numGoodsList')}" method="post">
+                            <input type="hidden" name="goods_type" value="{$Think.request.goods_type}"/>
+                            <div class="SearchAreaLeft">
+                            <label>
+                            <span>卡券名称</span>
+                            <input type="text" name="name" value="" />
+                            </label>
+                            <label>
+                            <span>卡券状态</span>
+                            <select>
+                            	
+                            </select>
+                            </label>
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                            </div>
+                        </form>
+                        </div>
+                        <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                        <tr class="th">
+                        <th>序号</th>
+                        <th>团购平台卡券号</th>
+                        <th>卡券名称</th>
+                        <th>卡券有效期</th>
+                        <th>卡券状态</th>
+                        <th>验证数</th>
+                        <th>操作</th>
+                        </tr>
+                        <tr class="title hover">
+                        <td>1</td>
+                        <td>8907867868</td>
+                        <td>8元代金券</td>
+                        <td>2015-10-01至2016-10-01</td>
+                        <td>正常</td>
+                        <td>199</td>
+                        <td><a href="javascript:void(0);" class="viewDetails">详情</td>
+                        </tr>
+                        <td>2</td>
+                        <td>8907867868</td>
+                        <td>8元代金券</td>
+                        <td>2015-10-01至2016-10-01</td>
+                        <td>正常</td>
+                        <td>199</td>
+                        <td><a href="javascript:void(0);" class="viewDetails">详情</td>
+                        </tr>
+                        <tr class="info">
+                            <td colspan="7" class="last">
+                                <div class="nonedata"></div>
+                            </td>
+                        </tr>
+                        </table>
+                        <div class="page">{$page}</div>
+                        </div>
+                        </div>
+                        <div class="Wcanal-tab-list" style=" display:none; float:none; width:100%; margin-top:15px;">
+                        <div class="SearchArea fn">
+                        <form id="theform" action="{:U('WangcaiPc/NumGoods/numGoodsList')}" method="post">
+                            <input type="hidden" name="goods_type" value="{$Think.request.goods_type}"/>
+                            <div class="SearchAreaLeft">
+                            <label>
+                            <span>卡券名称</span>
+                            <input type="text" name="name" value="" />
+                            </label>
+                            <label>
+                            <span>卡券状态</span>
+                            <select>
+                            	
+                            </select>
+                            </label>
+                            </div>
+                            <div class="SearchAreaRight">
+                            <a href="javascript:void(0);" class="searchBtn" id="search">查询</a>
+                            </div>
+                        </form>
+                        </div>
+                        <div class="shopCon">
+                        <table cellpadding="0" cellspacing="0" class="shopTable">
+                        <tr class="th">
+                        <th>序号</th>
+                        <th>团购平台卡券号</th>
+                        <th>卡券名称</th>
+                        <th>卡券有效期</th>
+                        <th>卡券状态</th>
+                        <th>验证数</th>
+                        <th>操作</th>
+                        </tr>
+                        <tr class="title hover">
+                        <td>1</td>
+                        <td>8907867868</td>
+                        <td>8元代金券</td>
+                        <td>2015-10-01至2016-10-01</td>
+                        <td>正常</td>
+                        <td>199</td>
+                        <td><a href="javascript:void(0);" class="viewDetails">详情</td>
+                        </tr>
+                        <td>2</td>
+                        <td>8907867868</td>
+                        <td>8元代金券</td>
+                        <td>2015-10-01至2016-10-01</td>
+                        <td>正常</td>
+                        <td>199</td>
+                        <td><a href="javascript:void(0);" class="viewDetails">详情</td>
+                        </tr>
+                        <tr class="info">
+                            <td colspan="7" class="last">
+                                <div class="nonedata"></div>
+                            </td>
+                        </tr>
+                        </table>
+                        <div class="page">{$page}</div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>
+<script type="text/javascript">
+$(".applyOpen").click(function(e) {
+    art.dialog.open("{:U('Alipay/Alipay/applyOpen')}",
+	{
+        title: '申请开通',
+        width:"500px"
+	});
+});
+</script>
+

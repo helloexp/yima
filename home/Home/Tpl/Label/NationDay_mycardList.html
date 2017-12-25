@@ -1,0 +1,600 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{$marketInfo['name']}</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no,minimal-ui">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/activity/wap_20151001.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/idangerous.swiper.min.js"></script>
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js"></script>
+<script>
+    var wxShareData = <?php echo json_encode($shareData['config']);?>;;
+    if(wxShareData) {
+        wx.config({
+            //debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: wxShareData.appId,  //必填，公众号的唯一标识
+            timestamp: wxShareData.timestamp, // 必填，生成签名的时间戳
+            nonceStr: wxShareData.nonceStr, // 必填，生成签名的随机串
+            signature: wxShareData.signature,// 必填，签名，见附录1
+            jsApiList: [
+                'onMenuShareTimeline',
+                'onMenuShareAppMessage'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+    }
+$(document).ready(function(e) {
+    wx.ready(function () {
+        wx.showOptionMenu();
+        var title = "{$shareData['desc']}";
+        var link = "{$shareData['link']}";
+        var imgUrl = "{$shareData['imgUrl']}";
+        wx.onMenuShareTimeline({
+            title: title, // 分享标题
+            link: link, // 分享链接
+            imgUrl: imgUrl // 分享图标
+        });
+        wx.onMenuShareAppMessage({
+            title: "{$shareData['title']}", // 分享标题
+            desc: "{$shareData['desc']}", // 分享描述
+            link: "{$shareData['link']}", // 分享链接
+            imgUrl: "{$shareData['imgUrl']}"// 分享图标
+        });
+    })
+	var loadImg = 0;
+	var imgNum = $(".loadimg").length-1;
+	$(".loadimg").one('load', function () {
+		loadImg++;
+		if (loadImg >= imgNum) {
+			$("#loading").hide();
+			$("#wrapper").addClass("begin");
+            return false;
+		}
+	}).each(function () {
+		if (this.complete) $(this).load();
+	});
+    setTimeout(function(){
+        $("#loading").hide();
+        $("#wrapper").addClass("begin");
+    },5000);
+});
+</script>
+</head>
+<body>
+<div id="loading">
+    <div class="loadingbox">
+        <h4>{$nodeName}</h4>
+        <div><i></i>
+            <?php if ($marketInfo['log_img']) { ?>
+            <img src="{$marketInfo['log_img']}" />
+            <?php } else{ ?>
+            <img src="__PUBLIC__/Label/Image/defaultlogo-sTwo.png">
+            <?php } ?>
+        </div>
+        <h5>Loading...</h5>
+        <h6>我是升旗手</h6>
+    </div>
+    <img src="__PUBLIC__/Label/Image/20151001/loadingbg.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151001/bg.jpg" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151001/prizebg.png" class="loadimg" />
+    <img src="__PUBLIC__/Label/Image/20151001/qj-18.png" class="loadimg" />
+</div>
+<div id="wrapper">
+    <div id="container">
+    	<div id="main">
+            <div class="recordBox">
+                <div class="title">我的中奖记录</div>
+                <ul>
+                    <php>if($card_list){</php>
+                    <volist name="card_list" id="vo">
+                        <li class="fn">
+                            <div class="fn">
+                                <php>if($vo['card_id'] !=''){</php>
+                                      <php>if($vo['wxcard_status']==1){</php>
+                                           <a href="javascript:getWxCard2('{$vo.card_id}','{$vo.card_num}')" class="receive" >领取</a>
+                                      <php>}else if($vo['use_status']==0){</php>
+                                           <a href="javascript:void(0)" class="receive">未使用</a>
+                                     <php>}else if($vo['use_status']==1){</php>
+                                           <a href="javascript:void(0)" class="receive">使用中</a>
+                                      <php>}else if($vo['use_status']==1){</php>
+                                           <a href="javascript:void(0)" class="receive hasUsed">已使用</a>、
+                                     <php>}</php>
+                                          <h3>{$vo.goods_name}</h3><i class="cardTicket">卡券</i>
+                                <php>}</php>
+                                <php>if($vo['bonus_id'] !=''){</php>
+                                     <h3>{$vo['goods_name']}</h3><i class="hongBao">红包</i>
+                                     <php>if($vo['bonus_phone'] ==$openid){</php>
+                                             <a href="javascript:void(0)" class="receive" onclick="getPrizeD('{$vo.cj_traceid}','{$vo.request_id}','{$vo.bonus_use_detail_id}','{$vo.relation_id}')">领取</a>
+                                      <php>}else if($vo['use_time'] ==""){</php>
+                                             <a href="{$vo.link_url}" class="receive">去使用</a>
+                                     <php>}else{</php>
+                                             <a href="javascript:void(0)" class="receive">已使用</a>
+                                     <php>}</php>
+                                 <php>}</php>
+                                <php>if($vo['card_id'] =='' && $vo['bonus_id'] ==''){</php>
+                                     <h3>{$vo.goods_name}</h3><i class="ticket">卡券</i>
+                                      <php>if($vo['barcode_phone']=="13900000000"){</php>
+                                          <a href="javascript:void(0)" class="receive" onclick="getPrizeD('{$vo.cj_traceid}','{$vo.request_id}','{$vo.bonus_use_detail_id}','{$vo.relation_id}')">领取</a>
+                                      <php>}else if($vo['use_status']==0){</php>
+                                           <a href="javascript:void(0)" class="receive">未使用</a>
+                                       <php>}else if($vo['use_status']==1){</php>
+                                            <a href="javascript:void(0)" class="receive">使用中</a>
+                                       <php>}else if($vo['use_status']==1){</php>
+                                           <a href="javascript:void(0)" class="receive hasUsed">已使用</a>、
+                                        <php>}</php>
+                                <php>}</php>
+                            </div>
+                        </li>
+                    </volist>
+                    <php>}else{</php>
+                	<li class="noRecord"><img src="__PUBLIC__/Label/Image/20151001/noRecord.png" width="100%"/></li>
+                    <php>}</php>
+                </ul>
+            </div>
+            <div class="fixedOpr">
+            	<a href="{:U('Label/NationDay/playGame',array('id'=>$id))}" class="btn-green">再一次升旗</a>
+            	<a href="{:U('Label/NationDay/foodList',array('id'=>$id))}" class="btn-yellow">我的材料</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--<script>-->
+    <!--var wxShareData = <?php echo json_encode($shareData);?>;-->
+<!--</script>-->
+<!--<include file="Label/Public/_shareWx"/>-->
+</body>
+</html>
+<script>
+    function getPrizeD(cj_traceid,request_id,bonus_use_detail_id,relation_id){
+        _global.cj_traceid=cj_traceid;
+        _global.request_id=request_id;
+        _global.bonus_use_detail_id=bonus_use_detail_id;
+        //用户是否手机和openid绑定关系过关系
+        if(typeof(relation_id) == 'string' && relation_id !=''){
+             //有绑定关系，无需弹窗用户输入手机号码，直接请求
+            var url = "{:U('Label/NationDay/reSend',array('id'=>$id))}";
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: {
+                    cj_traceid: cj_traceid,
+                    request_id: request_id,
+                    bonus_use_detail_id: bonus_use_detail_id
+                },
+                timeout: 10000,
+                dataType: "json",
+                success: function (resp) {
+                    if (resp.status == 1) {
+                        if (resp.info.type == 1) {
+                            var btn = [];
+                            if(resp.info.link_flag == 1){
+                                var html2 = "<p class='title'>"+ "恭喜您获得了"+resp.info.bonus_page_name+"！"+"<p></p>"+"您可现在去使用或稍后在中奖记录中查看领取。"+"</p>";
+                                cj.content({
+                                    msg: html2,
+                                    btn:[{
+                                        text:"关闭",
+                                        callback:function(){
+                                            window.location.reload();
+                                            cj.close();
+                                        }
+                                    },{
+                                        text:"去使用",
+                                        url:resp.info.link_url
+                                    }]
+                                });
+                                return false;
+                            }
+                            var html = "<p class='title'>"+ "恭喜您获得了"+resp.info.bonus_page_name+"！"+"<p></p>"+"您可现在去使用或稍后在中奖记录中查看领取。"+"</p>";
+                            cj.content({
+                                msg:html,
+                                btn:[{
+                                    text:"关闭",
+                                    callback:function(){
+                                        window.location.reload();
+                                        cj.close();
+                                    }
+                                }]
+                            });
+//                            setTimeout("cj.close()",2000);
+                            return false;
+                        } else {
+                            if(resp.dianzi_flag==1){
+                                var html = "<p class='title'>"+ "恭喜您获得了"+resp.goods_name+"！"+"<p></p>"+"中奖凭证将自动下发至您的手机，请注意查收。"+"</p>";
+                                cj.content({
+                                    msg:html,
+                                    btn:[{
+                                        text:"关闭",
+                                        callback:function(){
+                                            window.location.reload();
+                                            cj.close();
+                                        }
+                                    }]
+                                });
+                                return false;
+                            }else{
+                                var html2 = "领取成功";
+                                cj.content({
+                                    msg:html2,
+                                    btn:[{
+                                        text:"确定",
+                                        callback:function(){
+                                            cj.close();
+                                        }
+                                    }]
+                                });
+                                setTimeout("cj.close()",2000);
+                            }
+                        }
+                    } else {
+                        var html = "<p>" + resp.info + "</p>";
+                        cj.content({
+                            msg: html,
+                            btn: [{
+                                text: "确定",
+                                callback: function () {
+                                    cj.close();
+                                }
+                            }]
+                        });
+                    }
+                }
+            });
+        }else{
+            cj.login();
+        }
+    }
+    function getWxCard2(card_id,card_num){
+        $.ajax({
+            url: "{:U('Label/NationDay/get_card_ext',array('id'=>$id))}",
+            type: "POST",
+            data: {card_num:card_num},
+            dataType: "json",
+            success: function (data) {
+                if(data.status==1){
+                    //获取成功card_ext，开始转微信领取
+                    getWxCard(card_id,data.info);
+                }else{
+                    cj.content({
+                        msg:"<p>"+data.info+"</p>"
+                    })
+                }
+            }
+        })
+    }
+    document.addEventListener('WeixinJSBridgeReady', function(){
+        window['getWxCard'] = function(card_id,card_ext){
+            //todo debug
+            if(typeof(WeixinJSBridge) == 'undefined'){
+                alert('wait...');
+                return;
+            }
+            /*alert(data.card_id);
+             alert(data.card_ext);*/
+            WeixinJSBridge.invoke('batchAddCard', {
+                "card_list": [{
+                    "card_id": card_id,
+                    "card_ext": card_ext
+                }]
+            },function(res){
+                /*for(var i in res){
+                 alert(res[i]);
+                 }*/
+            });
+        }
+    }, false);
+var _global = {
+		onsub:false,
+		g:true,
+        bonus_use_detail_id:{},
+        cj_traceid:{},
+        request_id:{}
+	}
+$(document).ready(function(e) {
+	prize = new Swiper('.prizeFlash',{
+		autoplay:2000,
+		autoplayDisableOnInteraction:2000,
+		slidesPerView:3
+	});
+	$(".btn-get:not('.erro')").click(function(){
+		cj.login();
+	});
+});
+var cj = {
+	basic:function(msg){
+		cj.close();
+		if(!msg.title){var notitle="notitle";msg.title="";}else{var notitle="hastitle"}
+		if(msg.isclose){var closehtml = '<a href="javascript:void(0)" class="close-msgPop"><i><span>+</span></i></a>'}else{var closehtml = "";}
+		var html = ['<div class="msgPop bg '+notitle+'" id="'+msg.id+'">',
+			'<div class="msgBg">',
+			'<div class="msgTitle '+notitle+'">'+msg.title+closehtml+'</div>',
+			'<div class="msgCon">'+msg.html+'</div>',
+			'</div>',
+			'</div>'].join('');
+		$("body").append(html);
+		if(typeof(msg.start) == 'string'){
+			window[msg.start].call(this,$(this));
+		}else if(typeof(msg.start) == 'function'){
+			msg.start.call(this,$(this));
+		}
+		$("body").find(".msgBg",html).on("click",".cjBtn-back",function(){
+			var index = $(this).index();
+			if(typeof(msg.btn[index].callback) == 'string'){
+				window[msg.btn[index].callback].call(this,$(this));
+			}else if(typeof(msg.btn[index].callback) == 'function'){
+				msg.btn[index].callback.call(this,$(this));
+			}else{
+				msg.repeat ? (cj.close(),cj.login({repeat:msg.repeat})) : cj.close();
+				if($(this).attr("href")!="javascript:void(0)"){
+					window.location.href = $(this).attr("href");
+				}
+			}
+		});
+		$("body").find(".msgBg",html).on("click",".close-msgPop",function(){
+			if(typeof(msg.after) == 'string'){
+				window[msg.after].call(this,$(this));
+			}else if(typeof(msg.after) == 'function'){
+				msg.after.call(this,$(this));
+			}
+			msg.repeat ? (cj.remove(),cj.login({repeat:msg.repeat})) : cj.remove();
+		});
+		$("body").on("click","input",msg.html,function(){
+			$(this).removeClass("erro");
+		});
+	},
+	tip:function(msg){
+		$(".cjTip").remove();
+		var txt = ["10秒钟内点的越多，砍掉的价格越高"];
+		var codeRandom = Math.floor(Math.random()*txt.length);
+		if(!msg){msg = txt[codeRandom]};
+		if(msg==1){return false;}
+		var html = '<div class="cjTip"><div class="cjTipTxt"><i></i><p>'+msg+'</p></div><div class="cjTipbg"></div></div>';
+		$("body").append(html);
+	},
+	login: function (msg) {
+		var html = template("js-tmpl-popForm", _global);
+		msg = $.extend(true, {}, cj.msg, msg);
+		msg.html = html;
+		cj.basic(msg);
+	},
+	content:function(msg){
+		msg = $.extend(true, {}, cj.msg,msg);
+		msg.html = template("js-tmpl-msg",msg);
+		cj.basic(msg);
+	},
+	remove:function(msg){
+		_global.g = true;
+		$(".gameCon").removeClass("end");
+		$(".msgPop").remove();
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	close:function(msg){
+		_global.g = true;
+		$(".gameCon").removeClass("end");
+		var _MsgPopglobal = {
+			refurbish:false,
+			repeat:true
+		}
+		msg = $.extend(true, {}, _MsgPopglobal,msg);
+		$(".msgPop").not("[id!='']").remove();
+		if(msg.refurbish){
+			location.href = location.href ;
+		}
+	},
+	msg:{
+		id:"",
+		title:false,//标题
+		html:false,//内容
+		refurbish:false,//是否刷新
+		msg:"未知错误",//内容
+		icon:false,//图标
+		repeat:false,//重新填出登陆框
+		btn:[
+			{
+				text:"返回",//按钮文字
+				url:"javascript:void(0)",//按钮链接
+				callback:function(){
+					cj.close();
+				}
+			}
+		],
+		isclose:true,
+		start:false,//弹出之后callback
+		after:false//关闭之后callback
+	}
+}
+</script>
+<script type="text/html" id="js-tmpl-msg">
+<div class="cjText">
+	{{if !html}}
+	<div class="cjText-con">
+		{{if !icon}}
+			<div class="cjText-text noicon">{{#msg}}</div>
+		{{else}}
+			<div class="cjText-text">{{#msg}}</div>
+			<div class="cjText-img">
+				{{if icon==1}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-6.png" width="64">
+				{{else}}
+				<img src="__PUBLIC__/Label/Image/qianji/Item/qj-19-{{icon}}.png" width="100">
+				{{/if}}
+			</div>
+		{{/if}}
+	</div>
+	{{else}}
+	{{#html}}
+	{{/if}}
+</div>
+<div class="cjBtn">
+{{each btn as value i}}
+	<a href="{{value.url}}" class="cjBtn-back {{if btn.length>1}}{{if i==0}}sm{{/if}}{{/if}}">{{value.text}}</a>
+{{/each}}
+</div>
+</script>
+
+<!--普通抽奖-->
+<script type="text/html" id="js-tmpl-popForm">
+    <div class="cjCon" id="popForm">
+        <div class="cjText">
+            <p>为了保证在您中奖后，中奖凭证能自动下发至您的手机，请填写手机号码！</p>
+			<div class="formDiv">
+				<form id="theform" action="" method="post" name="theform">
+                    <input  type="hidden" name="cj_traceid" value="{{cj_traceid}}" id="cj_traceid"/>
+                    <input  type="hidden" name="request_id" value="{{request_id}}" id="request_id"/>
+                    <input  type="hidden" name="bonus_use_detail_id" value="{{bonus_use_detail_id}}" id="bonus_use_detail_id"/>
+                    <ul>
+                        <li><input type="tel" name="mobile" id="mobile" placeholder="请输入手机号" maxlength="11"/>
+                            <div class="formError">手机号错误</div>
+                        </li>
+                        <li>
+                            <input type="tel" id="verify" name="verify" placeholder="输入验证码" class="half">
+                            <div class="formError">验证码错误</div>
+                            <input type="button" value="获取验证码" class="sOne-cjpasscode-btn" id="getpasscode" data-in_ajax='0'>
+                        </li>
+                    </ul>
+				</form>
+			</div>
+        </div>
+        <div class="cjBtn">
+			<a href="javascript:void(0);" id="subcj">确定</a>
+        </div>
+    </div>
+</script>
+<script>
+    $(document).ready(function(e) {
+        $("body").on("click", "#getpasscode", function () {
+            var phone = $("#mobile").val();
+            var id = $("#id").val();
+            if (phone.length != 11) {
+                art.dialog.alert("手机号码不正确！");
+                return false;
+            }
+            var self = $(this);
+            if (self.data('in_ajax') != 0) return;
+            self.data('in_ajax', 1);
+            self.val("正在发送......");
+            $.get("{:U('Label/NationDay/sendCheckCode',array('id'=>$id))}" + '&phone=' + phone, function (data) {
+                self.data('in_ajax', 0);
+                if (data.status == 1) {
+                    self.data('in_ajax', 2);
+                    self.val("90秒");
+                    var sed = 90, Int;
+
+                    function aha() {
+                        sed = sed - 1;
+                        if (sed == 0) {
+                            self.data('in_ajax', 0);
+                            self.val('获取验证码');
+                            clearInterval(Int);
+                            return;
+                        } else {
+                            self.val(sed + '秒');
+                        }
+                    }
+
+                    Int = setInterval(aha, 1000);
+                } else {
+                    var html = "<p>"+data.info+"<p>";
+                    cj.content({
+                        msg:html,
+                        btn:[{
+                            text:"关闭",
+                            callback:function(){
+                                cj.close();
+                            }
+                        }]
+                    });
+                    $("#getpasscode").val("获取验证码");
+                }
+            }, "json");
+        });
+        $("body").on("click", "#subcj", function () {
+            var url = "{:U('Label/NationDay/reSend',array('id'=>$id))}";
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: {
+                    phone: $("#mobile").val(),
+                    verify: $("#verify").val(),
+                    cj_traceid: $("#cj_traceid").val(),
+                    request_id: $("#request_id").val(),
+                    bonus_use_detail_id: $("#bonus_use_detail_id").val()
+                },
+                timeout: 10000,
+                dataType: "json",
+                success: function (resp) {
+                    if (resp.status == 1) {
+                        if (resp.info.type == 1) {
+                            var btn = [];
+                            if(resp.info.link_flag == 1){
+                                var html2 = "<p class='title'>"+ "恭喜您获得了"+resp.info.bonus_page_name+"！"+"<p></p>"+"您可现在去使用或稍后在中奖记录中查看领取。"+"</p>";
+                                cj.content({
+                                    msg: html2,
+                                    btn:[{
+                                        text:"关闭",
+                                        callback:function(){
+                                            window.location.reload();
+                                            cj.close();
+                                        }
+                                    },{
+                                        text:"去使用",
+                                        url:resp.info.link_url
+                                    }]
+                                });
+                                return false;
+                            }
+                            var html = "<p class='title'>"+ "恭喜您获得了"+resp.info.bonus_page_name+"！"+"<p></p>"+"您可现在去使用或稍后在中奖记录中查看领取。"+"</p>";
+                            cj.content({
+                                msg:html,
+                                btn:[{
+                                    text:"确定",
+                                    callback:function(){
+                                        window.location.reload();
+                                        cj.close();
+                                    }
+                                }]
+                            });
+                            setTimeout("cj.close()",2000);
+                            return false;
+                        } else {
+                            var html2 = "恭喜您";
+                            cj.content({
+                                msg: html2,
+                                btn: [{
+                                    text: "领取成功",
+                                    callback: function () {
+                                        window.location.reload();
+                                        cj.close();
+                                    }
+                                }]
+                            });
+                            setTimeout("cj.close()", 2000);
+                        }
+                    } else {
+                        var html = "<p>" + resp.info + "</p>";
+                        cj.content({
+                            msg: html,
+                            btn: [{
+                                text: "确定",
+                                callback: function () {
+                                    cj.close();
+                                }
+                            }]
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>

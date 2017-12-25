@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>金猴闹春-基础信息</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wactivity2015.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js"></script>
+<script>
+var needShowTips     = "{$retInfo['needShowTips']}";
+var configOneActDays = "{$retInfo['configOneActDays']}";
+var exPrice          = "{$retInfo['exPrice']}";
+$(function(){
+	Gform();
+	$('#save').click(function(){
+		if($("#theform").validationEngine('validate')){
+			   var startTime = $('#act_time_from').val();
+			   var endTime = $('#act_time_to').val();
+			   startTime = new Date(parseInt(startTime.substr(0,4)), (parseInt(startTime.substr(4,2)) - 1), parseInt(startTime.substr(6,2)));
+			   endTime = new Date(parseInt(endTime.substr(0,4)), (parseInt(endTime.substr(4,2)) - 1), parseInt(endTime.substr(6,2)));
+			   var selectDays = parseInt(Math.floor((endTime.getTime(endTime) - startTime.getTime(startTime)) / (24*60*60*1000)));
+			   selectDays = selectDays + 1;
+			   if (needShowTips == '1' && selectDays > configOneActDays) {
+				   dialog = art.dialog({
+						content:'活动时间超出'+ configOneActDays + '天，每天按'+exPrice+'元/天，按天数收取',
+						cancel:function(){
+							dialog.close();
+						},
+						ok: function () {
+							dialog.close();
+							submitForm();
+						}
+				   });
+			   } else {
+				   submitForm();
+			   }
+			return false;
+		  }
+	}) ;
+	$("body").on("blur","#act_time_from,#act_time_to", showExTips);
+})
+
+function submitForm() {
+    var dialog;
+	$("#theform").ajaxSubmit({
+		beforeSubmit:function(){
+			dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+		},
+		success:function(data){
+            if(data.status == 0)
+            {
+                dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                return false;
+            }else{
+    		  	dialog.time(2).content("<div class='msg-all-succeed'>"+data.info.msg+"</div>");
+                var goUrl = '';
+                if(data.id == $('#m_id').val())
+                {
+                    goUrl = "{:U('MarketActive/Activity/MarketList')}";
+                }else{
+                    goUrl = "{:U('LabelAdmin/SpringMonkey/setActConfig')}&m_id="+data.info.id+"&isReEdit=0";
+                }
+                window.location.href = goUrl;
+            }
+		},
+		dataType:'json'
+	});
+}
+</script>
+<script>
+$(document).ready(function(e) {
+	$("body").on("click", ".Gview-background .Gchoose-opr-del", function() {
+		if($("[name='bg_pic']").val()==""){
+			$(".Gshow-background").css("background-image","url('__PUBLIC__/Image/bigTurnt/bigTurnt2.jpg')")
+		}
+	})
+});
+
+function limitPicker() {
+	var today = "{:date('Y-m-d')}";
+	var limit = "{$retInfo['freeUseLimit']}";
+	WdatePicker({minDate:today, maxDate:limit});
+}
+function normalDatePickerStart() {
+	WdatePicker({minDate:'%y-%M-%d', maxDate:"#F{$dp.$D(\\'act_time_to\\')}"});
+}
+function normalDatePickerEnd() {
+	WdatePicker({minDate:"#F{$dp.$D(\\'act_time_from\\')}"});
+}
+//显示超过60天付费的提示
+function showExTips() {
+	var startTime = $('#act_time_from').val();
+    var endTime = $('#act_time_to').val();
+    if (startTime.length > 0 && endTime.length > 0) {
+    	startTime = new Date(parseInt(startTime.substr(0,4)), (parseInt(startTime.substr(4,2)) - 1), parseInt(startTime.substr(6,2)));
+        endTime = new Date(parseInt(endTime.substr(0,4)), (parseInt(endTime.substr(4,2)) - 1), parseInt(endTime.substr(6,2)));
+        var selectDays = parseInt(Math.floor((endTime.getTime(endTime) - startTime.getTime(startTime)) / (24*60*60*1000)));
+        selectDays = selectDays + 1;
+        if (needShowTips == '1' && selectDays > configOneActDays) {
+        	$('#exTime').show();
+        } else {
+        	$('#exTime').hide();
+        }
+    }
+}
+</script>
+</head>
+<body>
+    <div id="wrapper"> 
+        <include file="./Home/Tpl/Public/Public_header.html" />
+
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+            	<div class="member_con">
+                	{$retInfo['stepBar']}
+                	<div class="member_l">
+                    	<div id="phone">
+                            <div class="phonetop"></div>
+                            <div id="phoneCon" class="selected activeTwoFestival" style="padding-top:0;">
+                            	<div class="Gshow-background">
+                                	<div class="activeTwoFestivalLogo"><img src="" class="Gshow-img" /></div>
+                                    <div class="activeTwoFestivalname Gshow-name"></div>
+                                    <div class="activeTwoFestivalbtn2 Gshow-btn"></div>
+                                	<img src="__PUBLIC__/Image/bigTurnt/bigTurnt3.png" width="320">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="member_r">
+                    	<form action="{:U('LabelAdmin/SpringMonkey/setActBasicInfo')}" method="POST" name="theform" id="theform" enctype="multipart/form-data">
+                        <input type="hidden" id="m_id" name="m_id" value="{$retInfo['id']}">
+                        <input type="hidden" name="wx_auth_type" value="{$retInfo['wx_auth_type']}">
+                        <input type="hidden" id="isReEdit" name="isReEdit" value="{$retInfo['isReEdit']}">
+                    	<h3>活动基础信息</h3>
+                        <div class="Gform l w700">
+                            <ul>
+                            <li class="Gname"><span>*</span> 活动名称</li>
+                            <li class="Ginput">
+                                <input type="text" maxlength="20" placeholder="活动列表中进行活动区分" class="validate[required,optional,maxSize[20]]" name="act_name" value="{$retInfo['act_name']}">
+                            </li>
+                            </ul>
+                            <ul>
+                            <li class="Gname"><span>*</span> 活动时间</li>
+                            <li class="Ginput">
+                            	<if condition="$retInfo['type'] eq 1">
+                            	<div class="Gtime2 fn">
+                                    <input type="text" class="validate[required]" readonly="readonly" name="act_time_from"  id="act_time_from" value="{$retInfo['act_time_from']}">
+                                    <em>至</em>
+                                    <input type="text" class="validate[required]" onclick="limitPicker();" name="act_time_to" id="act_time_to" value="{$retInfo['act_time_to']}">
+                                </div>
+                                <else />
+                                <div class="Gtime2 fn">
+                                    <input type="text" class="validate[required]" onclick="normalDatePickerStart()" name="act_time_from"  id="act_time_from" value="{$retInfo['act_time_from']}">
+                                    <em>至</em>
+                                    <input type="text" class="validate[required]" onclick="normalDatePickerEnd()" name="act_time_to" id="act_time_to" value="{$retInfo['act_time_to']}">
+                                </div>
+                            	</if>
+                            	<div class="txtTips important" id="exTime" style="display:none;">活动时间超过{$retInfo['configOneActDays']}天，超出的部分以{$retInfo['exPrice']}元/天，按天数收取。</div>
+                            </li>
+                        </ul>
+                            <ul class="last">
+                                <li class="Gname"><span>*</span> 活动说明</li>
+                                <li class="Ginput">
+                                    <textarea placeholder="在手机端活动说明页中展示" maxlength="1000" class="Gview-textarea validate[required]" name="introduce">{$retInfo['introduce']}</textarea><span class="maxTips forArea" data-max="1000">0/1000</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="cl"></div>
+                        <h3>商户信息</h3>
+                        <div class="Gform l w700">
+                            <ul>
+                            <li class="Gname"> 商户名称</li>
+                            <li class="Ginput">
+                                <input type="text" maxlength="20" class="Gview-name" value="{$retInfo['node_name']}" name="node_name">
+                            </li>
+                            </ul>
+                            <ul >
+                        <li class="Gname">商户logo</li>
+                        <li class="Ginput">
+                            <div class="Gchoose Gview-img">
+                                <input type="text" value="{$retInfo['node_logo']}" name="node_logo">
+                                <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:160,height:160}"><i></i></a>
+                            </div>
+                        </li>
+	                    </ul>
+	                    <ul class="last">
+                            <li class="Gname"><span>*</span> 抽奖按钮文字</li>
+                            <li class="Ginput">
+                                <input type="text" maxlength="6" class="Gview-btn validate[required,maxSize[6]]" value="{$retInfo['cj_button_text']}" name="cj_button_text">
+                            </li>
+                        </ul>
+                        <div class="cl"></div>
+                        <h3>微信分享设置</h3>
+                        <ul>
+                            <li class="Gname">分享标题</li>
+                            <li class="Ginput">
+                                <input type="text" maxlength="6" placeholder="金猴闹新春（请不要使用‘红包’等词汇）" class="validate[maxSize[6]]" value="{$retInfo['share_title']}" name="share_title">
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="Gname">分享描述</li>
+                            <li class="Ginput">
+                                <textarea maxlength="140" placeholder="2016羊去猴来，是时候告别“霾头苦干”的日子了。动动你的手指，点燃红火、沸腾的吉庆之鞭，享受清新、愉悦的新年气象。金猴闹新春，好礼等你拿！（请不要使用‘红包’等词汇）" class="Gview-textarea" name="share_descript">{$retInfo['share_descript']}</textarea><span class="maxTips forArea" data-max="140">0/140</span>
+                            </li>
+                        </ul>
+	                    <ul >
+	                        <li class="Gname">分享图标</li>
+	                        <li class="Ginput">
+	                            <div class="Gchoose Gview-img">
+	                                <input type="text" value="{$retInfo['share_pic']}" name="share_pic">
+	                                <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片" data-rel="{width:160,height:160}"><i></i></a>
+	                            </div>
+	                        </li>
+	                    </ul>
+	                    <ul class="pt20">
+                            <li class="Ginput noName tc">
+                                <a href="{:U('MarketActive/Activity/MarketList')}" class="btn-all-del">取消</a>
+                                <a href="javascript:void(0)" class="btn-all" id="save"><eq name="retInfo['isReEdit']" value="1">保存<else />下一步</eq></a>
+                            </li>
+                        </ul>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+		<include file="./Home/Tpl/Public/Public_footer.html" /> 
+    </div>
+    <div class="service"></div>
+</body>
+</html>

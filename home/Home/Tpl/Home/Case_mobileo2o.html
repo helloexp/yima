@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>在线活动</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O案例" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link href="__PUBLIC__/Css/Online_main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/masonry/jquery.masonry.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/masonry/jquery.infinitescroll.min.js?v=__VR__"/>
+<script>
+$(function(){
+	$("#time,#address,#trade").change(function(){
+		var trade = $("#trade").val();
+		var address = $("#address").val();
+		var time = $("#time").val();
+		gourl="{:U('Home/Case/index')}&trade="+trade+"&address="+address+"&time="+time+"&type=mobile";
+		location.href=gourl;
+	});
+	
+	$("#time_name").html($("#time option:selected").html());
+	$("#address_name").html($("#address option:selected").html());
+	$("#trade_name").html($("#trade option:selected").html());
+});
+</script>
+</head>
+
+<body class="no">
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+            <div id="mainlist" class="mainlist fn">
+                <div class="mainlist_title">
+                    翼码旺财&nbsp;|&nbsp;O2O在线案例
+                </div>
+                <div class="mainlist_search fn">
+                    <ul>
+                        <!-- <li class="first">
+                            <span id="time_name">本周</span>
+                            <select id="time">
+                                <option value="week" <?php if($_GET['time']=='week'){echo 'selected="selected"';}?>>本周</option>
+                                <option value="red" <?php if($_GET['time']=='red' OR empty($_GET['time'])){echo 'selected="selected"';}?>>推荐</option>
+                                <option value="hot" <?php if($_GET['time']=='hot'){echo 'selected="selected"';}?>>热门</option>
+                                <option value="new" <?php if($_GET['time']=='new'){echo 'selected="selected"';}?>>最新</option>
+                                <option value="all" <?php if($_GET['time']=='all'){echo 'selected="selected"';}?>>全部</option>
+                            </select>
+                            </li> -->
+                        <li class="center">
+                            <span id="address_name">地区</span>
+                            <select id="address">
+                                <option value="-1">全部地区</option>
+                                <?php foreach($hotCity as $k=>$vo){ ?>
+                                <option value="<?php echo $k;?>" <?php if($_GET['address']==$k){echo 'selected="selected"';}?>>{$vo}</option>
+                                <?php } ?>
+                            </select>
+                        </li>
+                        <li class="last">
+                            <span id="trade_name">行业</span>
+                            <select id="trade">
+                                <option value="">全部行业</option>
+                                <volist name="industryData" id="vo" key="k">
+                                <option value="{$k}" <?php if($_GET['trade']==$k){echo 'selected="selected"';}?>>{$vo}</option>
+                                </volist>
+                             </select>
+                        </li>
+                    </ul>
+                </div>
+                <div class="cl"></div>
+                <div id="masonry" class="clearfix">
+                 <?php if($list){ ?>
+                    <volist name="list" id="vo">
+                    <div class="box col0">
+                        <div class="mainlist_list">
+                            <div class="mainlist_item_pic"><a href="{:U('Label/Label/index','id='.$vo['id'])}"><img src="{$vo['img']}" /></a></div>
+                            <div class="mainlist_item_titile">{$vo['name']}</div>
+                            <div class="mainlist_item_contect">时间：{$vo.start_time|dateformat=###,'Y年m月d日'}—{$vo.end_time|dateformat=###,'Y年m月d日'}</div>
+                            <!-- 
+                            <div class="mainlist_item_message">
+                                <div class="mainlist_item_message_right">
+                                    <a><i class="icon01"></i><span>{$vo['click_count']}</span></a>
+                                    <a><i class="icon02"></i><span>{$vo['cj_count']}</span></a>
+                                </div>
+                            </div>
+                            -->
+                        </div>
+                    </div>
+                    </volist>
+                    <?php }else{ ?>
+                    <div  class="ml40 mt40"><span><h4>暂无活动案例</h4></span></div>
+                    <?php } ?>
+                </div>
+                <nav id="page-nav">
+                    <a href="{$nex_url}"></a>
+                </nav>
+                <?php if($route!='zc'){ ?>
+                <div class="mainlist_bottombtn"><a href="{:U('Home/WapReg/index')}">免费注册，马上试用</a></div>
+           		<?php }?>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+$(document).ready(function(e){
+    var $container = $('#masonry');
+    $container.imagesLoaded( function(){
+      $container.masonry({
+        itemSelector : '.box'
+      });
+    });
+    $container.infinitescroll({
+        navSelector  : '#page-nav',    // selector for the paged navigation 
+        nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
+        itemSelector : '.box',     // selector for all items you'll retrieve
+        loading: {
+            finishedMsg: '没有更多活动了',
+            img: 'http://i.imgur.com/6RMhx.gif'
+          }
+        },
+        // trigger Masonry as a callback
+        function( newElements ) {
+          // hide new items while they are loading
+          var $newElems = $( newElements ).css({ opacity: 0 });
+          // ensure that images load before adding to masonry layout
+          $newElems.imagesLoaded(function(){
+            // show elems now they're ready
+            $newElems.animate({ opacity: 1 });
+            $container.masonry( 'appended', $newElems, true ); 
+          });
+        }
+      );
+});
+</script>

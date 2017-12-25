@@ -1,0 +1,428 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>付满送_条码支付_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Walipay.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/ajaxfileupload.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script type="text/javascript">
+$(function(){
+	$("#js_select").click(function(e) {
+		$('#activename').find('input').val('');   
+        var url = "{:U('LabelAdmin/SelectBatches/index',array('filterType'=>'fms','batch_type'=>2,'id'=>$tid))}";
+        var title = '';
+        var _this = {callback:'bincallback'};
+        art.dialog.data('paysenddata', _this);
+        art.dialog.open(url, {
+            width: 800,
+            title: '选择互动模块',
+            id: 'selectjp'
+        });
+    }); 
+    $("#friend_select").click(function(e) {
+        $('#friendname').find('input').val('');   
+        art.dialog.open("{:U('Alipay/Paysend/addfriend_taick', array('callback'=>'friend_taick'))}" ,{
+                    title: '选择朋友的券',
+                    width:800
+                }); 
+    });
+ 
+
+        //var url = "{:U('Weixin/WeixinCard/wxFriendCardIndex')}";
+        
+	//选择抽奖
+	//$('#bind_cj').click(function(){
+//		var  name = '&callback=selectJpcallback&batch_id={$batch_id}';
+//		art.dialog.open("{:U('Common/SelectJp/index')}"+name,{
+//			id: 'closeJp',
+//			width: 800,
+//			title:'选择卡券'
+//		})
+//	});
+})
+function js_selectshow(t){
+	var val = t.attr("data-val");
+		$("#show0,#show1,#show2").hide();
+		$("#show"+val).show();
+}
+
+function friend_taick(data){
+     var goods_id=data.goods_id;
+     $('#thisoneform2 input[name=goods_id]').val(goods_id);
+     $('#thisoneform2 input[name=wx_card_id]').val(data.card_id);   
+     $('#friendname').show().find('input').empty().val(data.goodsname);   
+    // var _url="{:U('Common/SelectJp/addToPrizeItem')}";
+    // art.dialog.open(_url+'&prizeId='+goods_id + '&card_id=' + data.card_id + '&callback=priseitem_tiack' + //'&availableSendType=1',{title:'奖品基本信息设置',width:800});
+    }
+
+//绑定互动模块callback
+function savefun1(){
+	  if($('#thisoneform1 input[name=mid]').val()==''){
+					alert('没有选择模块请选择模块');return false;
+		  }  
+	  if($('#activename').show().find('input').empty().val()==''){
+		  			alert('没有选择模块请选择模块');return false;
+		  }    
+	  $("#thisoneform1").ajaxSubmit({
+			beforeSubmit:function(){
+				dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed:true,padding:0});
+			},
+			success:function(data){
+				if(data.status==1){ 
+				  dialog.time(1).content("<div class='msg-all-error'>添加新模块成功</div>");
+				  window.location.href=data.info; 
+				}else{
+					dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+				}
+			},
+			dataType:'json'
+		});  
+}
+function savefun2(){
+      if($('#friendname').show().find('input').empty().val()==''){
+                    alert('没有选择朋友的券请选择朋友的券');return false;
+          }    
+      $("#thisoneform2").ajaxSubmit({
+            beforeSubmit:function(){
+                dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed:true,padding:0});
+            },
+            success:function(data){
+                if(data.status==1){ 
+                  dialog.time(1).content("<div class='msg-all-error'>添加新模块成功</div>");
+                  window.location.href=data.info; 
+                }else{
+                    dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },
+            dataType:'json'
+        });  
+}
+function bincallback(data){ 
+ 		//设置活动id
+	  $('#thisoneform1 input[name=mid]').val(data.info.batch_id);  
+	  $('#activename').show().find('input').empty().val(data.info.name);   
+	 /* art.dialog.open("{:U('Alipay/Paysend/addAward', array('callback'=>'setcard1'))}",{
+			title: '添加奖品',
+			width:'900px',
+			lock:true,
+			height:'600px'
+		}); */ 
+}
+
+//设置奖品详情函数
+function priseitem(data){
+	if($('input[name=createtype]').val()==1){
+		$('#thisoneform1 input[name=priseitem]').val(data);  
+		$("#thisoneform1").ajaxSubmit({
+			beforeSubmit:function(){
+				dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed:true,padding:0});
+			},
+			success:function(data){
+				if(data.status==1){ 
+				  dialog.time(1).content("<div class='msg-all-error'>添加新模块成功</div>");
+				  window.location.href=data.info; 
+				}else{
+					dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+				}
+			},
+			dataType:'json'
+		}); 
+	}else{
+		//$('.addAward_btn').remove();
+		$('#thisoneform input[name=priseitem]').val(data); 
+	} 
+}
+function priseitem_tiack(){
+    if($('input[name=createtype]').val()==1){
+        $('#thisoneform1 input[name=priseitem]').val(data);  
+        $("#thisoneform1").ajaxSubmit({
+            beforeSubmit:function(){
+                dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed:true,padding:0});
+            },
+            success:function(data){
+                if(data.status==1){ 
+                  dialog.time(1).content("<div class='msg-all-error'>添加新模块成功</div>");
+                  window.location.href=data.info; 
+                }else{
+                    dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+            },
+            dataType:'json'
+        }); 
+    }else{
+        //$('.addAward_btn').remove();
+        $('#thisoneform2 input[name=priseitem]').val(data); 
+    } 
+}
+
+function setcard(data){
+     var goods_id=data.goods_id;
+     $('#thisoneform input[name=goods_id]').val(goods_id);
+     $('#thisoneform input[name=wx_card_id]').val(data.card_id);   
+     $('#prisename').html(data.goodsname + "<i></i>");
+     var _url="{:U('Common/SelectJp/addToPrizeItem')}";
+     art.dialog.open(_url+'&prizeId='+goods_id + '&card_id=' + data.card_id + '&callback=priseitem' + '&availableSendType=' + data.availableSendType,{title:'奖品基本信息设置',width:800});
+}
+$(function(){
+	$(".addAward_btn").click(function(e){
+		art.dialog.open("{:U('Alipay/Paysend/addAward', array('callback'=>'setcard'))}"	,{
+			title: '添加奖品',
+			width:800
+		});   
+})
+})
+function savefun() { 
+		  $("#thisoneform").ajaxSubmit({
+				beforeSubmit:function(){
+					dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed:true,padding:0});
+				},
+				success:function(data){
+					if(data.status==1){ 
+					  dialog.time(1).content("<div class='msg-all-error'>添加新模块成功</div>");
+					  window.location.href=data.info; 
+					}else{
+						dialog.time(5).content("<div class='msg-all-error'>"+data.info+"</div>");
+					}
+				},
+				dataType:'json'
+			}); 
+	
+}
+
+
+/*function changeIsCj() {
+	var data = {
+		m_id : $('#m_id').val()
+	}
+	$.post("{:U('Wmember/Member/changeIsCj')}", data, function(resp){
+		if (resp.status == '1') {
+			window.location.reload();
+		} else {
+			dialog = art.dialog({title:false,content:"<div class='msg-all-error'>"+resp.info+"</div>",fixed: true,padding:0,lock:true});
+		}
+	}, 'json');
+} */
+</script>
+
+</head>
+<body>
+	<div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html"/>
+         
+        <!--头部主导航结束-->
+        <div id="container">
+            <div id="main">
+					 <assign name="part" value="2" />
+					  	 <include file="./Home/Tpl/Alipay/Index_left_menu.html" leftmenuid="cj"/>               
+					<div class="subcon fn">
+                	 <div class="main-name fn">
+                        <h4>创建新活动</h4>
+                    </div>
+                	<div class="fn">
+                        <div class="Gform l">
+                            <ul>
+                                <li class="Gname"><span>*</span>活动内容来源</li>
+                                <li class="Ginput">
+                                <div class="switch" data-callback="js_selectshow">
+                                    <input type="radio" name="createtype" value="0" checked="checked">
+                                    <div class="newRadio">
+                                        <span class="valfirst hover" data-val="0">创建新活动</span>
+                                        <span class="vallast" data-val="1" id="js_select">选择模块</span>
+                                        <span class="vallast" data-val="2" id="friend_select">朋友的券</span>
+                                    </div>
+                                </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="cl"></div>
+                        <div id="show0">
+                            <div class="rel">
+                                <div class="member_l">
+                                    <div id="phone">
+                                        <div class="phonetop"></div>
+                                        <div id="phoneCon" class="selected" style="padding-top:0;">
+                                            <div class="phone_view">
+                                                <div class="topView">
+                                                <div class="shlogo"><img src="{$logo_value}" class="Gshow-img"></div>
+                                                <div class="shname"><p class="Gshow-name">商户名称</p></div>
+                                                </div>
+                                                <div class="hd_desc">
+                                                <dl>
+                                                <dt>活动说明</dt>
+                                                <dd class="Gshow-textarea">活动详情</dd>
+                                                </dl>
+                                                </div>
+                                                <div class="btn_view"><a href="javascript:void();"><span class="Gshow-btn">立即领取</span></a></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div>
+                                    <form  action="{:U('Alipay/Paysend/saveaddActive')}" method="post" name="thisoneform1" id="thisoneform1">
+                                    <input type="hidden" name="tid" value="{$tid}"/>
+                                    <input type="hidden" value="付满送奖品" name="cj_cate_name"/>
+                                    <input type="hidden" name="goods_id"/>
+                                    <input type="hidden" name="priseitem"/> 
+                                    <input type="hidden" name="mid" value="" />
+                                    <input type="hidden" name="wx_card_id"/>
+                                    </form> 
+ 
+                                </div>  
+                                <div>
+                                    <form  action="{:U('Alipay/Paysend/saveaddActive')}" method="post" name="thisoneform2" id="thisoneform2" enctype="multipart/form-data">
+                                    <input type="hidden" id="batch_id" name="tid" value="{$tid}"/>
+                                    <input type="hidden"  value="付满送朋友的券" name="cj_cate_name"/>
+                                    <input type="hidden"  value="1" name="friend_tiack"/>
+                                    <input type="hidden" name="goods_id"/>
+                                    <input type="hidden" name="wx_card_id"/> 
+                                    <input type="hidden" name="isshared" value='0'/> 
+                                    <input type="hidden" name="buttonname"  value='立即领取' />  
+                                    <input type="hidden" name="memo"  value='付满送朋友的券' /> 
+                                    <input type="hidden" name='name'  value="{$node_name}"/>
+                                    <input type="hidden" name='jp_type'  value="1"/>
+                                    <input type="hidden" name="isnodelogo" value="0"/>
+                                    </form> 
+                                </div>
+
+                                <div class="member_r">
+                                    <form  action="{:U('Alipay/Paysend/saveaddActive')}" method="post" name="theform" id="thisoneform" enctype="multipart/form-data">
+                                    <input type="hidden" id="batch_id" name="tid" value="{$tid}"/>
+                                    <input type="hidden"  value="付满送奖品" name="cj_cate_name"/>
+                                    <input type="hidden" name="goods_id"/>
+                                    <input type="hidden" name="priseitem"/>
+                                    <input type="hidden" name="wx_card_id"/> 
+                                    <h3><i></i>设置活动内容</h3>
+                                    <div class="Gform">
+                                        <ul class="first">
+                                        <li class="Gname"><span>*</span>商家名称</li>
+                                        <li class="Ginput">
+                                            <input type="text" name='name' maxlength="20" value="{$node_name}" class="Gview-name" />
+                                            <span class="maxTips forInput" data-max="20">0/20</span>
+                                        </li>
+                                        </ul>
+                                        <ul>
+                                            <li class="Gname"><span>*</span>商户logo</li>
+                                            <li class="Ginput">
+                                                <div class="switch">
+                                                <input type="radio" name="isnodelogo" value="1" checked="checked"/>
+                                                <div class="newRadio" style="float:left">
+                                                    <span class="valfirst" data-val="0">否</span>
+                                                    <span class="vallast" data-val="1">是</span>
+                                                </div>
+                                                <div class="newRadio-input">
+                                                    <div class="Gchoose Gview-img">
+                                                    <input name="logo" type="hidden" value="{$logo_value}"/>
+                                                    <a href="javascript:void(0)" class="Gbtn-pic" title="选择图片"><i></i></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                <span class="txtTips">选择否的时候商家logo为账户logo</span>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                            <li class="Gname"><span>*</span>活动介绍</li>
+                                            <li class="Ginput">
+                                                <textarea maxlength="140" name="memo" class="Gview-textarea" style="resize:none;"></textarea><span class="maxTips forArea" data-max="140">0/140</span>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                        <li class="Gname"><span>*</span>领取按钮文字</li>
+                                        <li class="Ginput">
+                                            <input type="text" name="buttonname" maxlength="20" class="Gview-btn" /><span class="maxTips forInput" data-max="20">0/20</span>
+                                        </li>
+                                        </ul>
+                                        <ul>
+                                            <li class="Gname"><span>*</span>奖品设置</li>
+                                            <li class="Ginput">
+                                                <div class="Gchoose">
+                                                <input type="text" class="validate[required]" id="goods_name" readonly="readonly" value="">
+                                                <a href="javascript:void(0)" id='prisename'></a>
+                                                <a href="javascript:void(0)" id="bind_cj" class="Gbtn-card addAward_btn" title="选择卡券"><i></i></a>
+                                                </div>
+                                                <!--<a href="javascript:void(0);" class="addAward_btn btn-add">添加奖品</a>            
+                                                <p id='prisename'></p>-->
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                            <li class="Gname"><span>*</span>卡券分享</li>
+                                            <li class="Ginput">
+                                                <div class="switch">
+                                                <input type="radio" name="isshared" value="0" checked="checked"/>
+                                                <div class="newRadio mb10">
+                                                    <span class="valfirst hover" data-val="0">不分享</span>
+                                                    <span class="vallast" data-val="1">分享</span>
+                                                </div>
+                                                <div class="newRadio-input">
+                                                    最多可分享 <input name='sharednum' type="text" style=" float:none; width:100px;" /> 份奖品
+                                                </div>
+                                                <span class="txtTips">
+                                                    <a target='_blank' href="{:U('Home/Help/helpDetails',array('newsId'=>1537))}">什么是卡券分享?</a></span>
+                                            </div>
+                                            </li>
+                                        </ul>
+                                        <ul>
+                                        <li class="Ginput pt0">
+                                            <a href="{:U('Alipay/Paysend/addActive',array('tid'=>$tid))}" class="btn-all btn-all-del btn-allMargin">上一步</a>
+                                            <a  href="javascript:void(0);" onclick="savefun()" class="btn-all btn_primary btn-allMargin" id="save">保存</a>
+                                            
+                                        </li>
+                                        </ul>
+                                    </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="show1" class="fn dn">
+                            <div class="Gform l">
+                            	<ul id='activename'>
+                                    <li class="Gname"><span>*</span>活动名称</li>
+                                    <li class="Ginput">
+                                        <input readonly="readonly" type="text"   class="Gview-text" />
+                                    </li>
+                                 </ul>
+                                 <ul>
+                                 <li class="Ginput">
+                                 	<a href="{:U('Alipay/Paysend/addActive',array('tid'=>$tid))}" class="btn-all-del">上一步</a>
+                                    <a href="javascript:void(0);" onclick="savefun1()" class="btn-all" id="save">保存</a>
+                                 </li>
+                                 </ul>
+                             </div>
+                         </div>
+                    <div id="show2" class="fn dn">
+                            <div class="Gform l">
+                                <ul id='friendname'>
+                                    <li class="Gname"><span>*</span>朋友的券</li>
+                                    <li class="Ginput">
+                                        <input readonly="readonly" type="text"   class="Gview-text" />
+                                    </li>
+                                 </ul>
+                                 <ul>
+                                 <li class="Ginput">
+                                    <a href="{:U('Alipay/Paysend/addActive',array('tid'=>$tid))}" class="btn-all-del">上一步</a>
+                                    <a href="javascript:void(0);" onclick="savefun2()" class="btn-all">保存</a>
+                                 </li>
+                                 </ul>
+                             </div>
+                    </div>
+
+                     </div>
+                 </div>
+             </div>
+         </div>
+         <include file="./Home/Tpl/Public/Public_footer.html" />
+     </div>
+	<div class="service"></div>
+</body>
+</html>

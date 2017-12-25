@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>中奖名单批量导入</title>
+	<link href="__PUBLIC__/Css/style.css?v=__VR__" rel="stylesheet" type="text/css"/>
+    <link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" ></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" ></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+    <style>
+        textarea{
+            resize:none;
+        }
+    </style>
+</head>
+
+<body>
+<form action="{:U('import_submit')}" method="post" id="theform" enctype="multipart/form-data">
+	<input type="hidden" name="mid" value="{$mid}"/>
+	<div id="global-libs-content" class="relative" style="padding-top:0; margin-top:-1px; z-index:1">
+		<div id="globallibscontent" class="c_bd_t_d2">
+			<div class="num-con fn-clear">
+				<div class="global-input3">
+					<div id="msg" style="color:red;">该活动已批量导入{$num}条记录！</div>
+					<ul style="overflow: visible">
+						<li class="global-input3-name">文件：</li>
+						<li class="global-input3-input relative" style="overflow: visible">
+							<input name="log_img_show" type="text" id="log_img_show" class="textbox w100 validate[required]"/>
+							<input type="file" id="up_file" name="up_file" class="upload_file"
+								   onChange="$('#log_img_show').val($(this).val())" />
+							<a href="javascript:;" title="上传" class="btn-60 ml10">浏览</a>
+						</li>
+					</ul>
+					<ul>
+						<li class="global-input3-name">奖品：</li>
+						<li class="global-input3-input">
+							<select name="bid" id="bid">
+								<volist name="list" id="vo">
+									<option value="{$vo.id}">{$vo.batch_name}</option>
+								</volist>
+							</select>
+						</li>
+					</ul>
+					<ul>
+						<li class="global-input3-name">备注：</li>
+						<li class="global-input3-input">
+							<textarea name="remark" id="remark" cols="40" class="validate[maxSize[500]]" rows="5"></textarea>
+						</li>
+					</ul>
+					<ul>
+						<li class="global-input3-name">&nbsp;</li>
+						<li class="global-input3-input"><a href="javascript:void(0);" id="save" class="btn-110">确认导入</a>
+						</li>
+					</ul>
+
+					<ul>
+						<li class="global-input3-name">文件格式：</li>
+						<li class="global-input3-input">
+						请勿直接上传excel格式的文件 <br/>
+						1. 新建文本文件<br>
+						2. 一行一个手机号<br>
+						如文件名：import.txt<br>
+						内容如下：<br>
+						13800138000<br>
+						13800138001<br>
+						13800138002<br>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+</body>
+<script>
+	window._g = {
+		url_file_upload: "{:U('import_submit')}"
+	};
+	$(function () {
+		$('#save').click(function () {
+			if(!$("#theform").validationEngine('validate')){
+				return false;
+			}
+			dialog = art.dialog({title:false,fixed: true,lock:true,padding:0});
+			$("#theform").ajaxSubmit({
+				beforeSubmit:function(){
+				},
+				success:function(data){
+					dialog.close();
+					if(data.status == 0){
+						art.dialog(data.info);
+					}else{
+						var api = art.dialog.open.api;
+						art.dialog({
+							content:data.info,
+							ok:function(){
+								api.close();
+							}
+						});
+					}
+				},
+				dataType:'json'
+			});
+		});
+	});
+
+	//文件上传
+	function ajaxFileUpload(imgid, hiddenid, url) {
+		var loading = art.dialog({lock: true}).hide();
+		loading.show();
+		$('#log_img_show').val('');
+		alert(1);
+		return ;
+		$.ajaxFileUpload
+		({
+			url: url,
+			secureuri: false,
+			fileElementId: imgid,
+			dataType: 'json',
+			data: getFormData('#theform'),
+			success: function (data, status) {
+				loading.hide();
+				art.dialog(data.info);
+				if(data.status == 0){
+					var api = art.dialog.open.api;
+					api.close();
+				}
+			},
+			error: function (data, status, e) {
+				loading.hide();
+				art.dialog(e);
+			}
+		})
+
+		return false;
+	}
+</script>
+</html>

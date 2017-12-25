@@ -1,0 +1,375 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>微信公众号_营销渠道库_翼码旺财</title>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/main.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/layout.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/module.css?v=__VR__"/>
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__"/>
+        <link href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/msguser.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/msgsend.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+        <link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+        <js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+        <js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+        <script>
+
+                    function selectcallback(data){
+                    var cnts = $('.tab_panel .tab_content');
+                            $('.tab_text').removeClass('selected');
+                            $('.tab_appmsg').addClass('selected');
+                            $('#material_id').val(data);
+                            $('#reply_type').val(2);
+                            $.post('{:U('Weixin/WeixinResp/showMaterialById')}', {material_id:data}, function(data){$(cnts[0]).hide(); $(cnts[1]).show().html('').append(data); });
+                    }
+            $(function(){
+            $('#search-btn').click(function(){
+            $('#search-btn').attr('disabled', true);
+                    dialog = art.dialog({title:false, content:"<div class='msg-all-succeed'>正在查询...</div>", fixed: true, padding:0});
+                    var month = $('input[name="month"]:checked').val();
+                    var start_day = $("#start_day").val();
+                    var end_day = $("#end_day").val();
+                    var select_type = $("#select_type").val();
+                    
+                    var chk_value =[]; 
+$('input[name="horoscope_list[]"]:checked').each(function(){ 
+chk_value.push($(this).val()); 
+}); 
+                    
+                    var data = {
+                    month : month,
+                            start_day : start_day,
+                            end_day : end_day,
+                            select_type : select_type,
+                            horoscope_list : chk_value,
+                    };
+                    $.post("{:U('Df/Member/batch_send_count')}", data, function(data){
+                    if (data.status == 1){
+                    $('#count').html(data.info + '您已经筛选了 ' + data.data + ' 位粉丝 进行群发操作.');
+                            dialog.time(2).close();
+                    } else{
+                    $('#count').html(data.info);
+                            dialog.time(2).close();
+                    }
+
+                    }, 'json');
+            });
+                    //下拉列表
+                    $('#js_sendObj').click(function(){
+            $('.jsDropdownList').children(this).css("display", "block");
+                    $('.dropdown_menu').addClass("open");
+            });
+                    $(".frm_checkbox").live('change', function(){
+            $(this).closest(".frm_checkbox_label").toggleClass("selected");
+            });
+                    $(".js_reply").live('click', function(){
+            $(this).closest("li").find(".quick_reply_box").show();
+            });
+                    //选择图文回复-页面已有
+                    $(".tab_appmsg").click(function(){
+            art.dialog.open('{:U('Weixin/WeixinResp/selectImgTxt', array('callback'=>'selectcallback'))}', {
+            lock: true,
+                    background: '#000', // 背景色
+                    opacity: 0.5, // 透明度
+                    title:"选择多图文信息",
+                    width:740,
+                    height: '80%'
+            });
+            });
+                    //选择文字回复-页面已有
+                    $('.tab_text').click(function(){
+            $(this).addClass('selected');
+                    $('.tab_appmsg').removeClass('selected');
+                    $('.tab_panel .tab_content:eq(0)').show();
+                    $('.tab_panel .tab_content:eq(1)').hide();
+                    $('#reply_type').val(0);
+            });
+                    $("#theform").submit(function(){
+
+            var reply_type = $('#reply_type').val();
+                    if (reply_type == '0'){
+            var cnt_obj = $('#reply_content_0');
+                    //处理换行
+                    cnt_obj.html($.trim(cnt_obj.html().replace(/<br\/?[^>]*>/g, "\n")));
+                    var reply_text = cnt_obj.html();
+                    check_lenght(600, 'js_editorTip', document.getElementById('reply_content_0'));
+                    if (reply_text.length == 0){
+            alert('请输入回复内容！');
+                    return false;
+            }
+            if (reply_text.length > 600){
+            alert('回复内容超长！');
+                    return false;
+            }
+
+            $('#reply_text').val(reply_text);
+            }
+            else if (reply_type == '2'){
+            var material_id = $('#material_id').val();
+                    if (material_id == ''){
+            alert('请选择图文内容！');
+                    return false;
+            }
+            }
+            else{
+            alert('参数错误，请刷新页面重试！');
+                    return false;
+            }
+
+            if (!confirm('是否确认发送！确认之后无法取消！'))
+                    return false;
+                    var dialog;
+                    $("#theform").ajaxSubmit({
+            beforeSubmit:function(){
+            $('#js_submit').attr('disabled', true);
+                    dialog = art.dialog({title:false, content:"<div class='msg-all-succeed'>正在提交...</div>", fixed: true, padding:0});
+            },
+                    success:function(data){
+                    $('#js_submit').attr('disabled', false);
+                            if (data.status == '1'){
+                    dialog.time(2).content("<div class='msg-all-succeed'>" + data.info + "</div>");
+                            //                    setTimeout(function(){dialog.close();},1000);
+                            //location.href="{:U('Weixin/Weixin/batch_send_his')}";
+                            return false;
+                    } else{
+                    dialog.time(3).content("<div class='msg-all-error'>" + data.info + "</div>");
+                    }
+                    },
+                    dataType:'json'
+            });
+                    return false;
+            });
+            });</script>
+    </head>
+    <body>
+        <form action="{:U('Df/Member/batch_send')}" method="post" id="theform">
+            <input type="hidden" name="reply_type" id="reply_type" value="0">
+                <input type="hidden" name="reply_text" id="reply_text" value="">
+                    <input type="hidden" name="material_id" id="material_id" value="">
+                        <div id="wrapper">
+                            <!--开始引入头部-->
+                            <include file="./Home/Tpl/Public/Public_header.html" />
+                            <div id="container" class="bgfff">
+                                <div id="main" class="rel">
+                                    <div class="sidenav">
+                                        <!--开始引入左菜单-->
+                                        <include file="Member/menu" leftmenuid="xxts"/>
+                                    </div>
+
+                                    <div class="subcon">
+                                        <div class="Wcanal-tab">
+
+
+                                            <!--<div class="extra_info mini_tips icon_after">
+                                            <a href="" target="_blank">群发消息规则说明</a><i class="icon_mini_tips document_link"></i>    
+                                            </div>
+                                            
+                                            <div class="Wcanal-tab-list">
+                                            <div class="highlight_box">
+                                                <p class="desc">为保障用户体验，微信公众平台严禁恶意营销以及诱导分享朋友圈，严禁发布色情低俗、暴力血腥、政治谣言等各类违反法律法规及相关政策规定d 信息。一旦发现，我们将严厉打击和处理。</p>
+                                            </div>-->
+
+                                            <!--微信消息-->
+                                            <div class="Wcanal-tab">
+                                                <div class="Wcanal-tab-title fn">
+                                                    <p class="Wcanal-tab-hover"><a href="#">生日信息推送</a></p>
+                                                    <p><a href="{:U('Df/Member/batch_send_his')}">发送历史</a></p>
+                                                </div>
+                                                <div class="Wcanal-tab-list">
+                                                    <div class="form-search mt10 fn">
+                                                        <div id="sidebar-tab"> 
+                                                            <div id="tab-title"> 
+                                                                <h3><span class="selected" onclick="select_by(0);">按生日</span><span onclick="select_by(1);">按星座</span></h3> 
+                                                            </div>
+                                                            <input type="hidden" name="select_type" id="select_type" value="0"/>
+                                                            <div id="tab-content"> 
+                                                                <ul>
+                                                                    <li>
+                                                                        <fieldset>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="1" name="month" checked="checked"/>一月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="2" name="month"/>二月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="3" name="month"/>三月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="4" name="month"/>四月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="5" name="month"/>五月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="6" name="month"/>六月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="7" name="month"/>七月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="8" name="month"/>八月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="9" name="month"/>九月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="10" name="month"/>十月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="11" name="month"/>十一月
+                                                                            </p>
+                                                                            <p class="ml5">
+                                                                                <input type="radio"  value="12" name="month"/>十二月
+                                                                            </p>
+                                                                            <div class="cl pt10"></div>
+                                                                            <p>生日：</p>
+                                                                            <p class="ml20">
+                                                                                <select class="selectbox w100" name="start_day" id="start_day">
+                                                                                    <php>for($key=1;$key<=31;$key++){</php>
+                                                                                    <option <if condition="$post['start_day'] eq $key ">selected="selected"</if> value="{$key}" >{$key}日</option>
+                                                                                    <php>}</php>
+
+                                                                                </select> 到  <select class="selectbox w100" name="end_day" id="end_day">
+                                                                                    <php>for($key=1;$key<=31;$key++){</php>
+                                                                                    <option <if condition="$post['end_day'] eq $key ">selected="selected"</if> value="{$key}" >{$key}日</option>
+                                                                                    <php>}</php>
+
+                                                                                </select>
+                                                                            </p>
+                                                                        </fieldset>
+                                                                    </li>
+                                                                </ul> 
+                                                                <ul class="hide">
+                                                                    <li>
+                                                                        <volist name="horoscope" id="vo">
+                                                                            <p><input name="horoscope_list[]" type="checkbox" value="{$key}" <php>if(in_array(strval($key),$post['horoscope_list'])){</php>checked="checked"<php>}</php> />{$vo}</p>
+                                                                        </volist>
+                                                                    </li>
+                                                                </ul>
+                                                            </div> 
+
+                                                        </div> 
+
+                                                        <p class="btn btn_input btn_primary" style="padding:0 22px 0 0; float:right; margin-right:20px; margin-top:15px;"><a id="search-btn">查询</a></p>
+                                                        <div style="display:block; float:left; margin-top:15px"><p class="mass_send_tips" id="count"></p></div>
+                                                    </div>
+
+
+                                                </div>
+                                                <div class="main_bd mt10">
+                                                    <div id="msgSender">
+                                                        <div class="msg_sender" id="js_msgSender" style="width:820px;">
+                                                            <div class="msg_tab">
+                                                                <ul class="tab_navs" style="margin-top:0px;">
+                                                                    <li class="tab_nav tab_text width5 selected" data-type="1" data-tab=".js_textArea">
+                                                                        <a href="javascript:void(0);"><i class="icon_msg_sender"></i>文字</a>
+                                                                    </li>
+                                                                    <li class="tab_nav tab_appmsg width5 no_extra" data-type="10" data-tab=".js_appmsgArea">
+                                                                        <a href="javascript:void(0);"><i class="icon_msg_sender"></i>选择图文消息</a>
+                                                                    </li>
+                                                                </ul>
+                                                                <div class="tab_panel">
+                                                                    <!--文字-->
+                                                                    <div class="tab_content">
+                                                                        <div class="js_textArea inner no_extra">
+                                                                            <div class="emotion_editor">
+                                                                                <div class="edit_area js_editorArea" id="reply_content_0" contenteditable="true" style="overflow-y: auto; overflow-x: hidden;" onkeydown="check_lenght_onkeydown(this)" onmouseover="pasteHandler()" onkeyup="check_lenght_weixin(600, 'js_editorTip', this);">
+                                                                                </div>
+                                                                                <div class="editor_toolbar">       
+                                                                                    <p class="editor_tip js_editorTip" id="js_editorTip">还可以输入<em>600</em>个字</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <!--图文-->
+                                                                    <div class="tab_content">
+                                                                        <div class="msg-item-wrapper" style="margin:0 auto;" data-material-id="726">
+
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="tool_area">
+
+                                                            <!--<div class="warn_tips">绑定腾讯微博后，可以同步群发到微博，现在<a href="">绑定</a></div>-->
+                                                            <div class="tool_bar" style="margin-top:0"><!--<p class="mass_send_tips"><i>●</i>你本月还能群发 <em id="leftNum">{$mass_premonth - $sent_num}</em> 条消息</p>-->
+
+                                                                <div id="verifycode"></div>
+
+                                                                <span class="btn btn_input btn_primary">
+                                                                    <button id="js_submit">群发</button>
+                                                                </span>
+                                                                <div class="bubbleTips bubble_left warn">
+                                                                    <div class="bubbleTips_inner">
+                                                                        <php>if($type>2){</php>
+                                                                        <p class="mass_send_tips">你本月还能群发 <em id="leftNum">{$mass_premonth - $sent_num}</em> 条消息</p>
+                                                                        <php>}if($type<=2){</php>
+                                                                        <p class="mass_send_tips">你今天还能群发 <em id="leftNum">{$count}</em> 条消息</p>
+                                                                        <php>}</php>
+                                                                    </div>
+                                                                    <i class="bubbleTips_arrow out"></i>
+                                                                    <i class="bubbleTips_arrow in"></i>
+                                                                </div>
+
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--微信消息-->
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <!--开始引入底部-->
+                            <include file="./Home/Tpl/Public/Public_footer.html" />
+                        </div>
+                        </form>
+                        <div class="service"></div>
+                        </body>
+                        </html>
+                        <script>
+                                    $(function(){
+                                    CityCode({
+                                    province:$("#province"), //省
+                                            city:$("#city"), //市
+                                            town:$("#town"), //区
+                                            selected:"", //默认选中的省市区代号
+                                            url:"index.php?g=Weixin&m=AjaxCity&a=index"//数据查询页
+                                    });
+                                    })
+                                    function select_by(v)
+                                    {
+                                        $('#select_type').val(v);
+                                    }
+                        </script>
+
+                        <style>
+                            #sidebar-tab{border:1px solid #ccf;margin-bottom:1.5em;overflow:hidden;} 
+                            #tab-title h3{color:#666;font-size:15px;font-weight:400;} 
+                            #tab-title .selected{color:#356aa0;border-bottom:0px;} /*标题被选中时的样式*/ 
+                            #tab-title span{padding:5px 9px 5px 10px;border:1px solid #ccf;border-right:0px;margin-left:-1px;cursor:pointer;} 
+                            #tab-content .hide{display:none;} /*默认让第一块内容显示，其余隐藏*/ 
+                            #tab-content ul{padding:5px 10px;overflow:hidden;} 
+                            #tab-content ul li{padding-top:5px;height:auto;} 
+                        </style>
+                        <script language="javascript">
+                                    $('#tab-title span').click(function(){
+                            $(this).addClass("selected").siblings().removeClass(); //removeClass就是删除当前其他类；只有当前对象有addClass("selected")；siblings()意思就是当前对象的同级元素，removeClass就是删除； 
+                                    $("#tab-content > ul").hide().eq($('#tab-title span').index(this)).show();
+                            });
+                        </script> 

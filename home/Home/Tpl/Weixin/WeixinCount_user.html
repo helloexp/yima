@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>用户统计_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msgdata.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/WX2.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?skin=blue"></script>
+
+<script type="text/javascript" src="__PUBLIC__/Js/highcharts.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.highchartTable.js?v=__VR__"></script>
+
+<script>
+$(document).ready(function() {
+	$("table.J_highchart")
+	.bind('highchartTable.beforeRender', function(event, highChartConfig) {
+		highChartConfig.xAxis.minTickInterval=2;
+	})
+  .highchartTable();
+  //时间控件
+  $("#b_trans_date").bind('click',function(){
+	WdatePicker({ maxDate:'#F{ $dp.$D(\'e_trans_date\'); }',minDate:'#F{ $dp.$D(\'e_trans_date\',{d:-30}); }',skin:"whyGreen"});
+  });
+  $("#e_trans_date").bind('click',function(){
+	WdatePicker({skin:"whyGreen",maxDate:'%y-%M-{%d-1}',minDate:'#F{ $dp.$D(\'b_trans_date\'); }'});
+  });
+});
+function msgshow(id){
+	var chart =$(".J_container").highcharts();
+	var series = chart.series;
+	for(var i=0;i<series.length;i++){
+		series[i].hide();
+	}
+	series[id-1].show();
+
+	$("#div_item_tabs").find("a").removeClass("current");
+	$("#tab_"+id).addClass("current")
+}
+</script>
+</head>
+<body>
+	<div id="wrapper" class="bgfff">
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="gongzhonghao"/>
+    	<div id="container" >
+            <div id="main" class="rel">
+                <!--<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>&gt;</p>
+                            <p>微信助手</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="sidenav">
+                   <!--开始引入左菜单-->
+					<include file="LabelAdmin/Batch/WleftMenu" leftmenuid="yhfx"/>
+                </div>
+
+				<div class="subcon">
+                    <div class="main-name fn">
+                        <h4>
+                            <p class="dib">用户分析</p>
+                        </h4>
+                    </div>
+                    <div class="mta_wechat">
+                    	<div class="mod_basic">
+                            <div class="title">
+                                <h3>昨日关键指标</h3>
+                            </div>
+                            <div class="content">
+                                <!-- 趋势格控件 开始 -->
+                                <table class="ui_trendgrid ui_trendgrid_4" id="key_index">
+                                	<tr>
+                                    	<td class="first">
+                                        	<div class="ui_trendgrid_item">
+                                            	<div class="ui_trendgrid_chart" id="key_index_chart_NewUser"></div>
+                                                <dl>
+                                                	<dt><b>新关注人数</b></dt>
+                                                    <dd class="ui_trendgrid_number"><strong>{$keyFollowData.count}</strong><em class="ui_trendgrid_unit"></em></dd>
+                                                    <dd>日<eq name="keyFollowData.day_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyFollowData['day_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyFollowData.day_rate|abs}%</eq></dd>
+                                                    <dd>周<eq name="keyFollowData.week_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyFollowData['week_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyFollowData.week_rate|abs}%</eq></dd></dd>
+                                                    <dd>月<eq name="keyFollowData.month_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyFollowData['month_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyFollowData.month_rate|abs}%</eq></dd></dd>
+                                                 </dl>
+                                             </div>
+                                         </td>
+                                         <td>
+                                         	<div class="ui_trendgrid_item">
+                                            	<div class="ui_trendgrid_chart" id="key_index_chart_CancelUser"></div>
+                                                <dl>
+                                                	<dt><b>取消关注人数</b></dt>
+                                                    <dd class="ui_trendgrid_number"><strong>{$keyCancelData.count}</strong><em class="ui_trendgrid_unit"></em></dd>
+                                                    <dd>日<eq name="keyCancelData.day_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyCancelData['day_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyCancelData.day_rate|abs}%</eq></dd>
+                                                    <dd>周<eq name="keyCancelData.week_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyCancelData['week_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyCancelData.week_rate|abs}%</eq></dd></dd>
+                                                    <dd>月<eq name="keyCancelData.month_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyCancelData['month_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyCancelData.month_rate|abs}%</eq></dd></dd>
+                                                </dl>
+                                            </div>
+                                        </td>
+                                        <td>
+                                        	<div class="ui_trendgrid_item">
+                                            	<div class="ui_trendgrid_chart" id="key_index_chart_NetUser"></div>
+                                                <dl>
+                                                	<dt><b>净增关注人数</b></dt>
+                                                    <dd class="ui_trendgrid_number"><strong>{$keyRemainData.count}</strong><em class="ui_trendgrid_unit"></em></dd>
+                                                    <dd>日<eq name="keyRemainData.day_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyRemainData['day_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyRemainData.day_rate|abs}%</eq></dd>
+                                                    <dd>周<eq name="keyRemainData.week_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyRemainData['week_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyRemainData.week_rate|abs}%</eq></dd></dd>
+                                                    <dd>月<eq name="keyRemainData.month_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyRemainData['month_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyRemainData.month_rate|abs}%</eq></dd></dd>
+                                                </dl>
+                                            </div>
+                                        </td>
+                                        <td class="last">
+                                        	<div class="ui_trendgrid_item">
+                                            	<div class="ui_trendgrid_chart" id="key_index_chart_CumulateUser"></div>
+                                                <dl>
+                                                	<dt><b>累积关注人数</b></dt>
+                                                    <dd class="ui_trendgrid_number"><strong>{$keyTotalData.count}</strong><em class="ui_trendgrid_unit"></em></dd>
+                                                    <dd>日<eq name="keyTotalData.day_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyTotalData['day_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyTotalData.day_rate|abs}%</eq></dd>
+                                                    <dd>周<eq name="keyTotalData.week_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyTotalData['week_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyTotalData.week_rate|abs}%</eq></dd></dd>
+                                                    <dd>月<eq name="keyTotalData.month_rate" value="--">&nbsp;&nbsp;&nbsp;--<else/><i class="{:($keyTotalData['month_rate'] >=0 ?'icon_up':'icon_down')}" ></i>{$keyTotalData.month_rate|abs}%</eq></dd></dd>
+                                                </dl>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <!-- 趋势格控件 结束 -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mod_basic">
+                        <!--标题栏目:start-->
+                        <div class="title">
+                            <h3>关键指标详解</h3>
+                            <div class="tabs" id="div_item_tabs">
+                            	<a class="first current" id="tab_1" href="javascript:;" onclick="msgshow(1)">新增人数</a>
+                                <a id="tab_2" href="javascript:;" onclick="msgshow(2)">取消关注人数</a>
+                                <a id="tab_3" href="javascript:;" onclick="msgshow(3)">净增人数</a>
+                                <a class="last" id="tab_4" href="javascript:;" onclick="msgshow(4)">累积人数</a>
+                            </div>
+                            <div class="sub_menu">
+                                <div class="group">
+                                    <div class="form-search mt10 fn">
+									 <form method="get" action="">
+									  <input type="hidden" name="g" value="{$Think.GROUP_NAME}">
+									  <input type="hidden" name="m" value="{$Think.MODULE_NAME}">
+									  <input type="hidden" name="a" value="{$Think.ACTION_NAME}">
+                                        <p>请选择日期区间:从</p>
+                                        <p class="ml5"><input name="b_trans_date" type="text" value="{$_GET.b_trans_date}" class="textbox w100 Wdate" id="b_trans_date" autocomplete="off" maxLength="8"></p>
+                                        <p class="mlr5">到</p>
+                                        <p><input name="e_trans_date" type="text" value="{$_GET.e_trans_date}" class="textbox w100 Wdate" id="e_trans_date" autocomplete="off" maxLength="8"></p>
+                                        <p class="ml5"><button type="submit">查询</button></p>
+									 </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--标题栏目:end-->
+                        <div class="content msgtab_con" id="tab_1_con">
+                            <h4 class="sub_title">趋势图</h4>
+                            <div class="sub_content fn">
+                    			<div class="J_container"></div>
+                            </div>
+                        </div>
+                       
+						<div class="content msgtab_con" id="tab_4_con">
+                            <h4 class="sub_title">详细数据</h4>
+                            <div class="sub_content fn">
+                    		 <table cellpadding="0" cellspacing="0" class="chartData-table  J_highchart" data-graph-container=".J_container" data-graph-type="area"  data-graph-yaxis-1-title-text="" >
+							  <thead> 
+								  <tr>
+									  <th>时间</th>
+									  <th data-graph-hidden >新关注人数</th>
+									  <th data-graph-hidden="1">取消注人数</th>
+									  <th data-graph-hidden="1">净增关注人数</th>
+									  <th data-graph-hidden="1">累积关注人数</th>
+								  </tr>
+							   </thead>
+							   <tbody>
+							    <php>
+								if(is_string($tableData)){
+									$errMsg = $tableData;
+									$tableData = array();
+									$empty = '<tr><td colspan="5">'.$errMsg.'</td></tr>';
+								}
+								</php>
+							    <volist name="tableData" id="vo" empty="$empty">
+								  <tr>
+									  <td>{:dateformat($vo['ref_date'].'000000','Y-m-d')}</td>
+									  <td>{$vo.new_user}</td>
+									  <td>{$vo.cancel_user}</td>
+									  <td>{$vo.remain_num}</td>
+									  <td>{$vo.cumulate_user}</td>
+								  </tr>
+								</volist>
+							  </tbody>
+							</table>
+                            </div>
+                        </div> 
+                    </div>
+                    
+				</div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+</html>

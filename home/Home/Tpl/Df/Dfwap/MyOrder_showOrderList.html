@@ -1,0 +1,140 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>订单凭证中心</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) {
+	
+	$(".showrece").click(function(){
+		var msg=$(this).find("div").html();
+		msgPop(msg);
+	})
+});
+$(window).resize(function(e) {	
+	flash(".flash-img",1);//幻灯尺寸
+});
+</script>
+<style>
+.gift_icon{ background:url(__PUBLIC__/Label/Image/gift/gift_icon.png) no-repeat; width:29px; height:17px; background-size:100% auto; display: block; position: relative; top:5px;left:65px;}
+</style>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="fn">
+            <div class="back"><i></i></div>
+			<neq name="wx_flag" value="1">
+			  <div class="loginout"><a href="index.php?g=Df&m=DFStore&a=logout&node_id=<?php echo session('node_id');?>">退出</a></div>
+			  </neq>
+            <div class="title">个人中心</div>
+        </div>
+        <div id="main">
+            <div class="myOrder">
+				<?php
+					$hasqmyx=0;
+				?>
+            	<ul class="fn <?php if($hasqmyx){?>list4<?php }else{ ?>list3<?php }?>">
+                	<li class="hover"><a href="index.php?g=Df&m=DFStore&a=showOrderList&node_id=<?php echo session('node_id');?>">我的订单</a></li>
+                    <li><a href="index.php?g=Df&m=DFStore&a=code&node_id=<?php echo session('node_id');?>">我的凭证</a></li>
+                    <li><a href="index.php?g=Df&m=DfWap&a=Dfmember_card">个人信息</a></li>
+                </ul>
+            </div>
+            <div id="mainCon" class="mainCon fn m0">
+                <div class="myOrderList">
+                    <?php
+					if(!empty($orderList)){
+						foreach($orderList as $k=>$val){
+
+							//判断订单是否有下架商品
+							$downcount=0;
+					
+					?>
+					<dl>
+                    	<dt>订单号：<?php echo $val['order_id'];?><span <?php if($val['pay_status']==1){?>class="erro"<?php }?>></span><p>订单时间：<?php echo dateformat($val['add_time']);?></p></dt>
+                       
+						<?php
+							//查询子商品
+							if($val['order_type']=='2'){
+								$where = array(
+									'g.order_id' => $val['order_id'],
+									'o.node_id'=>$node_id,
+								);
+								$goodsList = M()->table('tfb_df_pointshop_order_info_ex g')
+													->join("tfb_df_pointshop_order_info o ON o.order_id=g.order_id")
+													->join("tbatch_info t ON t.id=g.b_id")
+													->join("tgoods_info i ON i.goods_id=t.goods_id")
+													->where($where)                          
+													->select();
+								//echo  M()->table('ttg_order_info_ex g')->getLastSql();
+							}
+							elseif($val['order_type']=='0'){
+								$goodsList = M()->table('tfb_df_pointshop_order_info t')
+													->join("tbatch_info b ON b.m_id=t.batch_no")
+													->field("b.batch_img AS goods_image,b.batch_amt AS price,t.buy_num AS goods_num,b.batch_name AS b_name")
+													->where(array('t.order_id'=>$val['order_id']))                          
+													->select();
+							}
+						
+						?>
+						<?php
+						if(!empty($goodsList)){
+							
+
+							foreach($goodsList as $t=>$tal){
+							
+								//如果是小店订单判断batch_info status是否正常
+								if($val['order_type']=='2'){
+									$downinfo=M('tbatch_info')->where("id='".$tal['b_id']."'")->find();
+									
+									if($downinfo['status']=='1'){
+										$downcount++;
+									}
+									
+								
+								}
+						
+						
+						?>
+						<dd>
+                        	<img src="__UPLOAD__/{$tal['goods_image']}" />
+                        	<p><span><b><?php echo $tal['price']?>积分</b><br /><i>+</i><?php echo $tal['goods_num'];?></span>
+                                <?php echo $tal['b_name'];?>
+							<?php if($val['is_gift'] == '1'){ ?>
+							<i class="gift_icon"></i>
+							<?php } ?>
+							</p>
+
+                        </dd>
+
+						<?php
+							}
+						}
+						
+						?>
+                      
+                        <dd>
+                        	<h4>共<?php echo $val['buy_num'];?>件商品&nbsp;&nbsp;&nbsp;&nbsp;合计：<?php echo $val['order_amt']?>积分</h4>
+                        </dd>
+                    </dl>
+					<?php
+						}
+					}
+					?>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>

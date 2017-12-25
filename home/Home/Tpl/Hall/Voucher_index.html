@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>代金券管理_代金券分销助手_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"/>
+<js href="__PUBLIC__/Js/global.js?v=__VR__"/>
+<js href="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"/>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Mypartner.js?v=__VR__"></script>
+
+<style type="text/css">
+    .aui_content input{
+        padding: 0px 0;
+        height: 28px;
+        border: 1px solid #97928a;
+        line-height: 28px;
+        background: #fff;
+        width: 50px;
+        font-size: 18px;
+    }
+</style>
+<script>
+$(function(){
+	$("#search").click(function(){
+		$("form").submit();
+	});
+	$("#down").click(function(){
+		$("form").attr("action","{:U('Voucher/export')}").submit();
+	});
+	
+	/* $(".bution").click(function(){
+		 var typeid=$(this).attr('content');
+		 alert(typeid);
+		 if(typeid == '2'){	 
+			 alert('123');
+			 $(this).attr("href","javascript:void(0);");
+		 }else{
+			 
+			 $(this).attr("href","{:U('Hall/Voucher/publish?goods_id='.$vo['goods_id'])}");
+		 }
+		  
+	 }); */
+	$(".bution").click(function(){
+		var staval=$(this).attr('title');
+		var abc=$(this).attr('abc');
+		if(staval=='2'){
+			art.dialog({
+				 title:"提示",
+				 content:"此代金券已过期，不能进行分销！",
+				 width:300,
+				 height:100,
+				 lock:true,
+				 ok:true,
+				 okVal:"取消"
+			 })
+		}else{
+			$(this).attr("href","{:U('Hall/Voucher/publish')}&goods_id="+abc);
+		}
+	});  
+})
+
+
+
+function addStorageNum(id, name, obj){
+    art.dialog({
+        follow: obj,
+        title:'补充库存',
+        content: '请输入代金券“'+name+'”增加的库存量<br/> <input id="addNum" type="text" class="textbox" style="width:100px;" value="1" />',
+        id: 'art_addnum',
+        ok:function(){
+            var addNum = $('#addNum').val();
+            if(!/^[1-9]{1}[0-9]{0,7}$/.test(addNum)){
+                alert('数量格式错误！区间为1至99999999');
+                return false;
+            }
+            $.post('{:U('addStorageNum')}', {id:id, addNum:addNum}, function(resp){
+                alert(resp.info);
+                //库存添加成功
+                if(resp.status == 1){
+                    reload();
+                }
+            }, 'json');
+
+            return false;
+        },
+        cancel: true,
+        lock:true
+    }); 
+/*     art.dialog.prompt('请输入代金券“'+name+'”增加的库存量', function (val) {
+        alert(val+':'+id);
+        $.post('{:U('addStorageNum')}', {id:id, addNum:val}, function(resp){
+            alert(resp.info);
+            //库存添加成功
+            if(resp.status == 1){
+                reload();
+            }
+        }, 'json');
+    }, '0'); */
+}
+</script>
+</head>
+<body>
+    <div id="wrapper" class="bgeee">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div id="container" class="bgfff">
+            <div id="main" class="rel">
+                <div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>></p>
+                            <p><a href="{:U('Hall/Mypartner/index')}">代金券分销助手</a></p>
+                            <p>></p>
+							<p>我的代金券</p>
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidenav">
+                    <!--开始载入左菜单--> 
+                    <include file="Hall/Mypartner/left" leftmenuid="djqgl"/>
+                </div>
+            <div class="subcon fn">
+                    <div class="Wcanal-tab">
+                    <div class="Wcanal-tab-title fn"> 
+                            <h4 class="bd-b-565656 fn">
+                                <a href="{:U('Hall/Voucher/addNumGoods')}" class="mem-updatego r w110">我要创建代金券</a> 
+                                我的代金券
+                            </h4>
+                        </div>
+                    	
+                        <div class="Wcanal-tab-list">
+                             <div class="form-search fn">
+                                <form method="post" action="{:U('Voucher/index')}">
+<!--                                     <p>类&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;型</p>
+                                    <p>
+                                        <select name="batch_class" id="select" class="selectbox" >
+                                            <option value="" class="">全部</option>
+                                            
+                                            <volist name="batchClass" id="vo">
+                                            <option value="{$key}" class="" <if condition="strval($key) heq $post['batch_class']">selected="selected"</if>>{$vo}</option>
+                                            </volist>
+                                            
+                                        </select>
+                                    </p>
+ -->                                <p class="ml10">创建日期</p><p><input name="badd_time" type="text" value="{$post.badd_time}"  onClick="WdatePicker()" class="textbox w100"/></p><p>-</p><p><input name="eadd_time" type="text"  onClick="WdatePicker()" value="{$post.eadd_time}" class="textbox w100"/></p>
+                                    <p class="ml20">状态</p>
+                                    <p>
+                                        <select name="status" id="select" class="selectbox">
+                                        <option value="">全部</option>
+                                        <volist name="statusClass" id="vo">
+                                        <option value="{$key}" class="" <if condition="strval($key) heq $post['status']">selected="selected"</if>>{$vo}</option>
+                                        </volist>
+                                        </select>
+                                    </p>
+                                    <p class="ml20">代金券名称</p><p><input name="goodsname" type="text" value="{$post.goodsname}" class="textbox w100"/></p>
+                                    
+                                    <a href="javascript:void(0);" class="btn-all w90" id="search">查询</a>
+                                </form>
+                            </div>
+                            <div class="fn mt10">
+                                <table cellpadding="0" cellspacing="0" class="W-table">
+                                    <tr>
+                                        <th>代金券名称</th><th>所属商户</th><th>创建时间</th><th>总库存</th><th>剩余库存</th><th>有效期</th><th>状态</th><th>操作</th>
+                                    <if condition="$list"> 
+                                    <volist name="list" id="vo" >
+                                    <tr>
+                                        <td>{$vo.goods_name}</td>
+                                        <td><?php if($vo['node_name']!=''){echo $vo['node_name']; }else{ echo $nodename; } ?></td>
+                                        <td>{$vo.add_time|dateformat=###,'Y-m-d'}</td>
+                                        <td><?php if($vo['storage_type']==0){echo "不限";}else{ echo $vo['storage_num'];} ?></td>
+                                        <td><?php if($vo['remain_num']==-1){echo "不限";}else{ echo $vo['remain_num'];} ?></td>
+                                        <td>{$vo.begin_time|dateformat=###,'Y-m-d'}<br/>{$vo.end_time|dateformat=###,'Y-m-d'}</td>
+                                        <td><?php if($vo['status']==0){ echo "正常";}elseif($vo['status']==1){ echo "停发";}else{ echo "过期";} ?></td>
+                                        <td>
+                                            <?php if($vo['status']==0 && $vo['source']!=4){ ?>
+                                                <a href="javascript:void(0);" onclick="art.dialog.open('{:U('Hall/Voucher/voucherEdit?goods_id='.$vo['goods_id'])}',{width: 900, height: 600,title:'代金券编辑',lock: true})">编辑</a>
+                                            <?php } ?>
+                                            <a href="{:U('Voucher/voucherDetail?goods_id='.$vo['goods_id'])}">详情</a><br/>
+                                            <?php if($vo['source']!=4 && $vo['storage_type']==1 && $vo['end_time']>date('YmdHis',time())){ ?>
+                                                <a href="javascript:;" onclick="addStorageNum('{$vo.id}', '{$vo.goods_name}', this)">补库存</a> 
+                                            <?php } ?>
+                                            <?php if($vo['source']!=4){ ?>
+                                             <a href="javascript:void(0);" class="bution" title="{$vo['status']}" abc="{$vo.goods_id}">选择分销商</a>
+                                        	<?php } ?>
+                                        </td>
+                                    </tr>									
+                                    </volist>
+                                </table>
+                                <div class="page">{$page}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </div>
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+    <div class="service"></div>
+</body>
+
+
+</html>

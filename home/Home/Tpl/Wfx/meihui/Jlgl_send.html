@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>分销管理_美惠商城</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Waccount.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/FbMeihui.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wcanal.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/dtree/dtree.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js" ></script>
+<script>
+function jsDetails(id){
+    art.dialog.open("{:U('Wfx/Jlgl/printDetails')}&traceMonth="+id,{
+        title:"查看明细",
+        width:"800px",
+        height:'400px',
+        resize:true
+    });
+}
+function jsDown(id){
+    var url = "{:U('Wfx/Jlgl/downDetail')}&traceMonth="+id;
+    window.location.href=url;
+}
+function sendConfirm(id){
+    var title="您确认要发放奖励吗？";
+    art.dialog.confirm(title,function(){
+        $.post("{:U('Wfx/Jlgl/confirmSend')}",{"traceMonth":id},function(data){
+            if(data.status==1){
+                art.dialog({title:false,content:"<div class='msg-all-succeed'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+                window.location.reload();
+            }else{
+                art.dialog({title:false,content:"<div class='msg-all-error'>"+data.info+"</div>",fixed: true,padding:0,time:2});
+            }
+        },"json");
+    });
+}
+</script>
+</head>
+<body>
+    <div id="wrapper">
+    	<include file="./Home/Tpl/Public/Public_header.html" />  
+        <!--开始引入头部菜单-->                   
+        <div class="shopNav">
+        <include file="./Home/Tpl/Wfx/topMenu.html" topmenuid="wfxjl"/>
+        </div>
+        <div id="container" class="bgfff" style="margin-top:10px;">
+            <div id="main" class="rel">
+                <div class="new_sidenav">
+                    <include file="./Home/Tpl/Wfx/meihui/Meihui_sidenav.html" leftmenuid="mdqd"/>
+                </div>
+                <div class="subcon fn">
+                	<div class="main-name fn">
+                    <h4>奖励发放</h4>
+                    </div>
+                    <table cellpadding="0" cellspacing="0" class="W-table">
+                        <tbody>
+                        <tr class="th">
+                            <th width="15%">时间</th>
+                            <th width="15%">合计金额（元）</th>
+                            <th width="20%">发放状态</th>
+                            <th width="20%">操作</th>
+                        </tr>
+                        <if condition="!empty($list)">
+                            <volist name="list" id="vo">
+                            <tr class="hover">
+                                <td>{$vo.trace_month1}</td>
+                                <td>{$vo.score}</td>
+                                <td>{$user_get_flag[$vo['send_flag']]}</td>
+                                <td><a href="javascript:void(0);" data-id="1" class="js_details" onclick="jsDetails({$vo.trace_month})">查看明细</a>
+                                <a href="javascript:void(0);" data-id="1" class="js_download" onclick="jsDown({$vo.trace_month})">下载报表</a>
+                                <php>if($vo['send_flag']!=1){</php>
+                                <a href="javascript:void(0);" data-id="1" class="js_confirm" onclick="sendConfirm({$vo.trace_month});">确认发放</a></td>
+                                <php>}else{</php>
+                                <a href="javascript:void(0);">已发放</a></td>
+                                <php>}</php>
+                            </tr>
+                            </volist>
+                        <else />
+                            <tr>
+                                <td colspan="4"><div class="nonedata"></div></td>
+                            </tr>
+                        </if>
+                    	</tbody>
+                    </table>
+                    <div class="page">{$Page}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="service"></div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+</body>
+</html>

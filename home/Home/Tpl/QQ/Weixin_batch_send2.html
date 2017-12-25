@@ -1,0 +1,387 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>微信公众号_营销渠道库_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wcanal.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msg.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msguser.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/msgsend.css?v=__VR__" rel="stylesheet" type="text/css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<link href="__PUBLIC__/Css/Wqq.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/msg.js?v=__VR__"/>
+
+<script>
+
+function selectcallback(data){
+    var cnts = $('.tab_panel .tab_content');
+    $('.tab_text').removeClass('selected');
+    $('.tab_appmsg').addClass('selected');
+    $('#material_id').val(data);
+    $('#reply_type').val(2);
+    $.post('{:U('QQ/WeixinResp/showMaterialById')}', {material_id:data}, function(data){$(cnts[0]).hide();$(cnts[1]).show().html('').append(data);});
+}
+
+
+
+$(function(){
+	$('#search-btn').click(function(){
+        $('#search-btn').attr('disabled', true);
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在查询...</div>",fixed: true,padding:0});
+
+        var group_id = $('[name="group_id"]').val();
+        var sex = $('[name="sex"]').val();
+        var province = $('[name="province"]').val();
+        var city = $('[name="city"]').val();
+        var keywords = $('[name="keywords"]').val();
+
+        var data = {
+            group_id : group_id,
+            sex :sex,
+            province : province,
+            city : city,
+            keywords : keywords,
+        };
+
+        $.post("{:U('QQ/Weixin/batch_send_count')}", data, function(data){
+            if(data.status ==1){
+                $('#count').html(data.info +'您已经筛选了 ' + data.data + ' 位粉丝 进行群发操作.');
+                dialog.time(2).close();
+            }else{
+                $('#count').html(data.info);
+                dialog.time(2).close();
+            }
+
+        },'json');
+        
+	});
+	
+	//下拉列表
+	$('#js_sendObj').click(function(){
+		$('.jsDropdownList').children(this).css("display","block");
+		$('.dropdown_menu').addClass("open");
+		});
+	
+	
+	
+    $(".frm_checkbox").live('change', function(){
+        $(this).closest(".frm_checkbox_label").toggleClass("selected");
+    });
+    $(".js_reply").live('click', function(){
+        $(this).closest("li").find(".quick_reply_box").show();
+    });
+
+
+    //选择图文回复-页面已有
+    $(".tab_appmsg").click(function(){
+        art.dialog.open('{:U('QQ/WeixinResp/selectImgTxt', array('callback'=>'selectcallback'))}',{
+            lock: true,
+            background: '#000', // 背景色
+            opacity: 0.5,	// 透明度
+            title:"选择多图文信息",
+            width:740,
+            height: '80%'
+        });
+    });
+	
+    //选择文字回复-页面已有
+    $('.tab_text').click(function(){
+        $(this).addClass('selected');
+        $('.tab_appmsg').removeClass('selected');
+        $('.tab_panel .tab_content:eq(0)').show();
+        $('.tab_panel .tab_content:eq(1)').hide();
+        $('#reply_type').val(0);
+    });
+
+    $("#theform").submit(function(){
+        
+        var reply_type = $('#reply_type').val();
+
+        if(reply_type == '0'){
+            var cnt_obj = $('#reply_content_0');
+
+            //处理换行
+            cnt_obj.html($.trim(cnt_obj.html().replace(/<br\/?[^>]*>/g, "\n")));
+            var reply_text = cnt_obj.html();
+            check_lenght(600,'js_editorTip',document.getElementById('reply_content_0'));
+
+            if(reply_text.length == 0){
+                alert('请输入回复内容！');
+                return false;
+            }
+            if(reply_text.length > 600){
+                alert('回复内容超长！');
+                return false;
+            }
+
+            $('#reply_text').val(reply_text);
+        }
+        else if(reply_type == '2'){
+            var material_id = $('#material_id').val();
+            if(material_id == ''){
+                alert('请选择图文内容！');
+                return false;
+            }
+        }
+        else{
+            alert('参数错误，请刷新页面重试！');
+            return false;
+        }
+
+        if(!confirm('是否确认发送！确认之后无法取消！'))
+            return false;
+
+        var dialog;
+        $("#theform").ajaxSubmit({
+            beforeSubmit:function(){
+                $('#js_submit').attr('disabled', true);
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+                $('#js_submit').attr('disabled', false);
+                if(data.status == '1'){
+                    dialog.time(2).content("<div class='msg-all-succeed'>"+data.info+"</div>");
+                    setTimeout("art.dialog.close();",1000);
+                    //location.href="{:U('QQ/Weixin/batch_send_his')}";
+                    return false;
+                }else{
+                    dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+                }
+                },
+            dataType:'json'
+        });
+        return false;
+    });
+
+});
+</script>
+</head>
+<body>
+    <form action="{:U('QQ/Weixin/batch_send')}" method="post" id="theform">
+    <input type="hidden" name="reply_type" id="reply_type" value="0">
+    <input type="hidden" name="reply_text" id="reply_text" value="">
+    <input type="hidden" name="material_id" id="material_id" value="">
+	<div id="wrapper" >
+		<!--开始引入头部-->
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="qqgzh"/>
+    	<div id="container" >
+            <div id="main" class="rel">
+                <!--<div class="bread">
+                    <div class="bread-con fn">
+                        <div class="bread-area">
+                            <i class="icon-bread"></i>
+                            <p><a href="{:U('Home/Index/index')}">首页</a></p>
+                            <p>&gt;</p>
+                            <p><a href="{:U('Home/Index/marketingShow')}">业务中心</a></p>
+							<p>&gt;</p>
+                            <p>微信助手</p>        
+                        </div>
+                        <div class="bread-history">
+                            <i class="icon-history"></i>
+                            <p><a href="javascript:void(0)" class="ind-bread">返回</a></p>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="sidenav">
+					<!--开始引入左菜单-->
+					<include file="Batch/WleftMenu" leftmenuid="qf"/>
+                </div>
+
+                <div class="subcon">
+                	<div class="main-name fn">
+                        <h4>群发功能</h4>
+                    </div>
+                    <div class="Wcanal-tab">
+                        
+                        
+                        <!--<div class="extra_info mini_tips icon_after">
+                        <a href="" target="_blank">群发消息规则说明</a><i class="icon_mini_tips document_link"></i>    
+                        </div>
+                        
+                        <div class="Wcanal-tab-list">
+                        <div class="highlight_box">
+                            <p class="desc">为保障用户体验，微信公众平台严禁恶意营销以及诱导分享朋友圈，严禁发布色情低俗、暴力血腥、政治谣言等各类违反法律法规及相关政策规定d 信息。一旦发现，我们将严厉打击和处理。</p>
+                        </div>-->
+                        
+                            <!--微信消息-->
+                           	<div class="Wcanal-tab">
+	                        <div class="Wcanal-tab-title fn">
+	                            <p class="Wcanal-tab-hover"><a href="#">群发消息</a></p>
+                                <p><a href="{:U('QQ/Weixin/batch_send_setTiming')}">定时群发</a></p>
+	                            <p><a href="{:U('QQ/Weixin/batch_send_his')}">已发送</a></p>
+	                        </div>
+	                        <div class="Wcanal-tab-list">
+                                <div class="SearchArea fn" style="margin:10px 20px">
+                                    <div class="SearchAreaLeft" style="width:650px;">
+                                    <input type="hidden" id="batch_type" name="batch_type" value="{$batch_type}">
+                                    <input type="hidden" id="is_new" name="is_new" value="{$is_new}">
+                                    <label>
+                                    <span>群发对象</span>
+                                    <select name="group_id" id="group_id">
+                                            <option value="" class="">全部用户</option>
+                                            {:show_arr_opt($group_list)}
+                                        </select>
+                                    </label>
+                                    
+                                    <label>
+                                    <span>性别</span>
+                                    <select name="sex" id="sex">
+                                        <option value="">全部</option>
+                                        <option value="1" class="">男</option>
+                                        <option value="2" class="">女</option>
+                                    </select>
+                                    </label>
+                                    
+                                    <label>
+                                    <span>备注关键字</span>
+                                    <input type="text" name="scene">
+                                    </label>
+                                    
+                                    <label>
+                                    <span>粉丝来源</span>
+                                    <input type="text" name="keywords">
+                                    </label>
+                                    
+                                    <label>
+                                    <span>地区</span>
+                                    <select name="province" id="province" >
+                                        <option value="">全部</option>
+                                    </select>
+                                    <select name="city" id="city">
+                                        <option value="">市</option>
+                                    </select>
+                                    </label>
+                                    
+                                    <label><span>客户类型</span>
+                                        <select name="clientType">
+                                        <!--旺财版本 v0 => 旺财免费版, v0.5 => 旺财认证版, v1 => 旺财标准版, v2 => 旺财电商版, v3 => 旺财全民营销版, v4 => 旺财演示版, v5 => 旺财微博版, v6 => 旺财凭证活动版, v7 => 旺财凭证版-->
+                                        <option value=""></option>
+                                        <option value="v0" class="">免费版</option>
+                                        <option value="v0.5" class="">认证版</option>
+                                        <option value="v1" class="">标准版</option>
+                                        <option value="v2" class="">电商版</option>
+                                        <option value="v4" class="">演示版</option>
+                                        <option value="v5" class="">微博版</option>
+                                        <option value="v6" class="">凭证活动版</option>
+                                        <option value="v7" class="">凭证版</option>
+                                        </select>
+                                    </label>
+                                    
+                                    <label><span>客户行业</span>
+                                        <select name="clientGroup">
+                                            <option value=""></option>
+                                            <foreach name="industry" item="vo" >
+                                                <option value="{$vo.industry_name}">{$vo.industry_name}</option>
+                                            </foreach>
+                                        </select>
+                                    </label>
+                                    
+                                    
+                                    <label>
+                                    <span>粉丝来源</span>
+                                    <input type="text" name="scene">
+                                    </label>
+                                    </div>
+                                    <div class="SearchAreaRight">
+                                    <a href="javascript:void(0);" class="searchBtn" id="search-btn">查询</a>
+                                    <a href="javascript:void(0);" class="more-filter">更多筛选</a>
+                                    </div>
+                            </div>
+                            <div class="main_bd mt10">
+                                <div id="msgSender">
+                                    <div class="msg_sender" id="js_msgSender" style="width:820px;">
+                                        <div class="msg_tab">
+                                            <ul class="tab_navs" style="margin-top:0px;">
+                                                <li class="tab_nav tab_text width5 selected" data-type="1" data-tab=".js_textArea">
+                                                    <a href="javascript:void(0);"><i class="icon_msg_sender"></i>文字</a>
+                                                </li>
+                                                <li class="tab_nav tab_appmsg width5 no_extra" data-type="10" data-tab=".js_appmsgArea">
+                                                    <a href="javascript:void(0);"><i class="icon_msg_sender"></i>选择图文消息</a>
+                                                </li>
+                                            </ul>
+                                            <div class="tab_panel">
+                                                <!--文字-->
+                                                <div class="tab_content">
+                                                    <div class="js_textArea inner no_extra">
+                                                        <div class="emotion_editor">
+                                                            <div class="edit_area js_editorArea" id="reply_content_0" contenteditable="true" style="overflow-y: auto; overflow-x: hidden;" onkeydown="check_lenght_onkeydown(this)" onmouseover="pasteHandler()" onkeyup="check_lenght_weixin(600,'js_editorTip',this);">
+                                                            </div>
+                                                            <div class="editor_toolbar">       
+                                                                <p class="editor_tip js_editorTip" id="js_editorTip">还可以输入<em>600</em>个字</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--图文-->
+                                                <div class="tab_content">
+                                                    <div class="msg-item-wrapper" style="margin:0 auto;" data-material-id="726">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tool_area">
+                                        
+                                        <!--<div class="warn_tips">绑定腾讯微博后，可以同步群发到微博，现在<a href="">绑定</a></div>-->
+                                        <div class="tool_bar" style="margin-top:0"><!--<p class="mass_send_tips"><i>●</i>你本月还能群发 <em id="leftNum">{$mass_premonth - $sent_num}</em> 条消息</p>-->
+                                        
+                                            <div id="verifycode"></div>
+                                            
+                                            <span class="btn btn_input btn_primary">
+                                                <button id="js_submit">群发</button>
+                                            </span>
+                                            <div class="bubbleTips bubble_left warn">
+                                                    <div class="bubbleTips_inner">
+                                                        <php>if($type>2){</php>
+                                                        <p class="mass_send_tips">你本月还能群发 <em id="leftNum">{$mass_premonth - $sent_num}</em> 条消息</p>
+                                                        <php>}if($type<=2){</php>
+                                                        <p class="mass_send_tips">你今天还能群发 <em id="leftNum">{$count}</em> 条消息</p>
+                                                        <php>}</php>
+                                                    </div>
+                                                    <i class="bubbleTips_arrow out"></i>
+                                                    <i class="bubbleTips_arrow in"></i>
+                                                </div>
+                                            
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--微信消息-->
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+		<!--开始引入底部-->
+        <include file="./Home/Tpl/Public/Public_footer.html" />
+    </div>
+</form>
+    <div class="service"></div>
+</body>
+</html>
+<script>
+  $(function(){
+	CityCode({
+		province:$("#province"),//省
+		city:$("#city"),//市
+		town:$("#town"),//区
+		selected:"",//默认选中的省市区代号
+		url:"index.php?g=Weixin&m=AjaxCity&a=index"//数据查询页
+	});
+  })
+</script>

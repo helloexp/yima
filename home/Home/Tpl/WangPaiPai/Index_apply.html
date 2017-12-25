@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>我的旺水牌</title>
+<meta name="Keywords" content="{:C('SITE_KEYWORDS')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wpaipai20150705.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<script>
+$(function(){
+	Gform();
+	$("#form").validationEngine();
+	$(".js_active").click(function(e) {
+        var url = "{:U('WangPaiPai/Index/active')}";
+		art.dialog.open(url,{
+			id:"EnterpriseNo",
+			title:"在线激活旺拍拍",
+			width:"560px",
+			height:"450px",
+			fixed:true,
+		});
+    });
+
+    CityCode({
+        province:$("#province_code"),//省
+        city:$("#city_code"),//市
+        town:$("#town_code"),//区
+        business:$("#business_code"),//商圈
+        selected:"{$info['city_code']}",//默认选中的省市区代号
+        url:"{:U('LabelAdmin/AjaxCity/index')}"//数据查询页
+    });
+	
+	$(".js_view").click(function(e) {
+        var url = "{:U('WangPaiPai/Index/view')}";
+
+		art.dialog.open(url,{
+			id:"EnterpriseNo",
+			title:"查看数据",
+			width:"500px",
+			height:"450px",
+			fixed:true,
+		});
+    });
+	
+	$(".js_stop").click(function(e) {
+        var url = "{:U('WangPaiPai/Index/stop')}";
+		art.dialog.open(url,{
+			id:"EnterpriseNo",
+			title:"停用旺拍拍",
+			width:"500px",
+			height:"450px",
+			fixed:true,
+		});
+    });
+	//选择水牌类型
+	$(".card_select div").click(function(){
+		$(".card_select div").removeClass("current");
+        $(this).addClass("current");
+        if($(this).attr('id') == 't1'){
+            $("#type").val(1);
+        }else{
+            $("#type").val(2);
+        }
+    });	 
+	
+	$("#search").click(function(){
+        $("form").attr("action","").submit();
+    });
+
+})
+</script>
+<script>
+$(function() {
+
+	$("#btnSubmit").click(function(){
+
+        //防止a标签二次提交
+        var flag = $("#repeat").val();
+        var dialog;
+        var num = $("input[name='num']").val();
+        if($("#form").validationEngine('validate')){
+        	if(num < 10){
+        		art.dialog.confirm("数量不能少于10个",function(){
+                });
+        	}else{
+                if(0==flag){
+                    $('#form').submit();
+                }
+        	}
+        }
+        $("#repeat").val(1);
+    });
+
+	//提交表单
+    $.form_submit = function(){
+    	$("#form").ajaxSubmit({
+            beforeSubmit:function(){
+				
+                dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+            },
+            success:function(data){
+            },
+            dataType:'json'
+        });
+    }
+	
+	//取消
+	$("#btnCancel").click(function(e) {
+        window.location.href="{:U('WangPaiPai/Index/applyList');}&htmlid=18";
+    });
+});
+</script>
+</head>
+<body>
+    <div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <include file="./Home/Tpl/LabelAdmin/Channel_topMenu.html" topmenuid="2vm10"/>
+        <div id="container" class="bgfff"> 
+            <div id="main" class="rel">
+            	<div class="sidenav">
+                    <!--开始载入左菜单-->
+					<include file="LabelAdmin/Channel/leftMenu" leftmenuid="2vm18"/>
+                </div>
+                <div class="subcon fn">
+                    <div class="main-name fn">
+                        <h4>申请旺水牌</h4>
+                    </div>
+                    <form action="" method="post" id="form" >
+                    	<div class="steps fn cl">水牌信息</div>
+                        <div class="Gform" style="margin:0">
+                        <ul>
+                            <li class="Gname"><span>*</span>水牌样式</li>
+                            <li class="Ginput">
+                                <div class="card_select">
+                                <input type="hidden" name="type" value="1" id="type">
+        
+                                <php>if(2 != $info['type']){</php>
+                                    <div class="card1 current " id="t1">
+                                        <php>}else{</php>
+                                    <div class="card1" id="t1">
+                                <php>}</php>
+        
+                                    <p>
+                                    <img src="__PUBLIC__/Image/Wpaipai/selectType1.png">
+                                    <i></i>
+                                    </p>
+                                    <span>青春版<strong>￥18.00 元/个</strong></span>
+                                </div>
+        
+                                <php>if(2 == $info['type']){</php>
+                                     <div class="card2 current" id="t2">
+                                         <php>}else{</php>
+                                         <div class="card2" id="t2">
+                                <php>}</php>
+        
+                                    <p>
+                                    <img src="__PUBLIC__/Image/Wpaipai/selectType2.png">
+                                    <i></i>
+                                    </p>
+                                    <span>轻奢版<strong>￥18.00 元/个 </strong></span>
+                                </div>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li class="Gname"><span>*</span>订购数量</li>
+                            <li class="Ginput">
+                                <input type="text" name="num" maxlength="20" class="Gview-text validate[required,custom[integer]]" value="{$info['num']}" placeholder="申请个数至少10个"><span class="maxTips forInput">个</span>
+                            </li>
+                        </ul>
+                        </div>
+                        <div class="steps fn cl mt30">填写收货信息</div>
+                        <div class="Gform" style="margin:0">
+                            <ul>
+                                <li class="Gname"><span>*</span>收货人</li>
+                                <li class="Ginput">
+                                    <input type="text" maxlength="20" name="name" value="{$info['delivery_name']}" class="Gview-text validate[required]" placeholder="请输入收货人姓名"><span class="maxTips forInput" data-max="20">0/20</span>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gname"><span>*</span>联系方式</li>
+                                <li class="Ginput">
+                                    <input type="text" maxlength="11" name="tel" value="{$info['delivery_phone']}" class="validate[required,minSize[11],custom[phone]]" placeholder="请输入收货人联系方式"><span class="maxTips forInput" data-max="11">0/11</span>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gname"><span>*</span>所在区域</li>
+                                <li class="Ginput">
+                                    <select class="n3 validate[required]" name="province_code" id="province_code">
+                                        <option value="">选择省</option>
+                                    </select>
+                                    <select class="n3 validate[required]" name="city_code" id="city_code">
+                                        <option value="">选择市</option>
+                                    </select>
+                                    <select class="n3 " name="town_code" id="town_code">
+                                        <option value="">选择区</option>
+                                    </select>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gname"><span>*</span>详细地址</li>
+                                <li class="Ginput">
+                                    <input type="text" name="addre" value="{$info['delivery_add']}" maxlength="50" class="Gview-text validate[required]" placeholder="请输入具体的收货地址"><span class="maxTips forInput" data-max="50">0/50</span>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Gname">备注</li>
+                                <li class="Ginput">
+                                    <textarea name="des" class="Gview-textarea">{$info['comment']}</textarea>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li class="Ginput" style="padding-top:0">
+                                    <input type="hidden" value="0" name="repeat" id="repeat"/>
+                                    <a href="javascript:void(0)" class="btn-all" id="btnSubmit">提交</a>
+                                    <a href="javascript:void(0)" class="btn-all-del" id="btnCancel">取消</a>
+                                </li>
+                            </ul>
+                        </div>
+                            
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div class="service"></div>
+</body>
+</html>

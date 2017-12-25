@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>门店详情</title>
+    <meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+    <meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+    <meta content="telephone=no" name="format-detection" />
+    <meta content="email=no" name="format-detection" />
+    <meta name="apple-touch-fullscreen" content="NO">
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_cbc.css">
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js?v=__VR__"></script>
+    <script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?type=quick&ak=WRzAu3DNewWB4oeOELaczjsM&v=1.0"></script>
+    <script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js"></script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="main">
+
+            <if condition="$info['store_pic'] == '' ">
+                <div class="flash" style="height:200px;overflow:hidden;background:url('__PUBLIC__/Image/defilt.png') no-repeat center;background-size:cover">
+                    <div class="flash-txt"><span>{$info['store_name']}</span></div>
+                </div>
+                <else />
+               <div class="flash" style="height:200px;overflow:hidden;background:url({:get_upload_url($info['store_pic'])}) no-repeat center;background-size:cover">
+                        <div class="flash-txt"><span>{$info['store_name']}</span></div>
+                    </div>
+            </if>
+
+            <div id="mainCon">
+                	<div class="details-item">
+					       <div class="address">
+								<ul>
+									<li class="name"><i></i></li>
+									<li class="input"><a href="javascript:void(0);" onclick="mygps_url(this)"  class="going" lat="{$info['lbs_x']}" lng="{$info['lbs_y']}"><p>{$info['province']} {$info['city']} {$info['town']} {$info['address']} </p><i></i></a></li>
+									<input type="hidden" value="{$info['city']}" id="des_city"/>
+								</ul>
+						    </div>
+						    <div class="tel">
+								<ul>
+									<li class="name"><i></i></li>
+									<li class="input"><a  href="tel:{$info['store_phone']}"><p> {$info['store_phone']}</p><i></i></a></li>
+								</ul>
+						    </div>
+                	</div>
+					<volist name="info.activity" id="vo">
+					  <div class="details-item">
+					     <ul class="shopdes">
+								<if condition="$vo['activity_type'] == '1'">
+                                <li class="name"><i style="background:url(__PUBLIC__/Image/youhui.png) no-repeat center;"></i></li>
+                                <elseif condition="$vo['activity_type'] == '2'"/>
+								<li class="name"><i style="background:url(__PUBLIC__/Image/dazhe.png) no-repeat center;"></i></li>
+                                <elseif condition="$vo['activity_type'] == '3'"/>								
+								<li class="name"><i style="background:url(__PUBLIC__/Image/cuxiao.png) no-repeat center;"></i></li>
+                                <else />
+								<li class="name"><i style="background:url(__PUBLIC__/Image/fuwu.png) no-repeat center;"></i></li>
+                                </if>
+		                        <li class="input <?php if($key == 0) echo 'open'; ?>"><a href="javascript:void(0);"><p>{$vo['activity_title']}</p><i></i></a></li>
+								<div class="cont-hide <?php if($key > 0) echo 'dn'; ?>">
+									<li class="time"><p>{:dateformat($vo['start_time'],'Y-m-d')}  至  {:dateformat($vo['end_time'],'Y-m-d')}</p></li>
+									<li class="shop-txt">
+									   <p>{$vo['activity_desc']}</p>
+									   <p class="imgC">
+                                           <php>$activity_image=explode('|', $vo['activity_image']);</php>
+                                             <volist name="activity_image" id="vv">
+                                                 <a class="logo" href="{:get_upload_url($vv)}" style="background-image:url({:get_upload_url($vv)});background-size:contain;background-repeat:no-repeat;background-position:center center;margin:0 8px 0 0;width:75px;height:65px;display: inline-block;border-radius:5px;cursor:pointer"></a>
+                                             </volist>
+									   </p>
+									</li>
+								</div>
+		                 </ul>
+					  </div>
+				    </volist>
+               </div>
+             <div class="get-more"></div>
+			<!--  dssd-->
+        </div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    mygps_url=function(_this){
+        endLng = $(_this).attr('lng');
+        endLat = $(_this).attr('lat');
+        des_city = $('#des_city').val();
+        navigator.geolocation.getCurrentPosition(function(r){
+            var o = r.coords.longitude;
+            var a = r.coords.latitude;
+            var ggPoint = new BMap.Point(o,a);
+
+            if(ggPoint.lat && ggPoint.lng){
+
+                $.ajax(
+                        {
+                            url:'{:U('Label/ListShop/getcity',array('id'=>$id))}',
+                        data:{
+                    point_x:ggPoint.lat,
+                            point_y:ggPoint.lng
+                },
+                success:function(datas){
+                    if(datas.status==1){
+                        cityName=datas.info;
+
+                        var start = { latlng: new BMap.Point(datas.lng, datas.lat)};
+                        var end = {
+                            latlng:new BMap.Point(endLng, endLat)
+                        }
+                        var opts = {
+                            mode:BMAP_MODE_DRIVING,
+//										        region:"武汉市"
+                            origin_region: cityName,
+                            destination_region: des_city
+                        }
+                        var ss = new BMap.RouteSearch();
+                        ss.routeCall(start,end,opts);
+                    }
+                    else {
+                        alert('你当前浏览器不支持定位功能');
+                        return false;
+                    }
+                },
+                error:function(datas){
+                    Util_tools.ui.loading(false);
+                    alert('你当前浏览器不支持定位功能');
+                    return false;
+                },
+                async:false,
+                        dataType:'json'
+            }
+            )
+        }
+    }, function(error){alert('你当前浏览器不支持定位功能')});
+    }
+	//展开收缩
+	$(function(){
+		$(".shopdes .input").click(function(){
+			$(this).toggleClass("open");
+			$(this).next().slideToggle();
+		 })						
+	})
+
+</script>

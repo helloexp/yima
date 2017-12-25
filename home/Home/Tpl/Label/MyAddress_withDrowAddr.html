@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>确认收货地址</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_tlq.css?v=__VR__">
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<style type="text/css">
+	body { padding-bottom: 70px;}
+	.item { width: 100%; max-width: 640px;}
+	.item ul.btn-ul { margin: 8px 15px;}
+	.Gform .copyright { width: 100%; max-width: 640px; text-align: center; margin-bottom: 0;}
+	.Gform .item.bottom { width: 100%; position: fixed; bottom: 0; text-align: center; margin-bottom: 0;}
+</style>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+        	<div class="goback"><i></i></div>
+            <div class="logo"><span>确认收货地址</span></div>
+        </div>
+        <div class="tip"><p>填写收货信息，提领的商品将通过物流寄送给您！<br />线上提领成功后，即表示此券已被使用。</p></div>
+        <div id="main">
+            <div id="mainCon">
+            	<div class="Gform">
+                	<form id="form" action="javascript:;" method="" name="form">
+                		<div class="item">
+                			<ul>
+		                        <li class="name w72">所在区域</li>
+		                        <li class="input pl72 fn">
+                                            <if condition="$address.province neq '' ">
+                                                <select name='privince' id='province_code'>
+                                                    <option>{$address.province}</option>
+                                                </select>
+                                            </if>
+                                            <if condition="$address.city neq '' ">
+                                                <select name='city' id='city_code'>
+                                                    <option>{$address.city}</option>
+                                                </select>
+                                            </if>
+                                            <if condition="$address.town neq '' ">
+                                                <select name='town' id='town_code'>
+                                                    <option>{$address.town}</option>
+                                                </select>
+                                            </if>
+		                        </li>
+		                    </ul>
+                			<ul>
+		                        <li class="name w72">具体位置</li>
+		                        <li class="input pl72">
+		                        	<input name="name" type="text" id="" maxlength="20" class="textbox validate[required]" value="{$address.address}" data-rel="" readonly />
+		                        </li>
+		                    </ul>
+	                		<ul>
+		                        <li class="name w72">收货人</li>
+		                        <li class="input pl72">
+			                        <input name="name" type="text" id="" maxlength="4" class="textbox validate[required]" value="{$address.user_name}" data-rel="" readonly />
+		                        </li>
+		                    </ul>
+                			<ul>
+		                        <li class="name w72">联系方式</li>
+		                        <li class="input pl72">
+		                        	<input name="phone" id="phone" type="tel" class="textbox validate[required,minSize[11]]" maxlength="11" value="{$address.phone_no}" data-rel="" readonly />
+		                        </li>
+		                    </ul>
+                		</div>
+		                <div class="item">
+		                    <ul>
+		                        <li><input name='anatherAddress' type="button" rel='' value="使用其他地址" class="btn-up" style="background: #ffffff; color: #ed3f41; font-weight: normal;" /></li>
+		                    </ul>
+                		</div>
+                		<div class="copyright"><p>©2016 翼码科技 wangcaio2o.com 版权所有</p></div>
+                                <if condition="$coudOnlineVerify eq '1' ">
+                                    <div class="item bottom">
+                                        <ul class="btn-ul">
+                                            <li class="btn-li"><input type="button" name='sure' rel='{$address.id}' value="确认" class="btn-up" /></li>
+                                        </ul>
+                                    </div>
+                                </if>
+                	</form>
+	            </div>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+$(document).ready(function(e) {
+    $('#form').validationEngine({
+    	'allrules': {
+            "carname":{
+                "alertText":""
+            }
+        },
+    });
+
+    $(".Gform .clause label").eq(0).addClass("active");
+    $('.Gform .clause input').attr("checked","checked");
+    $(".Gform .clause input").click(function(){
+        $(this).parent("label").toggleClass("active");
+    });
+   
+   $('.goback').click(function(){
+       history.go(-1);
+   });
+   
+   $('input[name=anatherAddress]').click(function(){
+       window.location.href = "{:U('Label/MyAddress/addressList', array('seq'=>$seq))}";
+   });
+   
+   $('input[name=sure]').click(function(){
+       var addressId = $(this).attr('rel');
+       var seq = '{$seq}';
+       $.post("{:U('Label/Code/veryWithDrowCode')}", {'seq':seq, 'address':addressId}, function(data){
+          data = eval('('+data+')');
+          art.dialog({
+            title:'提示',
+            content:data['msg'],
+            width:'300px',
+            height:'50px',
+            close:function(){
+                window.location.href = data['url'];
+            }
+        });
+       });
+   });
+});
+
+</script>

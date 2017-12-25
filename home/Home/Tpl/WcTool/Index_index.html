@@ -1,0 +1,720 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>旺财测试工具</title>
+	<link rel="stylesheet" href="__PUBLIC__/bootstrap/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="__PUBLIC__/bootstrap/css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" href="__PUBLIC__/Css/farbtastic.css" />
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="__PUBLIC__/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/farbtastic.js?v=__VR__"></script>
+<script>
+	var flag = 1;
+	var flag2 = 0;
+	$(document).ready(function(){
+		$('#btn_1').click(function(){
+			var condition_search = $('#condition_search').val(); 
+			$.ajax({
+				type:'POST',
+				data:{condition_search:condition_search},
+				url:"{:U('WcTool/Index/index')}",
+				dataType:'json',
+				success:function(data){
+					if(data.status == '1')
+					{
+						$(".list-tr").hide();
+						$.each(data.info,function(k,v){
+							var html = '';
+							html += '<tr class="list-tr" onClick="looknode(\''+v.node_id+'\')">';
+							$.each(v,function(key,value){
+								html += '<td>'+value+'</td>';
+							});
+							html += '</tr>';
+							$('table#account-ll').append(html);
+						});
+					}else{
+						art.dialog.alert(data.info,function(){
+							$('#condition_search').focus();
+						});
+					}
+				},
+			});
+		});
+		$("#btn_2").click(function(){
+			$.ajax({
+				type:'POST',
+				data:{},
+				url:"{:U('WcTool/Index/getNearAccount')}",
+				dataType:'json',
+				success:function(data){
+					if(data.status == '1')
+					{
+						$(".list-tr").hide();
+						$.each(data.info,function(k,v){
+							var html = '';
+							html += '<tr class="list-tr" onClick="looknode(\''+v.node_id+'\')">';
+							$.each(v,function(key,value){
+								html += '<td>'+value+'</td>';
+							});
+							html += '</tr>';
+							$('table#account-ll').append(html);
+						});
+					}else{
+						art.dialog.alert(data.info);
+					}
+				},
+			});
+		});
+		$("#register-btn").click(function(){
+			$("#theForm1").ajaxSubmit({
+				success:function(d){
+					if(d == 'status[1]')
+					{
+						art.dialog.alert('注册成功');
+					}else{
+						art.dialog.alert(d.substr(13));
+					}
+				},
+			});
+		});
+		$("#getAccount").click(function(){
+			$.ajax({
+				type:'GET',
+				data:'',
+				dataType:'json',
+				url:"{:U('WangYan/My/nodeAddFast')}",
+				success:function(d){
+					if(d.status=='1')
+					{
+						$("#accountName").html('账号：'+d.account+'<br/>'+'密码：'+d.pass+' <input class="btn btn-info" type="button" onClick="looknode(\''+d.node_id+'\')" value="详情" />');
+					}else{
+						art.dialog.alert(d.info);
+					}
+				},
+				beforeSend:function(){
+					$("#accountName").html('');
+					$("#passName").html('');
+					$("#tip_pr").show();
+				},
+				complete:function(){
+					$("#tip_pr").hide();
+				}
+			});
+		});
+		 $('#picker').farbtastic('#color');
+	});
+	function fanyi(){
+		art.dialog({
+			content:$('#fanyiart').html(),
+			width:600,
+			height:400,
+			title:'中英文互译',
+		});
+	}
+	function utoc(){
+		var content = $("#textarea_content").val();
+		$("#textarea_content_ret").val(eval("'" + content + "'"));
+	}
+	function urltoc(){
+		var content = $("#textarea_content").val();
+		$("#textarea_content_ret").val(decodeURI(content));
+	}
+	function goGm(){
+		window.open("{:U('Home/Index/index')}");
+	}
+	function AsciiToUnicode() {
+		var content = $("#textarea_content").val();
+	    if (content == '') { 
+			alert('文本框中没有代码！'); 
+			return; 
+		}
+		var res = '';
+		for (var i = 0; i < content.length; i++)
+		    res += '&#' + content.charCodeAt(i) + ';';
+		$("#textarea_content_ret").val(res);
+		$("#textarea_content").focus();
+	}
+
+	//Unicode 转换 ASCII
+	function UnicodeToAscii() {
+	    var code = $("#textarea_content").val().match(/&#(\d+);/g);
+		if (code == null) { 
+			alert('文本框中没有合法的Unicode代码！'); 
+			$("#textarea_content").focus();
+			return; 
+		}
+		var res = '';
+		for (var i=0; i<code.length; i++)
+		    res += String.fromCharCode(code[i].replace(/[&#;]/g, ''));
+		$("#textarea_content_ret").val(res);
+		$("#textarea_content").focus();
+	}
+	function modwc(nodeId){
+		var html=[
+			'<form action="{:U("WcTool/Index/modWc")}" method="post" id="theForm2" class="form-inline">',
+			'旺财版本：<select name="wc_version_sel" class="form-control" id="wc_version_sel"><option value="v0">注册版</option><option value="v0.5">认证版</option><option value="v4">演示版</option><option value="v9">付费版</option></select><br/><br/>',
+			'付费模块：（可多选）<br/>　　　<input type="checkbox" name="pay_module_sel[]" value="m0" />旺财基础平台<br/>　　　<input type="checkbox" name="pay_module_sel[]" value="m1" />营销工具礼包<br/>　　　<input type="checkbox" name="pay_module_sel[]" value="m2" />多宝电商<br/>　　　<input type="checkbox" name="pay_module_sel[]" value="m3" />旺分销<br/>　　　<input type="checkbox" name="pay_module_sel[]" value="m4" />多赢积分<br/><br/>',
+			'<input type="hidden" name="node_id" value="'+nodeId+'" />',
+			'</form>',
+		].join('');
+		art.dialog({
+			id:'wcver',
+			title: '修改版本',
+			content: html,
+			fixed:true,
+			lock:true,
+			width:300,
+			cancel:false,
+			okVal:'修改',
+			ok:function(){
+				$("#theForm2").ajaxSubmit({
+					success:function(d){
+						if(d.status == '1')
+						{
+							looknode(d.node_id);
+							art.dialog.alert(d.info);
+							art.dialog.list['wcver'].close();
+						}else{
+							art.dialog.alert(d.info);
+						}
+					},
+					dataType:'json'
+				});
+				return false;
+			},
+			cancel:function(){
+				
+			}
+		});
+	}
+	function setWb(nodeId)
+	{
+		var html=[
+			'<form action="{:U("WangYan/My/setWb")}" method="post" id="theForm3" class="form-inline">',
+			'<label for="wbnumber">旺币数量：</label><input type="text" class="form-control" name="wbnumber" id="wbnumber" />',
+			'<input type="hidden" name="nodeid" value="'+nodeId+'" />',
+			'</form>',
+		].join('');
+		art.dialog({
+			id:'wbver',
+			title: '充值旺币',
+			content: html,
+			fixed:true,
+			lock:true,
+			width:350,
+			cancel:false,
+			okVal:'充值',
+			ok:function(){
+				$("#theForm3").ajaxSubmit({
+					success:function(d){
+						if(d == 'status[1]')
+						{
+							looknode(nodeId);
+							art.dialog.alert('充值成功');
+							art.dialog.list['wbver'].close();
+						}else{
+							art.dialog.alert('充值失败');
+							art.dialog.list['wbver'].close();
+						}
+					},
+				});
+				return false;
+			},
+			cancel:function(){
+
+			}
+		});
+	}
+	function setAccount(nodeId,client_id,node_name){
+		art.dialog.open('http://10.10.1.159/jsxt/index.php',{
+        title:'账号:xietm；密码：sunshine；机构号：'+nodeId+'；旺号：'+client_id+'；机构名：'+node_name,
+        id:'art_select_dialog',
+        width:1300,
+        height:600,
+    });
+		return false;
+	}
+	window.onscroll = function(){ 
+		if(flag2 == 1)
+		{
+			return false;
+		}
+		if(flag2 == 0)
+		{
+			flag2 = 1;
+			art.dialog({
+				id:'asdf',
+		   		title:'提示',
+		   		content:'是否显示背景图片',
+		   		width:200,
+		   		height:80,
+		   		ok:function(){
+		   			$(".main").css('background','url(__PUBLIC__/Image/wt_bg.jpg)');
+			   		$(".main").css('color','#fff');
+			   		$(".header_top").css('background','none');
+			   		$(".header_top_1").css('background','none');
+		   			flag = 0;
+		   		},
+		   		cancel:function(){
+		   			flag = 1;
+		   		}
+		   	});
+		}
+	   	
+	};
+	window.onload = function(){
+		window.setInterval("timelyFun()",3000);
+	};
+	function timelyFun(){
+		if(flag == 1)
+		{
+			$(".main").css('background','#aaa');
+	   		$(".main").css('color','#000');
+	   		$(".header_top").css('background','#888');
+			return false;
+		}
+		var num = Math.floor(Math.random()*10);
+		switch(num){
+			case 1:
+				$(".main").css('background-image','url(__PUBLIC__/Image/wt_1.jpg)');
+				break;
+			case 2:
+				$(".main").css('background-image','url(__PUBLIC__/Image/wt_2.jpg)');
+				break;
+			case 3:
+				$(".main").css('background-image','url(__PUBLIC__/Image/wt_3.jpg)');
+				break;
+			case 4:
+				$(".main").css('background-image','url(__PUBLIC__/Image/wt_4.jpg)');
+				break;
+			case 5:
+				$(".main").css('background-image','url(__PUBLIC__/Image/wt_5.jpg)');
+				break;
+			case 6:
+				$(".main").css('background-image','url(__PUBLIC__/Image/wt_6.jpg)');
+				break;
+			case 7:
+				$(".main").css('background-image','url(__PUBLIC__/Image/wt_7.jpg)');
+				break;
+			case 8:
+				$(".main").css('background-image','url(__PUBLIC__/Image/wt_8.jpg)');
+				break;
+			case 9:
+				$(".main").css('background-image','url(__PUBLIC__/Image/wt_9.jpg)');
+				break;
+			default:
+				$(".main").css('background-image','url(__PUBLIC__/Image/wt_bg.jpg)');
+				break;
+		}
+	}
+	function looknode(nodeId){
+		$.ajax({
+			type:'POST',
+			data:{nodeId:nodeId},
+			dataType:'json',
+			url:"{:U('WcTool/Index/looknode')}",
+			success:function(d){
+				$("#user_name").html(d.contact_eml);
+				$("#node_id").html(d.node_id);
+				$("#node_name").html(d.node_name.substr(0,13));
+				$("#pay_type").html(d.pay_type=='1'?'后付费':'预付费');
+				if(d.node_type == '0')
+				{
+					$("#node_type").html('签约(后付费)');
+				}else if(d.node_type == '1'){
+					$("#node_type").html('签约(预付费)');
+				}else if(d.node_type == '2'){
+					$("#node_type").html('注册用户');
+				}else if(d.node_type == '3'){
+					$("#node_type").html('翼码用户');
+				}else if(d.node_type == '4'){
+					$("#node_type").html('演示用户');
+				}
+				$("#contact_phone").html(d.contact_phone);
+				if(d.check_status == '0')
+				{
+					$("#check_status").html('未审核');
+				}else if(d.check_status == '1'){
+					$("#check_status").html('审核拒绝');
+				}else if(d.check_status == '2'){
+					$("#check_status").html('审核通过');
+				}else if(d.check_status == '3'){
+					$("#check_status").html('审核拒绝');
+				}
+				if(d.wc_version == 'v0')
+				{
+					$("#wc_version").html('注册用户(v0)'+'　<a href="javascript:void(0);"  onClick="modwc(\''+d.node_id+'\')" >修改版本</a>');
+				}else if(d.wc_version == 'v0.5'){
+					$("#wc_version").html('认证用户(v0.5)'+'　<a href="javascript:void(0);"  onClick="modwc(\''+d.node_id+'\')" >修改版本</a>');
+				}else if(d.wc_version == 'v4'){
+					$("#wc_version").html('演示用户(v4)'+'　<a href="javascript:void(0);"  onClick="modwc(\''+d.node_id+'\')" >修改版本</a>');
+				}else if(d.wc_version == 'v9'){
+					$("#wc_version").html('付费用户(v9)'+'　<a href="javascript:void(0);"  onClick="modwc(\''+d.node_id+'\')" >修改版本</a>');
+				}
+
+				$("#pay_module").html(d.pay_module);
+				$("#sale_flag").html((d.sale_flag == '1'?'已开通':'未开通') +'　<a href="javascript:void(0);"  onClick="modDuomi(\''+d.node_id+'\')" >修改</a>');
+				$("#client_id").html(d.client_id);
+				$("#contract_no").html(d.contract_no);
+				$("#wbr").html(d.wb+'　<a href="javascript:void(0);" onClick="setWb(\''+d.node_id+'\')" >充值</a>');
+				$("#accountr").html(d.account+'　<a href="javascript:void(0);" onClick="setAccount(\''+d.node_id+'\',\''+d.client_id+'\',\''+d.node_name+'\')" >充值</a>');
+			}
+		});
+	}
+	function openTool()
+	{
+		art.dialog({
+			content:$('#openToolContent').html(),
+			width:600,
+			height:400,
+			title:'Unicode转换工具',
+		});
+	}
+	function fanyi_clk(){
+		var fanyicontent = $("#fanyi_textarea_content").val();
+		$.ajax({
+			type:'GET',
+			url:'http://fanyi.youdao.com/openapi.do?keyfrom=wangcaio2o&key=1441583940&type=data&doctype=jsonp&version=1.1&q='+fanyicontent,
+			dataType:'jsonp',
+			success:function(d){
+				console.log(d);
+				var res = '';
+				if(d.translation)
+				{
+					res += d.translation+'　';
+				}
+				if(d.basic)
+				{
+					res += '(基本：'+d.basic.explains+'；读音：'+d.basic.phonetic+')';
+				}
+				if(d.web)
+				{
+					res += '\r\n-------------------网络释义-------------------\r\n';
+					$.each(d.web,function(k,v){
+						res += k+'：'+v.key+'(';
+						$.each(v.value,function(kk,vv){
+							res += vv+'；';
+						});
+						res += ')\r\n';
+					});
+				}
+				
+				$("#fanyi_textarea_content_ret").val(res);
+			}
+		});
+	}
+	function cansub(){
+		$('#condition_search').keydown(function(evt){
+			if(evt.keyCode == 13)
+			{
+				$('#btn_1').click();
+			}
+		});
+	}
+	function modDuomi(nodeId){
+		$.ajax({
+			url: '{:U("WcTool/Index/modDuomi")}',
+			type: 'POST',
+			dataType: 'json',
+			data: {nodeId: nodeId},
+			success:function(d){
+				if(d.status == '1'){
+					looknode(nodeId);
+				}else{
+					art.dialog.alert(d.info);
+				}
+			}
+		});
+	}
+</script>	
+<style>
+	body{
+		background: #ddd;
+	}
+	.main{
+		width:1080px;
+		height: 1100px;
+		margin: 0 auto;
+		padding: 0;
+		background: #aaa;
+		color:#000;
+	}
+	.fl{
+		float: left;
+	}
+	.header_top{
+		height: 50px;
+		text-align: center;
+		line-height: 50px;
+		background: #888;
+	}
+	.header_top_1{
+		height: 50px;
+		text-align: center;
+		line-height: 50px;
+		background: #ccc;
+	}
+	h3{
+		text-align: center;
+		font-weight: bold;
+		font-family: "黑体";
+		color:#992468;
+	}
+	.account-list{
+		width:442px;
+		height:700px;
+		overflow-x:hidden;
+		overflow-y:scroll;
+	}
+	.account-list .search{
+		width:442px;
+		height:50px;
+		padding-top: 10px;
+	}
+	.account-left{
+		width:30%;
+		height:700px;
+		overflow-x:hidden;
+		overflow-y:scroll;
+	}
+	.register-right{
+		width:29%;
+		height:300px;
+	}
+	.register-right dd{
+		float: right;
+	}
+	.register-right dl{
+		margin-right:20px;
+	}
+	.register-right-bottom{
+		clear:right;
+		width:29%;
+		height:150px;
+	}
+
+	#getAccount{
+		margin-left: 100px;
+	}
+	.fastRest-1{
+		margin-left: 120px;
+	}
+	a{
+		text-decoration: none;
+	}
+	a:hover{
+		text-decoration: none;
+		color:#555;
+	}
+	#accountName{
+		display: block;
+		margin-left: 35px;
+		color:blue;
+		font-size: 16px;
+	}
+	.fastRest dl{
+		margin-top: 50px;
+	}
+	.fastRest dl dd{
+		height: 50px;
+	}
+	#tip_pr{
+		display: none;
+		margin-left: 120px;
+	}
+	#tip{
+		color:red;
+		font-size: 14px;
+	}
+	.web{
+		width:29%;
+		height:150px;
+	}
+	#account-ll tr:hover{
+		cursor: pointer;
+	}
+	#ot_top{
+		margin:0;
+		padding: 0;
+		width: 600px;
+		background: #ccc;
+		height:330px;
+	}
+	#ot_top textarea,#fanyiart_top textarea{
+		width: 600px;
+		height:140px;
+	}
+	#btn_list{
+		width: 600px;
+		height:50px;
+		line-height: 50px;
+		background: #aaa;
+	}
+	#color_pos{
+		padding-left: 55px;
+		float: left;
+		clear:right;
+		width:29%;
+		height:250px;
+	}
+</style>
+</head>
+<body>
+<div class="main">
+	<div class="header_top">
+		<h3 style="line-height:50px;">旺财测试工具</h3>
+	</div>
+	<div class="header_top_1">
+		<input type="button" class="btn btn-primary" onClick="openTool()" value="Unicode转换工具" />
+		<input type="button" class="btn btn-primary" onClick="fanyi()" value="中英文互译" />
+		<input type="button" class="btn btn-primary" onClick="window.open('http://www.wangcaio2o.com/?__TEST_ENV=true')" value="预 生 产" />
+		<input type="button" class="btn btn-primary" onClick="window.open('http://test.wangcaio2o.com')" value="测试环境" />
+		<input type="button" class="btn btn-primary" onClick="window.open('http://admin.app.imageco.cn/index.php?m=Admin&a=Login')" value="旺财后台" />
+	</div>
+	<div class="account-list fl">
+		<div class="search">
+			<form action="javascript:void(0)" class="form-inline">
+			<label for="condition_search">&nbsp;&nbsp;邮箱：<input type="text" class="form-control" id="condition_search" name="condition_search" onFocus="cansub()" /></label>
+			<input type="button" id="btn_1" value="查询" class="btn btn-info" />
+			<input type="button" id="btn_2" value="最近注册" class="btn btn-info" />
+			</form>
+		</div>
+		<div class="list">
+			<table id="account-ll" class="table">
+				<tr>
+					<th>账号</th>
+					<th>机构号</th>
+					<th>版本</th>
+					<th>注册时间</th>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div class="account-left fl">
+		<h3>单击左侧查看</h3>
+		<table class="table">
+			<tr>
+				<td>用 户 名：</td>
+				<td id="user_name"></td>
+			</tr>
+			<tr>
+				<td>机 构 号：</td>
+				<td id="node_id"></td>
+			</tr>
+			<tr>
+				<td>商 户 名：</td>
+				<td id="node_name"></td>
+			</tr>
+			<tr>
+				<td>付费类型：</td>
+				<td id="pay_type"></td>
+			</tr>
+			<tr>
+				<td>机构类型：</td>
+				<td id="node_type"></td>
+			</tr>
+			<tr>
+				<td>联系手机：</td>
+				<td id="contact_phone"></td>
+			</tr>
+			<tr>
+				<td>资质认证：</td>
+				<td id="check_status"></td>
+			</tr>
+			<tr>
+				<td>旺财版本：</td>
+				<td id="wc_version"></td>
+			</tr>
+			<tr>
+				<td>付费模块：</td>
+				<td id="pay_module"></td>
+			</tr>
+			<tr>
+				<td>多米收单：</td>
+				<td id="sale_flag"></td>
+			</tr>
+			<tr>
+				<td>旺　　号：</td>
+				<td id="client_id"></td>
+			</tr>
+			<tr>
+				<td>结 算 号：</td>
+				<td id="contract_no"></td>
+			</tr>
+			<tr>
+				<td>旺　　币：</td>
+				<td id="wbr"></td>
+			</tr>
+			<tr>
+				<td>余　　额：</td>
+				<td id="accountr"></td>
+			</tr>
+		</table>
+		<p>注释：<br/>
+		只有付费的旺财版本(v9)，付费模块才不为空。<br/>m0为旺财基础平台，<br/>m1为营销工具礼包，<br/>m2为多宝电商，<br/>m3为旺分销，<br/>m4为多赢积分</p>
+	</div>
+	<div class="register-right fl">
+		<h3>手动注册</h3>
+		<form action="{:U('WangYan/My/nodeAdd')}" method="post" id="theForm1" class="form-inline">
+		<dl>
+			<dd><label for="regemail">用户名：</label><input type="text" name="regemail" class="form-control" id="regemail" /></dd>
+			<dd><label for="user_password">密码：</label><input type="text" class="form-control" name="user_password" id="user_password" /></dd>
+			<dd><label for="node_name">企业名称：</label><input type="text" class="form-control" name="node_name" id="node_name" /></dd>
+			<dd><label for="contact_name">联系人：</label><input type="text" class="form-control" name="contact_name" id="contact_name" /></dd>
+			<dd><label for="contact_phone">联系手机：</label><input type="text" class="form-control" name="contact_phone" id="contact_phone" /></dd>
+		</dl>
+		</form>
+		<div class="register-kk">
+		<input type="button" id="register-btn" value="注册" class="fastRest-1 btn btn-danger"/>
+		<input type="reset" value="重置" class="btn btn-success" />	
+		</div>
+		
+	</div>
+	<p>--------------------------------------------------------------</p>
+	<div class="register-right-bottom fl">
+		<h3>快速注册</h3>
+		<div class="fastRest">
+			<input type="button" value="点击获取账号密码" id="getAccount" class="btn btn-primary" />
+			<div id="tip_pr"><span id="tip">正在获取……</span></div>
+			<span id="accountName"></span>
+		</div>
+	</div>
+	<div id="color_pos">
+		<div id="picker"></div>
+		<div class="form-item">
+			<div class="input-prepend">
+			<span class="add-on">颜色值：</span><input class="span2" type="text" id="color" name="color" value="#123456" /></span>
+			</div>
+		</div>
+	</div>
+	
+</div>
+	<div id="openToolContent" style="display:none;">
+		<div id="ot_top">
+			<textarea id="textarea_content" name="content">请把你需要转换的内容粘贴在这里。</textarea>
+			<div id="btn_list">
+				<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+				<input type="button" name="btn1" onclick="utoc()" class="btn btn-primary" value="Unicode=>中文" />
+				<input type="button" onclick="urltoc()" class="btn btn-primary" value="URL解码" />
+				<input type="button" onclick="UnicodeToAscii()" class="btn btn-primary" value="Unicode => Ascii" />
+				<input type="button" onclick="AsciiToUnicode()" class="btn btn-primary" value="Ascii => Unicode" />
+			</div>
+			<textarea id="textarea_content_ret" name="content_ret"></textarea>
+		</div>
+	</div>
+	<div id="fanyiart" style="display:none;">
+		<div id="fanyiart_top">
+			<textarea id="fanyi_textarea_content" name="content"></textarea>
+			<div id="btn_list">
+				<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+				<input type="button" name="btn1" onclick="fanyi_clk()" class="btn btn-primary" value="翻译" />
+			</div>
+			<textarea id="fanyi_textarea_content_ret" name="content_ret"></textarea>
+		</div>
+	</div>
+</body>
+</html>

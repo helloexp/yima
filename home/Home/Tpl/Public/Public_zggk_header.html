@@ -1,0 +1,213 @@
+<style>
+    #headerTwo .headerBg { background: #ffffff; border-bottom: 1px #e5e5e5 solid;}
+    #headerTwo .logo-img { width:220px; background: url(__PUBLIC__/Image/Zggk/LOGO.png?v=2) no-repeat center center;}
+    #headerTwo .headerOpr .headerOprList>a { color: #666666;}
+    .login-logo2 h2 { margin-left: 0; float: none; text-align: center;}
+    .ind-footer { background: #fff; border-top: 1px #e5e5e5 solid;}
+    .ind-copyright span,.ind-copyright a,#headerTwo .headerMsg { color: #666666;}
+</style>
+<div id="headerTwo"> 
+    <div class="headerBg">
+        <div class="headerCon fn">
+            <div class="logo">
+                <div class="logo-img"><a href="{:U('Zggk/Index/index')}" class="a-hide"></a></div>
+            </div>
+            <?php
+            if(!empty($userInfo['node_id']))
+            {
+            ?>
+            <div class="headerOpr">
+                <div class="headerOprList <?php if($unReadMsg>0){ ?>hasMoreList<?php }?>">
+                    <a href="{:U('Home/AccountInfo/message')}"><i class="icon-mail-alt <?php if($unReadMsg>0){ ?>has<?php }?>"></i></a>
+                    <?php if($unReadMsg>0){ ?>
+                    <div class="headerMore">
+                        <div class="headerMoreNews">
+                        <volist name="msgArrcount" id='v'>
+                        <if condition="$v['message_type'] eq 1">
+                                <a href="{:U('Home/AccountInfo/message')}">系统消息 
+                                <elseif condition="$v['message_type'] eq 2"/>
+                                <a href="{:U('Home/AccountInfo/batch_msg')}">O2O活动消息
+                                <elseif condition="$v['message_type'] eq 3"/>
+                                <a href="{:U('Home/AccountInfo/message_new')}">
+                                留言板消息
+                                <elseif condition="$v['message_type'] eq 4"/>
+                                <a href="{:U('LabelAdmin/OrderList/index')}">
+                                电商订单提醒
+                         </if>
+                        <em>
+                        ({$v['new_message_cnt']})
+                        </em>
+                         </a>
+                        </volist>
+                        </div>
+                    </div>
+                    <?php }?>
+                </div>
+                <div class="headerOprList"><a href="{:U('Zggk/Index/index')}">返回首页</a></div>
+                <div class="headerOprList"><a href="index.php?g=Zggk&m=Logout&a=index">[退出]</a></div>
+            </div>
+            <div class="headerMsg">
+                <div class="text"><span>欢迎，{$userInfo.user_name}</span><i class="icon-down-dir"></i><i class="icon-up-dir"></i></div>
+                <div class="headerMore">
+                    <p>{$userInfo.user_name}，欢迎来到中港高科！</p>
+                    <p><span>{$nodename}<?php if($userInfo['status_tips']==1){ ?>，尊敬的旺财用户：截止到<span><?php echo date('Y年m月d日');?></span>,您的账户<span>已欠费</span>。为了不影响您继续使用旺财,请您尽快充值。如有疑问,请致电客服热线400-8827770。 <a href="<?php echo C('YZ_RECHARGE_URL')?>&node_id=<?php echo $userInfo['node_id'];?>&name=<?php echo $userInfo['user_name'];?>&token=<?php echo $token;?>">马上充值</a>
+<?php } ?></span></p>
+                    <p class="link"><a href="/index.php?g=Home&amp;m=NodeUserNew&amp;a=index">用户管理</a><a href="/index.php?g=Home&amp;m=EditPwd&amp;a=index">修改密码</a></p>
+                    <p class="link">
+                        <?php
+                        //支撑工单地址
+                        $pzt=get_iss_page_url('', '');
+                        if($_SESSION['GET_URL']==""){
+                        $userService = D('UserSess', 'Service');
+                        $sso = $userService->initSso();
+                        $userInfo = $userService->getUserInfo();
+                        $epos=C('EPOS_LOGIN_URL')."?token=".$userInfo['token']."&node_id=".$userInfo['node_id']."&node_name=".$userInfo['name']."&user_id=".$userInfo['user_id']."&user_name=".$userInfo['user_name'];
+                        session("epos_url",$epos);
+                        session("token_url",$userInfo['token']);
+                        $ds=C('DS_URL')."?token=".$userInfo['token']."&node_id=".$userInfo['node_id']."&node_name=".$userInfo['name']."&user_id=".$userInfo['user_id']."&user_name=".$userInfo['user_name'];
+                        session("ds_url",$ds);
+                        session('GET_URL','1');   
+                        }
+                        if(_hasIss()){
+                        ?>
+                        <a target="_blank" href="<?php echo $pzt;?>">翼码凭证通</a>
+                        <?php
+                        }
+                        ?>
+                        <?php
+                        //查询用户是否管理员
+                        $uInfo = M('tuser_info')->field("role_id")->where("node_id='".$userInfo['node_id']."' AND user_id='".$userInfo['user_id']."'")->find();
+                        if($uInfo['role_id']=='2'||$userInfo['node_id']=='00000000'){
+                        $sso_admin_url=C('SSO_ADMIN');
+                        $sso_id=C('SSO_SYSID');
+                        if($userInfo['token']=="" && !empty($_SESSION['token_url'])){
+                            $token_url=$_SESSION['token_url'];
+                        }else{
+                            $token_url=$userInfo['token'];
+                        }
+                        $sso_url=$sso_admin_url.$sso_id."&token=".$token_url;
+                        ?>
+                        <a target="_blank" href="<?php echo $sso_url;?>">SSO后台</a>
+                        <?php
+                        }
+                        ?>
+                        <?php
+                        if(_hasIss() && $userInfo['node_id']=='00000000'){
+                            if($userInfo['token']==""){
+                                $token_url=$_SESSION['token_url'];
+                            }else{
+                                $token_url=$userInfo['token'];
+                            }
+                            $wcadmin=C("WCADMIN_URL").$token_url;
+                        ?>
+                        <a target="_blank" href="<?php echo $wcadmin;?>">旺财后台</a>
+                        <?php
+                        }
+                        ?>
+                    </p>
+                </div>
+            </div>
+            <?php
+            }else{
+            ?>
+            <div class="headerOpr">
+                <div class="headerOprList"><a href="{:U('Zggk/Login/showLogin')}">登录</a></div>
+            </div>
+            <?php
+            }
+            ?>
+        </div>
+    </div>
+</div>
+
+<!--
+<style>
+    .global-input2 .global-input2-input {position:relative;}
+    #headerTwo,#headerTwo .logo { height: 56px;}
+    #headerTwo .logo { width: 332px;}
+    #headerTwo .logo-img { width: 332px; height: 56px; background: url(__PUBLIC__/Image/Wgxsy/logoGxsy.png) no-repeat 0 0;}
+</style>
+<div id="headerTwo">
+    <div class="header-bg">
+        <div class="header-container fn">
+            <div class="logo">
+                <div class="logo-img">
+                    <a href="{:U('CnpcGX/Index/index')}" class="a-hide" title="广西石油"></a>
+                </div>
+            </div>
+            <?php
+        if($userInfo['node_id']!="")
+        {
+        ?>
+                <div class="user-center">
+                    <div class="loginout r" style="line-height:16px;"><a href="index.php?g=CnpcGX&m=Logout&a=index">退出</a></div>
+                    <div class="user-bar r"><a href="/index.php?g=Home&amp;m=EditPwd&amp;a=index">修改密码</a></div>
+                    <div class="user-bar r"><a href="/index.php?g=Home&amp;m=NodeUserNew&amp;a=index">用户管理</a></div>
+                    <div class="user-bar r"><a href="/index.php?g=Home&amp;m=AccountInfo&amp;a=message">系统消息</a></div>
+                    <div class="user-bar r greenChannel" id="ywcd" style="overflow:visible; z-index:900"><a href="javascript:void();" class="js_showGC"><i class="gArrow"></i>业务菜单</a></div>
+                    <div class="greenChannel_show dn">
+                        <dl class="C_no1">
+                            <dd><a href="{:U('MicroWeb/Index/index')}">微官网<i class="blank"></i></a></dd>
+                            <dd><a href="{:U('LabelAdmin/Poster/index')}" class="hint hint-w">电子海报</a><a title="制作海报" href="{:U('LabelAdmin/Poster/add')}"><i></i></a></dd>
+                            <dd><a href="{:U('Weixin/Weixin/index')}" class="hint hint-w">微信营销</a><a title="立即绑定微信公众号" href="{:U('Weixin/Weixin/autobind')}"><i></i></a></dd>
+                            <dd><a href="{:U('Alipay/Index/index')}" class="hint hint-w">条码支付</a></dd>
+                        </dl>
+                        <dl class="C_no2">
+                            <dd><a href="{:U('Home/MarketActive/index')}" class="hint hint-w">营销活动</a><a title="创建抽奖" href="{:U('Home/MarketActive/createNew')}"><i></i></a></dd>
+                            <dd><a href="{:U('Wmember/Member/index')}" class="hint">会员管理</a></dd>
+                            <dd><a href="{:U('LabelAdmin/Channel/offlineCancel')}" class="hint hint-w">渠道管理</a></dd>
+                        </dl>
+                        <dl class="C_no3">
+                            <dd><a href="{:U('WangcaiPc/NumGoods/index')}" class="hint hint-w" style="width: 60px;">卡券管理</a><a title="新增一张卡券" href="{:U('WangcaiPc/NumGoods/addNumGoods')}"><i></i></a>
+                            </dd>
+                            <dd><a href="{:U('Home/Store/index')}" class="hint hint-w">门店管理 </a>
+                                <a title="申请终端 " href="{:U('Home/Store/Wapply_terminal')}"><i></i></a>
+                            </dd>
+                            <dd><a href="{:U('DataCenter/DateData/index')}" class="hint hint-w" data-hint="使用数据中心">数据中心</a></dd>
+                        </dl>
+                        <dl class="C_no4">
+                            <dt>其他</dt>
+                            <?php
+                    if(_hasIss()){
+                    ?>
+                                <dd><a target="_blank" href="<?php echo $pzt;?>"><span>翼码凭证通</span></a></dd>
+                                <?php
+                                }
+                                ?>
+                                    <dd><a target="_blank" href="<?php echo !empty($epos)?$epos:$_SESSION['epos_url'];?>"><span>EPOS系统</span></a></dd>
+                                    <dd><a target="_blank" href="http://221.181.75.11/gc/Invoicing/index.php"><span>纸质代金券</span></a></dd>
+                                    <?php
+                                //查询用户是否管理员
+                                $uInfo = M('tuser_info')->field("role_id")->where("node_id='".$userInfo['node_id']."' AND user_id='".$userInfo['user_id']."'")->find();
+                                if($uInfo['role_id']=='2'||$userInfo['node_id']=='00000000'){
+                                $sso_admin_url=C('SSO_ADMIN');
+                                $sso_id=C('SSO_SYSID');
+                                if($userInfo['token']=="" && !empty($_SESSION['token_url'])){
+                                    $token_url=$_SESSION['token_url'];
+                                }else{
+                                    $token_url=$userInfo['token'];
+                                }
+                                $sso_url=$sso_admin_url.$sso_id."&token=".$token_url;
+                                
+                                ?>
+                                        <dd><a target="_blank" href="<?php echo $sso_url;?>"><span>SSO后台</span></a></dd>
+                                        <?php 
+                                }
+                                ?>
+                        </dl>
+                    </div>
+                    <div class="care r">您好,<span>{$userInfo.user_name}</span>欢迎来到广西石油！</div>
+                </div>
+                <?php
+        }else{
+        ?>
+                    <div class="user-center mr30">
+                        <div class="loginin r"><a href="{:U('CnpcGX/Login/showLogin')}" class="mr15 login-url">登录</a></div>
+                    </div>
+                    <?php
+            }
+        ?>
+        </div>
+    </div>
+</div>
+-->

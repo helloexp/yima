@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>翼码旺财账会员中心-<if condition="ACTION_NAME eq 'edit'">编辑<else/>创建</if>终端</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wnumgoods.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?v=__VR__?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script>
+$(function(){
+	$("#smb").click(function(){
+		var type = "{$type}";
+		var type_tip = "确认要提交吗？";
+		if(type == 'EposAll'){
+			type_tip = "您开通的是全业务epos,每个月收费30元,您确定要申请epos?";
+		}
+		if($("#theform").validationEngine('validate') && confirm(type_tip)){
+		var dialog;
+		$("#theform").ajaxSubmit({
+			beforeSubmit:function(){
+				dialog = art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed: true,padding:0});
+			},
+			success:function(data){
+				 if(data.status == '1'){
+					   dialog.close();
+					   art.dialog.alert(data.info,function(){
+						var url = data.url.href;
+						if(url.indexOf('javascript:') == 0){
+							eval(url.substr(11,url.length));
+						}
+						else if(url != ''){
+							parent.location.href= url;
+						}
+						else{
+							art.dialog.close();
+						}
+					   });
+					   return false;
+				  }else{
+						dialog.time(3).content("<div class='msg-all-error'>"+data.info+"</div>");
+				  }
+			},
+			error:function(){
+				alert('error');
+			},
+			dataType:'json'
+		});
+		return false;
+	}
+	});
+})
+</script>
+</head>
+<body class="bgfff">
+<div style="width:840px; padding-left:30px;">
+	<div class="main-name fn">
+		<h4 class="bd-b-565656"><if condition="ACTION_NAME eq 'posEdit'">编辑<else/>申请</if>Epos</h4>
+	</div>
+	<div class="global-input6 fn">
+		<form method="post" action="{:U('Pos/eposAdd')}" id="theform">
+		 <input type="hidden" name="store_id" value="{$info.id}">
+         <input type="hidden" name="type" value="{$type}">
+			<div id="moremsg" class="fn">
+                <?php if($type=='EposAll'){ ?>
+                <ul>
+                    <li class="global-input6-name">&nbsp;价格：</li>
+                    <li class="global-input6-input"><p><eq name="is_12580" value="1">0<else/>30</eq>元/月</p></li>
+                </ul>
+                <?php }?>
+				<ul>
+					<li class="global-input6-name">*&nbsp;门店号：</li>
+					<li class="global-input6-input"><p>{$info.store_id}</p></li>
+				</ul>
+                <ul>
+    				<li class="global-input6-name">&nbsp;负责人邮箱：</li>
+    				<li class="global-input6-input"><p>{$info.principal_email}</p>
+                     <br />
+    				 <p style="color:red;">该邮箱将作为门店Epos系统登录账号的接收邮箱。</p>
+    				</li>
+			    </ul>
+    		</div>
+			
+			<ul>
+				<li class="global-input6-name"></li>
+				<li class="global-input6-input"><a href="javascript:void(0);" title="确认" id="smb" class="btn-all w110">提交</a><a href="javascript:art.dialog.close();" title="取消" class="btn-all-del w110 ml10">取消</a></li>
+			</ul>
+		</form>
+	</div>
+</div>
+</body>
+</html>

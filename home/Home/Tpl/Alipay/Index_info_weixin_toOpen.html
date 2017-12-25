@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>条码支付_翼码旺财</title>
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Wshop.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Walipay.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<load href="__PUBLIC__/Js/validationEngine/css/validationEngine.jquery.css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/citycode.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<js  href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<js href="__PUBLIC__/Js/validationEngine/languages/jquery.validationEngine-zh_CN.js?v=__VR__" />
+<js href="__PUBLIC__/Js/validationEngine/jquery.validationEngine.js?v=__VR__" />
+<style>
+	.alipay-input-content{line-height:30px;}
+	.alipay-input-content .text{
+		width:205px !important;
+		
+	}
+	.alipay-input-name{width:120px;}
+	h1{
+	background:#FFF2F3;
+	padding:5px 30px; 
+	padding-bottom:0 !important;
+	}
+	
+.Gform .textRead {
+    margin-top: 5px;
+    display: inline-block;
+    margin-right: 5px;
+    min-height: 14px;
+}
+</style>
+</head>
+<body>
+<div id="wrapper">
+        <include file="./Home/Tpl/Public/Public_header.html" />
+        <div class="shopNav">
+          <include file="./Home/Tpl/Alipay/Alipay_public_header.html" topmenuid="zhifu"/>
+          </div>
+     
+        <div id="container">
+            <div id="main" class="rel bgfff">
+            	 <div class="sidenav">
+                	 <include file="./Home/Tpl/Alipay/Index_left_menuNew2.html" leftmenuid="alipay"/>
+                 </div>
+                 <div class="subcon">
+                 <div class="main-name fn">
+                    <h4><a href="javascript:history.go(-1);" class="back"><i></i> 收款账户</a> / 微信支付待开通账户</h4>
+                </div>
+                <div class="tipNormal mb15">
+                	<ul>
+                    <li>开通步骤：① 提交资料  → ② 审核 → ③ 签约 → ④ 开通</li>
+                    <li>待开通账户状态说明：</li>
+                    <li><span style="color:#000">未审核：</span>提交申请后我们会在1个工作日内完成受理，之后会以短信形式通知您审核结果。</li>
+                    <li><span style="color:#000">未签约：</span>您的微信账户以及初始密码已发至您的联系邮箱；现需您登录微信支付商户平台完成“账户验证”及“协议签署”。</li>
+                    <li><span style="color:#000">未开通：</span>已成功申请微信支付，您提交相应的开通参数即可开通成功。</li>
+                    </ul>
+                </div>
+                <div class="Wcanal-tab" id="Wcanal-tabon">
+                <div class="Wcanal-tab-title fn">
+                    <p class="Wcanal-tab-hover"><a href="{:U('Alipay/Index/info_weixin_toOpen')}">微信支付</a></p>
+                    <p><a href="{:U('Alipay/Index/info_qqzf_toOpen')}">QQ支付</a></p>
+                    <p><a href="{:U('Alipay/Index/info_yizf_toOpen')}">翼支付</a></p>
+                </div>
+                <div class="Wcanal-tab-list">
+                <div class="edit-area">
+                <ul class="infoStatic mt15">
+                        <volist name="list" id="vo">
+                            <if condition="$vo.check_status eq '0'">
+                                <li>{$vo.add_time}提交账户申请资料,现在<span class="redfont">审核中</span>，您可以继续等待审核结果或<a href="{:U('info_weixin_open', array('id' =>$vo['id']))}">重新提交</a></li>
+                            <elseif condition="$vo.check_status eq '2'" />
+                                <li>{$vo.add_time}提交账户申请资料，现在审核<span class="redfont">未通过</span><i class="allAsk" title="原因:{$vo['check_memo']}" style="margin-top:0;"></i>，您可以<a href="{:U('info_weixin_open', array('id' =>$vo['id']))}">重新提交;</a></li>
+                            <elseif condition="$vo.check_status eq '1' AND $vo.sign_status eq '0' "  />
+                                <li>{$vo.add_time}提交账户申请资料已审核，账户名为{$vo.zfb_account}，现在<span class="redfont">未签约</span>，您可以去<a href="https://pay.weixin.qq.com" target="_blank">签约</a></li>
+                            <elseif condition="$vo.check_status eq '1' AND $vo.sign_status eq '1' AND $vo.status eq '0'" />
+                            <li>
+                                {$vo.add_time}已成功提交账户申请资料，现在审核<span class="redfont">已通过</span>，且<span class="redfont">已签约</span>，您可以去<a data-id="1" href="javascript:void(0);" onclick="goOpen({$vo.id})">开通</a>
+                            </li>
+                            <elseif condition="$vo.check_status eq '1' AND $vo.sign_status eq '1' AND $vo.status eq '2'" />
+                            <li>
+                                {$vo.add_time}已成功提交账户申请资料，现在审核<span class="redfont">已通过</span>，且已签约，已停用
+                            </li>
+                            <elseif condition="$vo.check_status eq '1' AND $vo.sign_status eq '1' AND $vo.status eq '3'" />
+                            <li>
+                            {$vo.add_time}已成功提交账户申请资料，账户名是：{$vo.zfb_account},现在审核<span class="redfont">已通过</span>，<span class="redfont">已签约</span>，已申请开通中...，请您耐心等待开通结果
+                            </li>
+                            </if>
+                        </volist> 
+                </ul>
+                <div class="page"></div>
+                </div>
+                </div>
+                </div> 
+                </div>  
+        	</div>
+    	</div>
+	<include file="./Home/Tpl/Public/Public_footer.html" />
+	<div class="service"></div>
+</div> 
+</body>
+</html>
+<script> 
+function goOpen(Id){
+    art.dialog({
+        title:"开通申请",
+        content:"<div class='DiatipsCon'>"+
+        "您的微信支付账号已成功申请，现在需要您提供对应的微信公众号appid。</div>"+
+        "<form action='')}'>"+
+        "<div class='Gform w1' style='margin-left:-30px;'>"+
+        "<ul>"+
+        "<li class='Gname'>公众号APPID</li>"+
+        "<li class='Ginput'><input type='text' name='appid' class='required'>"+
+        "<span class='txtTips'>此公众号即为支付后的默认关注公众号。</span></li>"+
+        "</ul></form>"+
+        "</div>",
+        width:"400px",
+        ok:function(){
+            var dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed:true,padding:0});
+            $.ajax({
+                url:"{:U('Alipay/Index/info_wexin_setAppId')}",
+                type:'POST',
+                data:{"id":Id,"appid":$(".required").val()},
+                dataType:'json',
+                success:function(data){
+                 dialog.close();
+                 console.log(data);
+                 if(data.status=='0000'){
+                    alert('提交失败,请重试!');
+                 }else{
+                    alert("提交成功!");
+                    location.reload();
+                 }
+                }
+            })
+        },
+        okVal:"确认",
+        cancel:true,
+        cancelVal:"取消"
+   })
+}
+function wxsub(){
+	var _dialog=art.dialog({title:false,content:"<div class='msg-all-succeed'>正在提交...</div>",fixed:true,padding:0});
+	  $.ajax({
+		  url:$('form').attr('action'),
+		  data:$('form').serialize(),
+		  dataType:'json',
+		  success:function(data){
+			 _dialog.close();
+		   if(data.status==0){ 
+				   Diaerror(data.info); 
+		   }
+		   else { 
+			   art.dialog({
+					title:"提交成功",
+					content:"<div class='loadTip'>"+
+					"<div class='loadStatus ok'>"+
+					"<dl>"+
+					"<dt>我们已经收到您提交的微信支付申请。</dt>"+
+					"<dd>旺小二将在1个工作日内完成信息的审核；</dd>"+
+					"<dd>审核完成后，我们会以短信通知您审核结果。</dd>"+
+					"</dl>"+
+					"</div>"+
+					"</div>",
+					width:"400px",
+					ok:function(){
+						window.location.href="{:U('Index/info_weixin_open')}"
+					},
+					okVal:"继续申请账号",
+					cancel:function(){
+						window.location.href="{:U('Index/info_weixin')}"
+					},
+					cancelVal:"返回申请列表"
+			   })
+		   }
+	
+	
+		  }
+	
+	})  
+                 
+        }
+	$(document).ready(function(){ 
+
+     $('#shop_type').change(function(){
+              if($(this).val()==1){
+              	  $('input[name^=organization_date]').parent().parent().parent().hide();
+              	  $('input[name=organization_code]').parent().parent().hide(); 
+              }
+                
+              if($(this).val()==0){
+              	  $('input[name^=organization_date]').parent().parent().parent().show();
+              	  $('input[name=organization_code]').parent().parent().show();
+              }
+                  
+        });
+
+		var win =["<div class='window'>",
+                	"<h1 class='title'>条码支付申请确认</h1>",
+                	"<div class='text'>",
+                		"<p class='tc mt25 mb15' id='zfb'></p>",
+                		"<p style='line-height: 1.5;'>旺小二将尽快审核您提交的信息，并提交至微信；相关进度可在<a href='javascript:;'>消息中心</a>查看。</p>",
+                	"</div>",
+                	"<div class='btns'>",
+                		"<button class='btn-all-del w100 mr20' onclick=\"javascript:art.dialog.list['comfid'].close();\">取消</button>",
+                		"<button class='btn-all w100' onclick='a()'>确认</button>",
+                	"</div>",
+                "</div>"].join(' ');
+        CityCode({
+    		province:$("#province_code"),//省
+    		city:$("#city_code"),//市
+    		selected:"{$wxInfo['province']}{$wxInfo['city']}",//默认选中的省市区代号
+    		url:"{:U('ListShop/AjaxCity/index3?node_id='.$node_id)}"//数据查询页
+       });
+         var opt={obj:"operate_category1",field:$("select[name=operate_category1]").attr('field'),selected:$("select[name=operate_category1]").attr('data')};
+         autogetcategory(opt);
+        
+	});
+	function getcategory(data){
+		$.post('{:U('Alipay/Index/operate_category')}',data,function(list){
+					var _option='';
+					var i=0;
+					$('select[name='+data.obj+']').empty();
+					if(list!=null)
+					for(i;i<list.length;i++){
+						_str="";
+						if(data.selected==list[i][data.field])
+								_str='selected=selected';
+						_option+="<option value='"+list[i][data.field]+"'"+_str+">"+list[i][data.field]+"</option>";	
+						}
+					if(_option!=''){
+						$('select[name='+data.obj+']').append(_option);
+						}
+					var _child=$('select[name='+data.obj+']').next();
+					if(list!=null) var _search=list[0][data.field]
+					else _search='';
+ 					if(_child.length>0){
+						getcategory({'search':_search, 'level':$('select[name='+data.obj+']').attr('field'),obj:_child.attr('name'),field:_child.attr('field'),selected:_child.attr('data')});		
+
+					}
+			},'json')
+}
+	
+	function autogetcategory(data){
+			$.post('{:U('Alipay/Index/operate_category')}',data,function(list){
+						var _option='';
+						var i=0;
+						if(list!=null)
+						for(i;i<list.length;i++){
+							_str="";
+							if(data.selected==list[i][data.field])
+									_str='selected=selected';
+							_option+="<option value='"+list[i][data.field]+"'"+_str+">"+list[i][data.field]+"</option>";	
+							}
+						if(_option!=''){
+							$('select[name='+data.obj+']').append(_option);
+							}
+						var _child=$('select[name='+data.obj+']').next();
+						var _search=data.selected?data.selected :list[0][data.field];
+						if(_child.length>0 && list!=null){
+							autogetcategory({'search':_search, 'level':$('select[name='+data.obj+']').attr('field'),obj:_child.attr('name'),field:_child.attr('field'),selected:_child.attr('data')});		
+						}
+				},'json')
+	}
+	function a(){
+	  $("#thisoneform").submit();
+	}
+	function organization_img(data){
+		cb_img('organization_img',data);
+		}
+	function contact_idmun_img2(data){
+		cb_img('contact_idmun_img2',data);
+		}
+	function business_img(data){
+		cb_img('business_img',data);
+		}
+	function contact_idmun_img1(data){
+		cb_img('contact_idmun_img1',data);
+		}
+	 function condition_img(data){
+		 cb_img('condition_img',data);
+		 }
+	 function cb_img(n, data){
+			//填充缩略图
+			$('img[id='+n+']').attr('src', data.src).show();
+			//上传用
+			$('input[name='+n+']').val(data.savename); 
+		} 
+	function uploadImg(cropPresets,callback) {
+        var opt = {
+            cropPresets:cropPresets,
+            callback:callback,
+            size:4,
+            thumb:1//不压缩
+        };
+        open_img_uploader(opt);
+	}
+</script>

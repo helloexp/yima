@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+        <meta content="telephone=no" name="format-detection" />
+        <meta content="email=no" name="format-detection" />
+        <meta name="apple-touch-fullscreen" content="NO">
+        <title>新增销售员</title>
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_wfx.css?v=__VR__">
+        <link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_Shop.css?v=__VR__">
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/jquery-2.1.1.min.js?v=__VR__"></script>
+        <include file="Public:Public:wechatAllShareJsdk" />
+        <script type="text/javascript" src="__PUBLIC__/Label/Js/wap_Shop.js?v=__VR__"></script>
+        <script type="text/javascript">
+            jQuery(document).ready(function($){
+                event.preventDefault();
+                $('.cd-popup').on('click', function(event){
+                    if( $(event.target).is('.cd-popup-close') || $(event.target).is('.cd-popup') ) {
+                        event.preventDefault();
+                        $(this).removeClass('is-visible');
+                    }
+                });
+            });
+        </script>
+        <style type="text/css">
+            .m-center{ padding-bottom:0}
+            .m-input{ border-bottom:0}
+            .m-input:last-child{ }
+            .cd-popup-container{width:95%;background-color:#FFF;}
+            #success{position:absolute;width:100%;border:1px solid;background-color:#666;z-index:9999;display: none;}
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                wx.ready(function () {
+                    wx.hideOptionMenu();
+                })
+            })
+        </script>
+    </head>
+    <body class="bg-f5">
+        <div class="cd-popup" role="alert" id="success">
+        <div class="cd-popup-container">
+            <div>错误提示：</div>
+            <div id="error_content"></div>
+        </div>
+        </div> 
+        <div id="wrapper">
+            <div id="container">
+                <div id="main">
+                <include file="Wfx:top"/>
+                    <div class="no_bg">
+                        信息需审核，请耐心等待！
+                    </div>
+                    <div class="m-bind">
+                        <div class="m-input">
+                            <p class="tit">销售员姓名</p>
+                            <p class="cont"><input type="text" class="input" name='salerName' placeholder="必填"></p>
+                        </div>
+                        <div class="m-input" style="padding-bottom:5px;border-bottom:1px solid #ddd">
+                            <p class="tit">手机号码</p>
+                            <p class="cont"><input type="text" class="input" name='salerPhone' placeholder="必填，用于登录分销系统"></p>
+                        </div>
+                    </div>
+                    <div style="color:red;padding-top:10px;background-color: #fff;" id='error'></div>
+                    <a class="m-btn" href="javascript:;" id='submitForm' style='margin-top: 10px;'>提交</a>
+                </div>
+            </div>
+        </div>
+	<include file="Store:nav"/>
+    </body>
+    <script type='text/javascript'>
+        $(function() {
+            function errorRelease(msg){
+                $('#error').empty();
+                $('#error').append(msg);
+            }
+            
+            function successRelease(msg){
+                $('.cd-popup').addClass('is-visible');
+                $('#error_content').html(msg);
+            }
+            
+            $('#submitForm').click(function() {
+                var salerName = $('input[name=salerName]').val();
+                var salerPhone = $('input[name=salerPhone]').val();
+                if (salerName == '' || salerPhone == '') {
+                    errorRelease('请输入销售员姓名及手机号码。');
+                    return false;
+                } else {
+                    var reg = /^1[34578][0-9]{9}$/;
+                    if (!reg.test(salerPhone)) {
+                        errorRelease('您输入的手机号码格式有误。');
+                        return false;
+                    }
+                }
+
+                $.post("{:U('Label/MyOrder/addSaler')}", {'salerName': salerName, 'salerPhone': salerPhone}, function(data) {
+                    data = eval("(" + data + ")");
+                    if(data['error'] != '0'){
+                        errorRelease(data['msg']);
+                    }else{
+                        successRelease(data['msg']);
+                        setTimeout(function(){
+                            window.location.href = "{:U('Label/MyOrder/mySaler')}";
+                        }, 3000);
+                    }
+                });
+            });
+        })
+
+    </script>
+</html>	

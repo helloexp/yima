@@ -1,0 +1,576 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>操作平台-{:C('SITE_TITLE')}</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="keywords" content="{:C('SITE_KEYWORDS')}" />
+<meta name="description" content="{:C('SITE_DESCRIPTION')}" />
+<link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+<link href="__PUBLIC__/Css/Windex.css?v=__VR__" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.easing.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/global.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/Windex.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<style>
+    .list-wrapper a:hover{text-decoration:none;}
+    .sysmsg_special{display:inline !important;
+                    color:#990000;
+                    font-family: "Arial Negreta","Arial";
+                    font-style: normal;
+                    font-weight: 700;
+                    border:1px solid #990000;
+        }
+        .sysmsgtitle,.sysmsgtitle:hover{
+                 color:#4D4D4D;
+                 text-decoration: none;
+            
+        }
+    .list-wrapper .hot-part i.hot-part-i-3,.list-wrapper .hot-part i.hot-part-i-4,.list-wrapper .hot-part i.hot-part-i-5,.list-wrapper .hot-part i.hot-part-i-9 { background-image: url(__PUBLIC__/Image/df/icon-index-df.png);}
+    .hot-part-i-3 { background-position: 0 0;}
+    .hot-part-i-4 { background-position: -64px 0;}
+    .hot-part-i-5 { background-position: 0 -64px;}
+    .hot-part-i-9 { background-position: -64px -64px;}
+
+
+    #especially{
+        background-color: #f00;
+        border-radius: 2px;
+        color: #fff;
+        display: inline-block;
+        font-size: 12px;
+        font-style: normal;
+        line-height: 12px;
+        margin-right: 5px;
+        padding: 2px 4px;
+    }
+</style>
+</if>
+
+
+
+<?php 
+    $check_memo = str_replace(array("\r\n", "\r", "\n"), '<br/>', $node['check_memo']);
+    $tipStr = '';
+    $url = C('YZ_RECHARGE_URL')."&node_id=".$userInfo['node_id']."&name=".$userInfo['user_name']."&token=".$token;
+    $wcVersion = get_wc_version();
+    $overPrice = $FlowInfo['AccountPrice'] + $FlowInfo['WbPrice'];
+    if($node['check_status']==1){
+        $tipStr = "<p style='padding:5px 0;'>您的企业资质信息未通过审核，您可以在账户中心的<a href='index.php?g=Home&m=AccountInfo&a=index'>企业资质信息</a>内重新上传并提交。</p>";
+    }
+    if($userInfo['status_tips']==1){
+         $tipStr .= "<p style='padding:5px 0;'>截止到".date('Y年m月d日').",您的账户已欠费。为了不影响您继续使用旺财,请您<a href='".$url."'>尽快充值</a>。如有疑问,请致电客服热线400-8827770。</p>";
+    }
+    if($userInfo['status_tips']!=1&&$overPrice>=0&&$overPrice<=50&&$wcVersion!='v0'&&$wcVersion!='v0.5'&&$wcVersion!='v4'&&$userInfo['pay_type']=='1'){
+       $tipStr .= "<p style='padding:5px 0;'>截止到".date('Y年m月d日').",您的账户余额和旺币余额合计已不足50元。为了不影响您继续使用旺财,请您<a href='".$url."'>尽快充值</a>。如有疑问,请致电客服热线400-8827770。</p>";
+    }
+    if(!empty($tipStr)&&$_SESSION['tips']!=1){
+?>
+<script type="text/javascript">  
+$(function(){
+	art.dialog({title:'提示信息',width:500,content:"<img src='__PUBLIC__/Image/msgerror.png' class='l'><div style='margin-left:100px; font-size:14px;line-height:18px;'><?php echo $tipStr; ?></div>",lock: true,fixed:true});
+ });
+</script>
+<?php 
+	$_SESSION['tips']=1;
+}
+?>
+
+<script>
+$(document).ready(function(e){
+    //上传logo图片
+    $("#js-header-logo").click(function(){
+        var opt = {
+            obj:$("#img_resp_show"),
+            height:160,
+            width:160,
+            callback:function(data){
+                //更新头销
+                var loading = art.dialog({title:false,content:'正在更新...'});
+                $.post("{:U('Home/Index/saveHeadLogo')}",{
+                    savename:data.savename
+                },function(res){
+                    loading.close();
+                    if(!res.status){
+                        alert(res.info);
+                        return;
+                    }
+                    $("#img_resp_show").attr('src',data.src);
+                },'json');
+            }
+        };
+        open_img_uploader(opt);
+    });
+});
+</script>
+</head>
+<body>
+<div id="wrapper" class="edeff5 nomalCon">
+ <include file="./Home/Tpl/Public/Public_header.html" />
+    <div class="IndHeader">
+     	<div class="w1100 fn">
+        	<div class="userbar">
+                <div class="userbar-portrait">
+                    <div class="portrait" id="js-header-logo">
+                        <?php
+                        if($nodeInfo['head_photo']!=""){
+                        ?>
+                        <img src="<?php echo get_upload_url($nodeInfo['head_photo'])?>" name="img_resp_show" id="img_resp_show"/>
+                        <?php 
+                        }else{
+                        ?>
+                        <img src="__PUBLIC__/Image/portrait.gif" name="img_resp_show" id="img_resp_show"/>
+                        <?php
+                        }
+                        ?>
+                        <input type="hidden" value="" name="img_resp" id="img_resp" />
+                    </div>
+                </div>
+                <div class="userbar-name">
+                	{$nodename}
+                	<?php if($nodeInfo['node_type']=='2'&&$nodeInfo['check_status']!='2'){?>
+                    <a href="javascript:void(0);" onclick="certif('<?php echo C('CERTIF_URL').$token;?>');"><i class="icon-novip">
+                        </i></a>
+                    <?php }else{?>
+                    	<i class="icon-vip"></i>
+                    <?php }?>
+                </div>
+                <div class="userbar-id">企业旺号：{$clientid}</div>
+                <?php 
+                //if($nodetype=='1'){
+                if($nodeInfo['pay_type']==1&&$nodeInfo['node_type']<=2){
+                ?>
+                <div class="userbar-money">
+                	余额：<span><?php if(!empty($FlowInfo['AccountPrice'])){?><?php echo $FlowInfo['AccountPrice']; ?><?php}else{?>0.00<?php }?></span>元<a href="javascript:void(0)"  id="js_spm_ye"><i class="allAsk mr10" style="vertical-align: -5px;"></i></i></a>旺币：<span><?php if(!empty($FlowInfo['AccountPrice'])){?><?php echo $FlowInfo['WbPrice']; ?><?php}else{?>0<?php }?></span>个<a href="javascript:void(0)"  id="js_spm_wb"><i class="allAsk" style="vertical-align: -5px;"></i></a>
+                </div>
+                <?php }?>
+                <div class="userbar-money mt10">
+                	<a href="{:U('Home/AccountInfo/index')}" id="js_spm_account">账户中心</a><?php if(($nodeInfo['pay_type']==1||$nodeInfo['pay_type']==0)&&$nodeInfo['node_type']<=2){?><a href="<?php echo C('YZ_RECHARGE_URL')?>&node_id=<?php echo $userInfo['node_id'];?>&name=<?php echo $userInfo['user_name'];?>&token=<?php echo $token;?>" target="_blank" class="ml10">充值</a><?php } ?><a href="{:U('Home/Wservice/basicVersion')}"  class="ml10 red" id="js_spm_buyNorWc">在线签约</a>
+                    <a href="{:U('Home/Index/index',['useold'=>'2'])}"  class="ml10 red" id="js_spm_buyNorWc">体验新版</a>
+                </div>
+            </div>
+            <div class="wcService fn">
+                <a href="javascript:void(0)" onclick="managercard()"><img src="__PUBLIC__/Image/wcService.png" class="l" /></a>
+            	<dl>
+                	<dd class="qq"><a href="http://wpa.b.qq.com/cgi/wpa.php?ln=1&key=XzkzODA2Njc3MF8zNzA4NjdfNDAwODgwNzAwNV8yXw" target="_blank"><i class="icon-wcService4"></i>在线QQ咨询</a></dd>
+                	<dd class="class">
+                    	<a href="javascript:void(0)" onclick="oClass()"><i class="icon-wcService5"><?=date('Y')?><br /><?=date('m.d')?></i>O2O营销公开课</a>
+                    	<div class="dn">
+                        	<span id="oClassTeacher">讲师{$o2o_info.lector_name}</span>
+                            <span id="oClassName">{$o2o_info.content}</span>
+                            <span id="oClassTime"><?=dateformat($o2o_info['apply_time'],'Y-m-d H:i:s')?></span>
+                            <span id="oClassOrder">{$o2o_info.apply_info}</span>
+                            <span id="oClassUrl">{:C('adminUploadImgUrl')}{$o2o_info.lector_url}</span>
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+            <div class="activityData">
+            	<ul class="fn">
+                	<li><p><a href="{:U('MarketActive/Activity/MarketList')}">{$batchNum}</a></p><a href="{:U('MarketActive/Activity/MarketList')}"><h4>活动数</h4></a></li>
+                    <li><p><a href="{:U('MarketActive/DataCenter/index')}">{$visitSum}</a></p><a href="{:U('MarketActive/DataCenter/index')}"><h4>活动访问人数</h4></a></li>
+                    <li><p><a href="{:U('DataCenter/CompareData/goodsData')}">{$sendSum}</a></p><a href="{:U('DataCenter/CompareData/goodsData')}"><h4>卡券发放数</h4></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>  
+	<div id="container">
+    	<div id="main">
+            <eq name="nRegFrom" value="7">
+			<eq name="isCreateStore" value="0">
+            <div style="width:400px;height:30px;line-height:30px;margin:0 auto;margin-bottom:25px;background:#fff;">
+                <p style="text-align:center;font-size:14px;"><a href="{:U('Home/Store/index',array('tip'=>1))}">旺财知道您想获取APP终端号，快猛戳这里吧！</a></p>
+            </div>
+            </eq>
+            </eq>
+			
+			<if condition="!empty($sysmsglist)">
+			<div class="ind-voice rel" style="z-index:2;">
+            	<div class="t"><i></i><a  class="sysmsgtitle" href="{:U('AccountInfo/message')}" id="js_spm_xitongxiaoxi">系统消息：</a></div>
+                <div class="opr">
+                	<i class="pre"></i>
+                    <i class="next"></i>
+                </div>
+                <div class="list">
+                	<ul>
+                	<volist name='sysmsglist' id='v'>
+                	 <li>
+                	   <volist name='v' id='item'>
+                          <a  target='_blank' href="{:U('AccountInfo/message_view',array('id'=>$item[id],'seq'=>$item['seq_id']))}"><if condition="$item['is_special'] eq 1"><font id="especially">特</font></if>{:msubstr($item['title'],0,25)}</a>
+                        </volist>
+                        </li>
+                	</volist>
+                    </ul>
+                </div>
+            </div>
+            </if>
+			<div class="ind-main rel" style="z-index:2;">
+  				<div class="nav-hot" <if condition="isset($fb_type) and !strcasecmp($fb_type,'df')">style="display:none"</if>>
+ 					<div class="left-nav">
+ 						<div class="news-sign"></div>
+ 						<h1>热门</h1>
+ 					</div>
+    				<ul class="list-wrapper fn">
+                        <foreach name="clickList" item="vo">
+                            <a target="_blank" href="{:U($vo['go_url'])}" id="js_click_{$vo['p_name']}">
+                                <li class="free mt70 first-row"><i class="corner-icon">经常使用</i>
+                                <div class="hot-part hot-part{$vo.bg_color}">
+                                    <i class="{$vo.icon_seek}"></i>
+                                </div>
+                                <h1>{$vo.recommend_name}</h1>
+                                <p>{$vo.buss_title}</p>
+                                </li>
+                            </a>
+                        </foreach>
+                        <foreach name="hotList" item="vo">
+                            <a target="_blank" href="{:U($vo['go_url'])}" id="js_hot_{$vo['p_name']}">
+                                <php>if($vo['special_label']){
+                                    echo '<li class="free mt70 first-row"><i class="corner-icon">'.$vo['special_label'].'</i>';
+                                    }else{
+                                        echo '<li class="mt70 first-row">';
+                                        }
+                                </php>
+                                    <div class="hot-part hot-part{$vo.bg_color}">
+                                        <i class="{$vo.icon_seek}"></i>
+                                    </div>
+                                    <h1>{$vo.recommend_name}</h1>
+                                    <p>{$vo.buss_title}</p>
+                                </li>
+                            </a>
+                        </foreach>
+    				</ul>
+				</div>
+                <img src="__PUBLIC__/Image/index-line-shadow.png" alt="" />
+                <include file="./Home/Tpl/Home/Index_index_fb.html" />
+				<div class="nav-normal bbm" style="padding-top:6px;">
+					<div class="left-nav">
+						<h2 style="padding-top:0;">旺业务</h2>
+					</div>
+					<ul class="list-wrapper fn list-yw">						
+						<a href="{:U('MarketActive/Activity/index')}" id="js_spm_changjianyixiaohuodong">
+						<li>
+							<i class="normal-icon normal-icon1"></i>
+							<h2>多乐互动</h2>
+                            </li>
+                        </a>
+                        <a href="{:U('Home/Index/marketingShow5')}" id="js_spm_o2odianshang">
+                            <li>
+                                <i class="normal-icon normal-icon3"></i>
+                                <h2>多宝电商</h2>
+                            </li>
+                        </a>
+
+                        <a href="{:U('Alipay/Index/index')}" id="js_spm_tiaomazhifu">
+                            <li>
+                                <i class="normal-icon normal-icon5"></i>
+                                <h2>多米收单</h2>
+                            </li>
+                        </a>
+                        <a href="{:U('Alipay/Paysend/index')}" id="js_spm_fms">
+                            <li>
+                                <i class="normal-icon normal-icon35"></i>
+                                <h2>付满送</h2>
+                            </li>
+                        </a>
+                        <a target="_blank" href="{:U('Hall/Index/index')}" id="js_spm_dianzhiquanjiaoyidating">
+                            <li>
+                                <i class="normal-icon normal-icon19"></i>
+                                <h2>卡券商城</h2>
+                            </li>
+                        </a>
+                        <a href="{:U('Hall/Mypartner/index')}" id="js_spm_dianzhiquanfenxiaozhushou">
+                            <li>
+                                <i class="normal-icon normal-icon22"></i>
+                                <h2>卡券分销助手</h2>
+                            </li>
+                        </a>
+                        <a href="{:U('Wfx/Fxgl/index')}">
+                            <li>
+                                <i class="normal-icon normal-icon30"></i>
+                                <h2>旺分销</h2>
+                            </li>
+                        </a>
+					</ul>
+				</div>	
+				<div class="nav-normal bbm">
+					<div class="left-nav">
+						<h2>旺渠道</h2>
+					</div>
+					<ul class="list-wrapper fn list-qd">
+						<a href="{:U('LabelAdmin/Channel/IndexNew')}&htmlid=11&type=1&sns_type=21" id="js_spm_erweimabiaoqianqudao">
+                        <li>
+                            <i class="normal-icon normal-icon9"></i>
+                            <h2>自建渠道</h2>
+                        </li>
+                        </a>
+                        <a href="{:U('Weixin/Weixin/index')}" id="js_spm_weixinyinxiao">
+						<li>
+							<i class="normal-icon normal-icon6"></i>
+							<h2>微信公众号</h2>
+						</li>
+						</a>
+						
+					</ul>
+				</div>
+				<div class="nav-normal bbm">
+					<div class="left-nav">
+						<h2>旺管理</h2>
+					</div>
+					<ul class="list-wrapper fn list-gl">						
+						<a href="{:U('WangcaiPc/NumGoods/index')}" id="js_spm_dianzhiquanguanli">
+						<li>
+							<i class="normal-icon normal-icon10"></i>
+							<h2>卡券管理</h2>
+						</li>
+						</a>						
+						<a href="{:U('Home/Store/index')}" id="js_spm_mendianguanli">
+						<li>
+							<i class="normal-icon normal-icon11"></i>
+							<h2>门店管理</h2>
+						</li>	
+						</a>
+                        <?php if($fb_type != 'df'){ ?> 
+						<a href="<if condition="($ispowermember eq true) and $Mcount gt 0">
+								{:U('Wmember/Member/index')}
+								<else/>
+								{:U('Wmember/Member/promotionn4880')}
+								
+						</if>"  >
+						<li>
+							<i class="normal-icon normal-icon31"></i>
+							<h2>会员管理</h2>
+						</li>
+                        <?php } ?>
+                        <a href="{:U('Integral/Integral/index')}" />
+                        <li>
+                            <i class="normal-icon normal-icon36"></i>
+                            <h2>多赢积分</h2>
+                        </li>
+						</a>	
+						<a href="{:U('DataCenter/DateData/index')}" id="js_spm_shujuzhongxin">
+						<li>
+							<i class="normal-icon normal-icon13"></i>
+							<h2>数据中心</h2>
+						</li>
+						</a>
+                        <a href="{:U('Home/AccountInfo/index')}" id="js_spm_zhanghuzhongxin">
+                            <li>
+                                <i class="normal-icon normal-icon23"></i>
+                                <h2>账户中心</h2>
+                            </li>
+                        </a>
+                    </ul>
+				</div>				
+				<div class="nav-normal">
+					<div class="left-nav">
+						<h2>旺工具</h2>
+					</div>
+					<ul class="list-wrapper fn list-gj">						
+						<a href="{:U('Home/Store/navigation')}" id="js_spm_mendiandaohang">
+						<li>
+							<i class="normal-icon normal-icon17"></i>
+							<h2>门店导航</h2>
+						</li>
+						</a>
+                        <if condition="$userInfo['node_id'] eq C('chaowai.node_id') ">
+                        <a href="{:U('Chaowai/MovingCar/index')}" id="js_spm_mendiandaohang">
+                        <li>
+                            <i class="normal-icon normal-icon17"></i>
+                            <h2>挪车服务</h2>
+                        </li>
+                        </a>
+                        </if>
+							<a href="{:U('Home/Wservice/windex',array('wserver_id'=>1))}" id="js_spm_o2ohuodong">
+						<li>
+							<i class="normal-icon" style="background-position:-387px -256px"></i>
+							<h2>旺服务</h2>
+						</li>
+						</a>
+						
+						<if condition="in_array($_SESSION['userSessInfo']['node_id'], C('access_jd_node_id'))">
+						<a href="{:U('Fb/Jingdong/groupBuyList')}" id="js_spm_jingdongtuangou">
+						<li>
+							<i class="normal-icon" style="background-position:-448px -64px;"></i>
+							<h2>京东团购</h2>
+						</li>
+						</a>
+						</if>
+						<if condition="$userInfo['node_id'] eq C('hbtpybx.node_id')">
+							<a href="{:U('HbTpy/Index/index')}" id="js_spm_zhongjiangchaxun">
+								<li>
+									<i class="normal-icon" style="background: url(__PUBLIC__/Image/fb/hbtpy_index_icon.png)"></i>
+									<h2>中奖查询</h2>
+								</li>
+							</a>
+						</if>
+                        <if condition="$userInfo['node_id'] eq C('gstpybx.node_id')">
+                            <a href="{:U('GsTpy/Index/index')}" id="js_spm_zhongjiangchaxun">
+                                <li>
+                                    <i class="normal-icon" style="background: url(__PUBLIC__/Image/fb/hbtpy_index_icon.png)"></i>
+                                    <h2>中奖查询</h2>
+                                </li>
+                            </a>
+                        </if>
+                        <if condition="$userInfo['node_id'] eq C('sxtpybx.node_id')">
+                            <a href="{:U('SxTpy/Index/index')}" id="js_spm_zhongjiangchaxun">
+                                <li>
+                                    <i class="normal-icon" style="background: url(__PUBLIC__/Image/fb/hbtpy_index_icon.png)"></i>
+                                    <h2>中奖查询</h2>
+                                </li>
+                            </a>
+                        </if>
+						<a href="{:U('WangcaiPc/TicketHelper/validate')}" id="js_spm_dianzihaibao">
+                        <li>
+                            <i class="normal-icon"  style='background-position: -528px -257px;'></i>
+                            <h2>卡券验证助手</h2>
+                        </li>
+                        </a>
+					</ul>
+				</div>
+    		</div>
+			</div>
+    	</div>
+    </div>
+    <include file="./Home/Tpl/Public/Public_footer.html" />
+    <div class="service"></div>
+</div>
+</body>
+</html>
+<script>
+window._g = window._g || {};
+_g.wc_version = '{$wcVersion}';
+_g.url_150501_pop = '{:U('LabelAdmin/LaborDay/index_pop')}';
+_g.laborday_popwin_flag = '{$laborday_popwin_flag}';
+$(function(){
+	//信息提示
+	$.get("<?php echo U('Home/Popwindow/pop_up'); ?>","",function(url){
+		artTip(url.data);
+	},'json');
+	
+	$("#add-shop").click(function(){
+			art.dialog.open(this.href,{
+				title: '新增门店',
+				width:'900px',
+				height:'80%',
+				lock:true
+			});
+			return false;
+    });
+    //营销课呀，谁再不加，劳资哦
+    $(".windowForm .min").live("click",function(){
+        var node=$(".windowForm form p");
+        var padd="<p class='mt10'><input class='windowtextbox w1-b validate[custom[integer],required]' type='text' name='qq[]' maxlength='12' placeholder='QQ' /></p>";
+        if(node.size()>4){
+            node.eq($(this).size()-3).remove();
+        }
+    })
+    $(".windowForm .add").live("click",function(){
+        var node=$(".windowForm form p");
+        var padd="<p class='mt10'><input class='windowtextbox w1-b validate[custom[integer],required]' type='text' name='qq[]' maxlength='12'  placeholder='QQ' /></p>";
+        if(node.size()<6){
+            node.eq($(this).size()-3).after(padd);
+        }
+    })
+    $('#sub_button2').live("click",function(){
+        $("#theform2").ajaxSubmit({
+            success:function(data){
+                $('.windowBg').hide();
+                art.dialog({
+                        width:"200px",
+                        title:"提示",
+                        lock:true,
+                        content:data.info,
+                        ok:true
+                    });
+            },
+            dataType:'json'
+        });
+        return false;
+    });
+
+    var fr = $('.first-row');
+    for(var i=0;i<=4;i++){
+        fr.eq(i).css('margin-top',0);
+    }
+
+    
+    $('.nav-normal:not(:first)').css('padding-top',40);
+
+});
+function certif(url){
+    art.dialog.open(url,{
+        title:'企业资质认证',width:750,height:600,lock:true,
+        close:function(){
+            var win = art.dialog.open.origin;
+            win.location.href = "index.php?m=AccountInfo&a=index";
+        }
+    });
+}
+function windowBg(){
+    var html=
+    ['<div class="oClass" style="height:240px;">',
+        '<div class="title">O2O实战培训免费报名</div>',
+        '<div class="windowForm">',
+                '<div class="add"></div>',
+                '<div class="min"></div>',
+                '<form action="index.php?g=Home&amp;m=O2oSchool&amp;a=training" method="post" id="theform2">',
+                    '<p>输入您的QQ号，我们会将您加入直播培训群</p>',
+                    '<p class="mt10"><input class="windowtextbox w1-b validate[custom[integer],required]" type="text" name="qq[]" maxlength="12" placeholder="QQ"></p>',
+                    '<p class="mt30 mb20"><input type="button" id="sub_button2" class="windowsubmit" value="免费报名"></p>',
+                '</form>',
+            '</div>',
+            '<a href="javascript:void(0)" class="close-mySec blue" onclick="windowBgclose()"></a>',
+        '</div>'].join('');
+    art.dialog({
+        id:'windowBg',
+        title:false,
+        content:html,
+        padding:"0",
+        top:"50%",
+        lock:true
+    });
+
+   
+}
+function windowBgclose(){
+    art.dialog({id:'windowBg'}).close();
+}
+</script>
+<script type="text/html" id="wangbi">
+   <div class="wangbi">
+       <h2>旺币说明</h2>
+        <p>1.旺币，是上海翼码因旺财平台的计费、客户回馈、营销管理等需要而发行的“虚拟货币”，仅可用于购买或体验旺财平台上的收费功能或服务，不能销售，不能转让，不能退，不能兑换现金。</p>
+        <p>2. 无论用户是否与上海翼码签订具体的业务合作协议，本说明均适用。但是，如与上海翼码签订了具体的业务合作协议、且协议中有旺币条款、且条款与本说明冲突，则冲突的部分以协议条款为准，没有冲突或条款中未涉及的部分，本说明仍然适用。</p>
+        <p>3. 客户在成为旺财平台用户、或参与上海翼码组织的营销推广、或与上海翼码签约合作协议时，可能获得上海翼码赠送的旺币。</p>
+        <p>4. 无论是通过何渠道、方式获得的旺币，当用户使用旺币购买或体验旺财平台的收费功能或服务时，按上海翼码公示的收费标准、按旺币与人民币1:1对价进行旺币扣减。如与上海翼码签订了业务合作协议，则按协议中约定的收费标准、按旺币与人民币1:1对价进行旺币扣减。</p>
+        <p>5. 旺币只可用于支付翼码卡券流量费、终端服务费、多米收单服务费、多乐互动业务服务费（请注意：收费项名称务必与“收费标准”、“合同模板”等形成对应），不能用于支付开展多米收单业务的客户用公司短信网关下发卡券的短信通道费。</p>
+        <p>6. 用户使用旺币支付结算账单时，用旺币结算的部分不予开票。</p>
+        <p>7. 旺币具有有效期，过期作废。除非在获赠旺币时另有说明或与上海翼码签订的业务合作协议中另有约定，旺币有效期均为一年，自获赠之日起算。</p>
+        <p>8. 如用户在旺财平台的账户中既有人民币、又有旺币，则优先消耗旺币且优先其中即将到期的旺币。但是，用户每月可消耗或使用的旺币总额不得超过2000，超过部分必须以人民币支付与结算。</p>
+        <p>9. 在不违反法律法规的情况下，旺币的解释权归上海翼码所有。</p>
+
+   </div>
+        
+    
+</script>
+
+
+<script type="text/html" id="yue">
+    <div class="wangbi">
+       <h2>账户余额说明</h2>
+        <p>1，上海新大陆翼码信息科技股份有限公司（以下简称上海翼码）旺财平台用户可登录旺财平台点击“充值”来通过银联支付、支付宝支付进行账户充值。</p>
+        <p>2，完成账户充值后，用户账户中的金额就被称为“账户余额”，用户可自行查看“账户余额”。</p>
+        <p>3，“账户余额”可用于支付：业务服务费、凭证流量费、受理服务费、卡券商城的商品采购、终端设备使用押金等，不能用于支付：订制开发费等其它费用、终端设备赔偿、卡券在线交易采购款等。</p>
+        <p>4，如用户无特殊要求，在用户充值时，上海翼码不对此预付费开具发票，而是在次月月初，根据用户实际选择的服务、收费标准、服务时长等计算服务费并开票。</p>
+        <p>5，关于账户余额的提现，如用户有需求，在完成支付应付款的情况下，用户账户中还有余额，可向上海翼码提出提现的要求，上海翼码予以配合。</p>
+   </div>
+
+    
+</script>

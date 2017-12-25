@@ -1,0 +1,788 @@
+<style type="text/css">
+    .pop { display: none; font-family: "微软雅黑"; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: rgba(0,0,0,.2); text-align: center; z-index: 10001;}
+    .pop .box { position: relative; width: 80%; height: auto; min-width: 280px; max-width: 580px; margin: 80px auto 0 auto; padding: 10px 0; background: #ffffff; border-radius: 5px; box-shadow: inset 0 0 10px rgba(0,0,0,.3);}
+    .pop .box li { list-style: none;}
+    .pop .box i { display: block; width: 18px; height: 18px; font-size: 32px; font-style: normal; color: #999999; -webkit-transform: rotate(45deg); position: absolute; right: 0px; top: 0px; cursor: pointer;}
+    .pop .box img { vertical-align: middle; margin-right: 20px;}
+    .pop .box span { font-size: 16px;}
+    .pop .box a { display: block; width: 170px; height: 35px; line-height: 35px; margin: 10px auto; text-decoration: none; color: #ffffff; background: #bf0600; border-radius: 5px; font-size: 18px;}
+
+</style>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery-ui-1.11.2.custom/template.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Js/Util_tools.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.cookie.js?v=__VR__"></script>
+<php>
+    //设置cookie手机
+    $_global_user_mobile = cookie('_global_user_mobile');
+    $u_arr = array();
+    $sharebatch_returnCj_url = U('Label/ShareBatch/returnCj', $u_arr);
+</php>
+<script type="text/javascript">
+var _pay_token='{$pay_token}';
+var activityFlag = "";
+var isgocj = true;
+var isPaySendActivity = parseInt('{$isPaySendActivity}');
+var zp_type = "{$row['cj_phone_type']}";//转盘类型
+var member_registration = "{:U('Label/MemberRecruit/index',array('id'=>$member_reg_label_id))}";
+$(document).ready(function(e) {
+	$(".close-AjaxWrapper").click(function(){
+        $("#AjaxWrapper").hide();
+        $("#popForm").hide();
+        $("#popMsg").hide();
+        var lotCenterObj = $(".lotCenter");
+        if(lotCenterObj.hasClass("lotCenter-market")){
+            lotCenterObj.attr("class","lotCenter lotCenter-market");
+        }else{
+            lotCenterObj.attr("class","lotCenter");
+        }
+	});
+});
+
+window['getWxCard'] = function(){
+    alert('您点得太快了，请多点几次');
+};
+document.addEventListener('WeixinJSBridgeReady', function(){
+   window['getWxCard'] = function(data){
+        if(typeof(WeixinJSBridge) == 'undefined'){
+            alert('wait...');
+            return;
+        }
+        WeixinJSBridge.invoke('batchAddCard', {
+            "card_list": [{
+                "card_id": data.card_id,
+                "card_ext": data.card_ext
+            }]
+        },function(res){
+            var _a='{$sharedid}';
+            if ('{$batch_type}'==54 && _a ==''){
+                $("#AjaxWrapper").fadeOut();
+                $("#js-popForm-other").hide(); 
+                $(".btns-all").click();
+           } 
+           if ('{$batch_type}'==54 && _a !=''){
+                window.location.href='{:U("PaySendActivity/index",array_merge($_REQUEST,array("check"=>1)))}';
+           } 
+	 })
+    }
+}, false);
+
+//处理中奖结果
+function handelCjResult(data){
+	console.log(data);
+    var _endCj = function(){
+        var msg2 = '';
+        if(data.card_id){ //微信卡券
+            popForm('popCard',data.info,{
+                card_ext:data.card_ext,
+                card_id:data.card_id
+            });
+
+        } else if(data.cj_code){ //输入手机号
+			if(data.is_jf) { //积分
+				data.status = 'jf';
+				msg2 = data.jf_name + ' +' + data.batch_amt;
+				data.info = "<p>"+data.info+"</p><p><span id='is_jf' data-name='"+data.jf_name+"' data-isjf='jf' data-phone='"+data.member_phone+"' data-code='"+data.batch_amt+"' data-url='"+data.link_url+"'>"+msg2+"</span></p>";
+				popForm('popPhone',data.info,data.cj_code);
+			} else if (typeof(data.batch_class) != 'undefined' && data.batch_class == '15') { //流量包
+				data.info = "<p>"+data.info+"</p><p><span data-name='"+data.batch_name+"' data-phone='"+data.member_phone+"'>请输入需要充值的手机号</span></p>";
+				popForm('popPhone',data.info,data.cj_code);
+			} else {
+				popForm('popPhone',data.info,data.cj_code);
+			}
+        } else if(data.is_jf) {
+        	data.status = 'jf';
+			msg2 = data.jf_name + ' +' + data.batch_amt;
+			var msg3 = '';
+			data.member_phone ? msg3 = "<p>已自动存入您的账号("+data.member_phone+")中</p>" : msg3="";
+        	data.info = "<p>"+data.info+"</p><p><span id='is_jf' data-name='"+data.jf_name+"' data-isjf='jf' data-phone='"+data.member_phone+"' data-code='"+data.batch_amt+"' data-url='"+data.link_url+"'>"+msg2+"</span></p>"+msg3;
+			popForm('popMsg',data.info,data.status);
+        }else if(data.bonus_use_detail_id){ //红包
+            popForm('popPhoneBonus',data.info,data.bonus_use_detail_id,data.button_name,data.link_url);
+        }else{
+            popForm('popMsg',data.info,data.status);
+            if(typeof(data.link_url) === "string" && data.link_url !="" ) {
+                fixbonus_change(data.button_name,data.link_url);
+            }
+
+        }
+    };
+    return _endCj;
+}
+function popForm(type,msg,isTrue,phone,isClose,tangshan_url,dydata) {
+    $("#js-popForm-other").html('');
+    var islogin = "{$islogin}"*1;
+    var join_mode = "{$join_mode}"*1;
+    var isVcard = $('#cj_resp_id').attr('rel');
+    //弹出登录框
+    if(type=="popForm"){
+        //判断是否是二维码名片
+        if(isVcard == 'vcard' && type=="popForm"){
+            var phone = $('#mobile').val();
+            window.location.href = 'index.php?g=Wap&m=Vcard&a=viewUser&mobile='+phone;
+            return false;
+        }
+        //如果已登录或者是微信参加方式
+        if(islogin || join_mode){
+		      $.post("{$sharebatch_returnCj_url}"+activityFlag + "&isPaySendActivity=" + isPaySendActivity,
+					{"id":$("#id").val(),"from_user_id":$("#from_user_id").val(),"from_type":$("#from_type").val(),"pay_token":_pay_token},
+					function(data){
+                        //微信参与，未中奖信息
+                        //输入手机号
+                        var _endCj = handelCjResult(data);
+						if(zp_type!="1"){
+							beginAction(data.data);
+	        		    	setTimeout(_endCj,6000);
+        		    	}else{
+                            _endCj();
+        		    	}
+        			},"json");
+			return false;
+		}
+        //如果未登录
+		$("#AjaxWrapper").fadeIn(300);
+    	if(phone){
+    		$("#mobile").val(phone);
+    	}
+        $("#popMsg").hide();
+        $("#popForm").show();
+
+        $("#popForm .cjText-text").html(msg);
+        $("#nocj_resp_id").hide();
+        $("#cj_resp_id").show();
+        <?php if($return_commission_flag != '1'){?>
+        fleshVerify();
+        <?php }?>
+    } else if(type == 'popMsg'){
+        var _a='{$sharedid}';
+        $("#popForm").hide();
+        $("#popMsg").show();
+        $("#AjaxWrapper").fadeIn(300);
+        $("#popMsg .cjText-text").html(msg);
+        if(isTrue == '1'){
+            $('#showPic').attr('src','__PUBLIC__/Label/Image/icon-ok.png');
+             //有佣金的模式
+             <php> if($return_commission_flag == '1'){ </php>
+            	$('#cj_resp_id').hide();
+            	$('#nocj_resp_id').attr('href',"index.php?g=Label&m=ShareBatch&a=index&id=<?php echo $id;?>");
+            	<?php if($label_batch_id != C('whfh')){ ?>
+            	$('#nocj_resp_id').html('推广此活动得佣金');
+            	<?php }else{?>
+            	$('#nocj_resp_id').html('分享得iPhone6');
+            	<?php }?>
+            	$('#nocj_resp_id').show();
+            <php> }else {</php>
+                $('#nocj_resp_id').attr('href',"javascript:void(0)");
+				if(isClose){
+					$('#nocj_resp_id').html(phone);
+					$('#nocj_resp_id').attr('href',isClose);
+					$("#cj_resp_id").hide();
+					$("#nocj_resp_id").show();
+				} else{
+                    var _a='{$sharedid}';
+                    $('#nocj_resp_id').html('返回');
+                    $('#nocj_resp_id').attr('href',"javascript:void(0)");
+                    $("#cj_resp_id").hide();
+                    $("#nocj_resp_id").show();
+				}
+            <?php }?>
+        } else if(isTrue == '3'){
+            $('#showPic').attr('src','__PUBLIC__/Label/Image/icon-error.png');
+			$('#cj_resp_id').hide();
+			$('#nocj_resp_id').attr('href',member_registration);
+			$('#nocj_resp_id').html('立即注册');
+			$('#nocj_resp_id').show();
+			$('#nocj_resp_id').click(function(){
+				var href = $(this).attr("href").indexOf("MemberRecruit");
+				if(href!=-1){
+					$("#memberLogin").css("position","absolute");
+					$('body,html').animate({scrollTop:0},500);
+					$("#memberLogin").fadeIn();
+					return false;
+				}
+				return false;
+			});
+        } else if(isTrue == 'jf'){
+            $('#showPic').attr('src','__PUBLIC__/Label/Image/icon-ok.png');
+             //有佣金的模式
+             <php> if($return_commission_flag == '1'){ </php>
+            	$('#cj_resp_id').hide();
+            	$('#nocj_resp_id').attr('href',"index.php?g=Label&m=ShareBatch&a=index&id=<?php echo $id;?>");
+            	<php> if($label_batch_id != C('whfh')){ </php>
+            	$('#nocj_resp_id').html('推广此活动得佣金');
+            	<php> }else{ </php>
+            	$('#nocj_resp_id').html('分享得iPhone6');
+            	<php> }</php>
+            	$('#nocj_resp_id').show();
+            <php> }else{ </php>
+                if(tangshan_url !=""){
+                    $('#nocj_resp_id').attr('href',tangshan_url);
+                }else{
+                    $('#nocj_resp_id').attr('href',"javascript:void(0)");
+                }
+				if(isClose){
+					$('#nocj_resp_id').html(phone);
+					$('#nocj_resp_id').attr('href',isClose);
+					$("#cj_resp_id").hide();
+					$("#nocj_resp_id").show();
+				} else if($("#is_jf",msg).length>=1){
+					var name = $("#is_jf",msg).attr("data-name");
+					var code = $("#is_jf",msg).attr("data-code");
+					var url = $("#is_jf",msg).attr("data-url");
+					var phone = $("#is_jf",msg).attr("data-phone");
+					//重置按钮;
+					$('#nocj_resp_id').attr('href',url).show().html('查看我的'+name);
+					$("#cj_resp_id").hide();
+				} else {
+                     var _a='{$sharedid}';
+                    if('{$batch_type}'==54  && _a ==''){
+                            $("#cj_resp_id").hide();
+                            $('a#btn').remove();
+                            $('a.btns-all').show();
+                            $('.mymobile').text($('#mobile').val());   
+                            $(".btns-all").click();
+                    }else {
+                        if('{$batch_type}'==54  && _a !=''){
+                            $('#nocj_resp_id').html('返回').click(function(){
+                                 window.location.reload();
+                            });
+                        } else {
+                            $('#nocj_resp_id').html('返回');
+                        }
+                        $("#cj_resp_id").hide();
+                        $("#nocj_resp_id").show();
+                    }
+				}
+            <php> } </php>
+        } else {
+            $('#showPic').attr('src','__PUBLIC__/Label/Image/icon-error.png');
+            <php> if($return_commission_flag == '1'){ </php>
+            if(isTrue == '2'){
+            	$('#cj_resp_id').hide();
+            	$('#nocj_resp_id').attr('href',"index.php?g=Label&m=ShareBatch&a=index&id=<?php echo $id;?>");
+            	<php> if($label_batch_id != C('whfh')){ </php>
+            	$('#nocj_resp_id').html('推广此活动得佣金');
+            	<php> } else { </php>
+            	$('#nocj_resp_id').html('分享得iPhone6');
+            	<php> } </php>
+            	$('#nocj_resp_id').show();
+            }
+            <php> }else{ </php>
+                if(!join_mode){
+                    $('#cj_resp_id').show();
+                        $('#nocj_resp_id').attr('href',"javascript:void(0)");
+                    $('#nocj_resp_id').html('返回');
+                    $('#nocj_resp_id').hide();
+                } else{
+                    isClose=1;
+                }
+            <php> } </php>
+			if(isClose==1){
+            	$('#cj_resp_id').hide();
+                $('#nocj_resp_id').attr('href',"javascript:void(0)");
+            	$('#nocj_resp_id').html('返回');
+                $('#nocj_resp_id').show();
+			}
+        }
+           
+    } else if(type == 'popLogin'){
+		if(islogin){
+			if($('#from_type').val()!=''){
+				location.href="{:U('Label/ShareBatch/index')}"+"&id="+$("#id").val()+"&from_type="+$('#from_type').val();
+			}else{
+				location.href="{:U('Label/ShareBatch/index')}"+"&id="+$("#id").val();
+			}
+		}else{
+			 $("#AjaxWrapper").fadeIn(300);
+			 $("#popForm").show();
+			 $("#nocj_resp_id").hide();
+			 $("#cj_resp_id").show();
+		}
+    }  else if(type == 'popPhone'){ //提交手机号来发码
+        var html = $(template("js-tmpl-phoneform",{
+            msg:msg,
+            cj_code:isTrue //这儿的isTrue参数变成了 cj_code了
+        }));
+        var _loading = false;
+        $("#js-getPrize",html).click(function(){
+            if(_loading){
+                return;
+            }
+            var _that = $(this);
+            var _form = $('form',html),
+              url = _form.data('action');
+			var _dataname = $("#is_jf",msg).attr("data-name");
+			var _datacode = $("#is_jf",msg).attr("data-code");
+			var _dataurl = $("#is_jf",msg).attr("data-url");
+			var _dataphone = $("#is_jf",msg).attr("data-phone");
+			var _isTrue =  $("#is_jf",msg).attr("data-isjf");
+			//重置按钮;
+			$('#nocj_resp_id').attr('href',url).show().html('查看我的'+name);
+			$("#cj_resp_id").hide();
+              data = _form.serialize();
+            var phone = $('input[name=phone]',_form).val();
+            if(!phone){
+                alert("手机号不能为空");
+                return;
+            }
+            _that.val("正在领取...");
+            _loading = true;
+            data+='&pay_token='+_pay_token;
+            $.post(url,data,function(res){
+                if(+res.status == 0){
+                <php>if($node_id==C('tangshan.node_id')){</php>
+                        if(typeof(res.info.tangshan_url) === "string"){
+                            alert(res.info.info);
+                            return false;
+                        }
+                <php>}else{</php>
+                    alert(res.info);
+                <php>}</php>
+                } else{
+					if(_isTrue == "jf") {
+						var msg2 = _dataname + ' +' + _datacode;
+						var msg3;
+						_dataphone ? msg3 = "<p>已自动存入您的账号("+data.member_phone+")中</p>" : msg3="";
+						res.info = "<p>"+res.info+"</p><p><span id='is_jf' data-name='"+_dataname+"' data-phone='"+_dataphone+"' data-code='"+_datacode+"' data-url='"+_dataurl+"'>"+msg2+"</span></p>"+msg3;
+                    	popForm('popMsg',res.info,"jf");
+					} else {
+                    	popForm('popMsg',res.info,res.status);
+					}
+                }
+            },'json').fail(function(){
+                alert('系统正忙...');
+            }).always(function(){
+                //还原
+                _loading = false;
+                _that.val(_that.data('value'));
+            });
+        });
+        _popOther(html);
+    } else if(type == 'popPhoneBonus'){ //提交手机号来领取红包
+		var button_name = phone;
+		var link_url = isClose;
+        var html = $(template("js-tmpl-phoneform",{
+            msg:msg,
+            bonus_use_detail_id:isTrue //这儿的isTrue参数变成了 cj_code了
+        }));
+        var _loading = false;
+        $("#js-getPrize",html).click(function(){
+            if(_loading){
+                return;
+            }
+            var _that = $(this);
+            var _form = $('form',html),
+			  url='{:U('Label/ShareBatch/getBonus')}';
+              data = _form.serialize();
+            var phone = $('input[name=phone]',_form).val();
+            if(!phone){
+                alert("手机号不能为空");
+                return;
+            }
+            _that.val("正在领取...");
+            _loading = true;
+            data+='&pay_token='+_pay_token;
+            $.post(url,data,function(res){
+                if(+res.status == 0){
+                    alert(res.info);
+                }  else {
+					popForm('popMsg',res.info,res.status,button_name,link_url);
+                }
+            },'json').fail(function(){
+                alert('系统正忙...');
+            }).always(function(){
+                //还原
+                _loading = false;
+				_that.val(_that.data('value'));
+            });
+        });
+        _popOther(html);
+    } else if(type == 'popCard'){ //微信卡券
+        var data = isTrue; //这儿的isTrue参数变成了 cj_code了
+        var html = $(template("js-tmpl-cardform",{
+            msg:msg
+        }));
+        $("#js-getWxCard",html).click(function(){
+            var  _a='{$sharedid}';
+            if('{$batch_type}'==54 && _a=='') {
+                    $('a#btn').remove();
+                    $('a.btns-all').show();
+                    // $('.myvcard').show();
+                    $('.mymobile').text($('#mobile').val());
+                }
+             
+            getWxCard(data);
+        });
+        _popOther(html);
+    }
+}
+
+</script>
+
+<!--唐山平安非标弹窗-->
+<div class="pop">
+    <div class="box">
+        <i class="close">+</i>
+        <ul>
+            <li id="nojp"><img src="http://test.wangcaio2o.com/Home/Public/Label/Image/icon-error.png" width="50" height="50" /><span>很遗憾，未中奖！</span></li>
+            <li id="hasjp"><img src="http://test.wangcaio2o.com/Home/Public/Label/Image/icon-ok.png" width="50" height="50" /><span>恭喜您，中奖了！</span></li>
+            <li id="addjp"><img src="http://test.wangcaio2o.com/Home/Public/Label/Image/icon-ok.png" width="50" height="50" /><span>添加成功！</span></li>
+            <li id="failjp"><img src="http://test.wangcaio2o.com/Home/Public/Label/Image/icon-error.png" width="50" height="50" /><span>添加失败！</span></li>
+            <!--<li><a href="javascript:;" class="close">返回</a></li>-->
+        </ul>
+    </div>
+</div>
+
+<div id="AjaxWrapper" class="dn">
+	<div class="cjWrapper">
+    	<div class="cjWrapper-close"><a href="javascript:void(0)" class="close-AjaxWrapper">+</a></div>
+    	<div class="cjCon pb10 dn" id="popMsg">
+            <div class="cjText">
+            	<div class="cjText-con">
+                    <div class="cjText-img"><img id="showPic" src="__PUBLIC__/Label/Image/icon-error.png"></div>
+                    <div class="cjText-text">您填写的信息有误，<br />请重新输入！</div>
+                </div>
+            </div>
+            <div class="cjBtn">
+
+                <a href="javascript:void(0)" class="cjBtn-back close-AjaxWrapper" id="nocj_resp_id">返回</a>
+
+                <a href="javascript:void(0)" class="cjBtn-back" style="display: none;" rel="{$vcard}" id="cj_resp_id" onclick="popForm('popForm')">返回</a>
+            </div>
+        </div>
+
+
+		<?php if($return_commission_flag != '1'){?>
+    	<div class="cjCon dn" id="popForm">
+            <div class="cjText"><?php if($batch_id == '704' && $batch_type == '3'){echo '请确认您的手机号信息';}else{echo '感谢参与！请输入您的信息';}?></div>
+            <form id="theform" action="<?php echo U('Label/Cj/Submit');?>" method="post" name="theform">
+                <input type="hidden" id="id" name="id" value="<?php echo $id;?>" />
+                <input type="hidden" id="cj_check_flag" name="cj_check_flag" value="{$cj_check_flag}" />
+                <input type="hidden" id="full_id" name="full_id" value="{$full_id}" />
+				<input type="hidden"  name="pay_token" value="{$pay_token}" />
+    <?php if(C('GWYL_NODE') == $node_id && $batch_type=='3' && $row['defined_one_name'] == '小票号') {?>
+                <input type="hidden" name="shopping_trace" id="shopping_trace" value=""/>
+                <?php }?>
+
+                <div class="cjForm">
+                    <ul class="sOne-cjForm">
+                        <?php if($cj_check_flag == '1'){ ?>
+                        <li><p>参与码:</p><input type="text" name="check_code" id="check_code" class="sOne-cjInput" maxlength="6"  placeholder="请输入您的参与码"/></li>
+                        <?php }?>
+                        <li><p>手机号:</p><input type="tel" name="mobile" id="mobile" class="sOne-cjInput from_mobile" placeholder="请输入手机号" maxlength="11" value="{$_global_user_mobile}" /></li>
+                        <li>
+                            <p>验证码:</p>
+                            <input type="tel" class="sOne-cjInput-half" name="verify" id="verify" maxlength="4" placeholder="验证码" >
+                            <a href="javascript:void(0);"><img src="<?php echo U('Label/VerifyCode/index/', array('_t'=>time()))?>" class="sOne-cjpasscode-img" id="verifyImg"  onclick="fleshVerify()"></a>
+                        </li>
+                        <li class="pt20"><input type="button" id="subcj" value="提交" class="cj-input-button" /></li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+        <script language="JavaScript">
+        function fleshVerify(){
+            //重载验证码
+            var obj = document.getElementById('verifyImg');
+            obj.src = '{:U('Label/VerifyCode/index/')}'+"&_t="+Math.random();
+        }
+        </script>
+		<?php }else{?>
+		<div class="cjCon dn" id="popForm">
+            <form id="theform_login" action="<?php echo U('Label/ShareBatch/login');?>" method="post" name="theform_login">
+            <input type="hidden" id="id" name="id" value="<?php echo $id;?>" />
+             <input type="hidden" id="from_user_id" name="from_user_id" value="<?php echo $from_user_id;?>" />
+              <input type="hidden" id="from_type" name="from_type"  value="<?php echo $from_type;?>" />
+			  <input type="hidden" id="full_id" name="full_id" value="{$full_id}" />
+			  <input type="hidden"  name="pay_token" value="{$pay_token}" />
+            <div class="cjForm">
+                <ul class="sOne-cjForm">
+                    {$_global_user_mobile}
+                    <li><p>手机号:</p><input type="tel" name="phone" id="phone" class="sOne-cjInput from_mobile" placeholder="请输入手机号" maxlength="11" value="{$_global_user_mobile}"/></li>
+                    <li>
+                        <p>验证码:</p>
+                        <input type="tel" class="sOne-cjInput-half" name="verify" id="verify" maxlength="4" placeholder="验证码" >
+                        <input type="button" class="sOne-cjgetpasscode l" value="获取验证码" id="getpasscode" name='getpasscode' data-href="">
+                    </li>
+					<li class="tips"><span id="getpasscode"></span></li>
+                    <li class="pt20"><input type="button" id="loginBd" value="登录" class="cj-input-button" /></li>
+                     <p class="tl" style="font-size: 12px;color: #999; width: 250px;margin:0 auto;">分享该活动有机会获得<?php echo $sns_prize;?>，登录即可获取您的专属分享链接。</p>
+                </ul>
+            </div>
+            </form>
+        </div>
+		<?php }?>
+
+        <!--用来切换的表单 by tr-->
+        <div id="js-popForm-other">
+
+        </div>
+
+    </div>
+</div>
+
+<?php if($return_commission_flag != '1' && !empty($member_reg_label_id)){?>
+<!--粉丝招募 -->
+<div id="memberLogin" class="memberLogin"><div class="memberLogin-cloose" onclick="javascript:$('#memberLogin').hide();">返回抽奖</div><iframe src="<?php echo U('Label/MemberRecruit/index',array('id'=>$member_reg_label_id)); ?>" name="iframeChild" style="width:100%; height:100%; border:none;" onload="javasctipt:$(window.frames['iframeChild'].document).find('.Gloading').hide()"></iframe></div>
+<?php }?>
+
+<!-- 返佣-->
+<?php
+if(strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') === false && $return_commission_flag == '1' && $tongbaozhai_flag != 1){
+    $style = $share_button_position=='2' ? 'bottom:0px;' : 'top:50%; margin-top:-40px;';
+    $button_img = $share_button_image_flag == '1' ? __PUBLIC__ . '/Label/Image/icon-Marketing.png' : __UPLOAD__ . '/' .$share_button_image;
+?>
+<div style=" position:fixed; z-index:151; <?php echo $style;?> right:0px; width:50px; height:146px;background: url(<?php echo $button_img;?>) no-repeat 0 0; background-size:100%;"><a href="javascript:void(0)" class="a-hide" id="fanyong"></a></div>
+<?php }?>
+
+
+<!--翼蕙宝注册-->
+
+
+<script>
+	//定额红包修改按钮名称和链接
+	function fixbonus_change(button_name,link_url){
+		$('#nocj_resp_id').text(button_name);
+		$('#nocj_resp_id').attr('href',link_url);
+	}
+$(function(){
+	var Int;
+	$("#getpasscode").on("click",function(){
+        $(this).val("正在发送..");
+        var phone = $("#phone").val();
+        var id = $("#id").val();
+		var verify =$("#verify").val();
+        $.post("index.php?g=Label&m=ShareBatch&a=sendCheckCode",{"id":id,"phone":phone,"verify":verify},function(data){
+            if(data.status=='1'){
+                $("#getpasscode").attr("id","noSend");
+                Int = setInterval(checkTime,1000);
+	
+            }else{
+                 popForm('popMsg',data.info,data.status);
+                $("#getpasscode").val("获取验证码");
+            }
+        },"json");
+    });
+    var time = 90;
+    var checkTime = function(){
+        $("input[name='getpasscode']").val("已发送,"+time+"秒");
+        if(time==0){
+            $("input[name='getpasscode']").val("获取验证码");
+            $("input[name='getpasscode']").attr("id","getpasscode");
+            time = 90;
+            clearInterval(Int);
+            return false;
+        }
+        time--;
+    };
+
+
+	 //登录
+    var _is_login = false;
+    $('#loginBd').click(function(){
+         if(_is_login)
+            return false;
+        _is_login = true;
+       $.post(
+        "{:U('Label/ShareBatch/login')}",
+		$('#theform_login').serialize(),
+		function(data) {
+			 _is_login = false;
+			if(data.status=='1'){
+				if(isgocj){
+					$.post("{$sharebatch_returnCj_url}"+ "&isPaySendActivity=" + isPaySendActivity,
+					{"id":$("#id").val(),"from_user_id":$("#from_user_id").val(),"from_type":$("#from_type").val(),"pay_token":_pay_token},
+					function(data){
+						var status_ = 0;
+						if(data.status == '2'){
+							status_  = 3;
+						}else{
+							status_  = data.status;
+						}
+						if(zp_type!="1"){
+		                    $("#AjaxWrapper").hide();
+		                    $("#popForm").hide();
+							beginAction(data.data);
+	        		    	setTimeout(function(){popForm('popMsg',data.info,data.status);},6000);
+        		    	}else{						
+             				popForm('popMsg',data.info,data.status);
+             			}
+        			},"json");
+					isgocj = true;
+					return false;
+				}else{
+					if($('#from_type').val()!=''){
+						location.href="{:U('Label/ShareBatch/index')}"+"&id="+$("#id").val()+"&from_type="+$('#from_type').val();
+					}else{
+						location.href="{:U('Label/ShareBatch/index')}"+"&id="+$("#id").val();
+					}
+					
+				}
+				
+			}else{
+				 popForm('popMsg',data.info,data.status);
+			}
+		},
+		'json'
+	   );        
+	});
+});
+
+function dialogShowMsg(msg){ 
+   var error_html=' <div class="cjText"><div class="cjText-con"><div class="cjText-img"><img id="showPic" src="__PUBLIC__/Image/Wyhb/logoYhb1.png"></div><div class="cjText-text">'+msg+'</div></div></div>';
+      art.dialog({
+        title:"提示",
+        content: error_html,
+        ok:true
+    });
+}
+
+function dialogShowMsg2(msg){ 
+   var error_html=' <div class="cjText"><div class="cjText-con"><div class="cjText-text">'+msg+'</div></div></div>';
+      art.dialog({
+        title:"提示",
+        content: error_html,
+        ok:true
+    });
+}
+
+</script>
+
+<!--模板区by tr -->
+ <!-- 输入手机号获取奖品的表单-->
+<script type="text/html" id="js-tmpl-phoneform">
+    <div class="cjText">
+        <div class="cjText-con">
+            <div class="cjText-img"><img id="showPic" src="__PUBLIC__/Label/Image/icon-ok.png"></div>
+            <div class="cjText-text">
+			{{#msg}}
+            </div>
+			<div class="cl"></div>
+        </div>
+    </div>
+    <div class="cjCon">
+        <form id="js-phoneform" data-action="<?php echo U('Label/ShareBatch/getPrize');?>" method="post">
+            <input type="hidden" name="id" value="<?php echo $id;?>" />
+            <input type="hidden" name="from_user_id" value="<?php echo $from_user_id;?>" />
+            <input type="hidden" name="from_type"  value="<?php echo $from_type;?>" />
+            <input type="hidden" name="full_id" value="{$full_id}" />
+            <input type="hidden" name="cj_code" value="{{cj_code}}" />
+            <input type="hidden"  name="pay_token" value="{$pay_token}" />
+			<input type="hidden" name="bonus_use_detail_id" value="{{bonus_use_detail_id}}" />
+            <div class="cjForm">
+                <ul class="sOne-cjForm" style="padding-top:0">
+                    <li style="height:68px"><p>手机号:</p><input type="tel" name="phone" id="phone" class="sOne-cjInput from_mobile" placeholder="请输入手机号" maxlength="11" value="{$_global_user_mobile}"/>
+					<div class="cl"></div>
+					<span style="padding-top:0; font-size:14px; text-align:center; color:#999; line-height:25px; float:left; margin-left:70px;">请输入手机号领取</span>
+					</li>
+                    <li class="pt20"><input type="button" id="js-getPrize" data-value="领取" value="领取" class="cj-input-button" /></li>
+                </ul>
+            </div>
+        </form>
+    </div>
+</script>
+
+<!-- 参与码输入 -->
+<script type="text/html" id="js-tmpl-activityform">
+    <div class="cjText">
+        <div class="cjText-con">
+            请输入参与码进行抽奖
+        </div>
+    </div>
+    <div class="cjCon">
+        <form id="js-activityform" data-action="<?php echo U('Label/ShareBatch/verifyActivityCode');?>" method="post">
+            <input type="hidden" name="id" value="<?php echo $jb_label_id;?>" />
+            <input type="hidden" name="cj_check_flag" id="cj_check_flag" value="<?php echo $cj_check_flag;?>" />
+             <input type="hidden" name="pay_token" value="{$pay_token}" />
+            <div class="cjForm">
+                <ul class="sOne-cjForm">
+                    <li><p>参与码:</p><input type="input" name="activity" id="activity" class="sOne-cjInput from_mobile" placeholder="请输入参与码" maxlength="8" value="" onkeypress="if(event.keyCode==13){ return false;}"/></li>
+                    <li class="pt20"><input type="button" id="js-activity" data-value="确认" value="确认" class="cj-input-button" /></li>
+                </ul>
+            </div>
+        </form>
+    </div>
+</script>
+
+<!-- 领取微信卡券-->
+<script type="text/html" id="js-tmpl-cardform">
+    <div class="cjText">
+        <div class="cjText-con">
+            <div class="cjText-img"><img id="showPic" src="__PUBLIC__/Label/Image/icon-ok.png"></div>
+            <div class="cjText-text">
+			{{msg}}<br/>
+            </div>
+        </div>
+    </div>
+    <div class="cjCon">
+        <form >
+            <div class="cjForm">
+                <ul class="sOne-cjForm">
+                    <li class="pt20"><input type="button" id="js-getWxCard" value="立即领取" class="cj-input-button" /></li>
+                </ul>
+            </div>
+            <input type="hidden" name="pay_token" value="{$pay_token}" />
+        </form>
+    </div>
+</script>
+
+
+
+<script type="text/html" id="js-register-phoneform">
+<style type="text/css">
+
+</style>
+    <div class="cjText">
+        <div class="cjText-con">
+            <div class="cjText-img"><img id="showPic" src="__PUBLIC__/Image/Wyhb/logoYhb1.png"></div>
+            <div class="cjText-text">
+            会员注册
+            </div>
+        </div>
+    </div>
+    <div class="cjCon Gform">
+        <form id="js-phoneform" data-action="{:U('Label/ShareBatch/yhbRegister')}" method="post">
+            <div class="cjForm">
+                <div class="item">
+                    <ul>
+                        <li class="name w70">手机号码</li>
+                        <li class="input pl70">
+                            <input name="phone" id="phone" type="tel" class="textbox validate[required,minSize[11]]" maxlength="11" placeholder="&nbsp;请输入手机号码" data-rel=""  />
+                        </li>
+                    </ul>
+                    <ul>
+                        <li class="name w70">验证码</li>
+                        <li class="input pl70">
+                            <input type="hidden" name="id" value="<?php echo $jb_label_id;?>" />
+                              <input type="hidden" name="pay_token" value="{$pay_token}" />
+                            <input name="verify" type="text" id="verify" maxlength="4" class="textbox half validate[required]" placeholder="&nbsp;点击获取验证码" data-rel="" style="width:55%;">
+                            <input type="button" name="getpasscode" id="getpasscode" class="btn-input half" value="获取验证码" style="width:43%;">
+                        </li>
+                    </ul>
+                </div>
+                <ul class="btn-ul">
+                    <li class="btn-li"><input type="button" id="js-register" data-value="注册" value="注册" class="btn-up" /></li>
+                </ul>
+            </div>
+
+        </form>
+    </div>
+
+</script>
+
+<script type="text/html" id="js-validate-phoneform">
+    <div class="cjCon Gform">
+        <div class="cjText">感谢参与！请输入您的手机号！</div>
+        <form id="js-phoneform" data-action="{:U('Label/ShareBatch/validatePhone', array('id' => $_REQUEST['id']))}" method="post">
+            <div class="cjForm">
+                <div class="item">
+                    <ul class="sOne-cjForm">
+                        <li><p>手机号码:</p><input name="phone" id="phone" type="tel" maxlength="11" class="sOne-cjInput from_mobile validate[required,minSize[11]]" placeholder="&nbsp;请输入手机号" data-rel=""/></li>
+                        <li><p>验证码:</p><input type="hidden" name="id" value="<?php echo $jb_label_id;?>" /><input name="verify" id="verify" type="text" maxlength="4" class="sOne-cjInput-half validate[required]" placeholder="&nbsp;请输入验证码" data-rel=""/>
+                            <input type="button" name="getpasscode" id="getpasscode" class="sOne-cjgetpasscode l" value="获取验证码"></li>
+                        <li class="pt20"><input type="button" id="js-register" data-value="确认" value="确认" class="cj-input-button" /></li>
+                </div>
+            </div>
+        </form>
+    </div>
+</script>

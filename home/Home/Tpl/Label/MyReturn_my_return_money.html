@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,maximum-scale=1,user-scalable=no,minimal-ui">
+	<meta content="telephone=no" name="format-detection" />
+	<meta content="email=no" name="format-detection" />
+	<meta name="apple-touch-fullscreen" content="NO">
+	<title>现金返佣详情</title>
+	<link rel="stylesheet" href="__PUBLIC__/Label/Css/wap_marketing.css?v=__VR__">
+	<script type="text/javascript" src="__PUBLIC__/Label/Js/zepto.min.js?v=__VR__"></script>
+	<script type="text/javascript" src="__PUBLIC__/Js/artTemplate/template.min.js?v=__VR__"></script>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="container">
+			<div id="main">
+				<div class="m-commission" id="list">
+				</div>
+				<a href="javascript:void(0);" data-nextp="1" id="more" style="margin-bottom: 100px;">加载更多</a>
+			</div>
+		</div>
+	</div>
+</body>
+<script id="tpl_list" type="text/html">
+	<div>
+		<%
+		var count = list.length;
+		for(i in list){
+			status = list[i]['status'] == '1';
+			cls1 = !status ? 'unget' : 'get';
+			cls2 = i == (count - 1) ? 'm-bn' : '';
+		%>
+		<div class="detail <%=cls2%>">
+			<div class="name">
+				<p><%=list[i]['commission_name']%></p>
+				<p class="time"><%=list[i]['node_short_name']%></p>
+				<p class="time"><%=list[i]['return_add_time']%></p>
+			</div>
+			<div class="status <%=cls1%>">
+				<p>￥<%=list[i]['return_num']%></p>
+				<p class="m-f12"><%=list[i]['status_txt']%></p>
+			</div>
+		</div>
+		<% } %>
+	</div>
+	<div class="m-gap"></div>
+</script>
+<script>
+	window._g = window._g || {};
+	_g.url_get_money = "{:U('ajax_return_money', array('id'=>$label_id))}";
+	//弹层
+	function msgPop(msg){
+		msgPopclose();
+		var option = {show_close: true};
+		if(arguments.length == 2)
+			option = $.extend(option, arguments[1]);
+		var html=['<div class="msgPop">',
+			'<div class="msgPopCon">'];
+		if(option.show_close)
+			html.push('<a href="javascript:void(0)" class="close" onclick="msgPopclose()">+</a>');
+		html.push(''+msg+'');
+		html.push('</div>');
+		html.push('</div>');
+		html = html.join('');
+		$("body").append(html);
+	}
+	function msgPopclose(){
+		$(".msgPop").remove();
+	}
+
+	function get_more(){
+		var no_close = {show_close:false}, $more = $('#more'), nextp = parseInt($more.data('nextp')), inajax = $more.data('inajax');
+		if(nextp == 0) return ;
+		if(inajax == 1) return ;
+		$more.data('inajax', 1);
+		$more.data('nextp', nextp+1);
+
+		msgPop('加载中....',no_close);
+		$.get(_g.url_get_money, {p: nextp}, function(resp){
+			$more.data('inajax', 0);
+			if(resp.status != 1){
+				msgPop(resp.info);
+				return ;
+			}else{
+				$(template('tpl_list', resp)).appendTo('#list');
+				$more.data('nextp', resp.nextp);
+				if(resp.nextp == 0)
+					$more.text('无更多数据');
+			}
+			msgPopclose();
+		}, 'json');
+	}
+	$(function(){
+		$('#more').click(function(){
+			get_more();
+		}).trigger('click');
+	});
+</script>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>评价计划_营销活动中心_翼码旺财</title>
+        <link href="__PUBLIC__/Css/main.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/layout.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/module.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link href="__PUBLIC__/Css/Wmarketing.css?v=__VR__" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" type="text/css" href="__PUBLIC__/Css/tfb_df_pointshop.css?v=__VR__" />
+        <js href="__PUBLIC__/Js/jquery-1.7.1.min.js?v=__VR__" />
+        <js href="__PUBLIC__/Js/global.js?v=__VR__" />
+        <script type="text/javascript" src="__PUBLIC_LOCAL__/Js/My97DatePicker/WdatePicker.js?v=__VR__"></script>
+        <js href="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default" />
+        <script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+        <script type="text/javascript" src="__PUBLIC__/Js/Wproduct.js?v=__VR__"></script>
+        <script>
+            $(document).ready(function (e) {
+                $("#sub_button").click(function () {
+                    $("#theform").attr("action", "{:U('OnlineSee/Activity/index')}").submit();
+                });
+            });
+            function info_status(id,status) {
+                art.dialog.confirm('你确定要操作这条记录吗？', function () {
+                    art.dialog.tips('执行确定操作');
+                    $.ajax({
+                        type: "POST",
+                        url: "index.php?g=OnlineSee&m=Activity&a=info_status",
+                        data: {
+                            id: id,
+                            status:status
+                        },
+                        datatype: "json",
+                        beforeSend: function () {
+                            dialog = art.dialog({
+                                title: false,
+                                content: "<div class='msg-all-succeed'>正在提交...</div>",
+                                fixed: true,
+                                padding: 0
+                            });
+                        },
+                        success: function (data) {
+                            ajaxobj = eval("(" + data + ")");
+                            if (ajaxobj.status == '1') {
+                                dialog.time(2).content("<div class='msg-all-succeed'>" + ajaxobj.info + "</div>");
+                                artDialog.close();
+                                window.location.reload();
+                            } else {
+                                dialog.time(5).content("<div class='msg-all-error'>" + ajaxobj.info + "</div>");
+                            }
+                        }
+                    });
+                }, function () {
+                    art.dialog.tips('执行取消操作');
+                });
+            }
+        </script>
+    </head>
+
+    <body>
+        <div id="wrapper">
+            <include file="./Home/Tpl/Public/Public_header.html" />
+
+            <include file="OnlineSee/nav" navmenuid="Navindex"/>
+            <div id="container" class="bgfff">
+                <div id="main" class="rel">
+                    <div class="mt20">
+                        <div class=""></div>
+                        <div class="main-name fn">
+                            <h4 class="bd-b-565656">
+                                <a href="{:U('OnlineSee/Activity/add/')}" class="btn-all w110 r">添加评价计划</a>
+                                评价计划
+                                <span style="font-size:12px; font-weight:bold;color:#FF0000;">&nbsp;&nbsp;&nbsp;活动一经发布，有消费者参与并提交问卷，问卷内容将无法被修改</span>
+                            </h4>
+                        </div>
+                        <div class="form-search  fn">
+                            <form action="{:U('OnlineSee/Activity/index/')}" method="POST" name="theform" id="theform">
+                                <p>活动名称</p>
+                                <p>
+                                    <input type="text" name="name" class="textbox w100" value="{$Think.request.name}" />
+                                </p>
+                                <p class="ml50">活动状态</p>
+                                <p>
+                                    <select class="selectbox w80" name="status" id="status">
+                                        <option value="" <?php if($_REQUEST[ 'status']=='' ){?> selected="selected"
+                                                <?php }?> >请选择</option>
+                                        <option value="1" <?php if($_REQUEST[ 'status']=='1' ){?> selected="selected"
+                                                <?php }?> >正常</option>
+                                        <option value="0" <?php if($_REQUEST[ 'status']=='0' ){?> selected="selected"
+                                                <?php }?> >停用</option>
+                                    </select>
+                                </p>
+                                <a href="javascript:void(0);" class="btn-all w110 r" id="sub_button">查询</a>
+                            </form>
+                        </div>
+                        <div class="shopCon">
+                            <table cellpadding="0" cellspacing="0" class="shopTable">
+                                <tr>
+                                    <th class="first">活动状态</th>
+                                    <th>活动时间</th>
+                                    <th>访问量</th>
+                                    <th>参与评价人数</th>
+                                    <th>员工数 </th>
+                                    <th class="last">操作</th>
+                                </tr>
+                                <volist name="list" id="vo">
+                                    <tr class="title hover">
+                                        <td class="title" colspan="6"><span class="red">{$vo.name}</span>
+                                            <span class="ml20 r mr20"><a href="{:U('OnlineSee/InsuranceWap/index',array('id'=>$vo['id'],'type'=>3))}" target="_blank">预览</a>  |<a href="{:U('OnlineSee/Activity/edit/',array('id'=>$vo['id']))}" >编辑 </a> |<php>if((int)$vo['status']==1){</php><a href="javascript:;" onclick="info_status({$vo['id']},0)">停用</a><php>}else{</php><a href="javascript:;" onclick="info_status({$vo['id']},1)">启用</a><php>}</php></span>
+                                        </td>
+                                    </tr>
+                                    <tr class="info <if condition=" $vo[ 'pay_status'] eq 2 ">hover</if>">
+                                        <td class="first"><?php echo $vo['status'] == '1'?'<i class="icon-on"></i>':'<i class="icon-off"></i>';?></td>
+                                        <td>{$vo['start_time']|dateformat=###,'Y-m-d'}~~{$vo['end_time']|dateformat=###,'Y-m-d'}</td>
+                                        <td>{$vo['click_count']}</td>
+                                        <td>{$vo['join_count']}</td>
+                                        <td>{$vo['member_count_1']+$vo['member_count_2']}</td>
+                                        <td class="last">
+                                            <a href="{:U('download',array('info_id'=>$vo['id']))}" title="下载评价者清单" class="icon-print">下载评价者清单</a>
+                                        </td>
+                                    </tr>
+                                </volist>
+                            </table>
+                        </div>
+                        <div class="shopPage fn">
+                            <?php echo $page;?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <include file="./Home/Tpl/Public/Public_footer.html" />
+        </div>
+        <div class="service"></div>
+    </body>
+    <!--
+        <script type="text/javascript" src="js/Service.js"></script>
+    -->
+
+</html>

@@ -1,0 +1,25 @@
+function dbtmessage(){
+	$(".dbt-message-click").click(function(){
+		if($("#dbt-message").css("right")=="26px"){
+			$("#dbt-message").animate({right:'310px'});
+		}else{
+			$("#dbt-message").animate({right:'26px'});
+			$(".dbt-textbox").eq(0).val("姓名");
+			$(".dbt-textbox").eq(1).val("手机号/邮箱");
+			$(".dbt-textarea").eq(0).val("备注");
+		}
+    });
+	$(".dbt-textbox").click(function(){
+		if($(this).val()=="姓名"){
+			$(this).val("");
+		}
+		if($(this).val()=="手机号/邮箱"){
+			$(this).val("");
+		}
+    });
+	$(".dbt-textarea").click(function(){
+		if($(this).val()=="备注"){
+			$(this).val("");
+		}
+    });
+}

@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>会员注册</title>
+<meta name="viewport" content="width=320, maximum-scale=1, user-scalable=no">
+<meta content="O2O,O2O营销,二维码,旺财,市场调研" name="Keywords">
+<meta content="telephone=no" name="format-detection" />
+<meta content="email=no" name="format-detection" />
+<meta name="apple-touch-fullscreen" content="NO">
+<link rel="stylesheet" type="text/css" href="__PUBLIC__/Label/Css/wap_df.css?v=__VR__">
+    <link href="__PUBLIC__/Js/artDialog6/ui-dialog.css" rel="stylesheet" type="text/css"/>
+    <style type="text/css">
+        .Gform .item .input label { margin-right: 20px; position: relative; line-height:35px;}
+        .Gform .item .input.radioBox { padding-left: 82px; text-align: left;}
+        .Gform .item .input label input[type="radio"] { width: 0;}
+        .Gform .item .input label:before { content: ""; display: inline-block; position: relative; top: 2px; right: 5px; width: 12px; height: 12px; border: 1px #999999 solid; border-radius: 50%;}
+        .Gform .item .input label.active:after { content: ""; display: inline-block; position: absolute; top: 2px; left: -2px; width: 8px; height: 8px; background: #999999; border-radius: 50%;}
+        .Gform .input p.date {position: absolute;
+            line-height: 35px;
+            left: 77px;
+            display:block;
+            color: #999;
+            background: #ffffff;
+            pointer-events: none;}
+    </style>
+    <script type="text/javascript" src="__PUBLIC__/Js/jquery-1.8.2.min.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Label/Image/df/Item/wap_df.js?v=__VR__"></script>
+<script src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine.js"></script>
+<script src="__PUBLIC__/Label/Js/validationEngine/jquery.validationEngine-zh_CN.js"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/jquery.form.js?v=__VR__"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/jquery.artDialog.js?skin=default"></script>
+<script type="text/javascript" src="__PUBLIC__/Js/artDialog4.1.6/plugins/iframeTools.js?v=__VR__"></script>
+<script>
+$(document).ready(function(e) {
+    var Int;
+    $("#getpasscode").click(function(){
+        var phone = $("#phone").val();
+        if(phone.length!=11)
+        {
+            art.dialog.alert("手机号码不正确！");
+            return false;
+        }
+        var self = $(this);
+        if(self.data('in_ajax') != 0) return ;
+        self.data('in_ajax', 1);
+        self.val("正在发送......");
+        $.get("{:U('Df/DfWap/sendCheckCode')}"+'&phone='+phone,function(data){
+            self.data('in_ajax', 0);
+            if (data.status == 1) {
+                self.data('in_ajax', 2);
+                self.val("90秒");
+                var sed = 90, Int;
+                function aha(){
+                    sed = sed - 1;
+                    if( sed == 0){
+                        self.data('in_ajax', 0);
+                        self.val('获取验证码');
+                        clearInterval(Int);
+                        return;
+                    }else{
+                        self.val(sed+'秒');
+                    }
+                }
+                Int = setInterval(aha, 1000);
+            } else {
+                art.dialog.alert(data.info);
+                $("#getpasscode").val("获取验证码");
+            }
+        },"json");
+    });
+    $(".Gform .item .input label").eq(0).addClass("active");
+    $('input:radio[name="sex"]:eq(0)').attr("checked","checked");
+    $(".Gform .item .input label").click(function(){
+        var radio = $(this).find(".mainTop input[type='radio']");
+        if($(this).find('input:radio[name="sex"]:checked')){
+            $(".Gform .item .input label").removeClass("active");
+            $(this).addClass("active");
+        }else{
+            $(".Gform .item .input label").removeClass("active");
+        };
+    });
+    $("#date_id").mouseup(function(){
+//        $(".date").remove();
+//    $(".date").css("display","none");
+        $(".date").hide();
+    });
+});
+</script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="container">
+        <div id="header" class="userCenter fn">
+        	<div class="goback"><!--<i></i>--></div>
+            <div class="logo"><span>会员注册</span></div>
+        </div>
+        <div id="main">
+        	<div class="mainTop bgf8f8f8">
+                <div class="logoDf">
+                	<img src="__PUBLIC__/Label/Image/df/Item/df-logo1.png" width="100%" height="auto" />
+                </div>
+            </div>
+            <div id="mainCon" class="Gform register">
+            	<form id="form" action="" method="post" name="form">
+                <ul>
+                    <li class="name w2"><span>姓名</span>&nbsp;&nbsp;|</li>
+                    <li class="input">
+                    	<input type="hidden" id="type" value="1" />
+                        <input name="name" type="text" class="textbox validate[required,maxSize[50]]" maxlength="5" placeholder="&nbsp;请填写真实姓名" data-rel="">
+                    </li>
+                </ul>
+                    <ul>
+                        <li class="name w2"><span>生日</span>&nbsp;&nbsp;|</li>
+                        <li class="input">
+                            <p class="date">请填写生日</p>
+                            <input name="birthday" type="date" class="textbox validate[required,maxSize[50]]" maxlength="20" placeholder="&nbsp;请填写生日" data-rel="" id="date_id"/>
+                        </li>
+                    </ul>
+                    <ul class="item">
+                        <li class="name w2"><span>性别</span>&nbsp;&nbsp;|</li>
+                        <li class="input radioBox">
+                        <label><input type="radio" name="sex" value="0" />男</label>
+                        <label><input type="radio" name="sex" value="1" />女</label>
+                         </li>
+                    </ul>
+                <ul>
+                    <li class="name w4"><span>手机号码</span>&nbsp;&nbsp;|</li>
+                    <li class="input">
+                        <input name="phone" id="phone" type="tel" class="textbox validate[required,minSize[11]]" maxlength="11" placeholder="&nbsp;请填写手机号码" data-rel="">
+                    </li>
+                </ul>
+                <ul>
+                    <li class="name w3"><span>验证码</span>&nbsp;&nbsp;|</li>
+                    <li class="input">
+                        <input name="verify" type="text" id="verify" maxlength="4" class="textbox half validate[required]" placeholder="&nbsp;验证码" data-rel="">
+                        <input type="button" name="getpasscode" id="getpasscode" class="btn-input half" value="获取验证码" data-in_ajax="0"/>
+                    </li>
+                </ul>
+                <ul class="btn-ul">
+                    <li class="btn-li"><input type="button" value="立即注册" class="btn-up" id="df_submit"/></li>
+                    <li class="btn-li"><a href="javascript:void(0)" class="btn-cancel">取消</a></li>
+                </ul>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<section style="display: none;" class="fullHtml loadingBox" id="loadingBox"><i></i><span></span></section>
+</body>
+</html>
+<script>
+    $("#df_submit").click(function(){
+        if($("#form").validationEngine('validate')) {
+            $("#form").ajaxSubmit({
+                success: function (data) {
+                    if (data.status == 1) {
+                        art.dialog.alert(data.info);
+                        window.location.href='/index.php?&g=Df&m=DfWap&a=Dfmember_card';
+                        return false;
+                    } else {
+                        art.dialog.alert(data.info);
+                    }
+                },
+                url: "{:U('Df/DfWap/df_reg')}",
+                dataType: 'json'
+            });
+        }
+    });
+    $(".btn-cancel").click(function(){
+        WeixinJSBridge.call('closeWindow');
+    });
+</script>
